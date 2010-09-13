@@ -16,7 +16,10 @@ from fileshare.models import (FileShare, FileShareSetting, available_validators,
 
 
 def index(request, template_name='fileshare/index.html', extra_context={}):
-
+    try:
+        filesetting = FileShareSetting.objects.get(id=1)
+    except:
+        return HttpResponse("No setting found")
     form = UploadForm(request.POST or None, request.FILES or None)
     if request.method == 'POST':
         if form.is_valid():

@@ -15,11 +15,5 @@ urlpatterns = patterns('fileshare.views',
                        url(r'^$',
                            'setting',
                            name='setting'),
-                       url(r'^validators/$',
-                           'validator_list',
-                           name='validator_list'),
-                        url(r'^splitters/$',
-                           'splitter_list',
-                           name='splitter_list'),
                        )
 
