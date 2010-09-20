@@ -15,5 +15,8 @@ urlpatterns = patterns('fileshare.views',
                        url(r'^$',
                            'setting',
                            name='setting'),
+                       url(r'^(?P<rule_id>\d+)/$',
+                           'edit_setting',
+                           name='edit_setting'),
                        )
 

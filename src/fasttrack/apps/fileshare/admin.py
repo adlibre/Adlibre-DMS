@@ -1,14 +1,14 @@
 
 from django.contrib import admin
 
-from models import FileShare
+from models import Rule
 
 
 
-class FileShareAdmin(admin.ModelAdmin):
-    list_display = ('hashcode', 'document')
+class RuleAdmin(admin.ModelAdmin):
+    list_display = ('validator',)
 
 
 
-admin.site.register(FileShare, FileShareAdmin)
+admin.site.register(Rule, RuleAdmin)
 

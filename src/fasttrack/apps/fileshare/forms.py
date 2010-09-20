@@ -2,20 +2,12 @@ import os
 
 from django import forms
 
-from fileshare.models import (FileShare,
-    available_splitters, available_validators, available_storages,
-    get_validator)
+from fileshare.models import (available_splitters, available_validators,
+    available_hash, available_storages, Rule)
 
 class UploadForm(forms.Form):
     file  = forms.FileField()
 
-    def clean_file(self):
-        file = self.files['file']
-        filename = self.files['file'].name
-        validator = get_validator()
-        if not validator.validate(os.path.splitext(filename)[0]):
-            raise forms.ValidationError("Your document code is not valid")
-        return file
 
 def splitter_choices():
     splitters = []
@@ -26,8 +18,8 @@ def splitter_choices():
 
 def validator_choices():
     validators = []
-    for validator in available_validators().keys():
-        validators.append([validator, validator])
+    for validator, plugin in available_validators().items():
+        validators.append([validator, '%s - %s' % (validator, plugin.description)])
     return validators
 
 
@@ -38,11 +30,23 @@ def storage_choices():
     return storages
 
 
-class SettingForm(forms.Form):
-    splitter = forms.ChoiceField(label="Split Method",
-        widget=forms.RadioSelect, choices=splitter_choices())
-    validator = forms.ChoiceField(label="Validator",
-        widget=forms.RadioSelect, choices=validator_choices())
+def hash_choices():
+    hashcodes = []
+    for hashcode in available_hash():
+        hashcodes.append([hashcode, hashcode])
+    return hashcodes
+
+
+class SettingForm(forms.ModelForm):
+    validator = forms.ChoiceField(label="DocCode",
+        choices=validator_choices())
     storage = forms.ChoiceField(label="Storage",
-        widget=forms.RadioSelect, choices=storage_choices())
+        choices=storage_choices())
+    splitter = forms.ChoiceField(label="Split Method",
+        choices=splitter_choices())
+    hashcode = forms.ChoiceField(label="HashCode",
+        choices=hash_choices())
+
+    class Meta:
+        model = Rule
 

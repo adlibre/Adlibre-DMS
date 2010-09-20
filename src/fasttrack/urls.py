@@ -13,8 +13,8 @@ urlpatterns = patterns('',
     # (r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^setting/', include('fileshare.urls')),
     (r'^$', 'fileshare.views.index'),
-    url(r'^(?P<hashcode>\w+)/(?P<filename>.*)$', 'fileshare.views.get_file', name="get_file"),
-
+    url(r'^get/(?P<document>\w+)$', 'fileshare.views.get_file_no_hash', name='get_file_no_hash'),
+    url(r'^(?P<hashcode>\w+)/(?P<document>\w+)$', 'fileshare.views.get_file', name='get_file'),
     # Uncomment the next line to enable the admin:
     (r'^admin/', include(admin.site.urls)),
 )

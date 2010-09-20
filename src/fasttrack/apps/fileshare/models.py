@@ -4,76 +4,63 @@ import pkgutil
 
 from django.db import models
 
-from fileshare.utils import ValidatorProvider, SplitterProvider, StorageProvider
+from fileshare.utils import ValidatorProvider, SplitterProvider, StorageProvider, HashProvider
 
-class FileShare(models.Model):
+
+class RuleManager(models.Manager):
+
+    def match(self, document):
+        for rule in self.filter(active=True):
+            validator = rule.get_validator()
+            if validator and validator.validate(document):
+                return rule
+        return None
+
+
+class Rule(models.Model):
+    validator = models.CharField(max_length=255, unique=True)
+    storage = models.CharField(max_length=255)
+    splitter = models.CharField(max_length=255)
     hashcode = models.CharField(max_length=255)
-    document = models.CharField(max_length=255)
-    splitter = models.CharField(max_length=255)
-    storage = models.CharField(max_length=255)
+    is_hash_active = models.BooleanField(default=True)
+    active = models.BooleanField(default=True)
 
+    objects = RuleManager()
 
-    def __unicode__(self):
-        return "%s" % os.path.basename(self.sharefile.file.name)
+    def get_validator(self):
+        """
+        Get active validator method
+        """
 
-    def save(self, *args, **kwargs):
-        self.hashcode = hashlib.md5(self.document).hexdigest()
-        super(FileShare, self).save(*args, **kwargs)
+        try:
+            validator = ValidatorProvider.plugins[self.validator]
+            return validator
+        except Exception, e:
+            return None
 
-    @models.permalink
-    def get_absolute_url(self):
-        return ('get_file', [self.hashcode, self.document])
+    def get_storage(self):
+        """
+        Get active storage engine
+        """
 
+        try:
+            storage = StorageProvider.plugins[self.storage]
+            return storage
+        except Exception, e:
+            print e
+            return None
 
+    def get_splitter(self):
+        """
+        Get active splitter method
+        """
 
-class FileShareSetting(models.Model):
-    validator = models.CharField(max_length=255)
-    storage = models.CharField(max_length=255)
-    splitter = models.CharField(max_length=255)
-
-
-def get_validator():
-    """
-    Get active validator method
-    """
-
-    try:
-        filesetting = FileShareSetting.objects.get(id=1)
-        validator = ValidatorProvider.plugins[filesetting.validator]
-        return validator
-    except Exception, e:
-        print e
-        return None
-
-
-
-def get_storage():
-    """
-    Get active storage engine
-    """
-
-    try:
-        filesetting = FileShareSetting.objects.get(id=1)
-        storage = StorageProvider.plugins[filesetting.storage]
-        return storage
-    except Exception, e:
-        print e
-        return None
-
-
-
-def get_splitter():
-    """
-    Get active splitter method
-    """
-
-    try:
-        filesetting = FileShareSetting.objects.get(id=1)
-        splitter = SplitterProvider.plugins[filesetting.splitter]
-        return splitter
-    except Exception, e:
-        print e
-        return None
+        try:
+            splitter = SplitterProvider.plugins[self.splitter]
+            return splitter
+        except Exception, e:
+            print e
+            return None
 
 
 def available_validators():
@@ -101,4 +88,13 @@ def available_splitters():
     for module in list(pkgutil.iter_modules(["plugins/splitters"])):
         __import__("plugins.splitters.%s" % module[1], fromlist=[""])
     return SplitterProvider.plugins
+
+
+def available_hash():
+    """
+    Get available splitter plugins
+    """
+    for module in list(pkgutil.iter_modules(["plugins/hash"])):
+        __import__("plugins.hash.%s" % module[1], fromlist=[""])
+    return HashProvider.plugins
 

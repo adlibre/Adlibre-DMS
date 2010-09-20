@@ -9,60 +9,88 @@ from django.shortcuts import get_object_or_404, render_to_response
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic.simple import direct_to_template
 from django.http import Http404
+from django.contrib import messages
+from django.contrib.admin.views.decorators import staff_member_required
+from django.core.urlresolvers import reverse
 
 from fileshare.forms import UploadForm, SettingForm
-from fileshare.models import (FileShare, FileShareSetting, available_validators,
-    available_splitters, get_storage, get_splitter)
+from fileshare.models import (Rule, available_validators,
+    available_splitters)
 
 
 def index(request, template_name='fileshare/index.html', extra_context={}):
-    try:
-        filesetting = FileShareSetting.objects.get(id=1)
-    except:
-        return HttpResponse("No setting found")
     form = UploadForm(request.POST or None, request.FILES or None)
     if request.method == 'POST':
         if form.is_valid():
-            document = form.files['file']
-            storage = get_storage()
-            splitter = get_splitter()
-            storage.store(document, splitter)
+            document = os.path.splitext(form.files['file'].name)[0]
+            rule = Rule.objects.match(document)
+            if not rule:
+                return HttpResponse("No rule found for your uploaded file")
+            splitter = rule.get_splitter()
+            storage = rule.get_storage()
+            storage.store(form.files['file'], splitter)
     extra_context['form'] = form
-    extra_context['file_list'] = FileShare.objects.all()
     return direct_to_template(request,
                               template_name,
                               extra_context=extra_context)
 
 
-def get_file(request, hashcode, filename):
-    obj = get_object_or_404(FileShare, hashcode=hashcode)
-    fullpath = obj.sharefile.file.name
-    statobj = os.stat(fullpath)
-    contents = open(fullpath, 'rb').read()
-    mimetype = mimetypes.guess_type(fullpath)[0] or 'application/octet-stream'
-    response = HttpResponse(contents, mimetype=mimetype)
-    response["Content-Length"] = len(contents)
+def get_file(request, hashcode, document):
+    rule = Rule.objects.match(document)
+    if not rule:
+        raise Http404
+    if not rule.is_hash_active:
+        raise Http404
+    #todo : check file again hashcode
+    splitter = rule.get_splitter()
+    storage = rule.get_storage()
+    mimetype, content = storage.get(document, splitter)
+    response = HttpResponse(content, mimetype=mimetype)
+    response["Content-Length"] = len(content)
     return response
 
 
+
+def get_file_no_hash(request, document):
+    rule = Rule.objects.match(document)
+    if not rule:
+        raise Http404
+    if rule.is_hash_active:
+        raise Http404
+    splitter = rule.get_splitter()
+    storage = rule.get_storage()
+    mimetype, content = storage.get(document, splitter)
+    response = HttpResponse(content, mimetype=mimetype)
+    response["Content-Length"] = len(content)
+    return response
+
+
+@staff_member_required
 def setting(request, template_name='fileshare/setting.html',
                    extra_context={}):
-
-    filesetting, created = FileShareSetting.objects.get_or_create(id=1)
+    rule_list = Rule.objects.all()
     if request.method == 'POST':
         form = SettingForm(request.POST)
         if form.is_valid():
-            filesetting.validator = form.cleaned_data['validator']
-            filesetting.splitter = form.cleaned_data['splitter']
-            filesetting.storage = form.cleaned_data['storage']
-            filesetting.save()
+            rule.save()
     else:
-        data = {
-            'splitter' : filesetting.splitter,
-            'validator' : filesetting.validator,
-            'storage' : filesetting.storage
-        }
-        form = SettingForm(initial=data)
+        form = SettingForm()
+
+    extra_context['form'] = form
+    extra_context['rule_list'] = rule_list
+    return direct_to_template(request, template_name, extra_context=extra_context)
+
+
+@staff_member_required
+def edit_setting(request, rule_id, template_name='fileshare/edit_setting.html',
+                   extra_context={}):
+    rule = get_object_or_404(Rule, id=rule_id)
+    form = SettingForm(request.POST or None, instance=rule)
+    if request.method == 'POST':
+        if form.is_valid():
+            rule.save()
+            messages.success(request, 'Rule details updated.')
+            return HttpResponseRedirect(reverse('setting'))
 
     extra_context['form'] = form
     return direct_to_template(request, template_name, extra_context=extra_context)

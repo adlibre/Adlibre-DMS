@@ -5,6 +5,7 @@ from fileshare.utils import ValidatorProvider
 
 class DocCode(ValidatorProvider):
     name = 'DocCode'
+    description = '[A-Z]{3}[0-9]{8}'
 
     @staticmethod
     def validate(document):
