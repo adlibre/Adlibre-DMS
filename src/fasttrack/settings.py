@@ -80,6 +80,8 @@ TEMPLATE_DIRS = (
     os.path.join(PROJECT_PATH, 'templates')
 )
 
+PLUGIN_DIR = os.path.join(PROJECT_PATH, 'plugins')
+
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -87,10 +89,11 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.admin',
     'fileshare',
-    
+
 )
 
 try:
     from settings_local import *
 except ImportError:
     pass
+

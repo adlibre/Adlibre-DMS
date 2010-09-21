@@ -3,6 +3,7 @@ import hashlib
 import pkgutil
 
 from django.db import models
+from django.conf import settings
 
 from fileshare.utils import ValidatorProvider, SplitterProvider, StorageProvider, HashProvider
 
@@ -67,7 +68,7 @@ def available_validators():
     """
     Get available document validator plugins
     """
-    for module in list(pkgutil.iter_modules(["plugins/validators"])):
+    for module in list(pkgutil.iter_modules(["%s/validators" % settings.PLUGIN_DIR])):
         __import__("plugins.validators.%s" % module[1], fromlist=[""])
     return ValidatorProvider.plugins
 
@@ -76,7 +77,7 @@ def available_storages():
     """
     Get available storage engines plugins
     """
-    for module in list(pkgutil.iter_modules(["plugins/storages"])):
+    for module in list(pkgutil.iter_modules(["%s/storages" % settings.PLUGIN_DIR])):
         __import__("plugins.storages.%s" % module[1], fromlist=[""])
     return StorageProvider.plugins
 
@@ -85,7 +86,7 @@ def available_splitters():
     """
     Get available splitter plugins
     """
-    for module in list(pkgutil.iter_modules(["plugins/splitters"])):
+    for module in list(pkgutil.iter_modules(["%s/splitters" % settings.PLUGIN_DIR])):
         __import__("plugins.splitters.%s" % module[1], fromlist=[""])
     return SplitterProvider.plugins
 
@@ -94,7 +95,7 @@ def available_hash():
     """
     Get available splitter plugins
     """
-    for module in list(pkgutil.iter_modules(["plugins/hash"])):
+    for module in list(pkgutil.iter_modules(["%s/hash" % settings.PLUGIN_DIR])):
         __import__("plugins.hash.%s" % module[1], fromlist=[""])
     return HashProvider.plugins
 
