@@ -7,6 +7,7 @@ import socket
 PROJECT_PATH = os.path.abspath(os.path.split(__file__)[0])
 sys.path.append(os.path.join(PROJECT_PATH, 'apps'))
 sys.path.append(os.path.join(PROJECT_PATH, 'libraries'))
+sys.path.append(os.path.join(PROJECT_PATH, 'plugins'))
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
