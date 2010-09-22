@@ -72,7 +72,7 @@ def setting(request, template_name='fileshare/setting.html',
     if request.method == 'POST':
         form = SettingForm(request.POST)
         if form.is_valid():
-            rule.save()
+            form.save()
     else:
         form = SettingForm()
 
@@ -88,7 +88,7 @@ def edit_setting(request, rule_id, template_name='fileshare/edit_setting.html',
     form = SettingForm(request.POST or None, instance=rule)
     if request.method == 'POST':
         if form.is_valid():
-            rule.save()
+            form.save()
             messages.success(request, 'Rule details updated.')
             return HttpResponseRedirect(reverse('setting'))
 
