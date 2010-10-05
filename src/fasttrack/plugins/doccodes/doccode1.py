@@ -1,10 +1,10 @@
 import re
 
-from fileshare.utils import ValidatorProvider
+from fileshare.utils import DocCodeProvider
 
 
-class DocCode(ValidatorProvider):
-    name = 'DocCode'
+class DocCode(DocCodeProvider):
+    name = 'DocCode-1'
     description = '[A-Z]{3}[0-9]{8}'
 
     @staticmethod

@@ -1,3 +1,15 @@
+class DocCodePluginMount(type):
+    def __init__(cls, name, bases, attrs):
+        if not hasattr(cls, 'plugins'):
+            cls.plugins = {}
+        else:
+            cls.plugins[cls.name] = cls
+
+
+class DocCodeProvider:
+    __metaclass__ = DocCodePluginMount
+
+
 class ValidatorPluginMount(type):
     def __init__(cls, name, bases, attrs):
         if not hasattr(cls, 'plugins'):
@@ -8,19 +20,6 @@ class ValidatorPluginMount(type):
 
 class ValidatorProvider:
     __metaclass__ = ValidatorPluginMount
-
-
-
-class SplitterPluginMount(type):
-    def __init__(cls, name, bases, attrs):
-        if not hasattr(cls, 'plugins'):
-            cls.plugins = {}
-        else:
-            cls.plugins[cls.name] = cls
-
-
-class SplitterProvider:
-    __metaclass__ = SplitterPluginMount
 
 
 
@@ -36,7 +35,7 @@ class StorageProvider:
     __metaclass__ = StoragePluginMount
 
 
-class HashPluginMount(type):
+class SecurityPluginMount(type):
     def __init__(cls, name, bases, attrs):
         if not hasattr(cls, 'plugins'):
             cls.plugins = {}
@@ -44,6 +43,6 @@ class HashPluginMount(type):
             cls.plugins[cls.name] = cls
 
 
-class HashProvider:
-    __metaclass__ = HashPluginMount
+class SecurityProvider:
+    __metaclass__ = SecurityPluginMount
 

@@ -12,10 +12,11 @@ from django.http import Http404
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.core.urlresolvers import reverse
+import pickle
 
 from fileshare.forms import UploadForm, SettingForm
-from fileshare.models import (Rule, available_validators,
-    available_splitters)
+from fileshare.models import (Rule, available_validators)
+from fileshare.utils import ValidatorProvider, StorageProvider, SecurityProvider, DocCodeProvider
 
 
 def index(request, template_name='fileshare/index.html', extra_context={}):
@@ -26,9 +27,8 @@ def index(request, template_name='fileshare/index.html', extra_context={}):
             rule = Rule.objects.match(document)
             if not rule:
                 return HttpResponse("No rule found for your uploaded file")
-            splitter = rule.get_splitter()
-            storage = rule.get_storage()
-            storage.store(form.files['file'], splitter)
+            storage = rule.pstorage
+            storage.store(form.files['file'])
     extra_context['form'] = form
     return direct_to_template(request,
                               template_name,
@@ -42,7 +42,6 @@ def get_file(request, hashcode, document):
     if not rule.is_hash_active:
         raise Http404
     #todo : check file again hashcode
-    splitter = rule.get_splitter()
     storage = rule.get_storage()
     mimetype, content = storage.get(document, splitter)
     response = HttpResponse(content, mimetype=mimetype)
@@ -57,7 +56,6 @@ def get_file_no_hash(request, document):
         raise Http404
     if rule.is_hash_active:
         raise Http404
-    splitter = rule.get_splitter()
     storage = rule.get_storage()
     mimetype, content = storage.get(document, splitter)
     response = HttpResponse(content, mimetype=mimetype)
@@ -72,7 +70,15 @@ def setting(request, template_name='fileshare/setting.html',
     if request.method == 'POST':
         form = SettingForm(request.POST)
         if form.is_valid():
-            form.save()
+            rule = Rule()
+            rule.doccode = pickle.dumps(DocCodeProvider.plugins[form.cleaned_data['doccode']])
+            rule.storage = pickle.dumps(StorageProvider.plugins[form.cleaned_data['storage']])
+            rule.securities = pickle.dumps([SecurityProvider.plugins[item]
+                for item in form.cleaned_data['securities']])
+            rule.validators = pickle.dumps([ValidatorProvider.plugins[item]
+                for item in form.cleaned_data['validators']])
+            rule.save()
+            messages.success(request, 'New rule added.')
     else:
         form = SettingForm()
 
@@ -85,10 +91,22 @@ def setting(request, template_name='fileshare/setting.html',
 def edit_setting(request, rule_id, template_name='fileshare/edit_setting.html',
                    extra_context={}):
     rule = get_object_or_404(Rule, id=rule_id)
-    form = SettingForm(request.POST or None, instance=rule)
+    initial = {
+        'doccode':rule.get_doccode().name,
+        'storage':rule.get_storage().name,
+        'validators':[item.name for item in rule.get_validators()],
+        'securities':[item.name for item in rule.get_securities()]
+    }
+    form = SettingForm(request.POST or initial)
     if request.method == 'POST':
         if form.is_valid():
-            form.save()
+            rule.doccode = pickle.dumps(DocCodeProvider.plugins[form.cleaned_data['doccode']])
+            rule.storage = pickle.dumps(StorageProvider.plugins[form.cleaned_data['storage']])
+            rule.securities = pickle.dumps([SecurityProvider.plugins[item]
+                for item in form.cleaned_data['securities']])
+            rule.validators = pickle.dumps([ValidatorProvider.plugins[item]
+                for item in form.cleaned_data['validators']])
+            rule.save()
             messages.success(request, 'Rule details updated.')
             return HttpResponseRedirect(reverse('setting'))
 

@@ -7,12 +7,12 @@ from converter import FileConverter
 
 
 class Local(StorageProvider):
-    name = "Local"
+    name = "Local Storage"
 
     @staticmethod
-    def store(f, splitter, root = settings.MEDIA_ROOT):
+    def store(f, root = settings.MEDIA_ROOT):
         filename = f.name
-        directory = splitter.perform(filename)
+        directory = "%s/%s/%s" % (filename[0:3], filename[3:7], os.path.splitext(filename)[0])
         if root:
             directory = "%s/%s" % (root, directory)
         if not os.path.exists(directory):
@@ -24,8 +24,8 @@ class Local(StorageProvider):
 
 
     @staticmethod
-    def get(document, splitter, root = settings.MEDIA_ROOT):
-        directory = splitter.perform(document)
+    def get(document, root = settings.MEDIA_ROOT):
+        directory = "%s/%s/%s" % (document[0:3], document[3:7], os.path.splitext(document)[0])
         if root:
             directory = "%s/%s" % (root, directory)
 

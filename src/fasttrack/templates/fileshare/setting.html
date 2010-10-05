@@ -1,25 +1,55 @@
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+
 <table border="1" cellspacing="0" cellpadding="0">
     <tr>
         <th>No</th>
-        <th>DocCode</th>
+        <th>DocCode Validator</th>
         <th>Storage</th>
-        <th>Splitter</th>
-        <th>HashCode</th>
+        <th>Securities</th>
+        <th>Validators</th>
         <th>Active</th>
         <th>Edit</th>
     </tr>
     {% for rule in rule_list %}
     <tr>
         <td>{{ forloop.counter }}</td>
-        <td>{{ rule.validator}} - {{ rule.get_validator.description }}</td>
-        <td>{{ rule.storage }}</td>
-        <td>{{ rule.splitter }}</td>
+        <td>{{ rule.get_doccode.name }} - {{ rule.get_doccode.description }}</td>
+        <td>{{ rule.get_storage.name }}</td>
         <td>
-        {% if rule.is_hash_active %}
-          {{ rule.hashcode }}(active)
-        {% else %}
-          {{ rule.hashcode }}(disabled)
-        {% endif %}
+        <ul>
+        {% for security in rule.get_securities %}
+          <li>
+          {% if security.active %}
+            {{ security.name }}(active)
+          {% else %}
+            {{ security.name }}(disabled)
+          {% endif %}
+          </li>
+        {% empty %}
+          <li>None</li>
+        {% endfor %}
+        </ul>
+        </td>
+        <td>
+        <ul>
+        {% for validator in rule.get_validators %}
+          <li>
+          {% if validator.active %}
+            {{ validator.name }}(active)
+          {% else %}
+            {{ validator.name }}(disabled)
+          {% endif %}
+          </li>
+        {% empty %}
+          <li>None</li>
+        {% endfor %}
+        </ul>
         </td>
         <td>{{ rule.active }}</td>
         <td><a href="{% url edit_setting rule.id %}">Edit</a></td>

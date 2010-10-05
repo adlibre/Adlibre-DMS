@@ -1,67 +1,69 @@
 import os
 import hashlib
 import pkgutil
+import pickle
 
 from django.db import models
 from django.conf import settings
 
-from fileshare.utils import ValidatorProvider, SplitterProvider, StorageProvider, HashProvider
+from fileshare.utils import ValidatorProvider, StorageProvider, SecurityProvider, \
+                            DocCodeProvider
 
 
 class RuleManager(models.Manager):
 
     def match(self, document):
         for rule in self.filter(active=True):
-            validator = rule.get_validator()
+            validator = rule.pvalidator
             if validator and validator.validate(document):
                 return rule
         return None
 
 
 class Rule(models.Model):
-    validator = models.CharField(max_length=255, unique=True)
+    doccode = models.CharField(max_length=255, unique=True)
     storage = models.CharField(max_length=255)
-    splitter = models.CharField(max_length=255)
-    hashcode = models.CharField(max_length=255)
-    is_hash_active = models.BooleanField(default=True)
+    validators = models.TextField(blank=True)
+    securities = models.TextField(blank=True)
     active = models.BooleanField(default=True)
 
     objects = RuleManager()
 
-    def get_validator(self):
-        """
-        Get active validator method
-        """
-
+    def get_doccode(self):
         try:
-            validator = ValidatorProvider.plugins[self.validator]
-            return validator
-        except Exception, e:
+            return pickle.loads(self.doccode.encode("ascii"))
+        except:
             return None
+
+    def get_securities(self):
+        try:
+            return pickle.loads(self.securities.encode("ascii"))
+        except:
+            return None
+
 
     def get_storage(self):
-        """
-        Get active storage engine
-        """
-
         try:
-            storage = StorageProvider.plugins[self.storage]
-            return storage
-        except Exception, e:
-            print e
+            return pickle.loads(self.storage.encode("ascii"))
+        except:
             return None
 
-    def get_splitter(self):
-        """
-        Get active splitter method
-        """
 
+    def get_validators(self):
         try:
-            splitter = SplitterProvider.plugins[self.splitter]
-            return splitter
-        except Exception, e:
-            print e
+            return pickle.loads(self.validators.encode("ascii"))
+        except:
             return None
+
+
+
+def available_doccodes():
+    """
+    Get available document code plugins
+    """
+    for module in list(pkgutil.iter_modules(["%s/doccodes" % settings.PLUGIN_DIR])):
+        __import__("doccodes.%s" % module[1], fromlist=[""])
+    return DocCodeProvider.plugins
 
 
 def available_validators():
@@ -82,20 +84,12 @@ def available_storages():
     return StorageProvider.plugins
 
 
-def available_splitters():
+
+def available_securities():
     """
     Get available splitter plugins
     """
-    for module in list(pkgutil.iter_modules(["%s/splitters" % settings.PLUGIN_DIR])):
-        __import__("splitters.%s" % module[1], fromlist=[""])
-    return SplitterProvider.plugins
-
-
-def available_hash():
-    """
-    Get available splitter plugins
-    """
-    for module in list(pkgutil.iter_modules(["%s/hash" % settings.PLUGIN_DIR])):
-        __import__("hash.%s" % module[1], fromlist=[""])
-    return HashProvider.plugins
+    for module in list(pkgutil.iter_modules(["%s/securities" % settings.PLUGIN_DIR])):
+        __import__("securities.%s" % module[1], fromlist=[""])
+    return SecurityProvider.plugins
 

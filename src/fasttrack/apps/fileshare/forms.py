@@ -1,19 +1,21 @@
 import os
+import pickle
 
 from django import forms
 
-from fileshare.models import (available_splitters, available_validators,
-    available_hash, available_storages, Rule)
+from fileshare.models import (available_validators, available_securities,
+    available_doccodes, available_storages, Rule)
+from fileshare.utils import DocCodeProvider
 
 class UploadForm(forms.Form):
     file  = forms.FileField()
 
 
-def splitter_choices():
-    splitters = []
-    for splitter in available_splitters():
-        splitters.append([splitter, splitter])
-    return splitters
+def doccode_choices():
+    doccodes = []
+    for doccode, plugin in available_doccodes().items():
+        doccodes.append([doccode, '%s - %s' % (doccode, plugin.description)])
+    return doccodes
 
 
 def validator_choices():
@@ -30,23 +32,24 @@ def storage_choices():
     return storages
 
 
-def hash_choices():
-    hashcodes = []
-    for hashcode in available_hash():
-        hashcodes.append([hashcode, hashcode])
-    return hashcodes
+def security_choices():
+    securities = []
+    for security in available_securities():
+        securities.append([security, security])
+    return securities
 
 
-class SettingForm(forms.ModelForm):
-    validator = forms.ChoiceField(label="DocCode",
-        choices=validator_choices())
-    storage = forms.ChoiceField(label="Storage",
-        choices=storage_choices())
-    splitter = forms.ChoiceField(label="Split Method",
-        choices=splitter_choices())
-    hashcode = forms.ChoiceField(label="HashCode",
-        choices=hash_choices())
+class SettingForm(forms.Form):
+    doccode = forms.ChoiceField(label="DocCode Validator", choices=doccode_choices())
+    storage = forms.ChoiceField(label="Storage", choices=storage_choices())
+    validators = forms.MultipleChoiceField(label="Validators",
+        choices=validator_choices(), required=False)
+    securities = forms.MultipleChoiceField(label="Securities",
+        choices=security_choices(), required=False)
 
-    class Meta:
-        model = Rule
+    def clean_doccode(self):
+        doccode = self.cleaned_data['doccode']
+        if Rule.objects.filter(doccode=pickle.dumps(DocCodeProvider.plugins[doccode])).exists():
+            raise forms.ValidationError("DocCode must be unique")
+        return doccode
 
