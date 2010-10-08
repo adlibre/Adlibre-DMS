@@ -24,11 +24,11 @@
         <td>
         <ul>
         {% for security in rule.get_securities %}
-          <li>
+          <li>{{ security.name }}
           {% if security.active %}
-            {{ security.name }}(active)
+            (active | <a href="{% url toggle_securities_plugin rule.id forloop.counter0 %}">toggle</a>)
           {% else %}
-            {{ security.name }}(disabled)
+            (disabled | <a href="{% url toggle_securities_plugin rule.id forloop.counter0 %}">toggle</a>)
           {% endif %}
           </li>
         {% empty %}
@@ -39,11 +39,11 @@
         <td>
         <ul>
         {% for validator in rule.get_validators %}
-          <li>
+          <li>{{ validator.name }}
           {% if validator.active %}
-            {{ validator.name }}(active)
+            (active | <a href="{% url toggle_validators_plugin rule.id forloop.counter0 %}">toggle</a>)
           {% else %}
-            {{ validator.name }}(disabled)
+            (disabled | <a href="{% url toggle_validators_plugin rule.id forloop.counter0 %}">toggle</a>)
           {% endif %}
           </li>
         {% empty %}
@@ -51,7 +51,7 @@
         {% endfor %}
         </ul>
         </td>
-        <td>{{ rule.active }}</td>
+        <td>{{ rule.active }} | <a href="{% url toggle_rule_state rule.id %}">toggle</a></td>
         <td><a href="{% url edit_setting rule.id %}">Edit</a></td>
     </tr>
     {% endfor %}

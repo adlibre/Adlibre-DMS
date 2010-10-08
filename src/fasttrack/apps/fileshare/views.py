@@ -14,7 +14,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.core.urlresolvers import reverse
 import pickle
 
-from fileshare.forms import UploadForm, SettingForm
+from fileshare.forms import UploadForm, SettingForm, EditSettingForm
 from fileshare.models import (Rule, available_validators)
 from fileshare.utils import ValidatorProvider, StorageProvider, SecurityProvider, DocCodeProvider
 
@@ -73,6 +73,7 @@ def setting(request, template_name='fileshare/setting.html',
             rule = Rule()
             rule.doccode = pickle.dumps(DocCodeProvider.plugins[form.cleaned_data['doccode']])
             rule.storage = pickle.dumps(StorageProvider.plugins[form.cleaned_data['storage']])
+            rule.hashcode = pickle.dumps(SecurityProvider.plugins[form.cleaned_data['hashcode']])
             rule.securities = pickle.dumps([SecurityProvider.plugins[item]
                 for item in form.cleaned_data['securities']])
             rule.validators = pickle.dumps([ValidatorProvider.plugins[item]
@@ -92,16 +93,16 @@ def edit_setting(request, rule_id, template_name='fileshare/edit_setting.html',
                    extra_context={}):
     rule = get_object_or_404(Rule, id=rule_id)
     initial = {
-        'doccode':rule.get_doccode().name,
         'storage':rule.get_storage().name,
+        'hashcode':rule.get_hashcode().name,
         'validators':[item.name for item in rule.get_validators()],
         'securities':[item.name for item in rule.get_securities()]
     }
-    form = SettingForm(request.POST or initial)
+    form = EditSettingForm(request.POST or initial)
     if request.method == 'POST':
         if form.is_valid():
-            rule.doccode = pickle.dumps(DocCodeProvider.plugins[form.cleaned_data['doccode']])
             rule.storage = pickle.dumps(StorageProvider.plugins[form.cleaned_data['storage']])
+            rule.hashcode = pickle.dumps(SecurityProvider.plugins[form.cleaned_data['hashcode']])
             rule.securities = pickle.dumps([SecurityProvider.plugins[item]
                 for item in form.cleaned_data['securities']])
             rule.validators = pickle.dumps([ValidatorProvider.plugins[item]
@@ -110,6 +111,37 @@ def edit_setting(request, rule_id, template_name='fileshare/edit_setting.html',
             messages.success(request, 'Rule details updated.')
             return HttpResponseRedirect(reverse('setting'))
 
+    extra_context['rule'] = rule
     extra_context['form'] = form
     return direct_to_template(request, template_name, extra_context=extra_context)
+
+
+@staff_member_required
+def toggle_rule_state(request, rule_id):
+    rule = get_object_or_404(Rule, id=rule_id)
+    rule.active = not rule.active
+    rule.save()
+    return HttpResponseRedirect(reverse("setting"))
+
+
+@staff_member_required
+def toggle_securities_plugin(request, rule_id, plugin_index):
+    rule = get_object_or_404(Rule, id=rule_id)
+    securities = rule.get_securities()
+    plugin = securities[int(plugin_index)]
+    plugin.active = not plugin.active
+    rule.securities = pickle.dumps(securities)
+    rule.save()
+    return HttpResponseRedirect(reverse("setting"))
+
+
+@staff_member_required
+def toggle_validators_plugin(request, rule_id, plugin_index):
+    rule = get_object_or_404(Rule, id=rule_id)
+    validators = rule.get_validators()
+    plugin = validators[int(plugin_index)]
+    plugin.active = not plugin.active
+    rule.validators = pickle.dumps(validators)
+    rule.save()
+    return HttpResponseRedirect(reverse("setting"))
 

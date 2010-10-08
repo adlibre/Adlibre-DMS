@@ -23,6 +23,7 @@ class RuleManager(models.Manager):
 class Rule(models.Model):
     doccode = models.CharField(max_length=255, unique=True)
     storage = models.CharField(max_length=255)
+    hashcode = models.CharField(max_length=255)
     validators = models.TextField(blank=True)
     securities = models.TextField(blank=True)
     active = models.BooleanField(default=True)
@@ -34,6 +35,15 @@ class Rule(models.Model):
             return pickle.loads(self.doccode.encode("ascii"))
         except:
             return None
+
+
+    def get_hashcode(self):
+        try:
+            return pickle.loads(self.hashcode.encode("ascii"))
+        except:
+            return None
+
+
 
     def get_securities(self):
         try:
@@ -87,9 +97,26 @@ def available_storages():
 
 def available_securities():
     """
-    Get available splitter plugins
+    Get available security plugins
     """
     for module in list(pkgutil.iter_modules(["%s/securities" % settings.PLUGIN_DIR])):
         __import__("securities.%s" % module[1], fromlist=[""])
-    return SecurityProvider.plugins
+    security_plugins = {}
+    for plugin in SecurityProvider.plugins.items():
+        if not hasattr(plugin[1], "plugin_type"):
+            security_plugins[plugin[0]] = plugin[1]
+    return security_plugins
+
+
+def available_hashcodes():
+    """
+    Get available hashcode plugins
+    """
+    for module in list(pkgutil.iter_modules(["%s/securities" % settings.PLUGIN_DIR])):
+        __import__("securities.%s" % module[1], fromlist=[""])
+    hash_plugins = {}
+    for plugin in SecurityProvider.plugins.items():
+        if hasattr(plugin[1], "plugin_type") and plugin[1].plugin_type == 'hash':
+            hash_plugins[plugin[0]] = plugin[1]
+    return hash_plugins
 
