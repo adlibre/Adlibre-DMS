@@ -73,7 +73,6 @@ def setting(request, template_name='fileshare/setting.html',
             rule = Rule()
             rule.doccode = pickle.dumps(DocCodeProvider.plugins[form.cleaned_data['doccode']])
             rule.storage = pickle.dumps(StorageProvider.plugins[form.cleaned_data['storage']])
-            rule.hashcode = pickle.dumps(SecurityProvider.plugins[form.cleaned_data['hashcode']])
             rule.securities = pickle.dumps([SecurityProvider.plugins[item]
                 for item in form.cleaned_data['securities']])
             rule.validators = pickle.dumps([ValidatorProvider.plugins[item]
@@ -94,7 +93,6 @@ def edit_setting(request, rule_id, template_name='fileshare/edit_setting.html',
     rule = get_object_or_404(Rule, id=rule_id)
     initial = {
         'storage':rule.get_storage().name,
-        'hashcode':rule.get_hashcode().name,
         'validators':[item.name for item in rule.get_validators()],
         'securities':[item.name for item in rule.get_securities()]
     }
@@ -102,7 +100,6 @@ def edit_setting(request, rule_id, template_name='fileshare/edit_setting.html',
     if request.method == 'POST':
         if form.is_valid():
             rule.storage = pickle.dumps(StorageProvider.plugins[form.cleaned_data['storage']])
-            rule.hashcode = pickle.dumps(SecurityProvider.plugins[form.cleaned_data['hashcode']])
             rule.securities = pickle.dumps([SecurityProvider.plugins[item]
                 for item in form.cleaned_data['securities']])
             rule.validators = pickle.dumps([ValidatorProvider.plugins[item]
@@ -144,4 +141,23 @@ def toggle_validators_plugin(request, rule_id, plugin_index):
     rule.validators = pickle.dumps(validators)
     rule.save()
     return HttpResponseRedirect(reverse("setting"))
+
+
+def plugin_setting(request, rule_id, plugin_type, plugin_index, template_name='fileshare/plugin_setting.html',
+                   extra_context={}):
+    rule = get_object_or_404(Rule, id=rule_id)
+    if plugin_type == 'validator':
+        plugins = rule.get_validators()
+    else:
+        plugins = rule.get_securities()
+    plugin = plugins[int(plugin_index)]
+    formclass = plugin.get_form()
+
+    form = formclass()
+
+    extra_context['plugin'] = plugin
+    extra_context['rule'] = rule
+    extra_context['form'] = form
+
+    return direct_to_template(request, template_name, extra_context=extra_context)
 
