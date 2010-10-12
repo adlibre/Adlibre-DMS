@@ -7,11 +7,21 @@ class HashForm(forms.Form):
     salt = forms.CharField(max_length=255)
     method = forms.CharField(max_length=255)
 
+    def __init__(self, instance, *args, **kwargs):
+        self.instance = instance
+        super(HashForm, self).__init__(*args, **kwargs)
+
+    def save(self):
+        pass
+
 
 class MD5Hash(SecurityProvider):
     name = 'Hash'
-    active = True
     has_configuration = True
+
+
+    def __init__(self):
+        self.active = True
 
     @staticmethod
     def perform(document):
@@ -20,4 +30,8 @@ class MD5Hash(SecurityProvider):
     @staticmethod
     def get_form():
         return HashForm
+
+    @staticmethod
+    def available_method(self):
+        return []
 

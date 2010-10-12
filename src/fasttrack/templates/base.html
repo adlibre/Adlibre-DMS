@@ -2,18 +2,23 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	<title>{% block title %}{% endblock %} - Fasttrack</title>	
+	<title>{% block title %}{% endblock %} - Fasttrack</title>
+	<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/css/style.css" />
+
 </head>
 <body>
     <div id="content">
         {% block content %}
-        
+
         {% endblock %}
     </div>
 	<div id="footer">
 	    &copy; Fasttrack
 	</div>
 	{% block javascript %}
-	{% endblock %}	
+	<script type="text/javascript" language="javascript" charset="utf-8" src="{{ MEDIA_URL }}js/jquery.tools.min.js"></script>
+	<script type="text/javascript" language="javascript" charset="utf-8" src="{{ MEDIA_URL }}js/script.js"></script>
+	{% endblock %}
 </body>
 </html>
+

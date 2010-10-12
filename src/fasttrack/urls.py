@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.conf.urls.defaults import *
 
 # Uncomment the next two lines to enable the admin:
@@ -11,11 +12,12 @@ urlpatterns = patterns('',
     # Uncomment the admin/doc line below and add 'django.contrib.admindocs'
     # to INSTALLED_APPS to enable admin documentation:
     # (r'^admin/doc/', include('django.contrib.admindocs.urls')),
-    url(r'^setting/', include('fileshare.urls')),
+    url(r'^settings/', include('fileshare.urls')),
     (r'^$', 'fileshare.views.index'),
     url(r'^get/(?P<document>\w+)$', 'fileshare.views.get_file_no_hash', name='get_file_no_hash'),
     url(r'^(?P<hashcode>\w+)/(?P<document>\w+)$', 'fileshare.views.get_file', name='get_file'),
     # Uncomment the next line to enable the admin:
     (r'^admin/', include(admin.site.urls)),
+    (r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT }),
 )
 

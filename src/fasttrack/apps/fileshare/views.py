@@ -71,11 +71,11 @@ def setting(request, template_name='fileshare/setting.html',
         form = SettingForm(request.POST)
         if form.is_valid():
             rule = Rule()
-            rule.doccode = pickle.dumps(DocCodeProvider.plugins[form.cleaned_data['doccode']])
-            rule.storage = pickle.dumps(StorageProvider.plugins[form.cleaned_data['storage']])
-            rule.securities = pickle.dumps([SecurityProvider.plugins[item]
+            rule.doccode = pickle.dumps(DocCodeProvider.plugins[form.cleaned_data['doccode']]())
+            rule.storage = pickle.dumps(StorageProvider.plugins[form.cleaned_data['storage']]())
+            rule.securities = pickle.dumps([SecurityProvider.plugins[item]()
                 for item in form.cleaned_data['securities']])
-            rule.validators = pickle.dumps([ValidatorProvider.plugins[item]
+            rule.validators = pickle.dumps([ValidatorProvider.plugins[item]()
                 for item in form.cleaned_data['validators']])
             rule.save()
             messages.success(request, 'New rule added.')
@@ -99,10 +99,10 @@ def edit_setting(request, rule_id, template_name='fileshare/edit_setting.html',
     form = EditSettingForm(request.POST or initial)
     if request.method == 'POST':
         if form.is_valid():
-            rule.storage = pickle.dumps(StorageProvider.plugins[form.cleaned_data['storage']])
-            rule.securities = pickle.dumps([SecurityProvider.plugins[item]
+            rule.storage = pickle.dumps(StorageProvider.plugins[form.cleaned_data['storage']]())
+            rule.securities = pickle.dumps([SecurityProvider.plugins[item]()
                 for item in form.cleaned_data['securities']])
-            rule.validators = pickle.dumps([ValidatorProvider.plugins[item]
+            rule.validators = pickle.dumps([ValidatorProvider.plugins[item]()
                 for item in form.cleaned_data['validators']])
             rule.save()
             messages.success(request, 'Rule details updated.')
@@ -124,10 +124,11 @@ def toggle_rule_state(request, rule_id):
 @staff_member_required
 def toggle_securities_plugin(request, rule_id, plugin_index):
     rule = get_object_or_404(Rule, id=rule_id)
-    securities = rule.get_securities()
-    plugin = securities[int(plugin_index)]
+    plugins = rule.get_securities()
+    plugin = plugins[int(plugin_index)]
     plugin.active = not plugin.active
-    rule.securities = pickle.dumps(securities)
+    plugins[int(plugin_index)] = plugin
+    rule.securities = pickle.dumps(plugins)
     rule.save()
     return HttpResponseRedirect(reverse("setting"))
 
@@ -135,10 +136,11 @@ def toggle_securities_plugin(request, rule_id, plugin_index):
 @staff_member_required
 def toggle_validators_plugin(request, rule_id, plugin_index):
     rule = get_object_or_404(Rule, id=rule_id)
-    validators = rule.get_validators()
-    plugin = validators[int(plugin_index)]
+    plugins = rule.get_validators()
+    plugin = plugins[int(plugin_index)]
     plugin.active = not plugin.active
-    rule.validators = pickle.dumps(validators)
+    plugins[int(plugin_index)] = plugin
+    rule.validators = pickle.dumps(plugins)
     rule.save()
     return HttpResponseRedirect(reverse("setting"))
 
@@ -152,9 +154,16 @@ def plugin_setting(request, rule_id, plugin_type, plugin_index, template_name='f
         plugins = rule.get_securities()
     plugin = plugins[int(plugin_index)]
     formclass = plugin.get_form()
-
-    form = formclass()
-
+    form = formclass(plugin, request.POST or None)
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            plugins[int(plugin_index)] = plugin
+            if plugin_type == 'validator':
+                rule.validators = pickle.dumps(plugins)
+            else:
+                rule.securities = pickle.dumps(plugins)
+            rule.save()
     extra_context['plugin'] = plugin
     extra_context['rule'] = rule
     extra_context['form'] = form

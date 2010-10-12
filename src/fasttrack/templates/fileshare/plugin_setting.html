@@ -1,9 +1,12 @@
 
 <h2>rule {{ rule.get_doccode.name }}</h2>
+
+{{ plugin.render }}
+
 <h3>{{ plugin.name }}'s Configuration </h3>
 <form action="" method="post">
   {{ form.as_p }}
 
-  <p><input type="submit" value="Continue &rarr;" /></p>
+  <p><input type="submit" value="Submit &rarr;" /></p>
 </form>
 
