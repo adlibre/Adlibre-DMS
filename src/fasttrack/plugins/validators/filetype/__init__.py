@@ -41,11 +41,13 @@ class FileType(ValidatorProvider):
 
 
     def __init__(self):
+        self.is_storing_action = True
+        self.is_retrieval_action = False
         self.active = True
         self.available_type = []
 
     @staticmethod
-    def perform(request):
+    def perform(request, document):
         return True
 
     @staticmethod

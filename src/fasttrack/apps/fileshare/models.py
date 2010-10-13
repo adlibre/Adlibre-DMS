@@ -14,8 +14,8 @@ class RuleManager(models.Manager):
 
     def match(self, document):
         for rule in self.filter(active=True):
-            validator = rule.pvalidator
-            if validator and validator.validate(document):
+            doccode = rule.get_doccode()
+            if doccode and doccode.validate(document):
                 return rule
         return None
 
@@ -36,19 +36,25 @@ class Rule(models.Model):
             return None
 
 
-    def get_hashcode(self):
-        try:
-            return pickle.loads(self.hashcode.encode("ascii"))
-        except:
-            return None
-
-
-
     def get_securities(self):
         try:
             return pickle.loads(self.securities.encode("ascii"))
         except:
             return []
+
+
+    def get_security(self, name):
+        """
+        Get security plugin by name
+        """
+        try:
+            securities = pickle.loads(self.securities.encode("ascii"))
+            for security in securities:
+                if security.name == name:
+                    return security
+        except:
+            pass
+        return None
 
 
     def get_storage(self):

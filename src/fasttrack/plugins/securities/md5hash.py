@@ -21,10 +21,12 @@ class MD5Hash(SecurityProvider):
 
 
     def __init__(self):
+        self.is_storing_action = False
+        self.is_retrieval_action = True
         self.active = True
 
     @staticmethod
-    def perform(document):
+    def perform(request, document):
         return hashlib.md5(document).hexdigest()
 
     @staticmethod

@@ -7,9 +7,17 @@ class security(SecurityProvider):
     name = 'Security Group'
     active = True
 
+    def __init__(self):
+        self.is_storing_action = True
+        self.is_retrieval_action = True
+        self.active = True
+
     @staticmethod
-    def perform(request):
-        security_group = Group.objects.get(name='security')
+    def perform(request, document):
+        try:
+            security_group = Group.objects.get(name='security')
+        except:
+            return False
         if security_group in request.user.groups.all():
             return True
         return False

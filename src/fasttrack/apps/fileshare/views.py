@@ -1,5 +1,6 @@
 import mimetypes
 import os
+import pickle
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -8,11 +9,10 @@ from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import get_object_or_404, render_to_response
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic.simple import direct_to_template
-from django.http import Http404
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.core.urlresolvers import reverse
-import pickle
+
 
 from fileshare.forms import UploadForm, SettingForm, EditSettingForm
 from fileshare.models import (Rule, available_validators)
@@ -20,6 +20,11 @@ from fileshare.utils import ValidatorProvider, StorageProvider, SecurityProvider
 
 
 def index(request, template_name='fileshare/index.html', extra_context={}):
+    """
+    Upload file processing. Uploaded file will be check against available rules to
+    determine storage, validator, and security plugins.
+    """
+
     form = UploadForm(request.POST or None, request.FILES or None)
     if request.method == 'POST':
         if form.is_valid():
@@ -27,8 +32,22 @@ def index(request, template_name='fileshare/index.html', extra_context={}):
             rule = Rule.objects.match(document)
             if not rule:
                 return HttpResponse("No rule found for your uploaded file")
-            storage = rule.pstorage
-            storage.store(form.files['file'])
+
+
+        # check against all validator
+        for validator in rule.get_validators():
+            if validator.is_storing_action and validator.active:
+                validator.perform(request, document)
+
+        # check against all securities
+        for security in rule.get_securities():
+            if security.is_storing_action and security.active:
+                security.perform(request, document)
+
+        storage = rule.get_storage()
+        storage.store(form.files['file'])
+        messages.success(request, 'File has been uploaded.')
+
     extra_context['form'] = form
     return direct_to_template(request,
                               template_name,
@@ -39,11 +58,23 @@ def get_file(request, hashcode, document):
     rule = Rule.objects.match(document)
     if not rule:
         raise Http404
-    if not rule.is_hash_active:
+
+    hashplugin = rule.get_security('Hash')
+    if hashplugin and not hashplugin.active:
         raise Http404
-    #todo : check file again hashcode
+
+    # check against all validator
+    for validator in rule.get_validators():
+        if validator.is_retrieval_action and validator.active:
+            validator.perform(request, document)
+
+    # check against all securities
+    for security in rule.get_securities():
+        if security.is_retrieval_action and security.active:
+            security.perform(request, document)
+
     storage = rule.get_storage()
-    mimetype, content = storage.get(document, splitter)
+    mimetype, content = storage.get(document)
     response = HttpResponse(content, mimetype=mimetype)
     response["Content-Length"] = len(content)
     return response
@@ -54,10 +85,25 @@ def get_file_no_hash(request, document):
     rule = Rule.objects.match(document)
     if not rule:
         raise Http404
-    if rule.is_hash_active:
+
+    hashplugin = rule.get_security('Hash')
+    if hashplugin and hashplugin.active:
         raise Http404
+
+
+    # check against all validator
+    for validator in rule.get_validators():
+        if validator.is_retrieval_action and validator.active:
+            validator.perform(request, document)
+
+    # check against all securities
+    for security in rule.get_securities():
+        if security.is_retrieval_action and security.active:
+            security.perform(request, document)
+
+
     storage = rule.get_storage()
-    mimetype, content = storage.get(document, splitter)
+    mimetype, content = storage.get(document)
     response = HttpResponse(content, mimetype=mimetype)
     response["Content-Length"] = len(content)
     return response
@@ -65,7 +111,11 @@ def get_file_no_hash(request, document):
 
 @staff_member_required
 def setting(request, template_name='fileshare/setting.html',
-                   extra_context={}):
+            extra_context={}):
+    """
+    Setting for adding and editing rule.
+    """
+
     rule_list = Rule.objects.all()
     if request.method == 'POST':
         form = SettingForm(request.POST)
@@ -115,6 +165,10 @@ def edit_setting(request, rule_id, template_name='fileshare/edit_setting.html',
 
 @staff_member_required
 def toggle_rule_state(request, rule_id):
+    """
+    Toggle rule state of being active or disabled
+    """
+
     rule = get_object_or_404(Rule, id=rule_id)
     rule.active = not rule.active
     rule.save()
@@ -147,6 +201,11 @@ def toggle_validators_plugin(request, rule_id, plugin_index):
 
 def plugin_setting(request, rule_id, plugin_type, plugin_index, template_name='fileshare/plugin_setting.html',
                    extra_context={}):
+    """
+    Some plugins have configuration and the configuration can be different for
+    each rule.
+    """
+
     rule = get_object_or_404(Rule, id=rule_id)
     if plugin_type == 'validator':
         plugins = rule.get_validators()
