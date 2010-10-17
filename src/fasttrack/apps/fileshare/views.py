@@ -62,6 +62,9 @@ def get_file(request, hashcode, document):
     hashplugin = rule.get_security('Hash')
     if hashplugin and not hashplugin.active:
         raise Http404
+    if hashplugin.perform(request, document) != hashcode:
+        return HttpResponse('Invalid hashcode')
+
 
     # check against all validator
     for validator in rule.get_validators():
@@ -226,6 +229,24 @@ def plugin_setting(request, rule_id, plugin_type, plugin_index, template_name='f
     extra_context['plugin'] = plugin
     extra_context['rule'] = rule
     extra_context['form'] = form
+    print plugin.render()
 
     return direct_to_template(request, template_name, extra_context=extra_context)
+
+
+
+def plugin_action(request, rule_id, plugin_type, plugin_index, action,
+                   extra_context={}):
+    """
+
+    """
+
+    rule = get_object_or_404(Rule, id=rule_id)
+    if plugin_type == 'validator':
+        plugins = rule.get_validators()
+    else:
+        plugins = rule.get_securities()
+    plugin = plugins[int(plugin_index)]
+    view = plugin.action(action)
+    return view(request, rule, plugin, rule_id, plugin_type, plugin_index)
 

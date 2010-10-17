@@ -30,5 +30,8 @@ urlpatterns = patterns('fileshare.views',
                        url(r'^(?P<rule_id>\d+)/conf/(?P<plugin_type>(security|validator))/(?P<plugin_index>\d+)/$',
                            'plugin_setting',
                            name='plugin_setting'),
+                       url(r'^(?P<rule_id>\d+)/conf/(?P<plugin_type>(security|validator))/(?P<plugin_index>\d+)/(?P<action>\w+)$',
+                           'plugin_action',
+                           name='plugin_action'),
                        )
 
