@@ -13,6 +13,8 @@ from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.core.urlresolvers import reverse
 
+from converter import FileConverter
+
 
 from fileshare.forms import UploadForm, SettingForm, EditSettingForm
 from fileshare.models import (Rule, available_validators)
@@ -30,31 +32,29 @@ def index(request, template_name='fileshare/index.html', extra_context={}):
         if form.is_valid():
             document = os.path.splitext(form.files['file'].name)[0]
             rule = Rule.objects.match(document)
-            if not rule:
-                return HttpResponse("No rule found for your uploaded file")
+            if rule:
+                # check against all validator
+                for validator in rule.get_validators():
+                    if validator.is_storing_action and validator.active:
+                        validator.perform(request, document)
 
+                # check against all securities
+                for security in rule.get_securities():
+                    if security.is_storing_action and security.active:
+                        security.perform(request, document)
 
-        # check against all validator
-        for validator in rule.get_validators():
-            if validator.is_storing_action and validator.active:
-                validator.perform(request, document)
-
-        # check against all securities
-        for security in rule.get_securities():
-            if security.is_storing_action and security.active:
-                security.perform(request, document)
-
-        storage = rule.get_storage()
-        storage.store(form.files['file'])
-        messages.success(request, 'File has been uploaded.')
-
+                storage = rule.get_storage()
+                storage.store(form.files['file'])
+                messages.success(request, 'File has been uploaded.')
+            else:
+                messages.error(request, "No rule found for your uploaded file")
     extra_context['form'] = form
     return direct_to_template(request,
                               template_name,
                               extra_context=extra_context)
 
 
-def get_file(request, hashcode, document):
+def get_file(request, hashcode, document, extension):
     rule = Rule.objects.match(document)
     if not rule:
         raise Http404
@@ -77,16 +77,21 @@ def get_file(request, hashcode, document):
             security.perform(request, document)
 
     storage = rule.get_storage()
-    mimetype, content = storage.get(document)
+    filepath = storage.get(document)
+    new_file = FileConverter(filepath, extension)
+    mimetype, content = new_file.convert()
+
     response = HttpResponse(content, mimetype=mimetype)
     response["Content-Length"] = len(content)
     return response
 
 
 
-def get_file_no_hash(request, document):
+def get_file_no_hash(request, document, extension):
+    print document
     rule = Rule.objects.match(document)
     if not rule:
+        print "x"
         raise Http404
 
     hashplugin = rule.get_security('Hash')
@@ -106,7 +111,12 @@ def get_file_no_hash(request, document):
 
 
     storage = rule.get_storage()
-    mimetype, content = storage.get(document)
+    filepath = storage.get(document)
+    new_file = FileConverter(filepath, extension)
+    try:
+        mimetype, content = new_file.convert()
+    except TypeError:
+        return HttpResponse("No file converter")
     response = HttpResponse(content, mimetype=mimetype)
     response["Content-Length"] = len(content)
     return response

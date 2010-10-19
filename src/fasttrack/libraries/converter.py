@@ -4,11 +4,26 @@ import mimetypes
 
 class FileConverter:
 
-    def __init__(self, filepath):
+    def __init__(self, filepath, extension):
         self.filepath = filepath
+        self.extension_to = extension
 
 
-    def to_pdf(self):
+    def convert(self):
+        filename = os.path.basename(self.filepath)
+        document, extension = os.path.splitext(filename)
+        extension_from = extension.strip(".")
+        if self.extension_to == extension_from:
+            content = open(self.filepath, 'rb').read()
+            return [mimetypes.guess_type(self.filepath)[0], content]
+        try:
+            func = getattr(self, '%s_to_%s' % (extension_from, self.extension_to))
+            return func()
+        except AttributeError:
+            return None
+
+
+    def tif_to_pdf(self):
         filename = os.path.basename(self.filepath)
         document = os.path.splitext(filename)[0]
         path = '%s/%s.pdf' % (os.path.dirname(self.filepath), document)
