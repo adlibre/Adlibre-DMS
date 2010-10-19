@@ -78,6 +78,8 @@ def get_file(request, hashcode, document, extension):
 
     storage = rule.get_storage()
     filepath = storage.get(document)
+    if not filepath:
+        return HttpResponse("No file match")
     new_file = FileConverter(filepath, extension)
     mimetype, content = new_file.convert()
 
@@ -88,10 +90,8 @@ def get_file(request, hashcode, document, extension):
 
 
 def get_file_no_hash(request, document, extension):
-    print document
     rule = Rule.objects.match(document)
     if not rule:
-        print "x"
         raise Http404
 
     hashplugin = rule.get_security('Hash')
@@ -112,6 +112,8 @@ def get_file_no_hash(request, document, extension):
 
     storage = rule.get_storage()
     filepath = storage.get(document)
+    if not filepath:
+        return HttpResponse("No file match")
     new_file = FileConverter(filepath, extension)
     try:
         mimetype, content = new_file.convert()

@@ -9,7 +9,7 @@ class Local(StorageProvider):
     name = "Local Storage"
 
     @staticmethod
-    def store(f, root = settings.MEDIA_ROOT):
+    def store(f, root = settings.DOCUMENT_ROOT):
         filename = f.name
         directory = "%s/%s/%s" % (filename[0:3], filename[3:7], os.path.splitext(filename)[0])
         if root:
@@ -23,12 +23,15 @@ class Local(StorageProvider):
 
 
     @staticmethod
-    def get(document, root = settings.MEDIA_ROOT):
+    def get(document, root = settings.DOCUMENT_ROOT):
+
         directory = "%s/%s/%s" % (document[0:3], document[3:7], os.path.splitext(document)[0])
         if root:
             directory = "%s/%s" % (root, directory)
-
-        filename = os.listdir(directory)[0]
+        try:
+            filename = os.listdir(directory)[0]
+        except OSError:
+            return None
         fullpath = '%s/%s' % (directory, filename)
         return fullpath
 
