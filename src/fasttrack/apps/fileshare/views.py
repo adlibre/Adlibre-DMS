@@ -11,7 +11,9 @@ from django.utils.translation import ugettext_lazy as _
 from django.views.generic.simple import direct_to_template
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
+
 
 from converter import FileConverter
 
@@ -21,6 +23,7 @@ from fileshare.models import (Rule, available_validators)
 from fileshare.utils import ValidatorProvider, StorageProvider, SecurityProvider, DocCodeProvider
 
 
+@login_required
 def index(request, template_name='fileshare/index.html', extra_context={}):
     """
     Upload file processing. Uploaded file will be check against available rules to

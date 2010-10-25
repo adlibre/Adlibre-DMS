@@ -33,3 +33,14 @@ class FileConverter:
         p = Popen('rm -rf %s' % path, shell=True,stdout=PIPE, stderr=PIPE)
         return ['application/pdf', content]
 
+
+    def pdf_to_txt(self):
+        filename = os.path.basename(self.filepath)
+        document = os.path.splitext(filename)[0]
+        path = '%s/%s.txt' % (os.path.dirname(self.filepath), document)
+        p = Popen('pdftotext -enc Latin1 %s %s' % (self.filepath, path), shell=True, stdout=PIPE, stderr=PIPE)
+        stdout, stderr = p.communicate()
+        content = open(path, 'rb').read()
+        p = Popen('rm -rf %s' % path, shell=True,stdout=PIPE, stderr=PIPE)
+        return ['text/plain', content]
+
