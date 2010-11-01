@@ -73,14 +73,50 @@ ul.tabs a.xl.current { background-position: 0 -62px; }
 	display:none;
 }
 
+table				{font: 88%/1.7em "Trebuchet MS", "Bitstream Vera Sans", Verdana, Helvetica, sans-serif;
+					border-collapse: separate; border-spacing: 0; margin: 0 0 1em 0; color:#000;}
+
+th			{border-bottom: 1px solid #999;border-top: 1px solid #999;}
+td			{line-height:normal; border-bottom: 1px solid #e1e1e1;}
+
+th,
+td 					{padding: 0.25em;}
+
+td					{text-align: left; vertical-align: top;}
+tbody th			{font-weight: normal; white-space: nowrap;}
+
+tbody th + td		{white-space: nowrap;}
+
+tbody tr.odd th,
+tbody tr.odd td 	{border-color: #deded8; background: #f9f9fb;}
+
+tbody tr:hover td,
+tbody tr:hover th 	{background: #fbfbf8;}
+caption 			{font-weight: bold; font-size: 1.7em; text-align: left; margin: 0; padding: 0.5em 0.25em;}
+
+
 
 table td {
     padding:10px;
 }
 
 table td ul {
-    list-style:none;
-    padding:0px;
     margin:0px;
+}
+
+body {
+    font-family:"Trebuchet MS", "Bitstream Vera Sans", Verdana, Helvetica, sans-serif;
+}
+
+.hide {
+    display:none;
+}
+
+#rules {
+    margin-top:30px;
+}
+
+h2 {
+    border-bottom:1px solid #e1e1e1;
 }
 

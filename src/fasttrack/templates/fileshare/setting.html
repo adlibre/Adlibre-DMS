@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% block title %}Settings{% endblock %}
+
 {% block content %}
 
 
@@ -11,7 +13,12 @@
 <!-- tab "panes" -->
 <div class="panes">
 	<div>
-      <table border="1" cellspacing="0" cellpadding="0">
+	    <a href="" id="new-rule">Add new rule</a>
+      <form action="" method="post" id="new-rule-form" class="hide">
+          {{ form.as_p }}
+          <p><input type="submit" value="Continue &rarr;" /></p>
+      </form>
+      <table cellspacing="0" cellpadding="0" id="rules">
       <tr>
           <th>No</th>
           <th>DocCode Validator</th>
@@ -67,11 +74,7 @@
       </tr>
       {% endfor %}
   </table>
-  <h2>Add new rule</h2>
-  <form action="" method="post">
-      {{ form.as_p }}
-      <p><input type="submit" value="Continue &rarr;" /></p>
-  </form>
+
 
 	</div>
 	<div>pane 2 content</div>
