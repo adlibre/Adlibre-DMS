@@ -1,15 +1,14 @@
 {% extends 'base.html' %}
 
+{% block title %}Upload your document{% endblock %}
 
 {% block content %}
+<div id="upload-page">
 <form action="" method="post" enctype="multipart/form-data" >
-    {{ form.as_p }}<input type="submit" value="Upload &rarr;" />
+    {{ form.file.errors }}{{ form.file }}
+    <input type="submit" value="Upload &rarr;" />
 </form>
 
-<ul>
-    {% for file in file_list %}
-    <li><a href="{{ file.get_absolute_url }}">{{ file }}</a></li>
-    {% endfor %}
-</ul>
-
+</div>
 {% endblock %}
+

@@ -1,5 +1,9 @@
+{% extends 'base.html' %}
 
-<h2>rule {{ rule.get_doccode.name }}</h2>
+{% block title %}Plugin settings{% endblock %}
+
+{% block content %}
+<h1>Rule {{ rule.get_doccode.name }}</h1>
 
 {{ plugin.render }}
 
@@ -10,4 +14,5 @@
   <p><input type="submit" value="Submit &rarr;" /></p>
 </form>
 <a href="{% url setting %}">Back to setting</a>
+{% endblock %}
 

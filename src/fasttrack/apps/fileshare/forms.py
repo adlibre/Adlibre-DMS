@@ -8,7 +8,7 @@ from fileshare.models import (available_validators, available_securities,
 from fileshare.utils import DocCodeProvider
 
 class UploadForm(forms.Form):
-    file  = forms.FileField()
+    file  = forms.FileField(widget=forms.FileInput(attrs={'size':40, 'class':'test'}))
 
 
 def doccode_choices():

@@ -7,6 +7,18 @@
 
 </head>
 <body>
+
+  {% if user.is_authenticated %}
+  <div id="header">
+    Sign in as <span>{{ user }}
+    {% if user.is_staff %}
+    | <a href="{% url setting %}">Settings</a>
+    {% endif %}
+    | <a href="{% url logout %}">Sign out</a>
+  </div>
+  {% endif %}
+
+  <div id="container">
     {% if messages %}
     <ul class="messages">
         {% for message in messages %}
@@ -20,7 +32,8 @@
         {% endblock %}
     </div>
 	<div id="footer">
-	    &copy; Fasttrack
+	    &copy; Fasttrack {% now "Y" %} · <a href="/docs/api/">API</a> · <a href="/">Upload</a>
+	</div>
 	</div>
 	{% block javascript %}
 	<script type="text/javascript" language="javascript" charset="utf-8" src="{{ MEDIA_URL }}js/jquery.tools.min.js"></script>

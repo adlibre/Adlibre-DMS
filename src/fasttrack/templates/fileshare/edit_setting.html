@@ -1,8 +1,14 @@
+{% extends 'base.html' %}
 
-<h2>Edit for rule {{ rule.get_doccode.name }}</h2>
+{% block title %}Settings{% endblock %}
+
+
+{% block content %}
+<h1>Edit for rule {{ rule.get_doccode.name }}</h1>
 <form action="" method="post">
   {{ form.as_p }}
 
   <p><input type="submit" value="Continue &rarr;" /></p>
 </form>
+{% endblock %}
 

@@ -1,13 +1,5 @@
-{% extends "admin/base_site.html" %}
+{% extends "base.html" %}
 {% load i18n %}
-
-{% block extrastyle %}{% load adminmedia %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% admin_media_prefix %}css/login.css" />{% endblock %}
-
-{% block bodyclass %}login{% endblock %}
-
-{% block content_title %}{% endblock %}
-
-{% block breadcrumbs %}{% endblock %}
 
 {% block content %}
 {% if error_message %}
@@ -32,3 +24,4 @@ document.getElementById('id_username').focus()
 </script>
 </div>
 {% endblock %}
+

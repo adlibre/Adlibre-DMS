@@ -2,17 +2,11 @@
 
 {% block title %}Settings{% endblock %}
 
+
 {% block content %}
 
 
-<ul class="tabs">
-	<li><a href="#">Settings</a></li>
-	<li><a href="#">Plugins</a></li>
-</ul>
-
-<!-- tab "panes" -->
-<div class="panes">
-	<div>
+<div>
 	    <a href="" id="new-rule">Add new rule</a>
       <form action="" method="post" id="new-rule-form" class="hide">
           {{ form.as_p }}
@@ -74,10 +68,6 @@
       </tr>
       {% endfor %}
   </table>
-
-
 	</div>
-	<div>pane 2 content</div>
-</div>
 {% endblock %}
 

@@ -1,5 +1,5 @@
 Accepted File Type
-<table border="1">
+<table cellspacing="0" cellpadding="0">
   <tr>
     <th>Mimetype</th>
     <th>Action</th>
@@ -7,7 +7,7 @@ Accepted File Type
   {% for item in mimetype_list %}
   <tr>
     <td>{{ item }}</td>
-    <td><a href="delete?index={{ forloop.counter0 }}">delete</a></td>
+    <td class="action"><a href="delete?index={{ forloop.counter0 }}">delete</a></td>
   </tr>
   {% endfor %}
 </table>
