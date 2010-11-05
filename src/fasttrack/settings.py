@@ -94,7 +94,8 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.flatpages',
     'fileshare',
-
+    'piston',
+    'api',
 )
 
 LOGIN_REDIRECT_URL = '/'

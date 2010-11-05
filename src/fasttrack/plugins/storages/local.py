@@ -7,6 +7,7 @@ from fileshare.utils import StorageProvider
 
 class Local(StorageProvider):
     name = "Local Storage"
+    description = "Local storage plugin"
 
     @staticmethod
     def store(f, root = settings.DOCUMENT_ROOT):

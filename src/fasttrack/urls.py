@@ -13,6 +13,7 @@ urlpatterns = patterns('',
     # to INSTALLED_APPS to enable admin documentation:
     # (r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^settings/', include('fileshare.urls')),
+    url(r'^api/', include('api.urls')),
     (r'^$', 'fileshare.views.index'),
     url(r'^get/(?P<document>\w+)\.(?P<extension>\w{3})$', 'fileshare.views.get_file_no_hash', name='get_file_no_hash'),
     url(r'^(?P<hashcode>\w+)/(?P<document>\w+)\.(?P<extension>\w{3})$', 'fileshare.views.get_file', name='get_file'),

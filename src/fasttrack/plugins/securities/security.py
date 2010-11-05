@@ -5,6 +5,7 @@ from fileshare.utils import SecurityProvider
 
 class security(SecurityProvider):
     name = 'Security Group'
+    description = 'Security group member only'
     active = True
 
     def __init__(self):

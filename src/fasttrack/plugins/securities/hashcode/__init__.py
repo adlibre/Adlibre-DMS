@@ -32,6 +32,7 @@ class HashForm(forms.Form):
 
 class HashCode(SecurityProvider):
     name = 'Hash'
+    description = 'Hash code security of file'
     has_configuration = True
 
 

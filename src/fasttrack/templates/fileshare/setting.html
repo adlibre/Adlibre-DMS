@@ -8,9 +8,12 @@
 
 <div>
 	    <a href="" id="new-rule">Add new rule</a>
-      <form action="" method="post" id="new-rule-form" class="hide">
+      <form action="" method="post" id="new-rule-form" {% if not form.errors %}class="hide"{% endif %}>
           {{ form.as_p }}
-          <p><input type="submit" value="Continue &rarr;" /></p>
+          <p>
+          <label>&nbsp;</label>
+          <input type="submit" value="Continue &rarr;" />
+          </p>
       </form>
       <table cellspacing="0" cellpadding="0" id="rules">
       <tr>

@@ -102,3 +102,8 @@ ul, ol {
     margin-left:25px;
 }
 
+
+option {
+    padding:0px 4px;
+}
+

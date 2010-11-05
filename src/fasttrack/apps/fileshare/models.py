@@ -21,8 +21,8 @@ class RuleManager(models.Manager):
 
 
 class Rule(models.Model):
-    doccode = models.CharField(max_length=255, unique=True)
-    storage = models.CharField(max_length=255)
+    doccode = models.TextField(max_length=255, unique=True)
+    storage = models.TextField(max_length=255)
     validators = models.TextField(blank=True)
     securities = models.TextField(blank=True)
     active = models.BooleanField(default=True)

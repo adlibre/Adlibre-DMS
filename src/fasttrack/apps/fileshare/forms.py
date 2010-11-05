@@ -50,7 +50,7 @@ class SettingForm(forms.Form):
 
     def clean_doccode(self):
         doccode = self.cleaned_data['doccode']
-        if Rule.objects.filter(doccode=pickle.dumps(DocCodeProvider.plugins[doccode])).exists():
+        if Rule.objects.filter(doccode=pickle.dumps(DocCodeProvider.plugins[doccode]())).exists():
             raise forms.ValidationError("DocCode must be unique")
         return doccode
 

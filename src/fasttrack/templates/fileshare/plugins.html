@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Settings{% endblock %}
+
+{% block content %}
+<div>
+	    <h1>Plugins</h1>
+
+      <table cellspacing="0" cellpadding="0" id="rules">
+      <tr>
+          <th>Name</th>
+          <th>Description</th>
+      </tr>
+      {% for key, plugin in plugin_list.items %}
+      <tr>
+        <td>{{ plugin.name }}</td>
+        <td>{{ plugin.description }}</td>
+      </tr>
+      {% endfor %}
+      </table>
+</div>
+{% endblock %}
+

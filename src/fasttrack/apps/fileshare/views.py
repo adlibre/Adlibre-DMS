@@ -19,7 +19,8 @@ from converter import FileConverter
 
 
 from fileshare.forms import UploadForm, SettingForm, EditSettingForm
-from fileshare.models import (Rule, available_validators)
+from fileshare.models import (Rule, available_validators, available_doccodes,
+    available_storages, available_securities)
 from fileshare.utils import ValidatorProvider, StorageProvider, SecurityProvider, DocCodeProvider
 
 
@@ -149,7 +150,6 @@ def setting(request, template_name='fileshare/setting.html',
             messages.success(request, 'New rule added.')
     else:
         form = SettingForm()
-
     extra_context['form'] = form
     extra_context['rule_list'] = rule_list
     return direct_to_template(request, template_name, extra_context=extra_context)
@@ -217,7 +217,24 @@ def toggle_validators_plugin(request, rule_id, plugin_index):
     return HttpResponseRedirect(reverse("setting"))
 
 
-def plugin_setting(request, rule_id, plugin_type, plugin_index, template_name='fileshare/plugin_setting.html',
+def plugins(request, template_name='fileshare/plugins.html',
+            extra_context={}):
+    """
+    List of available plugins
+    """
+
+    plugins = available_doccodes()
+    plugins.update(available_validators())
+    plugins.update(available_securities())
+    plugins.update(available_storages())
+    extra_context['plugin_list'] = plugins
+
+    return direct_to_template(request, template_name, extra_context=extra_context)
+
+
+
+def plugin_setting(request, rule_id, plugin_type, plugin_index,
+                   template_name='fileshare/plugin_setting.html',
                    extra_context={}):
     """
     Some plugins have configuration and the configuration can be different for
@@ -244,7 +261,6 @@ def plugin_setting(request, rule_id, plugin_type, plugin_index, template_name='f
     extra_context['plugin'] = plugin
     extra_context['rule'] = rule
     extra_context['form'] = form
-    print plugin.render()
 
     return direct_to_template(request, template_name, extra_context=extra_context)
 
