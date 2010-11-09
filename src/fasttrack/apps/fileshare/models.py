@@ -29,6 +29,9 @@ class Rule(models.Model):
 
     objects = RuleManager()
 
+    def __unicode__(self):
+        return self.get_doccode().name
+
     def get_doccode(self):
         try:
             return pickle.loads(self.doccode.encode("ascii"))

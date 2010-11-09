@@ -6,6 +6,8 @@ from piston.handler import BaseHandler
 from piston.utils import rc
 
 from fileshare.models import Rule
+from fileshare.models import (available_validators, available_doccodes,
+    available_storages, available_securities)
 from converter import FileConverter
 
 
@@ -39,4 +41,56 @@ class FileHandler(BaseHandler):
             storage.store(request.FILES['filename'])
             return rc.ALL_OK
         return rc.BAD_REQUEST
+
+
+class RulesHandler(BaseHandler):
+    allowed_methods = ('GET','POST')
+
+    verbose_name = 'rule'
+    verbose_name_plural = 'rules'
+
+    def read(self, request):
+        rules = []
+        for rule in Rule.objects.all():
+            readable_rule = {
+                'doccode' : rule.get_doccode().name,
+                'id' : rule.id
+            }
+            rules.append(readable_rule)
+        return rules
+
+
+class RulesDetailHandler(BaseHandler):
+    allowed_methods = ('GET','POST')
+    fields = ('id', 'doccode', 'storage', 'active','validators', 'securities')
+
+    verbose_name = 'rule'
+    verbose_name_plural = 'rules'
+
+    def read(self, request, id_rule):
+        rule = Rule.objects.get(id=id_rule)
+        rule.doccode = rule.get_doccode().name
+        rule.storage = rule.get_storage().name
+        securities = rule.get_securities()
+        rule.securities = ",".join([security.name for security in securities])
+        validators = rule.get_validators()
+        rule.validators = ",".join([validator.name for validator in validators])
+        return rule
+
+
+class PluginsHandler(BaseHandler):
+    allowed_methods = ('GET','POST')
+
+    verbose_name = 'plugin'
+    verbose_name_plural = 'plugins'
+
+    def read(self, request):
+        plugins = []
+        for plugin in available_doccodes():
+            plugins.append(plugin)
+        for plugin in available_validators():
+            plugins.append(plugin)
+        for plugin in available_securities():
+            plugins.append(plugin)
+        return plugins
 
