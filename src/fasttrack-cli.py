@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 import sys
 import os
-from subprocess import Popen, PIPE
+#from subprocess import Popen, PIPE
 
-FASTTRACK_SERVER = 'http://localhost:8000'
+FASTTRACK_SERVER = 'http://fasttrack.adlibre.net'
 
 if __name__ == "__main__":
     print "Fasttrack uploader"
@@ -17,7 +17,12 @@ if __name__ == "__main__":
                 os.system("curl -F 'filename=@%s' %s/api/file/" % (path, FASTTRACK_SERVER))
                 print "Upload OK"
             else:
-                pass
+                for fname in os.listdir(path):
+                    filename = "%s/%s" % (path, fname)
+                    if os.path.isfile(filename):
+                        os.system("curl -F 'filename=@%s' %s/api/file/" % (filename, FASTTRACK_SERVER))
+                        print "Upload OK"
+
         else:
             print "File or directory not found."
     except:
