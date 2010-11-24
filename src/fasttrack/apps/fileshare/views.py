@@ -40,12 +40,19 @@ def index(request, template_name='fileshare/index.html', extra_context={}):
                 # check against all validator
                 for validator in rule.get_validators():
                     if validator.is_storing_action and validator.active:
-                        validator.perform(request, document)
+                        try:
+                            validator.perform(request, document, form.files['file'])
+                        except Exception, e:
+                            return HttpResponse(e)
 
                 # check against all securities
                 for security in rule.get_securities():
                     if security.is_storing_action and security.active:
-                        security.perform(request, document)
+                        try:
+                            security.perform(request, document)
+                        except Exception, e:
+                            return HttpResponse(e)
+
 
                 storage = rule.get_storage()
                 storage.store(form.files['file'])
@@ -73,12 +80,19 @@ def get_file(request, hashcode, document, extension):
     # check against all validator
     for validator in rule.get_validators():
         if validator.is_retrieval_action and validator.active:
-            validator.perform(request, document)
+            try:
+                validator.perform(request, document)
+            except Exception, e:
+                return HttpResponse(e)
 
     # check against all securities
     for security in rule.get_securities():
         if security.is_retrieval_action and security.active:
-            security.perform(request, document)
+            try:
+                security.perform(request, document)
+            except Exception, e:
+                return HttpResponse(e)
+
 
     storage = rule.get_storage()
     filepath = storage.get(document)
@@ -106,12 +120,18 @@ def get_file_no_hash(request, document, extension):
     # check against all validator
     for validator in rule.get_validators():
         if validator.is_retrieval_action and validator.active:
-            validator.perform(request, document)
+            try:
+                validator.perform(request, document)
+            except Exception, e:
+                return HttpResponse(e)
 
     # check against all securities
     for security in rule.get_securities():
         if security.is_retrieval_action and security.active:
-            security.perform(request, document)
+            try:
+                security.perform(request, document)
+            except Exception, e:
+                return HttpResponse(e)
 
 
     storage = rule.get_storage()

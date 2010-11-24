@@ -3,6 +3,10 @@ from django.contrib.auth.models import Group
 from fileshare.utils import SecurityProvider
 
 
+class NotInSecurityGroupError(Exception):
+    def __str__(self):
+        return "NotInSecurityGroupError - You're not in security group"
+
 class security(SecurityProvider):
     name = 'Security Group'
     description = 'Security group member only'
@@ -13,13 +17,8 @@ class security(SecurityProvider):
         self.is_retrieval_action = True
         self.active = True
 
-    @staticmethod
-    def perform(request, document):
-        try:
-            security_group = Group.objects.get(name='security')
-        except:
-            return False
-        if security_group in request.user.groups.all():
-            return True
-        return False
+    def perform(self, request, document):
+        security_group, created = Group.objects.get_or_create(name='security')
+        if not security_group in request.user.groups.all():
+            raise NotInSecurityGroupError
 

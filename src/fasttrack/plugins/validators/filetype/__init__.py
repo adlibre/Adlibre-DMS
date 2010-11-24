@@ -1,10 +1,12 @@
 import pickle
 import os
+import magic
 
 from django import forms
 from django.template.loader import render_to_string
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
+
 
 from fileshare.utils import ValidatorProvider
 
@@ -20,7 +22,6 @@ class FileTypeForm(forms.Form):
             handler = open('%s/mimetypes.pickle' % path, "r")
             mimetypes = pickle.load(handler)
         except Exception, e:
-            print e
             mimetypes = [
                 ('pdf', 'application/pdf')
             ]
@@ -45,6 +46,10 @@ def delete(request, rule, filetype, rule_id, plugin_type, plugin_index):
     return HttpResponseRedirect(reverse('plugin_setting', args=[rule_id, plugin_type, plugin_index]))
 
 
+class FileTypeError(Exception):
+    def __str__(self):
+        return "FileTypeError - The file type is not allowed to be uploaded"
+
 
 class FileType(ValidatorProvider):
     name = 'File Type'
@@ -58,8 +63,10 @@ class FileType(ValidatorProvider):
         self.active = True
         self.available_type = []
 
-    @staticmethod
-    def perform(request, document):
+    def perform(self, request, document, filebuffer):
+        mime = magic.Magic(mime=True)
+        if not mime.from_buffer(filebuffer.read()) in self.available_type:
+            raise FileTypeError
         return True
 
     @staticmethod
