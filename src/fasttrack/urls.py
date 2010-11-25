@@ -12,11 +12,10 @@ urlpatterns = patterns('',
     # Uncomment the admin/doc line below and add 'django.contrib.admindocs'
     # to INSTALLED_APPS to enable admin documentation:
     # (r'^admin/doc/', include('django.contrib.admindocs.urls')),
-    url(r'^settings/', include('fileshare.urls')),
+    url(r'^settings/', include('fileshare.urls.settings')),
     url(r'^api/', include('api.urls')),
     (r'^$', 'fileshare.views.index'),
-    url(r'^get/(?P<document>\w+)\.(?P<extension>\w{3})$', 'fileshare.views.get_file_no_hash', name='get_file_no_hash'),
-    url(r'^(?P<hashcode>\w+)/(?P<document>\w+)\.(?P<extension>\w{3})$', 'fileshare.views.get_file', name='get_file'),
+    (r'^', include('fileshare.urls.documents')),
     # Uncomment the next line to enable the admin:
     (r'^admin/', include(admin.site.urls)),
     (r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT }),

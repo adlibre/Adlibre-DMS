@@ -16,7 +16,8 @@ class FileConverter:
         filename = os.path.basename(self.filepath)
         document, extension = os.path.splitext(filename)
         extension_from = extension.strip(".")
-        if self.extension_to == extension_from:
+
+        if self.extension_to is None or self.extension_to == extension_from:
             content = open(self.filepath, 'rb').read()
             return [mimetypes.guess_type(self.filepath)[0], content]
         try:

@@ -65,7 +65,7 @@ def index(request, template_name='fileshare/index.html', extra_context={}):
                               extra_context=extra_context)
 
 
-def get_file(request, hashcode, document, extension):
+def get_file(request, hashcode, document, extension=None):
     rule = Rule.objects.match(document)
     if not rule:
         raise Http404
@@ -73,7 +73,7 @@ def get_file(request, hashcode, document, extension):
     hashplugin = rule.get_security('Hash')
     if hashplugin and not hashplugin.active:
         raise Http404
-    if hashplugin.perform(request, document) != hashcode:
+    if hashplugin.perform(document) != hashcode:
         return HttpResponse('Invalid hashcode')
 
 
@@ -100,14 +100,20 @@ def get_file(request, hashcode, document, extension):
         return HttpResponse("No file match")
     new_file = FileConverter(filepath, extension)
     mimetype, content = new_file.convert()
-
+    if extension:
+        filename = "%s.%s" % (document, extension)
+    else:
+        filename = os.path.basename(filepath)
+        rev_document, extension = os.path.splitext(filename)
+        filename = "%s%s" % (document, extension)
     response = HttpResponse(content, mimetype=mimetype)
     response["Content-Length"] = len(content)
+    response['Content-Disposition'] = 'attachment; filename=%s' % filename
     return response
 
 
 
-def get_file_no_hash(request, document, extension):
+def get_file_no_hash(request, document, extension = None):
     rule = Rule.objects.match(document)
     if not rule:
         raise Http404
@@ -143,9 +149,56 @@ def get_file_no_hash(request, document, extension):
         mimetype, content = new_file.convert()
     except TypeError:
         return HttpResponse("No file converter")
+
+    if extension:
+        filename = "%s.%s" % (document, extension)
+    else:
+        filename = os.path.basename(filepath)
+        rev_document, extension = os.path.splitext(filename)
+        filename = "%s%s" % (document, extension)
+
     response = HttpResponse(content, mimetype=mimetype)
     response["Content-Length"] = len(content)
+    response['Content-Disposition'] = 'attachment; filename=%s' % filename
     return response
+
+
+def revision_document(request, document):
+    rule = Rule.objects.match(document)
+    if not rule:
+        raise Http404
+
+    # check against all validator
+    for validator in rule.get_validators():
+        if validator.is_retrieval_action and validator.active:
+            try:
+                validator.perform(request, document)
+            except Exception, e:
+                return HttpResponse(e)
+
+    # check against all securities
+    for security in rule.get_securities():
+        if security.is_retrieval_action and security.active:
+            try:
+                security.perform(request, document)
+            except Exception, e:
+                return HttpResponse(e)
+
+
+    storage = rule.get_storage()
+    fileinfo_db = storage.revision(document)
+    extra_context = {
+        'fileinfo_db':fileinfo_db,
+        'document':document,
+
+    }
+    hashplugin = rule.get_security('Hash')
+    if hashplugin and hashplugin.active:
+        extra_context['hash'] = hashplugin.perform(document)
+
+    return direct_to_template(request, 'fileshare/revision.html',
+        extra_context=extra_context)
+
 
 
 @staff_member_required

@@ -1,10 +1,10 @@
 import os
+import hashlib
 
 from django import forms
+from django.template.loader import render_to_string
 
 from fileshare.utils import SecurityProvider
-
-from django.template.loader import render_to_string
 
 path = os.path.abspath(os.path.split(__file__)[0])
 
@@ -41,7 +41,7 @@ class HashCode(SecurityProvider):
         self.active = True
         self.method = 'md5'
 
-    def perform(request, document):
+    def perform(self, document):
         h = hashlib.new(self.method)
         h.update(document)
         return h.hexdigest()

@@ -62,3 +62,16 @@ class Local(StorageProvider):
         fullpath = '%s/%s' % (directory, fileinfo['name'])
         return fullpath
 
+
+    @staticmethod
+    def revision(document, root = settings.DOCUMENT_ROOT):
+        directory = "%s/%s/%s" % (document[0:3], document[3:7], document)
+        if root:
+            directory = "%s/%s" % (root, directory)
+        json_file = '%s/%s.json' % (directory, document)
+        if os.path.exists(json_file):
+            json_handler = open(json_file , mode='r+')
+            fileinfo_db = json.load(json_handler)
+            return fileinfo_db
+        return None
+

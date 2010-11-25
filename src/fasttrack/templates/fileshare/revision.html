@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Revision{% endblock %}
+
+{% block content %}
+<div>
+	    <h1>Revision of {{ document }}</h1>
+
+      <table cellspacing="0" cellpadding="0" id="rules">
+      <tr>
+          <th>Name</th>
+          <th>Filename</th>
+          <th>Created Date</th>
+          <th>Download</th>
+      </tr>
+      {% for fileinfo in fileinfo_db %}
+        <tr>
+          <td>{{ fileinfo.revision }}</td>
+          <td>{{ fileinfo.name }}</td>
+          <td>{{ fileinfo.created_date }}</td>
+          <td>
+          {% if hash %}
+            <a href="/{{ hash }}/{{ document }}">Download</a>
+          {% else %}
+            <a href="/get/{{ document }}">Download</a>
+          {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </table>
+</div>
+{% endblock %}
+
