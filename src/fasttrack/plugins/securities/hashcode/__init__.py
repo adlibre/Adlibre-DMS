@@ -26,7 +26,6 @@ class HashForm(forms.Form):
 
     def save(self):
         self.instance.method = self.cleaned_data['method']
-        print self.instance.method
         return self.instance
 
 

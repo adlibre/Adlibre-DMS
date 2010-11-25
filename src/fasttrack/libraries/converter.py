@@ -3,6 +3,9 @@ from subprocess import Popen, PIPE
 import mimetypes
 
 class FileConverter:
+    """
+    Convert file from one mimetype to another mimetype
+    """
 
     def __init__(self, filepath, extension):
         self.filepath = filepath
@@ -24,6 +27,10 @@ class FileConverter:
 
 
     def tif_to_pdf(self):
+        """
+        tiff to pdf conversion, use tiff2pdf command
+        """
+
         filename = os.path.basename(self.filepath)
         document = os.path.splitext(filename)[0]
         path = '%s/%s.pdf' % (os.path.dirname(self.filepath), document)
@@ -35,6 +42,10 @@ class FileConverter:
 
 
     def pdf_to_txt(self):
+        """
+        pdf to txt conversion, use pdftotext command
+        """
+
         filename = os.path.basename(self.filepath)
         document = os.path.splitext(filename)[0]
         path = '%s/%s.txt' % (os.path.dirname(self.filepath), document)

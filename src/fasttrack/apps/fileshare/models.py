@@ -11,8 +11,15 @@ from fileshare.utils import ValidatorProvider, StorageProvider, SecurityProvider
 
 
 class RuleManager(models.Manager):
+    """
+    Manager for Rule model
+    """
 
     def match(self, document):
+        """
+        Get rule according to document naming, return None if not found
+        """
+
         for rule in self.filter(active=True):
             doccode = rule.get_doccode()
             if doccode and doccode.validate(document):
@@ -21,6 +28,11 @@ class RuleManager(models.Manager):
 
 
 class Rule(models.Model):
+    """
+    Specify rule for a document naming. Each rule has its own plugins.
+    The plugins is saved in pickle object format in database.
+    """
+
     doccode = models.TextField(max_length=255, unique=True)
     storage = models.TextField(max_length=255)
     validators = models.TextField(blank=True)
@@ -48,7 +60,7 @@ class Rule(models.Model):
 
     def get_security(self, name):
         """
-        Get security plugin by name
+        Get security plugin by name, return None if not found
         """
         try:
             securities = pickle.loads(self.securities.encode("ascii"))
@@ -79,6 +91,7 @@ def available_doccodes():
     """
     Get available document code plugins
     """
+
     for module in list(pkgutil.iter_modules(["%s/doccodes" % settings.PLUGIN_DIR])):
         __import__("doccodes.%s" % module[1], fromlist=[""])
     return DocCodeProvider.plugins
@@ -88,6 +101,7 @@ def available_validators():
     """
     Get available document validator plugins
     """
+
     for module in list(pkgutil.iter_modules(["%s/validators" % settings.PLUGIN_DIR])):
         __import__("validators.%s" % module[1], fromlist=[""])
     return ValidatorProvider.plugins
@@ -97,16 +111,17 @@ def available_storages():
     """
     Get available storage engines plugins
     """
+
     for module in list(pkgutil.iter_modules(["%s/storages" % settings.PLUGIN_DIR])):
         __import__("storages.%s" % module[1], fromlist=[""])
     return StorageProvider.plugins
-
 
 
 def available_securities():
     """
     Get available security plugins
     """
+
     for module in list(pkgutil.iter_modules(["%s/securities" % settings.PLUGIN_DIR])):
         __import__("securities.%s" % module[1], fromlist=[""])
     return SecurityProvider.plugins

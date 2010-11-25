@@ -7,6 +7,7 @@ class NotInSecurityGroupError(Exception):
     def __str__(self):
         return "NotInSecurityGroupError - You're not in security group"
 
+
 class security(SecurityProvider):
     name = 'Security Group'
     description = 'Security group member only'

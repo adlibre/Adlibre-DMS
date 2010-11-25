@@ -8,7 +8,7 @@ from fileshare.models import (available_validators, available_securities,
 from fileshare.utils import DocCodeProvider
 
 class UploadForm(forms.Form):
-    file  = forms.FileField(widget=forms.FileInput(attrs={'size':40, 'class':'test'}))
+    file  = forms.FileField(widget=forms.FileInput(attrs={'size':40}))
 
 
 def doccode_choices():
@@ -49,6 +49,9 @@ class SettingForm(forms.Form):
         choices=security_choices(), required=False)
 
     def clean_doccode(self):
+        """
+        Make sure doccode is unique
+        """
         doccode = self.cleaned_data['doccode']
         if Rule.objects.filter(doccode=pickle.dumps(DocCodeProvider.plugins[doccode]())).exists():
             raise forms.ValidationError("DocCode must be unique")
@@ -56,6 +59,9 @@ class SettingForm(forms.Form):
 
 
 class EditSettingForm(forms.Form):
+    """
+    Edit rule, only allow to change storage, validators and securities
+    """
     storage = forms.ChoiceField(label="Storage", choices=storage_choices())
     validators = forms.MultipleChoiceField(label="Validators",
         choices=validator_choices(), required=False)

@@ -1,12 +1,27 @@
 (lp0
-(S'image/tiff'
+(S'application/pdf'
 p1
-S'tif - image/tiff'
+S'pdf'
 p2
 tp3
-a(S'application/pdf'
+a(S'image/tiff'
 p4
-S'pdf - application/pdf'
+S'tiff'
 p5
 tp6
+a(S'text/plain'
+p7
+S'txt'
+p8
+tp9
+a(S'application/msword'
+p10
+S'doc'
+p11
+tp12
+a(S'application/vnd.ms-excel'
+p13
+S'xls'
+p14
+tp15
 a.

@@ -22,9 +22,15 @@ class FileTypeForm(forms.Form):
             handler = open('%s/mimetypes.pickle' % path, "r")
             mimetypes = pickle.load(handler)
         except Exception, e:
+            handler = open('%s/mimetypes.pickle' % path, "w")
             mimetypes = [
-                ('pdf', 'application/pdf')
+                ('application/pdf', 'pdf'),
+                ('image/tiff', 'tiff'),
+                ('text/plain', 'txt'),
+                ('application/msword', 'doc'),
+                ('application/vnd.ms-excel', 'xls'),
             ]
+            pickle.dump(mimetypes, handler)
 
         super(FileTypeForm, self).__init__(*args, **kwargs)
         self.fields['mimetype'] = forms.ChoiceField(choices=mimetypes)
@@ -33,10 +39,15 @@ class FileTypeForm(forms.Form):
     def save(self):
         if not self.cleaned_data['mimetype'] in self.instance.available_type:
             self.instance.available_type.append(self.cleaned_data['mimetype'])
+            print self.instance.available_type
         return self.instance
 
 
 def delete(request, rule, filetype, rule_id, plugin_type, plugin_index):
+    """
+    Delete action for filetype
+    """
+
     index = request.GET.get("index")
     filetype.available_type.pop(int(index))
     plugins = rule.get_validators()

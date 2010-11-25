@@ -1,4 +1,3 @@
-
 from django.contrib import admin
 
 from models import Rule
@@ -10,9 +9,7 @@ rule_doc.short_description = 'Document Code'
 
 
 class RuleAdmin(admin.ModelAdmin):
-    list_display = (rule_doc,)
-
-
+    list_display = (rule_doc, 'active')
 
 
 admin.site.register(Rule, RuleAdmin)
