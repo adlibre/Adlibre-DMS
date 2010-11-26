@@ -74,7 +74,8 @@ class FileType(ValidatorProvider):
         self.active = True
         self.available_type = []
 
-    def perform(self, request, document, filebuffer):
+    def perform(self, request, document):
+        filebuffer = request.FILES['file']
         mime = magic.Magic(mime=True)
         if not mime.from_buffer(filebuffer.read()) in self.available_type:
             raise FileTypeError

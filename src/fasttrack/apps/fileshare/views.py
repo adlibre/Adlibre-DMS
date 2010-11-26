@@ -41,7 +41,7 @@ def index(request, template_name='fileshare/index.html', extra_context={}):
                 for validator in rule.get_validators():
                     if validator.is_storing_action and validator.active:
                         try:
-                            validator.perform(request, document, form.files['file'])
+                            validator.perform(request, document)
                         except Exception, e:
                             return HttpResponse(e)
 
