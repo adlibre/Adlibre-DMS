@@ -22,7 +22,7 @@
           {% if hash %}
             <a href="/{{ hash }}/{{ document }}">Download</a>
           {% else %}
-            <a href="/get/{{ document }}">Download</a>
+            <a href="/get/{{ document }}?r={{ fileinfo.revision }}">Download</a>
           {% endif %}
           </td>
         </tr>

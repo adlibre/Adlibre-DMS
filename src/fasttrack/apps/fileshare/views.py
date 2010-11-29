@@ -93,9 +93,9 @@ def get_file(request, hashcode, document, extension=None):
             except Exception, e:
                 return HttpResponse(e)
 
-
+    revision = request.GET.get("r", None)
     storage = rule.get_storage()
-    filepath = storage.get(document)
+    filepath = storage.get(document, revision)
     if not filepath:
         return HttpResponse("No file match")
     new_file = FileConverter(filepath, extension)
@@ -139,9 +139,9 @@ def get_file_no_hash(request, document, extension = None):
             except Exception, e:
                 return HttpResponse(e)
 
-
+    revision = request.GET.get("r", None)
     storage = rule.get_storage()
-    filepath = storage.get(document)
+    filepath = storage.get(document, revision)
     if not filepath:
         return HttpResponse("No file match")
     new_file = FileConverter(filepath, extension)

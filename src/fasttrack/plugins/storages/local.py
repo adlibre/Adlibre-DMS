@@ -7,6 +7,11 @@ from fileshare.utils import StorageProvider
 import json
 
 
+class NoRevisionError(Exception):
+    def __str__(self):
+        return "NoRevisionError - No such revision number"
+
+
 class Local(StorageProvider):
     name = "Local Storage"
     description = "Local storage plugin"
@@ -47,7 +52,7 @@ class Local(StorageProvider):
 
 
     @staticmethod
-    def get(filename, root = settings.DOCUMENT_ROOT):
+    def get(filename, revision=None, root = settings.DOCUMENT_ROOT):
         document, extension = os.path.splitext(filename)
         extension = extension.strip(".")
         directory = "%s/%s/%s" % (document[0:3], document[3:7], document)
@@ -58,7 +63,13 @@ class Local(StorageProvider):
         if os.path.exists(json_file):
             json_handler = open(json_file , mode='r+')
             fileinfo_db = json.load(json_handler)
-            fileinfo = fileinfo_db[-1]
+            if revision:
+                try:
+                    fileinfo = fileinfo_db[int(revision)-1]
+                except:
+                    raise NoRevisionError
+            else:
+                fileinfo = fileinfo_db[-1]
         fullpath = '%s/%s' % (directory, fileinfo['name'])
         return fullpath
 
