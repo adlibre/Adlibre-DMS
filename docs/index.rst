@@ -1,34 +1,34 @@
-Fasttrack's documentation!
+Adlibre DMS technical documentation
+===================================
+
+How to retrieve a document
 ==========================
 
-How to get document
-===================
+1. List of document revisions
 
-1. List of document revision
+   ``http://example.com/revision/<document>``
 
-   ``http://fasttrack.com/revision/<document>``
+2. Get file without active url-hash plugin
 
-2. Get file without active hash plugin
-
-   ``http://fasttrack.com/get/<document>``
+   ``http://example.com/get/<document>``
 
    or
 
-   ``http://fasttrack.com/get/<document>.<extension>``
+   ``http://example.com/get/<document>.<extension>``
 
-3. Get file with active hash plugin
+3. Get file with active url-hash plugin
 
-   ``http://fasttrack.com/<hashcode>/<document>``
+   ``http://example.com/<hashcode>/<document>``
 
    or
 
-   ``http://fasttrack.com/<hashcode>/<document>.<extension>``
+   ``http://example.com/<hashcode>/<document>.<extension>``
 
 
 Plugins
 =======
 
-Plugins are located in plugins directory, and into 4 categories :
+Plugins are located in the plugins directory, and separated into 4 categories :
 
 1. Doccode
 
@@ -60,7 +60,7 @@ Doccode
 -------
 
 Doccode is a rule identifier for matching document naming with the rule on how
-the system process the document. To create new doccode, all you need to do is
+the system process the document. To create a new doccode, all you need to do is
 to create new python class that inherit from DoccodeProvider and put the file in
 the plugins doccode directory.
 
@@ -82,8 +82,8 @@ Sample
 Security
 --------
 
-Security plugin is a type of security that handle security aspect from document
-system.
+Security plugin is a type of plugin that handles the security aspect from
+document system.
 
 Methods:
 ~~~~~~~~
@@ -101,6 +101,7 @@ Methods:
 
     def perform(self, request, document):
         """Perform security check"""
+
 
 Sample
 ~~~~~~
@@ -130,9 +131,9 @@ Sample
 Storage
 -------
 
-Storage plugin is a type of plugin that handle how the file should be saved in
-the storage. It also should handle the revision system, because the revision is
-tied to how the storage plugin work.
+Storage plugin is a type of plugin that handle how the file should be persisted.
+It also should handle the revision system, revisions are intrinsically tied to
+the underlying storage system.
 
 
 Methods:
@@ -225,7 +226,7 @@ Sample
 
 Validator
 ---------
-Validator is a plugin to handle validation of a file.
+Validator is a plugin to handle validation of a file's contents.
 
 
 Methods:

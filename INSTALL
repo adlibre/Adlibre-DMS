@@ -1,0 +1,4 @@
+On OSX need to install the following in your base OS
+
+port install perl5
+port install p5-file-libmagic
