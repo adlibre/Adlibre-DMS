@@ -4,13 +4,13 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<title>{% block title %}{% endblock %} - Adlibre DMS</title>
 	<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/css/style.css" />
-
+    <link rel="shortcut icon" href="/media/favicon.ico" />
 </head>
 <body>
 
   {% if user.is_authenticated %}
   <div id="header">
-    Sign in as {{ user }}
+    Signed in as {{ user }}
     {% if user.is_staff %}
     | <a href="{% url setting %}">Settings</a>
     | <a href="{% url plugins %}">Plugins</a>
