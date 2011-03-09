@@ -50,7 +50,8 @@ class Local(StorageProvider):
             destination.write(chunk)
         destination.close()
 
-
+    # TODO: Make splitting more intelligent, should split on each character class / set in the doccode regex.
+    # or make splitting method definable as part of the doccode class.
     @staticmethod
     def get(filename, revision=None, root = settings.DOCUMENT_ROOT):
         document, extension = os.path.splitext(filename)
