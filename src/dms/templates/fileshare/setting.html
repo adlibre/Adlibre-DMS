@@ -7,7 +7,7 @@
 
 
 <div>
-	    <a href="" id="new-rule">Add new rule</a>
+    <h1>Settings</h1>
       <form action="" method="post" id="new-rule-form" {% if not form.errors %}class="hide"{% endif %}>
           {{ form.as_p }}
           <p>
@@ -20,7 +20,7 @@
           <th>No</th>
           <th>DocCode Validator</th>
           <th>Storage</th>
-          <th>Securities</th>
+          <th>Security</th>
           <th>Validators</th>
           <th>Active</th>
           <th>Edit</th>
@@ -71,6 +71,10 @@
       </tr>
       {% endfor %}
   </table>
+
+    <a href="" id="new-rule">Add new rule</a>
+
+
 	</div>
 {% endblock %}
 
