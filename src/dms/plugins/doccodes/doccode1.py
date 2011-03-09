@@ -4,12 +4,12 @@ from fileshare.utils import DocCodeProvider
 
 
 class DocCode(DocCodeProvider):
-    name = 'DocCode-1'
-    description = '[A-Z]{3}[0-9]{8}'
+    name = 'Adlibre Invoices'
+    description = 'ADL-[0-9]{4}'
 
     @staticmethod
     def validate(document):
-        if re.match("^[A-Z]{3}[0-9]{8}$", document):
+        if re.match("^ADL-[0-9]{4}$", document):
             return True
         return False
 
