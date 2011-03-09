@@ -105,3 +105,4 @@ try:
 except ImportError:
     pass
 
+APPEND_SLASH = False # Stop Django from adding slashes to urls
