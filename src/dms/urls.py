@@ -15,11 +15,14 @@ urlpatterns = patterns('',
     url(r'^settings/', include('fileshare.urls.settings')),
     url(r'^api/', include('api.urls')),
     (r'^$', 'fileshare.views.index'),
-    (r'^', include('fileshare.urls.documents')),
+    
     # Uncomment the next line to enable the admin:
     (r'^admin/', include(admin.site.urls)),
     (r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT }),
     url(r'^accounts/login/$', 'django.contrib.auth.views.login', name='login'),
-    url(r'^accounts/logout/$', 'django.contrib.auth.views.logout_then_login', name='logout')
+    url(r'^accounts/logout/$', 'django.contrib.auth.views.logout_then_login', name='logout'),
+
+    # This needs to be last
+    (r'^', include('fileshare.urls.documents')),
 )
 
