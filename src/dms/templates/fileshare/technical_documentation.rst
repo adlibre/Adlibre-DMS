@@ -1,5 +1,3 @@
-Adlibre DMS technical documentation
-===================================
 
 How to retrieve a document
 ==========================

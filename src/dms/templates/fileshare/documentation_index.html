@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% load markup %}
+
+{% block title %}Documentation{% endblock %}
+
+{% block content %}
+<h1>Documentation Index</h1>
+
+<ul>
+    <li><a href="{% url api_documentation %}">API</a></li>
+    <li><a href="{% url technical_documentation %}">Technical</a></li>
+</ul>
+{% endblock %}
+

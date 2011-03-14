@@ -3,9 +3,10 @@
     padding:0px;
 }
 
-table				{font: 88%/1.7em "Trebuchet MS", "Bitstream Vera Sans", Verdana, Helvetica, sans-serif;
+table				{
+                    font: 88%/1.7em "Trebuchet MS", "Bitstream Vera Sans", Verdana, Helvetica, sans-serif;
 					border-collapse: separate; border-spacing: 0; margin: 0 0 1em 0; color:#000;
-					    width:100%;
+					width:100%;
 					}
 
 th			{border-bottom: 1px solid #999;border-top: 1px solid #999;}

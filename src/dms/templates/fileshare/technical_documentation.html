@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% load markup %}
+
+{% block title %}Technical Documentation{% endblock %}
+
+{% block content %}
+{% filter restructuredtext %}
+{% include "fileshare/technical_documentation.rst" %}
+{% endfilter %}
+{% endblock %}
+

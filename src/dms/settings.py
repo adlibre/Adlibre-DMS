@@ -88,14 +88,17 @@ PLUGIN_DIR = os.path.join(PROJECT_PATH, 'plugins')
 
 INSTALLED_APPS = (
     'django.contrib.auth',
+    'django.contrib.admindocs',
     'django.contrib.contenttypes',
+    'django.contrib.markup',
     'django.contrib.sessions',
-    'django.contrib.sites',
+    #'django.contrib.sites',
     'django.contrib.admin',
     'django.contrib.flatpages',
     'fileshare',
     'piston',
     'api',
+    'docutils',
 )
 
 LOGIN_REDIRECT_URL = '/'
