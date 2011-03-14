@@ -1,4 +1,14 @@
 On OSX need to install the following in your base OS
 
-port install perl5
-port install p5-file-libmagic
+# port install perl5
+# port install p5-file-libmagic
+
+
+Standard deployment with virtualenv:
+
+# Might need to specify Python version if more than one installed eg. --python /usr/bin/python2.6
+virtualenv --no-site-packages dms
+cd dms/
+workon dms
+svn co https://svn.adlibre.net/projects/fasttrack/HEAD/ ./
+pip install -r deployment/pip-req.txt
