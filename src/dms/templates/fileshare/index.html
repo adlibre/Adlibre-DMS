@@ -1,14 +1,9 @@
 {% extends 'base.html' %}
 
-{% block title %}Upload your document{% endblock %}
+{% block title %}Welcome{% endblock %}
 
 {% block content %}
-<div id="upload-page">
-<form action="" method="post" enctype="multipart/form-data" >
-    {{ form.file.errors }}{{ form.file }}
-    <input type="submit" value="Upload &rarr;" />
-</form>
-
-</div>
+<h1>Adlibre DMS</h1>
+<p>The lightweight document management system.</p>
 {% endblock %}
 

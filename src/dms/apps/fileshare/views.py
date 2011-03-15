@@ -25,7 +25,7 @@ from fileshare.utils import ValidatorProvider, StorageProvider, SecurityProvider
 
 
 @login_required
-def index(request, template_name='fileshare/index.html', extra_context={}):
+def upload(request, template_name='fileshare/upload.html', extra_context={}):
     """
     Upload file processing. Uploaded file will be check against available rules to
     determine storage, validator, and security plugins.
@@ -354,11 +354,18 @@ def plugin_action(request, rule_id, plugin_type, plugin_index, action,
     view = plugin.action(action)
     return view(request, rule, plugin, rule_id, plugin_type, plugin_index)
 
+
+def index(request):
+    return direct_to_template(request, 'fileshare/index.html')
+
+
 def documentation_index(request):
     return direct_to_template(request, 'fileshare/documentation_index.html')
 
+
 def api_documentation(request):
     return direct_to_template(request, 'fileshare/api_documentation.html')
+
 
 def technical_documentation(request):
     return direct_to_template(request, 'fileshare/technical_documentation.html')

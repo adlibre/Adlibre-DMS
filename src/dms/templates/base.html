@@ -3,23 +3,27 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<title>{% block title %}{% endblock %} - Adlibre DMS</title>
-	<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}/css/style.css" />
-    <link rel="shortcut icon" href="/media/favicon.ico" />
+	<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/style.css" />
+    <link rel="shortcut icon" href="{{ MEDIA_URL }}favicon.ico" />
 </head>
 <body>
-
-  {% if user.is_authenticated %}
   <div id="header">
-    Signed in as {{ user }}
+  <!-- TODO: Remove this inline style -->
+  <span style="float:left;"><a href="/">Home</a></span>
+  {% if user.is_authenticated %}
+    Logged in as {{ user }}
     {% if user.is_staff %}
     | <a href="{% url setting %}">Settings</a>
     | <a href="{% url plugins %}">Plugins</a>
     {% endif %}
-    | <a href="{% url logout %}">Sign out</a>
-  </div>
+    | <a href="{% url logout %}">Log out</a>
+  {% else %}
+    Logged out
+    | <a href="{% url login %}">Log in</a>
   {% endif %}
-
-  <div id="container">
+  </div>
+    
+    <div id="container">
     {% if messages %}
     <ul class="messages">
         {% for message in messages %}
@@ -33,9 +37,9 @@
         {% endblock %}
     </div>
 	<div id="footer">
-	    Adlibre DMS - &copy; Adlibre {% now "Y" %} · <a href="{% url documentation_index %}">Docs</a> · <a href="/">Upload</a>
+	    Adlibre DMS - &copy; Adlibre {% now "Y" %} · <a href="{% url documentation_index %}">Docs</a> · <a href="{% url upload %}">Upload</a>
 	</div>
-	</div>
+    </div>
 	{% block javascript %}
 	<script type="text/javascript" language="javascript" charset="utf-8" src="{{ MEDIA_URL }}js/jquery.tools.min.js"></script>
 	<script type="text/javascript" language="javascript" charset="utf-8" src="{{ MEDIA_URL }}js/script.js"></script>

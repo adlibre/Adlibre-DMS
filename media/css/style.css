@@ -80,6 +80,10 @@ h2 {
     width:700px;
     margin:0px auto;
 }
+#content {
+    min-height: 200px;
+
+}
 
 label {
     display:block;

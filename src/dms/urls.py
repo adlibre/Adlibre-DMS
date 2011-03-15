@@ -6,15 +6,13 @@ from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns('',
-    # Example:
-    # (r'^fasttrack/', include('fasttrack.foo.urls')),
-
     # Uncomment the admin/doc line below and add 'django.contrib.admindocs'
     # to INSTALLED_APPS to enable admin documentation:
     (r'^admin/doc/', include('django.contrib.admindocs.urls')),
+    url(r'^api/', include('api.urls')),
     url(r'^settings/', include('fileshare.urls.settings')),
     url(r'^docs/', include('fileshare.urls.documentation')),
-    url(r'^api/', include('api.urls')),
+    url(r'^upload/$', 'fileshare.views.upload', name='upload'),
     (r'^$', 'fileshare.views.index'),
     
     # Uncomment the next line to enable the admin:
@@ -31,9 +29,5 @@ urlpatterns = patterns('',
 
     # This needs to be last
     (r'^', include('fileshare.urls.documents')),
-
-
-
-
 )
 
