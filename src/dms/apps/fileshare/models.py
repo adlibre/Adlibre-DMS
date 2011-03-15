@@ -109,7 +109,7 @@ def available_validators():
 
 def available_storages():
     """
-    Get available storage engines plugins
+    Get available storage engine plugins
     """
 
     for module in list(pkgutil.iter_modules(["%s/storages" % settings.PLUGIN_DIR])):
