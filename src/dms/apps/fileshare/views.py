@@ -73,9 +73,9 @@ def get_file(request, hashcode, document, extension=None):
     hashplugin = rule.get_security('Hash')
     if hashplugin and not hashplugin.active:
         raise Http404
-    if hashplugin.perform(document) != hashcode:
+    # TODO: Make salt / secret key a plugin option
+    if hashplugin.perform(document, settings.SECRET_KEY) != hashcode:
         return HttpResponse('Invalid hashcode')
-
 
     # check against all validator
     for validator in rule.get_validators():

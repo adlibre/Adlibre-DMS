@@ -41,9 +41,10 @@ class HashCode(SecurityProvider):
         self.active = True
         self.method = 'md5'
 
-    def perform(self, document):
+    def perform(self, document, salt):
         h = hashlib.new(self.method)
         h.update(document)
+        h.update(salt)
         return h.hexdigest()
 
 
