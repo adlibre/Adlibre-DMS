@@ -1,3 +1,6 @@
+=======================
+Technical Documentation
+=======================
 
 How to retrieve a document
 ==========================

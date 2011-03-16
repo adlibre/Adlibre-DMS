@@ -110,3 +110,5 @@ except ImportError:
     pass
 
 APPEND_SLASH = False # Stop Django from adding slashes to urls
+
+RESTRUCTUREDTEXT_FILTER_SETTINGS = { 'doctitle_xform': 0, } # stop first heading being munged for page title.
