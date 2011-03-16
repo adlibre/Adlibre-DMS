@@ -19,12 +19,14 @@ rules_missing = ()
 
 
 # TODO: We need to extend the API to the following
-# 1. Return revisions for a given file
-# 2. Return meta-data for a given file
-# 3. Delete files
-# 4. Require authentication for API actions.
+# 1. Return revisions for a given file /api/revisions/ADL-1234.json
+# 2. Return meta-data for a given file /api/metadata/ADL-1234.json
+# 3. Delete files /api/delete/ADL-1234
+# 4. Require authentication for API all actions.
 
 
+
+# TODO: Write a test that checks these methods for ALL doctypes that are currently installed :)
 
 class MiscTest(TestCase):
 
@@ -36,7 +38,6 @@ class MiscTest(TestCase):
         url = '/api/rules.json'
         response = self.client.get(url)
         self.assertContains(response, 'Adlibre Invoices')
-
 
     def test_api_rules(self):
         url = '/api/plugins.json'
