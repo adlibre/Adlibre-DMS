@@ -57,10 +57,12 @@ Atributes:
 Doccode
 -------
 
-Doccode is a rule identifier for matching document naming with the rule on how
-the system process the document. To create a new doccode, all you need to do is
-to create new python class that inherit from DoccodeProvider and put the file in
+Doccode is a rule identifier for matching the document name with the rule that
+defines how the system processes the document. To create a new doccode, all you need to do is
+to create new python class that inherits from DoccodeProvider and put the file in
 the plugins doccode directory.
+
+As shown in the example below, two methods need to be defined:
 
 Sample
 ~~~~~~
@@ -76,6 +78,10 @@ Sample
                 return True
             return False
 
+        @staticmethod
+        def split(document):
+            d = [ document[0:3], document[3:11], ]
+            return d
 
 Security
 --------
