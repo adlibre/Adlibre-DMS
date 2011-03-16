@@ -46,6 +46,7 @@ USE_I18N = True
 # Example: "/home/media/media.lawrence.com/"
 MEDIA_ROOT = os.path.join(PROJECT_PATH, '../../media')
 DOCUMENT_ROOT = os.path.join(PROJECT_PATH, '../../documents')
+FIXTURE_DIRS = ( os.path.join(PROJECT_PATH, '../../fixtures'), )
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
@@ -92,7 +93,7 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.markup',
     'django.contrib.sessions',
-    #'django.contrib.sites',
+    'django.contrib.sites', # required by testing
     'django.contrib.admin',
     'django.contrib.flatpages',
     'fileshare',

@@ -24,6 +24,9 @@ from fileshare.models import (Rule, available_validators, available_doccodes,
 from fileshare.utils import ValidatorProvider, StorageProvider, SecurityProvider, DocCodeProvider
 
 
+# FIXME: Need to fix the @staff_required decorator to redirect to standard login form
+# I don't think we want to necessarily use the django admin login.
+
 @login_required
 def upload(request, template_name='fileshare/upload.html', extra_context={}):
     """
@@ -309,6 +312,7 @@ def toggle_validators_plugin(request, rule_id, plugin_index):
     return HttpResponseRedirect(reverse("setting"))
 
 
+@staff_member_required
 def plugins(request, template_name='fileshare/plugins.html',
             extra_context={}):
     """
@@ -324,7 +328,7 @@ def plugins(request, template_name='fileshare/plugins.html',
     return direct_to_template(request, template_name, extra_context=extra_context)
 
 
-
+@staff_member_required
 def plugin_setting(request, rule_id, plugin_type, plugin_index,
                    template_name='fileshare/plugin_setting.html',
                    extra_context={}):
@@ -357,7 +361,7 @@ def plugin_setting(request, rule_id, plugin_type, plugin_index,
     return direct_to_template(request, template_name, extra_context=extra_context)
 
 
-
+@staff_member_required
 def plugin_action(request, rule_id, plugin_type, plugin_index, action,
                    extra_context={}):
     """
