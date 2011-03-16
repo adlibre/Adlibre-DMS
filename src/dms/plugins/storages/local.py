@@ -3,6 +3,7 @@ import datetime
 
 from django.conf import settings
 
+from fileshare.models import Rule
 from fileshare.utils import StorageProvider
 import json
 
@@ -11,17 +12,26 @@ class NoRevisionError(Exception):
     def __str__(self):
         return "NoRevisionError - No such revision number"
 
+def splitdir(document):
+    rule = Rule.objects.match(document)
+    doccode = rule.get_doccode()
+    splitdir = ''
+    for d in doccode.split(document):
+        splitdir = "%s/%s" % (splitdir, d)
+    return "%s/%s/%s" % (rule.id, splitdir, document)
+
 
 class Local(StorageProvider):
     name = "Local Storage"
     description = "Local storage plugin"
 
+
     @staticmethod
-    def store(f, root = settings.DOCUMENT_ROOT):
+    def store(f, root=settings.DOCUMENT_ROOT):
         filename = f.name
         document, extension = os.path.splitext(filename)
         extension = extension.strip(".")
-        directory = "%s/%s/%s" % (filename[0:3], filename[3:7], document)
+        directory = splitdir(document)
         if root:
             directory = "%s/%s" % (root, directory)
         if not os.path.exists(directory):
@@ -50,13 +60,12 @@ class Local(StorageProvider):
             destination.write(chunk)
         destination.close()
 
-    # TODO: Make splitting more intelligent, should split on each character class / set in the doccode regex.
-    # or make splitting method definable as part of the doccode class.
+
     @staticmethod
-    def get(filename, revision=None, root = settings.DOCUMENT_ROOT):
+    def get(filename, revision=None, root=settings.DOCUMENT_ROOT):
         document, extension = os.path.splitext(filename)
         extension = extension.strip(".")
-        directory = "%s/%s/%s" % (document[0:3], document[3:7], document)
+        directory = splitdir(document)
         if root:
             directory = "%s/%s" % (root, directory)
 
@@ -71,13 +80,15 @@ class Local(StorageProvider):
                     raise NoRevisionError
             else:
                 fileinfo = fileinfo_db[-1]
+        else:
+            raise NoRevisionError # TODO: This should be a different exception
         fullpath = '%s/%s' % (directory, fileinfo['name'])
         return fullpath
 
 
     @staticmethod
-    def revision(document, root = settings.DOCUMENT_ROOT):
-        directory = "%s/%s/%s" % (document[0:3], document[3:7], document)
+    def revision(document, root=settings.DOCUMENT_ROOT):
+        directory = splitdir(document)
         if root:
             directory = "%s/%s" % (root, directory)
         json_file = '%s/%s.json' % (directory, document)
@@ -86,4 +97,11 @@ class Local(StorageProvider):
             fileinfo_db = json.load(json_handler)
             return fileinfo_db
         return None
+
+
+    # TODO / FIXME: We need a list method here. So we can list all the available files
+    # for a given doccode rule.
+ #   @staticmethod
+ #   def get_list(rule, root=settings.DOCUMENT_ROOT):
+
 

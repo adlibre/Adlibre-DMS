@@ -13,3 +13,7 @@ class DocCode(DocCodeProvider):
             return True
         return False
 
+    @staticmethod
+    def split(document):
+        d = [ document[0:5], document[5:8], ]
+        return d
