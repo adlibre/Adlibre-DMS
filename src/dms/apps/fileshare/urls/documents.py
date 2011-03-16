@@ -7,6 +7,8 @@ urlpatterns = patterns('fileshare.views',
         'get_file_no_hash', name='get_file_no_hash_and_extension'),
     url(r'^get/(?P<document>[\S!/]+)\.(?P<extension>\w{3})$',
         'get_file_no_hash', name='get_file_no_hash'),
+    url(r'^files/(?P<id_rule>\d+)/$',
+        'files_document', name='files_document'),
     url(r'^revision/(?P<document>[\S!/]+)$',
         'revision_document', name='revision_document'),
     url(r'^(?P<hashcode>\w+)/(?P<document>[\S!/]+)$',
@@ -15,3 +17,4 @@ urlpatterns = patterns('fileshare.views',
         'get_file', name='get_file'),
 )
 
+# /files/code/

@@ -99,9 +99,26 @@ class Local(StorageProvider):
         return None
 
 
-    # TODO / FIXME: We need a list method here. So we can list all the available files
-    # for a given doccode rule.
- #   @staticmethod
- #   def get_list(rule, root=settings.DOCUMENT_ROOT):
+    # FIXME: I really don't like the chain of dependency. This is called from piston handlers.py
+    # which requires knowledge of the rule, and then the storage needs to know
+    # which rule is invoked as well... its a bit of a mess.
 
+    @staticmethod
+    def get_list(id_rule, root=settings.DOCUMENT_ROOT):
 
+        import os
+        import glob
+
+        # root of our storage tree for the given id_rule
+        if root:
+            directory = "%s/%s" % (root, id_rule)
+
+        rule = Rule.objects.get(id=id_rule)
+
+        for i in range(rule.get_doccode().splits + 1):
+            directory = "%s/%s" % (directory, '*')
+
+        files = []
+        for file in glob.glob(directory):
+            files.append(os.path.basename(file))
+        return files

@@ -43,6 +43,18 @@ class FileHandler(BaseHandler):
         return rc.BAD_REQUEST
 
 
+# FIXME: As per local.py, there is
+# dependenc on rules, which I don't
+# really like, but might not be avoidable
+class FileListHandler(BaseHandler):
+    allowed_methods = ('GET','POST')
+
+    def read(self, request, id_rule):
+        rule = Rule.objects.get(id=id_rule)
+        file_list = rule.get_storage().get_list(id_rule)
+        return file_list
+
+
 class RulesHandler(BaseHandler):
     allowed_methods = ('GET','POST')
 

@@ -200,6 +200,25 @@ def revision_document(request, document):
         extra_context=extra_context)
 
 
+# TODO : Add pagination
+# TODO : This should use the WS API to browse the repository
+# TODO : Add security
+def files_document(request, id_rule):
+    rule = Rule.objects.get(id=id_rule)
+    if not rule:
+        raise Http404
+    document_list = rule.get_storage().get_list(id_rule)
+    rule_context = {
+        'id': rule.id,
+        'name': rule.get_doccode().name,
+        }
+    extra_context = {
+        'document_list':document_list,
+        'rule':rule_context,
+        }
+    return direct_to_template(request, 'fileshare/documents.html',
+        extra_context=extra_context)
+
 
 @staff_member_required
 def setting(request, template_name='fileshare/setting.html',
