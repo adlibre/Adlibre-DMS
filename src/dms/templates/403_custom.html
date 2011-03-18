@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block title %}404 File Not Found{% endblock %}
+
+{% block content %}
+
+<h1>Access Denied: {{ message }}.</h1>
+<p>I'm sorry but we couldn't give you what you wanted.</p>
+<p>Request path: {{ request_path }}</p>
+{% endblock %}
+

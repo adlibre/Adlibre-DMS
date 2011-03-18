@@ -3,7 +3,6 @@ from django.test import TestCase
 from django.conf import settings
 
 
-# TODO: Create a test document code, and a set of test documents at the start of test
 """
 Test data
 """
@@ -12,10 +11,26 @@ username = 'admin'
 password = 'admin'
 
 documents = ('ADL-1111', 'ADL-1234', 'ADL-2222',)
-documents_missing = ()
+documents_missing = ('ADL-8888', 'ADL-9999',)
+documents_norule = ('ABC12345678',)
+
+documents_hash = [
+    ('abcde111', '6784d1b54f6405a70508c9fc02f37bad'),
+    ('abcde123', '7e7eb8bdbea79d095f5dc291d2d9588f'),
+    ('abcde222','fac584ea31b0ac927cecc12868513d39'),
+    ]
+
+documents_missing_hash = [
+    ('abcde888','e9c84a6bcdefb9d01e7c0f9eabba5581',),
+    ('abcde999','58a38de7b3652391f888f4e971c6e12e',),
+    ]
+
+
+
+
 
 rules = (1, 2,)
-rules_missing = ()
+rules_missing = (3, 4,)
 
 
 class ViewTest(TestCase):
@@ -26,11 +41,22 @@ class ViewTest(TestCase):
         for f in documents:
             url = '/upload/'
             self.client.login(username=username, password=password)
-
+            # do upload
             file = settings.FIXTURE_DIRS[0] + '/testdata/' + f + '.pdf'
             data = { 'file': open(file, 'r'), }
             response = self.client.post(url, data)
             self.assertContains(response, 'File has been uploaded')
+
+    def test_upload_files_hash(self):
+        for f in documents_hash:
+            url = '/upload/'
+            self.client.login(username=username, password=password)
+            # do upload
+            file = settings.FIXTURE_DIRS[0] + '/testdata/' + f[0] + '.pdf'
+            data = { 'file': open(file, 'r'), }
+            response = self.client.post(url, data)
+            self.assertContains(response, 'File has been uploaded')
+
 
     # TODO: expand this to get documents with specific revisions.
     # TODO: expand this to get documents that require a hash code.
@@ -42,11 +68,45 @@ class ViewTest(TestCase):
             url = '/get/' + d
             response = self.client.get(url)
             self.assertContains(response, '')
-        # currently failing due to exception not 404 response
+        for d in documents:
+            url = '/get/' + d + '.pdf'
+            response = self.client.get(url)
+            self.assertContains(response, '')
         for d in documents_missing:
             url = '/get/' + d
             response = self.client.get(url)
-            self.assertContains(response, '', status_code=404)
+            self.assertContains(response, 'No file match', status_code=404)
+        for d in documents_norule:
+            url = '/get/' + d
+            response = self.client.get(url)
+            self.assertContains(response, 'No rule found for file', status_code=404)
+        url = '/get/' + '97123987asdakjsdg1231123asad'
+        response = self.client.get(url)
+        self.assertContains(response, 'No rule found for file', status_code=404)
+
+
+    def test_get_document_hash(self):
+        for d in documents_hash:
+            url = '/' + d[1] + '/' + d[0]
+            response = self.client.get(url)
+            try:
+                self.assertContains(response, '')
+            except:
+                print('Failed on' + url)
+        for d in documents_hash:
+            url = '/' + d[1] + '/' + d[0] + '.pdf'
+            response = self.client.get(url)
+            try:
+                self.assertContains(response, '')
+            except:
+                print('Failed on' + url)
+
+        # TODO fix this it will break...
+        for d in documents_missing_hash:
+            url = '/' + d[1] + '/' + d[0]
+            response = self.client.get(url)
+            self.assertContains(response, 'No file match', status_code=404)
+
 
     def test_versions_view(self):
         for d in documents:
@@ -59,11 +119,10 @@ class ViewTest(TestCase):
             url = '/files/' + str(r) + '/'
             response = self.client.get(url)
             self.assertContains(response, 'Documents for')
-        # currently failing due to exception not 404 response
         for r in rules_missing:
             url = '/files/' + str(r) + '/'
             response = self.client.get(url)
-            self.assertContains(response, '', status_code=404)
+            self.assertContains(response, 'No rule found for given id', status_code=404)
 
 
 class SettingsTest(TestCase):

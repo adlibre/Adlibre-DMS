@@ -81,7 +81,7 @@ class Local(StorageProvider):
             else:
                 fileinfo = fileinfo_db[-1]
         else:
-            raise NoRevisionError # TODO: This should be a different exception
+            raise NoRevisionError # TODO: This should NoDocumentExists exception
         fullpath = '%s/%s' % (directory, fileinfo['name'])
         return fullpath
 
