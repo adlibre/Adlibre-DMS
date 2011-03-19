@@ -128,7 +128,7 @@ def get_file(request, document, hashcode=None, extension=None):
 
     response = HttpResponse(content, mimetype=mimetype)
     response["Content-Length"] = len(content)
-    response['Content-Disposition'] = 'attachment; filename=%s' % filename
+    response['Content-Disposition'] = 'filename=%s' % filename
     return response
 
 
