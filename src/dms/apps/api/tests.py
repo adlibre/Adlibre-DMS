@@ -48,3 +48,14 @@ class MiscTest(TestCase):
         url = '/api/files/2/'
         response = self.client.get(url)
         self.assertContains(response, 'ADL-1234')
+
+
+    def test_upload_files(self):
+        for f in documents:
+            url = '/api/file/'
+            self.client.login(username=username, password=password)
+            # do upload
+            file = settings.FIXTURE_DIRS[0] + '/testdata/' + f + '.pdf'
+            data = { 'filename': open(file, 'r'), }
+            response = self.client.post(url, data)
+            self.assertContains(response, '')

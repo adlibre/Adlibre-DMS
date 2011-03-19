@@ -3,7 +3,7 @@ import sys
 import os
 #from subprocess import Popen, PIPE
 
-FASTTRACK_SERVER = 'http://fasttrack.adlibre.net'
+FASTTRACK_SERVER = 'http://localhost:8000'
 
 if __name__ == "__main__":
     print "Fasttrack uploader"
