@@ -31,3 +31,10 @@ urlpatterns = patterns('',
     (r'^', include('fileshare.urls.documents')),
 )
 
+# custom 500 with MEDIA_URL context
+handler500 = 'dms.views.server_error'
+
+if settings.DEBUG:
+    urlpatterns += patterns('',
+        (r'^500/$', 'dms.views.server_error'),
+    )
