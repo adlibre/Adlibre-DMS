@@ -369,6 +369,10 @@ def documentation_index(request):
     return direct_to_template(request, 'fileshare/documentation_index.html')
 
 
+def about_documentation(request):
+    return direct_to_template(request, 'fileshare/about_documentation.html')
+
+
 def api_documentation(request):
     return direct_to_template(request, 'fileshare/api_documentation.html')
 

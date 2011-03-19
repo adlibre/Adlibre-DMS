@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
 
-{% block title %}Upload your document{% endblock %}
+{% block title %}Upload{% endblock %}
 
 {% block content %}
+<h1>Upload your document</h1>
 <div id="upload-page">
 <form action="" method="post" enctype="multipart/form-data" >
     {{ form.file.errors }}{{ form.file }}
