@@ -112,7 +112,7 @@ def get_file(request, document, hashcode=None, extension=None):
     try:
         filepath = storage.get(document, revision)
     except:
-        return handlerError(request, 404, "No file match")
+        return handlerError(request, 404, "No file or revision match")
     new_file = FileConverter(filepath, extension)
     try:
         mimetype, content = new_file.convert()
