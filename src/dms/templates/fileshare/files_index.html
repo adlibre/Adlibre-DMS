@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Documents{% endblock %}
+
+{% block content %}
+<div>
+	  <h1>Documents with active rules</h1>
+
+      <table id="rules">
+      <tr>
+          <th>Rule</th>
+          <th>Browse</th>
+      </tr>
+      {% for rule in rules %}
+        <tr>
+          <td>{{ rule }}</td>
+          <td><a href="{% url files_document rule.id %}">Browse</a></td>
+        </tr>
+      {% endfor %}
+      </table>
+</div>
+{% endblock %}
+

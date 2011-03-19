@@ -169,9 +169,24 @@ def revision_document(request, document):
         extra_context=extra_context)
 
 
+@staff_member_required
+def files_index(request):
+
+    try:
+        rules = Rule.objects.all() #.filter(active==True)
+    except:
+        return handlerError(request, 500, "No rules found")
+
+    extra_context = {
+       # 'rules_list': ('1','2',),
+        'rules': rules,
+        }
+    return direct_to_template(request, 'fileshare/files_index.html',
+        extra_context=extra_context)
+
+
 # TODO : Add pagination
 # TODO : This should use the WS API to browse the repository
-
 @staff_member_required
 def files_document(request, id_rule):
     try:
@@ -187,7 +202,7 @@ def files_document(request, id_rule):
         'document_list':document_list,
         'rule':rule_context,
         }
-    return direct_to_template(request, 'fileshare/documents.html',
+    return direct_to_template(request, 'fileshare/files.html',
         extra_context=extra_context)
 
 

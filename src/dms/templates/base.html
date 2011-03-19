@@ -13,7 +13,7 @@
         {% if user.is_authenticated %}
         Logged in as {{ user }}
         {% if user.is_staff %}
-        | <a href="/files/">Files</a>
+        | <a href="{% url files_index %}">Files</a>
         | <a href="{% url setting %}">Settings</a>
         | <a href="{% url plugins %}">Plugins</a>
         {% endif %}
