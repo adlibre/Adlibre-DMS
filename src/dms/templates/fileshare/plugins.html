@@ -9,11 +9,13 @@
       <table id="rules">
       <tr>
           <th>Name</th>
+          <th>Type</th>
           <th>Description</th>
       </tr>
       {% for key, plugin in plugin_list.items %}
       <tr>
         <td>{{ plugin.name }}</td>
+        <td>{{ plugin.plugin_type }}</td>
         <td>{{ plugin.description }}</td>
       </tr>
       {% endfor %}

@@ -4,6 +4,7 @@ class DocCodePluginMount(type):
             cls.plugins = {}
         else:
             cls.plugins[cls.name] = cls
+        cls.plugin_type = "Document Code"
 
 
 class DocCodeProvider:
@@ -16,6 +17,7 @@ class ValidatorPluginMount(type):
             cls.plugins = {}
         else:
             cls.plugins[cls.name] = cls
+        cls.plugin_type = "Validation"
 
 
 class ValidatorProvider:
@@ -29,6 +31,7 @@ class StoragePluginMount(type):
             cls.plugins = {}
         else:
             cls.plugins[cls.name] = cls
+        cls.plugin_type = "Storage"
 
 
 class StorageProvider:
@@ -41,6 +44,7 @@ class SecurityPluginMount(type):
             cls.plugins = {}
         else:
             cls.plugins[cls.name] = cls
+        cls.plugin_type = "Security"
 
 
 class SecurityProvider:

@@ -132,6 +132,7 @@ def get_file(request, document, hashcode=None, extension=None):
     return response
 
 
+@staff_member_required
 def revision_document(request, document):
     rule = Rule.objects.match(document)
     if not rule:
@@ -162,7 +163,7 @@ def revision_document(request, document):
     }
     hashplugin = rule.get_security('Hash')
     if hashplugin and hashplugin.active:
-        extra_context['hash'] = hashplugin.perform(document)
+        extra_context['hash'] = hashplugin.perform(document, settings.SECRET_KEY)
 
     return direct_to_template(request, 'fileshare/revision.html',
         extra_context=extra_context)
@@ -170,7 +171,8 @@ def revision_document(request, document):
 
 # TODO : Add pagination
 # TODO : This should use the WS API to browse the repository
-# TODO : Add security
+
+@staff_member_required
 def files_document(request, id_rule):
     try:
         rule = Rule.objects.get(id=id_rule)

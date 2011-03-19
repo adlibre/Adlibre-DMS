@@ -19,11 +19,7 @@
           <td>{{ fileinfo.name }}</td>
           <td>{{ fileinfo.created_date }}</td>
           <td>
-          {% if hash %}
-            <a href="/{{ hash }}/{{ document }}">Download</a>
-          {% else %}
-            <a href="/get/{{ document }}?r={{ fileinfo.revision }}">Download</a>
-          {% endif %}
+            <a href="{% if hash %}/{{ hash }}/{% else %}/get/{% endif %}{{ document }}?r={{ fileinfo.revision }}">Download</a>
           </td>
         </tr>
       {% endfor %}

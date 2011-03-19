@@ -59,9 +59,7 @@ class ViewTest(TestCase):
 
 
     # TODO: expand this to get documents with specific revisions.
-    # TODO: expand this to get documents that require a hash code.
     # FIXME: Currently failing on a fresh dataset. probably due to race condition.
-    # TODO: Test with and without extension in request eg /get/ADL-1234.pdf
     # TODO: Test document conversion, tiff2pdf, tiff2text
     def test_get_document(self):
         for d in documents:
@@ -109,12 +107,14 @@ class ViewTest(TestCase):
 
 
     def test_versions_view(self):
+        self.client.login(username=username, password=password)
         for d in documents:
             url = '/revision/' + d
             response = self.client.get(url)
             self.assertContains(response, 'Revision of')
 
     def test_documents_view(self):
+        self.client.login(username=username, password=password)
         for r in rules:
             url = '/files/' + str(r) + '/'
             response = self.client.get(url)
