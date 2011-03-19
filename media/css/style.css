@@ -3,6 +3,10 @@
     padding:0px;
 }
 
+html, body {
+    height: 100%;
+}
+
 table				{
                     font: 88%/1.7em "Trebuchet MS", "Bitstream Vera Sans", Verdana, Helvetica, sans-serif;
 					border-collapse: separate; border-spacing: 0; margin: 0 0 1em 0; color:#000;
@@ -63,6 +67,11 @@ h2 {
     margin:20px 0px;
 }
 
+#page_wrapper {
+    min-height:100%;
+    position:relative;
+}
+
 #header {
     border-bottom:1px solid #e1e1e1;
     padding:0px 10px;
@@ -70,20 +79,29 @@ h2 {
     margin-bottom:25px;
     text-align:right;
 }
-
-#footer {
-    margin-top:20px;
-    font-size:13px;
+#header span {
+    float:left;
 }
 
 #container {
     width:700px;
     margin:0px auto;
+    padding-bottom: 50px; /* prevent overlap with footer */
 }
-#content {
-    min-height: 200px;
 
+#content {}
+
+#footer {
+    position:absolute;
+    bottom:0;
+    width:100%;
+    border-top:1px solid #e1e1e1;    
+    font-size:13px;
 }
+#footer p {
+    padding-left: 10px;
+}
+
 
 label {
     display:block;
