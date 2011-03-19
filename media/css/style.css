@@ -100,8 +100,12 @@ h2 {
 }
 #footer p {
     padding-left: 10px;
+    padding-right: 10px;
 }
-
+#footer span {
+    color: grey;
+    float: right;
+}
 
 label {
     display:block;
