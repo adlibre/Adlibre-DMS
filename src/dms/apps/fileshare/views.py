@@ -173,14 +173,14 @@ def revision_document(request, document):
 def files_index(request):
 
     try:
-        rules = Rule.objects.all() #.filter(active==True)
+        rules = Rule.objects.all()
     except:
         return handlerError(request, 500, "No rules found")
 
     extra_context = {
-       # 'rules_list': ('1','2',),
         'rules': rules,
         }
+
     return direct_to_template(request, 'fileshare/files_index.html',
         extra_context=extra_context)
 
@@ -190,7 +190,7 @@ def files_index(request):
 @staff_member_required
 def files_document(request, id_rule):
     try:
-        rule = Rule.objects.get(id=id_rule)
+        rule = Rule.objects.get(id=id_rule)  # we should add the hash to this object :p
     except:
         return handlerError(request, 404, "No rule found for given id")
     document_list = rule.get_storage().get_list(id_rule)
@@ -202,6 +202,7 @@ def files_document(request, id_rule):
         'document_list':document_list,
         'rule':rule_context,
         }
+
     return direct_to_template(request, 'fileshare/files.html',
         extra_context=extra_context)
 

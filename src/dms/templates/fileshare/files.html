@@ -10,19 +10,11 @@
       <tr>
           <th>Document</th>
           <th>Revisions</th>
-          <th>Download</th>
       </tr>
       {% for document in document_list %}
         <tr>
           <td>{{ document }}</td>
           <td><a href="/revision/{{ document }}">Revisions</a></td>
-          <td>
-          {% if hash %}
-            <a href="/{{ hash }}/{{ document }}">Download</a>
-          {% else %}
-            <a href="/get/{{ document }}?r={{ fileinfo.revision }}">Download</a>
-          {% endif %}
-          </td>
         </tr>
       {% endfor %}
       </table>
