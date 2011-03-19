@@ -23,7 +23,7 @@ td.action {
 th,
 td 					{padding: 0.25em;}
 
-td					{text-align: left; vertical-align: top;}
+td					{text-align: center; vertical-align: top;}
 tbody th			{font-weight: normal; white-space: nowrap;}
 
 tbody th + td		{white-space: nowrap;}
