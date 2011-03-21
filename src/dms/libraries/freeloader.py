@@ -2,7 +2,7 @@ from django.template import TemplateDoesNotExist
 
 def load_template_source(template_name, template_dirs=None):
     """
-    Give capability to load template from spesific directory
+    Give capability to load template from specific directory
     """
 
     try:

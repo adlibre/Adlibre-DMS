@@ -60,7 +60,17 @@ class MiscTest(TestCase):
             file = settings.FIXTURE_DIRS[0] + '/testdata/' + f + '.pdf'
             data = { 'filename': open(file, 'r'), }
             response = self.client.post(url, data)
-            self.assertContains(response, '')
+            self.assertContains(response, '', status_code=201)
+
+
+    def test_delete_documents(self):
+        for f in documents:
+            url = '/api/file/?filename=' + f + '.pdf'
+            # TODO: FIXME: Should require authentication
+            #self.client.login(username=username, password=password)
+            # do delete
+            response = self.client.delete(url)
+            self.assertContains(response, '', status_code=204)
 
 
     def test_get_rev_count(self):
@@ -79,4 +89,4 @@ class MiscTest(TestCase):
         url = '/api/revision_count/sdfdsds42333333333333333333333333432423'
         response = self.client.get(url)
         self.assertContains(response, 'Bad Request', status_code=400)
-        
+

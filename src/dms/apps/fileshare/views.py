@@ -155,7 +155,7 @@ def revision_document(request, document):
                 return handlerError(request, 403, e)
 
     storage = rule.get_storage()
-    fileinfo_db = storage.revision(document)
+    fileinfo_db = storage.get_meta_data(document)
     extra_context = {
         'fileinfo_db':fileinfo_db,
         'document':document,

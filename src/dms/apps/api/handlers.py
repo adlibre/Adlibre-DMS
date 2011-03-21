@@ -8,14 +8,14 @@ from piston.utils import rc
 from fileshare.models import Rule
 from fileshare.models import (available_validators, available_doccodes,
     available_storages, available_securities)
-from converter import FileConverter
+from fileshare.converter import FileConverter
 
 
 class FileHandler(BaseHandler):
-    allowed_methods = ('GET','POST')
+    allowed_methods = ('GET','POST','DELETE',)
 
-    # TODO: We need a method for DELETE
-    # this method needs a security wrapper.
+    # TODO: these methods needs security wrapper.
+    # TODO: These methods need to support version, versions.
     
     def read(self, request):
         filename = request.GET.get('filename')
@@ -29,7 +29,6 @@ class FileHandler(BaseHandler):
         new_file = FileConverter(filepath, extension)
         mimetype, content = new_file.convert()
 
-
         response = HttpResponse(content, mimetype=mimetype)
         response["Content-Length"] = len(content)
         return response
@@ -42,7 +41,20 @@ class FileHandler(BaseHandler):
         if rule:
             storage = rule.get_storage()
             storage.store(request.FILES['filename'])
-            return rc.ALL_OK
+            return rc.CREATED
+        else:
+            return rc.BAD_REQUEST
+
+
+    def delete(self, request):
+        filename = request.GET.get('filename')
+        document, extension = os.path.splitext(filename)
+        extension = extension.strip(".")
+        rule = Rule.objects.match(document)
+        if rule:
+            storage = rule.get_storage()
+            storage.delete(filename)
+            return rc.DELETED
         else:
             return rc.BAD_REQUEST
 

@@ -1,14 +1,12 @@
 import os
 import datetime
+import shutil
 
 from django.conf import settings
 
 from fileshare.models import Rule
 from fileshare.utils import StorageProvider
 import json
-
-import os
-
 
 class NoRevisionError(Exception):
     def __str__(self):
@@ -97,8 +95,25 @@ class Local(StorageProvider):
         return fullpath
 
 
+    # TODO: Extend to handle revisions
     @staticmethod
-    def revision(document, root=settings.DOCUMENT_ROOT):
+    def delete(filename, revision=None, root=settings.DOCUMENT_ROOT):
+        document, extension = os.path.splitext(filename)
+        extension = extension.strip(".")
+        directory = splitdir(document)
+        if root:
+            directory = "%s/%s" % (root, directory)
+            try:
+                shutil.rmtree(directory)
+                return None
+            except:
+                raise NoRevisionError # FIXME: Should be something else
+        else:
+            return None
+
+
+    @staticmethod
+    def get_meta_data(document, root=settings.DOCUMENT_ROOT):
         directory = splitdir(document)
         if root:
             directory = "%s/%s" % (root, directory)
