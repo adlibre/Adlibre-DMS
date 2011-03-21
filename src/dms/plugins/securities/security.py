@@ -8,7 +8,7 @@ class NotInSecurityGroupError(Exception):
         return "NotInSecurityGroupError - You're not in security group"
 
 
-class security(SecurityProvider):
+class Security(SecurityProvider):
     name = 'Security Group'
     description = 'Security group member only'
     active = True
