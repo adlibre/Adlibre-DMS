@@ -73,7 +73,7 @@ class ViewTest(TestCase):
         for d in documents_missing:
             url = '/get/' + d
             response = self.client.get(url)
-            self.assertContains(response, 'No file match', status_code=404)
+            self.assertContains(response, 'No file or revision match', status_code=404)
         for d in documents_norule:
             url = '/get/' + d
             response = self.client.get(url)
@@ -103,7 +103,7 @@ class ViewTest(TestCase):
         for d in documents_missing_hash:
             url = '/' + d[1] + '/' + d[0]
             response = self.client.get(url)
-            self.assertContains(response, 'No file match', status_code=404)
+            self.assertContains(response, 'No file or revision match', status_code=404)
 
 
     def test_versions_view(self):

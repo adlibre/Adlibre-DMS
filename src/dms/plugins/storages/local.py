@@ -7,10 +7,21 @@ from fileshare.models import Rule
 from fileshare.utils import StorageProvider
 import json
 
+import os
+
 
 class NoRevisionError(Exception):
     def __str__(self):
         return "NoRevisionError - No such revision number"
+
+
+def filecount(directory):
+    # return the number of files in directory directory
+    try:
+        return len([f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))])
+    except Exception, e:
+        return None
+
 
 def splitdir(document):
     rule = Rule.objects.match(document)
@@ -99,6 +110,19 @@ class Local(StorageProvider):
         return None
 
 
+    @staticmethod
+    def get_revision_count(document, root=settings.DOCUMENT_ROOT):
+        # Hacky way, but faster than reading the revs from the metadata
+        directory = splitdir(document)
+        if root:
+            directory = "%s/%s" % (root, directory)
+
+        file_count = filecount(directory)
+        if file_count:
+            return filecount(directory) - 1
+        else:
+            return 0
+
     # FIXME: I really don't like the chain of dependency. This is called from piston handlers.py
     # which requires knowledge of the rule, and then the storage needs to know
     # which rule is invoked as well... its a bit of a mess.
@@ -106,7 +130,6 @@ class Local(StorageProvider):
     @staticmethod
     def get_list(id_rule, root=settings.DOCUMENT_ROOT):
 
-        import os
         import glob
 
         # root of our storage tree for the given id_rule

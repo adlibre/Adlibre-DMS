@@ -14,6 +14,9 @@ from converter import FileConverter
 class FileHandler(BaseHandler):
     allowed_methods = ('GET','POST')
 
+    # TODO: We need a method for DELETE
+    # this method needs a security wrapper.
+    
     def read(self, request):
         filename = request.GET.get('filename')
         document, extension = os.path.splitext(filename)
@@ -40,7 +43,8 @@ class FileHandler(BaseHandler):
             storage = rule.get_storage()
             storage.store(request.FILES['filename'])
             return rc.ALL_OK
-        return rc.BAD_REQUEST
+        else:
+            return rc.BAD_REQUEST
 
 
 # FIXME: As per local.py, there is
@@ -53,6 +57,22 @@ class FileListHandler(BaseHandler):
         rule = Rule.objects.get(id=id_rule)
         file_list = rule.get_storage().get_list(id_rule)
         return file_list
+
+
+# How many files do we have for a document.
+class RevisionCountHandler(BaseHandler):
+    allowed_methods = ('GET','POST')
+
+    def read(self, request, document):        
+        document, extension = os.path.splitext(document)
+        extension = extension.strip(".")
+        rule = Rule.objects.match(document)
+
+        if rule:
+            storage = rule.get_storage()
+            return storage.get_revision_count(document)
+        else:
+            return rc.BAD_REQUEST
 
 
 class RulesHandler(BaseHandler):

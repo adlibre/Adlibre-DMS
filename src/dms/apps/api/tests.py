@@ -39,10 +39,12 @@ class MiscTest(TestCase):
         response = self.client.get(url)
         self.assertContains(response, 'Adlibre Invoices')
 
+
     def test_api_rules(self):
         url = '/api/plugins.json'
         response = self.client.get(url)
         self.assertContains(response, 'Security Group')
+
 
     def test_api_files(self):
         url = '/api/files/2/'
@@ -59,3 +61,22 @@ class MiscTest(TestCase):
             data = { 'filename': open(file, 'r'), }
             response = self.client.post(url, data)
             self.assertContains(response, '')
+
+
+    def test_get_rev_count(self):
+        for f in documents:
+            url = '/api/revision_count/' + f
+            self.client.login(username=username, password=password)
+            # do upload
+            #file = settings.FIXTURE_DIRS[0] + '/testdata/' + f + '.pdf'
+            #data = { 'filename': open(file, 'r'), }
+            #response = self.client.post(url, data)
+            response = self.client.get(url)
+            self.assertContains(response, '')
+
+
+    def test_get_bad_rev_count(self):
+        url = '/api/revision_count/sdfdsds42333333333333333333333333432423'
+        response = self.client.get(url)
+        self.assertContains(response, 'Bad Request', status_code=400)
+        
