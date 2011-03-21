@@ -3,6 +3,11 @@ import sys
 import os
 #from subprocess import Popen, PIPE
 
+# TODO: as per https://redmine.adlibre.net/issues/28 need some more features:
+# Logging
+# optional append (pdf / tiff),
+# optional fail if file exists.
+
 FASTTRACK_SERVER = 'http://localhost:8000'
 
 if __name__ == "__main__":
