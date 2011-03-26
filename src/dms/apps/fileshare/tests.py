@@ -30,7 +30,7 @@ documents_missing_hash = [
 
 
 rules = (1, 2,)
-rules_missing = (3, 4,)
+rules_missing = (4, 99,)
 
 
 class ViewTest(TestCase):
