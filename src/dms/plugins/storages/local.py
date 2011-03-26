@@ -138,25 +138,22 @@ class Local(StorageProvider):
         else:
             return 0
 
-    # FIXME: I really don't like the chain of dependency. This is called from piston handlers.py
-    # which requires knowledge of the rule, and then the storage needs to know
-    # which rule is invoked as well... its a bit of a mess.
-
+    """
+    Return List of DocCodes in the repository for a given rule
+    """
     @staticmethod
     def get_list(id_rule, root=settings.DOCUMENT_ROOT):
 
-        import glob
+        directory = "%s/%s" % (root, id_rule)
 
-        # root of our storage tree for the given id_rule
-        if root:
-            directory = "%s/%s" % (root, id_rule)
-
-        rule = Rule.objects.get(id=id_rule)
-
-        for i in range(rule.get_doccode().splits + 1):
-            directory = "%s/%s" % (directory, '*')
-
-        files = []
-        for file in glob.glob(directory):
-            files.append(os.path.basename(file))
-        return files
+        # Iterate through the directory hierarchy looking for metadata containing dirs.
+        # This is more efficient than other methods of looking for leaf directories
+        # and works for storage rules where the depth of the storage tree is not constant for all doccodes.
+        
+        doccodes = []
+        for root, dirs, files in os.walk(directory):
+            for file in files:
+                doc, extension = os.path.splitext(file)
+                if extension == '.json':
+                    doccodes.append(doc)
+        return doccodes
