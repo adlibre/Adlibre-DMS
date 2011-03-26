@@ -13,6 +13,17 @@ class NoRevisionError(Exception):
         return "NoRevisionError - No such revision number"
 
 
+def naturalsort(L, reverse=False):
+    """
+    Natural Sort
+    """
+    import re
+
+    convert = lambda text: ('', int(text)) if text.isdigit() else (text, 0)
+    alpha = lambda key: [ convert(char) for char in re.split('([0-9]+)', key) ]
+    return sorted(L, key=alpha, reverse=reverse)
+
+
 def filecount(directory):
     # return the number of files in directory directory
     try:
@@ -149,11 +160,17 @@ class Local(StorageProvider):
         # Iterate through the directory hierarchy looking for metadata containing dirs.
         # This is more efficient than other methods of looking for leaf directories
         # and works for storage rules where the depth of the storage tree is not constant for all doccodes.
-        
+
+        # TODO: This will be inefficient at scale and will require caching
+
         doccodes = []
         for root, dirs, files in os.walk(directory):
             for file in files:
                 doc, extension = os.path.splitext(file)
                 if extension == '.json':
                     doccodes.append(doc)
-        return doccodes
+        return naturalsort(doccodes)
+
+
+
+
