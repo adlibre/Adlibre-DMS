@@ -161,7 +161,7 @@ class Local(StorageProvider):
         # This is more efficient than other methods of looking for leaf directories
         # and works for storage rules where the depth of the storage tree is not constant for all doccodes.
 
-        # TODO: This will be inefficient at scale and will require caching
+        # FIXME: This will be inefficient at scale and will require caching
 
         doccodes = []
         for root, dirs, files in os.walk(directory):

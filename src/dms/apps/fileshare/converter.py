@@ -2,6 +2,7 @@ import os
 from subprocess import Popen, PIPE
 import mimetypes
 
+
 class FileConverter:
     """
     Convert file from one mimetype to another mimetype
@@ -56,3 +57,5 @@ class FileConverter:
         p = Popen('rm -rf %s' % path, shell=True,stdout=PIPE, stderr=PIPE)
         return ['text/plain', content]
 
+
+# TODO: We need a txt_to_pdf conversion

@@ -117,7 +117,7 @@ def get_file(request, document, hashcode=None, extension=None):
     try:
         mimetype, content = new_file.convert()
     except TypeError:
-        return handlerError(request, 405, "No file converter")
+        return handlerError(request, 405, "Unable to convert to requested format")
 
     if extension:
         filename = "%s.%s" % (document, extension)

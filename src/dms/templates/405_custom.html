@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block title %}405 Method Not Allowed{% endblock %}
+
+{% block content %}
+
+<h1>Method Not Allowed: {{ message }}.</h1>
+<p>I'm sorry but we couldn't give you what you wanted.</p>
+<p>Request path: {{ request_path }}</p>
+<p>HTTP Status: 405</p>
+{% endblock %}
+
