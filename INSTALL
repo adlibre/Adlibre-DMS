@@ -3,6 +3,12 @@ On OSX need to install the following in your base OS
 # port install perl5
 # port install p5-file-libmagic
 
+and the following for converter.py to function (libtiff, poppler, a2ps, ghostscript)
+
+# port install tiff
+# port install poppler
+# port install a2ps
+# port install ghostscript
 
 Standard deployment with virtualenv:
 

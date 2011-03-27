@@ -30,7 +30,7 @@ class FileConverter:
 
     def tif_to_pdf(self):
         """
-        tiff to pdf conversion, use tiff2pdf command
+        tiff to pdf conversion, use tiff2pdf command (libtiff)
         """
 
         filename = os.path.basename(self.filepath)
@@ -45,7 +45,7 @@ class FileConverter:
 
     def pdf_to_txt(self):
         """
-        pdf to txt conversion, use pdftotext command
+        pdf to txt conversion, use pdftotext command (poppler)
         """
 
         filename = os.path.basename(self.filepath)
@@ -58,4 +58,16 @@ class FileConverter:
         return ['text/plain', content]
 
 
-# TODO: We need a txt_to_pdf conversion
+    def txt_to_pdf(self):
+        """
+        text to pdf conversion, use a2ps and ps2pdf command (a2ps & ghostscript)
+        """
+
+        filename = os.path.basename(self.filepath)
+        document = os.path.splitext(filename)[0]
+        path = '%s/%s.pdf' % (os.path.dirname(self.filepath), document) #output
+        p = Popen('a2ps --quiet --portrait --columns=1 --rows=1 -L 100 --no-header --borders=off -o - %s | ps2pdf -sPAPERSIZE=a4 - %s' % (self.filepath, path), shell=True, stdout=PIPE, stderr=PIPE)
+        stdout, stderr = p.communicate()
+        content = open(path, 'rb').read()
+        p = Popen('rm -rf %s' % path, shell=True,stdout=PIPE, stderr=PIPE)
+        return ['application/pdf', content]
