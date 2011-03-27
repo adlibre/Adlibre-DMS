@@ -1,5 +1,4 @@
 import re
-
 from fileshare.utils import DocCodeProvider
 
 

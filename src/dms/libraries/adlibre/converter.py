@@ -36,7 +36,7 @@ class FileConverter:
         filename = os.path.basename(self.filepath)
         document = os.path.splitext(filename)[0]
         path = '%s/%s.pdf' % (os.path.dirname(self.filepath), document)
-        p = Popen('tiff2pdf %s -o %s' % (self.filepath, path), shell=True, stdout=PIPE, stderr=PIPE)
+        p = Popen('tiff2pdf -o %s %s' % (path, self.filepath), shell=True, stdout=PIPE, stderr=PIPE)
         stdout, stderr = p.communicate()
         content = open(path, 'rb').read()
         p = Popen('rm -rf %s' % path, shell=True,stdout=PIPE, stderr=PIPE)
@@ -60,7 +60,7 @@ class FileConverter:
 
     def txt_to_pdf(self):
         """
-        text to pdf conversion, use a2ps and ps2pdf command (a2ps & ghostscript)
+        text to pdf conversion, use a2ps and ps2pdf  command (a2ps & ghostscript)
         """
 
         filename = os.path.basename(self.filepath)

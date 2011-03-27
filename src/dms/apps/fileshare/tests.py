@@ -10,7 +10,9 @@ Test data
 username = 'admin'
 password = 'admin'
 
-documents = ('ADL-1111', 'ADL-1234', 'ADL-2222',)
+documents_pdf = ('ADL-1111', 'ADL-1234', 'ADL-2222',)
+documents_txt = ('10001', '10006', '101',)
+documents_tif = ('2011-01-27-1', '2011-01-28-12',)
 documents_missing = ('ADL-8888', 'ADL-9999',)
 documents_norule = ('ABC12345678',)
 
@@ -26,19 +28,18 @@ documents_missing_hash = [
     ]
 
 
-
-
-
-rules = (1, 2,)
-rules_missing = (4, 99,)
+rules = (1, 2, 3, 4,)
+rules_missing = (5, 99,)
 
 
 class ViewTest(TestCase):
 
     # TODO: Add test to upload files with no doccode.
     # TODO: Add test to upload files with wrong mime type.
+
     def test_upload_files(self):
-        for f in documents:
+
+        for f in documents_pdf:
             url = '/upload/'
             self.client.login(username=username, password=password)
             # do upload
@@ -47,6 +48,25 @@ class ViewTest(TestCase):
             response = self.client.post(url, data)
             self.assertContains(response, 'File has been uploaded')
 
+        for f in documents_txt:
+            url = '/upload/'
+            self.client.login(username=username, password=password)
+            # do upload
+            file = settings.FIXTURE_DIRS[0] + '/testdata/' + f + '.txt'
+            data = { 'file': open(file, 'r'), }
+            response = self.client.post(url, data)
+            self.assertContains(response, 'File has been uploaded')
+            
+        for f in documents_tif:
+            url = '/upload/'
+            self.client.login(username=username, password=password)
+            # do upload
+            file = settings.FIXTURE_DIRS[0] + '/testdata/' + f + '.tif'
+            data = { 'file': open(file, 'r'), }
+            response = self.client.post(url, data)
+            self.assertContains(response, 'File has been uploaded')
+
+            
     def test_upload_files_hash(self):
         for f in documents_hash:
             url = '/upload/'
@@ -62,11 +82,11 @@ class ViewTest(TestCase):
     # FIXME: Currently failing on a fresh dataset. probably due to race condition.
     # TODO: Test document conversion, tiff2pdf, tiff2text
     def test_get_document(self):
-        for d in documents:
+        for d in documents_pdf:
             url = '/get/' + d
             response = self.client.get(url)
             self.assertContains(response, '')
-        for d in documents:
+        for d in documents_pdf:
             url = '/get/' + d + '.pdf'
             response = self.client.get(url)
             self.assertContains(response, '')
@@ -108,7 +128,7 @@ class ViewTest(TestCase):
 
     def test_versions_view(self):
         self.client.login(username=username, password=password)
-        for d in documents:
+        for d in documents_pdf:
             url = '/revision/' + d
             response = self.client.get(url)
             self.assertContains(response, 'Revision of')
@@ -158,3 +178,24 @@ class MiscTest(TestCase):
         url = '/docs/'
         response = self.client.get(url)
         self.assertContains(response, 'Documentation')
+
+
+class ConversionTest(TestCase):
+
+    def test_tif2pdf_conversion(self):
+        for d in documents_tif:
+            url = '/get/' + d + '.pdf'
+            response = self.client.get(url)
+            self.assertContains(response, '', status_code=200)
+
+    def test_txt2pdf_conversion(self):
+        for d in documents_txt:
+            url = '/get/' + d + '.pdf'
+            response = self.client.get(url)
+            self.assertContains(response, '', status_code=200)
+
+    def test_pdf2txt_conversion(self):
+        for d in documents_pdf:
+            url = '/get/' + d + '.txt'
+            response = self.client.get(url)
+            self.assertContains(response, d, status_code=200)
