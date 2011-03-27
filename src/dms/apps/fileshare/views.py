@@ -1,13 +1,9 @@
-import mimetypes
 import os
 import pickle
 
 from django.conf import settings
-from django.contrib.auth.models import User
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotFound, Http404
-from django.shortcuts import get_object_or_404, render_to_response
-from django.utils.translation import ugettext_lazy as _
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import get_object_or_404
 from django.views.generic.simple import direct_to_template
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
@@ -15,7 +11,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.template import RequestContext, loader
 
-from converter import FileConverter
+from adlibre.converter import FileConverter
 
 from fileshare.forms import UploadForm, SettingForm, EditSettingForm
 from fileshare.models import (Rule, available_validators, available_doccodes,
@@ -27,7 +23,7 @@ def handlerError(request, httpcode, message):
     t = loader.get_template(str(httpcode)+'_custom.html')
     context = RequestContext(
         request, {'request_path': request.path,
-            'message': message, }
+                  'message': message, }
         )
     response = HttpResponse(t.render(context))
     response.status_code = httpcode

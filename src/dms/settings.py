@@ -65,7 +65,7 @@ SECRET_KEY = 'z@ndqd972=9vmw0_5i^y!zwo59sxu*yru#3)5&4l*$eokb6_bp'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.load_template_source',
     'django.template.loaders.app_directories.load_template_source',
-    'freeloader.load_template_source',
+    'adlibre.freeloader.load_template_source',
 #     'django.template.loaders.eggs.load_template_source',
 )
 

@@ -1,5 +1,3 @@
-import os
-import hashlib
 import pkgutil
 import pickle
 
@@ -7,7 +5,7 @@ from django.db import models
 from django.conf import settings
 
 from fileshare.utils import ValidatorProvider, StorageProvider, SecurityProvider, \
-                            DocCodeProvider
+    DocCodeProvider
 
 
 class RuleManager(models.Manager):
