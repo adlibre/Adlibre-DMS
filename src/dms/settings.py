@@ -97,6 +97,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.flatpages',
     'base',
+    'browser',
     'piston',
     'api',
     'docutils',

@@ -5,7 +5,6 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from adlibre.converter import FileConverter
 
-from base.forms import UploadForm, SettingForm, EditSettingForm
 from base.models import (Rule, available_validators, available_doccodes,
     available_storages, available_securities)
 from base.utils import ValidatorProvider, StorageProvider, SecurityProvider, DocCodeProvider
