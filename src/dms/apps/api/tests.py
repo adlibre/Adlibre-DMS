@@ -58,7 +58,7 @@ class MiscTest(TestCase):
             self.client.login(username=username, password=password)
             # do upload
             file = settings.FIXTURE_DIRS[0] + '/testdata/' + f + '.pdf'
-            data = { 'filename': open(file, 'r'), }
+            data = { 'file': open(file, 'r'), }
             response = self.client.post(url, data)
             self.assertContains(response, '', status_code=201)
 

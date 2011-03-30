@@ -19,7 +19,7 @@ if __name__ == "__main__":
         path = sys.argv[1]
         if os.path.exists(path):
             if os.path.isfile(path):
-                os.system("curl -F 'filename=@%s' %s/api/file/" % (path, FASTTRACK_SERVER))
+                os.system("curl -F 'file=@%s' %s/api/file/" % (path, FASTTRACK_SERVER))
                 print "Upload OK"
             else:
                 for fname in os.listdir(path):

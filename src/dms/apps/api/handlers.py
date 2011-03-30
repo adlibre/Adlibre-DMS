@@ -5,70 +5,95 @@ from django.http import HttpResponse
 from piston.handler import BaseHandler
 from piston.utils import rc
 
-from fileshare.models import Rule
-from fileshare.models import (available_validators, available_doccodes,
-    available_storages, available_securities)
-from fileshare.converter import FileConverter
-
+from fileshare.dms import DmsBase, DmsRule, DmsDocument, DmsException
 
 class FileHandler(BaseHandler):
     allowed_methods = ('GET','POST','DELETE',)
 
-    # TODO: these methods needs security wrapper.
-    # TODO: These methods need to support version, versions.
-    
     def read(self, request):
+
         filename = request.GET.get('filename')
         document, extension = os.path.splitext(filename)
-        extension = extension.strip(".")
-        rule = Rule.objects.match(document)
-        storage = rule.get_storage()
-        filepath = storage.get(document)
-        if not filepath:
-            return HttpResponse("No file match")
-        new_file = FileConverter(filepath, extension)
-        mimetype, content = new_file.convert()
+        request_extension = extension.strip(".")
+
+        revision = request.GET.get("r", None) # TODO: TestMe
+        hashcode = request.GET.get("h", None) # TODO: TestMe
+
+        try:
+            d = DmsDocument(document, revision)
+        except DmsException, (e):
+            return rc.BAD_REQUEST
+
+        try:
+            content, filename, mimetype = d.get_file(request, hashcode, request_extension)
+        except DmsException, (e): # TODO: need to interpret these and return rc.NOT_FOUND etc.
+            return rc.BAD_REQUEST
+        except Exception, (e):
+            raise Exception(e) # Generic Exception. All others should be caught above by DmsException
 
         response = HttpResponse(content, mimetype=mimetype)
         response["Content-Length"] = len(content)
+        response['Content-Disposition'] = 'filename=%s' % filename
+
         return response
 
 
     def create(self, request):
-        document, extension = os.path.splitext(request.FILES['filename'].name)
+
+        document, extension = os.path.splitext(request.FILES['file'].name)
         extension = extension.strip(".")
-        rule = Rule.objects.match(document)
-        if rule:
-            storage = rule.get_storage()
-            storage.store(request.FILES['filename'])
-            return rc.CREATED
-        else:
+
+        revision = request.GET.get("r", None) # TODO: TestMe
+
+        try:
+            d = DmsDocument(document, revision)
+        except DmsException, (e):
             return rc.BAD_REQUEST
+
+        try:
+            d.set_file(request, request.FILES['file'])
+            #pass
+        except DmsException, (e): # TODO: need to interpret these and return appropriate exception
+            return rc.BAD_REQUEST
+        except Exception, (e):
+            raise Exception(e) # Generic Exception. All others should be caught above by DmsException
+        else:
+            return rc.CREATED
 
 
     def delete(self, request):
         filename = request.GET.get('filename')
         document, extension = os.path.splitext(filename)
         extension = extension.strip(".")
-        rule = Rule.objects.match(document)
-        if rule:
-            storage = rule.get_storage()
-            storage.delete(filename)
-            return rc.DELETED
-        else:
+
+        revision = request.GET.get("r", None) # TODO: TestMe
+
+        try:
+            d = DmsDocument(document, revision)
+        except DmsException, (e):
             return rc.BAD_REQUEST
 
+        try:
+            d.delete_file()
+        except DmsException, (e): # TODO: need to interpret these and return appropriate exception
+            return rc.BAD_REQUEST
+        except Exception, (e):
+            raise Exception(e) # Generic Exception. All others should be caught above by DmsException
+        else:
+            return rc.DELETED
 
-# FIXME: As per local.py, there is
-# dependenc on rules, which I don't
-# really like, but might not be avoidable
+
 class FileListHandler(BaseHandler):
     allowed_methods = ('GET','POST')
 
     def read(self, request, id_rule):
-        rule = Rule.objects.get(id=id_rule)
-        file_list = rule.get_storage().get_list(id_rule)
-        return file_list
+
+        try:
+            d = DmsRule(id_rule)
+        except DmsException, (e):
+            return rc.BAD_REQUEST
+        else:
+            return d.get_file_list()
 
 
 # How many files do we have for a document.
@@ -77,13 +102,15 @@ class RevisionCountHandler(BaseHandler):
 
     def read(self, request, document):        
         document, extension = os.path.splitext(document)
-        extension = extension.strip(".")
-        rule = Rule.objects.match(document)
 
-        if rule:
-            storage = rule.get_storage()
-            return storage.get_revision_count(document)
-        else:
+        try:
+            d = DmsDocument(document)
+        except DmsException, (e):
+            return rc.BAD_REQUEST
+
+        try:
+            return d.storage.get_revision_count(document)
+        except:
             return rc.BAD_REQUEST
 
 
@@ -94,16 +121,23 @@ class RulesHandler(BaseHandler):
     verbose_name_plural = 'rules'
 
     def read(self, request):
-        rules = []
-        for rule in Rule.objects.all():
-            readable_rule = {
-                'doccode' : rule.get_doccode().name,
-                'id' : rule.id
-            }
-            rules.append(readable_rule)
-        return rules
+
+        try:
+            d = DmsBase()
+        except DmsException, (e):
+            return rc.BAD_REQUEST
+        else:
+            rules = []
+            for rule in d.get_rules():
+                readable_rule = {
+                    'doccode' : rule.get_doccode().name,
+                    'id' : rule.id
+                }
+                rules.append(readable_rule)
+            return rules
 
 
+# TODO: Add a test for this.
 class RulesDetailHandler(BaseHandler):
     allowed_methods = ('GET','POST')
     fields = ('id', 'doccode', 'storage', 'active','validators', 'securities')
@@ -112,14 +146,13 @@ class RulesDetailHandler(BaseHandler):
     verbose_name_plural = 'rules'
 
     def read(self, request, id_rule):
-        rule = Rule.objects.get(id=id_rule)
-        rule.doccode = rule.get_doccode().name
-        rule.storage = rule.get_storage().name
-        securities = rule.get_securities()
-        rule.securities = ",".join([security.name for security in securities])
-        validators = rule.get_validators()
-        rule.validators = ",".join([validator.name for validator in validators])
-        return rule
+
+        try:
+            d = DMS(id_rule)
+        except DmsException, (e):
+            return rc.BAD_REQUEST
+        else:
+            return d.get_rule_details()
 
 
 class PluginsHandler(BaseHandler):
@@ -129,12 +162,10 @@ class PluginsHandler(BaseHandler):
     verbose_name_plural = 'plugins'
 
     def read(self, request):
-        plugins = []
-        for plugin in available_doccodes():
-            plugins.append(plugin)
-        for plugin in available_validators():
-            plugins.append(plugin)
-        for plugin in available_securities():
-            plugins.append(plugin)
-        return plugins
 
+        try:
+            d = DmsBase()
+        except DmsException, (e):
+            return rc.BAD_REQUEST
+        else:
+            return d.get_plugins()

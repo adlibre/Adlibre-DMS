@@ -1,7 +1,6 @@
 import os
 import pickle
 
-from django.conf import settings
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.views.generic.simple import direct_to_template
@@ -11,12 +10,11 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.template import RequestContext, loader
 
-from adlibre.converter import FileConverter
-
 from fileshare.forms import UploadForm, SettingForm, EditSettingForm
 from fileshare.models import (Rule, available_validators, available_doccodes,
     available_storages, available_securities)
-from fileshare.utils import ValidatorProvider, StorageProvider, SecurityProvider, DocCodeProvider
+
+from fileshare.dms import DmsBase, DmsRule, DmsDocument, DmsException
 
 
 def handlerError(request, httpcode, message):
@@ -42,30 +40,16 @@ def upload(request, template_name='fileshare/upload.html', extra_context={}):
     if request.method == 'POST':
         if form.is_valid():
             document = os.path.splitext(form.files['file'].name)[0]
-            rule = Rule.objects.match(document)
-            if rule:
-                # check against all validator
-                for validator in rule.get_validators():
-                    if validator.is_storing_action and validator.active:
-                        try:
-                            validator.perform(request, document)
-                        except Exception, e:
-                            return HttpResponse(e)
 
-                # check against all securities
-                for security in rule.get_securities():
-                    if security.is_storing_action and security.active:
-                        try:
-                            security.perform(request, document)
-                        except Exception, e:
-                            return HttpResponse(e)
+            try:
+                d = DmsDocument(document)
+            except DmsException, (e):
+                return handlerError(request, e.code, e.parameter)
 
+            file_content = form.files['file']
+            d.set_file(request, file_content, new_revision=True, append_content=False) # TODO: Add Exception check.
+            messages.success(request, 'File has been uploaded.')
 
-                storage = rule.get_storage()
-                storage.store(form.files['file'])
-                messages.success(request, 'File has been uploaded.')
-            else:
-                messages.error(request, "No rule found for your uploaded file")
     extra_context['form'] = form
     return direct_to_template(request,
                               template_name,
@@ -73,93 +57,43 @@ def upload(request, template_name='fileshare/upload.html', extra_context={}):
 
 
 def get_file(request, document, hashcode=None, extension=None):
-    rule = Rule.objects.match(document)
-    if not rule:
-        return handlerError(request, 404, "No rule found for file " + document)
-
-    hashplugin = rule.get_security('Hash')
-    if hashplugin and hashplugin.active and hashcode==None:
-        return handlerError(request, 403, "Hash Required")
-    elif hashplugin and hashplugin.active :
-        # TODO: Make salt / secret key a plugin option
-        if hashplugin.perform(document, settings.SECRET_KEY) != hashcode:
-            return HttpResponse('Invalid hashcode')
-    else:
-        pass
-
-    # check against all validator
-    for validator in rule.get_validators():
-        if validator.is_retrieval_action and validator.active:
-            try:
-                validator.perform(request, document)
-            except Exception, e:
-                return handlerError(request, 403, e)
-
-    # check against all securities
-    for security in rule.get_securities():
-        if security.is_retrieval_action and security.active:
-            try:
-                security.perform(request, document)
-            except Exception, e:
-                return handlerError(request, 403, e)
 
     revision = request.GET.get("r", None)
-    storage = rule.get_storage()
-    try:
-        filepath = storage.get(document, revision)
-    except:
-        return handlerError(request, 404, "No file or revision match")
-    new_file = FileConverter(filepath, extension)
-    try:
-        mimetype, content = new_file.convert()
-    except TypeError:
-        return handlerError(request, 405, "Unable to convert to requested format")
+    request_extension = extension
 
-    if extension:
-        filename = "%s.%s" % (document, extension)
+    try:
+        d = DmsDocument(document, revision)
+    except DmsException, (e):
+        return handlerError(request, e.code, e.parameter)
+
+    try:
+        content, filename, mimetype = d.get_file(request, hashcode, request_extension)
+    except DmsException, (e):
+        return handlerError(request, e.code, e.parameter)
+    except Exception, (e):
+        return handlerError(request, 500, e) # Generic Exception. All others should be caught above by DmsException
     else:
-        filename = os.path.basename(filepath)
-        rev_document, rev_extension = os.path.splitext(filename)
-        filename = "%s%s" % (rev_document, rev_extension)
-
-    response = HttpResponse(content, mimetype=mimetype)
-    response["Content-Length"] = len(content)
-    response['Content-Disposition'] = 'filename=%s' % filename
-    return response
+        response = HttpResponse(content, mimetype=mimetype)
+        response["Content-Length"] = len(content)
+        response['Content-Disposition'] = 'filename=%s' % filename
+        return response
 
 
 @staff_member_required
 def revision_document(request, document):
-    rule = Rule.objects.match(document)
-    if not rule:
-        return handlerError(request, 404, "No rule found for file")
 
-    # check against all validator
-    for validator in rule.get_validators():
-        if validator.is_retrieval_action and validator.active:
-            try:
-                validator.perform(request, document)
-            except Exception, e:
-                return handlerError(request, 403, e)
+    try:
+        d = DmsDocument(document)
+    except DmsException, (e):
+        return handlerError(request, e.code, e.parameter)
 
-    # check against all securities
-    for security in rule.get_securities():
-        if security.is_retrieval_action and security.active:
-            try:
-                security.perform(request, document)
-            except Exception, e:
-                return handlerError(request, 403, e)
-
-    storage = rule.get_storage()
-    fileinfo_db = storage.get_meta_data(document)
     extra_context = {
-        'fileinfo_db':fileinfo_db,
-        'document':document,
-
+        'fileinfo_db': d.get_meta_data(request),
+        'document': document,
     }
-    hashplugin = rule.get_security('Hash')
-    if hashplugin and hashplugin.active:
-        extra_context['hash'] = hashplugin.perform(document, settings.SECRET_KEY)
+
+    if d.get_hash():
+        extra_context['hash'] = d.get_hash
 
     return direct_to_template(request, 'fileshare/revision.html',
         extra_context=extra_context)
@@ -169,34 +103,40 @@ def revision_document(request, document):
 def files_index(request):
 
     try:
-        rules = Rule.objects.all()
+        dms = DmsBase()
+    except DmsException, (e):
+        return handlerError(request, e.code, e.parameter)
+
+    try:
+        rules = dms.get_rules()
     except:
         return handlerError(request, 500, "No rules found")
-
-    extra_context = {
-        'rules': rules,
-        }
-
-    return direct_to_template(request, 'fileshare/files_index.html',
-        extra_context=extra_context)
+    else:
+        extra_context = {
+            'rules': rules,
+            }
+    
+        return direct_to_template(request, 'fileshare/files_index.html',
+            extra_context=extra_context)
 
 
 # TODO : Add pagination
 # TODO : This should use the WS API to browse the repository
 @staff_member_required
 def files_document(request, id_rule):
+
     try:
-        rule = Rule.objects.get(id=id_rule)  # we should add the hash to this object :p
-    except:
-        return handlerError(request, 404, "No rule found for given id")
-    document_list = rule.get_storage().get_list(id_rule)
+        dms = DmsRule(id_rule)
+    except DmsException, (e):
+        return handlerError(request, e.code, e.parameter)
+
     rule_context = {
-        'id': rule.id,
-        'name': rule.get_doccode().name,
+        'id': dms.rule.id,
+        'name': dms.rule.get_doccode().name,
         }
     extra_context = {
-        'document_list':document_list,
-        'rule':rule_context,
+        'document_list': dms.get_file_list(),
+        'rule': rule_context,
         }
 
     return direct_to_template(request, 'fileshare/files.html',
@@ -209,7 +149,6 @@ def setting(request, template_name='fileshare/setting.html',
     """
     Setting for adding and editing rule.
     """
-
     rule_list = Rule.objects.all()
     if request.method == 'POST':
         form = SettingForm(request.POST)

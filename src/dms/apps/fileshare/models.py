@@ -3,6 +3,7 @@ import pickle
 
 from django.db import models
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 
 from fileshare.utils import ValidatorProvider, StorageProvider, SecurityProvider, \
     DocCodeProvider
@@ -22,7 +23,9 @@ class RuleManager(models.Manager):
             doccode = rule.get_doccode()
             if doccode and doccode.validate(document):
                 return rule
-        return None
+        #return None
+
+        raise ObjectDoesNotExist('Rule matching query does not exist')
 
 
 class Rule(models.Model):

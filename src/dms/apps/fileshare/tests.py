@@ -142,7 +142,7 @@ class ViewTest(TestCase):
         for r in rules_missing:
             url = '/files/' + str(r) + '/'
             response = self.client.get(url)
-            self.assertContains(response, 'No rule found for given id', status_code=404)
+            self.assertContains(response, 'No rule found for id', status_code=404)
 
 
 class SettingsTest(TestCase):
