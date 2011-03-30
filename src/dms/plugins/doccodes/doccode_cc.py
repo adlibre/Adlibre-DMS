@@ -22,7 +22,7 @@ class DocCode(DocCodeProvider):
 
     @staticmethod
     def split(document):
-        d = [ document[0:4], document[5:9], document[10:13], document[14:18]]
+        d = [ document[0:4], document[5:9], document[10:13], document[14:18] ]
         return d
 
     # Credit: http://en.wikipedia.org/wiki/Luhn_algorithm
