@@ -5,7 +5,7 @@ from django.db import models
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 
-from fileshare.utils import ValidatorProvider, StorageProvider, SecurityProvider, \
+from browser.utils import ValidatorProvider, StorageProvider, SecurityProvider, \
     DocCodeProvider
 
 

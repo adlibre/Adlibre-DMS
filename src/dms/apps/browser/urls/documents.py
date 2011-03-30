@@ -5,7 +5,7 @@ from django.conf.urls.defaults import *
 # DECISION: Need to make adding ruleid option to request url
 # eg /get/{ruleid}/MYDOC.pdf
 
-urlpatterns = patterns('fileshare.views',
+urlpatterns = patterns('browser.views',
      url(r'^get/(?P<document>[\w_-]+)$',
         'get_file', name='get_file_no_hash_and_extension'),
     url(r'^get/(?P<document>[\w_-]+)\.(?P<extension>\w{3})$',

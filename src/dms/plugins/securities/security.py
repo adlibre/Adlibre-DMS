@@ -1,6 +1,6 @@
 from django.contrib.auth.models import Group
 
-from fileshare.utils import SecurityProvider
+from browser.utils import SecurityProvider
 
 
 class NotInSecurityGroupError(Exception):

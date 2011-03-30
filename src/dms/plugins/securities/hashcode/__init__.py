@@ -4,7 +4,7 @@ import hashlib
 from django import forms
 from django.template.loader import render_to_string
 
-from fileshare.utils import SecurityProvider
+from browser.utils import SecurityProvider
 
 path = os.path.abspath(os.path.split(__file__)[0])
 

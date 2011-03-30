@@ -1,5 +1,5 @@
 import re
-from fileshare.utils import DocCodeProvider
+from browser.utils import DocCodeProvider
 
 
 class DocCode(DocCodeProvider):

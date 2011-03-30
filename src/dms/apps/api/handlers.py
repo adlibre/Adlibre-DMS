@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from piston.handler import BaseHandler
 from piston.utils import rc
 
-from fileshare.dms import DmsBase, DmsRule, DmsDocument, DmsException
+from browser.dms import DmsBase, DmsRule, DmsDocument, DmsException
 
 class FileHandler(BaseHandler):
     allowed_methods = ('GET','POST','DELETE',)

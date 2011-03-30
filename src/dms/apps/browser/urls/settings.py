@@ -1,6 +1,6 @@
 from django.conf.urls.defaults import *
 
-urlpatterns = patterns('fileshare.views',
+urlpatterns = patterns('browser.views',
     url(r'^$',
         'setting',
         name='setting'),

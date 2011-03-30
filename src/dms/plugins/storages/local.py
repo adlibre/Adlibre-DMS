@@ -4,8 +4,8 @@ import shutil
 
 from django.conf import settings
 
-from fileshare.models import Rule
-from fileshare.utils import StorageProvider
+from browser.models import Rule
+from browser.utils import StorageProvider
 import json
 
 class NoRevisionError(Exception):

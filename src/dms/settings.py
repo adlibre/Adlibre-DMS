@@ -96,7 +96,7 @@ INSTALLED_APPS = (
     'django.contrib.sites', # required by testing
     'django.contrib.admin',
     'django.contrib.flatpages',
-    'fileshare',
+    'browser',
     'piston',
     'api',
     'docutils',

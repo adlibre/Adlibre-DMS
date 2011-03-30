@@ -8,7 +8,7 @@ from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 
 
-from fileshare.utils import ValidatorProvider
+from browser.utils import ValidatorProvider
 
 
 path = os.path.abspath(os.path.split(__file__)[0])

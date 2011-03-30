@@ -5,10 +5,10 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from adlibre.converter import FileConverter
 
-from fileshare.forms import UploadForm, SettingForm, EditSettingForm
-from fileshare.models import (Rule, available_validators, available_doccodes,
+from browser.forms import UploadForm, SettingForm, EditSettingForm
+from browser.models import (Rule, available_validators, available_doccodes,
     available_storages, available_securities)
-from fileshare.utils import ValidatorProvider, StorageProvider, SecurityProvider, DocCodeProvider
+from browser.utils import ValidatorProvider, StorageProvider, SecurityProvider, DocCodeProvider
 
 
 # for codes to throw http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html

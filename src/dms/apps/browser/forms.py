@@ -2,9 +2,9 @@ import pickle
 
 from django import forms
 
-from fileshare.models import (available_validators, available_securities,
+from browser.models import (available_validators, available_securities,
     available_doccodes, available_storages, Rule)
-from fileshare.utils import DocCodeProvider
+from browser.utils import DocCodeProvider
 
 class UploadForm(forms.Form):
     file  = forms.FileField(widget=forms.FileInput(attrs={'size':40}))
