@@ -1,7 +1,7 @@
 from django.conf.urls.defaults import *
 
 
-urlpatterns = patterns('browser.views',
+urlpatterns = patterns('base.views',
      url(r'^$', 'documentation_index', name='documentation_index'),
      url(r'^about/$', 'about_documentation', name='about_documentation'),
      url(r'^api/$', 'api_documentation', name='api_documentation'),

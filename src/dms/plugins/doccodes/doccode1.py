@@ -1,5 +1,5 @@
 import re
-from browser.utils import DocCodeProvider
+from base.utils import DocCodeProvider
 
 
 class DocCode(DocCodeProvider):

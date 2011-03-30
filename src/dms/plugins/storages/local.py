@@ -4,8 +4,8 @@ import shutil
 
 from django.conf import settings
 
-from browser.models import Rule
-from browser.utils import StorageProvider
+from base.models import Rule
+from base.utils import StorageProvider
 import json
 
 class NoRevisionError(Exception):

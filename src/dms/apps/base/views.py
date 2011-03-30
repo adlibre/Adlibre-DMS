@@ -10,11 +10,11 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.template import RequestContext, loader
 
-from browser.forms import UploadForm, SettingForm, EditSettingForm
-from browser.models import (Rule, available_validators, available_doccodes,
+from base.forms import UploadForm, SettingForm, EditSettingForm
+from base.models import (Rule, available_validators, available_doccodes,
     available_storages, available_securities)
 
-from browser.dms import DmsBase, DmsRule, DmsDocument, DmsException
+from base.dms import DmsBase, DmsRule, DmsDocument, DmsException
 
 
 def handlerError(request, httpcode, message):
@@ -30,7 +30,7 @@ def handlerError(request, httpcode, message):
 # FIXME: Need to fix the @staff_required decorator to redirect to standard login form
 # I don't think we want to necessarily use the django admin login.
 @login_required
-def upload(request, template_name='browser/upload.html', extra_context={}):
+def upload(request, template_name='base/upload.html', extra_context={}):
     """
     Upload file processing. Uploaded file will be check against available rules to
     determine storage, validator, and security plugins.
@@ -95,7 +95,7 @@ def revision_document(request, document):
     if d.get_hash():
         extra_context['hash'] = d.get_hash
 
-    return direct_to_template(request, 'browser/revision.html',
+    return direct_to_template(request, 'base/revision.html',
         extra_context=extra_context)
 
 
@@ -116,7 +116,7 @@ def files_index(request):
             'rules': rules,
             }
     
-        return direct_to_template(request, 'browser/files_index.html',
+        return direct_to_template(request, 'base/files_index.html',
             extra_context=extra_context)
 
 
@@ -139,12 +139,12 @@ def files_document(request, id_rule):
         'rule': rule_context,
         }
 
-    return direct_to_template(request, 'browser/files.html',
+    return direct_to_template(request, 'base/files.html',
         extra_context=extra_context)
 
 
 @staff_member_required
-def setting(request, template_name='browser/setting.html',
+def setting(request, template_name='base/setting.html',
             extra_context={}):
     """
     Setting for adding and editing rule.
@@ -170,7 +170,7 @@ def setting(request, template_name='browser/setting.html',
 
 
 @staff_member_required
-def edit_setting(request, rule_id, template_name='browser/edit_setting.html',
+def edit_setting(request, rule_id, template_name='base/edit_setting.html',
                    extra_context={}):
     rule = get_object_or_404(Rule, id=rule_id)
     initial = {
@@ -232,7 +232,7 @@ def toggle_validators_plugin(request, rule_id, plugin_index):
 
 
 @staff_member_required
-def plugins(request, template_name='browser/plugins.html',
+def plugins(request, template_name='base/plugins.html',
             extra_context={}):
     """
     List of available plugins
@@ -249,7 +249,7 @@ def plugins(request, template_name='browser/plugins.html',
 
 @staff_member_required
 def plugin_setting(request, rule_id, plugin_type, plugin_index,
-                   template_name='browser/plugin_setting.html',
+                   template_name='base/plugin_setting.html',
                    extra_context={}):
     """
     Some plugins have configuration and the configuration can be different for
@@ -298,20 +298,20 @@ def plugin_action(request, rule_id, plugin_type, plugin_index, action,
 
 
 def index(request):
-    return direct_to_template(request, 'browser/index.html')
+    return direct_to_template(request, 'base/index.html')
 
 
 def documentation_index(request):
-    return direct_to_template(request, 'browser/documentation_index.html')
+    return direct_to_template(request, 'base/documentation_index.html')
 
 
 def about_documentation(request):
-    return direct_to_template(request, 'browser/about_documentation.html')
+    return direct_to_template(request, 'base/about_documentation.html')
 
 
 def api_documentation(request):
-    return direct_to_template(request, 'browser/api_documentation.html')
+    return direct_to_template(request, 'base/api_documentation.html')
 
 
 def technical_documentation(request):
-    return direct_to_template(request, 'browser/technical_documentation.html')
+    return direct_to_template(request, 'base/technical_documentation.html')

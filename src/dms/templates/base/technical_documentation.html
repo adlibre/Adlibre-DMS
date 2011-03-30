@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 {% load markup %}
 
-{% block title %}About{% endblock %}
+{% block title %}Technical Documentation{% endblock %}
 
 {% block content %}
 {% filter restructuredtext %}
-{% include "browser/about_documentation.rst" %}
+{% include "base/technical_documentation.rst" %}
 {% endfilter %}
 {% endblock %}
 

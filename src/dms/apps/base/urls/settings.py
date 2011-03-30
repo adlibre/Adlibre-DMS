@@ -1,6 +1,6 @@
 from django.conf.urls.defaults import *
 
-urlpatterns = patterns('browser.views',
+urlpatterns = patterns('base.views',
     url(r'^$',
         'setting',
         name='setting'),
