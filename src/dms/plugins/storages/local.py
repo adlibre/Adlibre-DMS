@@ -15,7 +15,7 @@ class NoRevisionError(Exception):
 
 def naturalsort(L, reverse=False):
     """
-    Natural Sort
+    Natural Language Sort
     """
     import re
 
@@ -42,9 +42,9 @@ def splitdir(document):
 
 
 class Local(StorageProvider):
+    
     name = "Local Storage"
     description = "Local storage plugin"
-
 
     @staticmethod
     def store(f, root=settings.DOCUMENT_ROOT):
@@ -149,12 +149,12 @@ class Local(StorageProvider):
         else:
             return 0
 
-    """
-    Return List of DocCodes in the repository for a given rule
-    """
+
     @staticmethod
     def get_list(id_rule, root=settings.DOCUMENT_ROOT):
-
+        """
+        Return List of DocCodes in the repository for a given rule
+        """
         directory = "%s/%s" % (root, id_rule)
 
         # Iterate through the directory hierarchy looking for metadata containing dirs.
@@ -170,7 +170,4 @@ class Local(StorageProvider):
                 if extension == '.json':
                     doccodes.append(doc)
         return naturalsort(doccodes)
-
-
-
 

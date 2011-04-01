@@ -32,7 +32,8 @@ class DmsBase():
             plugins.append(plugin)
         for plugin in available_securities():
             plugins.append(plugin)
-            # TODO: Add available storages
+        for plugin in available_storages():
+            plugins.append(plugin)    
         return plugins
 
     def get_rules(self):
@@ -106,12 +107,12 @@ class DmsDocument():
         for validator in self.rule.get_validators():
             if validator.is_retrieval_action and validator.active and is_retrieval:
                 try:
-                    validator.perform(request, self.document)
+                    return validator.perform(request, self.document)
                 except:
                     raise
             elif validator.is_storing_action and validator.active and not is_retrieval:
                 try:
-                    validator.perform(request, self.document)
+                    return validator.perform(request, self.document)
                 except:
                     raise
 
@@ -126,7 +127,7 @@ class DmsDocument():
                     raise
             elif security.is_storing_action and security.active and not is_retrieval:
                 try:
-                    security.perform(request, self.document)
+                    return security.perform(request, self.document)
                 except:
                     raise
 

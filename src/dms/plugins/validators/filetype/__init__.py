@@ -15,7 +15,7 @@ path = os.path.abspath(os.path.split(__file__)[0])
 
 class FileTypeForm(forms.Form):
 
-
+    # FIXME: Why are we writing mimetypes.pickle in current dir?
     def __init__(self, instance, *args, **kwargs):
         self.instance = instance
         try:
@@ -26,6 +26,9 @@ class FileTypeForm(forms.Form):
             mimetypes = [
                 ('application/pdf', 'pdf'),
                 ('image/tiff', 'tiff'),
+                ('image/jpeg', 'jpg'),
+                ('image/gif', 'gif'),
+                ('image/png', 'png'),
                 ('text/plain', 'txt'),
                 ('application/msword', 'doc'),
                 ('application/vnd.ms-excel', 'xls'),
