@@ -38,9 +38,11 @@ Adlibre can provide assistance with:
 License
 -------
 
-Adlibre DMS is open source software and is provided under the terms of 3-clause BSD License.
+Adlibre DMS is open source software and is provided under the terms of an OSI_ approved 3-clause BSD License.
 
 For full details please see the LICENSE file contained within the distribution archive.
 
 
 .. _Adlibre: http://www.adlibre.com.au/
+
+.. _OSI: http://www.opensource.org/licenses/bsd-license.php
