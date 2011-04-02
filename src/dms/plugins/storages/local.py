@@ -32,7 +32,9 @@ def naturalsort(L, reverse=False):
 
 
 def filecount(directory):
-    # return the number of files in directory directory
+    """
+    Count the number of files in a directory
+    """
     try:
         return len([f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))])
     except Exception, e:
