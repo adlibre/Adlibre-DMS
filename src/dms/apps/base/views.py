@@ -23,6 +23,9 @@ from base.models import (Rule, available_validators, available_doccodes,
 
 from base.dms import DmsBase, DmsRule, DmsDocument, DmsException
 
+from base.utils import ValidatorProvider, StorageProvider, SecurityProvider, \
+    DocCodeProvider
+
 
 def handlerError(request, httpcode, message):
     t = loader.get_template(str(httpcode)+'_custom.html')
