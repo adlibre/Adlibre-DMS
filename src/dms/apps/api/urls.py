@@ -1,3 +1,10 @@
+"""
+Module: DMS API Django URLs
+Project: Adlibre DMS
+Copyright: Adlibre Pty Ltd 2011
+License: See LICENSE for license information
+"""
+
 from django.conf.urls.defaults import *
 from piston.resource import Resource
 from handlers import FileHandler, FileListHandler, RevisionCountHandler, RulesHandler, RulesDetailHandler, PluginsHandler

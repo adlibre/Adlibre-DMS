@@ -1,3 +1,10 @@
+"""
+Module: DMS Utility Library
+Project: Adlibre DMS
+Copyright: Adlibre Pty Ltd 2011
+License: See LICENSE for license information
+"""
+
 class DocCodePluginMount(type):
     def __init__(cls, name, bases, attrs):
         if not hasattr(cls, 'plugins'):

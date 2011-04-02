@@ -1,3 +1,10 @@
+"""
+Module: DMS File Type Converter Library
+Project: Adlibre DMS
+Copyright: Adlibre Pty Ltd 2011
+License: See LICENSE for license information
+"""
+
 import os
 from subprocess import Popen, PIPE
 import mimetypes

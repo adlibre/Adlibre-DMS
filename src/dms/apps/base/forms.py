@@ -1,3 +1,10 @@
+"""
+Module: Base Django Forms
+Project: Adlibre DMS
+Copyright: Adlibre Pty Ltd 2011
+License: See LICENSE for license information
+"""
+
 import pickle
 
 from django import forms

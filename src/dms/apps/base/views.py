@@ -1,3 +1,10 @@
+"""
+Module: DMS Base Django Views
+Project: Adlibre DMS
+Copyright: Adlibre Pty Ltd 2011
+License: See LICENSE for license information
+"""
+
 import os
 import pickle
 
