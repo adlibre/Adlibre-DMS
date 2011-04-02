@@ -159,11 +159,12 @@ class DmsDocument():
         self.check_hash(hashcode) # FIXME: should hashplugin be validated as part of the validate request phase???
 
         try:
-            filepath = self.storage.get(self.document, self.revision)
+            filepath = self.storage.retrieve(self.document, self.revision)
         except:
             raise DmsException('No file or revision match', 404)
 
         # Convert the file if necessary
+        # TODO: This should be a transport plugin.
         new_file = FileConverter(filepath, request_extension)
         try:
             mimetype, content = new_file.convert()

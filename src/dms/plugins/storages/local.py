@@ -91,7 +91,7 @@ class Local(StorageProvider):
 
 
     @staticmethod
-    def get(filename, revision=None, root=settings.DOCUMENT_ROOT):
+    def retrieve(filename, revision=None, root=settings.DOCUMENT_ROOT):
         document, extension = os.path.splitext(filename)
         extension = extension.strip(".")
         directory = splitdir(document)

@@ -25,8 +25,8 @@ class LocalCaching(Local):
         return super(LocalCaching, self).store(filename, root)
 
 
-    def get(self, filename, revision=None, root=settings.DOCUMENT_ROOT):
-        return super(LocalCaching, self).get(filename, revision, root)
+    def retrieve(self, filename, revision=None, root=settings.DOCUMENT_ROOT):
+        return super(LocalCaching, self).retrieve(filename, revision, root)
 
 
     def delete(self, filename, revision=None, root=settings.DOCUMENT_ROOT):
