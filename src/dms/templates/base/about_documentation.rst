@@ -31,14 +31,14 @@ Full commercial support is available from Adlibre_.
 Adlibre can provide assistance with:
 
 * implementation
-* integratation
+* integration
 * modifications and customisations.
 
 
 License
 -------
 
-Adlibre DMS is provided under the terms of XXXX License.
+Adlibre DMS is open source software and is provided under the terms of 3-clause BSD License.
 
 For full details please see the LICENSE file contained within the distribution archive.
 
