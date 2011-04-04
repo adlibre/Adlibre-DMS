@@ -97,6 +97,8 @@ table td ul { margin:0px; }
     width:700px;
     margin:0px auto;
     padding-bottom: 50px; /* prevent overlap with footer */
+    padding-left: 25px;
+    padding-right: 25px;
 }
 
 #content {}
