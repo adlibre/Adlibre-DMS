@@ -1,9 +1,8 @@
-{% extends 'site_base.html' %}
+{% extends THEME_TEMPLATE %}
 
 {% block title %}403 Access Denied{% endblock %}
 
 {% block content %}
-
 <h1>Access Denied: {{ message }}.</h1>
 <p>I'm sorry but we couldn't give you what you wanted.</p>
 <p>Request path: {{ request_path }}</p>

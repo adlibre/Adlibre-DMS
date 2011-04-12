@@ -69,6 +69,18 @@ TEMPLATE_LOADERS = (
 #     'django.template.loaders.eggs.load_template_source',
 )
 
+TEMPLATE_CONTEXT_PROCESSORS = (
+    # default
+    'django.contrib.auth.context_processors.auth',
+    'django.core.context_processors.debug',
+    'django.core.context_processors.i18n',
+    'django.core.context_processors.media',
+    'django.contrib.messages.context_processors.messages',
+    # custom
+    'dms.context_processors.theme_name',
+    'dms.context_processors.theme_template_base',
+)
+
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -113,3 +125,6 @@ except ImportError:
 APPEND_SLASH = False # Stop Django from adding slashes to urls
 
 RESTRUCTUREDTEXT_FILTER_SETTINGS = { 'doctitle_xform': 0, } # stop first heading being munged for page title.
+
+# name of template theme, used by context_processors.py.
+THEME_NAME = 'adlibre' # 'adlibre' or 'basic'

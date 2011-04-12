@@ -3,53 +3,24 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<title>{% block title %}{% endblock %} - Adlibre DMS</title>
-	<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/style.css" />
+	<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}themes/{{ THEME_NAME }}/style.css" />
     <link rel="shortcut icon" href="{{ MEDIA_URL }}favicon.ico" />
 </head>
 <body>
 <div id="page_wrapper">
+    <div id="logo_wrapper">
+        {% block logo %}{% endblock %}
+    </div>
     <div id="header">
-        <span><a href="/">Home</a></span>
-        {% if user.is_authenticated %}
-        Logged in as {{ user }}
-        {% if user.is_staff %}
-        &middot; <a href="{% url files_index %}">Files</a>
-        &middot; <a href="{% url setting %}">Settings</a>
-        &middot; <a href="{% url plugins %}">Plugins</a>
-        {% endif %}
-        &middot; <a href="{% url logout %}">Log out</a>
-        {% else %}
-        Logged out
-        &middot; <a href="{% url login %}">Log in</a>
-        {% endif %}
+        {% block header %}{% endblock %}
     </div>
     <div id="container">
-        {% if messages %}
-        <ul class="messages">
-            {% for message in messages %}
-            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-            {% endfor %}
-        </ul>
-        {% endif %}
-        <div id="content">
-            {% block content %}
-            {% endblock %}
-        </div>
+        {% block body %}{% endblock %}
     </div>
     <div id="footer">
-        <p>
-            Adlibre DMS - &copy; Adlibre {% now "Y" %}
-            &middot; <a href="{% url about_documentation %}">About</a>
-            &middot; <a href="{% url documentation_index %}">Docs</a>
-            &middot; <a href="{% url upload %}">Upload</a>
-            <span>Version: 1.0 Alpha</span>
-        </p>
+        {% block footer %}{% endblock %}
 	</div>
-	{% block javascript %}
-	<script type="text/javascript" language="javascript" charset="utf-8" src="{{ MEDIA_URL }}js/jquery.tools.min.js"></script>
-	<script type="text/javascript" language="javascript" charset="utf-8" src="{{ MEDIA_URL }}js/script.js"></script>
-	{% endblock %}
+	{% block javascript %}{% endblock %}
 </div>
 </body>
 </html>
-

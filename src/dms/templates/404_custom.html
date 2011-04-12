@@ -1,9 +1,8 @@
-{% extends 'site_base.html' %}
+{% extends THEME_TEMPLATE %}
 
 {% block title %}404 File Not Found{% endblock %}
 
 {% block content %}
-
 <h1>Error: {{ message }}.</h1>
 <p>I'm sorry we could not fulfill your request.</p>
 <p>Request path: {{ request_path }}</p>

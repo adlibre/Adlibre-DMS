@@ -1,0 +1,48 @@
+{% extends 'site_base.html' %}
+
+{% block logo %}{% endblock %}
+
+{% block header %}
+    <span><a href="/">Home</a></span>
+    {% if user.is_authenticated %}
+    Logged in as {{ user }}
+    {% if user.is_staff %}
+    &middot; <a href="{% url files_index %}">Files</a>
+    &middot; <a href="{% url setting %}">Settings</a>
+    &middot; <a href="{% url plugins %}">Plugins</a>
+    {% endif %}
+    &middot; <a href="{% url logout %}">Log out</a>
+    {% else %}
+    Logged out
+    &middot; <a href="{% url login %}">Log in</a>
+    {% endif %}
+{% endblock %}
+
+{% block body %}
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    <div id="content">
+        {% block content %}
+        {% endblock %}
+    </div>
+{% endblock %}
+
+{% block footer %}
+    <p>
+        Adlibre DMS - &copy; Adlibre {% now "Y" %}
+        &middot; <a href="{% url about_documentation %}">About</a>
+        &middot; <a href="{% url documentation_index %}">Docs</a>
+        &middot; <a href="{% url upload %}">Upload</a>
+        <span>Version: 1.0 Alpha. {% if user.is_authenticated %}Logged in as {{ user }}{% else %}Logged out{% endif %}.</span>
+    </p>
+{% endblock %}
+
+{% block javascript %}
+    <script type="text/javascript" language="javascript" charset="utf-8" src="{{ MEDIA_URL }}js/jquery.tools.min.js"></script>
+    <script type="text/javascript" language="javascript" charset="utf-8" src="{{ MEDIA_URL }}js/script.js"></script>
+{% endblock %}

@@ -1,7 +1,10 @@
-{% extends "site_base.html" %}
+{% extends THEME_TEMPLATE %}
+
 {% load i18n %}
 
 {% block title %}Login{% endblock %}
+
+{% block body_class %}login{% endblock %}
 
 {% block content %}
 <h1>Login</h1>
