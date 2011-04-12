@@ -1,11 +1,10 @@
-{% extends 'site_base.html' %}
+{% extends THEME_TEMPLATE %}
 
 {% block title %}Settings{% endblock %}
 
+{% block body_class %}settings{% endblock %}
 
 {% block content %}
-
-
 <div>
     <h1>Settings</h1>
       <form action="" method="post" id="new-rule-form" {% if not form.errors %}class="hide"{% endif %}>
@@ -74,7 +73,6 @@
 
     <a href="" id="new-rule">Add new rule</a>
 
-
-	</div>
+</div>
 {% endblock %}
 
