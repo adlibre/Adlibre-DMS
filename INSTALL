@@ -1,4 +1,38 @@
-On OSX need to install the following in your base OS
+============
+Installation
+============
+
+Adlibre DMS can be easily installed on any operating system provided that a recent copy of a Python 2.6 interpreter is
+available as well as any dependent system libraries.
+
+Linux Requirements
+------------------
+
+Installation under Linux is the most straight forward.
+
+The following system libraries are required:
+
+* Python 2.6
+* libtiff,
+* poppler,
+* a2ps,
+* ghostscript
+
+
+Supported Linux Distributions:
+
+* Debian
+* Ubuntu
+* CentOS 5 / Red Hat 5
+
+TODO: Write more specific deployment documentation.
+
+OS X Requirements
+-----------------
+
+On OS X need the following will need to be installed using a 3rd party port / package manager:
+
+For 'magic' based file type validation we require the following:
 
 # port install perl5
 # port install p5-file-libmagic
@@ -10,11 +44,21 @@ and the following for converter.py to function (libtiff, poppler, a2ps, ghostscr
 # port install a2ps
 # port install ghostscript
 
-Standard deployment with virtualenv:
 
-# Might need to specify Python version if more than one installed eg. --python /usr/bin/python2.6
-virtualenv --no-site-packages dms
-cd dms/
-workon dms
-svn co https://svn.adlibre.net/projects/fasttrack/HEAD/ ./
-pip install -r deployment/pip-req.txt
+Windows
+-------
+
+For commercial Windows installation support. Please enquire at http://www.adlibre.com.au/
+
+Deployment
+----------
+
+We recommend deployment with _virtualenv_:
+
+You will need to specify Python version if more than one installed eg. --python /usr/bin/python2.6
+
+# virtualenv --no-site-packages dms
+# cd dms/
+# workon dms
+# svn co https://svn.adlibre.net/projects/fasttrack/HEAD/ ./
+# pip install -r deployment/pip-req.txt
