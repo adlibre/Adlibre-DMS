@@ -6,7 +6,7 @@
 	<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}themes/{{ THEME_NAME }}/style.css" />
     <link rel="shortcut icon" href="{{ MEDIA_URL }}favicon.ico" />
 </head>
-<body>
+<body class="{% block body_class %}{% endblock %}">
 <div id="page_wrapper">
     <div id="logo_wrapper">
         {% block logo %}{% endblock %}
