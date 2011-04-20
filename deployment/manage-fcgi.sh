@@ -16,12 +16,22 @@ SOCKET="$PROJDIR/${PROJNAME}.sock"
 
 ############################################
 
+ACTION=$1
+SETTINGS=$2
+
 # Functions
 function startit {
-    echo "Starting ${PROJNAME}:"
-    . ${BINDIR}/activate
-    python ${PROJDIR}/manage.py runfcgi protocol=scgi socket=$SOCKET pidfile=$PIDFILE
-    RC=$?
+    if [ "SETTINGS" == "" ]; then
+        echo "Starting ${PROJNAME}:"
+        . ${BINDIR}/activate
+        python ${PROJDIR}/manage.py runfcgi protocol=scgi socket=$SOCKET pidfile=$PIDFILE
+        RC=$?
+    else
+        echo "Starting ${PROJNAME} with ${SETTINGS}:"
+        . ${BINDIR}/activate
+        python ${PROJDIR}/manage.py runfcgi protocol=scgi socket=$SOCKET pidfile=$PIDFILE --settings=${SETTINGS}
+        RC=$?
+    fi
 }
 
 function stopit {
@@ -44,7 +54,7 @@ function status {
 }
 
 function showUsage {
-    echo "Usage: manage-fcgi.sh {start|stop|status|restart}"
+    echo "Usage: manage-fcgi.sh {start|stop|status|restart} <settings_file>"
 }
 
 # check that we have required parameters
