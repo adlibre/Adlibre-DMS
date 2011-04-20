@@ -22,26 +22,28 @@ SETTINGS=$2
 # Functions
 function startit {
     if [ "SETTINGS" == "" ]; then
-        echo "Starting ${PROJNAME}:"
+        echo -n"Starting ${PROJNAME}: "
         . ${BINDIR}/activate
         python ${PROJDIR}/manage.py runfcgi protocol=scgi socket=$SOCKET pidfile=$PIDFILE
         RC=$?
+        echo "Started"
     else
-        echo "Starting ${PROJNAME} with ${SETTINGS}:"
+        echo -n "Starting ${PROJNAME} with ${SETTINGS}: "
         . ${BINDIR}/activate
         python ${PROJDIR}/manage.py runfcgi protocol=scgi socket=$SOCKET pidfile=$PIDFILE --settings=${SETTINGS}
         RC=$?
+        echo "Started"
     fi
 }
 
 function stopit {
-    echo "Stopping ${PROJNAME}:"
+    echo -n "Stopping ${PROJNAME}: "
 
     if [ -f $PIDFILE ]; then
         kill `cat -- $PIDFILE` &&
         rm -f -- $PIDFILE &&
         RC=$?
-        echo "Process Terminated"
+        echo "Process(s) Terminated."
     else
         echo "PIDFILE not found. Killing likely processes."
         kill `pgrep -f "python ${PROJDIR}/manage.py"`
