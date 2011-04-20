@@ -9,7 +9,8 @@ PROJNAME='dms'
 WEB_USER='wwwpub'
 
 CWD=$(cd ${0%/*} && pwd -P)
-PROJDIR=$(cd $CWD/../src/${PROJNAME}/ && pwd -P) # Root of our project source
+PROJDIR=$(cd $CWD/../ && pwd -P) # Root of our project
+SRCDIR=$(cd $CWD/../src/${PROJNAME}/ && pwd -P) # Path to manage.py
 BINDIR=$(cd $CWD/../bin/ && pwd -P) # Path to activate / virtualenv
 PIDFILE="$PROJDIR/${PROJNAME}.pid"
 SOCKET="$PROJDIR/${PROJNAME}.sock"
@@ -24,13 +25,13 @@ function startit {
     if [ "SETTINGS" == "" ]; then
         echo -n"Starting ${PROJNAME}: "
         . ${BINDIR}/activate
-        python ${PROJDIR}/manage.py runfcgi protocol=scgi socket=$SOCKET pidfile=$PIDFILE
+        python ${SRCDIR}/manage.py runfcgi protocol=scgi socket=$SOCKET pidfile=$PIDFILE
         RC=$?
         echo "Started."
     else
         echo -n "Starting ${PROJNAME} with ${SETTINGS}: "
         . ${BINDIR}/activate
-        python ${PROJDIR}/manage.py runfcgi protocol=scgi socket=$SOCKET pidfile=$PIDFILE --settings=${SETTINGS}
+        python ${SRCDIR}/manage.py runfcgi protocol=scgi socket=$SOCKET pidfile=$PIDFILE --settings=${SETTINGS}
         RC=$?
         echo "Started."
     fi
@@ -46,7 +47,7 @@ function stopit {
         echo "Process(s) Terminated."
     else
         echo "PIDFILE not found. Killing likely processes."
-        kill `pgrep -f "python ${PROJDIR}/manage.py"`
+        kill `pgrep -f "python ${SRCDIR}/manage.py"`
         exit 128
     fi
 }
