@@ -25,13 +25,13 @@ function startit {
     if [ "SETTINGS" == "" ]; then
         echo -n"Starting ${PROJNAME}: "
         . ${BINDIR}/activate
-        python ${SRCDIR}/manage.py runfcgi protocol=scgi socket=$SOCKET pidfile=$PIDFILE
+        python ${SRCDIR}/manage.py runfcgi socket=$SOCKET pidfile=$PIDFILE
         RC=$?
         echo "Started."
     else
         echo -n "Starting ${PROJNAME} with ${SETTINGS}: "
         . ${BINDIR}/activate
-        python ${SRCDIR}/manage.py runfcgi protocol=scgi socket=$SOCKET pidfile=$PIDFILE --settings=${SETTINGS}
+        python ${SRCDIR}/manage.py runfcgi socket=$SOCKET pidfile=$PIDFILE --settings=${SETTINGS}
         RC=$?
         echo "Started."
     fi
