@@ -10,6 +10,7 @@ from subprocess import Popen, PIPE
 import mimetypes
 
 # FIXME: All of these converters write their temp file into the repository! This is a bad idea.
+# FIXME: These should work with a fileobject, not filepath!
 
 class FileConverter:
     """
