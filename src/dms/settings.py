@@ -76,9 +76,10 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.i18n',
     'django.core.context_processors.media',
     'django.contrib.messages.context_processors.messages',
-    # custom
-    'dms.context_processors.theme_name',
-    'dms.context_processors.theme_template_base',
+     # Adlibre DMS custom
+     'dms.context_processors.demo',
+     'dms.context_processors.theme_name',
+     'dms.context_processors.theme_template_base',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -128,3 +129,5 @@ RESTRUCTUREDTEXT_FILTER_SETTINGS = { 'doctitle_xform': 0, } # stop first heading
 
 # name of template theme, used by context_processors.py.
 THEME_NAME = 'adlibre' # 'adlibre' or 'basic'
+
+DEMO = True

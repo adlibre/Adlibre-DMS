@@ -5,3 +5,8 @@ def theme_template_base(context):
 
 def theme_name(context):
     return {'THEME_NAME': settings.THEME_NAME}
+
+def demo(context):
+    """ Returns Demo Mode Boolean Context Variable """
+    return {'DEMO': settings.DEMO}
+
