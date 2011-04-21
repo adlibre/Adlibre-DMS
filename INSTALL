@@ -62,7 +62,7 @@ We recommend deployment with _virtualenv_:
 
 You will need to specify Python version if more than one installed eg. --python /usr/bin/python2.6
 
-# virtualenv --no-site-packages dms
+# mkvirtualenv --no-site-packages dms
 # workon dms
 # cdvirtualenv
 # svn co https://svn.adlibre.net/projects/fasttrack/HEAD/ ./
