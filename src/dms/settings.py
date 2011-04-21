@@ -7,7 +7,7 @@ import socket
 PROJECT_PATH = os.path.abspath(os.path.split(__file__)[0])
 sys.path.append(os.path.join(PROJECT_PATH, 'apps'))
 sys.path.append(os.path.join(PROJECT_PATH, 'libraries'))
-sys.path.append(os.path.join(PROJECT_PATH, 'plugins'))
+sys.path.append(os.path.join(PROJECT_PATH, 'dmsplugins'))
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -98,7 +98,7 @@ TEMPLATE_DIRS = (
     os.path.join(PROJECT_PATH, 'templates')
 )
 
-PLUGIN_DIR = os.path.join(PROJECT_PATH, 'plugins')
+PLUGIN_DIR = os.path.join(PROJECT_PATH, 'dmsplugins')
 
 INSTALLED_APPS = (
     'django.contrib.auth',
