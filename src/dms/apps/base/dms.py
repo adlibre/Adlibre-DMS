@@ -65,18 +65,14 @@ class DmsRule():
         self.storage = self.rule.get_storage()
         self.security = self.rule.get_securities()
 
-    
     def get_setting(self):
         pass
 
-    
     def set_setting(self):
         pass
 
-
     def get_file_list(self):
         return self.rule.get_storage().get_list(self.id_rule)
-
 
     def get_rule_details(self):
         # FIXME: I don't like how this is written, but it will do for now
@@ -89,6 +85,7 @@ class DmsRule():
         rule.validators = ",".join([validator.name for validator in validators])
 
         return rule
+
 
 class DmsDocument():
     """
@@ -108,8 +105,7 @@ class DmsDocument():
         self.storage = self.rule.get_storage()
         self.security = self.rule.get_securities()
 
-
-    def check_request(self, request, is_retrieval=True):
+    def _check_request(self, request, is_retrieval=True):
         # check against all validator
         for validator in self.rule.get_validators():
             if validator.is_retrieval_action and validator.active and is_retrieval:
@@ -123,8 +119,7 @@ class DmsDocument():
                 except:
                     raise
 
-
-    def check_security(self, request, is_retrieval=True):
+    def _check_security(self, request, is_retrieval=True):
         # check against all securities
         for security in self.rule.get_securities():
             if security.is_retrieval_action and security.active and is_retrieval:
@@ -138,8 +133,7 @@ class DmsDocument():
                 except:
                     raise
 
-
-    def check_hash(self, hashcode):
+    def _check_hash(self, hashcode):
         # check hashcode
         if self.hashplugin and self.hashplugin.active and hashcode==None:
             raise DmsException('Hash Required', 403)
@@ -150,22 +144,21 @@ class DmsDocument():
         else:
             pass
 
-
     def get_file(self, request, hashcode=None, request_extension=None):
 
         # FIXME: Do these raise an exception on failure, or return False?
-        self.check_security(request, True)
-        self.check_request(request, True)
-        self.check_hash(hashcode) # FIXME: should hashplugin be validated as part of the validate request phase???
+        self._check_security(request, True)
+        self._check_request(request, True)
+        self._check_hash(hashcode) # FIXME: should hashplugin be validated as part of the validate request phase???
 
         try:
-            filepath = self.storage.retrieve(self.document, self.revision)
+            file_obj = self.storage.retrieve(self.document, self.revision)
         except:
             raise DmsException('No file or revision match', 404)
 
         # Convert the file if necessary
         # TODO: This should be a transport plugin.
-        new_file = FileConverter(filepath, request_extension)
+        new_file = FileConverter(file_obj, request_extension)
         try:
             mimetype, content = new_file.convert()
         except TypeError:
@@ -174,20 +167,20 @@ class DmsDocument():
         if request_extension:
             filename = "%s.%s" % (self.document, request_extension)
         else:
-            filename = os.path.basename(filepath)
+            filename = os.path.basename(file_obj.name)
             rev_document, rev_extension = os.path.splitext(filename)
             filename = "%s%s" % (rev_document, rev_extension)
 
-        return (content, filename, mimetype)
+        file_obj.close()
 
+        return (content, filename, mimetype)
 
     def get_meta_data(self, request):
 
-        self.check_security(request, True)
-        self.check_request(request, True)
+        self._check_security(request, True)
+        self._check_request(request, True)
 
         return self.storage.get_meta_data(self.document) # FIXME, we shouldn't need to pass document to storage
-
 
     def get_hash(self):
 
@@ -196,26 +189,25 @@ class DmsDocument():
         else:
             return None
 
-
-    def set_file(self, request, file_content, new_revision=True, append_content=False):
+    def set_file(self, request, file_obj, new_revision=True, append_content=False):
         """
         Upload file
         """
         # new_revision = False = overwrite if exists,
         # new_revision = True = make backup revision
 
-        self.check_security(request, False)
-        self.check_request(request, False)
+        self._check_security(request, False)
+        self._check_request(request, False)
 
-        return self.storage.store(file_content)
+        filename = file_obj.name
 
+        return self.storage.store(file_obj, filename) #InMemoryUploadedFile
 
     def delete_file(self):
 
         # TODO: Add security checks here.
 
         return self.storage.delete(self.document, self.revision)
-
 
     def set_meta_data(self):
         pass
