@@ -11,14 +11,15 @@
     {% if DEMO %}
     <h2>Demo</h2>
     <p>This is a fully functioning demonstration instance.</p>
+    {% if not user.is_authenticated %}
     <p>You can login to the administrative functions with the following credentials:</p>
     <ul>
         <li>Username: <em>admin</em></li>
         <li>Password: <em>admin</em></li>
     </ul>
+    {% endif %}
     <p>This instance refreshes every 30 minutes. So feel free to make changes to the configuration or upload documents using the sample <a href="/upload/">form</a> or via the webservices <a href="/docs/api/">API</a>.</p>
     <p>Please let us know your <a href="http://www.adlibre.com.au/contact/">feedback</a>.</p>
     {% endif %}
 
 {% endblock %}
-
