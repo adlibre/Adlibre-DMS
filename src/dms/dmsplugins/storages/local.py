@@ -56,16 +56,20 @@ class Local(StorageProvider):
     description = "Local storage plugin"
 
     @staticmethod
-    def store(f, root=settings.DOCUMENT_ROOT):
-        filename = f.name
+    def store(file_obj, filename, root=settings.DOCUMENT_ROOT):
         document, extension = os.path.splitext(filename)
         extension = extension.strip(".")
         directory = splitdir(document)
+
         if root:
             directory = "%s/%s" % (root, directory)
+        else:
+            raise Exception('Root not specified')
+        
         if not os.path.exists(directory):
             os.makedirs(directory)
 
+        # TODO: metadata should be written in separate method
         json_file = '%s/%s.json' % (directory, document)
         if os.path.exists(json_file):
             json_handler = open(json_file , mode='r+')
@@ -85,8 +89,8 @@ class Local(StorageProvider):
         json.dump(fileinfo_db, json_handler)
 
         destination = open('%s/%s' % (directory, fileinfo['name']), 'wb+')
-        for chunk in f.chunks():
-            destination.write(chunk)
+        file_obj.seek(0)
+        destination.write(file_obj.read())
         destination.close()
 
 
@@ -112,7 +116,8 @@ class Local(StorageProvider):
         else:
             raise NoRevisionError # TODO: This should NoDocumentExists exception
         fullpath = '%s/%s' % (directory, fileinfo['name'])
-        return fullpath
+        file_obj = open(fullpath, 'rb')
+        return file_obj
 
 
     # TODO: Extend to handle revisions
