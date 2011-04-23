@@ -12,10 +12,12 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from adlibre.converter import FileConverter
 
-from base.models import (Rule, available_validators, available_doccodes,
+from base.models import (Rule, PluginRule, available_validators, available_doccodes,
     available_storages, available_securities)
 from base.utils import ValidatorProvider, StorageProvider, SecurityProvider, DocCodeProvider
 
+from newplugins.transfer import TransferPluginPoint
+from plugins.models import PluginPoint
 
 # for codes to throw http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
 
@@ -156,6 +158,33 @@ class DmsDocument():
         except:
             raise DmsException('No file or revision match', 404)
 
+        # Hook new django-plugins
+        #
+
+        #for plugin in TransferPluginPoint.get_plugins():
+
+        # working!!
+        #p = TransferPluginPoint.get_plugins()
+        #p.sort()
+        #for plugin in p:
+
+        #point = PluginPoint.objects.get_point(TransferPluginPoint)
+        #for p in point.plugin_set.filter(active==True).order_by('index'):
+
+        plugins = PluginRule.objects.filter(rule=self.rule, active=True)
+
+        for p in plugins:
+            plugin = p.plugin.get_plugin()
+
+            if 'RETRIEVAL' in plugin.methods:
+                file_obj = plugin.work(file_obj, 'RETRIEVAL')
+
+        #temp
+        #file_obj.seek(0)
+        #content = file_obj.read()
+        #file_obj.close()
+        # filename & mimetype read from above
+
         # Convert the file if necessary
         # TODO: This should be a transport plugin.
         new_file = FileConverter(file_obj, request_extension)
@@ -171,7 +200,6 @@ class DmsDocument():
             rev_document, rev_extension = os.path.splitext(filename)
             filename = "%s%s" % (rev_document, rev_extension)
 
-        file_obj.close()
 
         return (content, filename, mimetype)
 
@@ -199,9 +227,16 @@ class DmsDocument():
         self._check_security(request, False)
         self._check_request(request, False)
 
+        # Hook new django-plugins
+        plugins = PluginRule.objects.filter(rule=self.rule, active=True).order_by('-index')
+        for p in plugins:
+            plugin = p.plugin.get_plugin()
+            if 'STORAGE' in plugin.methods:
+                file_obj = plugin.work(file_obj, 'STORAGE')
+
         filename = file_obj.name
 
-        return self.storage.store(file_obj, filename) #InMemoryUploadedFile
+        return self.storage.store(file_obj, filename)
 
     def delete_file(self):
 

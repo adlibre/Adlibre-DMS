@@ -1,6 +1,8 @@
 Django==1.3
 PIL==1.1.7
 ctypes==1.0.2
+distribute==0.6.15
+django-plugins==0.1
 docutils==0.7
 ## FIXME: could not find svn URL in dependency_links for this package:
 flup==1.0.3.dev-20110111
