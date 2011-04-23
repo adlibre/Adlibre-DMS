@@ -67,3 +67,4 @@ You will need to specify Python version if more than one installed eg. --python 
 # cdvirtualenv
 # svn co https://svn.adlibre.net/projects/fasttrack/HEAD/ ./
 # pip install -r deployment/pip-req.txt
+# ./src/dms/manage.py collectstatic
