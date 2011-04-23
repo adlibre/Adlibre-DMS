@@ -137,6 +137,8 @@ TEMPLATE_DIRS = (
 )
 
 PLUGIN_DIR = os.path.join(PROJECT_PATH, 'dmsplugins')
+NEW_PLUGIN_DIR = os.path.join(PROJECT_PATH, 'newplugins')
+
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -159,6 +161,8 @@ INSTALLED_APPS = (
     'api',
     'base',
     'browser',
+    'plugins',
+    'newplugins',
 )
 
 # A sample logging configuration. The only tangible logging

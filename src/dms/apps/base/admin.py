@@ -7,7 +7,7 @@ License: See LICENSE for license information
 
 from django.contrib import admin
 
-from models import Rule
+from models import Rule, PluginRule
 
 
 def rule_doc(obj):
@@ -21,3 +21,4 @@ class RuleAdmin(admin.ModelAdmin):
 
 admin.site.register(Rule, RuleAdmin)
 
+admin.site.register(PluginRule)

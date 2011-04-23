@@ -12,8 +12,9 @@ from django.db import models
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 
-from base.utils import ValidatorProvider, StorageProvider, SecurityProvider, \
-    DocCodeProvider
+from base.utils import ValidatorProvider, StorageProvider, SecurityProvider, DocCodeProvider
+
+from plugins.models import Plugin
 
 
 class RuleManager(models.Manager):
@@ -45,6 +46,7 @@ class Rule(models.Model):
     storage = models.TextField(max_length=255)
     validators = models.TextField(blank=True)
     securities = models.TextField(blank=True)
+    #transfers = models.ManyToManyField(PluginRule, blank=True, null=True) #FIXME: This needs to link to PluginRule(Plugin) model
     active = models.BooleanField(default=True)
 
     objects = RuleManager()
@@ -94,6 +96,12 @@ class Rule(models.Model):
             return []
 
 
+#    def get_transfers(self):
+#        t = []
+#        for transfer in self.transfers.all():
+#            t.append(transfer.get_plugin())
+#        return t
+
 
 def available_doccodes():
     """
@@ -134,3 +142,21 @@ def available_securities():
         __import__("securities.%s" % module[1], fromlist=[""])
     return SecurityProvider.plugins
 
+
+class PluginRule(models.Model):
+
+    rule = models.ForeignKey(Rule)
+    plugin = models.ForeignKey(Plugin)
+    active = models.BooleanField(default=True)
+    index = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['-index',]
+        #order_with_respect_to = 'rule'
+
+    def __unicode__(self):
+        return "%s - %s" % (self.rule, self.plugin)
+
+    # active = inherit , actually we should be able to turn this on and off
+    # point = inherit
+    # FIXME: How to make only some fields editable, the rest should inherit from the plugin!
