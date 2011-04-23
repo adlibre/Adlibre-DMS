@@ -14,8 +14,8 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.template import RequestContext, loader
 
+from dms.settings import DEBUG
 from browser.forms import UploadForm
-
 from base.dms import DmsBase, DmsRule, DmsDocument, DmsException
 
 
@@ -77,7 +77,10 @@ def get_file(request, document, hashcode=None, extension=None):
     except DmsException, (e):
         return handlerError(request, e.code, e.parameter)
     except Exception, (e):
-        return handlerError(request, 500, e) # Generic Exception. All others should be caught above by DmsException
+        if DEBUG:
+            raise
+        else:
+            return handlerError(request, 500, e) # Generic Exception. All others should be caught above by DmsException
     else:
         response = HttpResponse(content, mimetype=mimetype)
         response["Content-Length"] = len(content)
