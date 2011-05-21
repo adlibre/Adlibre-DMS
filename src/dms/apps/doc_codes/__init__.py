@@ -7,12 +7,15 @@ class DoccodeManager(object):
 
     def find_for_string(self, string):
         res = None
-        print "ALL DOCCODES: %s" % self.doccodes
-        for doccode in self.doccodes.values():
+        #print "ALL DOCCODES: %s" % self.get_doccodes() #TODO: log.debug this
+        for doccode in self.get_doccodes().values():
             if doccode.validate(string):
                 res = doccode
                 break
         return res
+
+    def get_doccodes(self):
+        return self.doccodes
 
 DoccodeManagerInstance = DoccodeManager()
 
