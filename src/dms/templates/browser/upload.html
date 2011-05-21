@@ -8,6 +8,7 @@
 <form action="" method="post" enctype="multipart/form-data" >
     {{ form.file.errors }}{{ form.file }}
     <input type="submit" value="Upload &rarr;" />
+    {%csrf_token%}
 </form>
 
 </div>
