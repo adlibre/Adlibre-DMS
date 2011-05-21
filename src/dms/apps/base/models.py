@@ -160,3 +160,22 @@ class PluginRule(models.Model):
     # active = inherit , actually we should be able to turn this on and off
     # point = inherit
     # FIXME: How to make only some fields editable, the rest should inherit from the plugin!
+
+"""
+New models
+"""
+from plugins.fields import ManyPluginField
+
+from dms_plugins import pluginpoints
+from doc_codes import DoccodeManagerInstance
+DOCCODE_CHOICES = map(lambda x: (str(x[0]), x[1].get_title()), DoccodeManagerInstance.get_doccodes().items())
+
+class DoccodePluginMapping(models.Model):
+    doccode = models.CharField(choices = DOCCODE_CHOICES, max_length = 64)
+    #if changing *_plugins names please change dms_plugins.pluginpoints correspondingly
+    before_storage_plugins = ManyPluginField(   pluginpoints.BeforeStoragePluginPoint, 
+                                                related_name = 'settings_before_storage',)
+    before_retrieval_plugins = ManyPluginField( pluginpoints.BeforeRetrievalPluginPoint, 
+                                                related_name = 'settings_before_retrieval',
+                                                blank = True) # blank is only for debug
+
