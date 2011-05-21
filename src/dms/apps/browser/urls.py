@@ -14,6 +14,7 @@ from django.conf.urls.defaults import *
 
 urlpatterns = patterns('browser.views',
     url(r'^upload/$', 'upload', name='upload'),
+    url(r'^new_upload/$', 'new_upload', name='new_upload'),
     url(r'^get/(?P<document>[\w_-]+)$',
         'get_file', name='get_file_no_hash_and_extension'),
     url(r'^get/(?P<document>[\w_-]+)\.(?P<extension>\w{3})$',
