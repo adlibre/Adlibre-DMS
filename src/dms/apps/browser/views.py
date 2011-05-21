@@ -62,6 +62,29 @@ def upload(request, template_name='browser/upload.html', extra_context={}):
                               extra_context=extra_context)
 
 
+def new_upload(request, template_name='browser/upload.html', extra_context={}):
+    """
+    Upload file processing. Uploaded file will be check against available rules to
+    determine storage, validator, and security plugins.
+    """
+
+    form = UploadForm(request.POST or None, request.FILES or None)
+    if request.method == 'POST':
+        if form.is_valid():
+            from document_manager import DocumentManager
+            manager = DocumentManager()
+            manager.store(request, form.files['file'])
+            if not manager.errors:
+                messages.success(request, 'File has been uploaded.')
+            else:
+                messages.error(request, "; ".join(manager.errors))
+
+    extra_context['form'] = form
+    return direct_to_template(request,
+                              template_name,
+                              extra_context=extra_context)
+
+
 def get_file(request, document, hashcode=None, extension=None):
 
     revision = request.GET.get("r", None)

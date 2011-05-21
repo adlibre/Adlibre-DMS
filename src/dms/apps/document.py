@@ -1,0 +1,41 @@
+import os
+
+from django.conf import settings
+
+from doc_codes import DoccodeManagerInstance
+
+class Document(object):
+    """
+        Uploaded file is http://docs.djangoproject.com/en/1.3/topics/http/file-uploads/#django.core.files.uploadedfile.UploadedFile
+    """
+    def __init__(self):
+        self.uploaded_file = None
+        self.id = None
+        self.saved = False
+        self.doccode = None
+        self.file_name = None
+        
+    def get_doccode(self):
+        if self.doccode is None:
+            self.doccode = DoccodeManagerInstance.find_for_string(self.get_stripped_filename())
+        print "DOCCODE: %s" % self.doccode
+        return self.doccode
+
+    def set_uploaded_file(self, uploaded_file):
+        self.uploaded_file = uploaded_file
+
+    def get_uploaded_file(self):
+        return self.uploaded_file
+
+    def set_id(self, doc_id):
+        self.id = doc_id
+
+    def get_id(self):
+        return self.id
+
+    def get_filename(self):
+        name = self.file_name or self.uploaded_file.name
+        return name
+
+    def get_stripped_filename(self):
+        return os.path.splitext(self.get_filename())[0]
