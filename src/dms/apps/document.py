@@ -2,6 +2,7 @@ import os
 
 from django.conf import settings
 
+from base.dms import DmsException
 from doc_codes import DoccodeManagerInstance
 
 class Document(object):
@@ -18,7 +19,9 @@ class Document(object):
     def get_doccode(self):
         if self.doccode is None:
             self.doccode = DoccodeManagerInstance.find_for_string(self.get_stripped_filename())
-        print "DOCCODE: %s" % self.doccode
+            if self.doccode is None:
+                raise DmsException("No doccode found for file " + self.get_filename(), 404)
+        #print "DOCCODE: %s" % self.doccode #TODO: log.debug this
         return self.doccode
 
     def set_uploaded_file(self, uploaded_file):

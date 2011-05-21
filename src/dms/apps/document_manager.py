@@ -2,13 +2,28 @@ from dms_plugins.workers import PluginError
 from dms_plugins.pluginpoints import BeforeStoragePluginPoint, BeforeRetrievalPluginPoint
 
 from document import Document
+from base import models
 
 class DocumentManager(object):
     def __init__(self):
         self.errors = []
 
+    def get_plugin_mapping(self, document):
+        mapping = models.DoccodePluginMapping.objects.filter(doccode = document.get_doccode().get_id())
+        if mapping.count():
+            mapping = mapping[0]
+        else:
+            mapping = None
+        return mapping
+
     def get_plugins(self, pluginpoint, document):
-        return pluginpoint.get_plugins() #TODO: filter plugins according to document doccode
+        mapping = self.get_plugin_mapping(document)
+        if mapping:
+            plugin_objects = getattr(mapping, pluginpoint.settings_field_name).order_by('index')
+            plugins = map(lambda plugin_obj: plugin_obj.get_plugin(), plugin_objects)
+        else:
+            plugins = []
+        return plugins
 
     def process_pluginpoint(self, pluginpoint, request, document = None):
         plugins = self.get_plugins(pluginpoint, document)
