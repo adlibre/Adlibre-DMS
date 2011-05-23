@@ -5,6 +5,9 @@
 {% block body_class %}home{% endblock %}
 
 {% block content %}
+{% if THEME_NAME == 'solid' %}
+<img src="{{ MEDIA_URL }}/themes/solid/cloud.jpg" width="317" height="289" class="alignright" />
+{% endif %}
 <h1>Adlibre DMS</h1>
 <p>The lightweight document management system for the cloud.</p>
 
