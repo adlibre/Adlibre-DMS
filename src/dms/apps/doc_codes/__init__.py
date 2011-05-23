@@ -19,8 +19,19 @@ class DoccodeManager(object):
 
 DoccodeManagerInstance = DoccodeManager()
 
+from test_pdf import TestPDFDoccode
+DoccodeManagerInstance.register(TestPDFDoccode())
+
 from adlibre_invoices import AdlibreInvoicesDoccode
 DoccodeManagerInstance.register(AdlibreInvoicesDoccode())
 
-from test_pdf import TestPDFDoccode
-DoccodeManagerInstance.register(TestPDFDoccode())
+from project_gutenberg_ebooks import ProjectGutenbergEbooksDoccode
+DoccodeManagerInstance.register(ProjectGutenbergEbooksDoccode())
+
+from fax_tiff import FaxTiffDoccode
+DoccodeManagerInstance.register(FaxTiffDoccode())
+
+from credit_card import CreditCardDoccode
+DoccodeManagerInstance.register(CreditCardDoccode())
+
+
