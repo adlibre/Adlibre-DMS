@@ -12,10 +12,10 @@ class Document(object):
     def __init__(self):
         self.uploaded_file = None
         self.id = None
-        self.saved = False
         self.doccode = None
         self.file_name = None
-        
+        self.revision = None
+
     def get_doccode(self):
         if self.doccode is None:
             self.doccode = DoccodeManagerInstance.find_for_string(self.get_stripped_filename())
@@ -42,3 +42,16 @@ class Document(object):
 
     def get_stripped_filename(self):
         return os.path.splitext(self.get_filename())[0]
+
+    def get_extension(self):
+        return os.path.splitext(self.get_filename())[1][1:]
+
+    def get_revision(self):
+        return self.revision
+
+    def set_revision(self, revision):
+        self.revision = revision
+
+    def get_filename_with_revision(self):
+        return "%s_r%s.%s" % (self.get_stripped_filename(), self.get_revision(), self.get_extension())
+

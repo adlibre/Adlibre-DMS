@@ -60,16 +60,16 @@ class Local(object):
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        #TODO: save metadata
-        #self.save_metadata(document.get_stripped_filename(), directory)
+        #save metadata, load revision
+        document = self.save_metadata(document, directory)
 
-        destination = open(os.path.join(directory, document.get_filename()), 'wb+')
+        destination = open(os.path.join(directory, document.get_filename_with_revision()), 'wb+')
         document.get_uploaded_file().seek(0)
         destination.write(document.get_uploaded_file().read())
         destination.close()
 
-    def save_metadata(self, document_name, directory):
-        json_file = os.path.join(directory, '%s.json' % (document_name,))
+    def save_metadata(self, document, directory):
+        json_file = os.path.join(directory, '%s.json' % (document.get_stripped_filename(),))
         if os.path.exists(json_file):
             json_handler = open(json_file , mode='r+')
             fileinfo_db = json.load(json_handler)
@@ -78,15 +78,17 @@ class Local(object):
             fileinfo_db = []
             revision = 1
 
+        document.set_revision(revision)
+
         fileinfo = {
-            'name' : "%s_r%s.%s" % (document_name, revision, extension),
-            'revision' : revision,
+            'name' : document.get_filename_with_revision(),
+            'revision' : document.get_revision(),
             'created_date' : str(datetime.datetime.today())
         }
         fileinfo_db.append(fileinfo)
         json_handler = open(json_file, mode='w')
         json.dump(fileinfo_db, json_handler)
-
+        return document
 
     def _store(self, file_obj, filename, root=settings.DOCUMENT_ROOT):
         document, extension = os.path.splitext(filename)
