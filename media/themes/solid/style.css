@@ -110,6 +110,7 @@ label {
 #rules th.last{width:70px;}
 
 #settings{margin-top:15px;}
+#settings ul { list-style:none; }
 #settings th.first,
 #settings th.last{width:40px;}
 #settings th.first{padding-left:15px;}
@@ -159,8 +160,7 @@ label {
 	
 	/* Login */
 	#login{
-		float:right;
-		padding:10px 15px; 
+		padding:10px 15px;
 		width:288px;
 		background-color:#3D4143;
 		border-color:#2B2E30 #18191A #010101 #18191A;
