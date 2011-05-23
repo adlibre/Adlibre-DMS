@@ -142,7 +142,7 @@ label {
 }
 
 
-#rules {
+#rules, #settings {
     margin-top:30px;
 }
 
@@ -207,7 +207,6 @@ label {
         white 0px 0px 10px,
         white 0px 0px 15px,
         white 0px 0px 20px;
-
 }
 
 

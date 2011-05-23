@@ -1,2 +1,203 @@
-@import "reset.css";
+/* Base */
 
+* {
+    margin:0px;
+    padding:0px;
+}
+
+html, body {
+    height: 100%;
+}
+
+img { border: 0; }
+
+/* HTML Redefines */
+
+table{width:100%; table-layout:auto; border-collapse:collapse;}
+	table th{text-align:left; color:#fff; text-shadow:1px 1px 1px #D48E3E; background-color:#F9A749; border-right:1px solid #fff;}
+	table th,
+	table td{padding-left:15px; height:34px; vertical-align:middle; line-height:120%;}
+	table td{border-top:1px solid #EBEBEC; font-size:13px; color:#3B3F41;}
+	table th.first{background:#F9A749 url(table-rounded-left.jpg) 0 0 no-repeat;}
+	table th.last{background:#F9A749 url(table-rounded-right.jpg) 100% 0 no-repeat; border:none;}	
+	table tr:hover td{background-color:#FFF9F3;}
+	table a:link{color:#3B3F41;}
+	table tr:hover a:link {color:#E78107;}
+	table ul{margin:0; list-style-position:inside;}
+
+body {
+    font-family:Arial, Helvetica, Tahoma, sans-serif;
+    line-height:1.5;
+    color: #3B3F41;
+	font-size:14px;
+}
+
+a:link {color:#E78107; text-decoration: underline; outline: none;}
+a:visited {color:#E78107; text-decoration: underline; outline: none;}
+a:hover {text-decoration: none;	}
+a:active {color:#E78107; text-decoration: underline; outline: none;}
+
+h1, h2, h3, h4, h5{font-weight:normal; color:#3B3F41;}
+h1{font-size:24px;}
+h2{font-size:24px;}
+h3{font-size:17px;}
+h4{font-size:15px;}	
+
+ul, ol {
+	margin:10px 0 15px 20px;
+}
+
+p{margin-bottom:15px;}
+
+
+option {
+    padding:0px 4px;
+}
+
+
+/* Custom Styles */
+
+#page_wrapper {
+    position:relative;
+	margin:0 auto;
+	min-width:760px;
+	width:760px;
+}
+
+#container {
+	height:300px;
+	height:auto !important;
+	min-height:300px;
+    padding:25px 0; /* prevent overlap with footer */
+}
+
+#content {overflow:hidden;}
+
+#footer {
+	padding-top:20px;
+	text-align:center;
+	border-top:2px solid #E9EAEA;	
+}
+
+#footer p {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+#footer span {
+    color: #EFEFEF;
+    float: right;
+}
+
+label {
+    display:block;
+}
+
+#upload-page {
+    text-align:center;
+    margin:150px 0px;
+}
+
+
+#upload-page form {
+
+}
+
+
+#rules {
+    margin-top:15px;
+}
+
+#rules th.last{width:70px;}
+
+#settings{margin-top:15px;}
+#settings th.first,
+#settings th.last{width:40px;}
+#settings th.first{padding-left:15px;}
+#settings th,
+#settings td{padding:5px 0 5px 10px;}
+
+.hide {
+    display:none;
+}
+
+
+/* new */
+
+#logo_wrapper {
+	padding:30px 0 0 10px;
+	height:82px;
+}
+
+#header {
+	
+}
+
+#menu {
+	height:35px;
+	line-height:35px;
+	background:url(bg-menu.png) 0 0 repeat-x;
+	border-color:#2B2E30 #18191A #010101 #18191A;
+	border-width:1px;
+	border-style:solid;
+	border-radius:5px;
+	-moz-border-radius:5px;	
+	-webkit-border-radius:5px;	
+	box-shadow:3px 3px 0 #E2E2E3;
+	-moz-box-shadow:3px 3px 0 #E2E2E3;
+	-webkit-box-shadow:3px 3px 0 #E2E2E3;		
+}
+
+#menu ul {margin:0; overflow:hidden; list-style:none;}
+	#menu ul li {float:left;}
+		#menu ul li a{float:left; padding:0 20px; height:35px; line-height:35px; font-size:14px; text-decoration:none; border-right:1px solid #2C2F31; border-left:1px solid #4A4E50; color:#d3d3d3; text-shadow:0 -1px 1px #000;}
+		#menu ul li.active a,		
+		#menu ul li a:hover {text-decoration:none; background:url(bg-menu-active.png) 0 0 repeat-x;}
+
+/* Try demo */
+#try-demo{overflow:hidden;}
+	#try-demo .text{float:left; padding:0 25px 0 15px; width:400px;}
+	
+	/* Login */
+	#login{
+		float:right;
+		padding:10px 15px; 
+		width:288px;
+		background-color:#3D4143;
+		border-color:#2B2E30 #18191A #010101 #18191A;
+		border-width:1px;
+		border-style:solid;
+		border-radius:5px;
+		-moz-border-radius:5px;	
+		-webkit-border-radius:5px;	
+		box-shadow:3px 3px 0 #E2E2E3;
+		-moz-box-shadow:3px 3px 0 #E2E2E3;
+		-webkit-box-shadow:3px 3px 0 #E2E2E3;				
+		}
+		
+		#login .line{margin-bottom:10px;}
+			#login label{padding-left:5px; color:#fff;}
+			#login .input{padding:0 10px; width:270px; height:39px; line-height:39px; border:none; background:url(bg-inputs.png) 0 0 no-repeat;}
+			#login .buttons{padding:5px 0; text-align:center;}
+				#login .submit{width:203px; height:44px; border:none; cursor:pointer; background:url(btn-try-demo.png) 0 0 no-repeat;}
+
+
+/* selected pages */
+.files #menu .files a,
+.settings #menu .settings a,
+.plugins #menu .plugins a,
+.login #menu .login a
+{
+    border-top:4px solid #F7931E;
+    height: 24px;
+    line-height:24px;
+}
+
+.alignleft{float:left;}
+.alignright{float:right; margin:0 0 10px 20px;}
+
+#content p,
+#content h1,
+#content h2,
+#content h3,
+#content h4,
+#content ul{padding-left:15px;}

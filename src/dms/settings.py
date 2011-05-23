@@ -195,7 +195,7 @@ APPEND_SLASH = False # Stop Django from adding slashes to urls
 RESTRUCTUREDTEXT_FILTER_SETTINGS = { 'doctitle_xform': 0, } # stop first heading being munged for page title.
 
 # name of template theme, used by context_processors.py.
-THEME_NAME = 'adlibre' # 'adlibre' or 'basic'
+THEME_NAME = 'solid' # 'adlibre' or 'basic' or 'solid'
 
 DEMO = True
 
