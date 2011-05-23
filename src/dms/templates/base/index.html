@@ -1,28 +1,57 @@
 {% extends THEME_TEMPLATE %}
 
+{% load i18n %}
+
 {% block title %}Welcome{% endblock %}
 
 {% block body_class %}home{% endblock %}
 
 {% block content %}
-{% if THEME_NAME == 'solid' %}
-<img src="{{ MEDIA_URL }}/themes/solid/cloud.jpg" width="317" height="289" class="alignright" />
-{% endif %}
-<h1>Adlibre DMS</h1>
-<p>The lightweight document management system for the cloud.</p>
 
-    {% if DEMO %}
-    <h2>Demo</h2>
-    <p>This is a fully functioning demonstration instance.</p>
+{% if DEMO %}
+<div id="try-demo">
+    <div class="text">
+        <h1>Adlibre DMS</h1>
+        <p>This is a fully functioning demonstration instance of Adlibre DMS - The lightweight document and media management system for the cloud.</p>
+        {% if not user.is_authenticated %}
+        <h2>Try Demo</h2>
+        <p>You can login to the administrative functions with the following credentials:</p>
+        <ul>
+            <li>Username: <em>admin</em></li>
+            <li>Password: <em>admin</em></li>
+        </ul>
+        {% endif %}
+        <p>This instance refreshes every 30 minutes. So feel free to make changes to the configuration or upload documents using the sample <a href="/upload/">form</a> or via the webservices <a href="/docs/api/">API</a>.</p>
+        <p>Please let us know your <a href="http://www.adlibre.com.au/contact/">feedback</a>.</p>
+    </div>
     {% if not user.is_authenticated %}
-    <p>You can login to the administrative functions with the following credentials:</p>
-    <ul>
-        <li>Username: <em>admin</em></li>
-        <li>Password: <em>admin</em></li>
-    </ul>
+    <div id="login" style="float:right;">
+        <form action="{% url django.contrib.auth.views.login %}" method="post" id="login-form">{% csrf_token %}
+        <dl class="line">
+            <dt><label for="id_username">{% trans 'Username' %}</label></dt>
+            <dd><input id="id_username" name="username" type="text" value="admin" class="input" /></dd>
+        </dl>
+        <dl class="line">
+            <dt><label for="id_password">{% trans 'Password' %}</label></dt>
+            <dd><input id="id_password" name="password" type="password" value="admin" class="input" />
+                <input type="hidden" name="this_is_the_login_form" value="1" /></dd>
+        </dl>
+        <div class="buttons">
+            <input name="" type="submit" value="" class="submit" />
+        </div>
+        </form>
+    </div>
+    {% else %}
+        <img src="{{ MEDIA_URL }}/themes/solid/cloud.jpg" width="317" height="289" class="" style="padding-bottom:20px;" />
     {% endif %}
-    <p>This instance refreshes every 30 minutes. So feel free to make changes to the configuration or upload documents using the sample <a href="/upload/">form</a> or via the webservices <a href="/docs/api/">API</a>.</p>
-    <p>Please let us know your <a href="http://www.adlibre.com.au/contact/">feedback</a>.</p>
+</div>
+{% else %}
+    {# not a demo #}
+    {% if THEME_NAME == 'solid' %}
+    <img src="{{ MEDIA_URL }}/themes/solid/cloud.jpg" width="317" height="289" class="alignright" />
     {% endif %}
+    <h1>Adlibre DMS</h1>
+    <p>The lightweight document and media management system for the cloud.</p>
+{% endif %}
 
 {% endblock %}
