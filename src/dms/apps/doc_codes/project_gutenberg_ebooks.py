@@ -1,10 +1,9 @@
 import re
-from doccodes import Doccode
 
 from doc_codes import DoccodeManagerInstance
 from base import Doccode
 
-class ProjectGutenbergEbookDoccode(Doccode):
+class ProjectGutenbergEbooksDoccode(Doccode):
     active = True
     name = 'Project Gutenberg eBooks'
     description = '[0-9]{1,6}'

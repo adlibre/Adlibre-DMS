@@ -1,10 +1,9 @@
 import re
-from doccodes import Doccode
 
 from doc_codes import DoccodeManagerInstance
 from base import Doccode
 
-class DocCode(Doccode):
+class FaxTiffDoccode(Doccode):
     active = True
     name = 'Fax Tiff documents'
     description = '[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{1,9}'
