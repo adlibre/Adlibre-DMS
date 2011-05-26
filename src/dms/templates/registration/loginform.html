@@ -1,0 +1,43 @@
+{% load i18n %}
+
+<div id="login">
+<form action="{% url django.contrib.auth.views.login %}" method="post" id="login-form">
+
+{% csrf_token %}
+
+{% if not DEMO %}
+    <dl class="line">
+        <dt><label for="id_username">{% trans 'Username' %}</label></dt>
+        <dd><input id="id_username" name="username" type="text" value="" class="input" /></dd>
+    </dl>
+    <dl class="line">
+        <dt><label for="id_password">{% trans 'Password' %}</label></dt>
+        <dd><input id="id_password" name="password" type="password" value="" class="input" />
+            <input type="hidden" name="this_is_the_login_form" value="1" /></dd>
+    </dl>
+    <div class="buttons">
+        <input name="" type="submit" value="{% trans 'Log in' %}" class="submit" />
+    </div>
+
+    <script type="text/javascript">
+    document.getElementById('id_username').focus();
+    </script>
+
+{% else %}
+
+    <dl class="line">
+        <dt><label for="id_username">{% trans 'Username' %}</label></dt>
+        <dd><input id="id_username" name="username" type="text" value="admin" class="input" /></dd>
+    </dl>
+    <dl class="line">
+        <dt><label for="id_password">{% trans 'Password' %}</label></dt>
+        <dd><input id="id_password" name="password" type="password" value="admin" class="input" />
+            <input type="hidden" name="this_is_the_login_form" value="1" /></dd>
+    </dl>
+    <div class="buttons">
+        <input name="" type="submit" value="Try Demo Now" class="submit" />
+    </div>
+
+{% endif %}
+</form>
+</div>

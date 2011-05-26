@@ -178,10 +178,10 @@ label {
 			#login label{padding-left:5px; color:#fff;}
 			#login .input{padding:0 10px; width:270px; height:39px; line-height:39px; border:none; background:url(bg-inputs.png) 0 0 no-repeat;}
 			#login .buttons{padding:5px 0; text-align:center;}
-				#login .submit{width:203px; height:44px; border:none; cursor:pointer; background:url(btn-try-demo.png) 0 0 no-repeat;}
-
+                #login .submit{width:203px; height:44px; border:none; cursor:pointer; background:url(btn-blank.png) 0 0 no-repeat; font-size: 16px; font-style:italic; font-weight: bold; color:#3B3F41; text-shadow: #FAC659 1px 0px 1px;}
 
 /* selected pages */
+.home #menu .home a,
 .files #menu .files a,
 .settings #menu .settings a,
 .plugins #menu .plugins a,
@@ -193,7 +193,7 @@ label {
 }
 
 .alignleft{float:left;}
-.alignright{float:right; margin:0 0 10px 20px;}
+.alignright{float:right; } /*margin:0 0 10px 20px;*/
 
 #content p,
 #content h1,
