@@ -1,6 +1,7 @@
 from dms_plugins.workers.storage import local
 from dms_plugins.workers.validators import filetype
 from dms_plugins.workers.security import groups, hashcode
+from dms_plugins.workers.transfer import gzip
 from dms_plugins.pluginpoints import BeforeStoragePluginPoint, BeforeRetrievalPluginPoint
 
 """
@@ -53,3 +54,19 @@ class GroupSecurityRetrieval(BeforeRetrievalPluginPoint):
 
     def work(self, request, document):
         return groups.GroupSecurityWorker().work(request, document)
+
+class GzipOnStorePlugin(BeforeStoragePluginPoint):
+    title = 'Gzip Plugin'
+    active = True
+    #has_configuration = True #TODO: configure
+    
+    def work(self, request, document):
+        return gzip.GzipWorker.work_store(request, document)
+
+class GzipOnRetrievePlugin(BeforeRetrievalPluginPoint):
+    title = 'Gzip Plugin'
+    active = True
+    #has_configuration = True #TODO: configure
+
+    def work(self, request, document):
+        return gzip.GzipWorker.work_retrieve(request, document)
