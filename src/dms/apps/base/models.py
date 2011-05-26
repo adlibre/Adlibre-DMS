@@ -179,3 +179,11 @@ class DoccodePluginMapping(models.Model):
                                                 related_name = 'settings_before_retrieval',
                                                 blank = True) # blank is only for debug
 
+
+    def __unicode__(self):
+        doccode_name = "ERROR"
+        try:
+            doccode_name = DoccodeManagerInstance.get_doccodes()[int(self.doccode)].title
+        except (KeyError, AttributeError):
+            pass
+        return unicode(doccode_name)

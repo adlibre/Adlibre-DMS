@@ -45,6 +45,6 @@ class DocumentManager(object):
     def retrieve(self, request, document_id):
         doc = Document()
         doc.set_id(document_id)
-        return self.process_pluginpoint(BeforeStoragePluginPoint, request, document = doc)
+        return self.process_pluginpoint(BeforeRetrievalPluginPoint, request, document = doc)
 
 
