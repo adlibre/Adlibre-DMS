@@ -25,6 +25,11 @@ class FileTypeValidationPlugin(BeforeStoragePluginPoint):
     def work(self, request, document):
         return filetype.FileTypeValidationWorker().work(request, document)
 
+class HashCodeValidationPlugin(BeforeRetrievalPluginPoint):
+    name = 'Hash'
+    description = 'Hash code validation on retrieval'
+    #has_configuration = True #TODO: configuration
+
 class LocalStoragePlugin(BeforeStoragePluginPoint):
     title = "Local Storage"
     description = "Saves document as local file"

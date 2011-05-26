@@ -42,9 +42,10 @@ class DocumentManager(object):
         doc.set_uploaded_file(uploaded_file)
         return self.process_pluginpoint(BeforeStoragePluginPoint, request, document = doc)
 
-    def retrieve(self, request, document_id):
+    def retrieve(self, request, document_id, hashcode = None):
         doc = Document()
         doc.set_id(document_id)
+        doc.set_hashcode(hashcode)
         return self.process_pluginpoint(BeforeRetrievalPluginPoint, request, document = doc)
 
 

@@ -15,6 +15,7 @@ class Document(object):
         self.doccode = None
         self.file_name = None
         self.revision = None
+        self.hashcode = None
 
     def get_doccode(self):
         if self.doccode is None:
@@ -55,3 +56,8 @@ class Document(object):
     def get_filename_with_revision(self):
         return "%s_r%s.%s" % (self.get_stripped_filename(), self.get_revision(), self.get_extension())
 
+    def set_hashcode(self, hashcode):
+        self.hashcode = hashcode
+
+    def get_hashcode(self):
+        return self.hashcode
