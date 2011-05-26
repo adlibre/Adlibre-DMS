@@ -1,5 +1,6 @@
 from dms_plugins.workers.storage import local
 from dms_plugins.workers.validators import filetype
+from dms_plugins.workers.security import groups, hashcode
 from dms_plugins.pluginpoints import BeforeStoragePluginPoint, BeforeRetrievalPluginPoint
 
 """
@@ -31,4 +32,19 @@ class LocalStoragePlugin(BeforeStoragePluginPoint):
 
     def work(self, request, document, **kwargs):
         return local.Local().store(request, document)
-    
+
+class GroupSecurityStore(BeforeStoragePluginPoint):
+    name = 'Security Group'
+    description = 'Security group member only'
+    active = True
+
+    def work(self, request, document):
+        return groups.GroupSecurityWorker().work(request, document)
+
+class GroupSecurityRetrieval(BeforeRetrievalPluginPoint):
+    name = 'Security Group'
+    description = 'Security group member only'
+    active = True
+
+    def work(self, request, document):
+        return groups.GroupSecurityWorker().work(request, document)
