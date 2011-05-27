@@ -11,3 +11,4 @@ class GroupSecurityWorker(object):
         security_group, created = Group.objects.get_or_create(name='security')
         if not security_group in request.user.groups.all():
             raise PluginError("You're not in security group")
+        return document

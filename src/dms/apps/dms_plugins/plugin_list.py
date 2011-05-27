@@ -1,6 +1,6 @@
 from dms_plugins.workers.storage import local
-from dms_plugins.workers.validators import filetype
-from dms_plugins.workers.security import groups, hashcode
+from dms_plugins.workers.validators import filetype, hashcode
+from dms_plugins.workers.security import groups
 from dms_plugins.workers.transfer import gzip
 from dms_plugins.pluginpoints import BeforeStoragePluginPoint, BeforeRetrievalPluginPoint
 
@@ -18,6 +18,10 @@ Methods:
 
 """
 
+class Plugin(object):
+    def get_plugin_type(self):
+        return getattr(self, 'plugin_type', None)
+
 class FileTypeValidationPlugin(BeforeStoragePluginPoint):
     title = "File Type Validator"
     description = "Validates document type against supported types"
@@ -31,13 +35,28 @@ class HashCodeValidationPlugin(BeforeRetrievalPluginPoint):
     description = 'Hash code validation on retrieval'
     #has_configuration = True #TODO: configuration
 
+    def work(self, request, document):
+        return hashcode.HashCodeValidator().work(request, document)
+
 class LocalStoragePlugin(BeforeStoragePluginPoint):
     title = "Local Storage"
     description = "Saves document as local file"
     active = True
+    plugin_type = 'storage'
+    worker = local.Local()
 
     def work(self, request, document, **kwargs):
-        return local.Local().store(request, document)
+        return self.worker.store(request, document)
+
+class LocalRetrievalPlugin(BeforeRetrievalPluginPoint):
+    title = "Local Retrieval"
+    description = "Loads document as local file"
+    active = True
+    plugin_type = 'storage'
+    worker = local.Local()
+
+    def work(self, request, document, **kwargs):
+        return self.worker.retrieve(request, document)
 
 class GroupSecurityStore(BeforeStoragePluginPoint):
     name = 'Security Group'
