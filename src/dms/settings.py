@@ -198,7 +198,7 @@ RESTRUCTUREDTEXT_FILTER_SETTINGS = { 'doctitle_xform': 0, } # stop first heading
 THEME_NAME = 'solid' # 'adlibre' or 'basic' or 'solid'
 
 DEMO = True
-
+NEW_SYSTEM = False
 try:
     from settings_local import *
 except ImportError:
