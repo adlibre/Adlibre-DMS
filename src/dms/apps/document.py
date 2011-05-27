@@ -11,11 +11,12 @@ class Document(object):
     """
     def __init__(self):
         self.uploaded_file = None
-        self.id = None
         self.doccode = None
         self.file_name = None
         self.revision = None
         self.hashcode = None
+        self.metadata = None
+        self.fullpath = None
 
     def get_doccode(self):
         if self.doccode is None:
@@ -31,18 +32,36 @@ class Document(object):
     def get_uploaded_file(self):
         return self.uploaded_file
 
-    def set_id(self, doc_id):
-        self.id = doc_id
+    def set_file_obj(self, file_obj): #TODO: check if uploaded_file and file_obj can be merged
+        self.file_obj = file_obj
 
-    def get_id(self):
-        return self.id
+    def get_file_obj(self):
+        if self.get_fullpath():
+            self.file_obj = open(self.get_fullpath(), 'rb')
+        return self.file_obj
+
+    def get_fullpath(self):
+        return self.fullpath
+
+    def set_fullpath(self, fullpath):
+        self.fullpath = fullpath
+
+    def set_filename(self, filename):
+        self.file_name = filename
 
     def get_filename(self):
         name = self.file_name or self.uploaded_file.name
+        if not name and self.get_revision():
+            name = self.get_metadata()[self.get_revision() - 1]['name']
         return name
 
     def get_stripped_filename(self):
-        return os.path.splitext(self.get_filename())[0]
+        filename = ''
+        if self.get_filename():
+            filename = self.get_filename()
+        else:
+            filename = os.path.splitext(self.get_filename())[0]
+        return filename
 
     def get_extension(self):
         return os.path.splitext(self.get_filename())[1][1:]
@@ -61,3 +80,9 @@ class Document(object):
 
     def get_hashcode(self):
         return self.hashcode
+
+    def get_metadata(self):
+        return self.metadata
+
+    def set_metadata(self, metadata):
+        self.metadata = metadata

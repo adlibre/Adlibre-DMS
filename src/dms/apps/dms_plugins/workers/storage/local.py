@@ -46,7 +46,7 @@ def splitdir(document):
         splitdir = ''
         for d in doccode.split(document.get_stripped_filename()):
             splitdir = os.path.join(splitdir, d)
-        directory = os.path.join(str(doccode.get_id()), splitdir, document.get_filename()) # TODO: doccode.get_id
+        directory = os.path.join(str(doccode.get_id()), splitdir, document.get_stripped_filename())
     return directory
 
 class Local(object):
@@ -67,9 +67,10 @@ class Local(object):
         document.get_uploaded_file().seek(0)
         destination.write(document.get_uploaded_file().read())
         destination.close()
+        return document
 
-    def save_metadata(self, document, directory):
-        json_file = os.path.join(directory, '%s.json' % (document.get_stripped_filename(),))
+    def load_metadata(self, document_name, directory):
+        json_file = os.path.join(directory, '%s.json' % (document_name,))
         if os.path.exists(json_file):
             json_handler = open(json_file , mode='r+')
             fileinfo_db = json.load(json_handler)
@@ -77,6 +78,10 @@ class Local(object):
         else:
             fileinfo_db = []
             revision = 1
+        return fileinfo_db, revision
+
+    def save_metadata(self, document, directory):
+        fileinfo_db, revision = self.load_metadata(document.get_stripped_filename(), directory)
 
         document.set_revision(revision)
 
@@ -88,70 +93,50 @@ class Local(object):
         fileinfo_db.append(fileinfo)
         json_handler = open(json_file, mode='w')
         json.dump(fileinfo_db, json_handler)
+
         return document
 
-    def _store(self, file_obj, filename, root=settings.DOCUMENT_ROOT):
-        document, extension = os.path.splitext(filename)
-        extension = extension.strip(".")
-        directory = splitdir(document)
+    def retrieve(self, request, document):
+        root = settings.DOCUMENT_ROOT
 
-        if root:
-            directory = "%s/%s" % (root, directory)
-        else:
-            raise Exception('Root not specified')
-        
-        if not os.path.exists(directory):
-            os.makedirs(directory)
+        directory = os.path.join(root, splitdir(document))
 
-        # TODO: metadata should be written in separate method
-        json_file = '%s/%s.json' % (directory, document)
-        if os.path.exists(json_file):
-            json_handler = open(json_file , mode='r+')
-            fileinfo_db = json.load(json_handler)
-            revision = fileinfo_db[-1]['revision'] + 1
-        else:
-            fileinfo_db = []
-            revision = 1
+        fileinfo_db, revision = self.load_metadata(document.get_stripped_filename(), directory)
+        if not fileinfo_db:
+            raise PluginError("No such document found")
+        revision = document.get_revision() or 1
+        try:
+            fileinfo = fileinfo_db[int(revision)-1]
+        except:
+            raise PluginError("No such revision for this document")
+        document.set_metadata(fileinfo_db)
+        fullpath = os.path.join(directory, fileinfo['name'])
+        document.set_fullpath(fullpath)
+        #file will be read on first access lazily
+        return document
 
-        fileinfo = {
-            'name' : "%s_r%s.%s" % (document, revision, extension),
-            'revision' : revision,
-            'created_date' : str(datetime.datetime.today())
-        }
-        fileinfo_db.append(fileinfo)
-        json_handler = open(json_file, mode='w')
-        json.dump(fileinfo_db, json_handler)
+    def get_list(self, doccode):
+        """
+        Return List of DocCodes in the repository for a given rule
+        """
+        root = settings.DOCUMENT_ROOT
+        directory = os.path.join(root, str(doccode.get_id()))
 
-        destination = open('%s/%s' % (directory, fileinfo['name']), 'wb+')
-        file_obj.seek(0)
-        destination.write(file_obj.read())
-        destination.close()
+        # Iterate through the directory hierarchy looking for metadata containing dirs.
+        # This is more efficient than other methods of looking for leaf directories
+        # and works for storage rules where the depth of the storage tree is not constant for all doccodes.
 
+        # FIXME: This will be inefficient at scale and will require caching
 
-    @staticmethod
-    def retrieve(filename, revision=None, root=settings.DOCUMENT_ROOT):
-        document, extension = os.path.splitext(filename)
-        extension = extension.strip(".")
-        directory = splitdir(document)
-        if root:
-            directory = "%s/%s" % (root, directory)
+        doccodes = []
+        for root, dirs, files in os.walk(directory):
+            for file in files:
+                doc, extension = os.path.splitext(file)
+                if extension == '.json':
+                    doccodes.append(doc)
+        return naturalsort(doccodes)
 
-        json_file = '%s/%s.json' % (directory, document)
-        if os.path.exists(json_file):
-            json_handler = open(json_file , mode='r+')
-            fileinfo_db = json.load(json_handler)
-            if revision:
-                try:
-                    fileinfo = fileinfo_db[int(revision)-1]
-                except:
-                    raise NoRevisionError
-            else:
-                fileinfo = fileinfo_db[-1]
-        else:
-            raise NoRevisionError # TODO: This should NoDocumentExists exception
-        fullpath = '%s/%s' % (directory, fileinfo['name'])
-        file_obj = open(fullpath, 'rb')
-        return file_obj
+#---------------- old code ---------------------
 
 
     # TODO: Extend to handle revisions
@@ -199,7 +184,7 @@ class Local(object):
 
 
     @staticmethod
-    def get_list(id_rule, root=settings.DOCUMENT_ROOT):
+    def _get_list(id_rule, root=settings.DOCUMENT_ROOT):
         """
         Return List of DocCodes in the repository for a given rule
         """

@@ -9,12 +9,16 @@ import os
 
 from django.http import HttpResponse
 from django.views.generic.simple import direct_to_template
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404
 from django.template import RequestContext, loader
 
+from base import models
 from dms.settings import DEBUG
+from document_manager import DocumentManager
 from browser.forms import UploadForm
 from base.dms import DmsBase, DmsRule, DmsDocument, DmsException
 
@@ -71,7 +75,6 @@ def new_upload(request, template_name='browser/upload.html', extra_context={}):
     form = UploadForm(request.POST or None, request.FILES or None)
     if request.method == 'POST':
         if form.is_valid():
-            from document_manager import DocumentManager
             manager = DocumentManager()
             manager.store(request, form.files['file'])
             if not manager.errors:
@@ -85,7 +88,34 @@ def new_upload(request, template_name='browser/upload.html', extra_context={}):
                               extra_context=extra_context)
 
 
-def get_file(request, document, hashcode=None, extension=None):
+def get_file(request, document, hashcode = None, extension = None):
+
+    if settings.NEW_SYSTEM:
+        document_name = document
+        manager = DocumentManager()
+        revision = request.REQUEST.get('r', None)
+        document = manager.retrieve(request, document_name, hashcode = hashcode, revision = revision)
+
+        #TODO: move this code into plugin
+        from adlibre.converter import FileConverter
+        from base.dms import DmsException
+        new_file = FileConverter(document.get_file_obj(), extension)
+        try:
+            mimetype, content = new_file.convert()
+        except TypeError:
+            raise DmsException('Unable to convert to requested format', 405)
+
+        if extension:
+            filename = document.get_filename()
+        elif revision:
+            filename = document.get_filename_with_revision()
+        else:
+            filename = document.get_stripped_filename()
+
+        response = HttpResponse(content, mimetype = mimetype)
+        response["Content-Length"] = len(content)
+        response['Content-Disposition'] = 'filename=%s' % filename
+        return response
 
     revision = request.GET.get("r", None)
     request_extension = extension
@@ -110,10 +140,24 @@ def get_file(request, document, hashcode=None, extension=None):
         response['Content-Disposition'] = 'filename=%s' % filename
         return response
 
-
 @staff_member_required
 def revision_document(request, document):
-
+    if settings.NEW_SYSTEM: 
+        document_name = document
+        manager = DocumentManager()
+        document = manager.retrieve(request, document_name)
+        extra_context = {}
+        if not manager.errors:
+            extra_context = {
+                'fileinfo_db': document.get_metadata(),
+                'document_name': document.get_stripped_filename(),
+            }
+            if document.get_hashcode():
+                extra_context['hash'] = document.get_hashcode()
+        else:
+            messages.error(request, "; ".join(manager.errors))
+        return direct_to_template(request, 'browser/new_revision.html',
+            extra_context=extra_context)
     try:
         d = DmsDocument(document)
     except DmsException, (e):
@@ -133,7 +177,11 @@ def revision_document(request, document):
 
 @staff_member_required
 def files_index(request):
-
+    if settings.NEW_SYSTEM:
+        mappings = models.DoccodePluginMapping.objects.all()
+        extra_context = {'rules': mappings}
+        return direct_to_template(request, 'browser/new_files_index.html',
+            extra_context=extra_context)
     try:
         dms = DmsBase()
     except DmsException, (e):
@@ -151,10 +199,18 @@ def files_index(request):
         return direct_to_template(request, 'browser/files_index.html',
             extra_context=extra_context)
 
-
 @staff_member_required
 def files_document(request, id_rule):
-
+    if settings.NEW_SYSTEM:
+        mapping = get_object_or_404(models.DoccodePluginMapping, pk = id_rule)
+        manager = DocumentManager()
+        file_list = manager.get_file_list(mapping)
+        extra_context = {
+            'mapping': mapping,
+            'document_list': file_list,
+        }
+        return direct_to_template(request, 'browser/new_files.html',
+            extra_context = extra_context)
     try:
         dms = DmsRule(id_rule)
     except DmsException, (e):

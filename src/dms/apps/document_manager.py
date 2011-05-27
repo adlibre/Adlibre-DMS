@@ -4,6 +4,9 @@ from dms_plugins.pluginpoints import BeforeStoragePluginPoint, BeforeRetrievalPl
 from document import Document
 from base import models
 
+class ConfigurationError(Exception):
+    pass
+
 class DocumentManager(object):
     def __init__(self):
         self.errors = []
@@ -16,20 +19,29 @@ class DocumentManager(object):
             mapping = None
         return mapping
 
-    def get_plugins(self, pluginpoint, document):
+    def get_plugins_from_mapping(self, mapping, pluginpoint, plugin_type):
+        plugins = []
+        plugin_objects = getattr(mapping, pluginpoint.settings_field_name).order_by('index')
+        plugins = map(lambda plugin_obj: plugin_obj.get_plugin(), plugin_objects)
+        if plugin_type:
+            plugins = filter(lambda plugin: hasattr(plugin, 'plugin_type') and plugin.plugin_type == plugin_type, plugins)
+        return plugins
+
+    def get_plugins(self, pluginpoint, document, plugin_type = None):
         mapping = self.get_plugin_mapping(document)
         if mapping:
-            plugin_objects = getattr(mapping, pluginpoint.settings_field_name).order_by('index')
-            plugins = map(lambda plugin_obj: plugin_obj.get_plugin(), plugin_objects)
+            plugins = self.get_plugins_from_mapping(mapping, pluginpoint, plugin_type)
         else:
             plugins = []
         return plugins
 
     def process_pluginpoint(self, pluginpoint, request, document = None):
         plugins = self.get_plugins(pluginpoint, document)
+        print 'plugins: %s' % plugins
         for plugin in plugins:
             try:
                 document = plugin.work(request, document)
+                print "Processed %s: Here is document: \n%s" % (plugin, document)
             except PluginError, e: # if some plugin throws an exception, stop processing and store the error message
                 self.errors.append(str(e))
                 break
@@ -42,10 +54,23 @@ class DocumentManager(object):
         doc.set_uploaded_file(uploaded_file)
         return self.process_pluginpoint(BeforeStoragePluginPoint, request, document = doc)
 
-    def retrieve(self, request, document_id, hashcode = None):
+    def retrieve(self, request, document_name, hashcode = None, revision = None):
         doc = Document()
-        doc.set_id(document_id)
+        doc.set_filename(document_name)
         doc.set_hashcode(hashcode)
+        doc.set_revision(revision)
         return self.process_pluginpoint(BeforeRetrievalPluginPoint, request, document = doc)
 
+    def get_storage(self, doccode_plugin_mapping, pluginpoint = BeforeStoragePluginPoint):
+        #Plugin point does not matter here as mapping must have a storage plugin both at storage and retrieval stages
+        storage = self.get_plugins_from_mapping(doccode_plugin_mapping, pluginpoint, plugin_type = 'storage')
+        #Document MUST have a storage plugin
+        if not storage:
+            raise ConfigurationError("No storage plugin for %s" % doccode_plugin_mapping)
+        #Should we validate more than one storage plugin?
+        return storage[0]
+
+    def get_file_list(self, doccode_plugin_mapping):
+        storage = self.get_storage(doccode_plugin_mapping)
+        return storage.worker.get_list(doccode_plugin_mapping.get_doccode())
 
