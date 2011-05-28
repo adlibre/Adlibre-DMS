@@ -12,7 +12,8 @@ import shutil
 
 from django.conf import settings
 
-from dms_plugins.workers import PluginError
+from dms_plugins.pluginpoints import BeforeStoragePluginPoint, BeforeRetrievalPluginPoint
+from dms_plugins.workers import Plugin, PluginError
 
 class NoRevisionError(Exception):
     def __str__(self):
@@ -155,20 +156,6 @@ class Local(object):
         else:
             return None
 
-
-    @staticmethod
-    def get_meta_data(document, root=settings.DOCUMENT_ROOT):
-        directory = splitdir(document)
-        if root:
-            directory = "%s/%s" % (root, directory)
-        json_file = '%s/%s.json' % (directory, document)
-        if os.path.exists(json_file):
-            json_handler = open(json_file , mode='r+')
-            fileinfo_db = json.load(json_handler)
-            return fileinfo_db
-        return None
-
-
     @staticmethod
     def get_revision_count(document, root=settings.DOCUMENT_ROOT):
         # Hacky way, but faster than reading the revs from the metadata
@@ -182,25 +169,24 @@ class Local(object):
         else:
             return 0
 
+class LocalStoragePlugin(Plugin, BeforeStoragePluginPoint):
+    title = "Local Storage"
+    description = "Saves document as local file"
+    active = True
 
-    @staticmethod
-    def _get_list(id_rule, root=settings.DOCUMENT_ROOT):
-        """
-        Return List of DocCodes in the repository for a given rule
-        """
-        directory = "%s/%s" % (root, id_rule)
+    plugin_type = 'storage'
+    worker = Local()
 
-        # Iterate through the directory hierarchy looking for metadata containing dirs.
-        # This is more efficient than other methods of looking for leaf directories
-        # and works for storage rules where the depth of the storage tree is not constant for all doccodes.
+    def work(self, request, document, **kwargs):
+        return self.worker.store(request, document)
 
-        # FIXME: This will be inefficient at scale and will require caching
+class LocalRetrievalPlugin(Plugin, BeforeRetrievalPluginPoint):
+    title = "Local Retrieval"
+    description = "Loads document as local file"
+    active = True
 
-        doccodes = []
-        for root, dirs, files in os.walk(directory):
-            for file in files:
-                doc, extension = os.path.splitext(file)
-                if extension == '.json':
-                    doccodes.append(doc)
-        return naturalsort(doccodes)
+    plugin_type = 'storage'
+    worker = Local()
 
+    def work(self, request, document, **kwargs):
+        return self.worker.retrieve(request, document)

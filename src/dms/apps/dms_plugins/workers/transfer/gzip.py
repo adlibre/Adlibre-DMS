@@ -1,7 +1,26 @@
 import zlib
 import tempfile
 
-class GzipWorker(object):
+from dms_plugins.pluginpoints import BeforeStoragePluginPoint, BeforeRetrievalPluginPoint
+from dms_plugins.workers import Plugin, PluginError
+
+class GzipOnStorePlugin(Plugin, BeforeStoragePluginPoint):
+    title = 'Gzip Plugin'
+    active = True
+    has_configuration = True #TODO: configure
+
+    def work(self, request, document):
+        return Gzip.work_store(request, document)
+
+class GzipOnRetrievePlugin(Plugin, BeforeRetrievalPluginPoint):
+    title = 'Gzip Plugin'
+    active = True
+    has_configuration = True #TODO: configure
+
+    def work(self, request, document):
+        return Gzip.work_retrieve(request, document)
+
+class Gzip(object):
     def _work(self, file_obj, method):
         file_obj.seek(0)
         content = file_obj.read()

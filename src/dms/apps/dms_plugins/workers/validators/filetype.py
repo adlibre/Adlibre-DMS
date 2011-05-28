@@ -1,5 +1,7 @@
 import magic
-from dms_plugins.workers import PluginError
+
+from dms_plugins.pluginpoints import BeforeStoragePluginPoint
+from dms_plugins.workers import Plugin, PluginError
 
 MIMETYPES = [
                 ('application/pdf', 'pdf'),
@@ -15,9 +17,13 @@ MIMETYPES = [
 def get_mimetypes():
     return [ x[0] for x in MIMETYPES ]
 
-class FileTypeValidationWorker(object):
+class FileTypeValidationPlugin(Plugin, BeforeStoragePluginPoint):
+    title = "File Type Validator"
+    description = "Validates document type against supported types"
+    active = True
+
     mimetypes = get_mimetypes()
-    
+
     def work(self, request, document, **kwargs):
         filebuffer = document.get_uploaded_file()
         if filebuffer is None:
@@ -26,4 +32,4 @@ class FileTypeValidationWorker(object):
         typ = mime.from_buffer( filebuffer.read() )
         if not typ in self.mimetypes:
             raise PluginError('File type %s is not supported' % typ)
-        return document
+
