@@ -46,6 +46,9 @@ def upload(request, template_name='browser/upload.html', extra_context={}):
     determine storage, validator, and security plugins.
     """
 
+    if settings.NEW_SYSTEM:
+        return new_upload(request, template_name, extra_context)
+
     form = UploadForm(request.POST or None, request.FILES or None)
     if request.method == 'POST':
         if form.is_valid():
@@ -96,23 +99,19 @@ def get_file(request, document, hashcode = None, extension = None):
         revision = request.REQUEST.get('r', None)
         document = manager.retrieve(request, document_name, hashcode = hashcode, revision = revision)
 
-        #TODO: move this code into plugin
-        from adlibre.converter import FileConverter
-        from base.dms import DmsException
-        new_file = FileConverter(document.get_file_obj(), extension)
-        try:
-            mimetype, content = new_file.convert()
-        except TypeError:
-            raise DmsException('Unable to convert to requested format', 405)
+        #todo convert
+        document.get_file_obj().seek(0)
+        content = document.get_file_obj().read()
+        mimetype = document.get_mimetype()
 
-        if extension:
-            filename = document.get_filename()
-        elif revision:
+        if revision:
             filename = document.get_filename_with_revision()
         else:
-            filename = document.get_stripped_filename()
+            filename = document.get_full_filename()
 
+        #print "FILENAME: %s" % filename
         response = HttpResponse(content, mimetype = mimetype)
+
         response["Content-Length"] = len(content)
         response['Content-Disposition'] = 'filename=%s' % filename
         return response
@@ -145,7 +144,7 @@ def revision_document(request, document):
     if settings.NEW_SYSTEM: 
         document_name = document
         manager = DocumentManager()
-        document = manager.retrieve(request, document_name)
+        document = manager.retrieve(request, document_name, only_metadata = True)
         extra_context = {}
         if not manager.errors:
             extra_context = {
@@ -156,6 +155,8 @@ def revision_document(request, document):
                 extra_context['hash'] = document.get_hashcode()
         else:
             messages.error(request, "; ".join(manager.errors))
+        if manager.warnings:
+            messages.warning(request, "; ".join(manager.warnings))
         return direct_to_template(request, 'browser/new_revision.html',
             extra_context=extra_context)
     try:

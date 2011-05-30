@@ -12,3 +12,9 @@ class Plugin(object):
 
 class PluginError(Exception):
     pass
+
+class PluginWarning(Exception):
+    pass
+
+class BreakPluginChain(Exception):
+    pass

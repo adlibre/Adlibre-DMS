@@ -13,7 +13,7 @@ import shutil
 from django.conf import settings
 
 from dms_plugins.pluginpoints import BeforeStoragePluginPoint, BeforeRetrievalPluginPoint
-from dms_plugins.workers import Plugin, PluginError
+from dms_plugins.workers import Plugin, PluginError, BreakPluginChain
 
 class NoRevisionError(Exception):
     def __str__(self):
@@ -50,6 +50,7 @@ def splitdir(document):
         directory = os.path.join(str(doccode.get_id()), splitdir, document.get_stripped_filename())
     return directory
 
+
 class Local(object):
     def store(self, request, document):
         root = settings.DOCUMENT_ROOT
@@ -65,8 +66,9 @@ class Local(object):
         document = self.save_metadata(document, directory)
 
         destination = open(os.path.join(directory, document.get_filename_with_revision()), 'wb+')
-        document.get_uploaded_file().seek(0)
-        destination.write(document.get_uploaded_file().read())
+        fil = document.get_file_obj()
+        fil.seek(0)
+        destination.write(fil.read())
         destination.close()
         return document
 
@@ -83,7 +85,6 @@ class Local(object):
 
     def save_metadata(self, document, directory):
         fileinfo_db, revision = self.load_metadata(document.get_stripped_filename(), directory)
-
         document.set_revision(revision)
 
         fileinfo = {
@@ -91,7 +92,13 @@ class Local(object):
             'revision' : document.get_revision(),
             'created_date' : str(datetime.datetime.today())
         }
+
+        if document.get_current_metadata():
+            fileinfo.update(document.get_current_metadata())
+
         fileinfo_db.append(fileinfo)
+        
+        json_file = os.path.join(directory, '%s.json' % (document.get_stripped_filename(),))
         json_handler = open(json_file, mode='w')
         json.dump(fileinfo_db, json_handler)
 
@@ -114,6 +121,8 @@ class Local(object):
         fullpath = os.path.join(directory, fileinfo['name'])
         document.set_fullpath(fullpath)
         #file will be read on first access lazily
+        if document.get_option('only_metadata') == True:
+            raise BreakPluginChain()
         return document
 
     def get_list(self, doccode):
