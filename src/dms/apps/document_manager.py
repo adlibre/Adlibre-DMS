@@ -1,4 +1,4 @@
-from dms_plugins.workers import PluginError
+from dms_plugins.workers import PluginError, PluginWarning, BreakPluginChain
 from dms_plugins.pluginpoints import BeforeStoragePluginPoint, BeforeRetrievalPluginPoint
 
 from document import Document
@@ -10,6 +10,7 @@ class ConfigurationError(Exception):
 class DocumentManager(object):
     def __init__(self):
         self.errors = []
+        self.warnings = []
 
     def get_plugin_mapping(self, document):
         mapping = models.DoccodePluginMapping.objects.filter(doccode = document.get_doccode().get_id())
@@ -45,20 +46,32 @@ class DocumentManager(object):
             except PluginError, e: # if some plugin throws an exception, stop processing and store the error message
                 self.errors.append(str(e))
                 break
+            except PluginWarning, e:
+                self.warnings.append(str(e))
+            except BreakPluginChain:
+                break
         return document
 
     def store(self, request, uploaded_file):
         #process all storage plugins
         #uploaded file is http://docs.djangoproject.com/en/1.3/topics/http/file-uploads/#django.core.files.uploadedfile.UploadedFile
         doc = Document()
-        doc.set_uploaded_file(uploaded_file)
+        doc.set_file_obj(uploaded_file)
+        doc.set_filename(uploaded_file.name)
+        doc.set_mimetype(uploaded_file.content_type)
         return self.process_pluginpoint(BeforeStoragePluginPoint, request, document = doc)
 
-    def retrieve(self, request, document_name, hashcode = None, revision = None):
+    def retrieve(self, request, document_name, hashcode = None, revision = None, only_metadata = False):
+        """
+            retrieve_only tells system that it should ignore all plugins AFTER storage 
+            plugin has retrieved file. This is necessary to prevent needless work like 
+            compression etc in case we only need metadata.
+        """
         doc = Document()
         doc.set_filename(document_name)
         doc.set_hashcode(hashcode)
         doc.set_revision(revision)
+        doc.update_options({'only_metadata': only_metadata})
         return self.process_pluginpoint(BeforeRetrievalPluginPoint, request, document = doc)
 
     def get_storage(self, doccode_plugin_mapping, pluginpoint = BeforeStoragePluginPoint):

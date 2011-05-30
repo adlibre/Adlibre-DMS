@@ -25,11 +25,15 @@ class FileTypeValidationPlugin(Plugin, BeforeStoragePluginPoint):
     mimetypes = get_mimetypes()
 
     def work(self, request, document, **kwargs):
-        filebuffer = document.get_uploaded_file()
+        filebuffer = document.get_file_obj()
         if filebuffer is None:
             raise PluginError('File buffer not initialized')
-        mime = magic.Magic( mime=True )
-        typ = mime.from_buffer( filebuffer.read() )
+        mime = magic.Magic( mime = True )
+        content = ''
+        for line in filebuffer:
+            content += line
+        typ = mime.from_buffer( content )
         if not typ in self.mimetypes:
             raise PluginError('File type %s is not supported' % typ)
-
+        document.set_mimetype(typ)
+        return document
