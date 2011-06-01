@@ -18,3 +18,12 @@ class PluginWarning(Exception):
 
 class BreakPluginChain(Exception):
     pass
+
+class DmsException(Exception):
+    def __init__(self, value, code):
+        self.parameter = value
+        self.code = code
+
+    def __str__(self):
+        return (repr(self.parameter), self.code)
+

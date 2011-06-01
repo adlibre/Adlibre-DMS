@@ -61,7 +61,7 @@ class DocumentManager(object):
         doc.set_mimetype(uploaded_file.content_type)
         return self.process_pluginpoint(BeforeStoragePluginPoint, request, document = doc)
 
-    def retrieve(self, request, document_name, hashcode = None, revision = None, only_metadata = False):
+    def retrieve(self, request, document_name, hashcode = None, revision = None, only_metadata = False, extension = None):
         """
             retrieve_only tells system that it should ignore all plugins AFTER storage 
             plugin has retrieved file. This is necessary to prevent needless work like 
@@ -71,7 +71,10 @@ class DocumentManager(object):
         doc.set_filename(document_name)
         doc.set_hashcode(hashcode)
         doc.set_revision(revision)
-        doc.update_options({'only_metadata': only_metadata})
+        options = {'only_metadata': only_metadata}
+        if extension:
+            options['convert_to_extension'] = extension
+        doc.update_options(options)
         return self.process_pluginpoint(BeforeRetrievalPluginPoint, request, document = doc)
 
     def get_storage(self, doccode_plugin_mapping, pluginpoint = BeforeStoragePluginPoint):

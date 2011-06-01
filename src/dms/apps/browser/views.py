@@ -97,7 +97,7 @@ def get_file(request, document, hashcode = None, extension = None):
         document_name = document
         manager = DocumentManager()
         revision = request.REQUEST.get('r', None)
-        document = manager.retrieve(request, document_name, hashcode = hashcode, revision = revision)
+        document = manager.retrieve(request, document_name, hashcode = hashcode, revision = revision, extension = extension)
 
         #todo convert
         document.get_file_obj().seek(0)
