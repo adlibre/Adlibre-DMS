@@ -81,17 +81,22 @@ class FileConverter:
         p = Popen('rm -rf %s' % path, shell=True,stdout=PIPE, stderr=PIPE)
         return ['application/pdf', content]
 
+import tempfile
 
 class NewFileConverter(object):
     """
     Convert file from one mimetype to another mimetype
     """
 
-    def __init__(self, file_obj, extension):
+    def __init__(self, file_obj, file_path, extension):
         self.file_obj = file_obj
-        self.filepath = file_obj.name
+        self.filepath = file_path
         self.filename = os.path.basename(self.filepath)
         self.document = os.path.splitext(self.filename)[0]
+
+        self.temp_input = tempfile.NamedTemporaryFile()
+        self.temp_input.write(self.file_obj.read())
+        self.temp_input.seek(0)
 
         self.extension_to = extension
 
@@ -114,11 +119,13 @@ class NewFileConverter(object):
             return (None, None)
 
     def do_convert(self, command):
-        import tempfile
-        tempfile = tempfile.NamedTemporaryFile()
-        p = Popen(command % {'to': tempfile.name, 'from': self.filepath}, shell=True, stdout=PIPE, stderr=PIPE)
+        from_path = self.temp_input.name
+        temp_output = tempfile.NamedTemporaryFile()
+        to_path = temp_output.name
+        p = Popen(command % {'to': to_path, 'from': from_path}, shell=True, stdout=PIPE, stderr=PIPE)
         stdout, stderr = p.communicate()
-        return tempfile
+        temp_output.seek(0)
+        return temp_output
 
     def tif_to_pdf(self):
         """
