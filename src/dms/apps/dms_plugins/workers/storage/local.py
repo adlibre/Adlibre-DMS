@@ -181,7 +181,6 @@ class Local(object):
 class LocalStoragePlugin(Plugin, BeforeStoragePluginPoint):
     title = "Local Storage"
     description = "Saves document as local file"
-    active = True
 
     plugin_type = 'storage'
     worker = Local()
@@ -192,7 +191,6 @@ class LocalStoragePlugin(Plugin, BeforeStoragePluginPoint):
 class LocalRetrievalPlugin(Plugin, BeforeRetrievalPluginPoint):
     title = "Local Retrieval"
     description = "Loads document as local file"
-    active = True
 
     plugin_type = 'storage'
     worker = Local()

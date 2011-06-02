@@ -6,7 +6,6 @@ from dms_plugins.workers import Plugin, PluginError
 class GroupSecurityStore(Plugin, BeforeStoragePluginPoint):
     name = 'Security Group'
     description = 'Security group member only'
-    active = True
 
     def work(self, request, document):
         return GroupSecurity().work(request, document)
@@ -14,8 +13,6 @@ class GroupSecurityStore(Plugin, BeforeStoragePluginPoint):
 class GroupSecurityRetrieval(Plugin, BeforeRetrievalPluginPoint):
     name = 'Security Group'
     description = 'Security group member only'
-    active = True
-    index = 0
 
     def work(self, request, document):
         return GroupSecurity().work(request, document)
