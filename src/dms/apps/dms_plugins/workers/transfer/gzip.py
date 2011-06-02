@@ -6,7 +6,6 @@ from dms_plugins.workers import Plugin, PluginError
 
 class GzipOnStorePlugin(Plugin, BeforeStoragePluginPoint):
     title = 'Gzip Plugin'
-    active = True
     has_configuration = True #TODO: configure
 
     def work(self, request, document):
@@ -14,7 +13,6 @@ class GzipOnStorePlugin(Plugin, BeforeStoragePluginPoint):
 
 class GzipOnRetrievePlugin(Plugin, BeforeRetrievalPluginPoint):
     title = 'Gzip Plugin'
-    active = True
     has_configuration = True #TODO: configure
 
     def work(self, request, document):

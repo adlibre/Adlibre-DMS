@@ -20,7 +20,6 @@ def get_mimetypes():
 class FileTypeValidationPlugin(Plugin, BeforeStoragePluginPoint):
     title = "File Type Validator"
     description = "Validates document type against supported types"
-    active = True
 
     mimetypes = get_mimetypes()
 

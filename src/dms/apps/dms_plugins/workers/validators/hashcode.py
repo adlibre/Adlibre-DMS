@@ -6,7 +6,6 @@ from dms_plugins.workers import Plugin, PluginError
 class HashCodeValidationPlugin(Plugin, BeforeRetrievalPluginPoint):
     title = 'Hash'
     description = 'Hash code validation on retrieval'
-    active = True
 
     method = 'md5'
     has_configuration = True #TODO: configuration
