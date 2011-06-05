@@ -7,7 +7,7 @@ License: See LICENSE for license information
 
 from django.contrib import admin
 
-from models import Rule, PluginRule, DoccodePluginMapping
+from models import Rule, PluginRule
 
 
 def rule_doc(obj):
@@ -23,4 +23,3 @@ admin.site.register(Rule, RuleAdmin)
 
 admin.site.register(PluginRule)
 
-admin.site.register(DoccodePluginMapping)
