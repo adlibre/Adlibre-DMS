@@ -163,8 +163,9 @@ class PluginRule(models.Model):
 
 """
 New models
-"""
-from plugins.fields import ManyPluginField
+
+from plugins.fields import PluginField, ManyPluginField
+from plugins.models import Plugin
 
 from dms_plugins import pluginpoints
 from doc_codes import DoccodeManagerInstance
@@ -192,3 +193,9 @@ class DoccodePluginMapping(models.Model):
 
     def get_doccode(self):
         return DoccodeManagerInstance.get_doccodes()[int(self.doccode)]
+
+class PluginOption(models.Model):
+    plugin = models.ForeignKey(Plugin)
+    name = models.CharField(max_length = 64)
+    value = models.TextField(default = '', blank = True)
+"""
