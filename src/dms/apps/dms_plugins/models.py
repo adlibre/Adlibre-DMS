@@ -45,3 +45,7 @@ class PluginOption(models.Model):
     plugin = models.ForeignKey(Plugin)
     name = models.CharField(max_length = 64)
     value = models.TextField(default = '', blank = True)
+
+    def __unicode__(self):
+        return "%s: %s" % (self.name, self.value)
+

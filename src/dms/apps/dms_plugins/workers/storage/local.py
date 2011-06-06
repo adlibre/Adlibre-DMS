@@ -100,7 +100,7 @@ class Local(object):
         
         json_file = os.path.join(directory, '%s.json' % (document.get_stripped_filename(),))
         json_handler = open(json_file, mode='w')
-        json.dump(fileinfo_db, json_handler)
+        json.dump(fileinfo_db, json_handler, indent = 4)
 
         return document
 

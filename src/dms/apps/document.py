@@ -127,6 +127,9 @@ class Document(object):
     def set_hashcode(self, hashcode):
         self.hashcode = hashcode
 
+    def save_hashcode(self, hashcode):
+        self.update_current_metadata({'hashcode': hashcode})
+
     def get_hashcode(self):
         return self.hashcode
 

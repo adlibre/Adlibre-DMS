@@ -8,23 +8,27 @@ License: See LICENSE for license information
 import os
 import pickle
 
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import get_object_or_404
-from django.views.generic.simple import direct_to_template
+from plugins import models as plugin_models
+
+from django.conf import settings as system_settings
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import get_object_or_404
 from django.template import RequestContext, loader
+from django.views.generic.simple import direct_to_template
 
 from base.forms import SettingForm, EditSettingForm
 from base.models import (Rule, available_validators, available_doccodes,
     available_storages, available_securities)
 
 from base.dms import DmsBase, DmsRule, DmsDocument, DmsException
-
 from base.utils import ValidatorProvider, StorageProvider, SecurityProvider, \
     DocCodeProvider
+from dms_plugins import models
+from dms_plugins import forms
 
 
 def handlerError(request, httpcode, message):
@@ -44,6 +48,19 @@ def setting(request, template_name='base/setting.html',
     """
     Setting for adding and editing rule.
     """
+    if system_settings.NEW_SYSTEM:
+        mappings = models.DoccodePluginMapping.objects.all()
+        if request.method == 'POST':
+            form = forms.MappingForm(request.POST)
+            if form.is_valid():
+                mapping = form.save()
+                return HttpResponseRedirect('.')
+        else:
+            form = forms.MappingForm
+        extra_context['form'] = form
+        extra_context['rule_list'] = mappings
+        return direct_to_template(request, "base/new_setting.html", extra_context=extra_context)
+
     rule_list = Rule.objects.all()
     if request.method == 'POST':
         form = SettingForm(request.POST)
@@ -67,6 +84,16 @@ def setting(request, template_name='base/setting.html',
 @staff_member_required
 def edit_setting(request, rule_id, template_name='base/edit_setting.html',
                    extra_context={}):
+    if system_settings.NEW_SYSTEM:
+        mapping = get_object_or_404(models.DoccodePluginMapping, id=rule_id)
+        form = forms.MappingForm(instance = mapping)
+        if request.method == 'POST':
+            form = forms.MappingForm(instance = mapping, data = request.POST)
+            if form.is_valid():
+                mapping = form.save()
+        extra_context['rule'] = mapping
+        extra_context['form'] = form
+        return direct_to_template(request, 'base/new_edit_setting.html', extra_context=extra_context)
     rule = get_object_or_404(Rule, id=rule_id)
     initial = {
         'storage':rule.get_storage().name,
@@ -95,12 +122,15 @@ def toggle_rule_state(request, rule_id):
     """
     Toggle rule state of being active or disabled
     """
-
+    if system_settings.NEW_SYSTEM:
+        mapping = get_object_or_404(models.DoccodePluginMapping, id=rule_id)
+        mapping.active = not mapping.active
+        mapping.save()
+        return HttpResponseRedirect(reverse("setting"))
     rule = get_object_or_404(Rule, id=rule_id)
     rule.active = not rule.active
     rule.save()
     return HttpResponseRedirect(reverse("setting"))
-
 
 @staff_member_required
 def toggle_securities_plugin(request, rule_id, plugin_index):
@@ -140,6 +170,30 @@ def plugins(request, template_name='base/plugins.html',
     extra_context['plugin_list'] = plugins
 
     return direct_to_template(request, template_name, extra_context=extra_context)
+
+@staff_member_required
+def new_plugin_setting(request, rule_id, plugin_id,
+                   template_name='base/new_plugin_setting.html',
+                   extra_context={}):
+    """
+    Some plugins have configuration and the configuration can be different for
+    each rule.
+    """
+
+    if system_settings.NEW_SYSTEM:
+        mapping = get_object_or_404(models.DoccodePluginMapping, id=rule_id)
+        plugin_obj = get_object_or_404(plugin_models.Plugin, id = plugin_id)
+        plugin = plugin_obj.get_plugin()
+        form = plugin.get_configuration_form(mapping)
+        if request.method == 'POST':
+            form = plugin.get_configuration_form(mapping, data = request.POST)
+            if form.is_valid():
+                plugin_option = form.save()
+                return HttpResponseRedirect('.')
+        extra_context['form'] = form
+        extra_context['rule'] = mapping
+        extra_context['plugin'] = plugin
+        return direct_to_template(request, template_name, extra_context=extra_context)
 
 
 @staff_member_required

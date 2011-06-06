@@ -4,14 +4,14 @@ from dms_plugins.pluginpoints import BeforeStoragePluginPoint, BeforeRetrievalPl
 from dms_plugins.workers import Plugin, PluginError
 
 class GroupSecurityStore(Plugin, BeforeStoragePluginPoint):
-    name = 'Security Group'
+    title = 'Security Group'
     description = 'Security group member only'
 
     def work(self, request, document):
         return GroupSecurity().work(request, document)
 
 class GroupSecurityRetrieval(Plugin, BeforeRetrievalPluginPoint):
-    name = 'Security Group'
+    title = 'Security Group'
     description = 'Security group member only'
 
     def work(self, request, document):

@@ -1,8 +1,8 @@
+from dms_plugins import models
 from dms_plugins.workers import PluginError, PluginWarning, BreakPluginChain
 from dms_plugins.pluginpoints import BeforeStoragePluginPoint, BeforeRetrievalPluginPoint
 
 from document import Document
-from base import models
 
 class ConfigurationError(Exception):
     pass
