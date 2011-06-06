@@ -9,7 +9,7 @@ class CreditCardDoccode(Doccode):
     but it demonstrates more complex validation is possible.
     """
 
-    name = 'Credit Card Scans'
+    title = 'Credit Card Scans'
     description = '[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{4}'
     active = True
     doccode_id = 5
