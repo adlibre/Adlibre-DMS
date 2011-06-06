@@ -5,11 +5,11 @@
 {% block body_class %}plugins{% endblock %}
 
 {% block content %}
-<h1>Rule {{ rule.get_doccode.name }}</h1>
+<h1>Rule {{ rule.get_doccode.title }}</h1>
 
 {{ plugin.render }}
 
-<h3>{{ plugin.name }}'s Configuration </h3>
+<h3>{{ plugin.title }}'s Configuration </h3>
 <form action="" method="post">
   {{ form.as_p }}
   {%csrf_token%}

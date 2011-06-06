@@ -16,7 +16,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from django.template import RequestContext, loader
 
-from base import models
+from dms_plugins import models
 from dms.settings import DEBUG
 from document_manager import DocumentManager
 from browser.forms import UploadForm
@@ -151,8 +151,6 @@ def revision_document(request, document):
                 'fileinfo_db': document.get_metadata(),
                 'document_name': document.get_stripped_filename(),
             }
-            if document.get_hashcode():
-                extra_context['hash'] = document.get_hashcode()
         else:
             messages.error(request, "; ".join(manager.errors))
         if manager.warnings:

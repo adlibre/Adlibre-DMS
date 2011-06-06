@@ -5,7 +5,7 @@ from base import Doccode
 
 
 class TestPDFDoccode(Doccode):
-    name = 'Test PDFs'
+    title = 'Test PDFs'
     description = '[a-z]{5}[0-9]{3}'
     active = True
     doccode_id = 1
