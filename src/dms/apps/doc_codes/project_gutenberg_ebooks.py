@@ -5,7 +5,7 @@ from base import Doccode
 
 class ProjectGutenbergEbooksDoccode(Doccode):
     active = True
-    name = 'Project Gutenberg eBooks'
+    title = 'Project Gutenberg eBooks'
     description = '[0-9]{1,6}'
     doccode_id = 3
 

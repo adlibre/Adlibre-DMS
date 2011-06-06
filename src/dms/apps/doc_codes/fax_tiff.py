@@ -5,7 +5,7 @@ from base import Doccode
 
 class FaxTiffDoccode(Doccode):
     active = True
-    name = 'Fax Tiff documents'
+    title = 'Fax Tiff documents'
     description = '[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{1,9}'
     doccode_id = 4
 
