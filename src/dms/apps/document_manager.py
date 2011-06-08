@@ -13,7 +13,9 @@ class DocumentManager(object):
         self.warnings = []
 
     def get_plugin_mapping(self, document):
-        mapping = models.DoccodePluginMapping.objects.filter(doccode = document.get_doccode().get_id())
+        mapping = models.DoccodePluginMapping.objects.filter(
+                    doccode = document.get_doccode().get_id(),
+                    active = True)
         if mapping.count():
             mapping = mapping[0]
         else:
@@ -90,3 +92,18 @@ class DocumentManager(object):
         storage = self.get_storage(doccode_plugin_mapping)
         return storage.worker.get_list(doccode_plugin_mapping.get_doccode())
 
+
+    def get_file(self, request, document_name, hashcode, extension):
+        manager = DocumentManager()
+        revision = request.REQUEST.get('r', None)
+        document = manager.retrieve(request, document_name, hashcode = hashcode, revision = revision, extension = extension)
+
+        document.get_file_obj().seek(0)
+        content = document.get_file_obj().read()
+        mimetype = document.get_mimetype()
+
+        if revision:
+            filename = document.get_filename_with_revision()
+        else:
+            filename = document.get_full_filename()
+        return mimetype, filename, content
