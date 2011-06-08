@@ -7,18 +7,19 @@ License: See LICENSE for license information
 
 import os
 
+from django.conf import settings
 from django.http import HttpResponse
 
 from piston.handler import BaseHandler
 from piston.utils import rc
 
 from base.dms import DmsBase, DmsRule, DmsDocument, DmsException
+from document_manager import DocumentManager
 
 class FileHandler(BaseHandler):
     allowed_methods = ('GET','POST','DELETE',)
 
     def read(self, request):
-
         filename = request.GET.get('filename')
         document, extension = os.path.splitext(filename)
         request_extension = extension.strip(".")
@@ -26,10 +27,21 @@ class FileHandler(BaseHandler):
         revision = request.GET.get("r", None) # TODO: TestMe
         hashcode = request.GET.get("h", None) # TODO: TestMe
 
+        if settings.NEW_SYSTEM:
+            manager = DocumentManager()
+            mimetype, filename, content = manager.get_file(request, document, hashcode, extension)
+            if manager.errors:
+                return rc.BAD_REQUEST
+            response = HttpResponse(content, mimetype=mimetype)
+            response["Content-Length"] = len(content)
+            response['Content-Disposition'] = 'filename=%s' % filename
+
+            return response
+
         try:
             d = DmsDocument(document, revision)
         except DmsException, (e):
-            return rc.BAD_REQUEST
+            return rc.BAD_REQUEST# TODO: need to interpret these and return rc.NOT_FOUND etc.
 
         try:
             content, filename, mimetype = d.get_file(request, hashcode, request_extension)
@@ -46,7 +58,6 @@ class FileHandler(BaseHandler):
 
 
     def create(self, request):
-
         document, extension = os.path.splitext(request.FILES['file'].name)
         extension = extension.strip(".")
 
