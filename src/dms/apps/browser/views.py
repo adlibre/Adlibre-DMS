@@ -92,24 +92,8 @@ def new_upload(request, template_name='browser/upload.html', extra_context={}):
 
 
 def get_file(request, document, hashcode = None, extension = None):
-
     if settings.NEW_SYSTEM:
-        document_name = document
-        manager = DocumentManager()
-        revision = request.REQUEST.get('r', None)
-        document = manager.retrieve(request, document_name, hashcode = hashcode, revision = revision, extension = extension)
-
-        #todo convert
-        document.get_file_obj().seek(0)
-        content = document.get_file_obj().read()
-        mimetype = document.get_mimetype()
-
-        if revision:
-            filename = document.get_filename_with_revision()
-        else:
-            filename = document.get_full_filename()
-
-        #print "FILENAME: %s" % filename
+        mimetype, filename, content = DocumentManager().get_file(request, document, hashcode, extension)
         response = HttpResponse(content, mimetype = mimetype)
 
         response["Content-Length"] = len(content)
