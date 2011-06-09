@@ -63,6 +63,13 @@ class FileHandler(BaseHandler):
 
         revision = request.GET.get("r", None) # TODO: TestMe
 
+        if settings.NEW_SYSTEM:
+            manager = DocumentManager()
+            manager.store(request, request.FILES['file'])
+            if len(manager.errors) > 0:
+                return rc.BAD_REQUEST
+            return rc.CREATED
+
         try:
             d = DmsDocument(document, revision)
         except DmsException, (e):
