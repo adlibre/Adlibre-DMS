@@ -1,6 +1,6 @@
 from dms_plugins import models
 from dms_plugins.workers import PluginError, PluginWarning, BreakPluginChain
-from dms_plugins.pluginpoints import BeforeStoragePluginPoint, BeforeRetrievalPluginPoint
+from dms_plugins.pluginpoints import BeforeStoragePluginPoint, BeforeRetrievalPluginPoint, BeforeRemovalPluginPoint
 
 from document import Document
 
@@ -24,7 +24,7 @@ class DocumentManager(object):
 
     def get_plugins_from_mapping(self, mapping, pluginpoint, plugin_type):
         plugins = []
-        plugin_objects = getattr(mapping, pluginpoint.settings_field_name).order_by('index')
+        plugin_objects = getattr(mapping, 'get_' + pluginpoint.settings_field_name)()
         plugins = map(lambda plugin_obj: plugin_obj.get_plugin(), plugin_objects)
         if plugin_type:
             plugins = filter(lambda plugin: hasattr(plugin, 'plugin_type') and plugin.plugin_type == plugin_type, plugins)
@@ -40,11 +40,10 @@ class DocumentManager(object):
 
     def process_pluginpoint(self, pluginpoint, request, document = None):
         plugins = self.get_plugins(pluginpoint, document)
-        print 'plugins: %s' % plugins
         for plugin in plugins:
             try:
                 document = plugin.work(request, document)
-                print "Processed %s: Here is document: \n%s" % (plugin, document)
+                #print "Processed %s: Here is document: \n%s" % (plugin, document)
             except PluginError, e: # if some plugin throws an exception, stop processing and store the error message
                 self.errors.append(str(e))
                 break
@@ -79,6 +78,12 @@ class DocumentManager(object):
         doc.update_options(options)
         return self.process_pluginpoint(BeforeRetrievalPluginPoint, request, document = doc)
 
+    def remove(self, request, document_name, revision = None):
+        doc = Document()
+        doc.set_filename(document_name)
+        doc.set_revision(revision)
+        return self.process_pluginpoint(BeforeRemovalPluginPoint, request, document = doc)
+
     def get_storage(self, doccode_plugin_mapping, pluginpoint = BeforeStoragePluginPoint):
         #Plugin point does not matter here as mapping must have a storage plugin both at storage and retrieval stages
         storage = self.get_plugins_from_mapping(doccode_plugin_mapping, pluginpoint, plugin_type = 'storage')
@@ -92,9 +97,8 @@ class DocumentManager(object):
         storage = self.get_storage(doccode_plugin_mapping)
         return storage.worker.get_list(doccode_plugin_mapping.get_doccode())
 
-
     def get_file(self, request, document_name, hashcode, extension):
-        manager = DocumentManager()
+        manager = self
         revision = request.REQUEST.get('r', None)
         document = manager.retrieve(request, document_name, hashcode = hashcode, revision = revision, extension = extension)
 
@@ -107,3 +111,13 @@ class DocumentManager(object):
         else:
             filename = document.get_full_filename()
         return mimetype, filename, content
+
+    def delete_file(self, request, document_name, revision = None):
+        document = self.remove(request, document_name, revision = revision)
+        return document
+
+    def get_revision_count(self, document_name, doccode_plugin_mapping):
+        storage = self.get_storage(doccode_plugin_mapping)
+        doc = Document()
+        doc.set_filename(document_name)
+        return storage.worker.get_revision_count(doc)

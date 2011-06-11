@@ -9,12 +9,14 @@ import os
 
 from django.conf import settings
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 
 from piston.handler import BaseHandler
 from piston.utils import rc
 
 from base.dms import DmsBase, DmsRule, DmsDocument, DmsException
 from document_manager import DocumentManager
+from dms_plugins import models
 
 class FileHandler(BaseHandler):
     allowed_methods = ('GET','POST','DELETE',)
@@ -65,10 +67,10 @@ class FileHandler(BaseHandler):
 
         if settings.NEW_SYSTEM:
             manager = DocumentManager()
-            manager.store(request, request.FILES['file'])
+            document = manager.store(request, request.FILES['file'])
             if len(manager.errors) > 0:
                 return rc.BAD_REQUEST
-            return rc.CREATED
+            return document.get_filename()
 
         try:
             d = DmsDocument(document, revision)
@@ -93,6 +95,13 @@ class FileHandler(BaseHandler):
 
         revision = request.GET.get("r", None) # TODO: TestMe
 
+        if settings.NEW_SYSTEM:
+            manager = DocumentManager()
+            manager.delete_file(request, document, revision = revision)
+            if len(manager.errors) > 0:
+                return rc.BAD_REQUEST
+            return rc.DELETED
+
         try:
             d = DmsDocument(document, revision)
         except DmsException, (e):
@@ -112,7 +121,11 @@ class FileListHandler(BaseHandler):
     allowed_methods = ('GET','POST')
 
     def read(self, request, id_rule):
-
+        if settings.NEW_SYSTEM:
+            mapping = get_object_or_404(models.DoccodePluginMapping, pk = id_rule)
+            manager = DocumentManager()
+            file_list = manager.get_file_list(mapping)
+            return file_list
         try:
             d = DmsRule(id_rule)
         except DmsException, (e):
@@ -125,8 +138,22 @@ class FileListHandler(BaseHandler):
 class RevisionCountHandler(BaseHandler):
     allowed_methods = ('GET','POST')
 
-    def read(self, request, document):        
+    def read(self, request, document):
         document, extension = os.path.splitext(document)
+
+        if settings.NEW_SYSTEM:
+            try:
+                from doc_codes import DoccodeManagerInstance
+                doccode = DoccodeManagerInstance.find_for_string(document)
+                if doccode:
+                    mapping = get_object_or_404(models.DoccodePluginMapping, doccode = doccode.get_id())
+                    manager = DocumentManager()
+                    rev_count = manager.get_revision_count(document, mapping)
+                    return rev_count
+                else:
+                    return rc.BAD_REQUEST
+            except Exception, e:
+                return rc.BAD_REQUEST
 
         try:
             d = DmsDocument(document)
@@ -146,7 +173,6 @@ class RulesHandler(BaseHandler):
     verbose_name_plural = 'rules'
 
     def read(self, request):
-
         try:
             d = DmsBase()
         except DmsException, (e):

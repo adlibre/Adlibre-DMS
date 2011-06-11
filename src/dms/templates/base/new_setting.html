@@ -29,7 +29,7 @@
       <td>{{ rule.get_doccode.title }} - {{ rule.get_doccode.description }}</td>
       <td>
         <ul>
-        {% for plugin in rule.get_storage_plugins %}
+        {% for plugin in rule.get_before_storage_plugins %}
             <li>{{plugin.get_plugin.title}}
                 {% if plugin.get_plugin.has_configuration and plugin.get_plugin.active %}
                  - <a href="{% url new_plugin_setting rule.id plugin.id %}">configure</a>
@@ -40,7 +40,7 @@
       </td>
       <td>
         <ul>
-        {% for plugin in rule.get_retrieval_plugins %}
+        {% for plugin in rule.get_before_retrieval_plugins %}
             <li>{{plugin.get_plugin.title}}
                 {% if plugin.get_plugin.has_configuration and plugin.get_plugin.active %}
                  - <a href="{% url new_plugin_setting rule.id plugin.id %}">configure</a>

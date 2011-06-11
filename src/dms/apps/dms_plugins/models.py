@@ -14,10 +14,14 @@ class DoccodePluginMapping(models.Model):
     doccode = models.CharField(choices = DOCCODE_CHOICES, max_length = 64)
     #if changing *_plugins names please change dms_plugins.pluginpoints correspondingly
     before_storage_plugins = ManyPluginField(   pluginpoints.BeforeStoragePluginPoint, 
-                                                related_name = 'settings_before_storage',)
+                                                related_name = 'settings_before_storage',
+                                                blank = True)
     before_retrieval_plugins = ManyPluginField( pluginpoints.BeforeRetrievalPluginPoint, 
                                                 related_name = 'settings_before_retrieval',
-                                                blank = True) # blank is only for debug
+                                                blank = True)
+    before_removal_plugins = ManyPluginField( pluginpoints.BeforeRemovalPluginPoint, 
+                                                related_name = 'settings_before_removal',
+                                                blank = True)
     active = models.BooleanField(default = False)
 
     def __unicode__(self):
@@ -34,11 +38,14 @@ class DoccodePluginMapping(models.Model):
     def get_doccode(self):
         return DoccodeManagerInstance.get_doccodes()[int(self.doccode)]
 
-    def get_storage_plugins(self):
+    def get_before_storage_plugins(self):
         return self.before_storage_plugins.all().order_by('index')
 
-    def get_retrieval_plugins(self):
+    def get_before_retrieval_plugins(self):
         return self.before_retrieval_plugins.all().order_by('index')
+        
+    def get_before_removal_plugins(self):
+        return self.before_removal_plugins.all().order_by('index')
 
 class PluginOption(models.Model):
     pluginmapping = models.ForeignKey(DoccodePluginMapping)
