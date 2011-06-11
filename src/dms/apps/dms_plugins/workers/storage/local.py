@@ -12,7 +12,7 @@ import shutil
 
 from django.conf import settings
 
-from dms_plugins.pluginpoints import BeforeStoragePluginPoint, BeforeRetrievalPluginPoint
+from dms_plugins.pluginpoints import BeforeStoragePluginPoint, BeforeRetrievalPluginPoint, BeforeRemovalPluginPoint
 from dms_plugins.workers import Plugin, PluginError, BreakPluginChain
 
 class NoRevisionError(Exception):
@@ -146,31 +146,19 @@ class Local(object):
                     doccodes.append(doc)
         return naturalsort(doccodes)
 
-#---------------- old code ---------------------
-
-
-    # TODO: Extend to handle revisions
-    @staticmethod
-    def delete(filename, revision=None, root=settings.DOCUMENT_ROOT):
-        document, extension = os.path.splitext(filename)
-        extension = extension.strip(".")
-        directory = splitdir(document)
-        if root:
-            directory = "%s/%s" % (root, directory)
-            try:
-                shutil.rmtree(directory)
-                return None
-            except:
-                raise NoRevisionError # FIXME: Should be something else
-        else:
+    def remove(self, request, document):
+        root = settings.DOCUMENT_ROOT
+        directory = os.path.join(root, splitdir(document))
+        try:
+            shutil.rmtree(directory)
             return None
+        except Exception, e:
+            raise PluginError(str(e))
 
-    @staticmethod
-    def get_revision_count(document, root=settings.DOCUMENT_ROOT):
+    def get_revision_count(self, document):
+        root = settings.DOCUMENT_ROOT
         # Hacky way, but faster than reading the revs from the metadata
-        directory = splitdir(document)
-        if root:
-            directory = "%s/%s" % (root, directory)
+        directory = os.path.join(root, splitdir(document))
 
         file_count = filecount(directory)
         if file_count:
@@ -197,3 +185,13 @@ class LocalRetrievalPlugin(Plugin, BeforeRetrievalPluginPoint):
 
     def work(self, request, document, **kwargs):
         return self.worker.retrieve(request, document)
+
+class LocalRemovalPlugin(Plugin, BeforeRemovalPluginPoint):
+    title = "Local Removal"
+    description = "Loads document as local file"
+
+    plugin_type = 'storage'
+    worker = Local()
+
+    def work(self, request, document, **kwargs):
+        return self.worker.remove(request, document)

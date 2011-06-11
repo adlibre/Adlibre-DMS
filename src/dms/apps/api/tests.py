@@ -5,10 +5,8 @@ Copyright: Adlibre Pty Ltd 2011
 License: See LICENSE for license information
 """
 
-from django.test import TestCase
-
 from django.conf import settings
-
+from django.test import TestCase
 
 # TODO: Create a test document code, and a set of test documents at the start of test
 """
@@ -37,11 +35,13 @@ rules_missing = ()
 
 class MiscTest(TestCase):
 
+    fixtures = ['test_data.json',]
+
     def test_api_rules(self):
         url = '/api/rules/1.json'
         response = self.client.get(url)
         self.assertContains(response, 'Local Storage')
-        
+
         url = '/api/rules.json'
         response = self.client.get(url)
         self.assertContains(response, 'Adlibre Invoices')
@@ -53,29 +53,39 @@ class MiscTest(TestCase):
         self.assertContains(response, 'Security Group')
 
 
-    def test_api_files(self):
-        url = '/api/files/2/'
-        response = self.client.get(url)
-        self.assertContains(response, 'ADL-1234')
+    def _fixture_setup(self, *args, **kwargs):
+        #dirty hack to have "our" plugins with correct ids, so that mappings had correct plugin relations
+        from plugins import models
+        models.PluginPoint.objects.all().delete()
+        models.Plugin.objects.all().delete()
+        #dirty hack ends
+        super(MiscTest, self)._fixture_setup(*args, **kwargs)
 
+    def test_api_files(self):
+        FILENAME = 'ADL-1234'
+        url = '/api/files/1/'
+        response = self.client.get(url)
+        self.assertContains(response, FILENAME)
+
+
+    def _upload_file(self, f):
+        url = '/api/file/'
+        self.client.login(username=username, password=password)
+        # do upload
+        file = settings.FIXTURE_DIRS[0] + '/testdata/' + f + '.pdf'
+        data = { 'file': open(file, 'r'), }
+        response = self.client.post(url, data)
+        return response
 
     def test_upload_files(self):
         for f in documents:
-            url = '/api/file/'
-            self.client.login(username=username, password=password)
-            # do upload
-            file = settings.FIXTURE_DIRS[0] + '/testdata/' + f + '.pdf'
-            data = { 'file': open(file, 'r'), }
-            response = self.client.post(url, data)
-            self.assertContains(response, '', status_code=201)
-
+            response = self._upload_file(f)
+            self.assertContains(response, f, status_code = 200)
 
     def test_delete_documents(self):
         for f in documents:
             url = '/api/file/?filename=' + f + '.pdf'
-            # TODO: FIXME: Should require authentication
-            #self.client.login(username=username, password=password)
-            # do delete
+            self.client.login(username=username, password=password)
             response = self.client.delete(url)
             self.assertContains(response, '', status_code=204)
 
@@ -95,5 +105,6 @@ class MiscTest(TestCase):
     def test_get_bad_rev_count(self):
         url = '/api/revision_count/sdfdsds42333333333333333333333333432423'
         response = self.client.get(url)
+        print response
         self.assertContains(response, 'Bad Request', status_code=400)
 
