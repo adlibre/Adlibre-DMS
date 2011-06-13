@@ -4,7 +4,7 @@
 
 {% block content %}
 <div>
-	  <h1>Revision of {{ document }}</h1>
+      <h1>Revision of {{ document_name }}</h1>
 
       <table id="rules">
       <tr>
@@ -19,7 +19,7 @@
           <td>{{ fileinfo.name }}</td>
           <td>{{ fileinfo.created_date }}</td>
           <td>
-            <a href="{% if hash %}/{{ hash }}/{% else %}/get/{% endif %}{{ document }}?r={{ fileinfo.revision }}">Download</a>
+            <a href="{% if fileinfo.hashcode %}/{{ fileinfo.hashcode }}/{% else %}/get/{% endif %}{{ document_name }}?r={{ fileinfo.revision }}">Download</a>
           </td>
         </tr>
       {% endfor %}

@@ -1,0 +1,61 @@
+{% extends THEME_TEMPLATE %}
+
+{% block title %}Settings{% endblock %}
+
+{% block body_class %}settings{% endblock %}
+
+{% block content %}
+<h1>Settings</h1>
+  <form action="" method="post" id="new-rule-form" {% if not form.errors %}class="hide"{% endif %}>
+      {{ form.as_p }}
+      {%csrf_token%}
+      <p>
+      <label>&nbsp;</label>
+      <input type="submit" value="Continue &rarr;" />
+      </p>
+  </form>
+  <table id="settings">
+  <tr>
+      <th class="first">No</th>
+      <th>DocCode</th>
+      <th>Storage Plugins</th>
+      <th>Retrieval Plugins</th>
+      <th>Active</th>
+      <th class="last">Edit</th>
+  </tr>
+  {% for rule in rule_list %}
+  <tr>
+      <td>{{ forloop.counter }}</td>
+      <td>{{ rule.get_doccode.title }} - {{ rule.get_doccode.description }}</td>
+      <td>
+        <ul>
+        {% for plugin in rule.get_before_storage_plugins %}
+            <li>{{plugin.get_plugin.title}}
+                {% if plugin.get_plugin.has_configuration and plugin.get_plugin.active %}
+                 - <a href="{% url plugin_setting rule.id plugin.id %}">configure</a>
+                {% endif %}
+            </li>
+        {%endfor%}
+        </ul>
+      </td>
+      <td>
+        <ul>
+        {% for plugin in rule.get_before_retrieval_plugins %}
+            <li>{{plugin.get_plugin.title}}
+                {% if plugin.get_plugin.has_configuration and plugin.get_plugin.active %}
+                 - <a href="{% url plugin_setting rule.id plugin.id %}">configure</a>
+                {% endif %}
+            </li>
+        {%endfor%}
+        </ul>
+      </td>
+      <td>{{ rule.active }} | <a href="{% url toggle_rule_state rule.id %}">toggle</a></td>
+      <td><a href="{% url edit_setting rule.id %}">Edit</a></td>
+  </tr>
+  {% endfor %}
+</table>
+
+<a href="" id="new-rule">Add new rule</a>
+
+{% endblock %}
+
