@@ -5,6 +5,8 @@ from dms_plugins.workers import Plugin, PluginError, DmsException
 
 class ConvertFileTypePlugin(Plugin, BeforeRetrievalPluginPoint):
     title = "File Type Converter"
+    description = "Converts file types"
+    plugin_type = "retrieval_processing"
 
     def work(self, request, document):
         return Converter().work_retrieve(request, document)
