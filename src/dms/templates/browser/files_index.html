@@ -2,7 +2,7 @@
 
 {% block content %}
 <div>
-	  <h1>Documents with active rules</h1>
+  <h1>Documents with active rules</h1>
 
       <table id="rules">
       <tr>
@@ -12,7 +12,7 @@
       {% for rule in rules %}
         <tr>
           <td>{{ rule }}</td>
-          <td><a href="{% url files_document rule.id %}">Browse</a></td>
+          <td><a href="{% url files_document rule.pk %}">Browse</a></td>
         </tr>
       {% endfor %}
       </table>
