@@ -5,15 +5,17 @@ from dms_plugins.pluginpoints import BeforeStoragePluginPoint, BeforeRetrievalPl
 from dms_plugins.workers import Plugin, PluginError
 
 class GzipOnStorePlugin(Plugin, BeforeStoragePluginPoint):
-    title = 'Gzip Plugin'
+    title = 'Gzip Plugin on storage'
     has_configuration = True #TODO: configure
+    plugin_type = "storage_processing"
 
     def work(self, request, document):
         return Gzip().work_store(request, document)
 
 class GzipOnRetrievePlugin(Plugin, BeforeRetrievalPluginPoint):
-    title = 'Gzip Plugin'
+    title = 'Gzip Plugin on retrieval'
     has_configuration = True #TODO: configure
+    plugin_type = "retrieval_processing"
 
     def work(self, request, document):
         return Gzip().work_retrieve(request, document)

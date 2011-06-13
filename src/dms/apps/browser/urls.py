@@ -13,6 +13,9 @@ from django.conf.urls.defaults import *
 # eg /get/{ruleid}/MYDOC.pdf
 
 urlpatterns = patterns('browser.views',
+    url(r'^settings/plugins$',
+        'plugins',
+        name='plugins'),
     url(r'^upload/$', 'upload', name='upload'),
     url(r'^get/(?P<document>[\w_-]+)$',
         'get_file', name='get_file_no_hash_and_extension'),

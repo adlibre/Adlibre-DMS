@@ -9,15 +9,17 @@
 
 <table id="rules">
 <tr>
+    <th>PluginPoint</th>
     <th>Name</th>
     <th>Type</th>
     <th>Description</th>
 </tr>
-{% for key, plugin in plugin_list.items %}
+{% for plugin in plugin_list %}
 <tr>
-    <td>{{ plugin.name }}</td>
-    <td>{{ plugin.plugin_type }}</td>
-    <td>{{ plugin.description }}</td>
+    <td>{%ifchanged plugin.point%}{{plugin.point|cut:"dms_plugins.pluginpoints."}}{%endifchanged%}</td>
+    <td>{{ plugin.get_plugin.title }}</td>
+    <td>{{ plugin.get_plugin.plugin_type }}</td>
+    <td>{{ plugin.get_plugin.description }}</td>
 </tr>
 {% endfor %}
 </table>

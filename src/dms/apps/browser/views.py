@@ -210,3 +210,15 @@ def files_document(request, id_rule):
 
     return direct_to_template(request, 'browser/files.html',
         extra_context=extra_context)
+
+@staff_member_required
+def plugins(request, template_name='base/plugins.html',
+            extra_context={}):
+    """
+    List of available plugins
+    """
+    manager = DocumentManager()
+    plugins = manager.get_plugin_list()
+    extra_context['plugin_list'] = plugins
+
+    return direct_to_template(request, template_name, extra_context=extra_context)

@@ -1,3 +1,5 @@
+import plugins
+
 from dms_plugins import models
 from dms_plugins.workers import PluginError, PluginWarning, BreakPluginChain
 from dms_plugins.pluginpoints import BeforeStoragePluginPoint, BeforeRetrievalPluginPoint, BeforeRemovalPluginPoint
@@ -121,3 +123,7 @@ class DocumentManager(object):
         doc = Document()
         doc.set_filename(document_name)
         return storage.worker.get_revision_count(doc)
+
+    def get_plugin_list(self):
+        all_plugins = plugins.models.Plugin.objects.all().order_by('point__name', 'index')
+        return all_plugins

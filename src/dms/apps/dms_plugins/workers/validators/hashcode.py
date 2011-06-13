@@ -31,8 +31,8 @@ class HashForm(forms.Form):
 
 class HashCodeValidationOnStoragePlugin(Plugin, BeforeStoragePluginPoint):
     title = 'Hash'
-    description = 'Hash code validation on storage'
-
+    description = 'Hash code calculation and saving on storage'
+    plugin_type = "storage_processing"
     method = 'md5'
     has_configuration = True
     configurable_fields = ['method',]
@@ -45,7 +45,7 @@ class HashCodeValidationOnStoragePlugin(Plugin, BeforeStoragePluginPoint):
 class HashCodeValidationOnRetrievalPlugin(Plugin, BeforeRetrievalPluginPoint):
     title = 'Hash'
     description = 'Hash code validation on retrieval'
-
+    plugin_type = "retrieval_validation"
     method = 'md5'
     has_configuration = True
     configurable_fields = ['method',]
