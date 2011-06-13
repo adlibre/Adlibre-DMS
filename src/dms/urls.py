@@ -10,7 +10,7 @@ urlpatterns = patterns('',
     # to INSTALLED_APPS to enable admin documentation:
     (r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^api/', include('api.urls')),
-    url(r'^settings/', include('base.urls.settings')),
+    url(r'^settings/', include('browser.urls_settings')),
     url(r'^docs/', include('base.urls.documentation')),
     (r'^$', 'base.views.index'),
     
