@@ -35,6 +35,9 @@ def handlerError(request, httpcode, message):
     response.status_code = httpcode
     return response
 
+def index(request):
+    return direct_to_template(request, 'browser/index.html')
+
 # TODO : These should all have pagination
 # TODO : These should use the WS API to browse the repository to reduce code duplication and to have pure separation.
 

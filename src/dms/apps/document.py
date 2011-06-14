@@ -4,7 +4,7 @@ import mimetypes
 
 from django.conf import settings
 
-from base.dms import DmsException
+from dms_plugins.workers import DmsException
 from doc_codes import DoccodeManagerInstance
 
 class Document(object):
