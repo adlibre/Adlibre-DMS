@@ -8,7 +8,7 @@ License: See LICENSE for license information
 from django.conf.urls.defaults import *
 
 
-urlpatterns = patterns('base.views',
+urlpatterns = patterns('docs.views',
      url(r'^$', 'documentation_index', name='documentation_index'),
      url(r'^about/$', 'about_documentation', name='about_documentation'),
      url(r'^api/$', 'api_documentation', name='api_documentation'),

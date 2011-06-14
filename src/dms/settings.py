@@ -159,10 +159,12 @@ INSTALLED_APPS = (
     'piston',
     # DMS
     'api',
-    'base',
+#    'base',
+    'docs',
     'browser',
     'plugins',
     'newplugins',
+    'dms_plugins',
 )
 
 # A sample logging configuration. The only tangible logging
