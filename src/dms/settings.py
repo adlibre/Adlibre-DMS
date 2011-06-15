@@ -157,13 +157,11 @@ INSTALLED_APPS = (
     # 3rd party
     'docutils',
     'piston',
+    'plugins',
     # DMS
     'api',
-#    'base',
     'docs',
     'browser',
-    'plugins',
-    'newplugins',
     'dms_plugins',
 )
 
