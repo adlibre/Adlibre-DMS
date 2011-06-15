@@ -29,7 +29,6 @@ class Gzip(object):
             compressed_file = zlib.compress(file_obj.read())
             tmp_file_obj.write(compressed_file)
             tmp_file_obj.seek(0)
-            print "FILE SIZE: %s bytes" % len(compressed_file)
         elif method == 'RETRIEVAL':
             content = file_obj.read()
             before = len(content)
