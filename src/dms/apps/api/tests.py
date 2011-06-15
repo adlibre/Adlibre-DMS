@@ -4,6 +4,7 @@ Project: Adlibre DMS
 Copyright: Adlibre Pty Ltd 2011
 License: See LICENSE for license information
 """
+import os
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
@@ -69,17 +70,18 @@ class MiscTest(TestCase):
         super(MiscTest, self)._fixture_setup(*args, **kwargs)
 
     def test_api_files(self):
-        FILENAME = 'ADL-1234'
-        url = '/api/files/1/'
+        doccode = DoccodeManagerInstance.get_doccode_by_name('Adlibre Invoices')
+        mapping = DoccodePluginMapping.objects.get(doccode = doccode.get_id())
+        url = reverse("api_file_list", kwargs = {'id_rule': mapping.pk})
         response = self.client.get(url)
-        self.assertContains(response, FILENAME)
+        self.assertContains(response, 'ADL-1234')
 
 
     def _upload_file(self, f):
-        url = '/api/file/'
+        url = reverse('api_file')
         self.client.login(username=username, password=password)
         # do upload
-        file = settings.FIXTURE_DIRS[0] + '/testdata/' + f + '.pdf'
+        file = os.path.join(settings.FIXTURE_DIRS[0], 'testdata', f + '.pdf')
         data = { 'file': open(file, 'r'), }
         response = self.client.post(url, data)
         return response
@@ -91,7 +93,7 @@ class MiscTest(TestCase):
 
     def test_delete_documents(self):
         for f in documents:
-            url = '/api/file/?filename=' + f + '.pdf'
+            url = reverse('api_file') + '?filename=' + f + '.pdf'
             self.client.login(username=username, password=password)
             response = self.client.delete(url)
             self.assertContains(response, '', status_code = 204)
@@ -99,18 +101,17 @@ class MiscTest(TestCase):
 
     def test_get_rev_count(self):
         for f in documents:
-            url = '/api/revision_count/' + f
+            url = reverse('api_revision_count', kwargs = {'document': f})
             self.client.login(username=username, password=password)
             # do upload
-            #file = settings.FIXTURE_DIRS[0] + '/testdata/' + f + '.pdf'
-            #data = { 'filename': open(file, 'r'), }
-            #response = self.client.post(url, data)
+            self._upload_file(f)
             response = self.client.get(url)
-            self.assertContains(response, '')
+            if not response.content.isdigit():
+                raise self.failureException('Invalid response: %s' % response.content)
 
 
     def test_get_bad_rev_count(self):
-        url = '/api/revision_count/sdfdsds42333333333333333333333333432423'
+        url = reverse('api_revision_count', kwargs = {'document': 'sdfdsds42333333333333333333333333432423'})
         response = self.client.get(url)
         self.assertContains(response, 'Bad Request', status_code=400)
 
