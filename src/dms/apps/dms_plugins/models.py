@@ -34,18 +34,22 @@ class DoccodePluginMapping(models.Model):
         except (KeyError, AttributeError):
             pass
         return unicode(doccode_name)
+    name = property(get_name)
 
     def get_doccode(self):
         return DoccodeManagerInstance.get_doccodes()[int(self.doccode)]
 
     def get_before_storage_plugins(self):
         return self.before_storage_plugins.all().order_by('index')
+    storage_plugins = property(get_before_storage_plugins)
 
     def get_before_retrieval_plugins(self):
         return self.before_retrieval_plugins.all().order_by('index')
-        
+    retrieval_plugins = property(get_before_retrieval_plugins)
+
     def get_before_removal_plugins(self):
         return self.before_removal_plugins.all().order_by('index')
+    removal_plugins = property(get_before_removal_plugins)
 
 class PluginOption(models.Model):
     pluginmapping = models.ForeignKey(DoccodePluginMapping)

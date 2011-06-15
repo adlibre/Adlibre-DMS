@@ -1,7 +1,7 @@
 import plugins
 
 from dms_plugins import models
-from dms_plugins.workers import PluginError, PluginWarning, BreakPluginChain
+from dms_plugins.workers import PluginError, PluginWarning, BreakPluginChain, DmsException
 from dms_plugins.pluginpoints import BeforeStoragePluginPoint, BeforeRetrievalPluginPoint, BeforeRemovalPluginPoint
 
 from document import Document
@@ -13,6 +13,16 @@ class DocumentManager(object):
     def __init__(self):
         self.errors = []
         self.warnings = []
+
+    def get_plugin_mappings(self):
+        return models.DoccodePluginMapping.objects.all()
+
+    def get_plugin_mapping_by_kwargs(self, **kwargs):
+        try:
+            mapping = models.DoccodePluginMapping.objects.get(**kwargs)
+        except models.DoccodePluginMapping.DoesNotExist:
+            raise DmsException('Rule not found', 404)
+        return mapping
 
     def get_plugin_mapping(self, document):
         mapping = models.DoccodePluginMapping.objects.filter(
