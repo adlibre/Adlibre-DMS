@@ -17,6 +17,12 @@ class DoccodeManager(object):
     def get_doccodes(self):
         return self.doccodes
 
+    def get_doccode_by_name(self, name):
+        for doccode in self.get_doccodes().values():
+            if doccode.get_title() == name:
+                return doccode
+        return None
+
 DoccodeManagerInstance = DoccodeManager()
 
 from test_pdf import TestPDFDoccode

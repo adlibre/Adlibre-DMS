@@ -68,7 +68,7 @@ class FileListHandler(BaseHandler):
     allowed_methods = ('GET','POST')
 
     def read(self, request, id_rule):
-        mapping = get_object_or_404(models.DoccodePluginMapping, pk = id_rule)
+        mapping = get_object_or_404(models.DoccodePluginMapping, pk = id_rule) # shouln't DocumentManager do this?
         manager = DocumentManager()
         file_list = manager.get_file_list(mapping)
         return file_list
@@ -92,8 +92,6 @@ class RevisionCountHandler(BaseHandler):
         except Exception, e:
             return rc.BAD_REQUEST
 
-# OLD CODE
-"""
 class RulesHandler(BaseHandler):
     allowed_methods = ('GET','POST')
 
@@ -101,38 +99,33 @@ class RulesHandler(BaseHandler):
     verbose_name_plural = 'rules'
 
     def read(self, request):
-        try:
-            d = DmsBase()
-        except DmsException, (e):
-            return rc.BAD_REQUEST
-        else:
-            rules = []
-            for rule in d.get_rules():
-                readable_rule = {
-                    'doccode' : rule.get_doccode().name,
-                    'id' : rule.id
-                }
-                rules.append(readable_rule)
-            return rules
+        manager = DocumentManager()
+        mappings = manager.get_plugin_mappings()
+        rules = list(map(lambda x: {'doccode': x.get_doccode().get_title(),
+                                'id': x.pk
+                                }, mappings))
+        return rules
 
-
-# TODO: Add a test for this.
 class RulesDetailHandler(BaseHandler):
     allowed_methods = ('GET','POST')
-    fields = ('id', 'doccode', 'storage', 'active','validators', 'securities')
+
+    fields = ['id', 'name', ('storage_plugins', ('name',)), 
+                            ('retrieval_plugins', ('name',)), 
+                            ('removal_plugins', ('name',))]
 
     verbose_name = 'rule'
     verbose_name_plural = 'rules'
 
     def read(self, request, id_rule):
-
+        manager = DocumentManager()
         try:
-            d = DMS(id_rule)
-        except DmsException, (e):
-            return rc.BAD_REQUEST
-        else:
-            return d.get_rule_details()
-
+            mapping = manager.get_plugin_mapping_by_kwargs(pk = id_rule)
+        except Exception:
+            if settings.DEBUG:
+                raise
+            else:
+                return rc.BAD_REQUEST
+        return mapping
 
 class PluginsHandler(BaseHandler):
     allowed_methods = ('GET','POST')
@@ -141,11 +134,12 @@ class PluginsHandler(BaseHandler):
     verbose_name_plural = 'plugins'
 
     def read(self, request):
-
+        manager = DocumentManager()
         try:
-            d = DmsBase()
-        except DmsException, (e):
-            return rc.BAD_REQUEST
-        else:
-            return d.get_plugins()
-"""
+            plugin_list = manager.get_plugin_list()
+        except Exception:
+            if settings.DEBUG:
+                raise
+            else:
+                return rc.BAD_REQUEST
+        return plugin_list

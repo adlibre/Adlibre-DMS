@@ -6,7 +6,13 @@ License: See LICENSE for license information
 """
 
 from django.conf import settings
+from django.core.urlresolvers import reverse
 from django.test import TestCase
+
+from plugins import models
+
+from doc_codes import DoccodeManagerInstance
+from dms_plugins.models import DoccodePluginMapping
 
 # TODO: Create a test document code, and a set of test documents at the start of test
 """
@@ -37,25 +43,26 @@ class MiscTest(TestCase):
 
     fixtures = ['test_data.json',]
 
-    def test_api_rules(self):
-        url = '/api/rules/1.json'
+    def test_api_rule_detail(self):
+        doccode = DoccodeManagerInstance.get_doccode_by_name('Test PDFs')
+        mapping = DoccodePluginMapping.objects.get(doccode = doccode.get_id())
+        #we don't really care if it crashes above, cause that means our database is imperfect
+        url = reverse('api_rules_detail', kwargs = {'id_rule': 2, 'emitter_format': 'json'})
         response = self.client.get(url)
-        self.assertContains(response, 'Local Storage')
-
-        url = '/api/rules.json'
-        response = self.client.get(url)
-        self.assertContains(response, 'Adlibre Invoices')
-
+        self.assertContains(response, 'Test PDFs')
 
     def test_api_rules(self):
-        url = '/api/plugins.json'
+        url = reverse('api_rules', kwargs = {'emitter_format': 'json'})
         response = self.client.get(url)
-        self.assertContains(response, 'Security Group')
+        self.assertContains(response, 'Test PDFs')
 
+    def test_api_plugins(self):
+        url = reverse('api_plugins', kwargs = {'emitter_format': 'json'})
+        response = self.client.get(url)
+        self.assertContains(response, 'dms_plugins.workers.storage.local.LocalStoragePlugin')
 
     def _fixture_setup(self, *args, **kwargs):
         #dirty hack to have "our" plugins with correct ids, so that mappings had correct plugin relations
-        from plugins import models
         models.PluginPoint.objects.all().delete()
         models.Plugin.objects.all().delete()
         #dirty hack ends
@@ -87,7 +94,7 @@ class MiscTest(TestCase):
             url = '/api/file/?filename=' + f + '.pdf'
             self.client.login(username=username, password=password)
             response = self.client.delete(url)
-            self.assertContains(response, '', status_code=204)
+            self.assertContains(response, '', status_code = 204)
 
 
     def test_get_rev_count(self):
@@ -105,6 +112,6 @@ class MiscTest(TestCase):
     def test_get_bad_rev_count(self):
         url = '/api/revision_count/sdfdsds42333333333333333333333333432423'
         response = self.client.get(url)
-        print response
         self.assertContains(response, 'Bad Request', status_code=400)
+
 
