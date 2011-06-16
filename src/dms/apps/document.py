@@ -151,3 +151,12 @@ class Document(object):
     def update_options(self, options):
         self.options.update(options)
 
+    def splitdir(self):
+        directory = None
+        doccode = self.get_doccode()
+        if doccode:
+            splitdir = ''
+            for d in doccode.split(self.get_stripped_filename()):
+                splitdir = os.path.join(splitdir, d)
+            directory = os.path.join(str(doccode.get_id()), splitdir, self.get_stripped_filename())
+        return directory

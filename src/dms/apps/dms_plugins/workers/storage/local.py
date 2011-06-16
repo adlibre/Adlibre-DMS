@@ -31,6 +31,21 @@ def naturalsort(L, reverse=False):
     return sorted(L, key=alpha, reverse=reverse)
 
 
+class LocalFilesystemManager(object):
+    def get_document_directory(self, document):
+        root = settings.DOCUMENT_ROOT
+        directory = document.splitdir()
+        if not directory:
+            raise PluginError("The document type is not supported.") # no doccode for document
+        directory = os.path.join(root, directory)
+        return directory
+
+    def get_or_create_document_directory(self, document):
+        directory = self.get_document_directory(document)
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        return directory
+
 def filecount(directory):
     """
     Count the number of files in a directory
@@ -40,28 +55,12 @@ def filecount(directory):
     except Exception, e:
         return None
 
-def splitdir(document):
-    directory = None
-    doccode = document.get_doccode()
-    if doccode:
-        splitdir = ''
-        for d in doccode.split(document.get_stripped_filename()):
-            splitdir = os.path.join(splitdir, d)
-        directory = os.path.join(str(doccode.get_id()), splitdir, document.get_stripped_filename())
-    return directory
-
-
 class Local(object):
+    def __init__(self):
+        self.filesystem = LocalFilesystemManager()
+
     def store(self, request, document):
-        root = settings.DOCUMENT_ROOT
-
-        directory = splitdir(document)
-        if not directory:
-            raise PluginError("The document type is not supported.") # no doccode for document
-        directory = os.path.join(root, directory)
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-
+        directory = self.filesystem.get_or_create_document_directory(document)
         #save metadata, load revision
         document = self.save_metadata(document, directory)
 
@@ -105,9 +104,7 @@ class Local(object):
         return document
 
     def retrieve(self, request, document):
-        root = settings.DOCUMENT_ROOT
-
-        directory = os.path.join(root, splitdir(document))
+        directory = self.filesystem.get_document_directory(document)
 
         fileinfo_db, revision = self.load_metadata(document.get_stripped_filename(), directory)
         if not fileinfo_db:
@@ -147,8 +144,7 @@ class Local(object):
         return naturalsort(doccodes)
 
     def remove(self, request, document):
-        root = settings.DOCUMENT_ROOT
-        directory = os.path.join(root, splitdir(document))
+        directory = self.filesystem.get_document_directory(document)
         try:
             shutil.rmtree(directory)
             return None
@@ -156,9 +152,8 @@ class Local(object):
             raise PluginError(str(e))
 
     def get_revision_count(self, document):
-        root = settings.DOCUMENT_ROOT
         # Hacky way, but faster than reading the revs from the metadata
-        directory = os.path.join(root, splitdir(document))
+        directory = self.filesystem.get_document_directory(document)
 
         file_count = filecount(directory)
         if file_count:
