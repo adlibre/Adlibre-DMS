@@ -18,7 +18,7 @@ from document_manager import DocumentManager
 from dms_plugins import models
 
 class FileHandler(BaseHandler):
-    allowed_methods = ('GET','POST','DELETE',)
+    allowed_methods = ('GET', 'POST', 'DELETE',)
 
     def read(self, request):
         filename = request.GET.get('filename')
@@ -68,10 +68,17 @@ class FileListHandler(BaseHandler):
     allowed_methods = ('GET','POST')
 
     def read(self, request, id_rule):
-        mapping = get_object_or_404(models.DoccodePluginMapping, pk = id_rule) # shouln't DocumentManager do this?
-        manager = DocumentManager()
-        file_list = manager.get_file_list(mapping)
-        return file_list
+        try:
+            manager = DocumentManager()
+            mapping = manager.get_plugin_mapping_by_kwargs(pk = id_rule)
+            file_list = manager.get_file_list(mapping)
+            return file_list
+        except Exception:
+            raise
+            if settings.DEBUG:
+                raise
+            else:
+                return rc.BAD_REQUEST
 
 # How many files do we have for a document.
 class RevisionCountHandler(BaseHandler):
