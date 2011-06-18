@@ -61,8 +61,6 @@ class Local(object):
 
     def store(self, request, document):
         directory = self.filesystem.get_or_create_document_directory(document)
-        #save metadata, load revision
-        document = self.save_metadata(document, directory)
 
         destination = open(os.path.join(directory, document.get_filename_with_revision()), 'wb+')
         fil = document.get_file_obj()
@@ -71,51 +69,10 @@ class Local(object):
         destination.close()
         return document
 
-    def load_metadata(self, document_name, directory):
-        json_file = os.path.join(directory, '%s.json' % (document_name,))
-        if os.path.exists(json_file):
-            json_handler = open(json_file , mode='r+')
-            fileinfo_db = json.load(json_handler)
-            revision = fileinfo_db[-1]['revision'] + 1
-        else:
-            fileinfo_db = []
-            revision = 1
-        return fileinfo_db, revision
-
-    def save_metadata(self, document, directory):
-        fileinfo_db, revision = self.load_metadata(document.get_stripped_filename(), directory)
-        document.set_revision(revision)
-
-        fileinfo = {
-            'name' : document.get_filename_with_revision(),
-            'revision' : document.get_revision(),
-            'created_date' : str(datetime.datetime.today())
-        }
-
-        if document.get_current_metadata():
-            fileinfo.update(document.get_current_metadata())
-
-        fileinfo_db.append(fileinfo)
-        
-        json_file = os.path.join(directory, '%s.json' % (document.get_stripped_filename(),))
-        json_handler = open(json_file, mode='w')
-        json.dump(fileinfo_db, json_handler, indent = 4)
-
-        return document
-
     def retrieve(self, request, document):
         directory = self.filesystem.get_document_directory(document)
 
-        fileinfo_db, revision = self.load_metadata(document.get_stripped_filename(), directory)
-        if not fileinfo_db:
-            raise PluginError("No such document found")
-        revision = document.get_revision() or 1
-        try:
-            fileinfo = fileinfo_db[int(revision)-1]
-        except:
-            raise PluginError("No such revision for this document")
-        document.set_metadata(fileinfo_db)
-        fullpath = os.path.join(directory, fileinfo['name'])
+        fullpath = os.path.join(directory, document.get_current_metadata()['name'])
         document.set_fullpath(fullpath)
         #file will be read on first access lazily
         if document.get_option('only_metadata') == True:
