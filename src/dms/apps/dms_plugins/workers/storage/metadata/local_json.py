@@ -1,3 +1,6 @@
+import json
+import os
+
 from dms_plugins.pluginpoints import BeforeStoragePluginPoint, BeforeRetrievalPluginPoint, BeforeRemovalPluginPoint
 from dms_plugins.workers import Plugin, PluginError, BreakPluginChain
 from dms_plugins.workers.storage.local import LocalFilesystemManager
@@ -27,7 +30,7 @@ class LocalJSONMetadata(object):
         document.set_metadata(fileinfo_db)
         if document.get_option('only_metadata') == True:
             raise BreakPluginChain()
-        return metadata
+        return document
 
     def load_metadata(self, document_name, directory):
         json_file = os.path.join(directory, '%s.json' % (document_name,))
