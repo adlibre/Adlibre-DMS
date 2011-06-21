@@ -1,7 +1,6 @@
 import re
 
-from doc_codes import DoccodeManagerInstance
-from base import Doccode
+from doc_codes import DoccodeManagerInstance, Doccode
 
 class CreditCardDoccode(Doccode):
     """
@@ -23,7 +22,7 @@ class CreditCardDoccode(Doccode):
         return False
 
     def split(self, document_name):
-        d = [ document_name[0:4], document_name[5:9], document_name[10:13], document_name[14:18] ]
+        d = [ document_name[0:4], document_name[5:9], document_name[10:13], document_name[14:18], document_name ]
         return d
 
     # Credit: http://en.wikipedia.org/wiki/Luhn_algorithm

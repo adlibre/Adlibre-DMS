@@ -19,7 +19,7 @@
           <td>{{ fileinfo.name }}</td>
           <td>{{ fileinfo.created_date }}</td>
           <td>
-            <a href="{% if fileinfo.hashcode %}/{{ fileinfo.hashcode }}/{% else %}/get/{% endif %}{{ document_name }}?r={{ fileinfo.revision }}">Download</a>
+            <a href="{% if fileinfo.hashcode %}/{{ fileinfo.hashcode }}/{% else %}/get/{% endif %}{{ document_name }}{%if fileinfo.revision%}?r={{ fileinfo.revision }}{%endif%}">Download</a>
           </td>
         </tr>
       {% endfor %}

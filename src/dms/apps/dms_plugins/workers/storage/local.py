@@ -27,7 +27,7 @@ def naturalsort(L, reverse=False):
     import re
 
     convert = lambda text: ('', int(text)) if text.isdigit() else (text, 0)
-    alpha = lambda key: [ convert(char) for char in re.split('([0-9]+)', key) ]
+    alpha = lambda key: [ convert(char) for char in re.split('([0-9]+)', key['name']) ]
     return sorted(L, key=alpha, reverse=reverse)
 
 
@@ -61,8 +61,9 @@ class Local(object):
 
     def store(self, request, document):
         directory = self.filesystem.get_or_create_document_directory(document)
-
         destination = open(os.path.join(directory, document.get_filename_with_revision()), 'wb+')
+        print "DIRECTORY: %s" % directory
+        print "DESTINATION: %s" % destination
         fil = document.get_file_obj()
         fil.seek(0)
         destination.write(fil.read())
@@ -71,8 +72,11 @@ class Local(object):
 
     def retrieve(self, request, document):
         directory = self.filesystem.get_document_directory(document)
-
-        fullpath = os.path.join(directory, document.get_current_metadata()['name'])
+        if document.get_current_metadata():
+            fullpath = os.path.join(directory, document.get_current_metadata()['name'])
+        else:
+            t = document.__dict__
+            fullpath = os.path.join(directory, document.get_filename())
         document.set_fullpath(fullpath)
         #file will be read on first access lazily
         if document.get_option('only_metadata') == True:
@@ -97,7 +101,11 @@ class Local(object):
             for file in files:
                 doc, extension = os.path.splitext(file)
                 if extension == '.json':
-                    doccodes.append(doc)
+                    doccodes.append({   'name': doc,})
+                                        #'directory': root})
+                elif not doccode.uses_repository:
+                    doccodes.append({   'name': file,
+                                        'directory': os.path.split(root)[1]})
         return naturalsort(doccodes)
 
     def remove(self, request, document):

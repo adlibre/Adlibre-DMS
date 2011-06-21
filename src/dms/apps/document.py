@@ -1,6 +1,8 @@
+import datetime
 import os
 import magic
 import mimetypes
+import time
 
 from django.conf import settings
 
@@ -43,6 +45,7 @@ class Document(object):
     def get_doccode(self):
         if self.doccode is None:
             self.doccode = DoccodeManagerInstance.find_for_string(self.get_stripped_filename())
+            print "DOCCODE: %s" % self.doccode
             if self.doccode is None:
                 raise DmsException("No doccode found for file " + self.get_full_filename(), 404)
         #print "DOCCODE: %s" % self.doccode #TODO: log.debug this
@@ -122,7 +125,12 @@ class Document(object):
         self.revision = revision
 
     def get_filename_with_revision(self):
-        return "%s_r%s.%s" % (self.get_stripped_filename(), self.get_revision(), self.get_extension())
+        revision = self.get_revision()
+        if revision:
+            name = "%s_r%s.%s" % (self.get_stripped_filename(), self.get_revision(), self.get_extension())
+        else:
+            name = self.get_full_filename()
+        return name
 
     def set_hashcode(self, hashcode):
         self.hashcode = hashcode
@@ -155,8 +163,26 @@ class Document(object):
         directory = None
         doccode = self.get_doccode()
         if doccode:
-            splitdir = ''
-            for d in doccode.split(self.get_stripped_filename()):
-                splitdir = os.path.join(splitdir, d)
-            directory = os.path.join(str(doccode.get_id()), splitdir, self.get_stripped_filename())
+            saved_dir = self.get_option('parent_directory') or ''
+            if saved_dir or not doccode.uses_repository:
+                doccode_dirs = doccode.split()
+                doccode_dirs = map(lambda x: x.replace('{{DATE}}', datetime.datetime.now().strftime('%Y-%m-%d')),
+                                    doccode_dirs)
+                if saved_dir:
+                    doccode_dirs[-1] = saved_dir
+                args = [str(doccode.get_id())] + doccode_dirs
+                directory = os.path.join(*args)
+            else:
+                splitdir = ''
+                for d in doccode.split(self.get_stripped_filename()):
+                    splitdir = os.path.join(splitdir, d)
+                directory = os.path.join(str(doccode.get_id()), splitdir)
         return directory
+
+    def get_creation_time(self):
+        metadata = self.get_current_metadata()
+        if metadata:
+            tim = metadata.get('creation_time', None)
+        else:
+            tim = time.strftime("%d/%m/%Y %H:%M:%S",time.localtime(os.stat(self.get_fullpath()).st_ctime))
+        return tim

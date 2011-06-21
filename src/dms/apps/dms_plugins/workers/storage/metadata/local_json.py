@@ -69,7 +69,7 @@ class LocalJSONMetadataRetrievalPlugin(Plugin, BeforeRetrievalPluginPoint):
     title = "Local Metadata Retrieval"
     description = "Loads document metadata as local file"
 
-    plugin_type = 'storage'
+    plugin_type = 'metadata'
     worker = LocalJSONMetadata()
 
     def work(self, request, document, **kwargs):
@@ -79,7 +79,7 @@ class LocalJSONMetadataStoragePlugin(Plugin, BeforeStoragePluginPoint):
     title = "Local Metadata Storage"
     description = "Saves document metadata as local file"
 
-    plugin_type = 'storage'
+    plugin_type = 'metadata'
     worker = LocalJSONMetadata()
 
     def work(self, request, document, **kwargs):

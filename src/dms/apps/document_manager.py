@@ -1,4 +1,4 @@
-import plugins
+import os, plugins
 
 from dms_plugins import models
 from dms_plugins.workers import PluginError, PluginWarning, BreakPluginChain, DmsException
@@ -55,7 +55,7 @@ class DocumentManager(object):
         for plugin in plugins:
             try:
                 document = plugin.work(request, document)
-                #print "Processed %s: Here is document: \n%s" % (plugin, document)
+                print "Processed %s: Here is document: \n%s" % (plugin, document)
             except PluginError, e: # if some plugin throws an exception, stop processing and store the error message
                 self.errors.append(str(e))
                 break
@@ -68,13 +68,16 @@ class DocumentManager(object):
     def store(self, request, uploaded_file):
         #process all storage plugins
         #uploaded file is http://docs.djangoproject.com/en/1.3/topics/http/file-uploads/#django.core.files.uploadedfile.UploadedFile
+        #or file object
         doc = Document()
         doc.set_file_obj(uploaded_file)
-        doc.set_filename(uploaded_file.name)
-        doc.set_mimetype(uploaded_file.content_type)
+        doc.set_filename(os.path.basename(uploaded_file.name))
+        if hasattr(uploaded_file, 'content_type'):
+            doc.set_mimetype(uploaded_file.content_type)
         return self.process_pluginpoint(BeforeStoragePluginPoint, request, document = doc)
 
-    def retrieve(self, request, document_name, hashcode = None, revision = None, only_metadata = False, extension = None):
+    def retrieve(self, request, document_name, hashcode = None, revision = None, only_metadata = False, 
+                        extension = None, parent_directory = None):
         """
             retrieve_only tells system that it should ignore all plugins AFTER storage 
             plugin has retrieved file. This is necessary to prevent needless work like 
@@ -84,7 +87,8 @@ class DocumentManager(object):
         doc.set_filename(document_name)
         doc.set_hashcode(hashcode)
         doc.set_revision(revision)
-        options = {'only_metadata': only_metadata}
+        options = { 'only_metadata': only_metadata,
+                    'parent_directory': parent_directory}
         if extension:
             options['convert_to_extension'] = extension
         doc.update_options(options)

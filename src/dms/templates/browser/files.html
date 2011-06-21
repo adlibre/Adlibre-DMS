@@ -11,8 +11,8 @@
       </tr>
       {% for document in document_list %}
         <tr>
-          <td>{{ document }}</td>
-          <td><a href="/revision/{{ document }}">Revisions</a></td>
+          <td>{{ document.name }}</td>
+          <td><a href="/revision/{{ document.name }}{%if document.directory%}?dir={{document.directory}}{%endif%}">Revisions</a></td>
         </tr>
       {% endfor %}
       </table>

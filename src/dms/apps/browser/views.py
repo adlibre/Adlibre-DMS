@@ -66,7 +66,9 @@ def upload(request, template_name='browser/upload.html', extra_context={}):
                               extra_context=extra_context)
 
 
-def get_file(request, document, hashcode = None, extension = None):
+def get_file(request, document):
+    extension = request.GET.get('extension', None)
+    hashcode = request.GET.get('hashcode', None)
     mimetype, filename, content = DocumentManager().get_file(request, document, hashcode, extension)
     response = HttpResponse(content, mimetype = mimetype)
     response["Content-Length"] = len(content)
@@ -76,14 +78,24 @@ def get_file(request, document, hashcode = None, extension = None):
 @staff_member_required
 def revision_document(request, document):
     document_name = document
+    parent_directory = request.GET.get('dir', None)
     manager = DocumentManager()
-    document = manager.retrieve(request, document_name, only_metadata = True)
+    document = manager.retrieve(request, document_name, only_metadata = True, parent_directory = parent_directory)
     extra_context = {}
+    metadata = document.get_metadata()
     if not manager.errors:
-        extra_context = {
-            'fileinfo_db': document.get_metadata(),
-            'document_name': document.get_stripped_filename(),
-        }
+        if metadata:
+            extra_context = {
+                'fileinfo_db': metadata,
+                'document_name': document.get_stripped_filename(),
+            }
+        else:
+            extra_context = {
+                'fileinfo_db': [{   'revision': None, 
+                                    'name': document.get_filename(), 
+                                    'created_date': document.get_creation_time()}],
+                'document_name': document.get_filename(),
+            }
     else:
         messages.error(request, "; ".join(manager.errors))
     if manager.warnings:
