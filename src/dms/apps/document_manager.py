@@ -55,7 +55,7 @@ class DocumentManager(object):
         for plugin in plugins:
             try:
                 document = plugin.work(request, document)
-                print "Processed %s: Here is document: \n%s" % (plugin, document)
+                #print "Processed %s: Here is document: \n%s" % (plugin, document)
             except PluginError, e: # if some plugin throws an exception, stop processing and store the error message
                 self.errors.append(str(e))
                 break

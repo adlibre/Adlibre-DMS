@@ -45,7 +45,6 @@ class Document(object):
     def get_doccode(self):
         if self.doccode is None:
             self.doccode = DoccodeManagerInstance.find_for_string(self.get_stripped_filename())
-            print "DOCCODE: %s" % self.doccode
             if self.doccode is None:
                 raise DmsException("No doccode found for file " + self.get_full_filename(), 404)
         #print "DOCCODE: %s" % self.doccode #TODO: log.debug this
