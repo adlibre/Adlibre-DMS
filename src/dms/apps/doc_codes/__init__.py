@@ -1,3 +1,28 @@
+class Doccode(object):
+    uses_repository = True
+
+    def get_id(self):
+        return self.doccode_id
+
+    def get_title(self):
+        title = getattr(self, 'title', '')
+        if not title:
+            title = getattr(self, 'name', '')
+        return title
+
+class NoDoccode(Doccode):
+    title = 'No doccode'
+    description = 'This doccode is assigned to the files that have no other suitable doccode.'
+    active = True
+    doccode_id = 1000
+    uses_repository = False
+
+    def validate(self, document_name):
+        return True
+
+    def split(self):
+        return ['{{DATE}}']
+
 class DoccodeManager(object):
     def __init__(self):
         self.doccodes = {}
@@ -6,8 +31,7 @@ class DoccodeManager(object):
         self.doccodes[doccode.get_id()] = doccode
 
     def find_for_string(self, string):
-        res = None
-        #print "ALL DOCCODES: %s" % self.get_doccodes() #TODO: log.debug this
+        res = NoDoccode()
         for doccode in self.get_doccodes().values():
             if doccode.validate(string):
                 res = doccode
@@ -24,6 +48,8 @@ class DoccodeManager(object):
         return None
 
 DoccodeManagerInstance = DoccodeManager()
+
+DoccodeManagerInstance.register(NoDoccode())
 
 from test_pdf import TestPDFDoccode
 DoccodeManagerInstance.register(TestPDFDoccode())

@@ -1,7 +1,6 @@
 import re
 
-from doc_codes import DoccodeManagerInstance
-from base import Doccode
+from doc_codes import DoccodeManagerInstance, Doccode
 
 class ProjectGutenbergEbooksDoccode(Doccode):
     active = True
@@ -21,4 +20,5 @@ class ProjectGutenbergEbooksDoccode(Doccode):
         d = []
         for i in range(len(document_name)):
             d.append(document_name[i-1:i])
+        d.append(document_name)
         return d

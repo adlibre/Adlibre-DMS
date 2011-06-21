@@ -1,7 +1,6 @@
 import re
 
-from doc_codes import DoccodeManagerInstance
-from base import Doccode
+from doc_codes import DoccodeManagerInstance, Doccode
 
 class AdlibreInvoicesDoccode(Doccode):
     title = 'Adlibre Invoices'
@@ -15,6 +14,6 @@ class AdlibreInvoicesDoccode(Doccode):
         return False
 
     def split(self, document_name):
-        d = [ document_name[0:3], document_name[4:8], ]
+        d = [ document_name[0:3], document_name[4:8], document_name]
         return d
 
