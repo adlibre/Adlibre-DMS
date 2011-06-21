@@ -62,8 +62,6 @@ class Local(object):
     def store(self, request, document):
         directory = self.filesystem.get_or_create_document_directory(document)
         destination = open(os.path.join(directory, document.get_filename_with_revision()), 'wb+')
-        print "DIRECTORY: %s" % directory
-        print "DESTINATION: %s" % destination
         fil = document.get_file_obj()
         fil.seek(0)
         destination.write(fil.read())
