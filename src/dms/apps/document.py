@@ -69,6 +69,7 @@ class Document(object):
     def get_file_obj(self):
         if not self.file_obj:
             self.file_obj = open(self.get_fullpath(), 'rb')
+        self.file_obj.seek(0)
         return self.file_obj
 
     def get_fullpath(self):
