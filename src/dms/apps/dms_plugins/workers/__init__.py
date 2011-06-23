@@ -64,7 +64,21 @@ class Plugin(object):
             pass
         return value
 
-class PluginError(Exception):
+class DmsException(Exception):
+    def __init__(self, value, code):
+        self.parameter = value
+        self.code = code
+
+    def __str__(self):
+        return (repr(self.parameter), self.code)
+
+    def __repr__(self):
+        return str(self)
+
+    def __unicode__(self):
+        return unicode(str(self))
+
+class PluginError(DmsException):
     pass
 
 class PluginWarning(Exception):
@@ -73,11 +87,5 @@ class PluginWarning(Exception):
 class BreakPluginChain(Exception):
     pass
 
-class DmsException(Exception):
-    def __init__(self, value, code):
-        self.parameter = value
-        self.code = code
 
-    def __str__(self):
-        return (repr(self.parameter), self.code)
 

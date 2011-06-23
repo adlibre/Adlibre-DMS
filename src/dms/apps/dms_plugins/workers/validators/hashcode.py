@@ -74,7 +74,8 @@ class HashCodeWorker(object):
     def work_retrieve(self, request, document, method):
         hashcode = document.get_hashcode()
         new_hashcode = self.get_hash(document.get_file_obj().read(), method)
+        #print "hadhcode = %s, new hashcode = %s" % (hashcode, new_hashcode)
         if hashcode and not (new_hashcode == hashcode):
-            raise PluginError("Hashcode did not validate.")
+            raise PluginError("Hashcode did not validate.", 500)
         #document.set_hashcode(new_hashcode) # should do this but it is meaningless :)
         return document

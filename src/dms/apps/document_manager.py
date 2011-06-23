@@ -25,13 +25,15 @@ class DocumentManager(object):
         return mapping
 
     def get_plugin_mapping(self, document):
+        doccode = document.get_doccode().get_id()
+        #print "DOCCODE: %s" % doccode
         mapping = models.DoccodePluginMapping.objects.filter(
                     doccode = document.get_doccode().get_id(),
                     active = True)
         if mapping.count():
             mapping = mapping[0]
         else:
-            mapping = None
+            raise DmsException('Rule not found', 404)
         return mapping
 
     def get_plugins_from_mapping(self, mapping, pluginpoint, plugin_type):
@@ -52,12 +54,16 @@ class DocumentManager(object):
 
     def process_pluginpoint(self, pluginpoint, request, document = None):
         plugins = self.get_plugins(pluginpoint, document)
+        #print "Pluginpoint: %s" % pluginpoint
+        #print "Plugins: %s" % plugins
         for plugin in plugins:
             try:
                 document = plugin.work(request, document)
-                #print "Processed %s: Here is document: \n%s" % (plugin, document)
+                #print "Processed %s:" % plugin
+                #print "Here is document: \n%s" % document.__dict__
             except PluginError, e: # if some plugin throws an exception, stop processing and store the error message
-                self.errors.append(str(e))
+                self.errors.append(e)
+                #print "ERROR: %s" % e.parameter
                 break
             except PluginWarning, e:
                 self.warnings.append(str(e))
@@ -92,7 +98,8 @@ class DocumentManager(object):
         if extension:
             options['convert_to_extension'] = extension
         doc.update_options(options)
-        return self.process_pluginpoint(BeforeRetrievalPluginPoint, request, document = doc)
+        doc = self.process_pluginpoint(BeforeRetrievalPluginPoint, request, document = doc)
+        return doc
 
     def remove(self, request, document_name, revision = None):
         doc = Document()
@@ -114,18 +121,19 @@ class DocumentManager(object):
         return storage.worker.get_list(doccode_plugin_mapping.get_doccode())
 
     def get_file(self, request, document_name, hashcode, extension):
-        manager = self
-        revision = request.REQUEST.get('r', None)
-        document = manager.retrieve(request, document_name, hashcode = hashcode, revision = revision, extension = extension)
+        revision = request.REQUEST.get('revision', None)
+        document = self.retrieve(request, document_name, hashcode = hashcode, revision = revision, extension = extension)
 
-        document.get_file_obj().seek(0)
-        content = document.get_file_obj().read()
-        mimetype = document.get_mimetype()
+        mimetype, filename, content = (None, None, None)
+        if not self.errors:
+            document.get_file_obj().seek(0)
+            content = document.get_file_obj().read()
+            mimetype = document.get_mimetype()
 
-        if revision:
-            filename = document.get_filename_with_revision()
-        else:
-            filename = document.get_full_filename()
+            if revision:
+                filename = document.get_filename_with_revision()
+            else:
+                filename = document.get_full_filename()
         return mimetype, filename, content
 
     def delete_file(self, request, document_name, revision = None):
