@@ -65,7 +65,6 @@ def upload(request, template_name='browser/upload.html', extra_context={}):
                               template_name,
                               extra_context=extra_context)
 
-
 def error_response(errors):
     error = errors[0]
     response = HttpResponse(error.parameter)
@@ -73,10 +72,11 @@ def error_response(errors):
     return response
 
 def get_file(request, document):
+    parent_directory = request.GET.get('dir', None)
     extension = request.GET.get('extension', None)
     hashcode = request.GET.get('hashcode', None)
     manager = DocumentManager()
-    mimetype, filename, content = manager.get_file(request, document, hashcode, extension)
+    mimetype, filename, content = manager.get_file(request, document, hashcode, extension, parent_directory = parent_directory)
     if manager.errors:
         return error_response(manager.errors)
     response = HttpResponse(content, mimetype = mimetype)
@@ -94,6 +94,8 @@ def revision_document(request, document):
     metadata = document.get_metadata()
     def get_args(fileinfo):
         args = []
+        if parent_directory:
+            args.append('dir=%s' % parent_directory)
         for arg in ['revision', 'hashcode']:
             if fileinfo.get(arg, None):
                 args.append("%s=%s" % (arg, fileinfo[arg]))
@@ -114,8 +116,8 @@ def revision_document(request, document):
                             'name': document.get_filename(), 
                             'created_date': document.get_creation_time(),
                             'hashcode': document.get_hashcode(),
-                            'args': get_args(fileinfo),
-                        },
+                        }
+            fileinfo['args'] = get_args(fileinfo)
             extra_context = {
                 'fileinfo_db': [fileinfo],
                 'document_name': document.get_filename(),
