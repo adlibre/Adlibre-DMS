@@ -22,12 +22,13 @@ class LocalJSONMetadata(object):
         directory = self.filesystem.get_or_create_document_directory(document)
         fileinfo_db, revision = self.load_metadata(document.get_stripped_filename(), directory)
         if not fileinfo_db:
-            raise PluginError("No such document found")
+            raise PluginError("No such document", 404)
         revision = document.get_revision() or 1
+        document.set_revision(revision)
         try:
             fileinfo = fileinfo_db[int(revision)-1]
         except:
-            raise PluginError("No such revision for this document")
+            raise PluginError("No such revision for this document", 404)
         document.set_metadata(fileinfo_db)
         if document.get_option('only_metadata') == True:
             raise BreakPluginChain()

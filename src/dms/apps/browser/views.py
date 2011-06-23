@@ -9,7 +9,7 @@ import os
 
 from plugins import models as plugin_models
 
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.views.generic.simple import direct_to_template
 from django.conf import settings
 from django.contrib import messages
@@ -58,7 +58,7 @@ def upload(request, template_name='browser/upload.html', extra_context={}):
             if not manager.errors:
                 messages.success(request, 'File has been uploaded.')
             else:
-                messages.error(request, "; ".join(manager.errors))
+                messages.error(request, "; ".join(map(lambda x: x[0], manager.errors)))
 
     extra_context['form'] = form
     return direct_to_template(request,
@@ -66,10 +66,19 @@ def upload(request, template_name='browser/upload.html', extra_context={}):
                               extra_context=extra_context)
 
 
+def error_response(errors):
+    error = errors[0]
+    response = HttpResponse(error.parameter)
+    response.status_code = error.code
+    return response
+
 def get_file(request, document):
     extension = request.GET.get('extension', None)
     hashcode = request.GET.get('hashcode', None)
-    mimetype, filename, content = DocumentManager().get_file(request, document, hashcode, extension)
+    manager = DocumentManager()
+    mimetype, filename, content = manager.get_file(request, document, hashcode, extension)
+    if manager.errors:
+        return error_response(manager.errors)
     response = HttpResponse(content, mimetype = mimetype)
     response["Content-Length"] = len(content)
     response['Content-Disposition'] = 'filename=%s' % filename
@@ -83,21 +92,36 @@ def revision_document(request, document):
     document = manager.retrieve(request, document_name, only_metadata = True, parent_directory = parent_directory)
     extra_context = {}
     metadata = document.get_metadata()
+    def get_args(fileinfo):
+        args = []
+        for arg in ['revision', 'hashcode']:
+            if fileinfo.get(arg, None):
+                args.append("%s=%s" % (arg, fileinfo[arg]))
+        arg_string = ""
+        if args:
+            arg_string = "?" + "&".join(args)
+        return arg_string
     if not manager.errors:
         if metadata:
+            for fileinfo in metadata:
+                fileinfo['args'] = get_args(fileinfo)
             extra_context = {
                 'fileinfo_db': metadata,
                 'document_name': document.get_stripped_filename(),
             }
         else:
+            fileinfo = {    'revision': None, 
+                            'name': document.get_filename(), 
+                            'created_date': document.get_creation_time(),
+                            'hashcode': document.get_hashcode(),
+                            'args': get_args(fileinfo),
+                        },
             extra_context = {
-                'fileinfo_db': [{   'revision': None, 
-                                    'name': document.get_filename(), 
-                                    'created_date': document.get_creation_time()}],
+                'fileinfo_db': [fileinfo],
                 'document_name': document.get_filename(),
             }
     else:
-        messages.error(request, "; ".join(manager.errors))
+        messages.error(request, "; ".join(map(lambda x: x[0], manager.errors)))
     if manager.warnings:
         messages.warning(request, "; ".join(manager.warnings))
     return direct_to_template(request, 'browser/revision.html',

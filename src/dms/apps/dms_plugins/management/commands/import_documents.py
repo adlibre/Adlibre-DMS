@@ -33,7 +33,7 @@ class Command(BaseCommand):
                         self.stderr.write(traceback.format_exc() + "\n")
                     else:
                         if manager.errors:
-                            self.stderr.write("\n".join(manager.errors) + "\n")
+                            self.stderr.write("\n".join(map(lambda x: x[0], manager.errors)) + "\n")
                         else:
                             cnt += 1
                     file_obj.close()

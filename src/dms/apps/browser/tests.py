@@ -5,10 +5,12 @@ Copyright: Adlibre Pty Ltd 2011
 License: See LICENSE for license information
 """
 
-from django.test import TestCase
+import magic
 
 from django.conf import settings
+from django.core.urlresolvers import reverse
 
+from base_test import AdlibreTestCase
 
 """
 Test data
@@ -24,9 +26,9 @@ documents_missing = ('ADL-8888', 'ADL-9999',)
 documents_norule = ('ABC12345678',)
 
 documents_hash = [
-    ('abcde111', '6784d1b54f6405a70508c9fc02f37bad'),
-    ('abcde123', '7e7eb8bdbea79d095f5dc291d2d9588f'),
-    ('abcde222','fac584ea31b0ac927cecc12868513d39'),
+    ('abcde111', 'cad121990e04dcd5631a9239b3467ee9'),
+    ('abcde123', 'bc3c5035805bb8098e5c164c5e1826da'),
+    ('abcde222', 'ba7e656a1288181cdcf676c0d719939e'),
     ]
 
 documents_missing_hash = [
@@ -36,54 +38,30 @@ documents_missing_hash = [
 
 
 rules = (1, 2, 3, 4,)
-rules_missing = (5, 99,)
+rules_missing = (99,)
 
 
-class ViewTest(TestCase):
-
+class ViewTest(AdlibreTestCase):
     # TODO: Add test to upload files with no doccode.
     # TODO: Add test to upload files with wrong mime type.
+    def _upload_file(self, filename):
+        url = reverse("upload")
+        self.client.login(username=username, password=password)
+        # do upload
+        data = { 'file': open(filename, 'r'), }
+        response = self.client.post(url, data)
+        return response
 
     def test_upload_files(self):
+        for doc_set, ext in [(documents_pdf, 'pdf'), (documents_txt, 'txt'), (documents_tif, 'tif') ]:
+            for f in doc_set:
+                response = self._upload_file(settings.FIXTURE_DIRS[0] + '/testdata/' + f + '.' + ext)
+                self.assertContains(response, 'File has been uploaded')
 
-        for f in documents_pdf:
-            url = '/upload/'
-            self.client.login(username=username, password=password)
-            # do upload
-            file = settings.FIXTURE_DIRS[0] + '/testdata/' + f + '.pdf'
-            data = { 'file': open(file, 'r'), }
-            response = self.client.post(url, data)
-            self.assertContains(response, 'File has been uploaded')
-
-        for f in documents_txt:
-            url = '/upload/'
-            self.client.login(username=username, password=password)
-            # do upload
-            file = settings.FIXTURE_DIRS[0] + '/testdata/' + f + '.txt'
-            data = { 'file': open(file, 'r'), }
-            response = self.client.post(url, data)
-            self.assertContains(response, 'File has been uploaded')
-            
-        for f in documents_tif:
-            url = '/upload/'
-            self.client.login(username=username, password=password)
-            # do upload
-            file = settings.FIXTURE_DIRS[0] + '/testdata/' + f + '.tif'
-            data = { 'file': open(file, 'r'), }
-            response = self.client.post(url, data)
-            self.assertContains(response, 'File has been uploaded')
-
-            
     def test_upload_files_hash(self):
         for f in documents_hash:
-            url = '/upload/'
-            self.client.login(username=username, password=password)
-            # do upload
-            file = settings.FIXTURE_DIRS[0] + '/testdata/' + f[0] + '.pdf'
-            data = { 'file': open(file, 'r'), }
-            response = self.client.post(url, data)
+            response = self._upload_file(settings.FIXTURE_DIRS[0] + '/testdata/' + f[0] + '.pdf')
             self.assertContains(response, 'File has been uploaded')
-
 
     # TODO: expand this to get documents with specific revisions.
     # FIXME: Currently failing on a fresh dataset. probably due to race condition.
@@ -92,46 +70,50 @@ class ViewTest(TestCase):
         for d in documents_pdf:
             url = '/get/' + d
             response = self.client.get(url)
-            self.assertContains(response, '')
+            self.assertContains(response, "You're not in security group", status_code = 403)
+        self.client.login(username=username, password=password)
+        
+        mime = magic.Magic( mime = True )
         for d in documents_pdf:
-            url = '/get/' + d + '.pdf'
+            url = '/get/' + d
             response = self.client.get(url)
-            self.assertContains(response, '')
+            mimetype = mime.from_buffer( response.content )
+            self.assertEquals(mimetype, 'application/pdf')
+        for d in documents_pdf:
+            url = '/get/' + d + '?extension=pdf'
+            response = self.client.get(url)
+            mimetype = mime.from_buffer( response.content )
+            self.assertEquals(mimetype, 'application/pdf')
         for d in documents_missing:
             url = '/get/' + d
             response = self.client.get(url)
-            self.assertContains(response, 'No file or revision match', status_code=404)
-        for d in documents_norule:
-            url = '/get/' + d
-            response = self.client.get(url)
-            self.assertContains(response, 'No rule found for file', status_code=404)
-        url = '/get/' + '97123987asdakjsdg1231123asad'
-        response = self.client.get(url)
-        self.assertContains(response, 'No rule found for file', status_code=404)
+            self.assertContains(response, 'No such document', status_code = 404)
 
 
     def test_get_document_hash(self):
+        self.client.login(username=username, password=password)
         for d in documents_hash:
-            url = '/' + d[1] + '/' + d[0]
+            url = '/get/%s?hashcode=%s' % (d[0], d[1])
             response = self.client.get(url)
-            try:
-                self.assertContains(response, '')
-            except:
-                print('Failed on' + url)
+            self.assertContains(response, '', status_code = 200)
+        
         for d in documents_hash:
-            url = '/' + d[1] + '/' + d[0] + '.pdf'
+            url = '/get/%s.pdf?hashcode=%s' % (d[0], d[1])
             response = self.client.get(url)
-            try:
-                self.assertContains(response, '')
-            except:
-                print('Failed on' + url)
+            self.assertContains(response, '', status_code = 200)
 
+        for d in documents_hash:
+            url = '/get/%s.pdf?hashcode=%s&extension=txt' % (d[0], d[1])
+            response = self.client.get(url)
+            self.assertContains(response, '', status_code = 200)
+
+        
         # TODO fix this it will break...
         for d in documents_missing_hash:
-            url = '/' + d[1] + '/' + d[0]
+            url = '/get/%s?hashcode=%s' % (d[0], d[1])
             response = self.client.get(url)
-            self.assertContains(response, 'No file or revision match', status_code=404)
-
+            self.assertContains(response, 'No such document', status_code = 404)
+        
 
     def test_versions_view(self):
         self.client.login(username=username, password=password)
@@ -149,10 +131,10 @@ class ViewTest(TestCase):
         for r in rules_missing:
             url = '/files/' + str(r) + '/'
             response = self.client.get(url)
-            self.assertContains(response, 'No rule found for id', status_code=404)
+            self.assertContains(response, '', status_code=404)
 
 
-class SettingsTest(TestCase):
+class SettingsTest(AdlibreTestCase):
 
     def test_settings_view(self):
         url = '/settings/'
@@ -174,12 +156,12 @@ class SettingsTest(TestCase):
         self.assertContains(response, 'Plugins')
 
 
-class MiscTest(TestCase):
+class MiscTest(AdlibreTestCase):
 
     def test_index_view(self):
         url = '/'
         response = self.client.get(url)
-        self.assertContains(response, 'The lightweight document management system')
+        self.assertContains(response, 'Adlibre DMS')
 
     def test_documentation_view(self):
         url = '/docs/'
@@ -187,22 +169,25 @@ class MiscTest(TestCase):
         self.assertContains(response, 'Documentation')
 
 
-class ConversionTest(TestCase):
+class ConversionTest(AdlibreTestCase):
 
     def test_tif2pdf_conversion(self):
+        self.client.login(username=username, password=password)
         for d in documents_tif:
-            url = '/get/' + d + '.pdf'
+            url = '/get/' + d + '?extension=pdf'
             response = self.client.get(url)
             self.assertContains(response, '', status_code=200)
 
     def test_txt2pdf_conversion(self):
+        self.client.login(username=username, password=password)
         for d in documents_txt:
-            url = '/get/' + d + '.pdf'
+            url = '/get/' + d + '?extension=pdf'
             response = self.client.get(url)
             self.assertContains(response, '', status_code=200)
 
     def test_pdf2txt_conversion(self):
+        self.client.login(username=username, password=password)
         for d in documents_pdf:
-            url = '/get/' + d + '.txt'
+            url = '/get/' + d + '?extension=txt'
             response = self.client.get(url)
             self.assertContains(response, d, status_code=200)

@@ -36,7 +36,7 @@ class LocalFilesystemManager(object):
         root = settings.DOCUMENT_ROOT
         directory = document.splitdir()
         if not directory:
-            raise PluginError("The document type is not supported.") # no doccode for document
+            raise PluginError("The document type is not supported.", 500) # no doccode for document
         directory = os.path.join(root, directory)
         return directory
 
@@ -73,8 +73,9 @@ class Local(object):
         if document.get_current_metadata():
             fullpath = os.path.join(directory, document.get_current_metadata()['name'])
         else:
-            t = document.__dict__
             fullpath = os.path.join(directory, document.get_filename())
+        if not os.path.exists(fullpath):
+            raise PluginError("No such document", 404)
         document.set_fullpath(fullpath)
         #file will be read on first access lazily
         if document.get_option('only_metadata') == True:
@@ -112,7 +113,7 @@ class Local(object):
             shutil.rmtree(directory)
             return None
         except Exception, e:
-            raise PluginError(str(e))
+            raise PluginError(str(e), 500)
 
     def get_revision_count(self, document):
         # Hacky way, but faster than reading the revs from the metadata
