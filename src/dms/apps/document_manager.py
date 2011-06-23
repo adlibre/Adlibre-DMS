@@ -58,6 +58,7 @@ class DocumentManager(object):
         #print "Plugins: %s" % plugins
         for plugin in plugins:
             try:
+                #print "begin processing %s:" % plugin
                 document = plugin.work(request, document)
                 #print "Processed %s:" % plugin
                 #print "Here is document: \n%s" % document.__dict__
@@ -120,9 +121,10 @@ class DocumentManager(object):
         storage = self.get_storage(doccode_plugin_mapping)
         return storage.worker.get_list(doccode_plugin_mapping.get_doccode())
 
-    def get_file(self, request, document_name, hashcode, extension):
+    def get_file(self, request, document_name, hashcode, extension, parent_directory = None):
         revision = request.REQUEST.get('revision', None)
-        document = self.retrieve(request, document_name, hashcode = hashcode, revision = revision, extension = extension)
+        document = self.retrieve(request, document_name, hashcode = hashcode, revision = revision, 
+                                    extension = extension, parent_directory = parent_directory)
 
         mimetype, filename, content = (None, None, None)
         if not self.errors:

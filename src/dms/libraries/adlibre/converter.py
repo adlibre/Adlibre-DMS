@@ -95,6 +95,7 @@ class NewFileConverter(object):
         self.document = os.path.splitext(self.filename)[0]
 
         self.temp_input = tempfile.NamedTemporaryFile()
+        self.file_obj.seek(0)
         self.temp_input.write(self.file_obj.read())
         self.temp_input.seek(0)
 
@@ -107,12 +108,11 @@ class NewFileConverter(object):
         if self.extension_to is None or self.extension_to == extension_from:
             self.file_obj.seek(0)
             content = self.file_obj.read()
-            self.file_obj.close()
             mime = magic.Magic( mime = True )
             mimetype = mime.from_buffer( content )
             return [mimetype, self.file_obj]
         try:
-            print "from: %s, to: %s" % (extension_from, self.extension_to)
+            #print "from: %s, to: %s" % (extension_from, self.extension_to)
             func = getattr(self, '%s_to_%s' % (extension_from, self.extension_to))
             return func()
         except AttributeError:
@@ -123,6 +123,7 @@ class NewFileConverter(object):
         temp_output = tempfile.NamedTemporaryFile()
         to_path = temp_output.name
         p = Popen(command % {'to': to_path, 'from': from_path}, shell=True, stdout=PIPE, stderr=PIPE)
+        #print command % {'to': to_path, 'from': from_path}
         stdout, stderr = p.communicate()
         temp_output.seek(0)
         return temp_output
