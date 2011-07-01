@@ -70,10 +70,10 @@ class DmsException(Exception):
         self.code = code
 
     def __str__(self):
-        return (repr(self.parameter), self.code)
+        return super(DmsException, self).__str__() + (" %s - %s" % (self.code, repr(self.parameter)))
 
     def __repr__(self):
-        return str(self)
+        return super(DmsException, self).__repr__() + (" %s - %s" % (self.code, repr(self.parameter)))
 
     def __unicode__(self):
         return unicode(str(self))
