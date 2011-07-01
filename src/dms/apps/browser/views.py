@@ -123,7 +123,8 @@ def revision_document(request, document):
                 'document_name': document.get_filename(),
             }
     else:
-        messages.error(request, "; ".join(map(lambda x: x[0], manager.errors)))
+        t = manager.errors
+        messages.error(request, "; ".join(map(lambda x: x.parameter, manager.errors)))
     if manager.warnings:
         messages.warning(request, "; ".join(manager.warnings))
     return direct_to_template(request, 'browser/revision.html',
