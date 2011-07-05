@@ -3,7 +3,7 @@ from django.test import TestCase
 from plugins import models
 
 class AdlibreTestCase(TestCase):
-    fixtures = ['test_data.json',]
+    fixtures = ['initial_data.json',]
     
     def _fixture_setup(self, *args, **kwargs):
         #dirty hack to have "our" plugins with correct ids, so that mappings had correct plugin relations

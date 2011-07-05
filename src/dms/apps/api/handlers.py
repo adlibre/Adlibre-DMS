@@ -90,9 +90,14 @@ class RevisionCountHandler(BaseHandler):
             from doc_codes import DoccodeManagerInstance
             doccode = DoccodeManagerInstance.find_for_string(document)
             if doccode:
-                mapping = get_object_or_404(models.DoccodePluginMapping, doccode = doccode.get_id())
+                try:
+                    mapping = models.DoccodePluginMapping.objects.get(doccode = doccode.get_id())
+                except models.DoccodePluginMapping.DoesNotExist:
+                    return rc.BAD_REQUEST
                 manager = DocumentManager()
                 rev_count = manager.get_revision_count(document, mapping)
+                if rev_count <= 0: #document without revisions is broken
+                    return rc.BAD_REQUEST
                 return rev_count
             else:
                 return rc.BAD_REQUEST
