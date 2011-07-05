@@ -103,6 +103,6 @@ class MiscTest(AdlibreTestCase):
     def test_get_bad_rev_count(self):
         url = reverse('api_revision_count', kwargs = {'document': 'sdfdsds42333333333333333333333333432423'})
         response = self.client.get(url)
-        self.assertContains(response, 'Bad Request', status_code=400)
+        self.assertContains(response, 'Bad Request', status_code = 400)
 
 
