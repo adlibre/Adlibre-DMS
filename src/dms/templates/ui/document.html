@@ -1,0 +1,19 @@
+{% extends "ui/base.html" %}
+
+{% load i18n %}
+
+{% block title %}Document{% endblock %}
+
+{% block content %}
+<h1>Document:</h1>
+<div id="ui_document">DOCUMENT HERE</div>
+{%endblock%}
+
+{%block javascript%}
+{{block.super}}
+<script type="text/javascript" language="javascript">
+$(document).ready(function(){
+    window.ui_manager.communicator.get_document(window.ui_manager.renderer.render_document);
+});
+</script>
+{%endblock%}
