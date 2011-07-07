@@ -8,6 +8,7 @@ License: See LICENSE for license information
 import os
 
 from django.conf import settings
+from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 
@@ -113,8 +114,10 @@ class RulesHandler(BaseHandler):
     def read(self, request):
         manager = DocumentManager()
         mappings = manager.get_plugin_mappings()
-        rules = list(map(lambda x: {'doccode': x.get_doccode().get_title(),
-                                'id': x.pk
+        rules = list(map(lambda x: {
+                            'doccode': x.get_doccode().get_title(),
+                            'id': x.pk,
+                            'ui_url': reverse('ui_document_list', kwargs = {'id_rule': x.pk})
                                 }, mappings))
         return rules
 

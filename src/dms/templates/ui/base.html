@@ -1,0 +1,36 @@
+{% extends 'site_base.html' %}
+
+{% block body %}
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    <div id="content">
+        {% block content %}
+        {% endblock %}
+    </div>
+{% endblock %}
+
+{% block footer %}
+    <p>
+        Adlibre DMS - &copy; Adlibre {% now "Y" %}
+        &middot; <a href="{% url about_documentation %}">About</a>
+        &middot; <a href="{% url documentation_index %}">Docs</a>
+        &middot; <a href="{% url upload %}">Upload</a>
+        <span>Version: 1.0 Beta. {% if user.is_authenticated %}Logged in as {{ user }}{% else %}Logged out{% endif %}.</span>
+    </p>
+{% endblock %}
+
+{%block javascript%}
+<script type="text/javascript" language="javascript" charset="utf-8" src="{{ MEDIA_URL }}js/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" language="javascript" src="{{MEDIA_URL}}/js/ui/communicator.js"></script>
+<script type="text/javascript" language="javascript" src="{{MEDIA_URL}}/js/ui/renderer.js"></script>
+<script type="text/javascript" language="javascript">
+var COMMUNICATOR_OPTIONS = {{communicator_options|safe}};
+</script>
+<script type="text/javascript" language="javascript" src="{{MEDIA_URL}}/js/ui/manager.js"></script>
+
+{%endblock%}
