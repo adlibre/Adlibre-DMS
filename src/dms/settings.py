@@ -163,6 +163,7 @@ INSTALLED_APPS = (
     'docs',
     'browser',
     'dms_plugins',
+    'ui',
 )
 
 # A sample logging configuration. The only tangible logging

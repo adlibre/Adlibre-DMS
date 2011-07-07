@@ -1,0 +1,21 @@
+{% extends "ui/base.html" %}
+
+{% load i18n %}
+
+{% block title %}Rules{% endblock %}
+
+{% block content %}
+<h1>Rules</h1>
+<ul id="ui_rule_list">
+    <li class="ui_rule_list_item"></li>
+</ul>
+{%endblock%}
+
+{%block javascript%}
+{{block.super}}
+<script type="text/javascript" language="javascript">
+$(document).ready(function(){
+    window.ui_manager.communicator.get_rules(window.ui_manager.renderer.render_rules);
+});
+</script>
+{%endblock%}

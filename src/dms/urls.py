@@ -12,6 +12,7 @@ urlpatterns = patterns('',
     url(r'^api/', include('api.urls')),
     url(r'^settings/', include('browser.urls_settings')),
     url(r'^docs/', include('docs.urls')),
+    url(r'^ui/', include('ui.urls')),
     (r'^$', 'browser.views.index'),
     
     # Uncomment the next line to enable the admin:
