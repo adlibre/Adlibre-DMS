@@ -19,4 +19,8 @@ function UICommunicator(options){
     this.get_documents = function(success_callback){
         $.getJSON(self.get_url('documents_url'), success_callback);
     }
+    
+    this.get_document = function(success_callback){
+        success_callback(self.get_url('document_url')); //No ajax, using iframe
+    }
 }

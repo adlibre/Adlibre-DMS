@@ -9,5 +9,6 @@ from django.conf.urls.defaults import *
 
 urlpatterns = patterns('ui.views',
     url(r'^rule-(?P<id_rule>\d+)/$','document_list', name='ui_document_list'),
+    url(r'^document-(?P<document_name>.+)/$','document', name='ui_document'),
     url(r'','rule_list', name='ui_rule_list'),
 )
