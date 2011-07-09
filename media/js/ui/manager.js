@@ -7,7 +7,7 @@ function UIManager(communicator, renderer){
 }
 
 $(document).ready(function(){
-    var communicator = new UICommunicator(COMMUNICATOR_OPTIONS);
+    var communicator = new UICommunicator();
     var renderer = new UIRenderer();
     window.ui_manager = new UIManager(communicator, renderer);
     }

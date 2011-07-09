@@ -4,6 +4,10 @@
 
 {% block title %}Documents{% endblock %}
 
+{%block breadcrumbs%}<li><a href="{%url ui_rule_list%}">Index</a></li>
+<li><a href="{%url ui_document_list id_rule=rule_id%}">GET RULE NAME HERE</a></li>
+{%endblock%}
+
 {% block content %}
 <h1>Documents</h1>
 <ul id="ui_document_list">

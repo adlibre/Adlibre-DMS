@@ -9,6 +9,9 @@
     </ul>
     {% endif %}
     <div id="content">
+        <ul id="ui_breadcrumbs">
+        <li><a href="{%url ui_rule_list%}">Index</a></li>
+        </ul>
         {% block content %}
         {% endblock %}
     </div>
@@ -29,7 +32,7 @@
 <script type="text/javascript" language="javascript" src="{{MEDIA_URL}}/js/ui/communicator.js"></script>
 <script type="text/javascript" language="javascript" src="{{MEDIA_URL}}/js/ui/renderer.js"></script>
 <script type="text/javascript" language="javascript">
-var COMMUNICATOR_OPTIONS = {{communicator_options|safe}};
+var UI_URLS = {{communicator_options|safe}};
 </script>
 <script type="text/javascript" language="javascript" src="{{MEDIA_URL}}/js/ui/manager.js"></script>
 
