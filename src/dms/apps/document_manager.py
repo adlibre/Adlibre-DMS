@@ -85,11 +85,6 @@ class DocumentManager(object):
 
     def retrieve(self, request, document_name, hashcode = None, revision = None, only_metadata = False, 
                         extension = None, parent_directory = None):
-        """
-            retrieve_only tells system that it should ignore all plugins AFTER storage 
-            plugin has retrieved file. This is necessary to prevent needless work like 
-            compression etc in case we only need metadata.
-        """
         doc = Document()
         doc.set_filename(document_name)
         doc.set_hashcode(hashcode)
@@ -121,8 +116,9 @@ class DocumentManager(object):
         storage = self.get_storage(doccode_plugin_mapping)
         return storage.worker.get_list(doccode_plugin_mapping.get_doccode())
 
-    def get_file(self, request, document_name, hashcode, extension, parent_directory = None):
-        revision = request.REQUEST.get('revision', None)
+    def get_file(self, request, document_name, hashcode, extension, revision = None, parent_directory = None):
+        if not revision:
+            revision = request.REQUEST.get('revision', None)
         document = self.retrieve(request, document_name, hashcode = hashcode, revision = revision, 
                                     extension = extension, parent_directory = parent_directory)
 
