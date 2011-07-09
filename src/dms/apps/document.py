@@ -186,3 +186,11 @@ class Document(object):
         else:
             tim = time.strftime("%d/%m/%Y %H:%M:%S",time.localtime(os.stat(self.get_fullpath()).st_ctime))
         return tim
+
+    def get_dict(self):
+        d = {}
+        d['current_metadata'] = self.get_current_metadata()
+        doccode = self.get_doccode()
+        d['doccode'] = {'title': doccode.get_title(), 'id': doccode.get_id()}
+        d['document_name'] = self.get_filename()
+        return d
