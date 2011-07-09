@@ -7,17 +7,19 @@ License: See LICENSE for license information
 
 from django.conf.urls.defaults import *
 from piston.resource import Resource
-from handlers import FileHandler, FileListHandler, RevisionCountHandler, RulesHandler, RulesDetailHandler, PluginsHandler
+from api import handlers
 
-file_handler = Resource(FileHandler)
-file_list_handler = Resource(FileListHandler)
-revision_count_handler = Resource(RevisionCountHandler)
-rules_handler = Resource(RulesHandler)
-rules_detail_handler = Resource(RulesDetailHandler)
-plugins_handler = Resource(PluginsHandler)
+file_handler = Resource(handlers.FileHandler)
+file_info_handler = Resource(handlers.FileInfoHandler)
+file_list_handler = Resource(handlers.FileListHandler)
+revision_count_handler = Resource(handlers.RevisionCountHandler)
+rules_handler = Resource(handlers.RulesHandler)
+rules_detail_handler = Resource(handlers.RulesDetailHandler)
+plugins_handler = Resource(handlers.PluginsHandler)
 
 urlpatterns = patterns('',
    url(r'^file/', file_handler, name = "api_file"),
+   url(r'^file-info/', file_info_handler, name = "api_file_info"),
    url(r'^files/(?P<id_rule>\d+)/$', file_list_handler, name = "api_file_list"),
    url(r'^revision_count/(?P<document>[\w_-]+)$', revision_count_handler, name = "api_revision_count"),
    url(r'^rules\.(?P<emitter_format>.+)$', rules_handler, name = "api_rules"),

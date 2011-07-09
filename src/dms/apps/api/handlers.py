@@ -5,7 +5,7 @@ Copyright: Adlibre Pty Ltd 2011
 License: See LICENSE for license information
 """
 
-import os
+import json, os
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
@@ -18,21 +18,48 @@ from piston.utils import rc
 from document_manager import DocumentManager
 from dms_plugins import models
 
-class FileHandler(BaseHandler):
-    allowed_methods = ('GET', 'POST', 'DELETE',)
-
-    def read(self, request):
+class BaseFileHandler(BaseHandler):
+    def get_file_info(self, request):
         filename = request.GET.get('filename')
         if not filename:
-            return rc.BAD_REQUEST
-        document, extension = os.path.splitext(filename)
-        request_extension = extension.strip(".")
+            raise ValueError("No filename")
+        document_name, extension = os.path.splitext(filename)
+        extension = extension.strip(".")
 
         revision = request.GET.get("r", None) # TODO: TestMe
         hashcode = request.GET.get("h", None) # TODO: TestMe
+        
+        return document_name, extension, revision, hashcode
 
+class FileInfoHandler(BaseFileHandler):
+    allowed_methods = ('GET',)
+    
+    def read(self, request):
+        try:
+            document_name, extension, revision, hashcode = self.get_file_info(request)
+        except ValueError:
+            return rc.BAD_REQUEST
         manager = DocumentManager()
-        mimetype, filename, content = manager.get_file(request, document, hashcode, request_extension)
+        document = manager.retrieve(request, document_name, hashcode = hashcode, revision = revision, only_metadata = True, 
+                        extension = extension)
+        mapping = manager.get_plugin_mapping(document)
+        if manager.errors:
+            return rc.BAD_REQUEST
+        info = document.get_dict()
+        info['document_list_url'] = reverse('ui_document_list', kwargs = {'id_rule': mapping.pk})
+        response = HttpResponse(json.dumps(info))
+        return response
+
+class FileHandler(BaseFileHandler):
+    allowed_methods = ('GET', 'POST', 'DELETE',)
+
+    def read(self, request):
+        try:
+            document_name, extension, revision, hashcode = self.get_file_info(request)
+        except ValueError:
+            return rc.BAD_REQUEST
+        manager = DocumentManager()
+        mimetype, filename, content = manager.get_file(request, document_name, hashcode, extension, revision = revision)
         if manager.errors:
             return rc.BAD_REQUEST
         response = HttpResponse(content, mimetype=mimetype)
@@ -76,7 +103,9 @@ class FileListHandler(BaseHandler):
             mapping = manager.get_plugin_mapping_by_kwargs(pk = id_rule)
             file_list = manager.get_file_list(mapping)
             for item in file_list:
-                item.update({'ui_url': reverse('ui_document', kwargs = {'document_name': item['name']})})
+                item.update({   'ui_url': reverse('ui_document', kwargs = {'document_name': item['name']}),
+                                'rule': mapping.get_name(),
+                            })
             return file_list
         except Exception:
             raise
