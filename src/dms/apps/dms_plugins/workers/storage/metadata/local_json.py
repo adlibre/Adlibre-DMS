@@ -20,10 +20,12 @@ class LocalJSONMetadata(object):
 
     def retrieve(self, request, document):
         directory = self.filesystem.get_or_create_document_directory(document)
-        fileinfo_db, revision = self.load_metadata(document.get_stripped_filename(), directory)
+        fileinfo_db, new_revision = self.load_metadata(document.get_stripped_filename(), directory)
         if not fileinfo_db:
             raise PluginError("No such document", 404)
-        revision = document.get_revision() or 1
+        revision = document.get_revision()
+        if not revision and new_revision > 0:
+            revision = new_revision - 1
         document.set_revision(revision)
         try:
             fileinfo = fileinfo_db[int(revision)-1]
