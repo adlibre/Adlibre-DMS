@@ -42,7 +42,6 @@ function UICommunicator(options, renderer){
             var rows = parseInt(($(window).height() - $("#" + self.options.document_list_id).offset().top) / self.document_height);
             var rows = rows ? rows : 1;
             self.objects_per_page = rows * docs_in_row;
-            alert(self.objects_per_page);
         }
         return self.objects_per_page;
     }
