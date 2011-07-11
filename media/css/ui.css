@@ -1,6 +1,13 @@
-#ui_document_list{
+ul#ui_breadcrumbs{
     list-style-type: none;
-    height: 500px;
+}
+
+ul#ui_breadcrumbs li{
+    display: inline-block;
+}
+
+ul#ui_document_list{
+    list-style-type: none;
 }
 
 #ui_document_list li{

@@ -65,7 +65,7 @@ function UICommunicator(options, renderer){
     }
 
     this.get_document_info = function(){
-        $.getJSON(self.get_url('document_info_url'), self.renderer.render_documents_info);
+        $.getJSON(self.get_url('document_info_url'), self.renderer.render_document_info);
     }
     
     this.get_document = function(){

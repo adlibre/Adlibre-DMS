@@ -1,5 +1,9 @@
 {% extends 'site_base.html' %}
 
+{%block extra_head%}
+<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/ui.css" />
+{%endblock%}
+
 {% block body %}
     {% if messages %}
     <ul class="messages">
@@ -10,7 +14,7 @@
     {% endif %}
     <div id="content">
         <ul id="ui_breadcrumbs">
-        <li><a href="{%url ui_rule_list%}">Index</a></li>
+            <li><a href="{%url ui_rule_list%}">Index</a></li>
         </ul>
         {% block content %}
         {% endblock %}
