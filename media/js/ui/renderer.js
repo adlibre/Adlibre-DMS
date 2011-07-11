@@ -16,9 +16,10 @@ function UIRenderer(options){
             var a = $('<a>');
             a.attr('href', crumb_item.url);
             a.text(crumb_item.text);
+            li.text(" > ");
             li.append(a);
         }else{
-            li.text(crumb_item.text);
+            li.text(" > " + crumb_item.text);
         }
         container.append(li);
     }

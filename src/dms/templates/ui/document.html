@@ -4,10 +4,6 @@
 
 {% block title %}Document{% endblock %}
 
-{%block breadcrumbs%}
-<li><a href="{%url ui_document document_name=document_name%}">back to GET RULE NAME HERE</a></li>
-{%endblock%}
-
 {% block content %}
 <h1>Document:</h1>
 <div id="ui_document">DOCUMENT HERE</div>
@@ -19,6 +15,6 @@
 $(document).ready(function(){
     window.ui_communicator.get_document_info();
     window.ui_communicator.get_document();
-});
+    });
 </script>
 {%endblock%}
