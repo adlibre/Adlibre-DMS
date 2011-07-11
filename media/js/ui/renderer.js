@@ -1,12 +1,16 @@
-function UIRenderer(){
+function UIRenderer(options){
     var self = this;
-    this.rule_list_id = "ui_rule_list";
-    this.document_list_id = "ui_document_list";
-    this.document_container_id = 'ui_document';
-    this.breadcrumb_list_id = "ui_breadcrumbs";
+    this.options = options;
 
+    this.info_rendered = false;
+
+    this.init = function(){
+        $('#' + self.options.document_list_id).bind('ui_documents_loaded', self.after_documents_load)
+    }
+    
+    
     this.update_breadcrumbs = function(crumb_item){
-        var container = $("#" + self.breadcrumb_list_id);
+        var container = $("#" + self.options.breadcrumb_list_id);
         var li = $("<li>");
         if (crumb_item.url){
             var a = $('<a>');
@@ -22,7 +26,7 @@ function UIRenderer(){
 
     this.render_object_list = function(list_id, objects, construct_item_callback){
         var container = $("#" + list_id);
-        var item = container.children().first().detach();
+        var item = $("<li>");
         for (var i = 0; i < objects.length; i++){
             var object_node = construct_item_callback(objects[i], item.clone());
             container.append(object_node);
@@ -30,7 +34,7 @@ function UIRenderer(){
     }
 
     this.render_rules = function(rules){
-        self.render_object_list(self.rule_list_id, rules, function(rule, rule_item){
+        self.render_object_list(self.options.rule_list_id, rules, function(rule, rule_item){
             var lnk = $('<a>');
             lnk.text(rule.doccode);
             lnk.attr('href', rule.ui_url);
@@ -40,8 +44,9 @@ function UIRenderer(){
     }
     
     this.render_documents = function(documents){
+        if(! documents.length){ return false; }
         var rule_name = documents[0].rule;
-        self.render_object_list(self.document_list_id, documents, function(document, document_item){
+        self.render_object_list(self.options.document_list_id, documents, function(document, document_item){
             var lnk = $('<a>');
             lnk.text(document.name);
             lnk.attr('href', document.ui_url);
@@ -49,20 +54,36 @@ function UIRenderer(){
             return document_item;
         });
         self.render_documents_info({'rule_name': rule_name});
+        $('#' + self.options.document_list_id).trigger('ui_documents_loaded');
     }
+
     this.render_documents_info = function(documents_info){
-        self.update_breadcrumbs({'url': '.', 'text': documents_info['rule_name']});
+        if (! self.info_rendered){
+            self.update_breadcrumbs({'url': '.', 'text': documents_info['rule_name']});
+            self.info_rendered = true;
+        }
     }
-    
+
+    this.after_documents_load = function(event){
+        $(self.options.document_list_id).endlessScroll({
+                bottomPixels: 450,
+                fireDelay: 100,
+                callback: function(p){
+                    $("#" + self.options.document_list_id).trigger('ui_more_documents_needed');
+                }
+        });
+    }
+
     this.render_document = function(document_url){
        var iframe = $('<iframe>');
        iframe.attr('src', document_url);
        iframe.css('border', '2px solid #333');
-       $('#' + self.document_container_id).empty().append(iframe);
+       $('#' + self.options.document_container_id).empty().append(iframe);
     }
-    
+
     this.render_document_info = function(document_info){
         self.update_breadcrumbs({'url': document_info['document_list_url'], 'text': document_info.doccode.title});
         self.update_breadcrumbs({'text': document_info['document_name']});
     }
+    this.init();
 }

@@ -17,8 +17,8 @@
 {{block.super}}
 <script type="text/javascript" language="javascript">
 $(document).ready(function(){
-    window.ui_manager.communicator.get_document_info(window.ui_manager.renderer.render_document_info);
-    window.ui_manager.communicator.get_document(window.ui_manager.renderer.render_document);
+    window.ui_communicator.get_document_info();
+    window.ui_communicator.get_document();
 });
 </script>
 {%endblock%}
