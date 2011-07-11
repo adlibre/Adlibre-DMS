@@ -2,6 +2,10 @@
 
 {% load i18n %}
 
+{%block extra_head%}
+<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/ui.css" />
+{%endblock%}
+
 {% block title %}Documents{% endblock %}
 
 {%block breadcrumbs%}<li><a href="{%url ui_rule_list%}">Index</a></li>
@@ -10,16 +14,16 @@
 
 {% block content %}
 <h1>Documents</h1>
-<ul id="ui_document_list">
-    <li class="ui_document_list_item"></li>
-</ul>
+<ul id="ui_document_list"></ul>
 {%endblock%}
 
 {%block javascript%}
 {{block.super}}
+<script type="text/javascript" language="javascript" src="{{ MEDIA_URL }}js/jquery-endless-scroll-1.3.js"></script>
 <script type="text/javascript" language="javascript">
 $(document).ready(function(){
-    window.ui_manager.communicator.get_documents(window.ui_manager.renderer.render_documents);
+    window.ui_communicator.document_list_init();
+    window.ui_communicator.get_documents();
 });
 </script>
 {%endblock%}

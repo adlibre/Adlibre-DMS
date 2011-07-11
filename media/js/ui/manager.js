@@ -1,14 +1,11 @@
-function UIManager(communicator, renderer){
-    this.communicator = communicator;
-    this.renderer = renderer;
-    this.init = function(){
-        1;
-    }
-}
-
 $(document).ready(function(){
-    var communicator = new UICommunicator();
-    var renderer = new UIRenderer();
-    window.ui_manager = new UIManager(communicator, renderer);
-    }
-);
+    var options = {};
+    options.rule_list_id = "ui_rule_list";
+    options.document_list_id = "ui_document_list";
+    options.document_container_id = 'ui_document';
+    options.breadcrumb_list_id = "ui_breadcrumbs";
+
+    renderer = new UIRenderer(options);
+    window.ui_communicator = new UICommunicator(options, renderer);
+
+});

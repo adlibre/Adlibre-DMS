@@ -112,9 +112,9 @@ class DocumentManager(object):
         #Should we validate more than one storage plugin?
         return storage[0]
 
-    def get_file_list(self, doccode_plugin_mapping):
+    def get_file_list(self, doccode_plugin_mapping, start = 0, finish = None):
         storage = self.get_storage(doccode_plugin_mapping)
-        return storage.worker.get_list(doccode_plugin_mapping.get_doccode())
+        return storage.worker.get_list(doccode_plugin_mapping.get_doccode(), start, finish)
 
     def get_file(self, request, document_name, hashcode, extension, revision = None, parent_directory = None):
         if not revision:

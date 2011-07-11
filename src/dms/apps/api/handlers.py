@@ -101,7 +101,16 @@ class FileListHandler(BaseHandler):
         try:
             manager = DocumentManager()
             mapping = manager.get_plugin_mapping_by_kwargs(pk = id_rule)
-            file_list = manager.get_file_list(mapping)
+            start = 0
+            finish = None
+            try:
+                start = int(request.GET.get('start', 0))
+                finish = request.GET.get('finish', None)
+                if finish:
+                    finish = int(finish)
+            except ValueError:
+                pass
+            file_list = manager.get_file_list(mapping, start, finish)
             for item in file_list:
                 item.update({   'ui_url': reverse('ui_document', kwargs = {'document_name': item['name']}),
                                 'rule': mapping.get_name(),

@@ -82,7 +82,7 @@ class Local(object):
             raise BreakPluginChain()
         return document
 
-    def get_list(self, doccode):
+    def get_list(self, doccode, start = 0, finish = None):
         """
         Return List of DocCodes in the repository for a given rule
         """
@@ -98,6 +98,8 @@ class Local(object):
         doccodes = []
         for root, dirs, files in os.walk(directory):
             for file in files:
+                if finish and len(doccodes) >= finish + 1:
+                    break
                 doc, extension = os.path.splitext(file)
                 if extension == '.json':
                     doccodes.append({   'name': doc,})
@@ -105,6 +107,8 @@ class Local(object):
                 elif not doccode.uses_repository:
                     doccodes.append({   'name': file,
                                         'directory': os.path.split(root)[1]})
+        if start:
+            doccodes = doccodes[start:]
         return naturalsort(doccodes)
 
     def remove(self, request, document):
