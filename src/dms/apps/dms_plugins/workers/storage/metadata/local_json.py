@@ -2,6 +2,8 @@ import datetime
 import json
 import os
 
+from django.conf import settings
+
 from dms_plugins.pluginpoints import BeforeStoragePluginPoint, BeforeRetrievalPluginPoint, BeforeRemovalPluginPoint
 from dms_plugins.workers import Plugin, PluginError, BreakPluginChain
 from dms_plugins.workers.storage.local import LocalFilesystemManager
@@ -67,6 +69,21 @@ class LocalJSONMetadata(object):
         json.dump(fileinfo_db, json_handler, indent = 4)
 
         return document
+
+    def get_directories(self, doccode):
+        """
+        Return List of directories with document files
+        """
+        root = settings.DOCUMENT_ROOT
+        doccode_directory = os.path.join(root, str(doccode.get_id()))
+
+        directories = []
+        for root, dirs, files in os.walk(doccode_directory):
+            for file in files:
+                doc, extension = os.path.splitext(file)
+                if extension == '.json' or (not doccode.uses_repository and not dirs): #dirs with metadata or leaf dirs
+                    directories.append(root)
+        return directories
 
 class LocalJSONMetadataRetrievalPlugin(Plugin, BeforeRetrievalPluginPoint):
     title = "Local Metadata Retrieval"

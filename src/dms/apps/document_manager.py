@@ -103,18 +103,31 @@ class DocumentManager(object):
         doc.set_revision(revision)
         return self.process_pluginpoint(BeforeRemovalPluginPoint, request, document = doc)
 
+    def get_plugins_by_type(self, doccode_plugin_mapping, plugin_type, pluginpoint = BeforeStoragePluginPoint):
+        plugins = self.get_plugins_from_mapping(doccode_plugin_mapping, pluginpoint, plugin_type = plugin_type)
+        return plugins
+
     def get_storage(self, doccode_plugin_mapping, pluginpoint = BeforeStoragePluginPoint):
         #Plugin point does not matter here as mapping must have a storage plugin both at storage and retrieval stages
-        storage = self.get_plugins_from_mapping(doccode_plugin_mapping, pluginpoint, plugin_type = 'storage')
+        storage = self.get_plugins_by_type(doccode_plugin_mapping, 'storage', pluginpoint)
         #Document MUST have a storage plugin
         if not storage:
             raise ConfigurationError("No storage plugin for %s" % doccode_plugin_mapping)
         #Should we validate more than one storage plugin?
         return storage[0]
 
+    def get_metadata(self, doccode_plugin_mapping, pluginpoint = BeforeStoragePluginPoint):
+        metadata = None
+        metadatas = self.get_plugins_by_type(doccode_plugin_mapping, 'metadata', pluginpoint)
+        if metadatas: metadata = metadatas[0]
+        return metadata
+
     def get_file_list(self, doccode_plugin_mapping, start = 0, finish = None):
         storage = self.get_storage(doccode_plugin_mapping)
-        return storage.worker.get_list(doccode_plugin_mapping.get_doccode(), start, finish)
+        metadata = self.get_metadata(doccode_plugin_mapping)
+        doccode = doccode_plugin_mapping.get_doccode()
+        document_directories = metadata.worker.get_directories(doccode)
+        return storage.worker.get_list(doccode, document_directories, start, finish)
 
     def get_file(self, request, document_name, hashcode, extension, revision = None, parent_directory = None):
         if not revision:
