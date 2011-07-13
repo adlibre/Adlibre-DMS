@@ -82,13 +82,10 @@ class Local(object):
             raise BreakPluginChain()
         return document
 
-    def get_list(self, doccode, start = 0, finish = None):
+    def get_list(self, doccode, directories, start = 0, finish = None):
         """
         Return List of DocCodes in the repository for a given rule
         """
-        root = settings.DOCUMENT_ROOT
-        directory = os.path.join(root, str(doccode.get_id()))
-
         # Iterate through the directory hierarchy looking for metadata containing dirs.
         # This is more efficient than other methods of looking for leaf directories
         # and works for storage rules where the depth of the storage tree is not constant for all doccodes.
@@ -96,16 +93,16 @@ class Local(object):
         # FIXME: This will be inefficient at scale and will require caching
 
         doccodes = []
-        for root, dirs, files in os.walk(directory):
-            for file in files:
-                if finish and len(doccodes) >= finish :
-                    break
-                doc, extension = os.path.splitext(file)
-                if extension == '.json':
-                    doccodes.append({   'name': doc,})
-                                        #'directory': root})
-                elif not doccode.uses_repository:
-                    doccodes.append({   'name': file,
+        for directory in directories:
+            for root, dirs, files in os.walk(directory):
+                for file in files:
+                    if finish and len(doccodes) >= finish :
+                        break
+                    doc, extension = os.path.splitext(file)
+                    if extension == '.json':
+                        doccodes.append({   'name': doc,})
+                    elif not doccode.uses_repository:
+                        doccodes.append({   'name': file,
                                         'directory': os.path.split(root)[1]})
         if start:
             doccodes = doccodes[start:]
