@@ -1,9 +1,15 @@
-{% extends 'site_base.html' %}
-
-{%block extra_head%}
-<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/ui.css" />
-{%endblock%}
-
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>{% block title %}{% endblock %} - Adlibre DMS</title>
+	<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}themes/{{ THEME_NAME }}/style.css" />
+    <link rel="shortcut icon" href="{{ MEDIA_URL }}favicon.ico" />
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/ui.css" />
+</head>
+<body class="{% block body_class %}{% endblock %}">
+<div id="page_wrapper">
+    <div id="container">
 {% block body %}
     {% if messages %}
     <ul class="messages">
@@ -20,7 +26,8 @@
         {% endblock %}
     </div>
 {% endblock %}
-
+    </div>
+    <div id="footer">
 {% block footer %}
     <p>
         Adlibre DMS - &copy; Adlibre {% now "Y" %}
@@ -30,14 +37,19 @@
         <span>Version: 1.0 Beta. {% if user.is_authenticated %}Logged in as {{ user }}{% else %}Logged out{% endif %}.</span>
     </p>
 {% endblock %}
-
+	</div>
 {%block javascript%}
 <script type="text/javascript" language="javascript" charset="utf-8" src="{{ MEDIA_URL }}js/jquery-1.4.2.min.js"></script>
 <script type="text/javascript" language="javascript" src="{{MEDIA_URL}}/js/ui/communicator.js"></script>
 <script type="text/javascript" language="javascript" src="{{MEDIA_URL}}/js/ui/renderer.js"></script>
+<script type="text/javascript" language="javascript" src="{{MEDIA_URL}}/js/ui/manager.js"></script>
 <script type="text/javascript" language="javascript">
 var UI_URLS = {{communicator_options|safe}};
+var manager = new UIManager();
+var renderer = new UIRenderer(manager);
+window.ui_communicator = new UICommunicator(manager, renderer);
 </script>
-<script type="text/javascript" language="javascript" src="{{MEDIA_URL}}/js/ui/manager.js"></script>
-
 {%endblock%}
+</div>
+</body>
+</html>

@@ -1,13 +1,13 @@
-function UIRenderer(options){
+function UIRenderer(manager){
     var self = this;
-    this.options = options;
+    this.manager = manager;
+    this.options = manager.options;
 
     this.info_rendered = false;
 
     this.init = function(){
         $('#' + self.options.document_list_id).bind('ui_documents_loaded', self.after_documents_load)
     }
-    
     
     this.update_breadcrumbs = function(crumb_item){
         var container = $("#" + self.options.breadcrumb_list_id);
@@ -86,5 +86,18 @@ function UIRenderer(options){
         self.update_breadcrumbs({'url': document_info['document_list_url'], 'text': document_info.doccode.title});
         self.update_breadcrumbs({'text': document_info['document_name']});
     }
+    
+    this.add_page = function(page){
+        var container = $("#" + self.options.pager_list_id);
+        var li = $("<li>");
+        var a = $('<a>');
+        var url = 'javascript:void(0);';
+        a.attr('href', url);
+        a.bind('click', function(event){self.manager.move_to_page(page);})
+        a.text(page);
+        li.append(a);
+        container.append(li);
+    }
+
     this.init();
 }

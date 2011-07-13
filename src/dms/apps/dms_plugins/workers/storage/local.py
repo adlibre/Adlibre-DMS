@@ -98,7 +98,7 @@ class Local(object):
         doccodes = []
         for root, dirs, files in os.walk(directory):
             for file in files:
-                if finish and len(doccodes) >= finish + 1:
+                if finish and len(doccodes) >= finish :
                     break
                 doc, extension = os.path.splitext(file)
                 if extension == '.json':
