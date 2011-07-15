@@ -38,8 +38,7 @@ class LocalJSONMetadata(object):
             raise BreakPluginChain()
         return document
 
-    def load_metadata(self, document_name, directory):
-        json_file = os.path.join(directory, '%s.json' % (document_name,))
+    def load_from_file(self, json_file):
         if os.path.exists(json_file):
             json_handler = open(json_file , mode='r+')
             fileinfo_db = json.load(json_handler)
@@ -49,6 +48,10 @@ class LocalJSONMetadata(object):
             revision = 1
         return fileinfo_db, revision
 
+    def load_metadata(self, document_name, directory):
+        json_file = os.path.join(directory, '%s.json' % (document_name,))
+        return self.load_from_file(json_file)
+
     def save_metadata(self, document, directory):
         fileinfo_db, revision = self.load_metadata(document.get_stripped_filename(), directory)
         document.set_revision(revision)
@@ -56,7 +59,7 @@ class LocalJSONMetadata(object):
         fileinfo = {
             'name' : document.get_filename_with_revision(),
             'revision' : document.get_revision(),
-            'created_date' : str(datetime.datetime.today())
+            'created_date' : datetime.datetime.today().strftime(settings.DATE_FORMAT)
         }
 
         if document.get_current_metadata():
@@ -70,20 +73,39 @@ class LocalJSONMetadata(object):
 
         return document
 
-    def get_directories(self, doccode):
+    def get_directories(self, doccode, load_metadata = False):
+        """
+        Return List of directories with document files
+        """
+        #FIXME: seems to be rather slow for large number of docs :(
+        root = settings.DOCUMENT_ROOT
+        doccode_directory = os.path.join(root, str(doccode.get_id()))
+
+        directories = []
+        for root, dirs, files in os.walk(doccode_directory):
+            for fil in files:
+                doc, extension = os.path.splitext(fil)
+                if extension == '.json' or (not doccode.uses_repository and not dirs): #dirs with metadata or leaf dirs
+                    if load_metadata:
+                        directories.append( (root, {'document_name': doc, 'metadatas': self.load_from_file(os.path.join(root, fil))[0]}) )
+                    else:
+                        directories.append(root)
+        return directories
+
+    def get_metadatas(self, doccode):
         """
         Return List of directories with document files
         """
         root = settings.DOCUMENT_ROOT
         doccode_directory = os.path.join(root, str(doccode.get_id()))
 
-        directories = []
+        metadatas = []
         for root, dirs, files in os.walk(doccode_directory):
-            for file in files:
-                doc, extension = os.path.splitext(file)
-                if extension == '.json' or (not doccode.uses_repository and not dirs): #dirs with metadata or leaf dirs
-                    directories.append(root)
-        return directories
+            for fil in files:
+                doc, extension = os.path.splitext(fil)
+                if extension == '.json': #dirs with metadata
+                    metadatas.append(self.load_from_file(os.path.join(root, fil)))
+        return metadatas
 
 class LocalJSONMetadataRetrievalPlugin(Plugin, BeforeRetrievalPluginPoint):
     title = "Local Metadata Retrieval"

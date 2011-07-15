@@ -82,7 +82,10 @@ class Local(object):
             raise BreakPluginChain()
         return document
 
-    def get_list(self, doccode, directories, start = 0, finish = None):
+    
+        
+
+    def get_list(self, doccode, directories, start = 0, finish = None, order = "created_date"):
         """
         Return List of DocCodes in the repository for a given rule
         """
@@ -91,19 +94,33 @@ class Local(object):
         # and works for storage rules where the depth of the storage tree is not constant for all doccodes.
 
         # FIXME: This will be inefficient at scale and will require caching
-
+        def sort_by_created_date(x, y):
+            first = datetime.datetime.strptime(x[1]['metadatas'][0]['created_date'], settings.DATE_FORMAT)
+            second = datetime.datetime.strptime(y[1]['metadatas'][0]['created_date'], settings.DATE_FORMAT)
+            if first < second:
+                return -1
+            elif first > second:
+                return 1
+            return 0
+        SORT_FUNCTIONS = {
+            'created_date': sort_by_created_date,
+        }
+        try:
+            directories.sort(SORT_FUNCTIONS[order])
+        except KeyError:
+            if settings.DEBUG:
+                raise
+            else:
+                pass
         doccodes = []
-        for directory in directories:
-            for root, dirs, files in os.walk(directory):
-                for file in files:
-                    if finish and len(doccodes) >= finish :
-                        break
-                    doc, extension = os.path.splitext(file)
-                    if extension == '.json':
-                        doccodes.append({   'name': doc,})
-                    elif not doccode.uses_repository:
-                        doccodes.append({   'name': file,
-                                        'directory': os.path.split(root)[1]})
+        for directory, metadata_info in directories:
+            if finish and len(doccodes) >= finish :
+                break
+            if not doccode.uses_repository:
+                doccodes.append({'name': metadata_info['document_name'],
+                    'directory': os.path.split(directory)[1]})
+            else:
+                doccodes.append({'name': metadata_info['document_name']})
         if start:
             doccodes = doccodes[start:]
         return naturalsort(doccodes)
