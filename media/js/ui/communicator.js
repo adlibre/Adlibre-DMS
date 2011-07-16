@@ -3,14 +3,14 @@ function UICommunicator(manager, renderer){
     this.renderer = renderer;
     this.manager = manager;
     this.options = manager.options;
-    this.already_loaded_documents = 0;
-    this.no_more_documents = false;
 
     this.document_list_init = function(){
+        self.manager.reset_document_list();
         var height = $(window).height() - 200;//TODO: some more intelligent way to tell container height
         height = (height < 150) ? 150 : height;
         $('#' + self.options.document_list_id).height(height);
         $('#' + self.options.document_list_id).bind('ui_more_documents_needed', self.get_more_documents);
+        self.renderer.render_control_panel();
     }
 
     this.get_url = function(name, params){
@@ -44,19 +44,19 @@ function UICommunicator(manager, renderer){
     }
     
     this.get_more_documents = function(event){
-        if (self.no_more_documents){ return false; }
+        if (self.manager.no_more_documents){ return false; }
         var per_page = self.manager.get_objects_per_page()
         var params = self.get_document_list_params();
-        if (params.finish > self.already_loaded_documents){
-            self.already_loaded_documents = params.finish;
+        if (params.finish > self.manager.already_loaded_documents){
+            self.manager.already_loaded_documents = params.finish;
             $.getJSON(self.get_url('documents_url'),
                 params,
                 function(documents){
                     self.renderer.render_documents(documents);
                     if (documents.length < (params.finish - params.start)){
-                        self.no_more_documents = true;
+                        self.manager.no_more_documents = true;
                     }
-                    current_page = self.already_loaded_documents / per_page;
+                    current_page = self.manager.already_loaded_documents / per_page;
                     self.renderer.add_page(current_page);
                 });
         }
