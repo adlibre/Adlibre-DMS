@@ -119,14 +119,17 @@ function UIRenderer(manager){
     
     this.add_page = function(page){
         var container = $("#" + self.options.pager_list_id);
-        var li = $("<li>");
-        var a = $('<a>');
-        var url = 'javascript:void(0);';
-        a.attr('href', url);
-        a.bind('click', function(event){self.manager.move_to_page(page);})
-        a.text(page);
-        li.append(a);
-        container.append(li);
+        var last_page = container.children().last().children().first().text();
+        if (!last_page | parseInt(last_page) < page){
+            var li = $("<li>");
+            var a = $('<a>');
+            var url = 'javascript:void(0);';
+            a.attr('href', url);
+            a.bind('click', function(event){self.manager.move_to_page(page);})
+            a.text(page);
+            li.append(a);
+            container.append(li);
+        }
     }
 
     this.init();
