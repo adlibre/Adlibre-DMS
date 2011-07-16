@@ -122,7 +122,7 @@ class DocumentManager(object):
         if metadatas: metadata = metadatas[0]
         return metadata
 
-    def get_file_list(self, doccode_plugin_mapping, start = 0, finish = None, order = 'created_date'):
+    def get_file_list(self, doccode_plugin_mapping, start = 0, finish = None, order = None):
         storage = self.get_storage(doccode_plugin_mapping)
         metadata = self.get_metadata(doccode_plugin_mapping)
         doccode = doccode_plugin_mapping.get_doccode()

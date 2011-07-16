@@ -7,6 +7,13 @@ function UIManager(){
     this.options.breadcrumb_list_id = "ui_breadcrumbs";
     this.options.pager_list_id = "ui_pager";
 
+
+    this.DOCUMENT_ORDERS = {
+                                "DATE": {'title':"Date", 'param_value': 'created_date'},
+                                "NAME": {'title':"Name", 'param_value': 'name'}
+                            };
+    this.document_order = this.DOCUMENT_ORDERS['DATE'];
+
     this.move_to_page = function(page){
         var page_height = self.get_document_height() * self.get_rows_per_page();
         var margin = 15;

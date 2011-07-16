@@ -8,7 +8,7 @@ function UIRenderer(manager){
     this.init = function(){
         $('#' + self.options.document_list_id).bind('ui_documents_loaded', self.after_documents_load)
     }
-    
+
     this.update_breadcrumbs = function(crumb_item){
         var container = $("#" + self.options.breadcrumb_list_id);
         var li = $("<li>");
@@ -43,7 +43,7 @@ function UIRenderer(manager){
             return rule_item;
         });
     }
-    
+
     this.render_documents = function(documents){
         if(! documents.length){ return false; }
         var rule_name = documents[0].rule;
@@ -58,9 +58,16 @@ function UIRenderer(manager){
         $('#' + self.options.document_list_id).trigger('ui_documents_loaded');
     }
 
+    this.get_document_list_details = function(){
+        return [
+                "Ordered by (" + self.manager.document_order.title + ")"
+                ].join("+");
+    }
+
     this.render_documents_info = function(documents_info){
         if (! self.info_rendered){
             self.update_breadcrumbs({'url': '.', 'text': documents_info['rule_name']});
+            self.update_breadcrumbs({'text': self.get_document_list_details()});
             self.info_rendered = true;
         }
     }
