@@ -28,3 +28,10 @@ ul#ui_pager li{
     margin: 15px;
     float: left;
 }
+
+#ui_control_panel{
+    width: 200px;
+    border: 2px solid #333;
+    float: right;
+    margin: 15px;
+}

@@ -7,6 +7,12 @@ function UIManager(){
     this.options.breadcrumb_list_id = "ui_breadcrumbs";
     this.options.pager_list_id = "ui_pager";
 
+    this.reset_document_list = function(){
+        this.already_loaded_documents = 0;
+        this.no_more_documents = false;
+        $("#" + self.options.document_list_id).empty();
+        $("#" + self.options.pager_list_id).empty();
+    }
 
     this.DOCUMENT_ORDERS = {
                                 "DATE": {'title':"Date", 'param_value': 'created_date'},

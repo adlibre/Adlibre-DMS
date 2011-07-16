@@ -9,8 +9,11 @@ function UIRenderer(manager){
         $('#' + self.options.document_list_id).bind('ui_documents_loaded', self.after_documents_load)
     }
 
-    this.update_breadcrumbs = function(crumb_item){
+    this.update_breadcrumbs = function(crumb_item, do_replace){
         var container = $("#" + self.options.breadcrumb_list_id);
+        if (do_replace){
+            container.children().last().remove();
+        }
         var li = $("<li>");
         if (crumb_item.url){
             var a = $('<a>');
@@ -24,6 +27,24 @@ function UIRenderer(manager){
         container.append(li);
     }
 
+
+    this.render_control_panel = function(){
+        for (var key in self.manager.DOCUMENT_ORDERS){
+            var li = $('<li>');
+            var a = $('<a>').attr('href', "javascript:void(0);");
+            a.bind('click', function(val){
+                    return function() { 
+                        self.manager.reset_document_list();
+                        self.manager.document_order = val;
+                        $("#" + self.options.document_list_id).trigger("ui_more_documents_needed");
+                    };
+            }(self.manager.DOCUMENT_ORDERS[key])
+            );
+            a.text(self.manager.DOCUMENT_ORDERS[key].title);
+            li.append(a);
+            $("#ui_order_tab").append(li);
+        }
+    }
 
     this.render_object_list = function(list_id, objects, construct_item_callback){
         var container = $("#" + list_id);
@@ -67,8 +88,10 @@ function UIRenderer(manager){
     this.render_documents_info = function(documents_info){
         if (! self.info_rendered){
             self.update_breadcrumbs({'url': '.', 'text': documents_info['rule_name']});
-            self.update_breadcrumbs({'text': self.get_document_list_details()});
             self.info_rendered = true;
+            self.update_breadcrumbs({'text': self.get_document_list_details()}, false);
+        } else{
+            self.update_breadcrumbs({'text': self.get_document_list_details()}, true);
         }
     }
 
