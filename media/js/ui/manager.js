@@ -20,11 +20,21 @@ function UIManager(){
                             };
     this.document_order = this.DOCUMENT_ORDERS['DATE'];
 
+    this.get_current_page = function(){
+        var page = $.bbq.getState('Page');
+        if (!page | typeof(page) == 'undefined'){ page = 1; }
+        return page;
+    }
+    this.set_current_page = function(page){
+        jQuery.bbq.pushState({'Page': page});
+    }
+
     this.move_to_page = function(page){
         var page_height = self.get_document_height() * self.get_rows_per_page();
         var margin = 15;
         var scroll_top = (page-1) * page_height + margin;
         $("#" + self.options.document_list_id).scrollTop(scroll_top);
+        self.set_current_page(page);
     }
 
     this.get_document_width = function(){

@@ -33,9 +33,10 @@ function UICommunicator(manager, renderer){
     }
     
     this.get_document_list_params = function(){
-        var per_page = self.manager.get_objects_per_page()
+        var per_page = self.manager.get_objects_per_page();
+        var current_page = self.manager.get_current_page();
         var more_documents_start = $("#" + self.options.document_list_id).children().length;
-        var more_documents_finish = more_documents_start + per_page;
+        var more_documents_finish = more_documents_start + per_page * current_page;
         var params = {'start': more_documents_start,
                 'finish': more_documents_finish,
                 'order': self.manager.document_order.param_value
@@ -57,7 +58,10 @@ function UICommunicator(manager, renderer){
                         self.manager.no_more_documents = true;
                     }
                     current_page = self.manager.already_loaded_documents / per_page;
-                    self.renderer.add_page(current_page);
+                    for(var i = 1; i <= current_page; i++){
+                        self.renderer.add_page(i);
+                    }
+                    self.manager.move_to_page(current_page);
                 });
         }
     }
