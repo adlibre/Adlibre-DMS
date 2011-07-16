@@ -82,10 +82,7 @@ class Local(object):
             raise BreakPluginChain()
         return document
 
-    
-        
-
-    def get_list(self, doccode, directories, start = 0, finish = None, order = "created_date"):
+    def get_list(self, doccode, directories, start = 0, finish = None, order = None):
         """
         Return List of DocCodes in the repository for a given rule
         """
@@ -94,24 +91,29 @@ class Local(object):
         # and works for storage rules where the depth of the storage tree is not constant for all doccodes.
 
         # FIXME: This will be inefficient at scale and will require caching
+
+        #FIXME: very un-elegant way to define available sort functions
         def sort_by_created_date(x, y):
             first = datetime.datetime.strptime(x[1]['metadatas'][0]['created_date'], settings.DATE_FORMAT)
             second = datetime.datetime.strptime(y[1]['metadatas'][0]['created_date'], settings.DATE_FORMAT)
-            if first < second:
-                return -1
-            elif first > second:
-                return 1
-            return 0
-        SORT_FUNCTIONS = {
-            'created_date': sort_by_created_date,
-        }
-        try:
-            directories.sort(SORT_FUNCTIONS[order])
-        except KeyError:
-            if settings.DEBUG:
-                raise
-            else:
-                pass
+            return cmp(first, second)
+        def sort_by_name(x, y):
+            first = x[1]['document_name']
+            second = y[1]['document_name']
+            return cmp(first, second)
+        if order:
+            SORT_FUNCTIONS = {
+                'created_date': sort_by_created_date,
+                'name': sort_by_name,
+            }
+            try:
+                directories.sort(SORT_FUNCTIONS[order])
+            except KeyError:
+                if settings.DEBUG:
+                    raise
+                else:
+                    pass
+
         doccodes = []
         for directory, metadata_info in directories:
             if finish and len(doccodes) >= finish :
@@ -123,7 +125,7 @@ class Local(object):
                 doccodes.append({'name': metadata_info['document_name']})
         if start:
             doccodes = doccodes[start:]
-        return naturalsort(doccodes)
+        return doccodes
 
     def remove(self, request, document):
         directory = self.filesystem.get_document_directory(document)
