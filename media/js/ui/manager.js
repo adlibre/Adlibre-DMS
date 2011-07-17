@@ -29,6 +29,12 @@ function UIManager(){
         jQuery.bbq.pushState(options);
     }
 
+    this.calculate_current_page = function(){
+        var current_scroll = $("#" + self.options.document_list_id).scrollTop();
+        var page_height = self.get_document_height() * self.get_rows_per_page() + 15;
+        return parseInt(current_scroll / page_height) + 1;
+    }
+
     this.move_to_page = function(page){
         var page_height = self.get_document_height() * self.get_rows_per_page();
         var margin = 15;

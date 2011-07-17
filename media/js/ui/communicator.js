@@ -11,6 +11,12 @@ function UICommunicator(manager, renderer){
         $('#' + self.options.document_list_id).height(height);
         $('#' + self.options.document_list_id).bind('ui_more_documents_needed', self.get_more_documents);
         self.renderer.render_control_panel();
+        $('#' + self.options.document_list_id).scroll(function(){
+            var page = self.manager.calculate_current_page();
+            if (page != parseInt(self.manager.get_state_variable('Page', 1))){
+               self.manager.set_state_variable('Page', page);
+            }
+        });
     }
 
     this.get_url = function(name, params){
