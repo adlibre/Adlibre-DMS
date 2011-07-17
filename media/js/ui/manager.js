@@ -15,18 +15,18 @@ function UIManager(){
     }
 
     this.DOCUMENT_ORDERS = {
-                                "DATE": {'title':"Date", 'param_value': 'created_date'},
-                                "NAME": {'title':"Name", 'param_value': 'name'}
+                                "Date": {'title':"Date", 'param_value': 'created_date'},
+                                "Name": {'title':"Name", 'param_value': 'name'}
                             };
-    this.document_order = this.DOCUMENT_ORDERS['DATE'];
-
-    this.get_current_page = function(){
-        var page = $.bbq.getState('Page');
-        if (!page | typeof(page) == 'undefined'){ page = 1; }
-        return page;
+    this.get_state_variable = function(var_name, default_value){
+        var val = $.bbq.getState(var_name);
+        if (!val | typeof(val) == 'undefined'){ val = default_value; }
+        return val;
     }
-    this.set_current_page = function(page){
-        jQuery.bbq.pushState({'Page': page});
+    this.set_state_variable = function(var_name, value){
+        var options = new Object();
+        options[var_name] = value;
+        jQuery.bbq.pushState(options);
     }
 
     this.move_to_page = function(page){
@@ -34,7 +34,7 @@ function UIManager(){
         var margin = 15;
         var scroll_top = (page-1) * page_height + margin;
         $("#" + self.options.document_list_id).scrollTop(scroll_top);
-        self.set_current_page(page);
+        self.set_state_variable('Page', page);
     }
 
     this.get_document_width = function(){

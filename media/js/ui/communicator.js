@@ -34,12 +34,12 @@ function UICommunicator(manager, renderer){
     
     this.get_document_list_params = function(){
         var per_page = self.manager.get_objects_per_page();
-        var current_page = self.manager.get_current_page();
+        var current_page = self.manager.get_state_variable('Page', 1);
         var more_documents_start = $("#" + self.options.document_list_id).children().length;
         var more_documents_finish = more_documents_start + per_page * current_page;
         var params = {'start': more_documents_start,
                 'finish': more_documents_finish,
-                'order': self.manager.document_order.param_value
+                'order': self.manager.DOCUMENT_ORDERS[self.manager.get_state_variable('Order', 'Date')].param_value
                 };
         return params;
     }
