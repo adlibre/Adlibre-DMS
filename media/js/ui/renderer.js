@@ -35,10 +35,10 @@ function UIRenderer(manager){
             a.bind('click', function(val){
                     return function() { 
                         self.manager.reset_document_list();
-                        self.manager.document_order = val;
+                        self.manager.set_state_variable('Order', val);
                         $("#" + self.options.document_list_id).trigger("ui_more_documents_needed");
                     };
-            }(self.manager.DOCUMENT_ORDERS[key])
+            }(key)
             );
             a.text(self.manager.DOCUMENT_ORDERS[key].title);
             li.append(a);
@@ -81,7 +81,7 @@ function UIRenderer(manager){
 
     this.get_document_list_details = function(){
         return [
-                "Ordered by (" + self.manager.document_order.title + ")"
+                "Ordered by (" + self.manager.DOCUMENT_ORDERS[self.manager.get_state_variable('Order', 'Date')].title + ")"
                 ].join("+");
     }
 
