@@ -122,12 +122,12 @@ class DocumentManager(object):
         if metadatas: metadata = metadatas[0]
         return metadata
 
-    def get_file_list(self, doccode_plugin_mapping, start = 0, finish = None, order = None):
+    def get_file_list(self, doccode_plugin_mapping, start = 0, finish = None, order = None, searchword = None):
         storage = self.get_storage(doccode_plugin_mapping)
         metadata = self.get_metadata(doccode_plugin_mapping)
         doccode = doccode_plugin_mapping.get_doccode()
         document_directories = metadata.worker.get_directories(doccode, load_metadata = True)
-        return storage.worker.get_list(doccode, document_directories, start, finish, order)
+        return storage.worker.get_list(doccode, document_directories, start, finish, order, searchword)
 
     def get_file(self, request, document_name, hashcode, extension, revision = None, parent_directory = None):
         if not revision:

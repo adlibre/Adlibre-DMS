@@ -82,7 +82,13 @@ class Local(object):
             raise BreakPluginChain()
         return document
 
-    def get_list(self, doccode, directories, start = 0, finish = None, order = None):
+    def document_matches_search(self, metadata_info, searchword):
+        result = False
+        if searchword in metadata_info['document_name'].lower():
+            result = True
+        return result
+
+    def get_list(self, doccode, directories, start = 0, finish = None, order = None, searchword = None):
         """
         Return List of DocCodes in the repository for a given rule
         """
@@ -118,11 +124,12 @@ class Local(object):
         for directory, metadata_info in directories:
             if finish and len(doccodes) >= finish :
                 break
-            if not doccode.uses_repository:
-                doccodes.append({'name': metadata_info['document_name'],
-                    'directory': os.path.split(directory)[1]})
-            else:
-                doccodes.append({'name': metadata_info['document_name']})
+            if not searchword or self.document_matches_search(metadata_info, searchword):
+                if not doccode.uses_repository:
+                    doccodes.append({'name': metadata_info['document_name'],
+                        'directory': os.path.split(directory)[1]})
+                else:
+                    doccodes.append({'name': metadata_info['document_name']})
         if start:
             doccodes = doccodes[start:]
         return doccodes

@@ -107,11 +107,12 @@ class FileListHandler(BaseHandler):
                 start = int(request.GET.get('start', 0))
                 finish = request.GET.get('finish', None)
                 order = request.GET.get('order', None)
+                searchword = request.GET.get('q', None)
                 if finish:
                     finish = int(finish)
             except ValueError:
                 pass
-            file_list = manager.get_file_list(mapping, start, finish, order)
+            file_list = manager.get_file_list(mapping, start, finish, order, searchword)
             for item in file_list:
                 item.update({   'ui_url': reverse('ui_document', kwargs = {'document_name': item['name']}),
                                 'rule': mapping.get_name(),
