@@ -17,6 +17,12 @@ function UICommunicator(manager, renderer){
                self.manager.set_state_variable('Page', page);
             }
         });
+        $('#ui_trigger_search').click(function(){
+            var q = $('#ui_search_field').attr('value') || null;
+            if (q){
+                window.location.href = $.param.querystring(window.location.href, {'q':q});
+            }
+        });
     }
 
     this.get_url = function(name, params){
@@ -43,13 +49,15 @@ function UICommunicator(manager, renderer){
         var current_page = self.manager.get_state_variable('Page', 1);
         var more_documents_start = $("#" + self.options.document_list_id).children().length;
         var more_documents_finish = more_documents_start + per_page * current_page;
+        var q = $.deparam.querystring()['q'];
         var params = {'start': more_documents_start,
                 'finish': more_documents_finish,
-                'order': self.manager.DOCUMENT_ORDERS[self.manager.get_state_variable('Order', 'Date')].param_value
+                'order': self.manager.DOCUMENT_ORDERS[self.manager.get_state_variable('Order', 'Date')].param_value,
+                'q': q
                 };
         return params;
     }
-    
+
     this.get_more_documents = function(event){
         if (self.manager.no_more_documents){ return false; }
         var per_page = self.manager.get_objects_per_page()

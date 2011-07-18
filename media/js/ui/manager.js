@@ -26,7 +26,7 @@ function UIManager(){
     this.set_state_variable = function(var_name, value){
         var options = new Object();
         options[var_name] = value;
-        jQuery.bbq.pushState(options);
+        jQuery.bbq.pushState(options, 0);
     }
 
     this.calculate_current_page = function(){
