@@ -49,7 +49,7 @@ function UICommunicator(manager, renderer){
         var current_page = self.manager.get_state_variable('Page', 1);
         var more_documents_start = $("#" + self.options.document_list_id).children().length;
         var more_documents_finish = more_documents_start + per_page * current_page;
-        var q = $.deparam.querystring()['q'];
+        var q = self.manager.get_searchword();
         var params = {'start': more_documents_start,
                 'finish': more_documents_finish,
                 'order': self.manager.DOCUMENT_ORDERS[self.manager.get_state_variable('Order', 'Date')].param_value,

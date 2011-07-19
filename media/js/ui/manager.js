@@ -29,6 +29,14 @@ function UIManager(){
         jQuery.bbq.pushState(options, 0);
     }
 
+    this.get_searchword = function(){
+        var searchword = $.deparam.querystring()['q'];
+        if ( !$("#ui_search_field").val() ){
+            $("#ui_search_field").val(searchword);
+        }
+        return searchword;
+    }
+
     this.calculate_current_page = function(){
         var current_scroll = $("#" + self.options.document_list_id).scrollTop();
         var page_height = self.get_document_height() * self.get_rows_per_page() + 15;
