@@ -14,7 +14,8 @@ function UICommunicator(manager, renderer){
         $('#' + self.options.document_list_id).scroll(function(){
             var page = self.manager.calculate_current_page();
             if (page != parseInt(self.manager.get_state_variable('Page', 1))){
-               self.manager.set_state_variable('Page', page);
+                //alert('new_page '+ page + ', current_page '+ parseInt(self.manager.get_state_variable('Page', 1)));
+                self.manager.set_state_variable('Page', page);
             }
         });
         $('#ui_trigger_search').click(function(){
@@ -63,15 +64,16 @@ function UICommunicator(manager, renderer){
         var per_page = self.manager.get_objects_per_page()
         var params = self.get_document_list_params();
         if (params.finish > self.manager.already_loaded_documents){
-            self.manager.already_loaded_documents = params.finish;
+            //self.manager.already_loaded_documents = params.finish;
             $.getJSON(self.get_url('documents_url'),
                 params,
                 function(documents){
                     self.renderer.render_documents(documents);
+                    self.manager.already_loaded_documents = $("#" + self.options.document_list_id).children().length;
                     if (documents.length < (params.finish - params.start)){
                         self.manager.no_more_documents = true;
                     }
-                    current_page = self.manager.already_loaded_documents / per_page;
+                    current_page = Math.ceil(self.manager.already_loaded_documents / per_page);
                     for(var i = 1; i <= current_page; i++){
                         self.renderer.add_page(i);
                     }

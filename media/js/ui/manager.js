@@ -26,7 +26,8 @@ function UIManager(){
     this.set_state_variable = function(var_name, value){
         var options = new Object();
         options[var_name] = value;
-        jQuery.bbq.pushState(options, 0);
+//        alert('pushstate = ' + value);
+        jQuery.bbq.pushState(options);
     }
 
     this.get_searchword = function(){
@@ -39,8 +40,9 @@ function UIManager(){
 
     this.calculate_current_page = function(){
         var current_scroll = $("#" + self.options.document_list_id).scrollTop();
-        var page_height = self.get_document_height() * self.get_rows_per_page() + 15;
-        return parseInt(current_scroll / page_height) + 1;
+        var margin = 15;
+        var page_height = self.get_document_height() * self.get_rows_per_page() + margin;
+        return Math.round(current_scroll / page_height) + 1;
     }
 
     this.move_to_page = function(page){
