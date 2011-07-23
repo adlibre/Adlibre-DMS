@@ -2,7 +2,8 @@ import os, plugins
 
 from dms_plugins import models
 from dms_plugins.workers import PluginError, PluginWarning, BreakPluginChain, DmsException
-from dms_plugins.pluginpoints import BeforeStoragePluginPoint, BeforeRetrievalPluginPoint, BeforeRemovalPluginPoint
+from dms_plugins.pluginpoints import BeforeStoragePluginPoint, BeforeRetrievalPluginPoint, BeforeRemovalPluginPoint, \
+BeforeUpdatePluginPoint
 
 from document import Document
 
@@ -73,15 +74,28 @@ class DocumentManager(object):
         return document
 
     def store(self, request, uploaded_file):
-        #process all storage plugins
-        #uploaded file is http://docs.djangoproject.com/en/1.3/topics/http/file-uploads/#django.core.files.uploadedfile.UploadedFile
-        #or file object
+        """
+        Process all storage plugins
+        uploaded file is http://docs.djangoproject.com/en/1.3/topics/http/file-uploads/#django.core.files.uploadedfile.UploadedFile
+        or file object
+        """
         doc = Document()
         doc.set_file_obj(uploaded_file)
         doc.set_filename(os.path.basename(uploaded_file.name))
         if hasattr(uploaded_file, 'content_type'):
             doc.set_mimetype(uploaded_file.content_type)
         return self.process_pluginpoint(BeforeStoragePluginPoint, request, document = doc)
+
+    def update(self, request, document_name, tag_string = None, remove_tag_string = None):
+        """
+        Process update plugins.
+        This is needed to update document properties like tags without re-storing document itself.
+        """
+        doc = Document()
+        doc.set_filename(document_name)
+        doc.set_tag_string(tag_string)
+        doc.set_remove_tag_string(remove_tag_string)
+        return self.process_pluginpoint(BeforeUpdatePluginPoint, request, document = doc)
 
     def retrieve(self, request, document_name, hashcode = None, revision = None, only_metadata = False, 
                         extension = None, parent_directory = None):

@@ -85,5 +85,5 @@ function UIManager(){
         }
         return self.objects_per_page;
     }
-
+    
 };

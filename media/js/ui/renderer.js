@@ -112,11 +112,32 @@ function UIRenderer(manager){
        $('#' + self.options.document_container_id).empty().append(iframe);
     }
 
+    this.construct_tag_list_item = function(tag){
+        var li = $('<li>');
+        li.append($('<span>').text(tag));
+        var a = $('<a>');
+        a.addClass('ui_delete_tag_link');
+        a.attr('href', 'javascript:void(0)');
+        a.text('X');
+        li.append(a);
+        return li;
+    }
+
     this.render_document_info = function(document_info){
         self.update_breadcrumbs({'url': document_info['document_list_url'], 'text': document_info.doccode.title});
         self.update_breadcrumbs({'text': document_info['document_name']});
+        self.render_document_tags(document_info.tags);
+        $('#' + self.options.document_container_id).trigger('ui_document_info_loaded');
     }
-    
+
+    this.render_document_tags = function(tags){
+        $('#ui_tag_list').empty();
+        for (var i = 0; i < tags.length; i++){
+            var tag = tags[i];
+            $('#ui_tag_list').append(self.construct_tag_list_item(tag));
+        }
+    }
+
     this.add_page = function(page){
         var container = $("#" + self.options.pager_list_id);
         var last_page = container.children().last().children().first().text();

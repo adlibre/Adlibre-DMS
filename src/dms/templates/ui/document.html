@@ -5,14 +5,25 @@
 {% block title %}Document{% endblock %}
 
 {% block content %}
+<div id="ui_control_panel">
+    <h3>Tags</h3>
+    <ul id="ui_tag_list"></ul>
+    <h4>Add tags</h4>
+    <form id="ui_add_tags_form" onsubmit="javascript:return false;">
+        <input type="text" name="tag" id="ui_add_tags_field" />
+        <input type="submit" name="save" value="Go" />
+    </form>
+</div>
 <h1>Document:</h1>
 <div id="ui_document">DOCUMENT HERE</div>
+
 {%endblock%}
 
 {%block javascript%}
 {{block.super}}
 <script type="text/javascript" language="javascript">
 $(document).ready(function(){
+    window.ui_communicator.document_init();
     window.ui_communicator.get_document_info();
     window.ui_communicator.get_document();
     });

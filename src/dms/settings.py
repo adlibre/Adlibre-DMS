@@ -158,6 +158,7 @@ INSTALLED_APPS = (
     'docutils',
     'piston',
     'plugins',
+    'taggit',
     # DMS
     'api',
     'docs',
