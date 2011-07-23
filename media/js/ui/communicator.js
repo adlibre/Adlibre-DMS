@@ -27,11 +27,13 @@ function UICommunicator(manager, renderer){
     }
     this.document_init = function(){
         $("#ui_add_tags_form").submit(function(){
+            var tag_string = $('#ui_add_tags_field').val();
+            if (!tag_string){return false;}
             $.ajax({
                 'type': 'PUT',
                 'url': self.get_url('document_url'),
                 'contentType': 'application/x-www-form-urlencoded',
-                'data': {"tag_string": $('#ui_add_tags_field').val()},
+                'data': {"tag_string": tag_string},
                 'success': function(jqXHR, textStatus){
                     self.renderer.render_document_tags($.parseJSON(jqXHR).tags);
                     $('#' + self.options.document_container_id).trigger('ui_document_info_loaded');
