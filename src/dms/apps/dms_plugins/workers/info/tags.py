@@ -24,13 +24,15 @@ class TagsUpdatePlugin(Plugin, BeforeUpdatePluginPoint):
 
     def work(self, request, document, **kwargs):
         tag_string = document.get_tag_string()
+        tag_string = tag_string.strip()
         remove_tag_string = document.get_remove_tag_string()
+        remove_tag_string = remove_tag_string.strip()
+        doc_model, created = Document.objects.get_or_create(name = document.get_filename())
         if tag_string or remove_tag_string:
-            doc_model, created = Document.objects.get_or_create(name = document.get_filename())
             if tag_string:
                 doc_model.tags.add(tag_string)
             else:
                 doc_model.tags.remove(remove_tag_string)
             doc_model = Document.objects.get(pk = doc_model.pk)
-            document.set_tags(doc_model.get_tag_list())
+        document.set_tags(doc_model.get_tag_list())
         return document
