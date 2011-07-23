@@ -1,3 +1,5 @@
+from taggit.utils import parse_tags
+
 from dms_plugins.models import Document
 from dms_plugins.pluginpoints import BeforeRetrievalPluginPoint, BeforeUpdatePluginPoint
 from dms_plugins.workers import Plugin, PluginError
@@ -30,7 +32,8 @@ class TagsUpdatePlugin(Plugin, BeforeUpdatePluginPoint):
         doc_model, created = Document.objects.get_or_create(name = document.get_filename())
         if tag_string or remove_tag_string:
             if tag_string:
-                doc_model.tags.add(tag_string)
+                tags = parse_tags(tag_string)
+                doc_model.tags.add(*tags)
             else:
                 doc_model.tags.remove(remove_tag_string)
             doc_model = Document.objects.get(pk = doc_model.pk)

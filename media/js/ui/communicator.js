@@ -37,6 +37,7 @@ function UICommunicator(manager, renderer){
                 'success': function(jqXHR, textStatus){
                     self.renderer.render_document_tags($.parseJSON(jqXHR).tags);
                     $('#' + self.options.document_container_id).trigger('ui_document_info_loaded');
+                    $('#ui_add_tags_field').val('');
                 }
             });
             return false;
