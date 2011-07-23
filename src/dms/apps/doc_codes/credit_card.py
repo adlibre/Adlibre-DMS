@@ -1,6 +1,6 @@
 import re
 
-from doc_codes import DoccodeManagerInstance, Doccode
+from doc_codes import Doccode
 
 class CreditCardDoccode(Doccode):
     """
