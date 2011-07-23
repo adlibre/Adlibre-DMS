@@ -430,6 +430,14 @@
         }
     }, 
     {
+        "pk": 4, 
+        "model": "plugins.pluginpoint", 
+        "fields": {
+            "status": 0, 
+            "name": "dms_plugins.pluginpoints.BeforeUpdatePluginPoint"
+        }
+    }, 
+    {
         "pk": 1, 
         "model": "plugins.plugin", 
         "fields": {
@@ -584,6 +592,28 @@
         }
     },
     {
+        "pk": 17, 
+        "model": "plugins.plugin", 
+        "fields": {
+            "status": 0, 
+            "index": 40, 
+            "_order": 7, 
+            "name": "dms_plugins.workers.info.tags.TagsPlugin", 
+            "point": 2
+        }
+    },
+    {
+        "pk": 19, 
+        "model": "plugins.plugin", 
+        "fields": {
+            "status": 0, 
+            "index": 10, 
+            "_order": 0, 
+            "name": "dms_plugins.workers.info.tags.TagsUpdatePlugin", 
+            "point": 4
+        }
+    }, 
+    {
         "pk": 1, 
         "model": "dms_plugins.doccodepluginmapping", 
         "fields": {
@@ -593,7 +623,8 @@
                 6, 
                 7, 
                 9, 
-                15
+                15, 
+                17
             ], 
             "before_removal_plugins": [
                 12, 
@@ -605,6 +636,9 @@
                 3, 
                 4, 
                 14
+            ], 
+            "before_update_plugins": [
+                19
             ], 
             "doccode": "2"
         }
@@ -620,7 +654,8 @@
                 7, 
                 9, 
                 11, 
-                15
+                15, 
+                17
             ], 
             "before_removal_plugins": [
                 12, 
@@ -634,6 +669,9 @@
                 10, 
                 14
             ], 
+            "before_update_plugins": [
+                19
+            ], 
             "doccode": "1"
         }
     }, 
@@ -645,7 +683,8 @@
             "before_retrieval_plugins": [
                 6, 
                 7, 
-                15
+                15, 
+                17
             ], 
             "before_removal_plugins": [
                 12, 
@@ -654,6 +693,9 @@
             "before_storage_plugins": [
                 4, 
                 14
+            ], 
+            "before_update_plugins": [
+                19
             ], 
             "doccode": "3"
         }
@@ -666,7 +708,8 @@
             "before_retrieval_plugins": [
                 6, 
                 7, 
-                15
+                15, 
+                17
             ], 
             "before_removal_plugins": [
                 12, 
@@ -676,6 +719,9 @@
                 2, 
                 4, 
                 14
+            ], 
+            "before_update_plugins": [
+                19
             ], 
             "doccode": "4"
         }
@@ -688,7 +734,8 @@
             "before_retrieval_plugins": [
                 6, 
                 7, 
-                15
+                15, 
+                17
             ], 
             "before_removal_plugins": [
                 12, 
@@ -698,6 +745,9 @@
                 2, 
                 4, 
                 14
+            ], 
+            "before_update_plugins": [
+                19
             ], 
             "doccode": "5"
         }
@@ -722,4 +772,5 @@
             "doccode": "1000"
         }
     }
+    
 ]

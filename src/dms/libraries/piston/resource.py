@@ -88,7 +88,7 @@ class Resource(object):
         if rm in ('POST', 'PUT'):
             try:
                 translate_mime(request)
-            except MimerDataException:
+            except MimerDataException, e:
                 return rc.BAD_REQUEST
         
         if not rm in handler.allowed_methods:

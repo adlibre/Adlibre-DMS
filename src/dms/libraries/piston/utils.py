@@ -207,7 +207,6 @@ class Mimer(object):
         
         if not self.is_multipart() and ctype:
             loadee = self.loader_for_type(ctype)
-            
             try:
                 self.request.data = loadee(self.request.raw_post_data)
                 

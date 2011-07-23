@@ -25,6 +25,9 @@ class Document(object):
         self.file_obj = None
         self.current_metadata = {}
         self.mimetype = None
+        self.tags = []
+        self.tag_string = ''
+        self.remove_tag_string = ''
 
     def get_name(self):
         name = self.get_filename()
@@ -159,6 +162,9 @@ class Document(object):
     def update_options(self, options):
         self.options.update(options)
 
+    def set_option(self, key, value):
+        self.options[key] = value
+
     def splitdir(self):
         directory = None
         doccode = self.get_doccode()
@@ -193,4 +199,25 @@ class Document(object):
         doccode = self.get_doccode()
         d['doccode'] = {'title': doccode.get_title(), 'id': doccode.get_id()}
         d['document_name'] = self.get_filename()
+        d['tags'] = self.get_tags()
         return d
+
+    def get_tags(self):
+        return self.tags
+
+    def set_tags(self, tags):
+        self.tags = tags
+
+    def get_tag_string(self):
+        return self.tag_string
+
+    def set_tag_string(self, tag_string):
+        if tag_string:
+            self.tag_string = tag_string
+
+    def get_remove_tag_string(self):
+        return self.remove_tag_string
+
+    def set_remove_tag_string(self, tag_string):
+        if tag_string:
+            self.remove_tag_string = tag_string

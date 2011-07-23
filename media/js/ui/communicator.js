@@ -25,7 +25,39 @@ function UICommunicator(manager, renderer){
             }
         });
     }
+    this.document_init = function(){
+        $("#ui_add_tags_form").submit(function(){
+            $.ajax({
+                'type': 'PUT',
+                'url': self.get_url('document_url'),
+                'contentType': 'application/x-www-form-urlencoded',
+                'data': {"tag_string": $('#ui_add_tags_field').val()},
+                'success': function(jqXHR, textStatus){
+                    self.renderer.render_document_tags($.parseJSON(jqXHR).tags);
+                    $('#' + self.options.document_container_id).trigger('ui_document_info_loaded');
+                }
+            });
+            return false;
+        });
+        $('#' + self.options.document_container_id).bind('ui_document_info_loaded', self.document_info_init);
+    }
 
+    this.document_info_init = function(){
+        $('a.ui_delete_tag_link').click(function(event){
+                var tag_string = $(event.target).prev().text();
+                $.ajax({
+                'type': 'PUT',
+                'url': self.get_url('document_url'),
+                'contentType': 'application/x-www-form-urlencoded',
+                'data': {"remove_tag_string": tag_string},
+                'success': function(jqXHR, textStatus){
+                    self.renderer.render_document_tags($.parseJSON(jqXHR).tags);
+                    $('#' + self.options.document_container_id).trigger('ui_document_info_loaded');
+                }
+                });
+        });
+    }
+    
     this.get_url = function(name, params){
         var url = UI_URLS[name];
         if (params){
@@ -83,7 +115,9 @@ function UICommunicator(manager, renderer){
     }
 
     this.get_document_info = function(){
-        $.getJSON(self.get_url('document_info_url'), self.renderer.render_document_info);
+        $.getJSON(self.get_url('document_info_url'), function(document_info){
+            self.renderer.render_document_info(document_info);
+            });
     }
     
     this.get_document = function(){

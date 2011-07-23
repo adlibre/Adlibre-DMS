@@ -5,6 +5,7 @@ New models
 """
 from plugins.fields import PluginField, ManyPluginField
 from plugins.models import Plugin
+from taggit.managers import TaggableManager
 
 from dms_plugins import pluginpoints
 from doc_codes import DoccodeManagerInstance
@@ -21,6 +22,9 @@ class DoccodePluginMapping(models.Model):
                                                 blank = True)
     before_removal_plugins = ManyPluginField( pluginpoints.BeforeRemovalPluginPoint, 
                                                 related_name = 'settings_before_removal',
+                                                blank = True)
+    before_update_plugins = ManyPluginField( pluginpoints.BeforeUpdatePluginPoint, 
+                                                related_name = 'settings_before_update',
                                                 blank = True)
     active = models.BooleanField(default = False)
 
@@ -51,6 +55,10 @@ class DoccodePluginMapping(models.Model):
         return self.before_removal_plugins.all().order_by('index')
     removal_plugins = property(get_before_removal_plugins)
 
+    def get_before_update_plugins(self):
+        return self.before_update_plugins.all().order_by('index')
+    update_plugins = property(get_before_update_plugins)
+
 class PluginOption(models.Model):
     pluginmapping = models.ForeignKey(DoccodePluginMapping)
     plugin = models.ForeignKey(Plugin)
@@ -60,3 +68,15 @@ class PluginOption(models.Model):
     def __unicode__(self):
         return "%s: %s" % (self.name, self.value)
 
+class Document(models.Model):
+    """
+        A model that represents Document for maintainig database relations.
+    """
+    name = models.CharField(max_length = 128)
+    tags = TaggableManager()
+
+    def get_tag_list(self):
+        return map(lambda x: x.name, self.tags.all())
+
+    def __unicode__(self):
+        return unicode(self.name)

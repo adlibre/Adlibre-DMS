@@ -47,11 +47,12 @@ class FileInfoHandler(BaseFileHandler):
             return rc.BAD_REQUEST
         info = document.get_dict()
         info['document_list_url'] = reverse('ui_document_list', kwargs = {'id_rule': mapping.pk})
+        info['tags'] = document.get_tags()
         response = HttpResponse(json.dumps(info))
         return response
 
 class FileHandler(BaseFileHandler):
-    allowed_methods = ('GET', 'POST', 'DELETE',)
+    allowed_methods = ('GET', 'POST', 'DELETE', 'PUT')
 
     def read(self, request):
         try:
@@ -93,6 +94,25 @@ class FileHandler(BaseFileHandler):
         if len(manager.errors) > 0:
             return rc.BAD_REQUEST
         return rc.DELETED
+
+    def update(self, request):
+      try:
+        try:
+            document_name, extension, revision, hashcode = self.get_file_info(request)
+        except ValueError:
+            return rc.BAD_REQUEST
+        tag_string = request.PUT.get('tag_string', None)
+        remove_tag_string = request.PUT.get('remove_tag_string', None)
+        #print "tag string: %s" % tag_string
+        #print "remove_tag_string: %s" % remove_tag_string
+        manager = DocumentManager()
+        document = manager.update(request, document_name, tag_string = tag_string, remove_tag_string = remove_tag_string)
+        return HttpResponse(json.dumps( document.get_dict() ))
+      except Exception, e:
+        import traceback
+        print "Exception: %s" % e
+        traceback.print_exc()
+        raise
 
 class FileListHandler(BaseHandler):
     allowed_methods = ('GET','POST')
