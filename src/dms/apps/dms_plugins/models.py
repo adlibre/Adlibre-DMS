@@ -73,6 +73,7 @@ class Document(models.Model):
         A model that represents Document for maintainig database relations.
     """
     name = models.CharField(max_length = 128)
+    doccode = models.CharField(max_length = 63, choices = DOCCODE_CHOICES)
     tags = TaggableManager()
 
     def get_tag_list(self):

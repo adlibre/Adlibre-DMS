@@ -29,7 +29,8 @@ class TagsUpdatePlugin(Plugin, BeforeUpdatePluginPoint):
         tag_string = tag_string.strip()
         remove_tag_string = document.get_remove_tag_string()
         remove_tag_string = remove_tag_string.strip()
-        doc_model, created = Document.objects.get_or_create(name = document.get_filename())
+        doc_model, created = Document.objects.get_or_create(name = document.get_filename(),
+                                                                doccode = document.get_doccode().get_id())
         if tag_string or remove_tag_string:
             if tag_string:
                 tags = parse_tags(tag_string)
@@ -39,3 +40,6 @@ class TagsUpdatePlugin(Plugin, BeforeUpdatePluginPoint):
             doc_model = Document.objects.get(pk = doc_model.pk)
         document.set_tags(doc_model.get_tag_list())
         return document
+
+    def get_tags(self, doccode):
+        pass

@@ -17,6 +17,7 @@ from piston.utils import rc
 
 from document_manager import DocumentManager
 from dms_plugins import models
+from doc_codes import DoccodeManagerInstance
 
 class BaseFileHandler(BaseHandler):
     def get_file_info(self, request):
@@ -109,10 +110,13 @@ class FileHandler(BaseFileHandler):
         document = manager.update(request, document_name, tag_string = tag_string, remove_tag_string = remove_tag_string)
         return HttpResponse(json.dumps( document.get_dict() ))
       except Exception, e:
-        import traceback
-        print "Exception: %s" % e
-        traceback.print_exc()
-        raise
+        if settings.DEBUG:
+            import traceback
+            print "Exception: %s" % e
+            traceback.print_exc()
+            raise
+        else:
+            return rc.BAD_REQUEST
 
 class FileListHandler(BaseHandler):
     allowed_methods = ('GET','POST')
@@ -152,7 +156,6 @@ class RevisionCountHandler(BaseHandler):
     def read(self, request, document):
         document, extension = os.path.splitext(document)
         try:
-            from doc_codes import DoccodeManagerInstance
             doccode = DoccodeManagerInstance.find_for_string(document)
             if doccode:
                 try:

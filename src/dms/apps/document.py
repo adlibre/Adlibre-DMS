@@ -57,7 +57,6 @@ class Document(object):
         if not self.mimetype and self.get_current_metadata():
             self.mimetype = self.get_current_metadata().get('mimetype', None)
         if not self.mimetype and self.get_file_obj():
-            
             mime = magic.Magic( mime = True )
             self.mimetype = mime.from_buffer( self.get_file_obj().read() )
         return self.mimetype
