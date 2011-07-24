@@ -149,6 +149,21 @@ class FileListHandler(BaseHandler):
             else:
                 return rc.BAD_REQUEST
 
+class TagsHandler(BaseHandler):
+    allowed_methods = ('GET',)
+
+    def read(self, request, id_rule):
+        try:
+            manager = DocumentManager()
+            mapping = manager.get_plugin_mapping_by_kwargs(pk = id_rule)
+            tags = manager.get_all_tags(doccode = mapping.get_doccode())
+            return map(lambda x: x.name, tags)
+        except Exception:
+            if settings.DEBUG:
+                raise
+            else:
+                return rc.BAD_REQUEST
+
 # How many files do we have for a document.
 class RevisionCountHandler(BaseHandler):
     allowed_methods = ('GET','POST')

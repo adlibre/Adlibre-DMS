@@ -2,6 +2,7 @@ import os, plugins
 
 from dms_plugins import models
 from dms_plugins.workers import PluginError, PluginWarning, BreakPluginChain, DmsException
+from dms_plugins.workers.info.tags import TagsPlugin
 from dms_plugins.pluginpoints import BeforeStoragePluginPoint, BeforeRetrievalPluginPoint, BeforeRemovalPluginPoint, \
 BeforeUpdatePluginPoint
 
@@ -136,6 +137,9 @@ class DocumentManager(object):
         if metadatas: metadata = metadatas[0]
         return metadata
 
+    def get_tags_plugin(self):
+        return
+
     def get_file_list(self, doccode_plugin_mapping, start = 0, finish = None, order = None, searchword = None):
         storage = self.get_storage(doccode_plugin_mapping)
         metadata = self.get_metadata(doccode_plugin_mapping)
@@ -174,3 +178,6 @@ class DocumentManager(object):
     def get_plugin_list(self):
         all_plugins = plugins.models.Plugin.objects.all().order_by('point__name', 'index')
         return all_plugins
+
+    def get_all_tags(self, doccode = None):
+        return TagsPlugin().get_all_tags(doccode = doccode)

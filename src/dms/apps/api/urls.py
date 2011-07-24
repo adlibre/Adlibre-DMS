@@ -16,6 +16,7 @@ revision_count_handler = Resource(handlers.RevisionCountHandler)
 rules_handler = Resource(handlers.RulesHandler)
 rules_detail_handler = Resource(handlers.RulesDetailHandler)
 plugins_handler = Resource(handlers.PluginsHandler)
+tags_handler = Resource(handlers.TagsHandler)
 
 urlpatterns = patterns('',
    url(r'^file/', file_handler, name = "api_file"),
@@ -24,6 +25,7 @@ urlpatterns = patterns('',
    url(r'^revision_count/(?P<document>[\w_-]+)$', revision_count_handler, name = "api_revision_count"),
    url(r'^rules\.(?P<emitter_format>.+)$', rules_handler, name = "api_rules"),
    url(r'^rules/(?P<id_rule>\d+)\.(?P<emitter_format>.+)$', rules_detail_handler, name = "api_rules_detail"),
+   url(r'^tags-(?P<id_rule>\d+)\.(?P<emitter_format>.+)$', tags_handler, name = "api_tags"),
    url(r'^plugins\.(?P<emitter_format>.+)$', plugins_handler, name = "api_plugins"),
 )
 

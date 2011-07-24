@@ -4,9 +4,12 @@ from django.core.urlresolvers import reverse
 from django.views.generic.simple import direct_to_template
 
 def get_urls(id_rule = None, document_name = None):
-    c = {'rules_url': reverse('api_rules', kwargs = {'emitter_format': 'json'})}
+    c = {   'rules_url': reverse('api_rules', kwargs = {'emitter_format': 'json'}),}
     if id_rule:
-        c.update({'documents_url': reverse("api_file_list", kwargs = {'id_rule': id_rule})})
+        c.update({
+            'documents_url': reverse("api_file_list", kwargs = {'id_rule': id_rule}),
+            'tags_url': reverse('api_tags', kwargs = {'emitter_format': 'json', 'id_rule': id_rule}),
+            })
     if document_name:
         c.update({  'document_url': reverse("api_file") + "?filename=%s.txt" % document_name,
                     'document_info_url': reverse("api_file_info") + "?filename=%s.txt" % document_name
