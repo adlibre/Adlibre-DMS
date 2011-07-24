@@ -24,10 +24,15 @@ function UICommunicator(manager, renderer){
                 window.location.href = $.param.querystring(window.location.href, {'q':q});
             }
         });
+        $('#ui_clear_filter').click(function(){
+            self.manager.remove_state_variable('Tag');
+            self.manager.reset_document_list();
+            $("#" + self.options.document_list_id).trigger("ui_more_documents_needed");
+        });
     }
     this.doccode_tags_init = function(){
         $('#ui_tag_list li a').click(function(event){
-            //alert($(event.target).text());
+            self.filter_by_tag($(event.target).text());
         });
     }
     this.document_init = function(){
@@ -89,6 +94,11 @@ function UICommunicator(manager, renderer){
     this.get_document_list_params = function(){
         var per_page = self.manager.get_objects_per_page();
         var current_page = self.manager.get_state_variable('Page', 1);
+        if (!current_page){
+            current_page = 1;
+            self.manager.set_state_variable(current_page);
+        }
+        var tag = self.manager.get_state_variable('Tag', null);
         var more_documents_start = $("#" + self.options.document_list_id).children().length;
         var more_documents_finish = more_documents_start + per_page * current_page;
         var q = self.manager.get_searchword();
@@ -97,6 +107,7 @@ function UICommunicator(manager, renderer){
                 'order': self.manager.DOCUMENT_ORDERS[self.manager.get_state_variable('Order', 'Date')].param_value,
                 'q': q
                 };
+        if (tag){ params['tag'] = tag;}
         return params;
     }
 
@@ -136,5 +147,10 @@ function UICommunicator(manager, renderer){
             self.renderer.render_doccode_tags(tags);
             self.doccode_tags_init();
             });
+    }
+    this.filter_by_tag = function(tag){
+        self.manager.set_state_variable('Tag', tag);
+        self.manager.reset_document_list();
+        $("#" + self.options.document_list_id).trigger("ui_more_documents_needed");
     }
 }

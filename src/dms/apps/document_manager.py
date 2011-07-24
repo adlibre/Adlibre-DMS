@@ -140,12 +140,16 @@ class DocumentManager(object):
     def get_tags_plugin(self):
         return
 
-    def get_file_list(self, doccode_plugin_mapping, start = 0, finish = None, order = None, searchword = None):
+    def get_file_list(self, doccode_plugin_mapping, start = 0, finish = None, order = None, searchword = None,
+                            tags = []):
         storage = self.get_storage(doccode_plugin_mapping)
         metadata = self.get_metadata(doccode_plugin_mapping)
         doccode = doccode_plugin_mapping.get_doccode()
+        doc_models = TagsPlugin().get_doc_models(doccode = doccode_plugin_mapping.get_doccode(), tags = tags)
+        doc_names = map(lambda x: x.name, doc_models)
         document_directories = metadata.worker.get_directories(doccode, load_metadata = True)
-        return storage.worker.get_list(doccode, document_directories, start, finish, order, searchword)
+        return storage.worker.get_list(doccode, document_directories, start, finish, order, searchword, 
+                                        limit_to = doc_names)
 
     def get_file(self, request, document_name, hashcode, extension, revision = None, parent_directory = None):
         if not revision:

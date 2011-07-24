@@ -80,9 +80,13 @@ function UIRenderer(manager){
     }
 
     this.get_document_list_details = function(){
-        return [
-                "Ordered by (" + self.manager.DOCUMENT_ORDERS[self.manager.get_state_variable('Order', 'Date')].title + ")"
-                ].join("+");
+        var details = ["Ordered by (" + 
+                        self.manager.DOCUMENT_ORDERS[self.manager.get_state_variable('Order', 'Date')].title + ")"]
+        var filter = self.manager.get_state_variable('Tag', null);
+        if (filter){
+            details.push('Filtered by (' + '"' + filter + '"' + ')');
+        }
+        return details.join(" + ");
     }
 
     this.render_doccode_tags = function(tags){

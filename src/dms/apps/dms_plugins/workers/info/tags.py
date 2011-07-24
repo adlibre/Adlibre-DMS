@@ -23,8 +23,16 @@ class TagsPlugin(Plugin, BeforeRetrievalPluginPoint):
     def get_all_tags(self, doccode = None):
         tags = Tag.objects.all()
         if doccode:
-            tags = tags.filter(taggit_taggeditem_items__document__doccode = doccode.get_id())
+            tags = tags.filter(taggit_taggeditem_items__document__doccode = doccode.get_id()).distinct()
         return tags
+
+    def get_doc_models(self, doccode = None, tags = []):
+        doc_models = Document.objects.all()
+        if doccode:
+            doc_models = doc_models.filter(doccode = doccode.get_id())
+        if tags:
+            doc_models = doc_models.filter(tags__name__in = tags)
+        return doc_models
 
 class TagsUpdatePlugin(Plugin, BeforeUpdatePluginPoint):
     title = "Tags Update"

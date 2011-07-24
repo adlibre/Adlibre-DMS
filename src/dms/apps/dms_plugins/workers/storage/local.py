@@ -88,7 +88,8 @@ class Local(object):
             result = True
         return result
 
-    def get_list(self, doccode, directories, start = 0, finish = None, order = None, searchword = None):
+    def get_list(self, doccode, directories, start = 0, finish = None, order = None, searchword = None, 
+                        limit_to = []):
         """
         Return List of DocCodes in the repository for a given rule
         """
@@ -122,14 +123,20 @@ class Local(object):
 
         doccodes = []
         for directory, metadata_info in directories:
+            doc_name = metadata_info['document_name']
             if finish and len(doccodes) >= finish :
                 break
-            if not searchword or self.document_matches_search(metadata_info, searchword):
+            elif searchword and not self.document_matches_search(metadata_info, searchword):
+                break
+            elif limit_to and doc_name not in limit_to:
+                #print "LIMIT TO = %s, DOC_NAME = %s" % (limit_to, doc_name)
+                pass
+            else:
                 if not doccode.uses_repository:
-                    doccodes.append({'name': metadata_info['document_name'],
+                    doccodes.append({'name': doc_name,
                         'directory': os.path.split(directory)[1]})
                 else:
-                    doccodes.append({'name': metadata_info['document_name']})
+                    doccodes.append({'name': doc_name})
         if start:
             doccodes = doccodes[start:]
         return doccodes
