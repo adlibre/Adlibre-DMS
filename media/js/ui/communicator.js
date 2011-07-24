@@ -25,6 +25,11 @@ function UICommunicator(manager, renderer){
             }
         });
     }
+    this.doccode_tags_init = function(){
+        $('#ui_tag_list li a').click(function(event){
+            //alert($(event.target).text());
+        });
+    }
     this.document_init = function(){
         $("#ui_add_tags_form").submit(function(){
             var tag_string = $('#ui_add_tags_field').val();
@@ -78,6 +83,7 @@ function UICommunicator(manager, renderer){
     this.get_documents = function(){
         //$.getJSON(self.get_url('documents_url'), self.renderer.render_documents);
         $("#" + self.options.document_list_id).trigger('ui_more_documents_needed');
+        self.get_doccode_tags();
     }
     
     this.get_document_list_params = function(){
@@ -122,8 +128,13 @@ function UICommunicator(manager, renderer){
             self.renderer.render_document_info(document_info);
             });
     }
-    
     this.get_document = function(){
         self.renderer.render_document(self.get_url('document_url')); //No ajax, using iframe
+    }
+    this.get_doccode_tags = function(){
+        $.getJSON(self.get_url('tags_url'), function(tags){
+            self.renderer.render_doccode_tags(tags);
+            self.doccode_tags_init();
+            });
     }
 }

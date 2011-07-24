@@ -85,6 +85,19 @@ function UIRenderer(manager){
                 ].join("+");
     }
 
+    this.render_doccode_tags = function(tags){
+        $('#ui_tag_list').empty();
+        for (var i = 0; i < tags.length; i++){
+            var tag = tags[i];
+            var li = $('<li>');
+            var a = $('<a>');
+            a.attr('href', 'javascript:void(0)');
+            a.text(tag);
+            li.append(a);
+            $('#ui_tag_list').append(li);
+        }
+    }
+
     this.render_documents_info = function(documents_info){
         if (! self.info_rendered){
             self.update_breadcrumbs({'url': '.', 'text': documents_info['rule_name']});

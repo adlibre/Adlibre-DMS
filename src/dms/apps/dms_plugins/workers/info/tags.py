@@ -1,3 +1,4 @@
+from taggit.models import Tag
 from taggit.utils import parse_tags
 
 from dms_plugins.models import Document
@@ -18,6 +19,12 @@ class TagsPlugin(Plugin, BeforeRetrievalPluginPoint):
             pass
         document.set_tags(tags)
         return document
+
+    def get_all_tags(self, doccode = None):
+        tags = Tag.objects.all()
+        if doccode:
+            tags = tags.filter(taggit_taggeditem_items__document__doccode = doccode.get_id())
+        return tags
 
 class TagsUpdatePlugin(Plugin, BeforeUpdatePluginPoint):
     title = "Tags Update"
