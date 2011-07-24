@@ -26,10 +26,11 @@ function UIManager(){
     this.set_state_variable = function(var_name, value){
         var options = new Object();
         options[var_name] = value;
-//        alert('pushstate = ' + value);
         jQuery.bbq.pushState(options);
     }
-
+    this.remove_state_variable = function(var_name){
+        jQuery.bbq.removeState(var_name);
+    }
     this.get_searchword = function(){
         var searchword = $.deparam.querystring()['q'];
         if ( !$("#ui_search_field").val() ){
