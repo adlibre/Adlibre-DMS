@@ -5,10 +5,6 @@ function UIRenderer(manager){
 
     this.info_rendered = false;
 
-    this.init = function(){
-        $('#' + self.options.document_list_id).bind('ui_documents_loaded', self.after_documents_load)
-    }
-
     this.update_breadcrumbs = function(crumb_item, do_replace){
         var container = $("#" + self.options.breadcrumb_list_id);
         if (do_replace){
@@ -112,16 +108,6 @@ function UIRenderer(manager){
         }
     }
 
-    this.after_documents_load = function(event){
-        $(self.options.document_list_id).endlessScroll({
-                bottomPixels: 450,
-                fireDelay: 100,
-                callback: function(p){
-                    $("#" + self.options.document_list_id).trigger('ui_more_documents_needed');
-                }
-        });
-    }
-
     this.render_document = function(document_url){
        var iframe = $('<iframe>');
        iframe.attr('src', document_url);
@@ -169,6 +155,4 @@ function UIRenderer(manager){
             container.append(li);
         }
     }
-
-    this.init();
 }

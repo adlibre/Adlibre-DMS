@@ -127,7 +127,7 @@ class Local(object):
             if finish and len(doccodes) >= finish :
                 break
             elif searchword and not self.document_matches_search(metadata_info, searchword):
-                break
+                pass
             elif limit_to and doc_name not in limit_to:
                 #print "LIMIT TO = %s, DOC_NAME = %s" % (limit_to, doc_name)
                 pass
@@ -139,6 +139,7 @@ class Local(object):
                     doccodes.append({'name': doc_name})
         if start:
             doccodes = doccodes[start:]
+        print "DOCCODES: %s" % doccodes
         return doccodes
 
     def remove(self, request, document):
