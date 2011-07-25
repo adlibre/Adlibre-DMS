@@ -6,6 +6,9 @@ function UICommunicator(manager, renderer){
 
     this.document_list_init = function(){
         self.manager.reset_document_list();
+
+        $('#' + self.options.document_list_id).bind('ui_documents_loaded', self.after_documents_load)
+
         var height = $(window).height() - 200;//TODO: some more intelligent way to tell container height
         height = (height < 150) ? 150 : height;
         $('#' + self.options.document_list_id).height(height);
@@ -18,11 +21,16 @@ function UICommunicator(manager, renderer){
                 self.manager.set_state_variable('Page', page);
             }
         });
-        $('#ui_trigger_search').click(function(){
+        $('#ui_search_field').val(self.manager.get_state_variable('Search', ''));
+        $('#ui_search_form').submit(function(){
             var q = $('#ui_search_field').attr('value') || null;
             if (q){
-                window.location.href = $.param.querystring(window.location.href, {'q':q});
+                self.manager.set_state_variable('Search', q);
+            }else{
+                self.manager.remove_state_variable('Search');
             }
+            self.manager.reset_document_list();
+            $("#" + self.options.document_list_id).trigger('ui_more_documents_needed');
         });
         $('#ui_clear_filter').click(function(){
             self.manager.remove_state_variable('Tag');
@@ -101,13 +109,13 @@ function UICommunicator(manager, renderer){
         var tag = self.manager.get_state_variable('Tag', null);
         var more_documents_start = $("#" + self.options.document_list_id).children().length;
         var more_documents_finish = more_documents_start + per_page * current_page;
-        var q = self.manager.get_searchword();
+        var q = self.manager.get_state_variable('Search', null);//self.manager.get_searchword();
         var params = {'start': more_documents_start,
                 'finish': more_documents_finish,
                 'order': self.manager.DOCUMENT_ORDERS[self.manager.get_state_variable('Order', 'Date')].param_value,
-                'q': q
                 };
         if (tag){ params['tag'] = tag;}
+        if (q){ params['q'] = q;}
         return params;
     }
 
@@ -132,6 +140,16 @@ function UICommunicator(manager, renderer){
                     self.manager.move_to_page(current_page);
                 });
         }
+    }
+
+    this.after_documents_load = function(event){
+        $(self.options.document_list_id).endlessScroll({
+                bottomPixels: 450,
+                fireDelay: 100,
+                callback: function(p){
+                    $("#" + self.options.document_list_id).trigger('ui_more_documents_needed');
+                }
+        });
     }
 
     this.get_document_info = function(){
