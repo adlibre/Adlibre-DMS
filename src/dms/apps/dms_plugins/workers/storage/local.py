@@ -101,8 +101,8 @@ class Local(object):
 
         #FIXME: very un-elegant way to define available sort functions
         def sort_by_created_date(x, y):
-            first = datetime.datetime.strptime(x[1]['metadatas'][0]['created_date'], settings.DATE_FORMAT)
-            second = datetime.datetime.strptime(y[1]['metadatas'][0]['created_date'], settings.DATE_FORMAT)
+            first = datetime.datetime.strptime(x[1]['metadatas'][0]['created_date'], settings.DATETIME_FORMAT)
+            second = datetime.datetime.strptime(y[1]['metadatas'][0]['created_date'], settings.DATETIME_FORMAT)
             return cmp(first, second)
         def sort_by_name(x, y):
             first = x[1]['document_name']
@@ -139,7 +139,7 @@ class Local(object):
                     doccodes.append({'name': doc_name})
         if start:
             doccodes = doccodes[start:]
-        print "DOCCODES: %s" % doccodes
+        #print "DOCCODES: %s" % doccodes
         return doccodes
 
     def remove(self, request, document):

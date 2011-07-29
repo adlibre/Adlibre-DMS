@@ -133,19 +133,22 @@ class FileListHandler(BaseHandler):
                 order = request.GET.get('order', None)
                 searchword = request.GET.get('q', None)
                 tag = request.GET.get('tag', None)
+                filter_date = request.GET.get('created_date', None)
                 if finish:
                     finish = int(finish)
             except ValueError:
                 pass
-            file_list = manager.get_file_list(mapping, start, finish, order, searchword, tags = [tag])
+            file_list = manager.get_file_list(mapping, start, finish, order, searchword, tags = [tag],
+                                                filter_date = filter_date)
             for item in file_list:
                 item.update({   'ui_url': reverse('ui_document', kwargs = {'document_name': item['name']}),
                                 'rule': mapping.get_name(),
                             })
             return file_list
         except Exception:
-            raise
             if settings.DEBUG:
+                import traceback
+                traceback.print_exc()
                 raise
             else:
                 return rc.BAD_REQUEST

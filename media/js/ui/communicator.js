@@ -4,16 +4,17 @@ function UICommunicator(manager, renderer){
     this.manager = manager;
     this.options = manager.options;
 
+    this.loading_documents = false;
+
     this.document_list_init = function(){
         self.manager.reset_document_list();
 
         $('#' + self.options.document_list_id).bind('ui_documents_loaded', self.after_documents_load)
 
-        var height = $(window).height() - 200;//TODO: some more intelligent way to tell container height
+        var height = $(window).height() - 200;//FIXME: some more intelligent way to tell container height
         height = (height < 150) ? 150 : height;
         $('#' + self.options.document_list_id).height(height);
         $('#' + self.options.document_list_id).bind('ui_more_documents_needed', self.get_more_documents);
-        self.renderer.render_control_panel();
         $('#' + self.options.document_list_id).scroll(function(){
             var page = self.manager.calculate_current_page();
             if (page != parseInt(self.manager.get_state_variable('Page', 1))){
@@ -21,6 +22,9 @@ function UICommunicator(manager, renderer){
                 self.manager.set_state_variable('Page', page);
             }
         });
+        
+        self.renderer.render_control_panel();
+        
         $('#ui_search_field').val(self.manager.get_state_variable('Search', ''));
         $('#ui_search_form').submit(function(){
             var q = $('#ui_search_field').attr('value') || null;
@@ -31,9 +35,19 @@ function UICommunicator(manager, renderer){
             }
             self.manager.reset_document_list();
             $("#" + self.options.document_list_id).trigger('ui_more_documents_needed');
+            return false;
+        });
+        
+        $('#id_date').val(self.manager.get_state_variable('Date', ''));
+        $('#ui_calendar_form').submit(function(event){
+            var date = $('#id_date').datepick('getDate')[0];
+            var fdate = $.datepick.formatDate('yyyy-mm-dd', date);
+            self.filter_by_date(fdate);
+            return false;
         });
         $('#ui_clear_filter').click(function(){
             self.manager.remove_state_variable('Tag');
+            self.manager.remove_state_variable('Date');
             self.manager.reset_document_list();
             $("#" + self.options.document_list_id).trigger("ui_more_documents_needed");
         });
@@ -101,12 +115,13 @@ function UICommunicator(manager, renderer){
     
     this.get_document_list_params = function(){
         var per_page = self.manager.get_objects_per_page();
-        var current_page = self.manager.get_state_variable('Page', 1);
+        var current_page = parseInt(self.manager.get_state_variable('Page', 1));
         if (!current_page){
             current_page = 1;
             self.manager.set_state_variable(current_page);
         }
         var tag = self.manager.get_state_variable('Tag', null);
+        var date = self.manager.get_state_variable('Date', null);
         var more_documents_start = $("#" + self.options.document_list_id).children().length;
         var more_documents_finish = more_documents_start + per_page * current_page;
         var q = self.manager.get_state_variable('Search', null);//self.manager.get_searchword();
@@ -116,15 +131,19 @@ function UICommunicator(manager, renderer){
                 };
         if (tag){ params['tag'] = tag;}
         if (q){ params['q'] = q;}
+        if (date){ params['created_date'] = date; }
         return params;
     }
 
     this.get_more_documents = function(event){
+        event.stopPropagation();
+        if (self.loading_documents){ return false; }
         if (self.manager.no_more_documents){ return false; }
         var per_page = self.manager.get_objects_per_page()
         var params = self.get_document_list_params();
         if (params.finish > self.manager.already_loaded_documents){
             //self.manager.already_loaded_documents = params.finish;
+            self.loading_documents = true;
             $.getJSON(self.get_url('documents_url'),
                 params,
                 function(documents){
@@ -138,6 +157,7 @@ function UICommunicator(manager, renderer){
                         self.renderer.add_page(i);
                     }
                     self.manager.move_to_page(current_page);
+                    self.loading_documents = false;
                 });
         }
     }
@@ -168,6 +188,11 @@ function UICommunicator(manager, renderer){
     }
     this.filter_by_tag = function(tag){
         self.manager.set_state_variable('Tag', tag);
+        self.manager.reset_document_list();
+        $("#" + self.options.document_list_id).trigger("ui_more_documents_needed");
+    }
+    this.filter_by_date = function(date){
+        self.manager.set_state_variable('Date', date);
         self.manager.reset_document_list();
         $("#" + self.options.document_list_id).trigger("ui_more_documents_needed");
     }

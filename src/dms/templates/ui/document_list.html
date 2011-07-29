@@ -4,6 +4,11 @@
 
 {% block title %}Documents{% endblock %}
 
+{%block head_includes%}
+<style type="text/css">@import "{{MEDIA_URL}}css/datepick/jquery.datepick.css";</style> 
+
+{%endblock%}
+
 {% block content %}
 <h1>Documents</h1>
 <div id="ui_control_panel">
@@ -16,9 +21,17 @@
         <input type="submit" value="Go" />
     </form>
     <h3>Filter</h3>
+    <hr />
     <h4>Tags</h4>
     <ul id="ui_tag_list"></ul>
+    <hr />
+    <form id="ui_calendar_form">
+        {{calendar_form.as_p}}
+        <input type="submit" value="Go" />
+    </form>
+    <hr />
     <button id="ui_clear_filter">Clear filter</button>
+    <hr />
 </div>
 <ul id="ui_document_list"></ul>
 <ul id="ui_pager"></ul>
@@ -26,10 +39,12 @@
 
 {%block javascript%}
 {{block.super}}
+<script type="text/javascript" src="{{MEDIA_URL}}js/datepick/jquery.datepick.js"></script>
 <script type="text/javascript" language="javascript" src="{{ MEDIA_URL }}js/jquery-endless-scroll-1.3.js"></script>
 <script type="text/javascript" language="javascript" src="{{ MEDIA_URL }}js/jquery.ba-bbq.js"></script>
 <script type="text/javascript" language="javascript">
 $(document).ready(function(){
+    $("#id_date").datepick();
     window.ui_communicator.document_list_init();
     window.ui_communicator.get_documents();
 });

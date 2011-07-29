@@ -52,6 +52,18 @@ class LocalJSONMetadata(object):
         json_file = os.path.join(directory, '%s.json' % (document_name,))
         return self.load_from_file(json_file)
 
+    def date_to_string(self, date):
+        return date.strftime(settings.DATETIME_FORMAT)
+
+    def string_to_date(self, string):
+        try:
+            date = datetime.datetime.strptime(string, settings.DATETIME_FORMAT)
+        except ValueError:
+            date = datetime.datetime.strptime(string[:10], settings.DATE_FORMAT)
+        except:
+            raise
+        return date
+
     def save_metadata(self, document, directory):
         fileinfo_db, revision = self.load_metadata(document.get_stripped_filename(), directory)
         document.set_revision(revision)
@@ -59,7 +71,7 @@ class LocalJSONMetadata(object):
         fileinfo = {
             'name' : document.get_filename_with_revision(),
             'revision' : document.get_revision(),
-            'created_date' : datetime.datetime.today().strftime(settings.DATE_FORMAT)
+            'created_date' : self.date_to_string(datetime.datetime.today())
         }
 
         if document.get_current_metadata():
@@ -73,7 +85,7 @@ class LocalJSONMetadata(object):
 
         return document
 
-    def get_directories(self, doccode, load_metadata = False):
+    def get_directories(self, doccode, filter_date = None):
         """
         Return List of directories with document files
         """
@@ -86,10 +98,17 @@ class LocalJSONMetadata(object):
             for fil in files:
                 doc, extension = os.path.splitext(fil)
                 if extension == '.json' or (not doccode.uses_repository and not dirs): #dirs with metadata or leaf dirs
-                    if load_metadata:
-                        directories.append( (root, {'document_name': doc, 'metadatas': self.load_from_file(os.path.join(root, fil))[0]}) )
-                    else:
-                        directories.append(root)
+                        metadatas = self.load_from_file(os.path.join(root, fil))[0]
+                        if filter_date and metadatas[0] and metadatas[0] and \
+                        self.string_to_date(metadatas[0]['created_date']).date() != self.string_to_date(filter_date).date():
+                            continue
+                            #print "%s != %s" % (self.string_to_date(metadatas[0]['created_date']).date(), self.string_to_date(filter_date).date())
+                        #print "%s appended" % doc
+                        directories.append( (root, {
+                                                    'document_name': doc, 
+                                                    'metadatas': metadatas
+                                                    }) )
+        print "DIRS: %s" % directories
         return directories
 
     def get_metadatas(self, doccode):
