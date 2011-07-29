@@ -141,13 +141,13 @@ class DocumentManager(object):
         return
 
     def get_file_list(self, doccode_plugin_mapping, start = 0, finish = None, order = None, searchword = None,
-                            tags = []):
+                            tags = [], filter_date = None):
         storage = self.get_storage(doccode_plugin_mapping)
         metadata = self.get_metadata(doccode_plugin_mapping)
         doccode = doccode_plugin_mapping.get_doccode()
         doc_models = TagsPlugin().get_doc_models(doccode = doccode_plugin_mapping.get_doccode(), tags = tags)
         doc_names = map(lambda x: x.name, doc_models)
-        document_directories = metadata.worker.get_directories(doccode, load_metadata = True)
+        document_directories = metadata.worker.get_directories(doccode, filter_date = filter_date)
         return storage.worker.get_list(doccode, document_directories, start, finish, order, searchword, 
                                         limit_to = doc_names)
 

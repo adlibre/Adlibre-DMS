@@ -3,6 +3,8 @@ import json
 from django.core.urlresolvers import reverse
 from django.views.generic.simple import direct_to_template
 
+from ui.forms import CalendarForm
+
 def get_urls(id_rule = None, document_name = None):
     c = {   'rules_url': reverse('api_rules', kwargs = {'emitter_format': 'json'}),}
     if id_rule:
@@ -24,7 +26,8 @@ def rule_list(request):
 def document_list(request, id_rule):
     template_name = "ui/document_list.html"
     c = {'communicator_options': get_urls(id_rule = id_rule),
-        'rule_id': id_rule}
+        'rule_id': id_rule,
+        'calendar_form': CalendarForm()}
     return direct_to_template(request, template_name, c)
 
 def document(request, document_name):

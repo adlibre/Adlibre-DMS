@@ -199,7 +199,8 @@ RESTRUCTUREDTEXT_FILTER_SETTINGS = { 'doctitle_xform': 0, } # stop first heading
 # name of template theme, used by context_processors.py.
 THEME_NAME = 'solid' # 'adlibre' or 'basic' or 'solid'
 
-DATE_FORMAT = "%Y-%m-%d %H:%M:%S" # format that is used in document metadata
+DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S" # format that is used in document metadata
+DATE_FORMAT = "%Y-%m-%d"
 
 DEMO = True
 NEW_SYSTEM = False
