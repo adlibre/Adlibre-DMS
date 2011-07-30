@@ -91,14 +91,18 @@ function UICommunicator(manager, renderer){
                 }
                 });
         });
+        $('a.ui_revision_link').click(function(event){
+            var revision = $(event.target).text();
+            var params = {'r': revision};
+            self.get_document(params);
+            self.get_document_info(params);
+        });
     }
     
     this.get_url = function(name, params){
         var url = UI_URLS[name];
         if (params){
-            for(var i = 0; i < params.length; i++){
-                url = (url.split("{{" + i + "}}")).join(params[i])
-            }
+            url = $.param.querystring(url, params);
         }
         return url
     }
@@ -172,12 +176,14 @@ function UICommunicator(manager, renderer){
         });
     }
 
-    this.get_document_info = function(){
-        $.getJSON(self.get_url('document_info_url'), function(document_info){
+    this.get_document_info = function(params){
+        if (!params){ params = {}; }
+        $.getJSON(self.get_url('document_info_url', params), function(document_info){
             self.renderer.render_document_info(document_info);
             });
     }
-    this.get_document = function(){
+    this.get_document = function(params){
+        if (!params){ params = {}; }
         self.renderer.render_document(self.get_url('document_url')); //No ajax, using iframe
     }
     this.get_doccode_tags = function(){

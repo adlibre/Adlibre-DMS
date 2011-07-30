@@ -110,7 +110,7 @@ function UIRenderer(manager){
     this.render_document = function(document_url){
        var iframe = $('<iframe>');
        iframe.attr('src', document_url);
-       iframe.css('border', '2px solid #333');
+       iframe.css('border', '2px solid #333'); //FIXME: implement proper css design
        $('#' + self.options.document_container_id).empty().append(iframe);
     }
 
@@ -126,8 +126,11 @@ function UIRenderer(manager){
     }
 
     this.render_document_info = function(document_info){
-        self.update_breadcrumbs({'url': document_info['document_list_url'], 'text': document_info.doccode.title});
-        self.update_breadcrumbs({'text': document_info['document_name']});
+        if (! self.info_rendered){
+            self.update_breadcrumbs({'url': document_info['document_list_url'], 'text': document_info.doccode.title});
+            self.update_breadcrumbs({'text': document_info['document_name']});
+            self.info_rendered = true;
+        }
         self.render_document_tags(document_info.tags);
         self.render_document_metadata(document_info.current_metadata);
         self.render_document_revisions(document_info.revisions);
@@ -159,6 +162,7 @@ function UIRenderer(manager){
         $('#ui_revision_list').empty();
         self.render_object_list('ui_revision_list', revisions, function(revision, revision_item){
             var lnk = $('<a>');
+            lnk.addClass('ui_revision_link');
             lnk.text(revision);
             lnk.attr('href', "javascript:void(0)");
             revision_item.append(lnk);
