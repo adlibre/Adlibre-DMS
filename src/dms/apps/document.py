@@ -192,8 +192,17 @@ class Document(object):
             tim = time.strftime("%d/%m/%Y %H:%M:%S",time.localtime(os.stat(self.get_fullpath()).st_ctime))
         return tim
 
+    def get_revisions(self):
+        revisions = []
+        metadatas = self.get_metadata()
+        if metadatas:
+            for metadata in metadatas:
+                revisions.append(metadata['revision'])
+        return revisions
+
     def get_dict(self):
         d = {}
+        d['revisions'] = self.get_revisions()
         d['current_metadata'] = self.get_current_metadata()
         doccode = self.get_doccode()
         d['doccode'] = {'title': doccode.get_title(), 'id': doccode.get_id()}
