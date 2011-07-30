@@ -23,7 +23,6 @@ function UIRenderer(manager){
         container.append(li);
     }
 
-
     this.render_control_panel = function(){
         for (var key in self.manager.DOCUMENT_ORDERS){
             var li = $('<li>');
@@ -130,6 +129,8 @@ function UIRenderer(manager){
         self.update_breadcrumbs({'url': document_info['document_list_url'], 'text': document_info.doccode.title});
         self.update_breadcrumbs({'text': document_info['document_name']});
         self.render_document_tags(document_info.tags);
+        self.render_document_metadata(document_info.current_metadata);
+        self.render_document_revisions(document_info.revisions);
         $('#' + self.options.document_container_id).trigger('ui_document_info_loaded');
     }
 
@@ -140,7 +141,30 @@ function UIRenderer(manager){
             $('#ui_tag_list').append(self.construct_tag_list_item(tag));
         }
     }
-
+    this.render_document_metadata = function(metadata){
+        $('#ui_metadata_list').empty();
+        var keys = {'name': 'Name', 
+                    'mimetype': 'Mimetype',
+                    'created_date': 'Creation Date',
+                    'compression_type': 'Compression Type',
+                    'revision': 'Revision'
+                    }
+        for (var key in keys){
+            var li = $('<li>');
+            li.text(keys[key] + ": " + metadata[key]);
+            $('#ui_metadata_list').append(li);
+        }
+    }
+    this.render_document_revisions = function(revisions){
+        $('#ui_revision_list').empty();
+        self.render_object_list('ui_revision_list', revisions, function(revision, revision_item){
+            var lnk = $('<a>');
+            lnk.text(revision);
+            lnk.attr('href', "javascript:void(0)");
+            revision_item.append(lnk);
+            return revision_item;
+        });
+    }
     this.add_page = function(page){
         var container = $("#" + self.options.pager_list_id);
         var last_page = container.children().last().children().first().text();
