@@ -17,6 +17,7 @@ class Document(object):
         self.options = {}
         self.doccode = None
         self.file_name = None
+        self.full_filename = None
         self.stripped_filename = None
         self.revision = None
         self.hashcode = None
@@ -69,9 +70,9 @@ class Document(object):
         self.file_obj = file_obj
 
     def get_file_obj(self):
-        if not self.file_obj:
+        if self.get_fullpath() and not self.file_obj:
             self.file_obj = open(self.get_fullpath(), 'rb')
-        self.file_obj.seek(0)
+            self.file_obj.seek(0)
         return self.file_obj
 
     def get_fullpath(self):
@@ -102,12 +103,17 @@ class Document(object):
         return stripped_filename
 
     def get_full_filename(self):
-        name = self.get_filename()
-        if not os.path.splitext(name)[1][1:]:
-            ext = self.get_extension_by_mimetype()
-            if ext:
-                name = "%s.%s" % (name, ext)
-        return name
+        if not self.full_filename:
+            name = self.get_filename()
+            if not os.path.splitext(name)[1][1:]:
+                ext = self.get_extension_by_mimetype()
+                if ext:
+                    name = "%s.%s" % (name, ext)
+            self.full_filename = name
+        return self.full_filename
+
+    def set_full_filename(self, filename):
+        self.full_filename = filename
 
     def get_extension_by_mimetype(self):
         mimetype = self.get_mimetype()
@@ -203,6 +209,7 @@ class Document(object):
     def get_dict(self):
         d = {}
         d['revisions'] = self.get_revisions()
+        d['metadata'] = self.get_metadata()
         d['current_metadata'] = self.get_current_metadata()
         doccode = self.get_doccode()
         d['doccode'] = {'title': doccode.get_title(), 'id': doccode.get_id()}

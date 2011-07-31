@@ -13,7 +13,7 @@ def get_urls(id_rule = None, document_name = None):
             'tags_url': reverse('api_tags', kwargs = {'emitter_format': 'json', 'id_rule': id_rule}),
             })
     if document_name:
-        c.update({  'document_url': reverse("api_file") + "?filename=%s.txt" % document_name,
+        c.update({  'document_url': reverse("api_file") + "?filename=%s" % document_name,
                     'document_info_url': reverse("api_file_info") + "?filename=%s.txt" % document_name
                     })
     return json.dumps(c)

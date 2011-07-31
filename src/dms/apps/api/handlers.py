@@ -59,10 +59,22 @@ class FileHandler(BaseFileHandler):
         try:
             document_name, extension, revision, hashcode = self.get_file_info(request)
         except ValueError:
+            if settings.DEBUG:
+                raise
             return rc.BAD_REQUEST
         manager = DocumentManager()
-        mimetype, filename, content = manager.get_file(request, document_name, hashcode, extension, revision = revision)
+        try:
+            mimetype, filename, content = manager.get_file(request, document_name, hashcode, extension, revision = revision)
+        except Exception, e:
+            if settings.DEBUG:
+                import traceback
+                print "Exception: %s" % e
+                traceback.print_exc()
+                raise
+            else:
+                return rc.BAD_REQUEST
         if manager.errors:
+            print "Manager errors: %s" % manager.errors
             return rc.BAD_REQUEST
         response = HttpResponse(content, mimetype=mimetype)
         response["Content-Length"] = len(content)
@@ -89,10 +101,21 @@ class FileHandler(BaseFileHandler):
         extension = extension.strip(".")
 
         revision = request.GET.get("r", None) # TODO: TestMe
+        full_filename = request.GET.get('full_filename')
 
         manager = DocumentManager()
-        manager.delete_file(request, document, revision = revision)
+        try:
+            manager.delete_file(request, document, revision = revision, full_filename = full_filename)
+        except Exception, e:
+            if settings.DEBUG:
+                import traceback
+                print "Exception: %s" % e
+                traceback.print_exc()
+                raise
+            else:
+                return rc.BAD_REQUEST
         if len(manager.errors) > 0:
+            print "Manager errors: %s" % manager.errors
             return rc.BAD_REQUEST
         return rc.DELETED
 

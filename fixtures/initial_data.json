@@ -614,6 +614,17 @@
         }
     }, 
     {
+        "pk": 20, 
+        "model": "plugins.plugin", 
+        "fields": {
+            "status": 0, 
+            "index": 30, 
+            "_order": 0, 
+            "name": "dms_plugins.workers.storage.metadata.local_json.LocalJSONMetadataRemovalPlugin", 
+            "point": 3
+        }
+    }, 
+    {
         "pk": 1, 
         "model": "dms_plugins.doccodepluginmapping", 
         "fields": {
@@ -628,7 +639,8 @@
             ], 
             "before_removal_plugins": [
                 12, 
-                13
+                13,
+                20
             ], 
             "before_storage_plugins": [
                 1, 
@@ -659,7 +671,8 @@
             ], 
             "before_removal_plugins": [
                 12, 
-                13
+                13,
+                20
             ], 
             "before_storage_plugins": [
                 1, 
@@ -688,7 +701,8 @@
             ], 
             "before_removal_plugins": [
                 12, 
-                13
+                13,
+                20
             ], 
             "before_storage_plugins": [
                 4, 
@@ -713,7 +727,8 @@
             ], 
             "before_removal_plugins": [
                 12, 
-                13
+                13,
+                20
             ], 
             "before_storage_plugins": [
                 2, 
@@ -739,7 +754,8 @@
             ], 
             "before_removal_plugins": [
                 12, 
-                13
+                13,
+                20
             ], 
             "before_storage_plugins": [
                 2, 
@@ -763,7 +779,8 @@
             ], 
             "before_removal_plugins": [
                 12, 
-                13
+                13,
+                20
             ], 
             "before_storage_plugins": [
                 3, 
@@ -772,5 +789,4 @@
             "doccode": "1000"
         }
     }
-    
 ]

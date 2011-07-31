@@ -112,10 +112,13 @@ class DocumentManager(object):
         doc = self.process_pluginpoint(BeforeRetrievalPluginPoint, request, document = doc)
         return doc
 
-    def remove(self, request, document_name, revision = None):
+    def remove(self, request, document_name, revision = None, full_filename = None):
         doc = Document()
         doc.set_filename(document_name)
-        doc.set_revision(revision)
+        if full_filename:
+            doc.set_full_filename(full_filename)
+        if revision:
+            doc.set_revision(revision)
         return self.process_pluginpoint(BeforeRemovalPluginPoint, request, document = doc)
 
     def get_plugins_by_type(self, doccode_plugin_mapping, plugin_type, pluginpoint = BeforeStoragePluginPoint):
@@ -169,8 +172,8 @@ class DocumentManager(object):
                 filename = document.get_full_filename()
         return mimetype, filename, content
 
-    def delete_file(self, request, document_name, revision = None):
-        document = self.remove(request, document_name, revision = revision)
+    def delete_file(self, request, document_name, revision = None, full_filename = None):
+        document = self.remove(request, document_name, revision = revision, full_filename = full_filename)
         return document
 
     def get_revision_count(self, document_name, doccode_plugin_mapping):

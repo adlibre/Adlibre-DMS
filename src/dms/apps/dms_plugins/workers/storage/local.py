@@ -144,11 +144,18 @@ class Local(object):
 
     def remove(self, request, document):
         directory = self.filesystem.get_document_directory(document)
-        try:
-            shutil.rmtree(directory)
-            return None
-        except Exception, e:
-            raise PluginError(str(e), 500)
+        if document.get_revision():
+            filename = document.get_filename_with_revision()
+            try:
+                os.unlink(os.path.join(directory, filename))
+            except Exception, e:
+                raise PluginError(str(e), 500)
+        else:
+            try:
+                shutil.rmtree(directory)
+            except Exception, e:
+                raise PluginError(str(e), 500)
+        return document
 
     def get_revision_count(self, document):
         # Hacky way, but faster than reading the revs from the metadata
