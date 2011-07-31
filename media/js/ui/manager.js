@@ -7,6 +7,8 @@ function UIManager(){
     this.options.breadcrumb_list_id = "ui_breadcrumbs";
     this.options.pager_list_id = "ui_pager";
 
+    this.metadata = {};
+
     this.reset_document_list = function(){
         this.already_loaded_documents = 0;
         this.no_more_documents = false;
@@ -85,6 +87,10 @@ function UIManager(){
             self.objects_per_page = self.get_rows_per_page() * self.get_docs_in_row();
         }
         return self.objects_per_page;
+    }
+    
+    this.store_revision_info = function(revision, filename){
+        self.metadata[revision] = filename;
     }
     
 };

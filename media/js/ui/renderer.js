@@ -133,7 +133,7 @@ function UIRenderer(manager){
         }
         self.render_document_tags(document_info.tags);
         self.render_document_metadata(document_info.current_metadata);
-        self.render_document_revisions(document_info.revisions);
+        self.render_document_revisions(document_info.metadata);
         $('#' + self.options.document_container_id).trigger('ui_document_info_loaded');
     }
 
@@ -158,14 +158,22 @@ function UIRenderer(manager){
             $('#ui_metadata_list').append(li);
         }
     }
-    this.render_document_revisions = function(revisions){
+    this.render_document_revisions = function(metadatas){
         $('#ui_revision_list').empty();
-        self.render_object_list('ui_revision_list', revisions, function(revision, revision_item){
+        self.render_object_list('ui_revision_list', metadatas, function(metadata, revision_item){
+            var revision = metadata['revision']
+            var filename = metadata['name']
+            self.manager.store_revision_info(revision, filename);
             var lnk = $('<a>');
             lnk.addClass('ui_revision_link');
             lnk.text(revision);
             lnk.attr('href', "javascript:void(0)");
             revision_item.append(lnk);
+            var delete_lnk = $('<a>');
+            delete_lnk.addClass('ui_delete_revision_link');
+            delete_lnk.attr('href', "javascript:void(0)");
+            delete_lnk.text("X");
+            revision_item.append(delete_lnk);
             return revision_item;
         });
     }
