@@ -150,6 +150,12 @@ class Local(object):
                 os.unlink(os.path.join(directory, filename))
             except Exception, e:
                 raise PluginError(str(e), 500)
+            if len(os.listdir(directory)) <= 1: # no files at all or only metadata file
+                try:
+                    shutil.rmtree(directory)
+                except Exception, e:
+                    raise PluginError(str(e), 500)
+                document.set_revision(None) # should not perform anything in later plugins.
         else:
             try:
                 shutil.rmtree(directory)

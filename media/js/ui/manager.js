@@ -6,6 +6,8 @@ function UIManager(){
     this.options.document_container_id = 'ui_document';
     this.options.breadcrumb_list_id = "ui_breadcrumbs";
     this.options.pager_list_id = "ui_pager";
+    
+    this.back_url = '';
 
     this.metadata = {};
 
