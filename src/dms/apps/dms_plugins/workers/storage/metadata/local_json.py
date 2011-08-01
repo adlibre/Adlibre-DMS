@@ -30,7 +30,7 @@ class LocalJSONMetadata(object):
             revision = new_revision - 1
         document.set_revision(revision)
         try:
-            fileinfo = fileinfo_db[int(revision)-1]
+            fileinfo = fileinfo_db[str(revision)]
         except:
             raise PluginError("No such revision for this document", 404)
         document.set_metadata(fileinfo_db)
@@ -42,9 +42,11 @@ class LocalJSONMetadata(object):
         if os.path.exists(json_file):
             json_handler = open(json_file , mode='r+')
             fileinfo_db = json.load(json_handler)
-            revision = fileinfo_db[-1]['revision'] + 1
+            revisions = fileinfo_db.keys()
+            revisions.sort()
+            revision = int(revisions[-1]) + 1
         else:
-            fileinfo_db = []
+            fileinfo_db = {}
             revision = 1
         return fileinfo_db, revision
 
@@ -77,7 +79,7 @@ class LocalJSONMetadata(object):
         if document.get_current_metadata():
             fileinfo.update(document.get_current_metadata())
 
-        fileinfo_db.append(fileinfo)
+        fileinfo_db[document.get_revision()] = fileinfo
 
         self.write_metadata(fileinfo_db, document, directory)
 
@@ -102,14 +104,18 @@ class LocalJSONMetadata(object):
                 doc, extension = os.path.splitext(fil)
                 if extension == '.json' or (not doccode.uses_repository and not dirs): #dirs with metadata or leaf dirs
                         metadatas = self.load_from_file(os.path.join(root, fil))[0]
-                        if filter_date and metadatas[0] and metadatas[0] and \
-                        self.string_to_date(metadatas[0]['created_date']).date() != self.string_to_date(filter_date).date():
+                        keys = metadatas.keys()
+                        keys.sort()
+                        first_metadata = metadatas[keys[0]]
+                        if filter_date and first_metadata and first_metadata and \
+                        self.string_to_date(first_metadata['created_date']).date() != self.string_to_date(filter_date).date():
                             continue
                             #print "%s != %s" % (self.string_to_date(metadatas[0]['created_date']).date(), self.string_to_date(filter_date).date())
                         #print "%s appended" % doc
                         directories.append( (root, {
                                                     'document_name': doc, 
-                                                    'metadatas': metadatas
+                                                    'metadatas': metadatas,
+                                                    'first_metadata': first_metadata,
                                                     }) )
         return directories
 
@@ -133,10 +139,7 @@ class LocalJSONMetadata(object):
         if revision:
             directory = self.filesystem.get_or_create_document_directory(document)
             fileinfo_db, new_revision = self.load_metadata(document.get_stripped_filename(), directory)
-            for metadata in fileinfo_db:
-                if int(metadata['revision']) == int(revision):
-                    del(metadata)
-                    break
+            del fileinfo_db[str(revision)]
             self.write_metadata(fileinfo_db, document, directory)
         else:
             pass # our directory with all metadata has just been deleted %)

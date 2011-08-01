@@ -160,8 +160,10 @@ function UIRenderer(manager){
     }
     this.render_document_revisions = function(metadatas){
         $('#ui_revision_list').empty();
-        self.render_object_list('ui_revision_list', metadatas, function(metadata, revision_item){
-            var revision = metadata['revision']
+        for (var revision in metadatas){
+//        self.render_object_list('ui_revision_list', metadatas, function(metadata, revision_item){
+            var revision_item = $('<li>');
+            var metadata = metadatas[revision];
             var filename = metadata['name']
             self.manager.store_revision_info(revision, filename);
             var lnk = $('<a>');
@@ -174,8 +176,8 @@ function UIRenderer(manager){
             delete_lnk.attr('href', "javascript:void(0)");
             delete_lnk.text("X");
             revision_item.append(delete_lnk);
-            return revision_item;
-        });
+            $('#ui_revision_list').append(revision_item);
+        }
     }
     this.add_page = function(page){
         var container = $("#" + self.options.pager_list_id);

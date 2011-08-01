@@ -101,8 +101,8 @@ class Local(object):
 
         #FIXME: very un-elegant way to define available sort functions
         def sort_by_created_date(x, y):
-            first = datetime.datetime.strptime(x[1]['metadatas'][0]['created_date'], settings.DATETIME_FORMAT)
-            second = datetime.datetime.strptime(y[1]['metadatas'][0]['created_date'], settings.DATETIME_FORMAT)
+            first = datetime.datetime.strptime(x[1]['first_metadata']['created_date'], settings.DATETIME_FORMAT)
+            second = datetime.datetime.strptime(y[1]['first_metadata']['created_date'], settings.DATETIME_FORMAT)
             return cmp(first, second)
         def sort_by_name(x, y):
             first = x[1]['document_name']
