@@ -86,7 +86,7 @@ class Document(object):
 
     def get_current_metadata(self):
         if not self.current_metadata and self.get_metadata() and self.get_revision():
-            self.current_metadata = self.get_metadata()[self.get_revision() - 1]
+            self.current_metadata = self.get_metadata()[str(self.get_revision())]
         return self.current_metadata
 
     def get_filename(self):
@@ -195,20 +195,11 @@ class Document(object):
         if metadata:
             tim = metadata.get('creation_time', None)
         else:
-            tim = time.strftime("%d/%m/%Y %H:%M:%S",time.localtime(os.stat(self.get_fullpath()).st_ctime))
+            tim = time.strftime(settings.DATETIME_FORMAT, time.localtime(os.stat(self.get_fullpath()).st_ctime))
         return tim
-
-    def get_revisions(self):
-        revisions = []
-        metadatas = self.get_metadata()
-        if metadatas:
-            for metadata in metadatas:
-                revisions.append(metadata['revision'])
-        return revisions
 
     def get_dict(self):
         d = {}
-        d['revisions'] = self.get_revisions()
         d['metadata'] = self.get_metadata()
         d['current_metadata'] = self.get_current_metadata()
         doccode = self.get_doccode()
