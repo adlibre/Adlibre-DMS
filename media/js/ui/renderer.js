@@ -127,6 +127,7 @@ function UIRenderer(manager){
 
     this.render_document_info = function(document_info){
         if (! self.info_rendered){
+            self.manager.back_url = document_info['document_list_url'];
             self.update_breadcrumbs({'url': document_info['document_list_url'], 'text': document_info.doccode.title});
             self.update_breadcrumbs({'text': document_info['document_name']});
             self.info_rendered = true;

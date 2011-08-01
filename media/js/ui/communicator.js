@@ -77,7 +77,14 @@ function UICommunicator(manager, renderer){
         $('#' + self.options.document_container_id).bind('ui_document_info_loaded', self.document_info_init);
         $("#ui_delete_document_form").submit(function(){
             if(confirm("All revisions of this document will be deleted. Are you sure you want to continue?")){
-                alert ("DELETE!");
+                $.ajax({
+                'type': 'DELETE',
+                'url': self.get_url('document_url'),
+                'contentType': 'application/x-www-form-urlencoded',
+                'success': function(jqXHR, textStatus){
+                        window.location.href = self.manager.back_url;
+                    }
+                });
             }
         });
     }
@@ -111,8 +118,12 @@ function UICommunicator(manager, renderer){
                 'url': self.get_url('document_url', params),
                 'contentType': 'application/x-www-form-urlencoded',
                 'success': function(jqXHR, textStatus){
-                    self.get_document(); // In case we've deleted current revision
-                    self.get_document_info();
+                    if ($('#ui_revision_list').children().length <= 1){
+                        window.location.href = self.manager.back_url;
+                    }else{
+                        self.get_document(); // In case we've deleted current revision
+                        self.get_document_info();
+                    }
                 }
                 });
             }
