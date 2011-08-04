@@ -41,6 +41,7 @@ class LocalJSONMetadata(object):
     def load_from_file(self, json_file):
         if os.path.exists(json_file):
             json_handler = open(json_file , mode='r+')
+            #print json_file
             fileinfo_db = json.load(json_handler)
             revisions = fileinfo_db.keys()
             revisions.sort()
@@ -102,7 +103,7 @@ class LocalJSONMetadata(object):
         for root, dirs, files in os.walk(doccode_directory):
             for fil in files:
                 doc, extension = os.path.splitext(fil)
-                if extension == '.json' or (not doccode.uses_repository and not dirs): #dirs with metadata or leaf dirs
+                if extension == '.json' or (doccode.no_doccode and not dirs): #dirs with metadata or leaf dirs
                         metadatas = self.load_from_file(os.path.join(root, fil))[0]
                         keys = metadatas.keys()
                         keys.sort()
@@ -124,7 +125,7 @@ class LocalJSONMetadata(object):
         Return List of directories with document files
         """
         root = settings.DOCUMENT_ROOT
-        doccode_directory = os.path.join(root, str(doccode.get_id()))
+        doccode_directory = os.path.join(root, doccode.get_directory_name())
 
         metadatas = []
         for root, dirs, files in os.walk(doccode_directory):

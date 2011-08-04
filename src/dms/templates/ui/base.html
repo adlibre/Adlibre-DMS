@@ -23,6 +23,13 @@
         <ul id="ui_breadcrumbs">
             <li><a href="{%url ui_rule_list%}">Index</a></li>
         </ul>
+        <form id="ui_upload_file_form" enctype="multipart/form-data" action="{%url ui_upload_document%}" method="post">
+            <h3 class="float-left">Upload File</h3>
+            {%csrf_token%}
+            <input type="file" name="file" id="ui_upload_file_field" />
+            <input type="submit" value="Go" />
+        </form>
+        <br style="clear: both" />
         {% block content %}
         {% endblock %}
     </div>

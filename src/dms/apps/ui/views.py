@@ -4,6 +4,7 @@ from django.core.urlresolvers import reverse
 from django.views.generic.simple import direct_to_template
 
 from ui.forms import CalendarForm
+from api.handlers import FileHandler
 
 def get_urls(id_rule = None, document_name = None):
     c = {   'rules_url': reverse('api_rules', kwargs = {'emitter_format': 'json'}),}
@@ -14,7 +15,7 @@ def get_urls(id_rule = None, document_name = None):
             })
     if document_name:
         c.update({  'document_url': reverse("api_file") + "?filename=%s" % document_name,
-                    'document_info_url': reverse("api_file_info") + "?filename=%s.txt" % document_name
+                    'document_info_url': reverse("api_file_info") + "?filename=%s" % document_name
                     })
     return json.dumps(c)
 
@@ -35,3 +36,9 @@ def document(request, document_name):
     c = {'communicator_options': get_urls(document_name = document_name),
         'document_name': document_name}
     return direct_to_template(request, template_name, c)
+
+def upload_document(request):
+    document_name = FileHandler().create(request)
+    if type(document_name) == unicode:
+        return document(request, document_name)
+    return HttpResponse(str(document_name))

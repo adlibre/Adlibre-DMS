@@ -106,8 +106,8 @@ function UICommunicator(manager, renderer){
         $('a.ui_revision_link').click(function(event){
             var revision = $(event.target).text();
             var params = {'r': revision};
-            self.get_document(params);
             self.get_document_info(params);
+            self.get_document(params);
         });
         $("a.ui_delete_revision_link").click(function(event){
             var revision = $(event.target).prev().text();
@@ -121,8 +121,8 @@ function UICommunicator(manager, renderer){
                     if ($('#ui_revision_list').children().length <= 1){
                         window.location.href = self.manager.back_url;
                     }else{
-                        self.get_document(); // In case we've deleted current revision
                         self.get_document_info();
+                        self.get_document(); // In case we've deleted current revision
                     }
                 }
                 });
@@ -209,6 +209,7 @@ function UICommunicator(manager, renderer){
 
     this.get_document_info = function(params){
         if (!params){ params = {}; }
+        params = $.param.querystring(document.location.href);
         $.getJSON(self.get_url('document_info_url', params), function(document_info){
             self.renderer.render_document_info(document_info);
             self.manager.document_metadata = document_info['metadata']
@@ -216,7 +217,13 @@ function UICommunicator(manager, renderer){
     }
     this.get_document = function(params){
         if (!params){ params = {}; }
-        self.renderer.render_document(self.get_url('document_url')); //No ajax, using iframe
+        params = $.param.querystring(document.location.href);
+        if (params.indexOf('parent_directory') != -1){
+            //this is a no-doccode file
+            self.renderer.render_document_link(self.get_url('document_url', params));
+        }else{
+            self.renderer.render_document(self.get_url('document_url', params)); //No ajax, using iframe
+        }
     }
     this.get_doccode_tags = function(){
         $.getJSON(self.get_url('tags_url'), function(tags){

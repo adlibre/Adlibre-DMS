@@ -107,7 +107,7 @@ class DocumentManager(object):
         options = { 'only_metadata': only_metadata,
                     'parent_directory': parent_directory}
         if extension:
-            options['convert_to_extension'] = extension
+            doc.set_requested_extension(extension)
         doc.update_options(options)
         doc = self.process_pluginpoint(BeforeRetrievalPluginPoint, request, document = doc)
         return doc
@@ -150,7 +150,10 @@ class DocumentManager(object):
         doccode = doccode_plugin_mapping.get_doccode()
         doc_models = TagsPlugin().get_doc_models(doccode = doccode_plugin_mapping.get_doccode(), tags = tags)
         doc_names = map(lambda x: x.name, doc_models)
-        document_directories = metadata.worker.get_directories(doccode, filter_date = filter_date)
+        if metadata:
+            document_directories = metadata.worker.get_directories(doccode, filter_date = filter_date)
+        else:
+            document_directories = []
         return storage.worker.get_list(doccode, document_directories, start, finish, order, searchword, 
                                         limit_to = doc_names)
 

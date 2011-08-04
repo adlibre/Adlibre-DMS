@@ -40,15 +40,19 @@ class FileInfoHandler(BaseFileHandler):
             document_name, extension, revision, hashcode = self.get_file_info(request)
         except ValueError:
             return rc.BAD_REQUEST
+        parent_directory = request.GET.get('parent_directory', None)
         manager = DocumentManager()
         document = manager.retrieve(request, document_name, hashcode = hashcode, revision = revision, only_metadata = True, 
-                        extension = extension)
+                        extension = extension, parent_directory = parent_directory)
         mapping = manager.get_plugin_mapping(document)
         if manager.errors:
+            if settings.DEBUG:
+                print "MANAGER ERRORS: %s" % manager.errors
             return rc.BAD_REQUEST
         info = document.get_dict()
         info['document_list_url'] = reverse('ui_document_list', kwargs = {'id_rule': mapping.pk})
         info['tags'] = document.get_tags()
+        info['no_doccode'] = document.get_doccode().no_doccode
         response = HttpResponse(json.dumps(info))
         return response
 
@@ -62,9 +66,11 @@ class FileHandler(BaseFileHandler):
             if settings.DEBUG:
                 raise
             return rc.BAD_REQUEST
+        parent_directory = request.GET.get('parent_directory', None)
         manager = DocumentManager()
         try:
-            mimetype, filename, content = manager.get_file(request, document_name, hashcode, extension, revision = revision)
+            mimetype, filename, content = manager.get_file(request, document_name, hashcode, 
+            extension, revision = revision, parent_directory = parent_directory)
         except Exception, e:
             if settings.DEBUG:
                 import traceback
@@ -87,7 +93,7 @@ class FileHandler(BaseFileHandler):
         document, extension = os.path.splitext(request.FILES['file'].name)
         extension = extension.strip(".")
 
-        revision = request.GET.get("r", None) # TODO: TestMe
+        #revision = request.GET.get("r", None) # TODO: TestMe
 
         manager = DocumentManager()
         document = manager.store(request, request.FILES['file'])
@@ -164,7 +170,11 @@ class FileListHandler(BaseHandler):
             file_list = manager.get_file_list(mapping, start, finish, order, searchword, tags = [tag],
                                                 filter_date = filter_date)
             for item in file_list:
-                item.update({   'ui_url': reverse('ui_document', kwargs = {'document_name': item['name']}),
+                ui_url = reverse('ui_document', kwargs = {'document_name': item['name']})
+                print item
+                if 'directory' in item.keys():
+                    ui_url += "?parent_directory=" + item['directory']
+                item.update({   'ui_url': ui_url,
                                 'rule': mapping.get_name(),
                             })
             return file_list

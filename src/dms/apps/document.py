@@ -29,6 +29,7 @@ class Document(object):
         self.tags = []
         self.tag_string = ''
         self.remove_tag_string = ''
+        self.requested_extension = None
 
     def get_name(self):
         name = self.get_filename()
@@ -123,10 +124,19 @@ class Document(object):
     def get_extension(self):
         return os.path.splitext(self.get_full_filename())[1][1:]
 
+    def set_requested_extension(self, extension):
+        self.requested_extension = extension
+
+    def get_requested_extension(self):
+        return self.requested_extension
+
     def get_revision(self):
         r = self.revision
         if r: 
-            r = int(r)
+            try:
+                r = int(r)
+            except ValueError:
+                pass
         return r
 
     def set_revision(self, revision):
@@ -175,9 +185,9 @@ class Document(object):
         doccode = self.get_doccode()
         if doccode:
             saved_dir = self.get_option('parent_directory') or ''
-            if saved_dir or not doccode.uses_repository:
+            if saved_dir or doccode.no_doccode:
                 doccode_dirs = doccode.split()
-                doccode_dirs = map(lambda x: x.replace('{{DATE}}', datetime.datetime.now().strftime('%Y-%m-%d')),
+                doccode_dirs = map(lambda x: x.replace('{{DATE}}', datetime.datetime.now().strftime(settings.DATE_FORMAT)),
                                     doccode_dirs)
                 if saved_dir:
                     doccode_dirs[-1] = saved_dir
