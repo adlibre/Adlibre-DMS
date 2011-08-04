@@ -59,6 +59,14 @@ class Local(object):
     def __init__(self):
         self.filesystem = LocalFilesystemManager()
 
+    def get_fake_metadata(self, root, fil):
+        return {   'created_date': datetime.datetime.strptime( 
+                    os.path.split(root)[-1], settings.DATE_FORMAT
+                    ).strftime(settings.DATETIME_FORMAT),
+                    'name': fil,
+                    'revision': 'N/A'
+                }
+
     def store(self, request, document):
         directory = self.filesystem.get_or_create_document_directory(document)
         destination = open(os.path.join(directory, document.get_filename_with_revision()), 'wb+')
@@ -73,7 +81,14 @@ class Local(object):
         if document.get_current_metadata():
             fullpath = os.path.join(directory, document.get_current_metadata()['name'])
         else:
-            fullpath = os.path.join(directory, document.get_filename())
+            filename = document.get_filename()
+            if document.get_requested_extension():
+                filename = "%s.%s" % (document.get_filename(), document.get_requested_extension())
+                fake_revision = 'N/A'
+                document.set_revision(fake_revision)
+                document.set_metadata({fake_revision: self.get_fake_metadata(directory, filename)})
+            fullpath = os.path.join(directory, filename)
+            #print "FULLPATH: %s" % fullpath
         if not os.path.exists(fullpath):
             raise PluginError("No such document", 404)
         document.set_fullpath(fullpath)
@@ -108,6 +123,17 @@ class Local(object):
             first = x[1]['document_name']
             second = y[1]['document_name']
             return cmp(first, second)
+        #TODO: move in more appropriate place. Perhaps some fake metadata plugin for NoDoccode files?
+        if not directories: #NoDoccode files
+            directories = []
+            doccode_root = os.path.join(settings.DOCUMENT_ROOT, doccode.get_directory_name())
+            for root, dirs, files in os.walk(doccode_root):
+                for fil in files:
+                    fake_metadata = self.get_fake_metadata(root, fil)
+                    directories.append((root, {'document_name': fil,
+                                                    'metadatas': [fake_metadata],
+                                                    'first_metadata': fake_metadata
+                                                    }))
         if order:
             SORT_FUNCTIONS = {
                 'created_date': sort_by_created_date,
@@ -132,7 +158,7 @@ class Local(object):
                 #print "LIMIT TO = %s, DOC_NAME = %s" % (limit_to, doc_name)
                 pass
             else:
-                if not doccode.uses_repository:
+                if doccode.no_doccode:
                     doccodes.append({'name': doc_name,
                         'directory': os.path.split(directory)[1]})
                 else:

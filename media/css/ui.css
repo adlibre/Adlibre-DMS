@@ -1,3 +1,7 @@
+.float-left{
+    float: left;
+}
+/******************************/
 ul#ui_breadcrumbs, ul#ui_document_list, #ul.ui_pager{
     list-style-type: none;
 }
@@ -34,4 +38,8 @@ ul#ui_pager li{
     border: 2px solid #333;
     float: right;
     margin: 15px;
+}
+
+#ui_upload_file_form{
+    float: right;
 }

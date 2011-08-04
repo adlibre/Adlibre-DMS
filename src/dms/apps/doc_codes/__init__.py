@@ -1,5 +1,5 @@
 class Doccode(object):
-    uses_repository = True
+    no_doccode = False
 
     def get_id(self):
         return self.doccode_id
@@ -10,12 +10,15 @@ class Doccode(object):
             title = getattr(self, 'name', '')
         return title
 
+    def get_directory_name(self):
+        return str(self.get_id())
+
 class NoDoccode(Doccode):
     title = 'No doccode'
     description = 'This doccode is assigned to the files that have no other suitable doccode.'
     active = True
     doccode_id = 1000
-    uses_repository = False
+    no_doccode = True
 
     def validate(self, document_name):
         return True

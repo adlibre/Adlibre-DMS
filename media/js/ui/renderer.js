@@ -107,6 +107,13 @@ function UIRenderer(manager){
         }
     }
 
+    this.render_document_link = function(document_url){
+        var link = $('<a>');
+        link.attr('href', document_url)
+        link.text('Download file');
+        $('#' + self.options.document_container_id).empty().append(link);
+    }
+
     this.render_document = function(document_url){
        var iframe = $('<iframe>');
        iframe.attr('src', document_url);
@@ -135,7 +142,14 @@ function UIRenderer(manager){
         self.render_document_tags(document_info.tags);
         self.render_document_metadata(document_info.current_metadata);
         self.render_document_revisions(document_info.metadata);
+        if (document_info.no_doccode){
+            self.process_no_doccode();
+        }
         $('#' + self.options.document_container_id).trigger('ui_document_info_loaded');
+    }
+
+    this.process_no_doccode = function(){
+        $('#ui_tags').remove();
     }
 
     this.render_document_tags = function(tags){
@@ -154,29 +168,34 @@ function UIRenderer(manager){
                     'revision': 'Revision'
                     }
         for (var key in keys){
-            var li = $('<li>');
-            li.text(keys[key] + ": " + metadata[key]);
-            $('#ui_metadata_list').append(li);
+            if (metadata[key]){
+                var li = $('<li>');
+                li.text(keys[key] + ": " + metadata[key]);
+                $('#ui_metadata_list').append(li);
+            }
         }
     }
     this.render_document_revisions = function(metadatas){
         $('#ui_revision_list').empty();
         for (var revision in metadatas){
-//        self.render_object_list('ui_revision_list', metadatas, function(metadata, revision_item){
             var revision_item = $('<li>');
             var metadata = metadatas[revision];
             var filename = metadata['name']
             self.manager.store_revision_info(revision, filename);
-            var lnk = $('<a>');
-            lnk.addClass('ui_revision_link');
-            lnk.text(revision);
-            lnk.attr('href', "javascript:void(0)");
-            revision_item.append(lnk);
-            var delete_lnk = $('<a>');
-            delete_lnk.addClass('ui_delete_revision_link');
-            delete_lnk.attr('href', "javascript:void(0)");
-            delete_lnk.text("X");
-            revision_item.append(delete_lnk);
+            if (revision == 'N/A'){
+                revision_item.text(revision);
+            }else{
+                var lnk = $('<a>');
+                lnk.addClass('ui_revision_link');
+                lnk.text(revision);
+                lnk.attr('href', "javascript:void(0)");
+                revision_item.append(lnk);
+                var delete_lnk = $('<a>');
+                delete_lnk.addClass('ui_delete_revision_link');
+                delete_lnk.attr('href', "javascript:void(0)");
+                delete_lnk.text("X");
+                revision_item.append(delete_lnk);
+            }
             $('#ui_revision_list').append(revision_item);
         }
     }
