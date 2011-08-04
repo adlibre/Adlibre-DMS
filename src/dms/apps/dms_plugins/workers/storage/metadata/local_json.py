@@ -22,18 +22,24 @@ class LocalJSONMetadata(object):
 
     def retrieve(self, request, document):
         directory = self.filesystem.get_or_create_document_directory(document)
-        fileinfo_db, new_revision = self.load_metadata(document.get_stripped_filename(), directory)
-        if not fileinfo_db:
-            raise PluginError("No such document", 404)
-        revision = document.get_revision()
-        if not revision and new_revision > 0:
-            revision = new_revision - 1
-        document.set_revision(revision)
-        try:
-            fileinfo = fileinfo_db[str(revision)]
-        except:
-            raise PluginError("No such revision for this document", 404)
-        document.set_metadata(fileinfo_db)
+        if document.get_doccode().no_doccode:
+            revision = 'N/A'
+            fake_metadata = self.get_fake_metadata(directory, document.get_full_filename())
+            document.set_revision(revision)
+            document.set_metadata({revision: fake_metadata})
+        else:
+            fileinfo_db, new_revision = self.load_metadata(document.get_stripped_filename(), directory)
+            if not fileinfo_db:
+                raise PluginError("No such document", 404)
+            revision = document.get_revision()
+            if not revision and new_revision > 0:
+                revision = new_revision - 1
+            document.set_revision(revision)
+            try:
+                fileinfo = fileinfo_db[str(revision)]
+            except:
+                raise PluginError("No such revision for this document", 404)
+            document.set_metadata(fileinfo_db)
         if document.get_option('only_metadata') == True:
             raise BreakPluginChain()
         return document
@@ -91,19 +97,27 @@ class LocalJSONMetadata(object):
         json_handler = open(json_file, mode='w')
         json.dump(fileinfo_db, json_handler, indent = 4)
 
+    def get_fake_metadata(self, root, fil):
+        return {   'created_date': datetime.datetime.strptime( 
+                    os.path.split(root)[-1], settings.DATE_FORMAT
+                    ).strftime(settings.DATETIME_FORMAT),
+                    'name': fil,
+                    'revision': 'N/A'
+                }
+
     def get_directories(self, doccode, filter_date = None):
         """
         Return List of directories with document files
         """
         #FIXME: seems to be rather slow for large number of docs :(
         root = settings.DOCUMENT_ROOT
-        doccode_directory = os.path.join(root, str(doccode.get_id()))
+        doccode_directory = os.path.join(root, doccode.get_directory_name())
 
         directories = []
         for root, dirs, files in os.walk(doccode_directory):
             for fil in files:
                 doc, extension = os.path.splitext(fil)
-                if extension == '.json' or (doccode.no_doccode and not dirs): #dirs with metadata or leaf dirs
+                if extension == '.json':
                         metadatas = self.load_from_file(os.path.join(root, fil))[0]
                         keys = metadatas.keys()
                         keys.sort()
@@ -118,6 +132,12 @@ class LocalJSONMetadata(object):
                                                     'metadatas': metadatas,
                                                     'first_metadata': first_metadata,
                                                     }) )
+                elif doccode.no_doccode and not dirs: #leaf directory, no metadata file => NoDoccode
+                    fake_metadata = self.get_fake_metadata(root, fil)
+                    directories.append((root, {'document_name': fil,
+                                                    'metadatas': [fake_metadata],
+                                                    'first_metadata': fake_metadata
+                                                    }))
         return directories
 
     def get_metadatas(self, doccode):

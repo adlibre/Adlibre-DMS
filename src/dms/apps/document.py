@@ -106,7 +106,9 @@ class Document(object):
     def get_full_filename(self):
         if not self.full_filename:
             name = self.get_filename()
-            if not os.path.splitext(name)[1][1:]:
+            if self.get_doccode().no_doccode and self.get_requested_extension():
+                name = "%s.%s" % (name, self.get_requested_extension())
+            elif not os.path.splitext(name)[1][1:]:
                 ext = self.get_extension_by_mimetype()
                 if ext:
                     name = "%s.%s" % (name, ext)
