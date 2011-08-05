@@ -16,6 +16,8 @@ class LocalJSONMetadata(object):
         self.filesystem = LocalFilesystemManager()
 
     def store(self, request, document):
+        if document.get_doccode().no_doccode:
+            return document
         directory = self.filesystem.get_or_create_document_directory(document)
         document = self.save_metadata(document, directory)
         return document
