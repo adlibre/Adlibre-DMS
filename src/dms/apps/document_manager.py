@@ -1,5 +1,7 @@
 import os, plugins
 
+from django.conf import settings
+
 from dms_plugins import models
 from dms_plugins.workers import PluginError, PluginWarning, BreakPluginChain, DmsException
 from dms_plugins.workers.info.tags import TagsPlugin
@@ -66,7 +68,8 @@ class DocumentManager(object):
                 #print "Here is document: \n%s" % document.__dict__
             except PluginError, e: # if some plugin throws an exception, stop processing and store the error message
                 self.errors.append(e)
-                #print "ERROR: %s" % e.parameter
+                if settings.DEBUG:
+                    print "ERROR: %s" % e.parameter
                 break
             except PluginWarning, e:
                 self.warnings.append(str(e))
@@ -85,15 +88,34 @@ class DocumentManager(object):
         doc.set_filename(os.path.basename(uploaded_file.name))
         if hasattr(uploaded_file, 'content_type'):
             doc.set_mimetype(uploaded_file.content_type)
+        #print "DOCCODE: %s" % doc.get_doccode()
         return self.process_pluginpoint(BeforeStoragePluginPoint, request, document = doc)
 
-    def update(self, request, document_name, tag_string = None, remove_tag_string = None):
+    def rename(self, request, document_name, new_name, extension, parent_directory = None):
+        doc = self.retrieve(request, document_name, extension = extension, parent_directory = parent_directory)
+        if new_name and new_name != doc.get_filename():
+            from django.core.files.uploadedfile import UploadedFile
+            name = new_name
+            #if extension:
+            #    name = "%s.%s" % (new_name, extension)
+            ufile = UploadedFile(doc.get_file_obj(), name, content_type = doc.get_mimetype())
+            new_doc = self.store(request, ufile)
+            if not self.errors:
+                self.remove(request, doc.get_filename(), parent_directory = parent_directory)
+            return new_doc
+
+    def update(self, request, document_name, tag_string = None, remove_tag_string = None,
+                    parent_directory = None, extension = None):
         """
         Process update plugins.
         This is needed to update document properties like tags without re-storing document itself.
         """
         doc = Document()
         doc.set_filename(document_name)
+        if extension:
+            doc.set_requested_extension(extension)
+        if parent_directory:
+            doc.set_option('parent_directory', parent_directory)
         doc.set_tag_string(tag_string)
         doc.set_remove_tag_string(remove_tag_string)
         return self.process_pluginpoint(BeforeUpdatePluginPoint, request, document = doc)
@@ -112,13 +134,15 @@ class DocumentManager(object):
         doc = self.process_pluginpoint(BeforeRetrievalPluginPoint, request, document = doc)
         return doc
 
-    def remove(self, request, document_name, revision = None, full_filename = None):
+    def remove(self, request, document_name, revision = None, full_filename = None, parent_directory = None):
         doc = Document()
         doc.set_filename(document_name)
         if full_filename:
             doc.set_full_filename(full_filename)
         if revision:
             doc.set_revision(revision)
+        if parent_directory:
+            doc.set_option('parent_directory', parent_directory)
         return self.process_pluginpoint(BeforeRemovalPluginPoint, request, document = doc)
 
     def get_plugins_by_type(self, doccode_plugin_mapping, plugin_type, pluginpoint = BeforeStoragePluginPoint):
@@ -175,8 +199,9 @@ class DocumentManager(object):
                 filename = document.get_full_filename()
         return mimetype, filename, content
 
-    def delete_file(self, request, document_name, revision = None, full_filename = None):
-        document = self.remove(request, document_name, revision = revision, full_filename = full_filename)
+    def delete_file(self, request, document_name, revision = None, full_filename = None, parent_directory = None):
+        document = self.remove(request, document_name, revision = revision, full_filename = full_filename,
+                                parent_directory = parent_directory)
         return document
 
     def get_revision_count(self, document_name, doccode_plugin_mapping):

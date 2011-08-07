@@ -61,6 +61,7 @@ class Document(object):
         if not self.mimetype and self.get_file_obj():
             mime = magic.Magic( mime = True )
             self.mimetype = mime.from_buffer( self.get_file_obj().read() )
+            #print "GUESSED MIMETYPE: %s" % self.mimetype
         return self.mimetype
 
     def set_mimetype(self, mimetype):
@@ -106,8 +107,9 @@ class Document(object):
     def get_full_filename(self):
         if not self.full_filename:
             name = self.get_filename()
-            if self.get_doccode().no_doccode and self.get_requested_extension():
-                name = "%s.%s" % (name, self.get_requested_extension())
+            if self.get_doccode().no_doccode:
+                if self.get_requested_extension():
+                    name = "%s.%s" % (name, self.get_requested_extension())
             elif not os.path.splitext(name)[1][1:]:
                 ext = self.get_extension_by_mimetype()
                 if ext:

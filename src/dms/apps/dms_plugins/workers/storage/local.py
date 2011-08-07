@@ -12,7 +12,8 @@ import shutil
 
 from django.conf import settings
 
-from dms_plugins.pluginpoints import BeforeStoragePluginPoint, BeforeRetrievalPluginPoint, BeforeRemovalPluginPoint
+from dms_plugins.pluginpoints import BeforeStoragePluginPoint, BeforeRetrievalPluginPoint, BeforeRemovalPluginPoint,\
+BeforeUpdatePluginPoint
 from dms_plugins.workers import Plugin, PluginError, BreakPluginChain
 
 class NoRevisionError(Exception):
@@ -61,6 +62,7 @@ class Local(object):
 
     def store(self, request, document):
         directory = self.filesystem.get_or_create_document_directory(document)
+        #print "STORE IN %s" % directory
         destination = open(os.path.join(directory, document.get_filename_with_revision()), 'wb+')
         fil = document.get_file_obj()
         fil.seek(0)
@@ -74,19 +76,16 @@ class Local(object):
             fullpath = os.path.join(directory, document.get_current_metadata()['name'])
         else:
             filename = document.get_full_filename()
-            #if document.get_requested_extension():
-                #filename = "%s.%s" % (document.get_filename(), document.get_requested_extension())
-                #fake_revision = 'N/A'
-                #document.set_revision(fake_revision)
-                #document.set_metadata({fake_revision: self.get_fake_metadata(directory, filename)})
             fullpath = os.path.join(directory, filename)
-            print "FULLPATH: %s" % fullpath
         if not os.path.exists(fullpath):
             raise PluginError("No such document", 404)
         document.set_fullpath(fullpath)
         #file will be read on first access lazily
         if document.get_option('only_metadata') == True:
             raise BreakPluginChain()
+        return document
+
+    def update(self, request, document):
         return document
 
     def document_matches_search(self, metadata_info, searchword):
@@ -209,3 +208,13 @@ class LocalRemovalPlugin(Plugin, BeforeRemovalPluginPoint):
 
     def work(self, request, document, **kwargs):
         return self.worker.remove(request, document)
+
+class LocalUpdatePlugin(Plugin, BeforeUpdatePluginPoint):
+    title = "Local Update"
+    description = "Updates document in the filestytem"
+
+    plugin_type = 'storage'
+    worker = Local()
+
+    def work(self, request, document, **kwargs):
+        return self.worker.update(request, document)

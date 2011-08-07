@@ -36,6 +36,7 @@ class DoccodeManager(object):
     def find_for_string(self, string):
         res = NoDoccode()
         for doccode in self.get_doccodes().values():
+            #print "%s is validated by %s: %s" % (string, doccode, doccode.validate(string))
             if doccode.validate(string):
                 res = doccode
                 break

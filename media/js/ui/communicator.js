@@ -87,6 +87,19 @@ function UICommunicator(manager, renderer){
                 });
             }
         });
+        $("#ui_rename_document_form").submit(function(){
+            var new_name = $('#ui_new_name_field').val();
+            if (!new_name){return false;}
+            var params = $.param.querystring(document.location.href, {"new_name": new_name});
+            $.ajax({
+                'type': 'PUT',
+                'url': self.get_url('document_url', params),
+                'contentType': 'application/x-www-form-urlencoded',
+                'success': function(jqXHR, textStatus){
+                    window.location.href = self.manager.back_url;
+                }
+            });
+        });
     }
 
     this.document_info_init = function(){
