@@ -28,11 +28,12 @@ class FileTypeValidationPlugin(Plugin, BeforeStoragePluginPoint):
         filebuffer = document.get_file_obj()
         if filebuffer is None:
             raise PluginError('File buffer not initialized', 500)
-        mime = magic.Magic( mime = True )
-        content = ''
-        for line in filebuffer:
-            content += line
-        typ = mime.from_buffer( content )
+        #mime = magic.Magic( mime = True )
+        #content = ''
+        #for line in filebuffer:
+        #    content += line
+        #typ = mime.from_buffer( content )
+        typ = document.get_mimetype()
         if not typ in self.mimetypes:
             raise PluginError('File type %s is not supported' % typ, 500)
         document.set_mimetype(typ)

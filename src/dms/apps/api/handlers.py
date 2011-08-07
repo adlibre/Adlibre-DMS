@@ -131,12 +131,18 @@ class FileHandler(BaseFileHandler):
             document_name, extension, revision, hashcode = self.get_file_info(request)
         except ValueError:
             return rc.BAD_REQUEST
-        tag_string = request.PUT.get('tag_string', None)
-        remove_tag_string = request.PUT.get('remove_tag_string', None)
+        parent_directory = request.GET.get('parent_directory', None)
+        tag_string = request.GET.get('tag_string', None)
+        remove_tag_string = request.GET.get('remove_tag_string', None)
         #print "tag string: %s" % tag_string
         #print "remove_tag_string: %s" % remove_tag_string
+        new_name = request.GET.get('new_name', None)
         manager = DocumentManager()
-        document = manager.update(request, document_name, tag_string = tag_string, remove_tag_string = remove_tag_string)
+        if new_name:
+            document = manager.rename(request, document_name, new_name, extension, parent_directory = parent_directory)
+        else:
+            document = manager.update(request, document_name, tag_string = tag_string, remove_tag_string = remove_tag_string,
+                                    parent_directory = parent_directory, extension = extension)
         return HttpResponse(json.dumps( document.get_dict() ))
       except Exception, e:
         if settings.DEBUG:

@@ -625,6 +625,17 @@
         }
     }, 
     {
+        "pk": 19, 
+        "model": "plugins.plugin", 
+        "fields": {
+            "status": 0, 
+            "index": 5, 
+            "_order": 0, 
+            "name": "dms_plugins.workers.storage.local.LocalUpdatePlugin", 
+            "point": 4
+        }
+    }, 
+    {
         "pk": 1, 
         "model": "dms_plugins.doccodepluginmapping", 
         "fields": {
@@ -650,7 +661,8 @@
                 14
             ], 
             "before_update_plugins": [
-                19
+                19,
+                21
             ], 
             "doccode": "2"
         }
@@ -683,7 +695,8 @@
                 14
             ], 
             "before_update_plugins": [
-                19
+                19,
+                21
             ], 
             "doccode": "1"
         }
@@ -709,7 +722,8 @@
                 14
             ], 
             "before_update_plugins": [
-                19
+                19,
+                21
             ], 
             "doccode": "3"
         }
@@ -736,7 +750,8 @@
                 14
             ], 
             "before_update_plugins": [
-                19
+                19,
+                21
             ], 
             "doccode": "4"
         }
@@ -763,7 +778,8 @@
                 14
             ], 
             "before_update_plugins": [
-                19
+                19,
+                21
             ], 
             "doccode": "5"
         }
@@ -787,6 +803,9 @@
                 3, 
                 4,
                 14
+            ], 
+            "before_update_plugins": [
+                21
             ], 
             "doccode": "1000"
         }
