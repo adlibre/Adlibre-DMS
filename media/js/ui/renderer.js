@@ -61,7 +61,11 @@ function UIRenderer(manager){
     }
 
     this.render_documents = function(documents){
-        if(! documents.length){ return false; }
+        if(! documents.length){ 
+            $('#' + self.options.document_list_id).before($('<h4>No documents, sorry.</h4>'));
+            $('#' + self.options.document_list_id).remove();
+            return false; 
+        }
         var rule_name = documents[0].rule;
         self.render_object_list(self.options.document_list_id, documents, function(document, document_item){
             var lnk = $('<a>');
