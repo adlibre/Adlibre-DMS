@@ -105,7 +105,7 @@ def revision_document(request, document):
         return arg_string
     if not manager.errors:
         if metadata:
-            for fileinfo in metadata:
+            for fileinfo in metadata.values():
                 fileinfo['args'] = get_args(fileinfo)
             extra_context = {
                 'fileinfo_db': metadata,
