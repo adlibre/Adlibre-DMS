@@ -119,27 +119,26 @@ class LocalJSONMetadata(object):
         for root, dirs, files in os.walk(doccode_directory):
             for fil in files:
                 doc, extension = os.path.splitext(fil)
+                metadatas = None
+                first_metadata = None
                 if extension == '.json':
                         metadatas = self.load_from_file(os.path.join(root, fil))[0]
                         keys = metadatas.keys()
                         keys.sort()
                         first_metadata = metadatas[keys[0]]
-                        if filter_date and first_metadata and first_metadata and \
+                elif doccode.no_doccode and not dirs: #leaf directory, no metadata file => NoDoccode
+                    first_metadata = self.get_fake_metadata(root, fil)
+                    metadatas = [first_metadata]
+                    doc = fil
+                if filter_date and first_metadata and first_metadata and \
                         self.string_to_date(first_metadata['created_date']).date() != self.string_to_date(filter_date).date():
                             continue
-                            #print "%s != %s" % (self.string_to_date(metadatas[0]['created_date']).date(), self.string_to_date(filter_date).date())
-                        #print "%s appended" % doc
-                        directories.append( (root, {
+                if metadatas and first_metadata:
+                    directories.append( (root, {
                                                     'document_name': doc, 
                                                     'metadatas': metadatas,
                                                     'first_metadata': first_metadata,
                                                     }) )
-                elif doccode.no_doccode and not dirs: #leaf directory, no metadata file => NoDoccode
-                    fake_metadata = self.get_fake_metadata(root, fil)
-                    directories.append((root, {'document_name': fil,
-                                                    'metadatas': [fake_metadata],
-                                                    'first_metadata': fake_metadata
-                                                    }))
         return directories
 
     def get_metadatas(self, doccode):
