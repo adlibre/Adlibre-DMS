@@ -37,7 +37,6 @@ function UICommunicator(manager, renderer){
             $("#" + self.options.document_list_id).trigger('ui_more_documents_needed');
             return false;
         });
-        
         $('#id_date').val(self.manager.get_state_variable('Date', ''));
         $('#ui_calendar_form').submit(function(event){
             var date = $('#id_date').datepick('getDate')[0];
@@ -250,7 +249,11 @@ function UICommunicator(manager, renderer){
         $("#" + self.options.document_list_id).trigger("ui_more_documents_needed");
     }
     this.filter_by_date = function(date){
-        self.manager.set_state_variable('Date', date);
+        if (date){
+            self.manager.set_state_variable('Date', date);
+        }else{
+            self.manager.remove_state_variable('Date');
+        }
         self.manager.reset_document_list();
         $("#" + self.options.document_list_id).trigger("ui_more_documents_needed");
     }
