@@ -449,28 +449,6 @@
         }
     }, 
     {
-        "pk": 5, 
-        "model": "plugins.plugin", 
-        "fields": {
-            "status": 0, 
-            "index": 60, 
-            "_order": 0, 
-            "name": "dms_plugins.workers.transfer.gzip.GzipOnRetrievePlugin", 
-            "point": 2
-        }
-    }, 
-    {
-        "pk": 12, 
-        "model": "plugins.plugin", 
-        "fields": {
-            "status": 0, 
-            "index": 20, 
-            "_order": 0, 
-            "name": "dms_plugins.workers.storage.local.LocalRemovalPlugin", 
-            "point": 3
-        }
-    }, 
-    {
         "pk": 2, 
         "model": "plugins.plugin", 
         "fields": {
@@ -479,28 +457,6 @@
             "_order": 1, 
             "name": "dms_plugins.workers.validators.filetype.FileTypeValidationPlugin", 
             "point": 1
-        }
-    }, 
-    {
-        "pk": 6, 
-        "model": "plugins.plugin", 
-        "fields": {
-            "status": 0, 
-            "index": 0, 
-            "_order": 1, 
-            "name": "dms_plugins.workers.security.groups.GroupSecurityRetrieval", 
-            "point": 2
-        }
-    }, 
-    {
-        "pk": 13, 
-        "model": "plugins.plugin", 
-        "fields": {
-            "status": 0, 
-            "index": 10, 
-            "_order": 1, 
-            "name": "dms_plugins.workers.security.groups.GroupSecurityRemoval", 
-            "point": 3
         }
     }, 
     {
@@ -515,17 +471,6 @@
         }
     }, 
     {
-        "pk": 7, 
-        "model": "plugins.plugin", 
-        "fields": {
-            "status": 0, 
-            "index": 50, 
-            "_order": 2, 
-            "name": "dms_plugins.workers.storage.local.LocalRetrievalPlugin", 
-            "point": 2
-        }
-    }, 
-    {
         "pk": 4, 
         "model": "plugins.plugin", 
         "fields": {
@@ -534,6 +479,39 @@
             "_order": 3, 
             "name": "dms_plugins.workers.storage.local.LocalStoragePlugin", 
             "point": 1
+        }
+    }, 
+    {
+        "pk": 5, 
+        "model": "plugins.plugin", 
+        "fields": {
+            "status": 0, 
+            "index": 60, 
+            "_order": 0, 
+            "name": "dms_plugins.workers.transfer.gzip.GzipOnRetrievePlugin", 
+            "point": 2
+        }
+    }, 
+    {
+        "pk": 6, 
+        "model": "plugins.plugin", 
+        "fields": {
+            "status": 0, 
+            "index": 0, 
+            "_order": 1, 
+            "name": "dms_plugins.workers.security.groups.GroupSecurityRetrieval", 
+            "point": 2
+        }
+    }, 
+    {
+        "pk": 7, 
+        "model": "plugins.plugin", 
+        "fields": {
+            "status": 0, 
+            "index": 50, 
+            "_order": 2, 
+            "name": "dms_plugins.workers.storage.local.LocalRetrievalPlugin", 
+            "point": 2
         }
     }, 
     {
@@ -570,6 +548,28 @@
         }
     }, 
     {
+        "pk": 12, 
+        "model": "plugins.plugin", 
+        "fields": {
+            "status": 0, 
+            "index": 20, 
+            "_order": 0, 
+            "name": "dms_plugins.workers.storage.local.LocalRemovalPlugin", 
+            "point": 3
+        }
+    }, 
+    {
+        "pk": 13, 
+        "model": "plugins.plugin", 
+        "fields": {
+            "status": 0, 
+            "index": 10, 
+            "_order": 1, 
+            "name": "dms_plugins.workers.security.groups.GroupSecurityRemoval", 
+            "point": 3
+        }
+    }, 
+    {
         "pk": 14, 
         "model": "plugins.plugin", 
         "fields": {
@@ -590,7 +590,7 @@
             "name": "dms_plugins.workers.storage.metadata.local_json.LocalJSONMetadataRetrievalPlugin", 
             "point": 2
         }
-    },
+    }, 
     {
         "pk": 17, 
         "model": "plugins.plugin", 
