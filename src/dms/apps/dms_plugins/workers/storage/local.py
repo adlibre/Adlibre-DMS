@@ -211,7 +211,7 @@ class LocalRemovalPlugin(Plugin, BeforeRemovalPluginPoint):
 
 class LocalUpdatePlugin(Plugin, BeforeUpdatePluginPoint):
     title = "Local Update"
-    description = "Updates document in the filestytem"
+    description = "Updates document in the filesystem"
 
     plugin_type = 'storage'
     worker = Local()
