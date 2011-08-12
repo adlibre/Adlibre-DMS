@@ -3,9 +3,9 @@ PIL==1.1.7
 ctypes==1.0.2
 distribute==0.6.15
 django-plugins==0.1
+django-taggit==0.9.3
 docutils==0.7
 ## FIXME: could not find svn URL in dependency_links for this package:
 flup==1.0.3.dev-20110111
 python-magic==0.4.0
 wsgiref==0.1.2
-taggit==0.9.3
