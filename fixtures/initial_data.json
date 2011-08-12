@@ -625,7 +625,7 @@
         }
     }, 
     {
-        "pk": 19, 
+        "pk": 21, 
         "model": "plugins.plugin", 
         "fields": {
             "status": 0, 
