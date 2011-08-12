@@ -55,6 +55,8 @@ DoccodeManagerInstance = DoccodeManager()
 
 DoccodeManagerInstance.register(NoDoccode())
 
+# FIXME: These should automatically load when a new class is created / file saved in this plugin directory.
+
 from test_pdf import TestPDFDoccode
 DoccodeManagerInstance.register(TestPDFDoccode())
 
