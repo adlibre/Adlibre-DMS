@@ -27,8 +27,8 @@ class BaseFileHandler(BaseHandler):
         document_name, extension = os.path.splitext(filename)
         extension = extension.strip(".")
 
-        revision = request.GET.get("r", None) # TODO: TestMe
-        hashcode = request.GET.get("h", None) # TODO: TestMe
+        revision = request.GET.get("r", None)
+        hashcode = request.GET.get("h", None)
         
         return document_name, extension, revision, hashcode
 
@@ -132,15 +132,15 @@ class FileHandler(BaseFileHandler):
         except ValueError:
             return rc.BAD_REQUEST
         parent_directory = request.GET.get('parent_directory', None)
-        tag_string = request.GET.get('tag_string', None)
-        remove_tag_string = request.GET.get('remove_tag_string', None)
-        #print "tag string: %s" % tag_string
-        #print "remove_tag_string: %s" % remove_tag_string
+        tag_string = request.PUT.get('tag_string', None)
+        remove_tag_string = request.PUT.get('remove_tag_string', None)
         new_name = request.GET.get('new_name', None)
         manager = DocumentManager()
         if new_name:
+            #TODO: test me
             document = manager.rename(request, document_name, new_name, extension, parent_directory = parent_directory)
         else:
+            #TODO: test me
             document = manager.update(request, document_name, tag_string = tag_string, remove_tag_string = remove_tag_string,
                                     parent_directory = parent_directory, extension = extension)
         return HttpResponse(json.dumps( document.get_dict() ))
@@ -177,7 +177,6 @@ class FileListHandler(BaseHandler):
                                                 filter_date = filter_date)
             for item in file_list:
                 ui_url = reverse('ui_document', kwargs = {'document_name': item['name']})
-                print item
                 if 'directory' in item.keys():
                     ui_url += "?parent_directory=" + item['directory']
                 item.update({   'ui_url': ui_url,
@@ -196,6 +195,7 @@ class TagsHandler(BaseHandler):
     allowed_methods = ('GET',)
 
     def read(self, request, id_rule):
+        #TODO: test me
         try:
             manager = DocumentManager()
             mapping = manager.get_plugin_mapping_by_kwargs(pk = id_rule)
