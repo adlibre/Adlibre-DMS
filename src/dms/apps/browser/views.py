@@ -105,10 +105,15 @@ def revision_document(request, document):
         return arg_string
     if not manager.errors:
         if metadata:
-            for fileinfo in metadata.values():
+            revisions = map(lambda x: int(x), metadata.keys())
+            revisions.sort()
+            fileinfos = []
+            for revision in revisions:
+                fileinfo = metadata[str(revision)]
                 fileinfo['args'] = get_args(fileinfo)
+                fileinfos.append(fileinfo)
             extra_context = {
-                'fileinfo_db': metadata,
+                'fileinfo_db': fileinfos,
                 'document_name': document.get_stripped_filename(),
             }
         else:
