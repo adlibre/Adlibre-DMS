@@ -56,5 +56,3 @@ class TagsUpdatePlugin(Plugin, BeforeUpdatePluginPoint):
         document.set_tags(doc_model.get_tag_list())
         return document
 
-    def get_tags(self, doccode):
-        pass
