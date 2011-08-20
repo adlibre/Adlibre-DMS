@@ -80,7 +80,7 @@ function UIManager(){
     
     this.get_rows_per_page = function(){
         var rows = parseInt(($(window).height() - $("#" + self.options.document_list_id).offset().top) / self.get_document_height());
-        var rows = rows ? rows : 1;
+        rows = rows ? rows : 1;
         return rows;
     }
     

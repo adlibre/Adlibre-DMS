@@ -112,7 +112,7 @@ class ViewTest(AdlibreTestCase):
         for d in documents_missing_hash:
             url = '/get/%s?hashcode=%s' % (d[0], d[1])
             response = self.client.get(url)
-            self.assertContains(response, 'No such document', status_code = 404)
+            self.assertContains(response, 'Hashcode did not validate', status_code = 500)
         
 
     def test_versions_view(self):

@@ -4,6 +4,7 @@ Project: Adlibre DMS
 Copyright: Adlibre Pty Ltd 2011
 License: See LICENSE for license information
 """
+import json
 import os
 
 from django.conf import settings
@@ -26,9 +27,19 @@ password = 'admin'
 documents = ('ADL-1111', 'ADL-1234', 'ADL-2222',)
 documents_missing = ()
 
+documents_hash = [
+    ('abcde111', 'cad121990e04dcd5631a9239b3467ee9'),
+    ('abcde123', 'bc3c5035805bb8098e5c164c5e1826da'),
+    ('abcde222', 'ba7e656a1288181cdcf676c0d719939e'),
+    ]
+
 rules = (1, 2,)
 rules_missing = ()
 
+# no doccode
+no_doccode_name = "test_no_doccode"
+adl_invoice_name = "ADL-1985"
+# end no doccode
 
 # TODO: We need to extend the API to the following
 # 1. Return revisions for a given file /api/revisions/ADL-1234.json
@@ -66,6 +77,40 @@ class MiscTest(AdlibreTestCase):
         response = self.client.get(url)
         self.assertContains(response, 'ADL-1234')
 
+    def test_api_file(self):
+        self.client.login(username=username, password=password)
+        f = documents_hash[0][0]
+        doc_hash = documents_hash[0][1]
+        response1 = self._upload_file(f)
+        revision = 1
+        url = reverse('api_file') + '?filename=%s.pdf&r=%s&h=%s' % (f, revision, doc_hash)
+        response = self.client.get(url)
+        self.assertContains(response, '', status_code = 200)
+
+    def test_api_fileinfo(self):
+        self.client.login(username = username, password = password)
+        for f in documents:
+            url = reverse('api_file_info') + '?filename=%s' % f
+            response = self.client.get(url)
+            data = json.loads(response.content)
+            if not 'document_name' in data or not (data['document_name'] == f):
+                raise self.failureException('Invalid response: %s' % response.content)
+
+    def test_api_rename(self):
+        #login
+        self.client.login(username = username, password = password)
+        #upload no doccode
+        response = self._upload_file(no_doccode_name)
+        self.assertContains(response, '', status_code = 200)
+        #do rename
+        url = reverse('api_file')
+        data = {'new_name': adl_invoice_name, 'filename': no_doccode_name + ".pdf"}
+        response = self.client.put(url, data)
+        self.assertContains(response, '', status_code = 200)
+        #fetch renamed file
+        url = reverse('api_file') + '?filename=%s.pdf' % adl_invoice_name
+        response = self.client.get(url)
+        self.assertContains(response, '', status_code = 200)
 
     def _upload_file(self, f):
         url = reverse('api_file')
