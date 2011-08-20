@@ -93,8 +93,6 @@ class FileHandler(BaseFileHandler):
         document, extension = os.path.splitext(request.FILES['file'].name)
         extension = extension.strip(".")
 
-        #revision = request.GET.get("r", None) # TODO: TestMe
-
         manager = DocumentManager()
         document = manager.store(request, request.FILES['file'])
         if len(manager.errors) > 0:
@@ -139,7 +137,6 @@ class FileHandler(BaseFileHandler):
 
         manager = DocumentManager()
         if new_name:
-            #TODO: test me
             document = manager.rename(request, document_name, new_name, extension, parent_directory = parent_directory)
         else:
             #TODO: test me
