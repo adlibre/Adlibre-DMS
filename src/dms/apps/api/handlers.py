@@ -5,7 +5,7 @@ Copyright: Adlibre Pty Ltd 2011
 License: See LICENSE for license information
 """
 
-import json, os
+import json, os, traceback
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
@@ -102,19 +102,18 @@ class FileHandler(BaseFileHandler):
         return document.get_filename()
 
     def delete(self, request):
-        filename = request.GET.get('filename')
+        filename = request.REQUEST.get('filename')
         document, extension = os.path.splitext(filename)
         extension = extension.strip(".")
 
-        revision = request.GET.get("r", None) # TODO: TestMe
-        full_filename = request.GET.get('full_filename')
+        revision = request.REQUEST.get("r", None) # TODO: TestMe
+        full_filename = request.REQUEST.get('full_filename', None)
 
         manager = DocumentManager()
         try:
             manager.delete_file(request, document, revision = revision, full_filename = full_filename)
         except Exception, e:
             if settings.DEBUG:
-                import traceback
                 print "Exception: %s" % e
                 traceback.print_exc()
                 raise
@@ -131,10 +130,13 @@ class FileHandler(BaseFileHandler):
             document_name, extension, revision, hashcode = self.get_file_info(request)
         except ValueError:
             return rc.BAD_REQUEST
-        parent_directory = request.GET.get('parent_directory', None)
+        parent_directory = request.PUT.get('parent_directory', None)
+
         tag_string = request.PUT.get('tag_string', None)
         remove_tag_string = request.PUT.get('remove_tag_string', None)
-        new_name = request.GET.get('new_name', None)
+
+        new_name = request.PUT.get('new_name', None)
+
         manager = DocumentManager()
         if new_name:
             #TODO: test me
@@ -146,7 +148,6 @@ class FileHandler(BaseFileHandler):
         return HttpResponse(json.dumps( document.get_dict() ))
       except Exception, e:
         if settings.DEBUG:
-            import traceback
             print "Exception: %s" % e
             traceback.print_exc()
             raise
