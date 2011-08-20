@@ -39,15 +39,9 @@ rules_missing = ()
 # no doccode
 no_doccode_name = "test_no_doccode"
 adl_invoice_name = "ADL-1985"
-# end no doccode
 
-# TODO: We need to extend the API to the following
-# 1. Return revisions for a given file /api/revisions/ADL-1234.json
-# 2. Return meta-data for a given file /api/metadata/ADL-1234.json
-# 3. Delete files /api/delete/ADL-1234
-# 4. Require authentication for API all actions.
-
-
+#tagging
+test_tag = 'test_tag'
 
 # TODO: Write a test that checks these methods for ALL doctypes that are currently installed :)
 
@@ -111,6 +105,34 @@ class MiscTest(AdlibreTestCase):
         url = reverse('api_file') + '?filename=%s.pdf' % adl_invoice_name
         response = self.client.get(url)
         self.assertContains(response, '', status_code = 200)
+
+    def test_api_tags(self):
+        #login
+        self.client.login(username = username, password = password)
+        #upload file
+        filename = documents[0]
+        response = self._upload_file(filename)
+        self.assertContains(response, '', status_code = 200)
+        #remove tag
+        url = reverse('api_file')
+        data = {'filename': filename, 'remove_tag_string': test_tag}
+        response = self.client.put(url, data)
+        self.assertContains(response, '', status_code = 200)
+        #check that we don't have tag
+        url = reverse('api_file_info')
+        data = {'filename': filename}
+        response = self.client.get(url, data)
+        self.assertNotContains(response, test_tag, status_code = 200)
+        #set tags
+        url = reverse('api_file')
+        data = {'filename': filename, 'tag_string': test_tag}
+        response = self.client.put(url, data)
+        self.assertContains(response, '', status_code = 200)
+        #check that we have tag
+        url = reverse('api_file_info')
+        data = {'filename': filename}
+        response = self.client.get(url, data)
+        self.assertContains(response, test_tag, status_code = 200)
 
     def _upload_file(self, f):
         url = reverse('api_file')
