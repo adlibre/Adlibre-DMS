@@ -24,6 +24,7 @@ Test data
 username = 'admin'
 password = 'admin'
 
+adlibre_invoices_rule_id = 1
 documents = ('ADL-1111', 'ADL-1234', 'ADL-2222',)
 documents_missing = ()
 
@@ -132,6 +133,10 @@ class MiscTest(AdlibreTestCase):
         url = reverse('api_file_info')
         data = {'filename': filename}
         response = self.client.get(url, data)
+        self.assertContains(response, test_tag, status_code = 200)
+        #get all tags for rule, check our tag
+        url = reverse('api_tags', kwargs = {'id_rule': adlibre_invoices_rule_id, 'emitter_format': 'json'})
+        response = self.client.get(url)
         self.assertContains(response, test_tag, status_code = 200)
 
     def _upload_file(self, f):

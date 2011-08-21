@@ -139,7 +139,6 @@ class FileHandler(BaseFileHandler):
         if new_name:
             document = manager.rename(request, document_name, new_name, extension, parent_directory = parent_directory)
         else:
-            #TODO: test me
             document = manager.update(request, document_name, tag_string = tag_string, remove_tag_string = remove_tag_string,
                                     parent_directory = parent_directory, extension = extension)
         return HttpResponse(json.dumps( document.get_dict() ))
@@ -193,7 +192,6 @@ class TagsHandler(BaseHandler):
     allowed_methods = ('GET',)
 
     def read(self, request, id_rule):
-        #TODO: test me
         try:
             manager = DocumentManager()
             mapping = manager.get_plugin_mapping_by_kwargs(pk = id_rule)
