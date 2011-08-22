@@ -438,6 +438,14 @@
         }
     }, 
     {
+        "pk": 5, 
+        "model": "plugins.pluginpoint", 
+        "fields": {
+            "status": 0, 
+            "name": "dms_plugins.pluginpoints.StoragePluginPoint"
+        }
+    }, 
+    {
         "pk": 1, 
         "model": "plugins.plugin", 
         "fields": {
@@ -656,7 +664,9 @@
             "before_storage_plugins": [
                 1, 
                 2, 
-                3, 
+                3
+            ], 
+            "storage_plugins": [
                 4, 
                 14
             ], 
@@ -690,8 +700,10 @@
                 1, 
                 2, 
                 3, 
+                10
+            ], 
+            "storage_plugins": [
                 4, 
-                10, 
                 14
             ], 
             "before_update_plugins": [
@@ -717,7 +729,7 @@
                 13,
                 20
             ], 
-            "before_storage_plugins": [
+            "storage_plugins": [
                 4, 
                 14
             ], 
@@ -745,7 +757,9 @@
                 20
             ], 
             "before_storage_plugins": [
-                2, 
+                2
+            ], 
+            "storage_plugins": [
                 4, 
                 14
             ], 
@@ -773,7 +787,9 @@
                 20
             ], 
             "before_storage_plugins": [
-                2, 
+                2
+            ], 
+            "storage_plugins": [
                 4, 
                 14
             ], 
@@ -800,8 +816,10 @@
                 20
             ], 
             "before_storage_plugins": [
-                3, 
-                4,
+                3
+            ], 
+            "storage_plugins": [
+                4, 
                 14
             ], 
             "before_update_plugins": [

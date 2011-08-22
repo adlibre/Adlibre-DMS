@@ -6,6 +6,10 @@ class BeforeStoragePluginPoint(object):
     __metaclass__ = PluginMount
     settings_field_name = 'before_storage_plugins'
 
+class StoragePluginPoint(object):
+    __metaclass__ = PluginMount
+    settings_field_name = 'storage_plugins'
+
 class BeforeRetrievalPluginPoint(object):
     __metaclass__ = PluginMount
     settings_field_name = 'before_retrieval_plugins'

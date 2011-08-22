@@ -16,16 +16,24 @@ class DoccodePluginMapping(models.Model):
     #if changing *_plugins names please change dms_plugins.pluginpoints correspondingly
     before_storage_plugins = ManyPluginField(   pluginpoints.BeforeStoragePluginPoint, 
                                                 related_name = 'settings_before_storage',
-                                                blank = True)
+                                                blank = True,
+                                                verbose_name = "Pre-Storage Workflow")
+    storage_plugins = ManyPluginField(   pluginpoints.BeforeStoragePluginPoint, 
+                                                related_name = 'settings_storage',
+                                                blank = True,
+                                                verbose_name = "Storage Workflow")
     before_retrieval_plugins = ManyPluginField( pluginpoints.BeforeRetrievalPluginPoint, 
                                                 related_name = 'settings_before_retrieval',
-                                                blank = True)
+                                                blank = True,
+                                                verbose_name = "Retrieval Workflow")
     before_removal_plugins = ManyPluginField( pluginpoints.BeforeRemovalPluginPoint, 
                                                 related_name = 'settings_before_removal',
-                                                blank = True)
+                                                blank = True,
+                                                verbose_name = "Removal Workflow")
     before_update_plugins = ManyPluginField( pluginpoints.BeforeUpdatePluginPoint, 
                                                 related_name = 'settings_before_update',
-                                                blank = True)
+                                                blank = True,
+                                                verbose_name = "Modification Workflow")
     active = models.BooleanField(default = False)
 
     def __unicode__(self):
@@ -45,19 +53,18 @@ class DoccodePluginMapping(models.Model):
 
     def get_before_storage_plugins(self):
         return self.before_storage_plugins.all().order_by('index')
-    storage_plugins = property(get_before_storage_plugins)
+
+    def get_storage_plugins(self):
+        return self.storage_plugins.all().order_by('index')
 
     def get_before_retrieval_plugins(self):
         return self.before_retrieval_plugins.all().order_by('index')
-    retrieval_plugins = property(get_before_retrieval_plugins)
 
     def get_before_removal_plugins(self):
         return self.before_removal_plugins.all().order_by('index')
-    removal_plugins = property(get_before_removal_plugins)
 
     def get_before_update_plugins(self):
         return self.before_update_plugins.all().order_by('index')
-    update_plugins = property(get_before_update_plugins)
 
 class PluginOption(models.Model):
     pluginmapping = models.ForeignKey(DoccodePluginMapping)

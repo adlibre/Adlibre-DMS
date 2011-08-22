@@ -245,9 +245,10 @@ class RulesHandler(BaseHandler):
 class RulesDetailHandler(BaseHandler):
     allowed_methods = ('GET','POST')
 
-    fields = ['id', 'name', ('storage_plugins', ('name',)), 
-                            ('retrieval_plugins', ('name',)), 
-                            ('removal_plugins', ('name',))]
+    fields = ['id', 'name', ('before_storage_plugins', ('name',)), 
+                            ('storage_plugins', ('name',)), 
+                            ('before_retrieval_plugins', ('name',)), 
+                            ('before_removal_plugins', ('name',))]
 
     verbose_name = 'rule'
     verbose_name_plural = 'rules'

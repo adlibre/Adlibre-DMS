@@ -1,0 +1,9 @@
+<ul>
+{% for plugin in plugins %}
+    <li>{{plugin.get_plugin.title}}
+{% if plugin.get_plugin.has_configuration and plugin.get_plugin.active %}
+ - <a href="{% url plugin_setting rule.id plugin.id %}">configure</a>
+{% endif %}
+    </li>
+{%endfor%}
+</ul>
