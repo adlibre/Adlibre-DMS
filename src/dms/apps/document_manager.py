@@ -5,8 +5,7 @@ from django.conf import settings
 from dms_plugins import models
 from dms_plugins.workers import PluginError, PluginWarning, BreakPluginChain, DmsException
 from dms_plugins.workers.info.tags import TagsPlugin
-from dms_plugins.pluginpoints import BeforeStoragePluginPoint, BeforeRetrievalPluginPoint, BeforeRemovalPluginPoint, \
-BeforeUpdatePluginPoint
+from dms_plugins import pluginpoints
 
 from document import Document
 
@@ -88,8 +87,10 @@ class DocumentManager(object):
         doc.set_filename(os.path.basename(uploaded_file.name))
         if hasattr(uploaded_file, 'content_type'):
             doc.set_mimetype(uploaded_file.content_type)
-        #print "DOCCODE: %s" % doc.get_doccode()
-        return self.process_pluginpoint(BeforeStoragePluginPoint, request, document = doc)
+        #process before storage plugins
+        doc = self.process_pluginpoint(pluginpoints.BeforeStoragePluginPoint, request, document = doc)
+        #process storage plugins
+        return self.process_pluginpoint(pluginpoints.StoragePluginPoint, request, document = doc)
 
     def rename(self, request, document_name, new_name, extension, parent_directory = None):
         doc = self.retrieve(request, document_name, extension = extension, parent_directory = parent_directory)
@@ -118,7 +119,7 @@ class DocumentManager(object):
             doc.set_option('parent_directory', parent_directory)
         doc.set_tag_string(tag_string)
         doc.set_remove_tag_string(remove_tag_string)
-        return self.process_pluginpoint(BeforeUpdatePluginPoint, request, document = doc)
+        return self.process_pluginpoint(pluginpoints.BeforeUpdatePluginPoint, request, document = doc)
 
     def retrieve(self, request, document_name, hashcode = None, revision = None, only_metadata = False, 
                         extension = None, parent_directory = None):
@@ -131,7 +132,7 @@ class DocumentManager(object):
         if extension:
             doc.set_requested_extension(extension)
         doc.update_options(options)
-        doc = self.process_pluginpoint(BeforeRetrievalPluginPoint, request, document = doc)
+        doc = self.process_pluginpoint(pluginpoints.BeforeRetrievalPluginPoint, request, document = doc)
         return doc
 
     def remove(self, request, document_name, revision = None, full_filename = None, parent_directory = None):
@@ -143,13 +144,13 @@ class DocumentManager(object):
             doc.set_revision(revision)
         if parent_directory:
             doc.set_option('parent_directory', parent_directory)
-        return self.process_pluginpoint(BeforeRemovalPluginPoint, request, document = doc)
+        return self.process_pluginpoint(pluginpoints.BeforeRemovalPluginPoint, request, document = doc)
 
-    def get_plugins_by_type(self, doccode_plugin_mapping, plugin_type, pluginpoint = BeforeStoragePluginPoint):
+    def get_plugins_by_type(self, doccode_plugin_mapping, plugin_type, pluginpoint = pluginpoints.BeforeStoragePluginPoint):
         plugins = self.get_plugins_from_mapping(doccode_plugin_mapping, pluginpoint, plugin_type = plugin_type)
         return plugins
 
-    def get_storage(self, doccode_plugin_mapping, pluginpoint = BeforeStoragePluginPoint):
+    def get_storage(self, doccode_plugin_mapping, pluginpoint = pluginpoints.StoragePluginPoint):
         #Plugin point does not matter here as mapping must have a storage plugin both at storage and retrieval stages
         storage = self.get_plugins_by_type(doccode_plugin_mapping, 'storage', pluginpoint)
         #Document MUST have a storage plugin
@@ -158,7 +159,7 @@ class DocumentManager(object):
         #Should we validate more than one storage plugin?
         return storage[0]
 
-    def get_metadata(self, doccode_plugin_mapping, pluginpoint = BeforeStoragePluginPoint):
+    def get_metadata(self, doccode_plugin_mapping, pluginpoint = pluginpoints.StoragePluginPoint):
         metadata = None
         metadatas = self.get_plugins_by_type(doccode_plugin_mapping, 'metadata', pluginpoint)
         if metadatas: metadata = metadatas[0]
