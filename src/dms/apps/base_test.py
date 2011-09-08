@@ -1,3 +1,7 @@
+import os
+
+from django.conf import settings
+from django.core.management import call_command
 from django.test import TestCase
 
 from plugins import models
@@ -11,3 +15,8 @@ class AdlibreTestCase(TestCase):
         models.Plugin.objects.all().delete()
         #dirty hack ends
         super(AdlibreTestCase, self)._fixture_setup(*args, **kwargs)
+        try:
+            call_command('import_documents', 
+                        os.path.join(settings.FIXTURE_DIRS[0], 'testdata') )
+        except IndexError:
+            pass
