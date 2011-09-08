@@ -47,6 +47,12 @@ class LocalFilesystemManager(object):
             os.makedirs(directory)
         return directory
 
+def file_present(file_name, directory):
+    """
+    Determine if file is present in directory
+    """
+    return file_name in os.listdir(directory)
+
 def filecount(directory):
     """
     Count the number of files in a directory
@@ -172,12 +178,15 @@ class Local(object):
     def get_revision_count(self, document):
         # Hacky way, but faster than reading the revs from the metadata
         directory = self.filesystem.get_document_directory(document)
-
-        file_count = filecount(directory)
-        if file_count:
-            return filecount(directory) - 1
+        file_count = 0
+        if document.get_doccode().no_doccode:
+            if file_present(document.get_full_filename(), directory):
+                file_count = 1
         else:
-            return 0
+            file_count = filecount(directory)
+            if file_count:
+                file_count -= 1
+        return file_count
 
 class LocalStoragePlugin(Plugin, BeforeStoragePluginPoint):
     title = "Local Storage"

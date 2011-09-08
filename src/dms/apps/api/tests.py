@@ -153,13 +153,18 @@ class MiscTest(AdlibreTestCase):
             response = self._upload_file(f)
             self.assertContains(response, f, status_code = 200)
 
-    def _test_delete_documents(self): # disabled
-        for f in documents:
-            url = reverse('api_file') + '?filename=' + f + '.pdf'
-            self.client.login(username=username, password=password)
-            response = self.client.delete(url)
-            self.assertContains(response, '', status_code = 204)
+    def test_delete_documents(self): # disabled
+        delete_doc = documents[0]
+        remain_doc = documents[1]
 
+        url = reverse('api_file') + '?filename=' + delete_doc + '.pdf'
+        self.client.login(username=username, password=password)
+        response = self.client.delete(url)
+        self.assertContains(response, '', status_code = 204)
+
+        url = reverse('api_file') + '?filename=%s.pdf' % remain_doc
+        response = self.client.get(url)
+        self.assertContains(response, '', status_code = 200)
 
     def test_get_rev_count(self):
         for f in documents:

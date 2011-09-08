@@ -215,16 +215,19 @@ class RevisionCountHandler(BaseHandler):
                 try:
                     mapping = models.DoccodePluginMapping.objects.get(doccode = doccode.get_id())
                 except models.DoccodePluginMapping.DoesNotExist:
-                    return rc.BAD_REQUEST
+                    raise
                 manager = DocumentManager()
                 rev_count = manager.get_revision_count(document, mapping)
                 if rev_count <= 0: #document without revisions is broken
-                    return rc.BAD_REQUEST
+                    raise
                 return rev_count
             else:
-                return rc.BAD_REQUEST
+                raise Exception("No Doccode")
         except Exception, e:
-            return rc.BAD_REQUEST
+            if settings.DEBUG:
+                raise
+            else:
+                return rc.BAD_REQUEST
 
 class RulesHandler(BaseHandler):
     allowed_methods = ('GET','POST')
