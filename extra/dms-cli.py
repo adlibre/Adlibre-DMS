@@ -1,17 +1,17 @@
 #!/usr/bin/env python
+
 import sys
 import os
-#from subprocess import Popen, PIPE
 
-# TODO: as per https://redmine.adlibre.net/issues/28 need some more features:
-# Logging
-# optional append (pdf / tiff),
-# optional fail if file exists.
+#
+# Adlibre DMS: Example of command line uploading using the web services API
+#
 
-FASTTRACK_SERVER = 'http://localhost:8000'
+
+DMS_SERVER = 'http://localhost:8000'
 
 if __name__ == "__main__":
-    print "Fasttrack uploader"
+    print "DMS Uploader"
     if len(sys.argv) < 2:
         print "use --help to display available parameters"
 
@@ -19,13 +19,13 @@ if __name__ == "__main__":
         path = sys.argv[1]
         if os.path.exists(path):
             if os.path.isfile(path):
-                os.system("curl -F 'file=@%s' %s/api/file/" % (path, FASTTRACK_SERVER))
+                os.system("curl -F 'file=@%s' %s/api/file/" % (path, DMS_SERVER))
                 print "Upload OK"
             else:
                 for fname in os.listdir(path):
                     filename = "%s/%s" % (path, fname)
                     if os.path.isfile(filename):
-                        os.system("curl -F 'filename=@%s' %s/api/file/" % (filename, FASTTRACK_SERVER))
+                        os.system("curl -F 'filename=@%s' %s/api/file/" % (filename, DMS_SERVER))
                         print "Upload OK"
 
         else:
