@@ -169,10 +169,11 @@ class Local(object):
                     raise PluginError(str(e), 500)
                 document.set_revision(None) # should not perform anything in later plugins.
         else:
-            try:
-                shutil.rmtree(directory)
-            except Exception, e:
-                raise PluginError(str(e), 500)
+             if len(os.listdir(directory)) == 0: # no files at all for no_doccode
+                try:
+                    shutil.rmtree(directory)
+                except Exception, e:
+                    raise PluginError(str(e), 500)
         return document
 
     def get_revision_count(self, document):
