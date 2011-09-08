@@ -16,6 +16,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
+        silent = 'silent' in options.keys()
         if len(args) == 0:
             self.stdout.write('No arguments specified\n')
             return
@@ -42,7 +43,8 @@ class Command(BaseCommand):
                         else:
                             cnt += 1
                     file_obj.close()
-            if cnt:
-                self.stdout.write('Successfully imported %s documents from directory "%s"\n' % (cnt, directory))
-            else:
-                self.stdout.write('No documents were imported\n')
+            if not silent:
+                if cnt:
+                    self.stdout.write('Successfully imported %s documents from directory "%s"\n' % (cnt, directory))
+                else:
+                    self.stdout.write('No documents were imported\n')
