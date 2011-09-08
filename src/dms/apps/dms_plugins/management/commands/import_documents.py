@@ -15,6 +15,11 @@ class Command(BaseCommand):
     help = 'Imports the documents from specified directory'
 
     def handle(self, *args, **options):
+
+        if len(args) == 0:
+            self.stdout.write('No arguments specified\n')
+            return
+
         for directory in args:
             if not os.path.exists(directory):
                 self.stderr.write('Could not import %s: no such directory\n' % directory)
