@@ -25,8 +25,6 @@ Supported Linux Distributions:
 * Ubuntu
 * CentOS 5 / Red Hat 5
 
-TODO: Write more specific deployment documentation.
-
 OS X Requirements
 -----------------
 
@@ -47,7 +45,7 @@ and the following for converter.py to function (libtiff, poppler, a2ps, ghostscr
 NB. On OS X there is a bug with building ctypes. You will need to implement
 this workaround https://trac.macports.org/ticket/22418
 and if you get this error: 
->     env: /users/andrew/django/virtualenvs/dmsmerge/build/ctypes/source/libffi/configure: Permission denied
+>     env: /users/user/django/virtualenvs/dmsmerge/build/ctypes/source/libffi/configure: Permission denied
 You'll need to make sure that _build/ctypes/source/libffi/configure_ is executable. (chmod +x if necessary).
 
 Windows
