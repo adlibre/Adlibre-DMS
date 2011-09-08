@@ -1,7 +1,9 @@
 #!/bin/bash
 #
-# Manages the startup and shutdown of this projects FCGI processes.
-# Uses UNIX sockets
+# Manages the startup and shutdown of this projects FCGI processes
+# as well as rebuilding the search index.
+#
+# Uses UNIX sockets for FCGI
 #
 
 # Project Specific Config
@@ -12,24 +14,22 @@ CWD=$(cd ${0%/*} && pwd -P)
 PROJDIR=$(cd $CWD/../ && pwd -P) # Root of our project
 SRCDIR=$(cd $CWD/../src/${PROJNAME}/ && pwd -P) # Path to manage.py
 BINDIR=$(cd $CWD/../bin/ && pwd -P) # Path to activate / virtualenv
-PIDFILE="$PROJDIR/${PROJNAME}.pid"
-SOCKET="$PROJDIR/${PROJNAME}.sock"
 
 ############################################
 
 ACTION=$1
-SETTINGS=$2
+SETTINGS=${2-settings}
+SOCKET="$PROJDIR/"${3-$(echo "${PROJNAME}")}".sock"
+PIDFILE="$PROJDIR/"${3-$(echo "${PROJNAME}")}".pid"
 
 # Functions
 function startit {
-    if [ "SETTINGS" == "" ]; then
-        echo -n"Starting ${PROJNAME}: "
-        . ${BINDIR}/activate
-        python ${SRCDIR}/manage.py runfcgi socket=$SOCKET pidfile=$PIDFILE
-        RC=$?
-        echo "Started."
+    echo -n "Starting ${PROJNAME} with ${SETTINGS}: "
+
+    if [ -f "${PIDFILE}" ]; then
+        echo "Error: PIDFILE ${PIDFILE} exists. Already running?"
+        RC=128
     else
-        echo -n "Starting ${PROJNAME} with ${SETTINGS}: "
         . ${BINDIR}/activate
         python ${SRCDIR}/manage.py runfcgi socket=$SOCKET pidfile=$PIDFILE --settings=${SETTINGS}
         RC=$?
@@ -41,14 +41,15 @@ function stopit {
     echo -n "Stopping ${PROJNAME}: "
 
     if [ -f $PIDFILE ]; then
-        kill `cat -- $PIDFILE` &&
-        rm -f -- $PIDFILE &&
+        kill `cat -- $PIDFILE`
         RC=$?
         echo "Process(s) Terminated."
+        rm -f -- $PIDFILE
     else
         echo "PIDFILE not found. Killing likely processes."
-        kill `pgrep -f "python ${SRCDIR}/manage.py"`
-        exit 128
+        kill `pgrep -f "python ${SRCDIR}/manage.py runfcgi socket=$SOCKET pidfile=$PIDFILE --settings=${SETTINGS}"`
+        RC=$?
+        echo "Process(s) Terminated."
     fi
 }
 
@@ -56,8 +57,16 @@ function status {
     echo "I don't know how to do that yet"
 }
 
+function rebuildindex {
+    echo -n "Rebuilding ${PROJNAME} search index with ${SETTINGS}: "
+    . ${BINDIR}/activate
+    python ${SRCDIR}/manage.py update_index --remove --settings=${SETTINGS}
+    RC=$?
+    echo "Done."
+}
+
 function showUsage {
-    echo "Usage: manage-fcgi.sh {start|stop|status|restart} <settings_file>"
+    echo "Usage: manage-fcgi.sh {start|stop|status|rebuildindex|restart} <settings_file>"
 }
 
 # check that we have required parameters
@@ -82,6 +91,9 @@ case "$ACTION" in
 	;;
     status)
         status
+        ;;
+    rebuildindex)
+        rebuildindex
         ;;
     restart)
         stopit
