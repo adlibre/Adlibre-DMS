@@ -96,7 +96,9 @@ class Local(object):
 
     def document_matches_search(self, metadata_info, searchword):
         result = False
-        if searchword in metadata_info['document_name'].lower():
+        print "%s is in %s: %s" % (searchword, metadata_info['document_name'], 
+            searchword.lower() in metadata_info['document_name'].lower())
+        if searchword.lower() in metadata_info['document_name'].lower():
             result = True
         return result
 
