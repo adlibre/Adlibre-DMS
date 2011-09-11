@@ -80,7 +80,7 @@ class FileHandler(BaseFileHandler):
             else:
                 return rc.BAD_REQUEST
         if manager.errors:
-            print "Manager errors: %s" % manager.errors
+            #print "Manager errors: %s" % manager.errors
             return rc.BAD_REQUEST
         response = HttpResponse(content, mimetype=mimetype)
         response["Content-Length"] = len(content)
@@ -113,8 +113,6 @@ class FileHandler(BaseFileHandler):
             manager.delete_file(request, document, revision = revision, full_filename = full_filename,
                 parent_directory = parent_directory, extension = extension)
         except Exception, e:
-            import traceback
-            traceback.print_exc(e)
             if settings.DEBUG:
                 print "Exception: %s" % e
                 traceback.print_exc()
@@ -122,7 +120,6 @@ class FileHandler(BaseFileHandler):
             else:
                 return rc.BAD_REQUEST
         if len(manager.errors) > 0:
-            print "MANAGER_ERRORS ON DELETE: %s" % manager.errors
             return rc.BAD_REQUEST
         return rc.DELETED
 
