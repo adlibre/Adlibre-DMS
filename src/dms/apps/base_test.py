@@ -15,8 +15,5 @@ class AdlibreTestCase(TestCase):
         models.Plugin.objects.all().delete()
         #dirty hack ends
         super(AdlibreTestCase, self)._fixture_setup(*args, **kwargs)
-        try:
-            call_command('import_documents', 
-                        os.path.join(settings.FIXTURE_DIRS[0], 'testdata'), silent = True )
-        except IndexError:
-            pass
+        call_command('import_documents', 
+                        os.path.join(settings.FIXTURE_DIRS[0], 'testdata'), silent = True)

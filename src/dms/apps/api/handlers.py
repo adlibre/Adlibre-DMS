@@ -106,11 +106,15 @@ class FileHandler(BaseFileHandler):
 
         revision = request.REQUEST.get("r", None) # TODO: TestMe
         full_filename = request.REQUEST.get('full_filename', None)
+        parent_directory = request.GET.get('parent_directory', None)
 
         manager = DocumentManager()
         try:
-            manager.delete_file(request, document, revision = revision, full_filename = full_filename)
+            manager.delete_file(request, document, revision = revision, full_filename = full_filename,
+                parent_directory = parent_directory, extension = extension)
         except Exception, e:
+            import traceback
+            traceback.print_exc(e)
             if settings.DEBUG:
                 print "Exception: %s" % e
                 traceback.print_exc()
@@ -118,7 +122,7 @@ class FileHandler(BaseFileHandler):
             else:
                 return rc.BAD_REQUEST
         if len(manager.errors) > 0:
-            print "Manager errors: %s" % manager.errors
+            print "MANAGER_ERRORS ON DELETE: %s" % manager.errors
             return rc.BAD_REQUEST
         return rc.DELETED
 
@@ -141,6 +145,8 @@ class FileHandler(BaseFileHandler):
         else:
             document = manager.update(request, document_name, tag_string = tag_string, remove_tag_string = remove_tag_string,
                                     parent_directory = parent_directory, extension = extension)
+        if len(manager.errors) > 0:
+            return rc.BAD_REQUEST
         return HttpResponse(json.dumps( document.get_dict() ))
       except Exception, e:
         if settings.DEBUG:

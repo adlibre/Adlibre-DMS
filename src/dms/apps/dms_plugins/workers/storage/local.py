@@ -9,6 +9,7 @@ import datetime
 import json
 import os
 import shutil
+#import traceback
 
 from django.conf import settings
 
@@ -84,7 +85,7 @@ class Local(object):
             filename = document.get_full_filename()
             fullpath = os.path.join(directory, filename)
         if not os.path.exists(fullpath):
-            raise PluginError("No such document", 404)
+            raise PluginError("No such document: %s" % fullpath, 404)
         document.set_fullpath(fullpath)
         #file will be read on first access lazily
         if document.get_option('only_metadata') == True:
@@ -158,6 +159,27 @@ class Local(object):
 
     def remove(self, request, document):
         directory = self.filesystem.get_document_directory(document)
+        filename = None
+        if document.get_doccode().no_doccode:
+            filename = document.get_full_filename()
+        elif document.get_revision():
+            filename = document.get_filename_with_revision()
+        if filename:
+            try:
+                os.unlink(os.path.join(directory, filename))
+            except Exception, e:
+                raise PluginError(str(e), 500)
+
+        if not filename or (document.get_doccode().no_doccode and len(os.listdir(directory)) == 0) or\
+                len(os.listdir(directory)) <= 1: # delete everything or no files at all or only metadata file
+            try:
+                shutil.rmtree(directory)
+            except Exception, e:
+                raise PluginError(str(e), 500)
+
+        if document.get_revision:
+            document.set_revision(None) # should not perform anything in later plugins.
+        """
         if document.get_revision():
             filename = document.get_filename_with_revision()
             try:
@@ -171,11 +193,19 @@ class Local(object):
                     raise PluginError(str(e), 500)
                 document.set_revision(None) # should not perform anything in later plugins.
         else:
-             if len(os.listdir(directory)) == 0: # no files at all for no_doccode
+            filename = document.get_full_filename()
+            try:
+                os.unlink(os.path.join(directory, filename))
+                #print "No doccode file %s unlinked!" % os.path.join(directory, filename)
+                #traceback.print_stack()
+            except Exception, e:
+                raise PluginError(str(e), 500)
+            if len(os.listdir(directory)) == 0: # no files at all for no_doccode
                 try:
                     shutil.rmtree(directory)
                 except Exception, e:
                     raise PluginError(str(e), 500)
+        """
         return document
 
     def get_revision_count(self, document):

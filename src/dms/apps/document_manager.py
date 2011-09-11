@@ -1,6 +1,7 @@
 import os, plugins
 
 from django.conf import settings
+from django.core.files.uploadedfile import UploadedFile
 
 from dms_plugins import models
 from dms_plugins.workers import PluginError, PluginWarning, BreakPluginChain, DmsException
@@ -95,14 +96,15 @@ class DocumentManager(object):
     def rename(self, request, document_name, new_name, extension, parent_directory = None):
         doc = self.retrieve(request, document_name, extension = extension, parent_directory = parent_directory)
         if new_name and new_name != doc.get_filename():
-            from django.core.files.uploadedfile import UploadedFile
             name = new_name
-            #if extension:
-            #    name = "%s.%s" % (new_name, extension)
             ufile = UploadedFile(doc.get_file_obj(), name, content_type = doc.get_mimetype())
             new_doc = self.store(request, ufile)
             if not self.errors:
-                self.remove(request, doc.get_filename(), parent_directory = parent_directory)
+                self.remove(request, doc.get_filename(), parent_directory = parent_directory, 
+                    extension = extension)
+#            else:
+#                if settings.DEBUG:
+#                    print "ERRORS: %s" % self.errors
             return new_doc
 
     def update(self, request, document_name, tag_string = None, remove_tag_string = None,
@@ -135,9 +137,12 @@ class DocumentManager(object):
         doc = self.process_pluginpoint(pluginpoints.BeforeRetrievalPluginPoint, request, document = doc)
         return doc
 
-    def remove(self, request, document_name, revision = None, full_filename = None, parent_directory = None):
+    def remove(self, request, document_name, revision = None, full_filename = None, 
+                    parent_directory = None, extension = None):
         doc = Document()
         doc.set_filename(document_name)
+        if extension:
+            doc.set_requested_extension(extension)
         if full_filename:
             doc.set_full_filename(full_filename)
         if revision:
@@ -200,9 +205,10 @@ class DocumentManager(object):
                 filename = document.get_full_filename()
         return mimetype, filename, content
 
-    def delete_file(self, request, document_name, revision = None, full_filename = None, parent_directory = None):
+    def delete_file(self, request, document_name, revision = None, full_filename = None, 
+                parent_directory = None, extension = None):
         document = self.remove(request, document_name, revision = revision, full_filename = full_filename,
-                                parent_directory = parent_directory)
+                                parent_directory = parent_directory, extension = extension)
         return document
 
     def get_revision_count(self, document_name, doccode_plugin_mapping):

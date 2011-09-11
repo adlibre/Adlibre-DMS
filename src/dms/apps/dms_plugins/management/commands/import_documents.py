@@ -16,7 +16,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        silent = 'silent' in options.keys()
+        silent = 'silent' in options.keys() and options['silent']
         if len(args) == 0:
             self.stdout.write('No arguments specified\n')
             return

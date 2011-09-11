@@ -106,7 +106,10 @@ class MiscTest(AdlibreTestCase):
         #fetch renamed file
         url = reverse('api_file') + '?filename=%s.pdf' % adl_invoice_name
         response = self.client.get(url)
-        self.assertContains(response, '', status_code = 200)
+        #fail to fetch old file
+        url = reverse('api_file') + '?filename=%s.pdf' % no_doccode_name
+        response = self.client.get(url)
+        self.assertContains(response, '', status_code = 400)
 
     def test_api_tags(self):
         #login
@@ -154,7 +157,7 @@ class MiscTest(AdlibreTestCase):
             response = self._upload_file(f)
             self.assertContains(response, f, status_code = 200)
 
-    def test_delete_documents(self, delete_doc = documents[0], remain_doc = documents[1]):
+    def _delete_documents(self, delete_doc, remain_doc):
         url = reverse('api_file') + '?filename=' + delete_doc + '.pdf'
         self.client.login(username=username, password=password)
         response = self.client.delete(url)
@@ -164,10 +167,15 @@ class MiscTest(AdlibreTestCase):
         response = self.client.get(url)
         self.assertContains(response, '', status_code = 200)
 
+    def test_delete_documents(self):
+        delete_doc = documents[0]
+        remain_doc = documents[1]
+        self._delete_documents(delete_doc, remain_doc)
+
     def test_delete_no_doccode_documents(self):
         delete_doc = no_doccode_docs[0]
         remain_doc = no_doccode_docs[1]
-        self.test_delete_documents(delete_doc, remain_doc)
+        self._delete_documents(delete_doc, remain_doc)
 
     def test_get_rev_count(self):
         for f in documents:
