@@ -75,10 +75,11 @@ function UICommunicator(manager, renderer){
         });
         $('#' + self.options.document_container_id).bind('ui_document_info_loaded', self.document_info_init);
         $("#ui_delete_document_form").submit(function(){
+            var params = $.deparam($.param.querystring(document.location.href));
             if(confirm("All revisions of this document will be deleted. Are you sure you want to continue?")){
                 $.ajax({
                 'type': 'DELETE',
-                'url': self.get_url('document_url'),
+                'url': self.get_url('document_url', params),
                 'contentType': 'application/x-www-form-urlencoded',
                 'success': function(jqXHR, textStatus){
                         window.location.href = self.manager.back_url;
@@ -126,6 +127,7 @@ function UICommunicator(manager, renderer){
             var revision = $(event.target).prev().text();
             if(confirm("Revision " + revision + " of this document will be deleted. Are you sure you want to continue?")){
                 var params = {"r": revision, 'full_filename': self.manager.metadata[revision]};
+                params = $.deparam($.param.querystring($.param.querystring(document.location.href, params)));
                 $.ajax({
                 'type': 'DELETE',
                 'url': self.get_url('document_url', params),

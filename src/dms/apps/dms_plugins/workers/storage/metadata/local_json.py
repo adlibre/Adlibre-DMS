@@ -32,7 +32,7 @@ class LocalJSONMetadata(object):
         else:
             fileinfo_db, new_revision = self.load_metadata(document.get_stripped_filename(), directory)
             if not fileinfo_db:
-                raise PluginError("No such document", 404)
+                raise PluginError("No such document: %s" % document.get_stripped_filename(), 404)
             revision = document.get_revision()
             if not revision and new_revision > 0:
                 revision = new_revision - 1
