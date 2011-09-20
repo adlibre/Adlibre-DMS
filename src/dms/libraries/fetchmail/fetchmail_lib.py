@@ -33,9 +33,9 @@ def process_email(email_obj=None, quiet=False):
         connection = login_server(email_object, quiet=quiet)
         if connection.connection_type_info == PROTOCOL_TYPE_IMAP4:
             mail_folder = discover_folders(connection, folder_name=email_object.folder_name, quiet=quiet)
-            emails = imap_email_processor(folder=mail_folder, filters=email_object.filters, quiet=quiet)
+            emails, filename_filter = imap_email_processor(folder=mail_folder, filters=email_object.filters, quiet=quiet)
             if emails:
-                filenames = process_letters(emails=emails, email_obj=email_object, mail_folder=mail_folder, quiet=quiet)
+                filenames = process_letters(emails=emails, email_obj=email_object, filename_filter=filename_filter, mail_folder=mail_folder, quiet=quiet)
                 connection.logout()
                 if not filenames and not quiet: return 'No attachments received'
                 if filenames:
@@ -50,7 +50,6 @@ def process_email(email_obj=None, quiet=False):
                 if not quiet:
                     print 'No messages with specified parameters exist'
                 return 'Done'
-
 
 def login_server(email_obj, quiet):
     """
@@ -109,7 +108,6 @@ def connect_imap4(email_obj):
     imap_server.connection_type_info = email_obj.protocol
     return imap_server
 
-# TODO: add some algorithm of selecting folders in mailbox
 def discover_folders(connection, folder_name=DEFAULT_EMAIL_FOLDER_NAME, quiet=False):
     """ 
     Suits for finding folders in connection, as there may be many occasions.
@@ -122,9 +120,12 @@ def discover_folders(connection, folder_name=DEFAULT_EMAIL_FOLDER_NAME, quiet=Fa
 
 def imap_email_processor(folder, filters, quiet=False):
     """
-    Takes folder instance (mailbox folder)
-    and finds messages, according to filters, inside it.
+    Takes folder instance (mailbox folder) and filters from email_object.
+    Finds messages, according to filters, inside it.
+    
+    Returns tuple of messages found and a filename filter flag
     """
+    filename_filter = False
     # constructing filter string to select messages
     filter_string = '('
     for filter in filters:
@@ -134,24 +135,29 @@ def imap_email_processor(folder, filters, quiet=False):
         if filter.type == DEFAULT_FILTER_SUBJECT_NAME:
             if filter_string != '(': filter_string += ' '
             filter_string += 'SUBJECT "'+str(filter.value)+'"'
+        if filter.type == DEFAULT_FILTER_FILENAME_NAME:
+            filename_filter = filter.value
     filter_string += ')'
     if not quiet:
         print 'Message filter:'
         print filter_string
+        if filename_filter:
+            print 'FIltered filename: '+str(filename_filter)
     status, msg_ids_list = folder.search(None, filter_string)
     if not quiet:
-        print 'Status: '+str(status)
         print "Message id's to be fetched:"
         print msg_ids_list
     if msg_ids_list == ['']:
-        return None
+        return None, filename_filter
     else:
-        return msg_ids_list
+        return msg_ids_list, filename_filter
 
-def process_letters(emails, email_obj, mail_folder, quiet=False):
+def process_letters(emails, email_obj, filename_filter, mail_folder, quiet=False):
     """
     Processes a list of fetched messages ID's
     for e.g.: ['1 2 3']
+    Returns list of lists of attachment's filenames for every email processed
+    for e.g.: [ ['filename1.txt', 'filename2.txt'], ['filenae3.txt', 'filename4.txt', filename5.txt' ... ], ... ]
     """
     letters = emails[0].split()
     result = []
@@ -161,12 +167,12 @@ def process_letters(emails, email_obj, mail_folder, quiet=False):
         status, data = mail_folder.fetch(letter_number, '(RFC822)')
         # uncomment to print formated message
         #print 'Message %s\n%s\n' % (letter_number, data[0][1])
-        result += process_single_letter(data, quiet=quiet)
+        result += process_single_letter(msg=data, filter_filename=filename_filter, quiet=quiet)
         if email_obj.delete_messages_flag:
             delete_letter_imap(letter_number=letter_number, mail_folder=mail_folder, quiet=quiet)
     return result
         
-def process_single_letter(msg, quiet=False):
+def process_single_letter(msg, filter_filename=False, quiet=False):
     """
     Processing single message.
     Takes message instance ('msg' must be an RFC822 formatted message.)
@@ -183,6 +189,17 @@ def process_single_letter(msg, quiet=False):
             continue
         filename = part.get_filename()
         if filename:
+            # checking if 'filename' filter applied and omitting save sequence 
+            # in case filename does not contain this string
+            # TODO: HACK! a bit of a hack here. maybe change it in future
+            # TODO: filename may be checke for containing this string,
+            # not only exact match like it is now.
+            if filter_filename:
+                if filename.rfind(filter_filename) != -1:
+                #if not filename == filter_filename:
+                    pass
+                else:
+                    continue
             if not quiet:
                 print ("Fetched filename:"+ str(filename));
             # cycle file existence check/renaming sequence
@@ -206,6 +223,11 @@ def process_single_letter(msg, quiet=False):
             fp.close()
             filenames += [filename]
     return filenames
+
+def process_filename():
+    """ 
+    Single filename processor
+    """
 
 def delete_letter_imap(letter_number, mail_folder, quiet=False):
     """
