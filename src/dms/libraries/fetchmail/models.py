@@ -8,7 +8,6 @@ and 2 main object types used in the library: Filter_object() and Email_object()
 Fetcher can be instantated to be used in views or models.
 usage:
 
-
 from libraries.fetchmail.models import *
 
 #creating filters objects first
@@ -74,7 +73,6 @@ class Filter_object(object):
         self.name = ''
         self.type = '' # TODO: subject, sender, filename
         self.value = ''
-        self.delete = False # TODO: delete messages on server after processing ability 
     
     def create_filter(self, filter_type='', name='',  value='', delete=False):
         """
@@ -83,7 +81,6 @@ class Filter_object(object):
         - 'filter_type' must be str(): 'subject', 'sender', 'filename', or some changed from defaults string from app_settings
         - 'value' is a u'' filter value. For e.g. 'Iurii Garmash' or 'example@gmail.com'
         - 'name' is not necessary to be specified except possible future uses e.g. 'Messages from my mother'
-        - 'delete' is boolean flag to select either to delete messages after processing or not
         """
         # checking for filter type
         if (filter_type == DEFAULT_FILTER_SUBJECT_NAME) or (filter_type == DEFAULT_FILTER_SENDER_NAME) or (filter_type == DEFAULT_FILTER_FILENAME_NAME):
@@ -124,6 +121,7 @@ class Email_object(object):
         self.email_port_number = ''
         self.folder_name = DEFAULT_EMAIL_FOLDER_NAME
         self.filters = 'all'
+        self.delete_messages_flag = False
     
     def __str__(self):
         return str(self.login)+'@'+str(self.server_name)
@@ -139,7 +137,8 @@ class Email_object(object):
                encryption='SSL', 
                port=False,
                folder_name=DEFAULT_EMAIL_FOLDER_NAME,
-               filters=False):
+               filters=False,
+               delete=False):
         """
         Creates a email object instance with specified parameters.
         
@@ -162,6 +161,7 @@ class Email_object(object):
             [Filter_obj(), Filter_obj(), ...]
             Warning! If no filters specified fetchmail will process all mail in specified folder
             and by default it is 'INBOX'.
+        - 'delete' flag either to delete messages from this mailbox upon processing or not. Default is False.
         """
         # clean.protocol
         if (protocol == PROTOCOL_TYPE_IMAP4) or (protocol == PROTOCOL_TYPE_POP3):
@@ -189,6 +189,7 @@ class Email_object(object):
         try:
             self.filters = filters
         except: raise FetchmailExeption('Error in "filters" provided. Must be list of [ Filter_object(), ... ]')
+        self.delete_messages_flag = delete
         return self
 
 class FetchmailExeption(Exception):
