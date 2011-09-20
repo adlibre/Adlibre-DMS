@@ -30,6 +30,9 @@ fetcher.fetchmail(email=email)
 Filter is an object to contain filters used for choosing email messages to fetch.
 Email is widely used in processor to store default mailbox values for processing.
 
+To understand how to create Filter and Email objects correctly please examine app_settings.py
+and follow comments there. They must help you to understand most usecases.
+
 Author: Iurii Garmash (garmon1@gmail.com)
 """
 
