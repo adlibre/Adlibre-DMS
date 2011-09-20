@@ -30,19 +30,21 @@ FETCH_FILTERS = {
     'filter1': { 
                 'type': 'sender',
                 'value': 'Iurii',
-                'delete': False , # TODO: delete messages on server after processing ability 
                 },
     'filter2': { 
                 'type': 'subject',
-                'value': 'test message 3',
-                'delete': False , # TODO: delete messages on server after processing ability 
+                'value': 'test message 3', 
                 },
 }
 
 # E-mail servers to fetch attachments from. 
 # Structure same as filters object.
 # Filters should be specified with list.
-# for e.g. ['filter1', 'filter2', ...] 
+#     for e.g. ['filter1', 'filter2', ...] 
+# Folder name should be specified (For IMAP processing only)
+# TODO: document this after resolving issue with folders and implementing POP3
+#     Most common is 'INBOX', but you can use for e.g. 'Personal' or any other IMAP folder name.
+# delete is a flag to delete messages from mailbox
 FETCH_EMAILS = [
     {
         'server_name': 'imap.gmail.com',
@@ -52,8 +54,9 @@ FETCH_EMAILS = [
         'password': 'adlibre_dms_test_password',
         'email_port_default': False,
         'email_port_number': '993', # custom mail port. not used if email_port_default = True
-        'folder_name': 'INBOX',
-        'filters': ['filter1', 'filter2', ] # or 'all' for all filters applied
+        'folder_name': 'INBOX', # or 'Personal' for e.g., or any other folder name
+        'filters': ['filter1', 'filter2', ], # or 'all' for all filters applied
+        'delete': False,
     },
 ]
 # Where to save attachments to. Need to have write perm's for directory.

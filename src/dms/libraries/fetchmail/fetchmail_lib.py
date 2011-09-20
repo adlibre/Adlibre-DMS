@@ -35,7 +35,7 @@ def process_email(email_obj=None, quiet=False):
             mail_folder = discover_folders(connection, folder_name=email_object.folder_name, quiet=quiet)
             emails = imap_email_processor(folder=mail_folder, filters=email_object.filters, quiet=quiet)
             if emails:
-                filenames = process_letters(emails=emails, mail_folder=mail_folder, quiet=quiet)
+                filenames = process_letters(emails=emails, email_obj=email_object, mail_folder=mail_folder, quiet=quiet)
                 connection.logout()
                 if not filenames and not quiet: return 'No attachments received'
                 if filenames:
@@ -148,7 +148,7 @@ def imap_email_processor(folder, filters, quiet=False):
     else:
         return msg_ids_list
 
-def process_letters(emails, mail_folder, quiet=False):
+def process_letters(emails, email_obj, mail_folder, quiet=False):
     """
     Processes a list of fetched messages ID's
     for e.g.: ['1 2 3']
@@ -162,6 +162,8 @@ def process_letters(emails, mail_folder, quiet=False):
         # uncomment to print formated message
         #print 'Message %s\n%s\n' % (letter_number, data[0][1])
         result += process_single_letter(data, quiet=quiet)
+        if email_obj.delete_messages_flag:
+            delete_letter_imap(letter_number=letter_number, mail_folder=mail_folder, quiet=quiet)
     return result
         
 def process_single_letter(msg, quiet=False):
@@ -204,7 +206,23 @@ def process_single_letter(msg, quiet=False):
             fp.close()
             filenames += [filename]
     return filenames
-    
+
+def delete_letter_imap(letter_number, mail_folder, quiet=False):
+    """
+    Helper function to delete a message from IMAP4 mailbox
+    takes int(letter_number)
+    mail_folder = IMAP4 mail folder object, connected and containing desired message id
+    """
+    try:
+        typ, response = mail_folder.fetch(letter_number, '(FLAGS)')
+        typ, response = mail_folder.store(letter_number, '+FLAGS', r'(\Deleted)')
+        # may be used in some cases, but connection.close(), we're using overrides this method
+        #typ, response = mail_folder.expunge()
+        if not quiet:
+            print 'Deleted message id:', str(letter_number)
+    except:
+        raise FetchmailExeption('Error deleting message from mailbox')
+
 # Prohibited due to priority changes
 def feed_API(filenames, quiet=False):
     """
@@ -215,5 +233,4 @@ def feed_API(filenames, quiet=False):
     """
     #for filename in filenames:
     #    if not quiet: print 'Feeding API with file: '+str(filename)
-    # TODO: develop this function to not only store files to temp folder, but to actually feed the API
     return filenames

@@ -29,6 +29,7 @@ def read_settings(quiet=False):
         mailbox.email_port_number = email['email_port_number']
         mailbox.folder_name = email['folder_name']
         mailbox.filters = read_filters(email['filters'])
+        mailbox.delete_messages_flag = email['delete']
         emails.append(mailbox)
         if not quiet:
             print '\nWill process server:'+str(mailbox)
@@ -55,7 +56,6 @@ def read_filters(filter_names=False):
                 filter_instance.name = email_filter
                 filter_instance.type = email_filter['type']
                 filter_instance.value = email_filter['value']
-                filter_instance.delete = email_filter['delete']
                 if filter_name == key:
                     filters.append(filter_instance)
                 
@@ -65,6 +65,5 @@ def read_filters(filter_names=False):
             filter_instance.name = key
             filter_instance.type = email_filter['type']
             filter_instance.value = email_filter['value']
-            filter_instance.delete = email_filter['delete']
             filters.append(filter_instance)
     return filters
