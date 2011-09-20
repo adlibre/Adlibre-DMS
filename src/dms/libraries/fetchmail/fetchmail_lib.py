@@ -159,6 +159,7 @@ def process_letters(emails, mail_folder, quiet=False):
         if not quiet:
             print "About to fetch email ID's: "+str(letter_number)
         status, data = mail_folder.fetch(letter_number, '(RFC822)')
+        # uncomment to print formated message
         #print 'Message %s\n%s\n' % (letter_number, data[0][1])
         result += process_single_letter(data, quiet=quiet)
     return result
@@ -179,13 +180,25 @@ def process_single_letter(msg, quiet=False):
         if part.get_content_maintype() == 'multipart':
             continue
         filename = part.get_filename()
-        # FIXME: Applications should really sanitize the given filename so that an
-        # email message can't be used to overwrite same files
-        # e.g. we got 2 different messages with identical filenames
         if filename:
             if not quiet:
                 print ("Fetched filename:"+ str(filename));
-            # TODO: check for filename exists here and change it accordingly
+            # cycle file existence check/renaming sequence
+            file_exists = os.path.isfile(os.path.join(STORE_FILES_PATH, filename))
+            if file_exists:
+                if not quiet:
+                    print 'File already exists: '+str(filename)
+                new_file_exists = True
+                new_filename = filename
+                while new_file_exists:
+                    directory, filename = os.path.split(new_filename)
+                    filename_string, extension = os.path.splitext(new_filename)
+                    new_filename_string = filename_string + FILENAME_EXISTS_CHANGE_SYMBOL
+                    new_filename = new_filename_string + extension
+                    new_file_exists = os.path.isfile(os.path.join(STORE_FILES_PATH, new_filename))
+                filename = new_filename
+                if not quiet:
+                    print 'Renamed to: ' + str(filename)
             fp = open(os.path.join(STORE_FILES_PATH, filename), 'wb')
             fp.write(part.get_payload(decode=True))
             fp.close()
