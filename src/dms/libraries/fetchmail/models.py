@@ -2,11 +2,13 @@
 Fetchmail library for Adlibre DMS
 
 Main objects module.
+Role: Main library logic for programtic manipulations
 Defines Fetcher_object() class for programmatic library manipulations 
 and 2 main object types used in the library: Filter_object() and Email_object()
 
 Fetcher can be instantated to be used in views or models.
-usage:
+
+USAGE EXAMPLE:
 
 from libraries.fetchmail.models import *
 
@@ -74,7 +76,7 @@ class Filter_object(object):
     """
     def __init__(self):
         self.name = ''
-        self.type = '' # TODO: subject, sender, filename
+        self.type = ''
         self.value = ''
     
     def create_filter(self, filter_type='', name='',  value='', delete=False):
@@ -116,7 +118,7 @@ class Email_object(object):
     """
     def __init__(self):
         self.server_name =''
-        self.protocol = ''  # TODO: Add a POP3 server connection protocol
+        self.protocol = ''
         self.encryption = ''
         self.login = ''
         self.password = ''

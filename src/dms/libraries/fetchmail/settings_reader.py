@@ -1,13 +1,13 @@
 """
 Fetchmail library for Adlibre DMS
 
-MAin Settings Processor
+Main Settings Processor
 Role: Converts settings from easy readable to "library suitable" format.
 
 Author: Iurii Garmash (garmon1@gmail.com)
 """
-from libraries.fetchmail.models import *
-from libraries.fetchmail.app_settings import *
+from libraries.fetchmail.models import Email_object, Filter_object
+from libraries.fetchmail.app_settings import USE_ALL_FILTERS_STRING, FETCH_EMAILS, FETCH_FILTERS
 
 def read_settings(quiet=False):
     """
@@ -51,7 +51,6 @@ def read_filters(filter_names=False):
     if filter_names:
         for filter_name in filter_names:
             for key, email_filter in FETCH_FILTERS.iteritems():
-                
                 filter_instance = Filter_object()
                 filter_instance.name = email_filter
                 filter_instance.type = email_filter['type']
@@ -59,7 +58,7 @@ def read_filters(filter_names=False):
                 if filter_name == key:
                     filters.append(filter_instance)
                 
-    else:
+    elif filter_names == USE_ALL_FILTERS_STRING:
         for key, email_filter in FETCH_FILTERS.iteritems():
             filter_instance = Filter_object()
             filter_instance.name = key
