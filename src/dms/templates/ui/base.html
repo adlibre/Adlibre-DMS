@@ -4,7 +4,9 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<title>{% block title %}{% endblock %} - Adlibre DMS</title>
 	<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}themes/{{ THEME_NAME }}/style.css" />
+	<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}themes/{{ THEME_NAME }}/ui.css" />
     <link rel="shortcut icon" href="{{ MEDIA_URL }}favicon.ico" />
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/uploadfile.css" />
     <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/ui.css" />
     {%block head_includes%}{%endblock%}
 </head>
@@ -20,16 +22,23 @@
     </ul>
     {% endif %}
     <div id="content">
-        <ul id="ui_breadcrumbs">
-            <li><a href="{%url ui_rule_list%}">Index</a></li>
+        <ul id="logotype">
+            <a href="/ui/"><img src="{{ MEDIA_URL }}themes/{{ THEME_NAME }}/adlibre-dms-logo.png" title="Adlibre DMS" alt="Adlibre DMS" /></a>
         </ul>
-        <form id="ui_upload_file_form" enctype="multipart/form-data" action="{%url ui_upload_document%}" method="post">
-            <h3 class="float-left">Upload File</h3>
-            {%csrf_token%}
-            <input type="file" name="file" id="ui_upload_file_field" />
-            <input type="submit" value="Go" />
-        </form>
-        <br style="clear: both" />
+        <ul id="ui_breadcrumbs">
+            <li><a href="{%url ui_rule_list%}">Rules</a></li>
+        </ul>
+        <ul id="ui_upload_file_form_wrapper">
+            <form id="ui_upload_file_form" enctype="multipart/form-data" action="{%url ui_upload_document%}" method="post">
+                {%csrf_token%}
+                <span id="ui_upload_file_form_name" class="float-left">Upload File</span>
+                <input type="file" value="" name="file" id="upload_file_fileinput" />
+                <input type="text" id="upload_file_fake_filename" readonly="readonly" class="textareas" />
+                <input type="button" class="simple_button" id="upload_file_fake_browse" value="Browse" />
+                <input type="submit" class="simple_button upload_btn" id="ui_upload_file_submit" name="" value="Go" title="" />
+            </form>
+            <br style="clear: both" />
+        </ul>
         {% block content %}
         {% endblock %}
     </div>
@@ -52,6 +61,7 @@
 <script type="text/javascript" language="javascript" src="{{MEDIA_URL}}/js/ui/communicator.js"></script>
 <script type="text/javascript" language="javascript" src="{{MEDIA_URL}}/js/ui/renderer.js"></script>
 <script type="text/javascript" language="javascript" src="{{MEDIA_URL}}/js/ui/manager.js"></script>
+<script type="text/javascript" language="javascript" src="{{MEDIA_URL}}/js/uploadfile.js"></script>
 <script type="text/javascript" language="javascript">
 var UI_URLS = {{communicator_options|safe}};
 var manager = new UIManager();
