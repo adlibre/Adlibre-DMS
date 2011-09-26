@@ -29,7 +29,7 @@
     border-width: 1px;
     box-shadow: 3px 3px 0 #E2E2E3;
     padding: 10px 15px;
-    width: 550px;
+    width: 555px;
 }
 
 #upload_file_fake_filename {
@@ -49,18 +49,22 @@
 }
 
 #upload_file_fake_browse, #ui_upload_file_submit {
-    background: url("btn-browse.png") no-repeat scroll 0 0 transparent;
-    border: none;
-    border-style: none;
+    background: -moz-linear-gradient(top, #E78107, #F9A749);
+    border-color: #2B2E30 #18191A #010101;
+    border-radius: 3px 3px 3px 3px;
+    border-style: solid;
+    border-width: 1px;
+    -moz-border-bottom-colors: none;
+    -moz-border-image: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    /* url("btn-browse.png") no-repeat scroll 0 0 transparent; */
     color: #3B3F41;
     cursor: pointer;
     font-size: 16px;
     font-style: italic;
     font-weight: bold;
-    height: 32px;
+    height: 33px;
     text-shadow: 1px 0 1px #FAC659;
-}
-
-#ui_upload_file_submit {
-    background: url("btn-go.png") no-repeat scroll 0 0 transparent;
 }
