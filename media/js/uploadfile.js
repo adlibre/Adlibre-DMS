@@ -3,8 +3,12 @@
  * Requires jQuery 1.5.3 or higher to function.
  */
 
-// UI emulating browse call for hidden file input
+// emulating browse call for hidden file input
 $('#upload_file_fake_browse').click(function(){
+     $('#upload_file_fileinput').click();
+});
+//emulating Mac behavior
+$('#upload_file_fake_filename').click(function(){
      $('#upload_file_fileinput').click();
 });
 
