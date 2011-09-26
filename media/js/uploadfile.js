@@ -2,7 +2,8 @@
  * Script to handle file Upload form.
  * Requires jQuery 1.5.3 or higher to function.
  */
-// emulating browse call for hidden file input
+
+// UI emulating browse call for hidden file input
 $('#upload_file_fake_browse').click(function(){
      $('#upload_file_fileinput').click();
 });
