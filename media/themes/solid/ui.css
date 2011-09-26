@@ -21,7 +21,7 @@
     text-shadow: 1px 1px 1px #D48E3E;
 }
 
-#ui_upload_file_form {
+#ui_upload_file_form, #upload-page form {
     background-color: #3D4143;
     border-color: #2B2E30 #18191A #010101;
     border-radius: 5px 5px 5px 5px;
@@ -30,6 +30,10 @@
     box-shadow: 3px 3px 0 #E2E2E3;
     padding: 10px 15px;
     width: 555px;
+}
+
+#upload-page {
+    margin: 120px auto;
 }
 
 #upload_file_fake_filename {
@@ -49,7 +53,24 @@
 }
 
 #upload_file_fake_browse, #ui_upload_file_submit {
-    background: -moz-linear-gradient(top, #E78107, #F9A749);
+/* IE10 */ 
+background-image: -ms-linear-gradient(bottom, #E78107 0%, #F9A749 100%);
+
+/* Mozilla Firefox */ 
+background-image: -moz-linear-gradient(bottom, #E78107 0%, #F9A749 100%);
+
+/* Opera */ 
+background-image: -o-linear-gradient(bottom, #E78107 0%, #F9A749 100%);
+
+/* Webkit (Safari/Chrome 10) */ 
+background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, #E78107), color-stop(1, #F9A749));
+
+/* Webkit (Chrome 11+) */ 
+background-image: -webkit-linear-gradient(bottom, #E78107 0%, #F9A749 100%);
+
+/* Proposed W3C Markup */ 
+background-image: linear-gradient(bottom, #E78107 0%, #F9A749 100%);
+
     border-color: #2B2E30 #18191A #010101;
     border-radius: 3px 3px 3px 3px;
     border-style: solid;
@@ -59,7 +80,6 @@
     -moz-border-left-colors: none;
     -moz-border-right-colors: none;
     -moz-border-top-colors: none;
-    /* url("btn-browse.png") no-repeat scroll 0 0 transparent; */
     color: #3B3F41;
     cursor: pointer;
     font-size: 16px;

@@ -2,15 +2,28 @@
 
 {% block title %}Upload{% endblock %}
 
+{% block extra_head %}
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/ui.css" />
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/uploadfile.css" />
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}themes/{{ THEME_NAME }}/ui.css" />
+{%endblock%}
+
 {% block content %}
 <h1>Upload your document</h1>
 <div id="upload-page">
 <form action="" method="post" enctype="multipart/form-data" >
-    {{ form.file.errors }}{{ form.file }}
-    <input type="submit" value="Upload &rarr;" />
+    {{ form.file.errors }}
+    <input type="file" id="upload_file_fileinput" name="file" size="40">
+    <input type="text" id="upload_file_fake_filename" readonly="readonly" class="textareas" />
+    <input type="button" class="simple_button" id="upload_file_fake_browse" value="Browse" />
+    <input type="submit" class="simple_button upload_btn" id="ui_upload_file_submit" name="" value="Upload" title="" />
     {%csrf_token%}
 </form>
 
 </div>
 {% endblock %}
 
+{%block javascript%}
+    <script type="text/javascript" language="javascript" charset="utf-8" src="{{ MEDIA_URL }}js/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" language="javascript" src="{{MEDIA_URL}}js/uploadfile.js"></script>
+{% endblock %}
