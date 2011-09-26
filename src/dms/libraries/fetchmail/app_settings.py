@@ -99,7 +99,7 @@ FETCH_EMAILS = [
     },
 ]
 # Where to save attachments to. Need to have write perm's for directory.
-STORE_FILES_PATH = os.path.join(settings.PROJECT_PATH, '../../emails_temp/') #emails_temp in root project dir
+STORE_FILES_PATH = os.path.join(settings.PROJECT_PATH, '..', '..', 'emails_temp') #emails_temp in root project dir
 # Will be appended to the end of filename if same exists in output directory.
 FILENAME_EXISTS_CHANGE_SYMBOL = '_' 
 
