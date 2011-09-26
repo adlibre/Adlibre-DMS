@@ -6,7 +6,7 @@ Role: Main library logic for programtic manipulations
 Defines Fetcher_object() class for programmatic library manipulations 
 and 2 main object types used in the library: Filter_object() and Email_object()
 
-Fetcher can be instantated to be used in views or models.
+Fetcher can be instantiated to be used in views or models.
 
 USAGE EXAMPLE:
 
@@ -33,7 +33,7 @@ Filter is an object to contain filters used for choosing email messages to fetch
 Email is widely used in processor to store default mailbox values for processing.
 
 To understand how to create Filter and Email objects correctly please examine app_settings.py
-and follow comments there. They must help you to understand most usecases.
+and follow comments there. They must help you to understand most use cases.
 
 Author: Iurii Garmash (garmon1@gmail.com)
 """
@@ -155,7 +155,7 @@ class Email_object(object):
         - 'protocol' must be 'IMAP4' or 'POP3'. Default is IMAP4
         - 'encryption' must be 'SSL' or 'none'. Default is SSL
         - 'login' your mail server login
-        - 'password' your mail server password. Must not be encrypted! (in u'' or any convertable format. for e.g. u'password')
+        - 'password' your mail server password. Must not be encrypted! (in u'' or any convertible format. for e.g. u'password')
         - 'port' may be specified to override default connection port for mail. Default is False.
         - 'folder_name' is your mailbox name for letters to process.
             It's useful like in Gmail you have filters that sort new mail with Tags. You can set a Tag name here.
