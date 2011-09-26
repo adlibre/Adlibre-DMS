@@ -53,24 +53,18 @@
 }
 
 #upload_file_fake_browse, #ui_upload_file_submit {
-/* IE10 */ 
-background-image: -ms-linear-gradient(bottom, #E78107 0%, #F9A749 100%);
-
-/* Mozilla Firefox */ 
-background-image: -moz-linear-gradient(bottom, #E78107 0%, #F9A749 100%);
-
-/* Opera */ 
-background-image: -o-linear-gradient(bottom, #E78107 0%, #F9A749 100%);
-
-/* Webkit (Safari/Chrome 10) */ 
-background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, #E78107), color-stop(1, #F9A749));
-
-/* Webkit (Chrome 11+) */ 
-background-image: -webkit-linear-gradient(bottom, #E78107 0%, #F9A749 100%);
-
-/* Proposed W3C Markup */ 
-background-image: linear-gradient(bottom, #E78107 0%, #F9A749 100%);
-
+    /* IE10 */ 
+    background-image: -ms-linear-gradient(bottom, #E78107 0%, #F9A749 100%);
+    /* Mozilla Firefox */ 
+    background-image: -moz-linear-gradient(bottom, #E78107 0%, #F9A749 100%);
+    /* Opera */ 
+    background-image: -o-linear-gradient(bottom, #E78107 0%, #F9A749 100%);
+    /* Webkit (Safari/Chrome 10) */ 
+    background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, #E78107), color-stop(1, #F9A749));
+    /* Webkit (Chrome 11+) */ 
+    background-image: -webkit-linear-gradient(bottom, #E78107 0%, #F9A749 100%);
+    /* Proposed W3C Markup */ 
+    background-image: linear-gradient(bottom, #E78107 0%, #F9A749 100%);
     border-color: #2B2E30 #18191A #010101;
     border-radius: 3px 3px 3px 3px;
     border-style: solid;
