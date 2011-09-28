@@ -1,4 +1,6 @@
 /* UI declarations */
+
+/* UI page header */
 #ui_breadcrumbs {
     height:35px;
     line-height:35px;
@@ -21,64 +23,203 @@
     text-shadow: 1px 1px 1px #D48E3E;
 }
 
-#ui_upload_file_form, #upload-page form {
-    background-color: #3D4143;
+#ui_breadcrumbs li a:hover {
+    text-decoration: none;
+}
+
+/* UI right control panel */
+#ui_control_panel {
+    background-color: #FEEEBD;
     border-color: #2B2E30 #18191A #010101;
     border-radius: 5px 5px 5px 5px;
     border-style: solid;
     border-width: 1px;
     box-shadow: 3px 3px 0 #E2E2E3;
-    padding: 10px 15px;
-    width: 555px;
+    color: #383838;
 }
 
-#upload-page {
-    margin: 120px auto;
+#ui_control_panel ul, 
+#ui_control_panel ul h3 {
+    marign: 0;
+    padding: 0;
+    list-style-type: none;
+    color: #383838;
 }
 
-#upload_file_fake_filename {
-    background: url("bg-inputs.png") no-repeat scroll 0 0 transparent;
-    border: medium none;
-    height: 39px;
-    line-height: 39px;
-    padding: 0 10px;
-    width: 270px;
+#ui_search_field, 
+#ui_calendar_form #id_date,
+#ui_add_tags_field,
+#ui_new_name_field {
+    background: url('bg-inputs.png') no-repeat top left;
+    height: 25px;
+    background-size: 119px 25px;
+    width: 119px;
 }
 
-#ui_upload_file_form_name {
-    font-size: 24px;
-    color: white;
-    height: 39px;
-    line-height: 39px;
+#ui_calendar_form #id_date {
+    background-size: 69px 25px;
+    width: 69px;
 }
 
-#upload_file_fake_browse, #ui_upload_file_submit {
-    /* IE10 */ 
-    background-image: -ms-linear-gradient(bottom, #E78107 0%, #F9A749 100%);
-    /* Mozilla Firefox */ 
-    background-image: -moz-linear-gradient(bottom, #E78107 0%, #F9A749 100%);
-    /* Opera */ 
-    background-image: -o-linear-gradient(bottom, #E78107 0%, #F9A749 100%);
-    /* Webkit (Safari/Chrome 10) */ 
-    background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, #E78107), color-stop(1, #F9A749));
-    /* Webkit (Chrome 11+) */ 
-    background-image: -webkit-linear-gradient(bottom, #E78107 0%, #F9A749 100%);
-    /* Proposed W3C Markup */ 
-    background-image: linear-gradient(bottom, #E78107 0%, #F9A749 100%);
-    border-color: #2B2E30 #18191A #010101;
-    border-radius: 3px 3px 3px 3px;
+#ui_tag_list li,
+#ui_order_tab li {
+    padding-bottom: 3px;
+}
+
+#ui_tag_list li span {
+    marign-right:2px;
+}
+
+#ui_tag_list li a, 
+#ui_tag_list li span,
+#ui_revision_list li a,
+#ui_order_tab li a, 
+#ui_clear_filter, 
+#ui_date_filter_submit,
+#ui_search_submit,
+#ui_pager li a,
+#ui_rename_document_form_submit,
+#ui_add_tags_form_submit,
+#ui_delete_document_form input {
+    background-color: #FECE2F;
+    background-clip: border-box;
+    background-attachment: scroll;
+    background-origin: padding-box;
+    border-bottom-color: #D19405;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+    border-left-color: #D19405;
+    border-left-style: solid;
+    border-left-width: 1px;
+    border-right-color: #D19405;
+    border-right-style: solid;
+    border-right-width: 1px;
+    border-top-color: #D19405;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    border-top-style: solid;
+    border-top-width: 1px;
+    color: #4C3000;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 14px;
+    font-style: normal;
+    font-variant: normal;
+    font-weight: bold;
+    text-decoration: none;
+    height: 18px;
+    line-height: 18px;
+    list-style-image: none;
+    list-style-position: outside;
+    list-style-type: disc;
+    margin-bottom: 2px;
+    margin-left: 0px;
+    margin-right: 5px;
+    margin-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 7px;
+    padding-right: 7px;
+    padding-top: 2px;
+    position: relative;
+    text-align: auto;
+    text-align: -webkit-auto;
+    width: 38px;
+    cursor: pointer; /* hand-shaped cursor */
+    cursor: hand; /* for IE 5.x */
+}
+
+#ui_tag_list li a:hover, 
+#ui_order_tab li a:hover, 
+#ui_clear_filter:hover,
+#ui_date_filter_submit:hover,
+#ui_search_submit:hover,
+#ui_pager li a:hover,
+#ui_revision_list li a:hover,
+#ui_add_tags_form_submit:hover,
+#ui_rename_document_form_submit:hover,
+#ui_delete_document_form input:hover {
+    background-color: #F9A749;
+}
+
+#ui_search_submit {
+    width: 18px;
+    height: 18px;
+    position: absolute;
+    right:10px;
+}
+
+#ui_clear_filter {
+   height: 25px;
+   width: 80px;
+}
+
+/* UI GO buttons specific */
+#ui_date_filter_submit,
+#ui_add_tags_form_submit,
+#ui_rename_document_form_submit {
+    width: 55px;
+    height: 25px;
+    margin-left: 10px;
+}
+
+#ui_order_tab li a {
+    padding-left: 14px;
+    background: url('arrow_tiny.gif') no-repeat center left;
+    background-size: 9px 9px;
+    background-color: #FECE2F;
+}
+
+.ui_delete_revision_link, 
+.ui_delete_tag_link {
+    text-transform:lowercase;
+        color: red !important; 
+}
+
+#ui_revision_list li {
+    margin-bottom: 2px;
+
+}
+
+#ui_metadata_list {
+    margin-left: 0px;
+}
+
+#ui_metadata_list li{
+    border-color: #D19405;
     border-style: solid;
     border-width: 1px;
-    -moz-border-bottom-colors: none;
-    -moz-border-image: none;
-    -moz-border-left-colors: none;
-    -moz-border-right-colors: none;
-    -moz-border-top-colors: none;
-    color: #3B3F41;
-    cursor: pointer;
-    font-size: 16px;
-    font-style: italic;
-    font-weight: bold;
-    height: 33px;
-    text-shadow: 1px 0 1px #FAC659;
+    margin-right: 5px;
+    background: white;
+}
+#ui_delete_document_form input {
+    padding-left: 25px;
+    background: url('btn-delete-document.png') no-repeat center left;
+    background-size: 23px 23px;
+    background-color: #FECE2F;
+    width: 169px;
+    height: 30px;
+}
+
+#ui_tag_list li span {
+    cursor: default;
+}
+
+/* UI overrides of main style.css here. Datepicker design overrides correcting. */
+div.datepick-popup table th, 
+div.datepick-popup table td {
+    height: 17px;
+    border-spacing: 0px;
+}
+
+div.datepick-popup table tr:hover a:link {
+    color: #3B3F41
+}
+
+/* UI restyle document body */
+#ui_document iframe {
+    width: 530px;
+    height: 650px;
+}
+
 }

@@ -201,3 +201,84 @@ label {
 #content h3,
 #content h4,
 #content ul{padding-left:15px;}
+
+/* Upload files form */
+#ui_upload_file_form, 
+#upload-page form {
+    background-color: #3D4143;
+    border-color: #2B2E30 #18191A #010101;
+    border-radius: 5px 5px 5px 5px;
+    border-style: solid;
+    border-width: 1px;
+    box-shadow: 3px 3px 0 #E2E2E3;
+    padding: 10px 15px;
+    width: 555px;
+}
+
+#upload-page {
+    margin: 120px auto;
+}
+
+#upload_file_fake_filename {
+    background: url("bg-inputs.png") no-repeat scroll 0 0 transparent;
+    border: medium none;
+    height: 39px;
+    line-height: 39px;
+    padding: 0 10px;
+    width: 270px;
+}
+
+#ui_upload_file_form_name {
+    font-size: 24px;
+    color: white;
+    height: 39px;
+    line-height: 39px;
+}
+
+#upload_file_fake_browse, 
+#ui_upload_file_submit {
+    /* IE10 */ 
+    background-image: -ms-linear-gradient(bottom, #E78107 0%, #F9A749 100%);
+    /* Mozilla Firefox */ 
+    background-image: -moz-linear-gradient(bottom, #E78107 0%, #F9A749 100%);
+    /* Opera */ 
+    background-image: -o-linear-gradient(bottom, #E78107 0%, #F9A749 100%);
+    /* Webkit (Safari/Chrome 10) */ 
+    background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, #E78107), color-stop(1, #F9A749));
+    /* Webkit (Chrome 11+) */ 
+    background-image: -webkit-linear-gradient(bottom, #E78107 0%, #F9A749 100%);
+    /* Proposed W3C Markup */ 
+    background-image: linear-gradient(bottom, #E78107 0%, #F9A749 100%);
+    border-color: #2B2E30 #18191A #010101;
+    border-radius: 3px 3px 3px 3px;
+    border-style: solid;
+    border-width: 1px;
+    -moz-border-bottom-colors: none;
+    -moz-border-image: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    color: #3B3F41;
+    cursor: pointer;
+    font-size: 16px;
+    font-style: italic;
+    font-weight: bold;
+    height: 33px;
+    text-shadow: 1px 0 1px #FAC659;
+}
+
+#upload_file_fake_browse:hover, 
+#ui_upload_file_submit:hover {
+    /* IE10 */ 
+    background-image: -ms-linear-gradient(bottom, #FFFCF7 0%, #FF9A26 100%);
+    /* Mozilla Firefox */ 
+    background-image: -moz-linear-gradient(bottom, #FFFCF7 0%, #FF9A26 100%);
+    /* Opera */ 
+    background-image: -o-linear-gradient(bottom, #FFFCF7 0%, #FF9A26 100%);
+    /* Webkit (Safari/Chrome 10) */ 
+    background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, #FFFCF7), color-stop(1, #FF9A26));
+    /* Webkit (Chrome 11+) */ 
+    background-image: -webkit-linear-gradient(bottom, #FFFCF7 0%, #FF9A26 100%);
+    /* Proposed W3C Markup */ 
+    background-image: linear-gradient(bottom, #FFFCF7 0%, #FF9A26 100%);
+}

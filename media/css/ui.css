@@ -17,7 +17,9 @@ ul#ui_pager{
 
 ul#ui_pager li{
     display: inline-block;
-    margin: 5px;
+    margin: 1px;
+    width: 26px;
+    height: 26px;
 }
 
 #ui_document_list{
@@ -38,6 +40,7 @@ ul#ui_pager li{
     border: 2px solid #333;
     float: right;
     margin: 15px;
+    margin-right: 1px;
 }
 
 #ui_upload_file_form{
