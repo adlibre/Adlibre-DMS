@@ -6,27 +6,34 @@
 
 {% block content %}
 <div id="ui_control_panel">
-    <h3>Revisions</h3>
-    <ul id="ui_revision_list"></ul>
-    <h3>Metadata</h3>
-    <ul id="ui_metadata_list"></ul>
+    <ul id="ui_metadata">
+        <h3>Metadata:</h3>
+        <ul id="ui_metadata_list"></ul>
+    </ul>
+    <hr />
+    <ul id="ui_revissions_filter">
+        <h3>Revisions:</h3>
+        <ul id="ui_revision_list"></ul>
+    </ul>
+    <hr />
     <div id="ui_tags">
-        <h3>Tags</h3>
+        <h3>Tags:</h3>
         <ul id="ui_tag_list"></ul>
-        <h4>Add tags</h4>
+        <h4>Add a tag:</h4>
         <form id="ui_add_tags_form" onsubmit="javascript:return false;">
             <input type="text" name="tag" id="ui_add_tags_field" />
-            <input type="submit" name="save" value="Go" />
+            <input type="submit" id="ui_add_tags_form_submit" name="save" value="Go &rarr;" />
         </form>
     </div><!--#ui_tags-->
-    <h3>Rename Document</h3>
+    <hr />
+    <h3>Rename Document:</h3>
     <form id="ui_rename_document_form" onsubmit="javascript:return false;">
         <input type="text" id="ui_new_name_field" />
-        <input type="submit" name="rename" value="Go" />
+        <input type="submit" id="ui_rename_document_form_submit" name="rename" value="Go &rarr;" />
     </form>
-    <br /><hr /><br />
+    <hr />
     <form id="ui_delete_document_form" onsubmit="javascript:return false;">
-        <input type="submit" name="delete" value="delete document" />
+        <input type="submit" name="delete" value="Delete document" />
     </form>
     
 </div>
