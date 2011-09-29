@@ -28,3 +28,8 @@
     /* IE Specific */
     position: absolute\9;
 }
+
+#upload_file_fake_filename {
+    height: 25px;
+    width: 200px;
+}

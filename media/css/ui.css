@@ -46,3 +46,59 @@ ul#ui_pager li{
 #ui_upload_file_form{
     float: right;
 }
+
+#footer {
+    position:absolute;
+    bottom:0;
+    width:100%;
+    height:30px;   /* Height of the footer */
+}
+
+/* Delete buttons decoration */
+.ui_delete_revision_link,
+.ui_delete_tag_link {
+    margin-left: 5px;
+    color:red;
+    text-transform:lowercase;
+    border: 1px solid black;
+    padding: 0 4px 0 4px;
+    text-decoration: none;
+}
+
+.ui_delete_revision_link:hover, 
+.ui_delete_tag_link:hover {
+    
+}
+/* END-------------------------------------------------*/
+
+#ui_revision_list,
+#ui_metadata_list,
+#ui_tag_list {
+    list-style: none;
+    margin-left: 0px;
+}
+
+#ui_tag_list span,
+#ui_tag_list li a {
+	border: 1px solid black;
+	padding: 0 4px 0 4px;
+	text-decoration: none;
+}
+
+#ui_tags,
+#ui_rename_document_form,
+#ui_delete_document_form {
+	margin-left: 25px;
+}
+
+#ui_new_name_field, 
+#ui_add_tags_field,
+#ui_search_field {
+	width: 100px;
+}
+
+/* UI restyle document body */
+#ui_document iframe {
+    width: 470px;
+    height: 750px;
+}
