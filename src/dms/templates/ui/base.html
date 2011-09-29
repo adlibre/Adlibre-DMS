@@ -22,9 +22,11 @@
     </ul>
     {% endif %}
     <div id="content">
+    {% if THEME_NAME == 'solid' %}
         <ul id="logotype">
             <a href="/ui/"><img src="{{ MEDIA_URL }}themes/{{ THEME_NAME }}/adlibre-dms-logo.png" title="Adlibre DMS" alt="Adlibre DMS" /></a>
         </ul>
+    {% endif %}
         <ul id="ui_breadcrumbs">
             <li><a href="{%url ui_rule_list%}">Rules</a></li>
         </ul>
