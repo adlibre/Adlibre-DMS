@@ -10,43 +10,49 @@
 {%endblock%}
 
 {% block content %}
-<h1>Documents</h1>
 <div id="ui_control_panel">
-    <ul id="ui_order_filter">
-        <h3>Order:</h3>
-        <ul id="ui_order_tab"></ul>
-    </ul>
-    
-    <hr />
-    
-    <ul id="ui_search_form">
-        <h3>Search:</h3>
-        <h3><form id="ui_search_form">
-            <input id="ui_search_field" type="text" name="q" />
-            <span><input id="ui_search_submit" type="image" value="Go" src="{{ MEDIA_URL }}themes/{{ THEME_NAME }}/btn-search.png" /></span>
-        </h3></form>
-    </ul>
-    
-    <hr />
-    
-    <ul id="ui_filters_header">
-        <h3>Filter by:
-        <button id="ui_clear_filter">Clear all</button>
-        </h3>
-    </ul>
-    <ul id="ui_tags_filter">
-        <h3>Tag:</h3>
-        <ul id="ui_tag_list"></ul>
-    </ul>
-    <ul id="ui_date_filter">
-        <form id="ui_calendar_form">
-           {{calendar_form}}
-           <input id="ui_date_filter_submit" type="submit" value="Go &rarr;" />
-        </form>
-    </ul>
+    <div id="ui_control_panel_left_side">
+        <ul id="ui_tags_filter">
+            <h3>Tag:</h3>
+            <ul id="ui_tag_list"></ul>
+        </ul>
+    </div>
+    <div id="ui_control_panel_right_side">
+	    <ul id="ui_order_filter">
+	        <h3>Order:</h3>
+	        <ul id="ui_order_tab"></ul>
+	    </ul>
+	    
+	    <hr />
+	    
+	    <ul id="ui_search_form">
+	        <h3>Search:</h3>
+	        <h3><form id="ui_search_form">
+	            <input id="ui_search_field" type="text" name="q" />
+	            <span><input id="ui_search_submit" type="image" value="Go" src="{{ MEDIA_URL }}themes/{{ THEME_NAME }}/btn-search.png" /></span>
+	        </h3></form>
+	    </ul>
+	    
+	    <hr />
+	    
+	    <ul id="ui_filters_header">
+	        <h3>Filter by:
+	        <button id="ui_clear_filter">Clear all</button>
+	        </h3>
+	    </ul>
+	    <ul id="ui_date_filter">
+	        <form id="ui_calendar_form">
+	           {{calendar_form}}
+	           <input id="ui_date_filter_submit" type="submit" value="Go &rarr;" />
+	        </form>
+	    </ul>
+	</div>
 </div>
-<ul id="ui_document_list"></ul>
-<ul id="ui_pager"></ul>
+<div id="ui_documents_list_wrapper">
+    <h1>Documents</h1>
+    <ul id="ui_document_list"></ul>
+    <ul id="ui_pager"></ul>
+</div>
 {%endblock%}
 
 {%block javascript%}

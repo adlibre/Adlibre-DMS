@@ -1,9 +1,47 @@
 /* UI declarations */
 
-/* UI page header */
+/* UI page header settings */
+#container {
+	padding-top: 0px;
+}
+
+#ui_page_header_wrapper {
+    position: fixed;
+    top: 0;
+    height: 95px;
+    width: 100%;
+    background: white;
+}
+
+#ui_content_wrapper {
+    margin-top:60px;
+    margin-bottom: 15px;
+}
+
+#page_wrapper {
+	width:100%;
+	height: 100%;
+}
+
+#logotype {
+    position: fixed;
+	margin-top: 1px;
+}
+
+#ui_upload_file_form_wrapper {
+    position: fixed;
+    top:3px;
+    right:3px;
+    margin-top: 0px;
+}
+
 #ui_breadcrumbs {
-    height:35px;
-    line-height:35px;
+    position: fixed;
+    width: 100%;
+    margin-top: 70px;
+    margin-left: 0px;
+    height:25px;
+    line-height:25px;
     background-color: #F9A749;
 }
 
@@ -12,8 +50,8 @@
     color: #FFFFFF;
     float: left;
     font-size: 14px;
-    height: 35px;
-    line-height: 35px;
+    height: 25px;
+    line-height: 25px;
     padding: 0 20px;
 }
 
@@ -27,15 +65,67 @@
     text-decoration: none;
 }
 
+/* UI content block overriding */
+#ui_content_wrapper {
+	overflow: visible;
+	position: absolute;
+	right: 0px;
+	left: 0px;
+	top: 95px;
+	bottom: 10px;
+    margin-top: 0px;
+    min-width: 0px;
+    min-height: 0px;
+}
+
+/* UI restyle document body */
+#ui_document iframe {
+    height: 100%;
+    width: 100%;
+    margin-right: 0px;
+    min-width: 0px;
+    min-height: 0px;
+    border: 0px !important;
+}
+
+/* UI main document */
+#ui_document {
+    position: absolute;
+    right: 370px;
+    left:0px;
+}
+
 /* UI right control panel */
 #ui_control_panel {
+	position: absolute;
+	top: 0px;
+	bottom: 10px;
+	right: 0px;
+	margin-right: 0px;
+    margin-top: 0px;
+    margin-bottom: 0px;
     background-color: #FEEEBD;
     border-color: #2B2E30 #18191A #010101;
-    border-radius: 5px 5px 5px 5px;
     border-style: solid;
     border-width: 1px;
-    box-shadow: 3px 3px 0 #E2E2E3;
     color: #383838;
+    font-size: 12px;
+    width: 364px;
+    height: 100%;
+    
+}
+
+#ui_control_panel_left_side {
+    float: left;
+    width: 149px;
+    height:100%;
+}
+
+#ui_control_panel_right_side {
+    float: right;
+    width: 214px;
+    border-left: 1px solid #CCC;
+    height:100%;
 }
 
 #ui_control_panel ul, 
@@ -44,6 +134,13 @@
     padding: 0;
     list-style-type: none;
     color: #383838;
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+#ui_control_panel div h3, 
+#ui_control_panel div h4 {
+
 }
 
 #ui_search_field, 
@@ -57,13 +154,14 @@
 }
 
 #ui_calendar_form #id_date {
-    background-size: 69px 25px;
+    background-size: 69px 16px;
     width: 69px;
+    height: 16px;
 }
 
 #ui_tag_list li,
 #ui_order_tab li {
-    padding-bottom: 3px;
+    padding-bottom: 5px;
 }
 
 #ui_tag_list li span {
@@ -160,7 +258,7 @@
 #ui_rename_document_form_submit {
     width: 55px;
     height: 25px;
-    margin-left: 10px;
+    margin-left: 5px;
 }
 
 #ui_order_tab li a {
@@ -173,12 +271,21 @@
 .ui_delete_revision_link, 
 .ui_delete_tag_link {
     text-transform:lowercase;
-        color: red !important; 
+    color: red !important; 
+}
+
+#ui_revissions_filter {
+    height: auto;
+    padding-left: 5px;
 }
 
 #ui_revision_list li {
-    margin-bottom: 2px;
+    margin-bottom: 4px;
+}
 
+#ui_metadata {
+	height: auto;
+	padding-left: 5px;
 }
 
 #ui_metadata_list {
@@ -201,6 +308,17 @@
     height: 30px;
 }
 
+#ui_tags_view_item_list {
+    margin-top: 2px;
+}
+
+#ui_tags,
+#ui_rename_document_form,
+#ui_delete_document_form {
+    margin-left: 5px;
+    margin-bottom: 5px;
+}
+
 #ui_tag_list li span {
     cursor: default;
 }
@@ -216,8 +334,52 @@ div.datepick-popup table tr:hover a:link {
     color: #3B3F41
 }
 
-/* UI restyle document body */
-#ui_document iframe {
-    width: 530px;
-    height: 650px;
+/* UI footer settings */
+#footer {
+	position: absolute;
+    padding-top: 0px;
+    text-align: center;
+    border-top: 2px solid #E9EAEA;
+    position: fixed;
+    bottom: 0px;
+    width: 100%;
+    background: white;
 }
+
+#footer p {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+/* UI rules list design fixups */
+#ui_rules_list_wrapper {
+    margin: 20px 40px;
+} 
+
+/* UI documents list page settings */
+#ui_documents_list_wrapper {
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    right: 400px;
+    left: 0px;
+}
+
+#ui_pager {
+    position: absolute;
+    bottom: 5px;
+    left: 0px;
+    width: 100%;
+    height: 20px;
+}
+
+#ui_document_list {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    top: 0px;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+}
+

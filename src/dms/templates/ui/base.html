@@ -22,6 +22,7 @@
     </ul>
     {% endif %}
     <div id="content">
+    <div id="ui_page_header_wrapper">
     {% if THEME_NAME == 'solid' %}
         <ul id="logotype">
             <a href="/ui/"><img src="{{ MEDIA_URL }}themes/{{ THEME_NAME }}/adlibre-dms-logo.png" title="Adlibre DMS" alt="Adlibre DMS" /></a>
@@ -41,8 +42,11 @@
             </form>
             <br style="clear: both" />
         </ul>
-        {% block content %}
-        {% endblock %}
+        </div><!-- ui_page_header_wrapper -->
+        <div id="ui_content_wrapper">
+            {% block content %}
+            {% endblock %}
+        </div>
     </div>
 {% endblock %}
     </div>
