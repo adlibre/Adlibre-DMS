@@ -6,40 +6,41 @@
 
 {% block content %}
 <div id="ui_control_panel">
-    <ul id="ui_metadata">
-        <h3>Metadata:</h3>
-        <ul id="ui_metadata_list"></ul>
-    </ul>
-    <hr />
-    <ul id="ui_revissions_filter">
-        <h3>Revisions:</h3>
-        <ul id="ui_revision_list"></ul>
-    </ul>
-    <hr />
-    <div id="ui_tags">
-        <h3>Tags:</h3>
-        <ul id="ui_tag_list"></ul>
+    <div id="ui_control_panel_left_side">
+        <div id="ui_metadata">
+            <h3>Metadata:</h3>
+            <ul id="ui_metadata_list"></ul>
+        </div>
+        <div id="ui_revissions_filter">
+            <h3>Revisions:</h3>
+            <ul id="ui_revision_list"></ul>
+        </div>
+    </div>
+    <div id="ui_control_panel_right_side">
+        <div id="ui_document_manipulations">
+            <form id="ui_delete_document_form" onsubmit="javascript:return false;">
+                <input type="submit" name="delete" value="Delete document" />
+            </form>
+            <form id="ui_rename_document_form" onsubmit="javascript:return false;">
+                <h3>Rename Document:</h3>
+                <input type="text" id="ui_new_name_field" />
+                <input type="submit" id="ui_rename_document_form_submit" name="rename" value="Go &rarr;" />
+            </form>
+        </div>
+        <div id="ui_tags">
         <h4>Add a tag:</h4>
-        <form id="ui_add_tags_form" onsubmit="javascript:return false;">
-            <input type="text" name="tag" id="ui_add_tags_field" />
-            <input type="submit" id="ui_add_tags_form_submit" name="save" value="Go &rarr;" />
-        </form>
-    </div><!--#ui_tags-->
-    <hr />
-    <form id="ui_rename_document_form" onsubmit="javascript:return false;">
-        <h3>Rename Document:</h3>
-        <input type="text" id="ui_new_name_field" />
-        <input type="submit" id="ui_rename_document_form_submit" name="rename" value="Go &rarr;" />
-    </form>
-    <hr />
-    <form id="ui_delete_document_form" onsubmit="javascript:return false;">
-        <input type="submit" name="delete" value="Delete document" />
-    </form>
-    
+            <form id="ui_add_tags_form" onsubmit="javascript:return false;">
+                <input type="text" name="tag" id="ui_add_tags_field" />
+                <input type="submit" id="ui_add_tags_form_submit" name="save" value="Go &rarr;" />
+            </form>
+        <div id="ui_tags_view_item_list">
+            <h3>Tags:</h3>
+            <ul id="ui_tag_list"></ul>
+        </div>
+        </div><!--#ui_tags-->
+	</div>
 </div>
-<h1>Document:</h1>
 <div id="ui_document">DOCUMENT HERE</div>
-
 {%endblock%}
 
 {%block javascript%}
