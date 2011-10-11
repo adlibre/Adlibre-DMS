@@ -18,7 +18,7 @@ class DoccodePluginMapping(models.Model):
                                                 related_name = 'settings_before_storage',
                                                 blank = True,
                                                 verbose_name = "Pre-Storage Workflow")
-    storage_plugins = ManyPluginField(   pluginpoints.BeforeStoragePluginPoint, 
+    storage_plugins = ManyPluginField(   pluginpoints.StoragePluginPoint, 
                                                 related_name = 'settings_storage',
                                                 blank = True,
                                                 verbose_name = "Storage Workflow")
