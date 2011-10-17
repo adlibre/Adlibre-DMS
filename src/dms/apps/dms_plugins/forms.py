@@ -37,6 +37,12 @@ class PluginSelectorForm(forms.ModelForm):
         for k in keys:
             self.data[k] = kwds[k]
 
+    def setModel(self, pk):
+        """
+        Sets an instance to the active form.
+        """
+        self = instntatePluginSelectorForm(self, pk)
+
     def validation_ok(self):
         """
         Form validation sequence overridden here.
@@ -61,5 +67,7 @@ class PluginSelectorForm(forms.ModelForm):
                    'before_removal_plugins',
                    'before_update_plugins')
 
-
-
+def instntatePluginSelectorForm(self, pk):
+    """
+    Parse a form and assigns an existing model instance to it.
+    """
