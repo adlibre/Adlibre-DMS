@@ -2,7 +2,7 @@ from django import forms
 
 from dms_plugins import models
 
-from django.core.exceptions import ValidationError
+#from django.core.exceptions import ValidationError
 
 class MappingForm(forms.ModelForm):
     class Meta:
@@ -36,29 +36,22 @@ class PluginSelectorForm(forms.ModelForm):
         keys.sort()
         for k in keys:
             self.data[k] = kwds[k]
-  
-#    def validate(self, post):
-#        """
-#        Validate the contents of the form
-#        """
-#        
-#        
-#        for name,field in self.fields.items():
-#            try:
-#                field.clean(post[name])
-#            except ValidationError, e:
-#                self.errors[name] = e.messages
-    
-    def is_valid(self):
+
+    def validation_ok(self):
         """
         Form validation sequence overridden here.
         validates only one field as far as it is critical for now.
-        Doccode checks if it is selected.
+        Doccode checks if it is selected or None.
         """
-        # TODO: add error to the existing form to be able to return form with faulty field and all data.
+        
         if not self.data['doccode'] == u'':
             return True
-        else: return False
+        else: 
+            msg = u"You have forgotten to select Doccode in order to set a mapping"
+            
+            if not self._errors: self._errors = {}
+            self._errors["doccode"] = self.error_class([msg])
+            return False
 
     class Meta:
         model = models.DoccodePluginMapping

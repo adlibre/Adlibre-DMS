@@ -1,5 +1,9 @@
 """
-
+Module: Doccode Mapping form grouping changer
+Project: Adlibre DMS
+Copyright: Adlibre Pty Ltd 2011
+License: See LICENSE for license information
+Author: Iurii Garmash
 """
 from django import forms
 from plugins.models import Plugin, PluginPoint
