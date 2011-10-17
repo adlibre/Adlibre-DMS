@@ -233,8 +233,6 @@ def plugin_setting(request, rule_id, plugin_id,
 
 from plugins.models import Plugin
 from dms_plugins.representator import save_PluginSelectorForm, create_form_fields
-#from django.views.decorators.csrf import csrf_exempt
-#@csrf_exempt
 @staff_member_required
 def testing(request, template_name='browser/setting.html',
             extra_context={}):
@@ -249,18 +247,10 @@ def testing(request, template_name='browser/setting.html',
     form.setFields(kwargs)
     
     if request.method == 'POST':
-        #form.validate(request.POST)
         form.setData(request.POST)
-#        print form.is_valid()
-#        print form.errors
-        new_mapping_instance = save_PluginSelectorForm(request.POST, plugins)
-        return HttpResponseRedirect('.')
-#        if form.is_valid():
-#            form = forms.MappingForm(converted_post)
-#            #print form.html()
-#            #mapping = form.save()
-#            return HttpResponseRedirect('.')
-
+        if form.validation_ok():
+            save_PluginSelectorForm(request.POST, plugins)
+            return HttpResponseRedirect('.')
     extra_context['form'] = form
     extra_context['rule_list'] = mappings
     return direct_to_template(request, template_name, extra_context=extra_context)
