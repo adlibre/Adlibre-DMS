@@ -24,6 +24,9 @@ from dms.settings import DEBUG
 from document_manager import DocumentManager
 from browser.forms import UploadForm
 
+# regrouped form requires
+from plugins.models import Plugin
+from dms_plugins.representator import save_PluginSelectorForm, create_form_fields
 
 def handlerError(request, httpcode, message):
     t = loader.get_template(str(httpcode)+'_custom.html')
@@ -174,13 +177,16 @@ def setting(request, template_name='browser/setting.html',
     Setting for adding and editing rule.
     """
     mappings = models.DoccodePluginMapping.objects.all()
+    plugins = Plugin.objects.all()
+    kwargs = create_form_fields(plugins)
+    form = forms.PluginSelectorForm()
+    form.setFields(kwargs)
+    
     if request.method == 'POST':
-        form = forms.MappingForm(request.POST)
-        if form.is_valid():
-            mapping = form.save()
+        form.setData(request.POST)
+        if form.validation_ok():
+            save_PluginSelectorForm(request.POST, plugins)
             return HttpResponseRedirect('.')
-    else:
-        form = forms.MappingForm
     extra_context['form'] = form
     extra_context['rule_list'] = mappings
     return direct_to_template(request, template_name, extra_context=extra_context)
@@ -231,8 +237,7 @@ def plugin_setting(request, rule_id, plugin_id,
     extra_context['plugin'] = plugin
     return direct_to_template(request, template_name, extra_context=extra_context)
 
-from plugins.models import Plugin
-from dms_plugins.representator import save_PluginSelectorForm, create_form_fields
+
 @staff_member_required
 def testing(request, template_name='browser/setting.html',
             extra_context={}):
