@@ -25,4 +25,8 @@ urlpatterns = patterns('browser.views',
         'files_document', name='files_document'),
     url(r'^revision/(?P<document>.+)$',
         'revision_document', name='revision_document'),
+    # teporary view for tests
+    url(r'^settings/testing/',
+        'testing',
+        name='test'),
 )

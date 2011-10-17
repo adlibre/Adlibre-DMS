@@ -185,7 +185,6 @@ def setting(request, template_name='browser/setting.html',
     extra_context['rule_list'] = mappings
     return direct_to_template(request, template_name, extra_context=extra_context)
 
-
 @staff_member_required
 def edit_setting(request, rule_id, template_name='browser/edit_setting.html',
                    extra_context={}):
@@ -231,3 +230,39 @@ def plugin_setting(request, rule_id, plugin_id,
     extra_context['rule'] = mapping
     extra_context['plugin'] = plugin
     return direct_to_template(request, template_name, extra_context=extra_context)
+
+from plugins.models import Plugin
+from dms_plugins.representator import save_PluginSelectorForm, create_form_fields
+#from django.views.decorators.csrf import csrf_exempt
+#@csrf_exempt
+@staff_member_required
+def testing(request, template_name='browser/setting.html',
+            extra_context={}):
+    """
+    TEST Setting for adding rule.
+    """
+    mappings = models.DoccodePluginMapping.objects.all()
+    
+    plugins = Plugin.objects.all()
+    kwargs = create_form_fields(plugins)
+    form = forms.PluginSelectorForm()
+    form.setFields(kwargs)
+    
+    if request.method == 'POST':
+        #form.validate(request.POST)
+        form.setData(request.POST)
+#        print form.is_valid()
+#        print form.errors
+        new_mapping_instance = save_PluginSelectorForm(request.POST, plugins)
+        return HttpResponseRedirect('.')
+#        if form.is_valid():
+#            form = forms.MappingForm(converted_post)
+#            #print form.html()
+#            #mapping = form.save()
+#            return HttpResponseRedirect('.')
+
+    extra_context['form'] = form
+    extra_context['rule_list'] = mappings
+    return direct_to_template(request, template_name, extra_context=extra_context)
+
+
