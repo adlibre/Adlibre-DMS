@@ -10,6 +10,8 @@ from plugins.models import Plugin, PluginPoint
 from django.utils.importlib import import_module
 from .models import DoccodePluginMapping
 
+from django.shortcuts import get_object_or_404
+
 def create_form_fields(plugins_param = ''):
     """
     Generator of form fields in desired grouping.
@@ -117,7 +119,26 @@ def sort_plugins_by_pluginpoint(requested_plugin_pks, plugins_queryset = False):
         plugins_sorted_dict[plugin_instance.settings_field_name].append(plugin_pk)
     return plugins_sorted_dict
 
-def save_doccode_model(plugins_sorted_dict, input_post_data):
+def sort_plugins_by_type(pks_array, plugins_queryset = ''):
+    """
+    Ruturns a dictionary of key:plugin_type, value: list of submited plugin PK's
+    Takes:
+    - list of submitted plugin's PK's (cleared to only numbers) 
+    - plugins model queryset or produces one for own usage.
+    """ 
+    plugins_sorted_dict = {}
+    if not plugins_queryset: plugins_queryset = Plugin.objects.all()
+    for plugin_pk in pks_array:
+        current_plugin = plugins_queryset.filter(pk=plugin_pk)
+        plugin_instance = current_plugin[0].get_plugin()
+        # if plugins of this point were NOT added before create this KEY
+        if not plugins_sorted_dict.has_key(plugin_instance.plugin_type):
+            plugins_sorted_dict[plugin_instance.plugin_type] = []
+        # add a plugin to selected pluginpoint list
+        plugins_sorted_dict[plugin_instance.plugin_type].append(plugin_pk)
+    return plugins_sorted_dict
+
+def save_doccode_model(plugins_sorted_dict, input_post_data, pk = False):
     """
     Model instance aving sequence.
     Takes 2 arguments: 
@@ -126,10 +147,20 @@ def save_doccode_model(plugins_sorted_dict, input_post_data):
     creates a model instance and saves to base.
     Needs ONLY validated data. 
     """
-    mapping = DoccodePluginMapping()
+    if pk:
+        # clearing model fields and using this model instance
+        mapping = DoccodePluginMapping.objects.get(pk=pk)
+        mapping.before_storage_plugins = []
+        mapping.storage_plugins = []
+        mapping.before_retrieval_plugins = []
+        mapping.before_removal_plugins = []
+        mapping.before_update_plugins = []
+    else:
+        mapping = DoccodePluginMapping()
     mapping.active = input_post_data.has_key('active')
     mapping.doccode = input_post_data['doccode']
     mapping.save()
+    # need to clear fields here in  case writing to existing model
     for field_name, value in plugins_sorted_dict.iteritems():
         setattr(mapping, field_name, value)
     mapping.save()
@@ -165,7 +196,7 @@ def get_plugin_from_string(plugin_name):
     module = import_module(modulename)
     return getattr(module, classname)
 
-def save_PluginSelectorForm(serialized_POST, plugins_queryset = False):
+def save_PluginSelectorForm(serialized_POST, plugins_queryset = False, pk = False):
     """
     Main form save sequence manager.
     Uses methods above to save model instance based on provided form data.
@@ -173,5 +204,37 @@ def save_PluginSelectorForm(serialized_POST, plugins_queryset = False):
     if not plugins_queryset: plugins_queryset = Plugin.objects.all()
     plugins_used_list = extract_plugin_pks(serialized_POST, plugins_queryset)
     plugins_sorted_dict = sort_plugins_by_pluginpoint(plugins_used_list, plugins_queryset)
-    instance_ = save_doccode_model(plugins_sorted_dict, serialized_POST)
+    instance_ = save_doccode_model(plugins_sorted_dict, serialized_POST, pk)
     return instance_
+
+def get_plugins_for_doccode(instance, plugins_queryset = False):
+    """
+    Helper to extract all plugin's PK's from DccodePluginMapping instance.
+    Takes a DoccodePluginMapping instance and extracts all plugin's pk's it uses.
+    Returns a list of plugin's mapping uses.
+    WARNING it highly depends on model methods and structure.
+    Pleas change it accordingly upon adding PluginPoints.
+    """
+    plg_s = []
+    plugins_dict = []
+    plg_s.append(instance.get_before_storage_plugins())
+    plg_s.append(instance.get_storage_plugins())
+    plg_s.append(instance.get_before_retrieval_plugins())
+    plg_s.append(instance.get_before_removal_plugins())
+    plg_s.append(instance.get_before_update_plugins())
+    for queryset in plg_s:
+        for plugin in queryset:
+            plugins_dict.append(plugin.pk)
+    return plugins_dict
+
+def serialize_model_for_PluginSelectorForm(instance):
+    """
+    Serializes a model instance to add to a PluginSelector form.
+    Makes it a suitable sorting view.
+    """
+    pks_array = get_plugins_for_doccode(instance)
+    dict = sort_plugins_by_type(pks_array, Plugin.objects.all())
+    dict["doccode"] = instance.doccode
+    if instance.active:
+        dict["active"]=u'on'
+    return dict
