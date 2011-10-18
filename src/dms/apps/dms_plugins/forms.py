@@ -14,6 +14,9 @@ class PluginSelectorForm(forms.ModelForm):
     
     Built based on code of Django Snippet: Dynamic Django form.
     http://djangosnippets.org/snippets/714/
+    
+    form usage: 
+        
     """
     
     def __init__(self, *args, **kwargs):
@@ -36,12 +39,6 @@ class PluginSelectorForm(forms.ModelForm):
         keys.sort()
         for k in keys:
             self.data[k] = kwds[k]
-
-    def setModel(self, pk):
-        """
-        Sets an instance to the active form.
-        """
-        self = instntatePluginSelectorForm(self, pk)
 
     def validation_ok(self):
         """
@@ -66,8 +63,3 @@ class PluginSelectorForm(forms.ModelForm):
                    'before_retrieval_plugins', 
                    'before_removal_plugins',
                    'before_update_plugins')
-
-def instntatePluginSelectorForm(self, pk):
-    """
-    Parse a form and assigns an existing model instance to it.
-    """

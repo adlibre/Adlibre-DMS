@@ -19,7 +19,7 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
 from django.template import RequestContext, loader
 
-from dms_plugins import models, forms
+from dms_plugins import models, forms, representator
 from dms.settings import DEBUG
 from document_manager import DocumentManager
 from browser.forms import UploadForm
@@ -195,11 +195,17 @@ def setting(request, template_name='browser/setting.html',
 def edit_setting(request, rule_id, template_name='browser/edit_setting.html',
                    extra_context={}):
     mapping = get_object_or_404(models.DoccodePluginMapping, id=rule_id)
-    form = forms.MappingForm(instance = mapping)
+    instance = representator.serialize_model_for_PluginSelectorForm(mapping)
+    plugins = Plugin.objects.all()
+    kwargs = create_form_fields(plugins)
+    form = forms.PluginSelectorForm(initial = instance)
+    form.setFields(kwargs)
+    
     if request.method == 'POST':
-        form = forms.MappingForm(instance = mapping, data = request.POST)
-        if form.is_valid():
-            mapping = form.save()
+        form.setData(request.POST)
+        if form.validation_ok():
+            save_PluginSelectorForm(request.POST, plugins, rule_id)
+            return HttpResponseRedirect('.')
     extra_context['rule'] = mapping
     extra_context['form'] = form
     return direct_to_template(request, template_name, extra_context=extra_context)
@@ -235,29 +241,6 @@ def plugin_setting(request, rule_id, plugin_id,
     extra_context['form'] = form
     extra_context['rule'] = mapping
     extra_context['plugin'] = plugin
-    return direct_to_template(request, template_name, extra_context=extra_context)
-
-
-@staff_member_required
-def testing(request, template_name='browser/setting.html',
-            extra_context={}):
-    """
-    TEST Setting for adding rule.
-    """
-    mappings = models.DoccodePluginMapping.objects.all()
-    
-    plugins = Plugin.objects.all()
-    kwargs = create_form_fields(plugins)
-    form = forms.PluginSelectorForm()
-    form.setFields(kwargs)
-    
-    if request.method == 'POST':
-        form.setData(request.POST)
-        if form.validation_ok():
-            save_PluginSelectorForm(request.POST, plugins)
-            return HttpResponseRedirect('.')
-    extra_context['form'] = form
-    extra_context['rule_list'] = mappings
     return direct_to_template(request, template_name, extra_context=extra_context)
 
 
