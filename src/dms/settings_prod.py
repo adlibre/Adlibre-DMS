@@ -1,5 +1,6 @@
 from dms.settings import *
 
+DEMO = False
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
@@ -9,3 +10,5 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
+# remove fcgi script name from url (lighttpd)
+FORCE_SCRIPT_NAME = ''
