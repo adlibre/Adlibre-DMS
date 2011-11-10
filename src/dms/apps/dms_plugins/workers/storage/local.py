@@ -243,7 +243,7 @@ class LocalRetrievalPlugin(Plugin, BeforeRetrievalPluginPoint):
 
 class LocalRemovalPlugin(Plugin, BeforeRemovalPluginPoint):
     title = "Local Removal"
-    description = "Removes document from filestytem"
+    description = "Removes document from filesystem"
 
     plugin_type = 'storage'
     worker = Local()
