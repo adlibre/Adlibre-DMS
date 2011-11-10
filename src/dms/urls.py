@@ -8,7 +8,7 @@ admin.autodiscover()
 urlpatterns = patterns('',
     # Uncomment the admin/doc line below and add 'django.contrib.admindocs'
     # to INSTALLED_APPS to enable admin documentation:
-    (r'^admin/doc/', include('django.contrib.admindocs.urls')),
+    #(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^api/', include('api.urls')),
     url(r'^settings/', include('browser.urls_settings')),
     url(r'^docs/', include('docs.urls')),
