@@ -30,6 +30,7 @@
 }
 
 #upload_file_fake_filename {
-    height: 25px;
-    width: 200px;
+    /* height: 25px;
+    width: 200px;*/
+    font-size: 14px;
 }
