@@ -1,7 +1,7 @@
 #!/bin/bash
 #
-# Manages the startup and shutdown of this projects FCGI processes
-# as well as rebuilding the search index.
+# Manages the startup and shutdown of this projects processes
+# as well as runing various tasks.
 #
 # Uses UNIX sockets for FCGI
 #
@@ -9,6 +9,10 @@
 # Project Specific Config
 PROJNAME='dms'
 WEB_USER='wwwpub'
+
+MAXSPARE=1
+MINSPARE=1
+MAXCHILDREN=5
 
 CWD=$(cd ${0%/*} && pwd -P)
 PROJDIR=$(cd $CWD/../ && pwd -P) # Root of our project
@@ -20,18 +24,21 @@ BINDIR=$(cd $CWD/../bin/ && pwd -P) # Path to activate / virtualenv
 ACTION=$1
 SETTINGS=${2-settings}
 SOCKET="$PROJDIR/"${3-$(echo "${PROJNAME}")}".sock"
-PIDFILE="$PROJDIR/"${3-$(echo "${PROJNAME}")}".pid"
+PIDBASE="$PROJDIR/"${3-$(echo "${PROJNAME}")}
+WPIDFILE="${PIDBASE}.wsgi.pid"
+CPIDFILE="${PIDBASE}.celeryd.pid"
+
 
 # Functions
 function startit {
     echo -n "Starting ${PROJNAME} with ${SETTINGS}: "
 
-    if [ -f "${PIDFILE}" ]; then
-        echo "Error: PIDFILE ${PIDFILE} exists. Already running?"
+    if [ -f "${WPIDFILE}" ]; then
+        echo "Error: PIDFILE ${WPIDFILE} exists. Already running?"
         RC=128
     else
         . ${BINDIR}/activate
-        python ${SRCDIR}/manage.py runfcgi socket=$SOCKET pidfile=$PIDFILE --settings=${SETTINGS}
+        python ${SRCDIR}/manage.py runfcgi method=threaded minspare=${MINSPARE} maxspare=${MAXSPARE} maxchildren=${MAXCHILDREN} socket=$SOCKET pidfile=${WPIDFILE} --settings=${SETTINGS}
         RC=$?
         echo "Started."
     fi
@@ -40,14 +47,14 @@ function startit {
 function stopit {
     echo -n "Stopping ${PROJNAME}: "
 
-    if [ -f $PIDFILE ]; then
-        kill `cat -- $PIDFILE`
+    if [ -f "${WPIDFILE}" ]; then
+        kill `cat -- ${WPIDFILE}`
         RC=$?
         echo "Process(s) Terminated."
-        rm -f -- $PIDFILE
+        rm -f -- ${WPIDFILE}
     else
         echo "PIDFILE not found. Killing likely processes."
-        kill `pgrep -f "python ${SRCDIR}/manage.py runfcgi socket=$SOCKET pidfile=$PIDFILE --settings=${SETTINGS}"`
+        kill `pgrep -f "python ${SRCDIR}/manage.py runfcgi method=threaded minspare=${MINSPARE} maxspare=${MAXSPARE} maxchildren=${MAXCHILDREN} socket=$SOCKET pidfile=${WPIDFILE} --settings=${SETTINGS}"`
         RC=$?
         echo "Process(s) Terminated."
     fi
@@ -57,7 +64,37 @@ function status {
     echo "I don't know how to do that yet"
 }
 
-function rebuildindex {
+function startCelery {
+    echo -n "Starting CeleryD ${PROJNAME} with ${SETTINGS}: "
+
+    if [ -f "${CPIDFILE}" ]; then
+        echo "Error: PIDFILE ${CPIDFILE} exists. Already running?"
+        RC=128
+    else
+        . ${BINDIR}/activate
+        python ${SRCDIR}/manage.py celeryd_detach --pidfile=${CPIDFILE} --settings=${SETTINGS}
+        RC=$?
+        echo "Started."
+    fi
+}
+
+function stopCelery {
+    echo -n "Stopping CeleryD ${PROJNAME}: "
+
+    if [ -f "${CPIDFILE}" ]; then
+        kill `cat -- ${CPIDFILE}`
+        RC=$?
+        echo "Process(s) Terminated."
+        rm -f -- ${CPIDFILE}
+    else
+        echo "PIDFILE not found. Killing likely processes."
+        kill `pgrep -f "python ${SRCDIR}/manage.py celeryd_detach pidfile=${CPIDFILE} --settings=${SETTINGS}"`
+        RC=$?
+        echo "Process(s) Terminated."
+    fi
+}
+
+function rebuildIndex {
     echo -n "Rebuilding ${PROJNAME} search index with ${SETTINGS}: "
     . ${BINDIR}/activate
     python ${SRCDIR}/manage.py update_index --remove --settings=${SETTINGS}
@@ -66,7 +103,7 @@ function rebuildindex {
 }
 
 function showUsage {
-    echo "Usage: manage-fcgi.sh {start|stop|status|rebuildindex|restart} <settings_file>"
+    echo "Usage: manage-fcgi.sh {start|stop|restart|status|rebuildindex|startCelery|stopCelery|restartCelery} <settings_file> <sitename>"
 }
 
 # check that we have required parameters
@@ -89,11 +126,21 @@ case "$ACTION" in
     stop)
         stopit
 	;;
+    startCelery)
+        startCelery
+	;;
+    stopCelery)
+        stopCelery
+	;;
+	restartCelery)
+	    stopCelery
+	    startCelery
+	;;
     status)
         status
         ;;
     rebuildindex)
-        rebuildindex
+        rebuildIndex
         ;;
     restart)
         stopit
