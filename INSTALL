@@ -29,6 +29,9 @@ OS X Requirements
 -----------------
 
 On OS X need the following will need to be installed using a 3rd party port / package manager:
+You can install it for e.g. from:
+http://www.macports.org/install.php
+Site has handy .dmg package install scripts.
 
 For 'magic' based file type validation we require the following:
 
@@ -47,6 +50,11 @@ this workaround https://trac.macports.org/ticket/22418
 and if you get this error: 
 >     env: /users/user/django/virtualenvs/dmsmerge/build/ctypes/source/libffi/configure: Permission denied
 You'll need to make sure that _build/ctypes/source/libffi/configure_ is executable. (chmod +x if necessary).
+
+NB. Has a bug while installing from pip-req.txt. "pip install -r deployment/pip-req.txt" breaks with error.
+You have to manually change setup.py of that package. It says about the line with error.
+Something called long_description. Change it to whatever string you like in the predownloaded package.
+And run "pip install -r deployment/pip-req.txt" again
 
 Windows
 -------
