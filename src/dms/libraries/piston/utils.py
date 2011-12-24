@@ -180,10 +180,12 @@ class Mimer(object):
         different than a submitted form - application/x-www-form-urlencoded
         """
         type_formencoded = "application/x-www-form-urlencoded"
+        type_formencoded_ff = "application/x-www-form-urlencoded; charset=UTF-8"
 
         ctype = self.request.META.get('CONTENT_TYPE', type_formencoded)
-        
-        if ctype == type_formencoded:
+
+        # HACK: to fix wrong browser behaviour (request from mozilla FF throws exceptions)
+        if (ctype == type_formencoded) or (ctype == type_formencoded_ff):
             return None
         
         return ctype
