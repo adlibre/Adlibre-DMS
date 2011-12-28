@@ -177,8 +177,9 @@ class Local(object):
             except Exception, e:
                 raise PluginError(str(e), 500)
 
-        if document.get_revision:
-            document.set_revision(None) # should not perform anything in later plugins.
+        # TODO: farther test if it is proper fix for Bug #399 (will it break something more)
+        #if document.get_revision:
+        #    document.set_revision(None) # should not perform anything in later plugins.
         """
         if document.get_revision():
             filename = document.get_filename_with_revision()
