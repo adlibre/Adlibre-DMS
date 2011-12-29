@@ -140,7 +140,8 @@ class SettingsTest(AdlibreTestCase):
         url = '/settings/'
         # un-authenticated request
         response = self.client.get(url)
-        self.assertContains(response, 'Django administration')
+        self.assertContains(response, 'Adlibre DMS')
+        self.assertContains(response, 'Log in |')
         # authenticated
         self.client.login(username=username, password=password)
         response = self.client.get(url)
@@ -148,8 +149,10 @@ class SettingsTest(AdlibreTestCase):
 
     def test_plugins_view(self):
         url = '/settings/plugins'
+        # un-authenticated request
         response = self.client.get(url)
-        self.assertContains(response, 'Django administration')
+        self.assertContains(response, 'Adlibre DMS')
+        self.assertContains(response, 'Log in |')
         # authenticated
         self.client.login(username=username, password=password)
         response = self.client.get(url)
