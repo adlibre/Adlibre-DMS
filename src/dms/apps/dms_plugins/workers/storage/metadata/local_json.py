@@ -48,12 +48,21 @@ class LocalJSONMetadata(object):
 
     def load_from_file(self, json_file):
         if os.path.exists(json_file):
+            revisions = []
             json_handler = open(json_file , mode='r+')
-            #print json_file
+#            if settings.DEBUG:
+#                print json_file
             fileinfo_db = json.load(json_handler)
-            revisions = fileinfo_db.keys()
+            revisions_unsorted = fileinfo_db.keys()
+            for rev in revisions_unsorted:
+                revisions.append(int(rev))
             revisions.sort()
-            revision = int(revisions[-1]) + 1
+#            if settings.DEBUG:
+#                print 'Document Revisions: '
+#                print revisions
+            revision = max(revisions) + 1
+#            if settings.DEBUG:
+#                print 'Latest File Revision: ', str(revision - 1)
         else:
             fileinfo_db = {}
             revision = 1
@@ -61,7 +70,8 @@ class LocalJSONMetadata(object):
 
     def load_metadata(self, document_name, directory):
         json_file = os.path.join(directory, '%s.json' % (document_name,))
-        return self.load_from_file(json_file)
+        file = self.load_from_file(json_file)
+        return file
 
     def date_to_string(self, date):
         return date.strftime(settings.DATETIME_FORMAT)
