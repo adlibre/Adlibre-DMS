@@ -112,6 +112,12 @@ class Document(object):
                     name = "%s.%s" % (name, self.get_requested_extension())
             elif not os.path.splitext(name)[1][1:]:
                 ext = self.get_extension_by_mimetype()
+                #Fixes extension format 2 dots in API output filename (Bug #588)
+                try:
+                    if '.' in ext:
+                        dot, ext = ext.split(".",1)
+                except:
+                    pass # file type conversion is in progress failing gracefully
                 if ext:
                     name = "%s.%s" % (name, ext)
             self.full_filename = name
