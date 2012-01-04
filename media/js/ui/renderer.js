@@ -179,19 +179,29 @@ function UIRenderer(manager){
             }
         }
     }
-    this.render_document_revisions = function(metadatas){
+    this.render_document_revisions = function(metads){
         $('#ui_revision_list').empty();
-        for (var revision in metadatas){
+        var metadatas = []
+        // converting JSON to JS list
+        for (var key in metads){
+            metadatas.push(metads[key]);
+        };
+        // sorting list by revision number
+        metadatas.sort(function(a, b) {
+            return a.revision - b.revision;
+        });
+        for (var item_num = 0; item_num < metadatas.length; item_num++) {
+            var revision = metadatas[item_num];
+            var metadata = metadatas[item_num];
             var revision_item = $('<li>');
-            var metadata = metadatas[revision];
             var filename = metadata['name']
             self.manager.store_revision_info(revision, filename);
             if (revision == 'N/A'){
-                revision_item.text(revision);
+                revision_item.text(item_num+1);
             }else{
                 var lnk = $('<a>');
                 lnk.addClass('ui_revision_link');
-                lnk.text(revision);
+                lnk.text(item_num+1);
                 lnk.attr('href', "javascript:void(0)");
                 revision_item.append(lnk);
                 var delete_lnk = $('<a>');
