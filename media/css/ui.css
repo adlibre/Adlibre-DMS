@@ -95,10 +95,3 @@ ul#ui_pager li{
     width: 470px;
     height: 750px;
 }
-
-/* UI scrolling fixes */
-#ui_revissions_filter,
-#ui_tags_view_item_list {
-    height: 300px !important;
-    overflow:auto;
-}

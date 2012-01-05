@@ -112,7 +112,8 @@
     font-size: 12px;
     width: 364px;
     height: 100%;
-    
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 #ui_control_panel_left_side {
@@ -123,7 +124,7 @@
 
 #ui_control_panel_right_side {
     float: right;
-    width: 214px;
+    width: 190px;
     border-left: 1px solid #CCC;
     height:100%;
 }
