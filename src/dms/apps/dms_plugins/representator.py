@@ -5,6 +5,7 @@ Copyright: Adlibre Pty Ltd 2011
 License: See LICENSE for license information
 Author: Iurii Garmash
 """
+
 from django import forms
 from plugins.models import Plugin, PluginPoint
 from django.utils.importlib import import_module

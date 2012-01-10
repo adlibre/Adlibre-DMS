@@ -1,3 +1,10 @@
+"""
+Module: DMS Browser Django Settings URLs
+Project: Adlibre DMS
+Copyright: Adlibre Pty Ltd 2011
+License: See LICENSE for license information
+"""
+
 from django.conf.urls.defaults import *
 
 urlpatterns = patterns('browser.views',
