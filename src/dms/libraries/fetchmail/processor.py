@@ -1,12 +1,20 @@
 """
-Fetchmail library for Adlibre DMS
+Module: Fetchmail library for Adlibre DMS
+Project: Adlibre DMS
+Copyright: Adlibre Pty Ltd 2012
+License: See LICENSE for license information
+Author: Iurii Garmash (yuri@adlibre.com.au)
+
+Details:
 
 Processor Module
-Role: Handles ready and downloaded message. 
+
+Role:
+
+Handles ready and downloaded message.
 It does In memory message processing and saves attachments to directory,
 specified in settings
 
-Author: Iurii Garmash (garmon1@gmail.com)
 """
 
 import email, os

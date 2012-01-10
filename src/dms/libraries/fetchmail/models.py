@@ -1,8 +1,15 @@
 """
-Fetchmail library for Adlibre DMS
+Module: Fetchmail library for Adlibre DMS
+Project: Adlibre DMS
+Copyright: Adlibre Pty Ltd 2012
+License: See LICENSE for license information
+Author: Iurii Garmash (yuri@adlibre.com.au)
+
+Details:
 
 Main objects module.
-Role: Main library logic for programtic manipulations
+
+Role: Main library logic for programmatic manipulations
 Defines Fetcher_object() class for programmatic library manipulations 
 and 2 main object types used in the library: Filter_object() and Email_object()
 
@@ -35,7 +42,6 @@ Email is widely used in processor to store default mailbox values for processing
 To understand how to create Filter and Email objects correctly please examine app_settings.py
 and follow comments there. They must help you to understand most use cases.
 
-Author: Iurii Garmash (garmon1@gmail.com)
 """
 
 from libraries.fetchmail.fetchmail_lib import *

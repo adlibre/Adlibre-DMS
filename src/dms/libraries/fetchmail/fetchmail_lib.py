@@ -1,5 +1,11 @@
 """
-Fetchmail library for Adlibre DMS
+Module: Fetchmail library for Adlibre DMS
+Project: Adlibre DMS
+Copyright: Adlibre Pty Ltd 2012
+License: See LICENSE for license information
+Author: Iurii Garmash (yuri@adlibre.com.au)
+
+Details:
 
 Main Library Module
 
@@ -12,7 +18,6 @@ or with subject ('accounting report' or 'file:')...
 Please see models.py documentation of this library for usage examples
 Please see app_settings.py documentation for useful settings to be set
 
-Author: Iurii Garmash (garmon1@gmail.com)
 """
 
 from libraries.fetchmail.app_settings import PROTOCOL_TYPE_IMAP4, PROTOCOL_TYPE_POP3

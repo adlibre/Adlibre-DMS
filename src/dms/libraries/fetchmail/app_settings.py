@@ -1,14 +1,17 @@
 """
-Fetchmail library for Adlibre DMS
+Module: Fetchmail library for Adlibre DMS
+Project: Adlibre DMS
+Copyright: Adlibre Pty Ltd 2012
+License: See LICENSE for license information
+Author: Iurii Garmash (yuri@adlibre.com.au)
 
-Settings Module
+Details: Settings Module
 Role: Be able to setup mailbox and filters once in config file.
 
 Main interest part is User settings.
 Here you can define a mailbox and filter rules.
 
 It's a standard Python module. No more, no less.
-Author: Iurii Garmash (garmon1@gmail.com)
 """
 
 from django.conf import settings

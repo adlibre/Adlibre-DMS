@@ -1,10 +1,16 @@
 """
-Fetchmail library for Adlibre DMS
+Module: Fetchmail library for Adlibre DMS
+Project: Adlibre DMS
+Copyright: Adlibre Pty Ltd 2012
+License: See LICENSE for license information
+Author: Iurii Garmash (yuri@adlibre.com.au)
 
-Handler for IMAP4 protocol. 
-Role: Authenticaes, Aplies filters, Downloads messages, Deletes from server
+Details:
 
-Author: Iurii Garmash (garmon1@gmail.com)
+Handler for IMAP4 protocol.
+
+Role: Authenticates, Applies filters, Downloads messages, Deletes from server
+
 """
 from libraries.fetchmail.app_settings import ENCRYPTION_EXISTS, DEFAULT_IMAP4_SSL_PORT, ENCRYPTION_ABSENT
 from libraries.fetchmail.app_settings import DEFAULT_IMAP4_PORT, DEFAULT_FILTER_SENDER_NAME, DEFAULT_FILTER_SUBJECT_NAME

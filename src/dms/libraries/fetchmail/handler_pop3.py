@@ -1,10 +1,16 @@
 """
-Fetchmail library for Adlibre DMS
+Module: Fetchmail library for Adlibre DMS
+Project: Adlibre DMS
+Copyright: Adlibre Pty Ltd 2012
+License: See LICENSE for license information
+Author: Iurii Garmash (yuri@adlibre.com.au)
 
-Handler for POP3 protocol. 
-Role: Authenticaes, Aplies filters, Downloads messages, Deletes from server
+Details:
 
-Author: Iurii Garmash (garmon1@gmail.com)
+Handler for POP3 protocol.
+
+Role: Authenticates, Applies filters, Downloads messages, Deletes from server
+
 """
 
 from libraries.fetchmail.app_settings import ENCRYPTION_EXISTS, DEFAULT_POP3_SSL_PORT, ENCRYPTION_ABSENT, DEFAULT_POP3_PORT
