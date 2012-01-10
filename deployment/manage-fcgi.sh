@@ -5,14 +5,16 @@
 #
 # Uses UNIX sockets for FCGI
 #
+# Version 2.1
 
 # Project Specific Config
 PROJNAME='dms'
 WEB_USER='wwwpub'
 
-MAXSPARE=1
-MINSPARE=1
+MAXSPARE=2
+MINSPARE=2
 MAXCHILDREN=5
+UMASK=007
 
 CWD=$(cd ${0%/*} && pwd -P)
 PROJDIR=$(cd $CWD/../ && pwd -P) # Root of our project
@@ -38,7 +40,7 @@ function startit {
         RC=128
     else
         . ${BINDIR}/activate
-        python ${SRCDIR}/manage.py runfcgi method=threaded minspare=${MINSPARE} maxspare=${MAXSPARE} maxchildren=${MAXCHILDREN} socket=$SOCKET pidfile=${WPIDFILE} --settings=${SETTINGS}
+        python ${SRCDIR}/manage.py runfcgi method=threaded minspare=${MINSPARE} maxspare=${MAXSPARE} maxchildren=${MAXCHILDREN} socket=$SOCKET pidfile=${WPIDFILE} umask=${UMASK} --settings=${SETTINGS}
         RC=$?
         echo "Started."
     fi
