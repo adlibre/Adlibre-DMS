@@ -1,10 +1,14 @@
 """
-Fetchmail library for Adlibre DMS
+Module: Fetchmail library for Adlibre DMS
+Project: Adlibre DMS
+Copyright: Adlibre Pty Ltd 2012
+License: See LICENSE for license information
+Author: Iurii Garmash (yuri@adlibre.com.au)
 
-Main Settings Processor
+Details: Main Settings Processor
+
 Role: Converts settings from easy readable to "library suitable" format.
 
-Author: Iurii Garmash (garmon1@gmail.com)
 """
 from libraries.fetchmail.models import Email_object, Filter_object
 from libraries.fetchmail.app_settings import USE_ALL_FILTERS_STRING, FETCH_EMAILS, FETCH_FILTERS
