@@ -24,6 +24,21 @@ Test data
 username = 'admin'
 password = 'admin'
 
+# documents should be added to this list
+# if manually added to 'fixtures/testdata' directory,
+# or they will be added to project by every test run and left there...
+unlisted_files_used = [
+    'test_document_template.odt',
+    'test_no_doccode.pdf',
+    '2011-01-27-1.tif',
+    '2011-01-28-12.tif',
+    'abcde888.pdf',
+    'abcde999.pdf',
+    '10001.txt',
+    '10006.txt',
+    '101.txt',
+]
+
 adlibre_invoices_rule_id = 1
 documents = ('ADL-1111', 'ADL-1234', 'ADL-2222',)
 documents_missing = ()
@@ -193,4 +208,46 @@ class MiscTest(AdlibreTestCase):
         response = self.client.get(url)
         self.assertContains(response, 'Bad Request', status_code = 400)
 
+    def test_z_cleanup(self):
+        # Name of this test should be alphabetically last
+        # to be ran after all tests finished
+        
+        # files cleanup using API
+        url = reverse("api_file")
+        self.client.login(username=username, password=password)
+        # building proper cleanup list for normal docs
+        cleanup_docs_list = []
+        for doc in documents, [adl_invoice_name]:
+            cleanup_docs_list.append(doc)
+        # cleaning up simple docs
+        for list in cleanup_docs_list:
+            for doc in list:
+                data = { 'filename': doc, }
+                response = self.client.delete(url, data)
+                self.assertEqual(response.status_code, 204)
+
+        # cleaning up no doccode docs
+        for doc in no_doccode_docs:
+            data = { 'filename': doc + '.pdf' }
+            response = self.client.delete(url, data)
+            self.assertEqual(response.status_code, 204)
+
+        # building proper list for docs that contain HASH
+        for doc, hash in documents_hash:
+            data = { 'filename': doc, }
+            response = self.client.delete(url, data)
+            self.assertEqual(response.status_code, 204)
+
+        # unlisted docs cleanup
+        for doc in unlisted_files_used:
+            data = { 'filename': doc, }
+            response = self.client.delete(url, data)
+            self.assertEqual(response.status_code, 204)
+
+        # MAC specific cleanup:
+        try:
+            data = { 'filename': '.DS_Store' }
+            response = self.client.delete(url, data)
+        except:
+            pass
 

@@ -25,6 +25,13 @@ documents_tif = ('2011-01-27-1', '2011-01-28-12',)
 documents_missing = ('ADL-8888', 'ADL-9999',)
 documents_norule = ('ABC12345678',)
 
+unlisted_files_used = [
+    'test_document_template.odt',
+    'test_no_doccode.pdf',
+    'ADL-12345.pdf',
+    'ADL-54321.pdf',
+]
+
 documents_hash = [
     ('abcde111', 'cad121990e04dcd5631a9239b3467ee9'),
     ('abcde123', 'bc3c5035805bb8098e5c164c5e1826da'),
@@ -51,6 +58,47 @@ class ViewTest(AdlibreTestCase):
         data = { 'file': open(filename, 'r'), }
         response = self.client.post(url, data)
         return response
+
+    def test_z_cleaup(self):
+        # Name of this test should be alphabetically last
+        # to be ran after all tests finished
+        
+        # files cleanup using API
+        url = reverse("api_file")
+        self.client.login(username=username, password=password)
+        # building proper cleanup list for normal docs
+        cleanup_docs_list = []
+        for doc in documents_pdf, documents_tif, documents_txt:
+            cleanup_docs_list.append(doc)
+        #cleaning up simple docs
+        for list in cleanup_docs_list:
+            for doc in list:
+                data = { 'filename': doc, }
+                response = self.client.delete(url, data)
+                self.assertEqual(response.status_code, 204)
+
+        #building proper list for docs that contain HASH
+        cleanup_docs_list = []
+        for doc in documents_hash, documents_missing_hash:
+            cleanup_docs_list.append(doc)
+        for list in cleanup_docs_list:
+            for doc, hash in list:
+                data = { 'filename': doc, }
+                response = self.client.delete(url, data)
+                self.assertEqual(response.status_code, 204)
+
+        # unlisted docs cleanup
+        for doc in unlisted_files_used:
+            data = { 'filename': doc, }
+            response = self.client.delete(url, data)
+            self.assertEqual(response.status_code, 204)
+
+        # MAC specific cleanup:
+        try:
+            data = { 'filename': '.DS_Store' }
+            response = self.client.delete(url, data)
+        except:
+            pass
 
     def test_upload_files(self):
         for doc_set, ext in [(documents_pdf, 'pdf'), (documents_txt, 'txt'), (documents_tif, 'tif') ]:
@@ -132,7 +180,6 @@ class ViewTest(AdlibreTestCase):
             url = '/files/' + str(r) + '/'
             response = self.client.get(url)
             self.assertContains(response, '', status_code=404)
-
 
 class SettingsTest(AdlibreTestCase):
 
