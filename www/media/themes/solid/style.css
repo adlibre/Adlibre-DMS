@@ -30,6 +30,7 @@ body {
     line-height:1.5;
     color: #3B3F41;
 	font-size:14px;
+    background-image: url(brushed_alu.png);
 }
 
 a:link {color:#E78107; text-decoration: underline; outline: none;}

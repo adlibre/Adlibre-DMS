@@ -28,12 +28,12 @@ a:hover {
 
 h1 {
     margin:25px 0px;
-    color: #ff5d06; /*#0066cc;*/
+    color: #f68600;
     text-shadow: 1px 1px 1px grey;
 }
 
 h2 {
-    color: #db4d00;
+    color: #f68600;
     border-bottom:1px solid #e1e1e1;
     margin:20px 0px;
 }
@@ -82,7 +82,7 @@ table td ul { margin:0px; }
 }
 
 #header {
-    border-bottom:1px solid #ff5d06; /*#0066cc;  #e1e1e1;*/
+    border-bottom:1px solid #f68600;
     padding:0px 10px;
     font-size:13px;
     margin-bottom:25px;
