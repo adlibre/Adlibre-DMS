@@ -1,20 +1,21 @@
 {% extends 'site_base.html' %}
+{% load i18n %}
 
 {% block logo %}{% endblock %}
 
 {% block header %}
-    <span><a href="/">Home</a></span>
+    <span><a href="/">{% trans 'Home' %}</a></span>
     {% if user.is_authenticated %}
-    Logged in as {{ user }}
+    {% trans 'Loggin in as' %} {{ user }}
     {% if user.is_staff %}
-    &middot; <a href="{% url files_index %}">Files</a>
-    &middot; <a href="{% url setting %}">Settings</a>
-    &middot; <a href="{% url plugins %}">Plugins</a>
+    &middot; <a href="{% url files_index %}">{% trans 'Files' %}</a>
+    &middot; <a href="{% url setting %}">{% trans 'Settings' %}</a>
+    &middot; <a href="{% url plugins %}">{% trans 'Plugins' %}</a>
     {% endif %}
-    &middot; <a href="{% url logout %}">Log out</a>
+    &middot; <a href="{% url logout %}">{% trans 'Log out' %}</a>
     {% else %}
-    Logged out
-    &middot; <a href="{% url login %}">Log in</a>
+    {% trans 'Logged out' %}
+    &middot; <a href="{% url login %}">{% trans 'Log in' %}</a>
     {% endif %}
 {% endblock %}
 
@@ -33,16 +34,9 @@
 {% endblock %}
 
 {% block footer %}
-    <p>
-        Adlibre DMS - &copy; Adlibre {% now "Y" %}
-        &middot; <a href="{% url about_documentation %}">About</a>
-        &middot; <a href="{% url documentation_index %}">Docs</a>
-        &middot; <a href="{% url upload %}">Upload</a>
-        <span>Version: 1.0. {% if user.is_authenticated %}Logged in as {{ user }}{% else %}Logged out{% endif %}.</span>
-    </p>
+    {{ block.super }}
 {% endblock %}
 
 {% block javascript %}
-    <script type="text/javascript" language="javascript" charset="utf-8" src="{{ MEDIA_URL }}js/jquery.tools.min.js"></script>
-    <script type="text/javascript" language="javascript" charset="utf-8" src="{{ MEDIA_URL }}js/script.js"></script>
+    {{ block.super }}
 {% endblock %}

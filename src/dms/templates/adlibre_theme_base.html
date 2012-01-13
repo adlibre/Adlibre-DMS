@@ -1,22 +1,23 @@
 {% extends 'site_base.html' %}
+{% load i18n %}
 
 {% block logo %}
-    <a href="/"><img src="{{ MEDIA_URL }}themes/adlibre/adlibre-dms-logo.png" title="Adlibre DMS" alt="Adlibre DMS" /></a>
+    <a href="/"><img src="{{ MEDIA_URL }}themes/adlibre/adlibre-dms-logo.png" title="{% trans 'Adlibre DMS' %}" alt="{% trans 'Adlibre DMS' %}" /></a>
 {% endblock %}
 
 {% block header %}
     <div id="menu">
         <ul>
-            <li class="home"><a href="/">Home</a></li>
+            <li class="home"><a href="/">{% trans 'Home' %}</a></li>
             {% if user.is_staff %}
-            <li class="files"><a href="{% url files_index %}">Files</a></li>
-            <li class="settings"><a href="{% url setting %}">Settings</a></li>
-            <li class="plugins"><a href="{% url plugins %}">Plugins</a></li>
+            <li class="files"><a href="{% url files_index %}">{% trans 'Files' %}</a></li>
+            <li class="settings"><a href="{% url setting %}">{% trans 'Settings' %}</a></li>
+            <li class="plugins"><a href="{% url plugins %}">{% trans 'Plugins' %}</a></li>
             {% endif %}
             {% if user.is_authenticated %}
-            <li class="logout"><a href="{% url logout %}">Log out</a></li>
+            <li class="logout"><a href="{% url logout %}">{% trans 'Log out' %}</a></li>
             {% else %}
-            <li class="login"><a href="{% url login %}">Log in</a></li>
+            <li class="login"><a href="{% url login %}">{% trans 'Log in' %}</a></li>
             {% endif %}
         </ul>
     </div>
@@ -37,18 +38,11 @@
 {% endblock %}
 
 {% block footer %}
-    <p>
-        Adlibre DMS - &copy; Adlibre {% now "Y" %}
-        &middot; <a href="{% url about_documentation %}">About</a>
-        &middot; <a href="{% url documentation_index %}">Docs</a>
-        &middot; <a href="{% url upload %}">Upload</a>
-        <span>Version: 1.0. {% if user.is_authenticated %}Logged in as {{ user }}{% else %}Logged out{% endif %}.</span>
-    </p>
+    {{ block.super }}
 {% endblock %}
 
 {% block javascript %}
-    <script type="text/javascript" language="javascript" charset="utf-8" src="{{ MEDIA_URL }}js/jquery.tools.min.js"></script>
-    <script type="text/javascript" language="javascript" charset="utf-8" src="{{ MEDIA_URL }}js/script.js"></script>
+    {{ block.super }}
 {% endblock %}
 
 
