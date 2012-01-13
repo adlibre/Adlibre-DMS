@@ -1,10 +1,14 @@
+{% load i18n %}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	<title>{% block title %}{% endblock %} - Adlibre DMS</title>
+	<title>{% block title %}Welcome{% endblock %} - {% trans 'Adlibre DMS' %}</title>
 	<link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}themes/{{ THEME_NAME }}/style.css" />
     <link rel="shortcut icon" href="{{ MEDIA_URL }}favicon.ico" />
+    <script type="text/javascript" language="javascript" charset="utf-8" src="{{ MEDIA_URL }}js/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" language="javascript" charset="utf-8" src="{{ MEDIA_URL }}js/jquery.tools.min.js"></script>
+    <script type="text/javascript" language="javascript" charset="utf-8" src="{{ MEDIA_URL }}js/script.js"></script>
     {%block extra_head%}{%endblock%}
 </head>
 <body class="{% block body_class %}{% endblock %}">
@@ -19,9 +23,20 @@
         {% block body %}{% endblock %}
     </div>
     <div id="footer">
-        {% block footer %}{% endblock %}
+        {% block footer %}
+            <p>
+                {% trans 'Adlibre DMS' %} - &copy; Adlibre {% now "Y" %}
+                &middot; <a href="{% url about_documentation %}">{% trans 'About' %}</a>
+                &middot; <a href="{% url documentation_index %}">{% trans 'Docs' %}</a>
+                &middot; <a href="{% url upload %}">{% trans 'Upload' %}</a>
+                <span>{% trans 'Version' %}: {{ PRODUCT_VERSION }}. {% if user.is_authenticated %}{% trans 'Logged in as' %} {{ user }}{% else %}{% trans 'Logged out' %}{% endif %}.</span>
+            </p>
+        {% endblock %}
 	</div>
-	{% block javascript %}{% endblock %}
+
+    {% block javascript %}
+
+    {% endblock %}
 </div>
 </body>
 </html>

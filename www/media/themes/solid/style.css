@@ -85,7 +85,8 @@ option {
     padding-right: 10px;
 }
 #footer span {
-    color: #EFEFEF;
+    color: #CCC;
+    font-weight: normal;
     float: right;
 }
 

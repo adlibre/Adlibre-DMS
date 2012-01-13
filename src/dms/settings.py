@@ -112,10 +112,11 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.media',
     'django.core.context_processors.static',
     'django.contrib.messages.context_processors.messages',
-     # Adlibre DMS custom
-     'dms.context_processors.demo',
-     'dms.context_processors.theme_name',
-     'dms.context_processors.theme_template_base',
+    # Adlibre DMS custom
+    'dms.context_processors.demo',
+    'dms.context_processors.theme_name',
+    'dms.context_processors.theme_template_base',
+    'dms.context_processors.product_version',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -195,6 +196,10 @@ LOGIN_REDIRECT_URL = '/'
 APPEND_SLASH = False # Stop Django from adding slashes to urls
 
 RESTRUCTUREDTEXT_FILTER_SETTINGS = { 'doctitle_xform': 0, } # stop first heading being munged for page title.
+
+# Adlibre DMS Specific Settings
+
+PRODUCT_VERSION = '1.0'
 
 # name of template theme, used by context_processors.py.
 THEME_NAME = 'solid' # 'adlibre' or 'basic' or 'solid'
