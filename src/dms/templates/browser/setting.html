@@ -18,7 +18,7 @@
   <tr>
       <th class="first">No</th>
       <th>DocCode</th>
-      <th style="width: 50%">Plugins</th>
+      <th width="50%">Plugins</th>
       <th>Active</th>
       <th class="last">Edit</th>
   </tr>
@@ -27,32 +27,30 @@
       <td>{{ forloop.counter }}</td>
       <td>{{ rule.get_doccode.title }} - {{ rule.get_doccode.description }}</td>
       <td>
-        <table>
-        <tr><td><h4>Pre-Storage Workflow</h4>
-        {% with rule.get_before_storage_plugins as plugins %}
-        {%include "browser/include/workflow_plugins.html"%}
-        {%endwith%}</td></tr>
+          <h4>Pre-Storage Workflow</h4>
+          {% with rule.get_before_storage_plugins as plugins %}
+              {%include "browser/include/workflow_plugins.html"%}
+          {%endwith%}
 
-        <tr><td><h4>Storage Workflow</h4>
-        {% with rule.get_storage_plugins as plugins %}
-        {%include "browser/include/workflow_plugins.html"%}
-        {%endwith%}</td></tr>
+          <h4>Storage Workflow</h4>
+          {% with rule.get_storage_plugins as plugins %}
+              {%include "browser/include/workflow_plugins.html"%}
+          {%endwith%}
 
-        <tr><td><h4>Retrieval Workflow</h4>
-        {% with rule.get_before_retrieval_plugins as plugins %}
-        {%include "browser/include/workflow_plugins.html"%}
-        {%endwith%}</td></tr>
+          <h4>Retrieval Workflow</h4>
+          {% with rule.get_before_retrieval_plugins as plugins %}
+              {%include "browser/include/workflow_plugins.html"%}
+          {%endwith%}
 
-        <tr><td><h4>Modification Workflow</h4>
-        {% with rule.get_before_update_plugins as plugins %}
-        {%include "browser/include/workflow_plugins.html"%}
-        {%endwith%}</td></tr>
+          <h4>Modification Workflow</h4>
+          {% with rule.get_before_update_plugins as plugins %}
+              {%include "browser/include/workflow_plugins.html"%}
+          {%endwith%}
 
-        <tr><td><h4>Removal Workflow</h4>
-        {% with rule.get_before_removal_plugins as plugins %}
-        {%include "browser/include/workflow_plugins.html"%}
-        {%endwith%}</td></tr>
-        </table>
+          <h4>Removal Workflow</h4>
+          {% with rule.get_before_removal_plugins as plugins %}
+              {%include "browser/include/workflow_plugins.html"%}
+          {%endwith%}
       </td>
       <td>{{ rule.active }} | <a href="{% url toggle_rule_state rule.id %}">toggle</a></td>
       <td><a href="{% url edit_setting rule.id %}">Edit</a></td>

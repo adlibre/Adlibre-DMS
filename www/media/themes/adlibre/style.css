@@ -150,6 +150,8 @@ label {
     display:none;
 }
 
+#settings ul {list-style: none; padding: 5px;}
+#settings ul li{padding-left: 15px;}
 
 /* new */
 
@@ -161,7 +163,7 @@ label {
 
 #header {
     height: 36px;
-    background-image:url("/media/themes/adlibre/menu_gradient.png");
+    background-image:url("menu_gradient.png");
     background-repeat:repeat-x;
     background-color: #dcdcdc;
     border-top: 4px solid grey;

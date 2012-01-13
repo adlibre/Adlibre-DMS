@@ -143,3 +143,5 @@ label {
 .hide {
     display:none;
 }
+
+#settings ul {list-style: none;}

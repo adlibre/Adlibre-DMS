@@ -20,7 +20,7 @@ table{width:100%; table-layout:auto; border-collapse:collapse;}
 	table td{border-top:1px solid #EBEBEC; font-size:13px; color:#3B3F41;}
 	table th.first{background:#F9A749 url(table-rounded-left.jpg) 0 0 no-repeat;}
 	table th.last{background:#F9A749 url(table-rounded-right.jpg) 100% 0 no-repeat; border:none;}	
-	table tr:hover td{background-color:#FFF9F3;}
+	table tr:hover td{background-color: rgba(245,245,245,0.4);}
 	table a:link{color:#3B3F41;}
 	table tr:hover a:link {color:#E78107;}
 	table ul{margin:0; list-style-position:inside;}
@@ -116,7 +116,10 @@ label {
 #settings th.last{width:40px;}
 #settings th.first{padding-left:15px;}
 #settings th,
-#settings td{padding:5px 0 5px 10px;}
+#settings td{padding:5px;}
+
+#settings ul {padding: 5px;}
+#settings ul li{padding-left: 15px;}
 
 .hide {
     display:none;
