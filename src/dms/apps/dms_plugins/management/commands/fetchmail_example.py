@@ -1,9 +1,16 @@
-# Mail management script for Adlibre DMS
-#
-# Example usage of "fetchmail" library.
-# must be run under full access privileges to write files
-#
-# Author: Iurii Garmash (garmon1@gmail.com)
+"""
+Module: Mail management script for Adlibre DMS
+Project: Adlibre DMS
+Copyright: Adlibre Pty Ltd 2011
+License: See LICENSE for license information
+
+Description:
+
+ Example usage of "fetchmail" library.
+ must be run under full access privileges to write files
+
+Author: Iurii Garmash (yuir@adlibre.com.au)
+"""
 
 from django.core.management.base import BaseCommand
 from libraries.fetchmail.models import Fetcher_object, Email_object, Filter_object
