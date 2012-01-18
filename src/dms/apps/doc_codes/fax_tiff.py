@@ -1,3 +1,10 @@
+"""
+Module: Example DocCodes for Adlibre DMS
+Project: Adlibre DMS
+Copyright: Adlibre Pty Ltd 2012
+License: See LICENSE for license information
+"""
+
 import re
 
 from doc_codes import Doccode

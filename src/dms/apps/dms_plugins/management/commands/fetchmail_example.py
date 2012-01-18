@@ -9,7 +9,7 @@ Description:
  Example usage of "fetchmail" library.
  must be run under full access privileges to write files
 
-Author: Iurii Garmash (yuir@adlibre.com.au)
+Author: Iurii Garmash (yuri@adlibre.com.au)
 """
 
 from django.core.management.base import BaseCommand
