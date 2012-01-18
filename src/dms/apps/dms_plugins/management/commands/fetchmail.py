@@ -1,11 +1,18 @@
-# Mail management script for Adlibre DMS
-#
-# - Authenticates with IMAP4/POP3 protocols
-# - Searches mailbox for messages based on provided filters
-# - Saves attachments to temporary folder
-# - Default settings stored in libraries/fetchmail/app_settings.py
-#
-# Author: Iurii Garmash (garmon1@gmail.com)
+"""
+Module: Mail management script for Adlibre DMS
+Project: Adlibre DMS
+Copyright: Adlibre Pty Ltd 2011
+License: See LICENSE for license information
+
+Description:
+
+ - Authenticates with IMAP4/POP3 protocols
+ - Searches mailbox for messages based on provided filters
+ - Saves attachments to temporary folder
+ - Default settings stored in libraries/fetchmail/app_settings.py
+
+Author: Iurii Garmash (yuir@adlibre.com.au)
+"""
 
 from django.core.management.base import BaseCommand
 from libraries.fetchmail.fetchmail_lib import process_email
