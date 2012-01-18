@@ -10,10 +10,10 @@ class AdlibreTestCase(TestCase):
     fixtures = ['initial_data.json',]
     
     def _fixture_setup(self, *args, **kwargs):
-        #dirty hack to have "our" plugins with correct ids, so that mappings had correct plugin relations
+        # KLUDGE: dirty hack to have "our" plugins with correct ids, so that mappings had correct plugin relations
         models.PluginPoint.objects.all().delete()
         models.Plugin.objects.all().delete()
-        #dirty hack ends
+        # KLUDGE:  dirty hack ends
         super(AdlibreTestCase, self)._fixture_setup(*args, **kwargs)
         call_command('import_documents', 
                         os.path.join(settings.FIXTURE_DIRS[0], 'testdata'), silent = True)
