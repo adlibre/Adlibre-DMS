@@ -75,3 +75,46 @@ You will need to specify Python version if more than one installed eg. --python 
 # pip install -r deployment/pip-req.txt
 # ./src/dms/manage.py syncdb
 # ./src/dms/manage.py collectstatic
+
+Initial Data
+------------
+
+Here is an info about how to populate DB with some
+initial data to play with. To do that copy initial test
+fixtures and make syncdb...
+
+Do something like this at the fixtures directory,
+after that leave to source directory and sync your base:
+$ cp test_initial_data.json initial_data.json
+$ cd ../src/dms
+$ python manage.py syncdb
+
+Output will be something like this:
+$ python manage.py syncdb
+Creating tables ...
+Installing custom SQL ...
+Installing indexes ...
+Installed 73 object(s) from 1 fixture(s)
+
+It will mean you have sample initial data installed to your DB.
+
+Sample initial data include superuser:
+
+login:     admin
+password:  admin
+
+Good idea would be to delete that copied ".json" file, jus in case...
+
+Now you may add some test data to the system.
+DMS has test files in "fixtures/testdata" directory.
+You can run builtin "import_documents" command,
+pointing out to this "testdata" directory.
+It may look something like this:
+
+$ python manage.py import_documents ../../fixtures/testdata/
+
+This will populate documents folder with initial files,
+imported by console command. You may run it several times to get
+as much revisions, as you run the command.
+
+Note, they will be deleted, storing with standard names on tests run at least once...
