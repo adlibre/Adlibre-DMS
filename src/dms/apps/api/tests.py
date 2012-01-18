@@ -211,7 +211,6 @@ class MiscTest(AdlibreTestCase):
     def test_z_cleanup(self):
         # Name of this test should be alphabetically last
         # to be ran after all tests finished
-        
         # files cleanup using API
         url = reverse("api_file")
         self.client.login(username=username, password=password)
