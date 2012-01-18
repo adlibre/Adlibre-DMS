@@ -11,7 +11,7 @@ Description:
  - Saves attachments to temporary folder
  - Default settings stored in libraries/fetchmail/app_settings.py
 
-Author: Iurii Garmash (yuir@adlibre.com.au)
+Author: Iurii Garmash (yuri@adlibre.com.au)
 """
 
 from django.core.management.base import BaseCommand
