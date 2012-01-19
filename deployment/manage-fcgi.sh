@@ -5,7 +5,7 @@
 #
 # Uses UNIX sockets for FCGI
 #
-# Version 2.1
+# Version 2.2
 
 # Project Specific Config
 PROJNAME='dms'
@@ -13,7 +13,7 @@ WEB_USER='wwwpub'
 
 MAXSPARE=2
 MINSPARE=2
-MAXCHILDREN=5
+MAXCHILDREN=10
 UMASK=007
 
 CWD=$(cd ${0%/*} && pwd -P)
