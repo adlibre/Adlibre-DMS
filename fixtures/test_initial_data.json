@@ -827,5 +827,77 @@
             ], 
             "doccode": "1000"
         }
+    },
+    {
+        "pk": 1,
+        "model": "doc_codes.doccodemodel",
+        "fields": {
+            "regex": "",
+            "description": "This doccode is assigned to the files that have no other suitable doccode.",
+            "title": "No doccode", 
+            "active": true,
+            "doccode_id": 1000,
+            "no_doccode": true
+        }
+    },
+    {
+        "pk": 2,
+        "model": "doc_codes.doccodemodel",
+        "fields": {
+            "regex": "[a-z]{5}[0-9]{3}",
+            "description": "[a-z]{5}[0-9]{3}",
+            "title": "Test PDFs",
+            "active": true,
+            "doccode_id": 1,
+            "no_doccode": false
+        }
+    },
+    {
+        "pk": 3,
+        "model": "doc_codes.doccodemodel",
+        "fields": {
+            "regex": "ADL-[0-9]{4}",
+            "description": "ADL-[0-9]{4}]",
+            "title": "Adlibre Invoices",
+            "active": true,
+            "doccode_id": 2,
+            "no_doccode": false
+        }
+    },
+    {
+        "pk": 4,
+        "model": "doc_codes.doccodemodel",
+        "fields": {
+            "regex": "[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{1,9}",
+            "description": "[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{1,9}",
+            "title": "Fax Tiff documents",
+            "active": true,
+            "doccode_id": 4,
+            "no_doccode": false
+        }
+    },
+    {
+        "pk": 5,
+        "model": "doc_codes.doccodemodel",
+        "fields": {
+            "regex": "[0-9]{1,6}",
+            "description": "[0-9]{1,6}",
+            "title": "Project Gutenberg eBooks",
+            "active": true,
+            "doccode_id": 3,
+            "no_doccode": false
+        }
+    },
+    {
+        "pk": 6,
+        "model": "doc_codes.doccodemodel",
+        "fields": {
+            "regex": "[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{4}",
+            "description": "[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{4}",
+            "title": "Credit Card Scans",
+            "active": true,
+            "doccode_id": 5,
+            "no_doccode": false
+        }
     }
 ]

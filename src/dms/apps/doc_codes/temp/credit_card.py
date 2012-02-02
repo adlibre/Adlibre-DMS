@@ -32,7 +32,3 @@ class CreditCardDoccode(Doccode):
         d = [ document_name[0:4], document_name[5:9], document_name[10:13], document_name[14:18], document_name ]
         return d
 
-    # Credit: http://en.wikipedia.org/wiki/Luhn_algorithm
-    def is_luhn_valid(self, cc):
-        num = [int(x) for x in str(cc)]
-        return sum(num[::-2] + [sum(divmod(d * 2, 10)) for d in num[-2::-2]]) % 10 == 0
