@@ -9,7 +9,9 @@ from taggit.managers import TaggableManager
 
 from dms_plugins import pluginpoints
 from doc_codes import DoccodeManagerInstance
-DOCCODE_CHOICES = map(lambda x: (str(x[0]), x[1].get_title()), DoccodeManagerInstance.get_doccodes().items())
+from doc_codes.models import DoccodeModel
+
+DOCCODE_CHOICES = map(lambda doccode: (str(doccode.doccode_id), doccode.title), DoccodeManagerInstance.get_doccodes())
 
 class DoccodePluginMapping(models.Model):
     doccode = models.CharField(choices = DOCCODE_CHOICES, max_length = 64)
@@ -40,16 +42,21 @@ class DoccodePluginMapping(models.Model):
         return self.get_name()
 
     def get_name(self):
-        doccode_name = "ERROR"
+        doccode_name = "No name given"
         try:
-            doccode_name = self.get_doccode().title
+            doccode_name = DoccodeModel.objects.get(doccode_id=self.doccode).title
         except (KeyError, AttributeError):
             pass
         return unicode(doccode_name)
     name = property(get_name)
 
     def get_doccode(self):
-        return DoccodeManagerInstance.get_doccodes()[int(self.doccode)]
+        doccodes = DoccodeManagerInstance.get_doccodes()
+        try:
+            doccode = doccodes[int(self.doccode)]
+        except:
+            doccode = doccodes.filter(doccode_id=self.doccode)[0]
+        return doccode
 
     def get_before_storage_plugins(self):
         return self.before_storage_plugins.all().order_by('index')

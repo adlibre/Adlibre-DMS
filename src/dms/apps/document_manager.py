@@ -32,8 +32,8 @@ class DocumentManager(object):
         doccode = document.get_doccode().get_id()
         #print "DOCCODE: %s" % doccode
         mapping = models.DoccodePluginMapping.objects.filter(
-                    doccode = document.get_doccode().get_id(),
-                    active = True)
+                    doccode = doccode,
+                    active=True)
         if mapping.count():
             mapping = mapping[0]
         else:

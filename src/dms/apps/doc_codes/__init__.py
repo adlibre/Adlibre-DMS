@@ -1,3 +1,11 @@
+"""
+Module: DocCodes for Adlibre DMS
+Project: Adlibre DMS
+Copyright: Adlibre Pty Ltd 2012
+License: See LICENSE for license information
+"""
+from models import DoccodeModel
+
 class Doccode(object):
     no_doccode = False
 
@@ -28,48 +36,54 @@ class NoDoccode(Doccode):
 
 class DoccodeManager(object):
     def __init__(self):
-        self.doccodes = {}
+        self.doccodes = DoccodeModel.objects.all()
 
-    def register(self, doccode):
-        self.doccodes[doccode.get_id()] = doccode
+#    def register(self, doccode):
+#        self.doccodes[doccode.get_id()] = doccode
 
     def find_for_string(self, string):
         res = NoDoccode()
-        for doccode in self.get_doccodes().values():
+        for doccode in self.doccodes:
             #print "%s is validated by %s: %s" % (string, doccode, doccode.validate(string))
             if doccode.validate(string):
                 res = doccode
                 break
+        #print res
         return res
 
     def get_doccodes(self):
-        return self.doccodes
+        return DoccodeModel.objects.all()
 
     def get_doccode_by_name(self, name):
-        for doccode in self.get_doccodes().values():
+        doccodes = self.get_doccodes()
+        try:
+            doccode = doccodes.filter(title=name)[0]
+            return doccode
+        except: pass
+        for doccode in doccodes:
             if doccode.get_title() == name:
                 return doccode
         return None
 
 DoccodeManagerInstance = DoccodeManager()
 
-DoccodeManagerInstance.register(NoDoccode())
+#DoccodeManagerInstance.register(NoDoccode())
 
 # FIXME: These should automatically load when a new class is created / file saved in this plugin directory.
 
-from test_pdf import TestPDFDoccode
-DoccodeManagerInstance.register(TestPDFDoccode())
-
-from adlibre_invoices import AdlibreInvoicesDoccode
-DoccodeManagerInstance.register(AdlibreInvoicesDoccode())
-
-from project_gutenberg_ebooks import ProjectGutenbergEbooksDoccode
-DoccodeManagerInstance.register(ProjectGutenbergEbooksDoccode())
-
-from fax_tiff import FaxTiffDoccode
-DoccodeManagerInstance.register(FaxTiffDoccode())
-
-from credit_card import CreditCardDoccode
-DoccodeManagerInstance.register(CreditCardDoccode())
+#from test_pdf import TestPDFDoccode
+#DoccodeManagerInstance.register(TestPDFDoccode())
+#
+#from adlibre_invoices import AdlibreInvoicesDoccode
+#DoccodeManagerInstance.register(AdlibreInvoicesDoccode())
+#
+#from project_gutenberg_ebooks import ProjectGutenbergEbooksDoccode
+#DoccodeManagerInstance.register(ProjectGutenbergEbooksDoccode())
+#
+#from fax_tiff import FaxTiffDoccode
+#DoccodeManagerInstance.register(FaxTiffDoccode())
+#
+#from credit_card import CreditCardDoccode
+#DoccodeManagerInstance.register(CreditCardDoccode())
 
 
