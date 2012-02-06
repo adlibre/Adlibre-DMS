@@ -39,7 +39,7 @@ class Command(BaseCommand):
                     dirs.remove('.svn')  # don't visit svn directories
                 for fil in files:
                     if not silent:
-                        print 'Importing file: ', fil
+                        self.stdout.write( 'Importing file: "%s"\n' % fil )
                     file_obj = open(os.path.join(root, fil))
                     file_obj.seek(0)
                     try:
