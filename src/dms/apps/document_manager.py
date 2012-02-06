@@ -29,10 +29,10 @@ class DocumentManager(object):
         return mapping
 
     def get_plugin_mapping(self, document):
-        doccode = document.get_doccode().get_id()
+        doccode = document.get_doccode()
         #print "DOCCODE: %s" % doccode
         mapping = models.DoccodePluginMapping.objects.filter(
-                    doccode = doccode,
+                    doccode = str(doccode.doccode_id),
                     active=True)
         if mapping.count():
             mapping = mapping[0]

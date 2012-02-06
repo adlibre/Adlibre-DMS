@@ -11,7 +11,12 @@ from dms_plugins import pluginpoints
 from doc_codes import DoccodeManagerInstance
 from doc_codes.models import DoccodeModel
 
-DOCCODE_CHOICES = map(lambda doccode: (str(doccode.doccode_id), doccode.title), DoccodeManagerInstance.get_doccodes())
+try:
+    DOCCODE_CHOICES = map(lambda doccode: (str(doccode.doccode_id), doccode.title), DoccodeModel.objects.all())
+except:
+    # HACK: syncdb or no initial DoccodeModel exists...
+    DOCCODE_CHOICES = [('1000', 'No Doccode'),]
+    pass
 
 class DoccodePluginMapping(models.Model):
     doccode = models.CharField(choices = DOCCODE_CHOICES, max_length = 64)
