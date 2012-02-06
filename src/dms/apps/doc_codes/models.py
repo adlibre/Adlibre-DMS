@@ -12,6 +12,7 @@ import re
 DOCCODE_TYPES = [
     ('1', 'Default'),
     ('2', 'Credit Card'),
+    ('3', 'Book'),
 ]
 
 class DoccodeModel(models.Model):
@@ -23,7 +24,6 @@ class DoccodeModel(models.Model):
         - no_doccode = True
         - active = True
         - regex = '' (no filename data)
-
     Maybe we need to add function to check and store this model on init.
     For now DMR requires it to be like so.
     """
@@ -32,7 +32,23 @@ class DoccodeModel(models.Model):
     no_doccode = models.BooleanField(default = False)
     title = models.CharField("Doccode Name", max_length=60)
     description = models.TextField("Description", blank=True)
-    regex = models.CharField("Filename Regex", max_length=100, blank=True)
+    regex = models.CharField("Filename Regex", max_length=100, blank=True,
+        help_text="""
+        Regex To validate Filaname against. <br />
+        E.g.: <br />
+        [a-z]{5}[0-9]{3}<br />
+        Will validate documents with name like 'abcde222'<br />
+        """)
+    split_string = models.CharField("Spliting Method", max_length=100, blank=True,
+        help_text="""
+        WARNING! Please assign a Split method for 'Default' doccode type!. <br />
+        It is responsible for 'Folder hierarchy' of files stored.<br />
+        E.g.:<br />
+        Document name: 'abcde222'<br />
+        Spliting method:  ['abcde', '222', 'abcde222']<br />
+        Folder Files Stored: /{{ doccode_path }}/abcde/222/abcde222/<br />
+        Split string: <br />
+        """)
     active = models.BooleanField(default=True)
 
     def __unicode__(self):
@@ -65,26 +81,33 @@ class DoccodeModel(models.Model):
             # no Doccode spliting method
             return ['{{DATE}}']
         else:
-            # TODO: KLUDGE: Here split methods are simply listed below to finish refactoring. NEEDS elegant method.
-            if self.doccode_id == 2:
-                d = [ document_name[0:3], document_name[4:8], document_name]
-            if self.doccode_id == 5:
-                d = [ document_name[0:4], document_name[5:9], document_name[10:13], document_name[14:18], document_name ]
-            if self.doccode_id == 4:
-                d = [ document_name[0:4], document_name[5:7], document_name[8:10], document_name[11:20], document_name]
-            if self.doccode_id == 3:
+            split_method = False
+            if self.doccode_type == '1':
+                # Default Storing Documents
+                # Based on self.split_string
+                if self.split_string:
+                    #print 'Splitstring: ', self.split_string
+                    split_list=self.split_string.split(',')
+                    split_method = []
+                    for pair in split_list:
+                        s,e = pair.split(':')
+                        split_method.append(document_name[int(s):int(e)])
+                    split_method.append(document_name)
+
+            if self.doccode_type == '2':
+                split_method = [ document_name[0:4], document_name[5:9], document_name[10:13], document_name[14:18], document_name ]
+            if self.doccode_type == '3':
                 # Split document_name as per Project Gutenberg method for 'eBook number' not, eText
                 # http://www.gutenberg.org/dirs/00README.TXT
-                d = []
+                split_method = []
                 for i in range(len(document_name)):
-                    d.append(document_name[i-1:i])
-                d.append(document_name)
-            if self.doccode_id == 1:
-                d = [ document_name[0:5], document_name[5:8], document_name]
-            if not d:
-                d='Storage_errors' #folder name for improper doccdes!!!!!
-            #print "Spliting method: ", d
-            return d
+                    split_method.append(document_name[i-1:i])
+                split_method.append(document_name)
+            if not split_method:
+                split_method=['Split_errors',] #folder name for improper doccdes!!!!!
+                print 'Splitting Errors exist! [DoccodeModel.split()]'
+            #print "Spliting method: ", split_method
+            return split_method
 
     def is_luhn_valid(self, cc):
         """
