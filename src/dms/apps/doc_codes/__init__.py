@@ -21,18 +21,18 @@ class Doccode(object):
     def get_directory_name(self):
         return str(self.get_id())
 
-class NoDoccode(Doccode):
-    title = 'No doccode'
-    description = 'This doccode is assigned to the files that have no other suitable doccode.'
-    active = True
-    doccode_id = 1000
-    no_doccode = True
-
-    def validate(self, document_name):
-        return True
-
-    def split(self):
-        return ['{{DATE}}']
+#class NoDoccode(Doccode):
+#    title = 'No doccode'
+#    description = 'This doccode is assigned to the files that have no other suitable doccode.'
+#    active = True
+#    doccode_id = 1000
+#    no_doccode = True
+#
+#    def validate(self, document_name):
+#        return True
+#
+#    def split(self):
+#        return ['{{DATE}}']
 
 class DoccodeManager(object):
     def __init__(self):
@@ -42,13 +42,12 @@ class DoccodeManager(object):
 #        self.doccodes[doccode.get_id()] = doccode
 
     def find_for_string(self, string):
-        res = NoDoccode()
+        res = DoccodeModel.objects.filter(no_doccode = True, active = True)[0]
         for doccode in self.doccodes:
             #print "%s is validated by %s: %s" % (string, doccode, doccode.validate(string))
             if doccode.validate(string):
                 res = doccode
                 break
-        #print res
         return res
 
     def get_doccodes(self):

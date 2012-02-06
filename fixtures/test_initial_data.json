@@ -836,6 +836,7 @@
             "description": "This doccode is assigned to the files that have no other suitable doccode.",
             "title": "No doccode", 
             "active": true,
+            "doccode_type": "1",
             "doccode_id": 1000,
             "no_doccode": true
         }
@@ -848,6 +849,7 @@
             "description": "[a-z]{5}[0-9]{3}",
             "title": "Test PDFs",
             "active": true,
+            "doccode_type": "1",
             "doccode_id": 1,
             "no_doccode": false
         }
@@ -860,6 +862,7 @@
             "description": "ADL-[0-9]{4}]",
             "title": "Adlibre Invoices",
             "active": true,
+            "doccode_type": "1",
             "doccode_id": 2,
             "no_doccode": false
         }
@@ -872,6 +875,7 @@
             "description": "[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{1,9}",
             "title": "Fax Tiff documents",
             "active": true,
+            "doccode_type": "1",
             "doccode_id": 4,
             "no_doccode": false
         }
@@ -884,6 +888,7 @@
             "description": "[0-9]{1,6}",
             "title": "Project Gutenberg eBooks",
             "active": true,
+            "doccode_type": "1",
             "doccode_id": 3,
             "no_doccode": false
         }
@@ -896,6 +901,7 @@
             "description": "[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{4}",
             "title": "Credit Card Scans",
             "active": true,
+            "doccode_type": "2",
             "doccode_id": 5,
             "no_doccode": false
         }
