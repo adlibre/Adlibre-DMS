@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<!--[if lt IE 7 ]> <html class="ie ie6 no-js" lang="en"> <![endif]-->
+<!--[if IE 7 ]>    <html class="ie ie7 no-js" lang="en"> <![endif]-->
+<!--[if IE 8 ]>    <html class="ie ie8 no-js" lang="en"> <![endif]-->
+<!--[if IE 9 ]>    <html class="ie ie9 no-js" lang="en"> <![endif]-->
+<!--[if gt IE 9]><!--><html class="no-js" lang="en"><!--<![endif]-->
+	<head>
+		<meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"> 
+        <title></title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="shortcut icon" href="{{ STATIC_URL }}favicon.ico">
+        <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/demo.css" />
+		<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+        {% block css %}{% endblock %}
+    </head>
+    <body>
+        <div class="container">
+			<header>
+                <h1>Adlibre DMS <span>MDTUI</span></h1>
+                <h2>with magic</h2>
+                <nav class="codrops-demos">
+					<a class="current" href="index.html">Item 1</a>
+					<a href="index2.html">Item 2</a>
+					<a href="index3.html">Item 3</a>
+					<a href="index4.html">Item 4</a>
+					<a href="index5.html">Item 5</a>
+                <nav>
+			</header>
+			<section>
+                {% block body_content %}
+                <div id="container_buttons">
+                    <p>
+                        <a href="#" class="a_demo_one">
+                            Click me!
+                        </a>
+                    </p>
+                    <p>
+                        <a href="#" class="a_demo_one">
+                            Come on, don't be afraid
+                        </a>
+                    </p>
+                    <p>
+                        <a href="#" class="a_demo_one">
+                            You can make this as wide as you want ;)
+                        </a>
+                    </p>
+                </div>
+                {% endblock %}
+			</section>
+        </div>
+    </body>
+</html>
