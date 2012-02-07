@@ -167,6 +167,7 @@ INSTALLED_APPS = (
     'dms_plugins',
     'ui',
     'doc_codes',
+    'mdtui',
 )
 
 # A sample logging configuration. The only tangible logging
