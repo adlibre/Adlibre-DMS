@@ -5,21 +5,21 @@ Copyright: Adlibre Pty Ltd 2012
 License: See LICENSE for license information
 """
 from models import DoccodeModel
-
-class Doccode(object):
-    no_doccode = False
-
-    def get_id(self):
-        return self.doccode_id
-
-    def get_title(self):
-        title = getattr(self, 'title', '')
-        if not title:
-            title = getattr(self, 'name', '')
-        return title
-
-    def get_directory_name(self):
-        return str(self.get_id())
+#
+#class Doccode(object):
+#    no_doccode = False
+#
+#    def get_id(self):
+#        return self.doccode_id
+#
+#    def get_title(self):
+#        title = getattr(self, 'title', '')
+#        if not title:
+#            title = getattr(self, 'name', '')
+#        return title
+#
+#    def get_directory_name(self):
+#        return str(self.get_id())
 
 #class NoDoccode(Doccode):
 #    title = 'No doccode'
