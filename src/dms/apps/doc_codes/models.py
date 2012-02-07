@@ -25,7 +25,7 @@ class DoccodeModel(models.Model):
         - active = True
         - regex = '' (no filename data)
     Maybe we need to add function to check and store this model on init.
-    For now DMR requires it to be like so.
+    For now DMS requires it to be like so.
     """
     doccode_type = models.CharField(choices = DOCCODE_TYPES, max_length = 64, default = '1')
     doccode_id = models.IntegerField('Doccode ID')
@@ -111,7 +111,7 @@ class DoccodeModel(models.Model):
 
     def is_luhn_valid(self, cc):
         """
-        Method to validate Lughn algorithm based on:
+        Method to validate Luhn algorithm based on:
         # Credit: http://en.wikipedia.org/wiki/Luhn_algorithm
         """
         num = [int(x) for x in str(cc)]
