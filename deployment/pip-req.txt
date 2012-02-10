@@ -9,3 +9,4 @@ docutils==0.7
 flup==1.0.3.dev-20110111
 python-magic==0.4.0
 wsgiref==0.1.2
+couchdbkit==0.6.1

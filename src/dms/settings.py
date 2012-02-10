@@ -29,6 +29,10 @@ DATABASES = {
     }
 }
 
+COUCHDB_DATABASES = (
+         ('dmscouch', 'http://127.0.0.1:5984/dmscouch'),
+)
+
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
@@ -160,6 +164,7 @@ INSTALLED_APPS = (
     'piston',
     'plugins',
     'taggit',
+    'couchdbkit.ext.django', #needed for CouchDB usage
     # DMS
     'api',
     'docs',
@@ -168,6 +173,7 @@ INSTALLED_APPS = (
     'ui',
     'doc_codes',
     'mdtui',
+    'dmscouch', # temporary couchapp
 )
 
 # A sample logging configuration. The only tangible logging
