@@ -79,7 +79,7 @@ class Local(object):
 
     def retrieve(self, request, document):
         directory = self.filesystem.get_document_directory(document)
-        if not document.get_doccode().no_doccode:
+        if not document.get_docrule().no_doccode:
             fullpath = os.path.join(directory, document.get_current_metadata()['name'])
         else:
             filename = document.get_full_filename()
@@ -160,7 +160,7 @@ class Local(object):
     def remove(self, request, document):
         directory = self.filesystem.get_document_directory(document)
         filename = None
-        if document.get_doccode().no_doccode:
+        if document.get_docrule().no_doccode:
             filename = document.get_full_filename()
         elif document.get_revision():
             filename = document.get_filename_with_revision()
@@ -170,7 +170,7 @@ class Local(object):
             except Exception, e:
                 raise PluginError(str(e), 500)
 
-        if not filename or (document.get_doccode().no_doccode and len(os.listdir(directory)) == 0) or\
+        if not filename or (document.get_docrule().no_doccode and len(os.listdir(directory)) == 0) or\
                 len(os.listdir(directory)) <= 1: # delete everything or no files at all or only metadata file
             try:
                 shutil.rmtree(directory)
@@ -213,7 +213,7 @@ class Local(object):
         # Hacky way, but faster than reading the revs from the metadata
         directory = self.filesystem.get_document_directory(document)
         file_count = 0
-        if document.get_doccode().no_doccode:
+        if document.get_docrule().no_doccode:
             if file_present(document.get_full_filename(), directory):
                 file_count = 1
         else:

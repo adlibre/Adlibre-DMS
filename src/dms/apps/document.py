@@ -7,7 +7,7 @@ import time
 from django.conf import settings
 
 from dms_plugins.workers import DmsException
-from doc_codes import DoccodeManagerInstance
+from doc_codes.models import DocumentTypeRuleManagerInstance
 
 class Document(object):
     """
@@ -34,7 +34,7 @@ class Document(object):
     def get_name(self):
         name = self.get_filename()
         if not name:
-            name = self.get_doccode().get_name()
+            name = self.get_docrule().get_name()
         name = "<Document> %s" % name
         return name
 
@@ -47,9 +47,9 @@ class Document(object):
     def __repr__(self):
         return self.get_name()
 
-    def get_doccode(self):
+    def get_docrule(self):
         if self.doccode is None:
-            self.doccode = DoccodeManagerInstance.find_for_string(self.get_stripped_filename())
+            self.doccode = DocumentTypeRuleManagerInstance.find_for_string(self.get_stripped_filename())
             if self.doccode is None:
                 raise DmsException("No doccode found for file " + self.get_full_filename(), 404)
         #print "DOCCODE: %s" % self.doccode #TODO: log.debug this
@@ -107,7 +107,7 @@ class Document(object):
     def get_full_filename(self):
         if not self.full_filename:
             name = self.get_filename()
-            if self.get_doccode().no_doccode:
+            if self.get_docrule().no_doccode:
                 if self.get_requested_extension():
                     name = "%s.%s" % (name, self.get_requested_extension())
             elif not os.path.splitext(name)[1][1:]:
@@ -192,7 +192,7 @@ class Document(object):
 
     def splitdir(self):
         directory = None
-        doccode = self.get_doccode()
+        doccode = self.get_docrule()
         if doccode:
             saved_dir = self.get_option('parent_directory') or ''
             if saved_dir or doccode.no_doccode:
@@ -222,7 +222,7 @@ class Document(object):
         d = {}
         d['metadata'] = self.get_metadata()
         d['current_metadata'] = self.get_current_metadata()
-        doccode = self.get_doccode()
+        doccode = self.get_docrule()
         d['doccode'] = {'title': doccode.get_title(), 'id': doccode.get_id()}
         d['document_name'] = self.get_filename()
         d['tags'] = self.get_tags()

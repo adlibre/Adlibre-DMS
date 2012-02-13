@@ -5,7 +5,7 @@
 {% block body_class %}settings{% endblock %}
 
 {% block content %}
-<h1>Edit for rule {{ rule.get_doccode.title }}</h1>
+<h1>Edit for rule {{ rule.get_docrule.title }}</h1>
 <form action="" method="post">
   {{ form.as_p }}
   {%csrf_token%}

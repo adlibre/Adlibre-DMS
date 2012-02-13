@@ -830,7 +830,7 @@
     },
     {
         "pk": 1,
-        "model": "doc_codes.doccodemodel",
+        "model": "doc_codes.documenttyperule",
         "fields": {
             "regex": "",
             "description": "This doccode is assigned to the files that have no other suitable doccode.",
@@ -845,7 +845,7 @@
     },
     {
         "pk": 2,
-        "model": "doc_codes.doccodemodel",
+        "model": "doc_codes.documenttyperule",
         "fields": {
             "regex": "[a-z]{5}[0-9]{3}",
             "description": "[a-z]{5}[0-9]{3}",
@@ -860,7 +860,7 @@
     },
     {
         "pk": 3,
-        "model": "doc_codes.doccodemodel",
+        "model": "doc_codes.documenttyperule",
         "fields": {
             "regex": "ADL-[0-9]{4}",
             "description": "ADL-[0-9]{4}]",
@@ -875,7 +875,7 @@
     },
     {
         "pk": 4,
-        "model": "doc_codes.doccodemodel",
+        "model": "doc_codes.documenttyperule",
         "fields": {
             "regex": "[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{1,9}",
             "description": "[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{1,9}",
@@ -890,7 +890,7 @@
     },
     {
         "pk": 5,
-        "model": "doc_codes.doccodemodel",
+        "model": "doc_codes.documenttyperule",
         "fields": {
             "regex": "[0-9]{1,6}",
             "description": "[0-9]{1,6}",
@@ -905,7 +905,7 @@
     },
     {
         "pk": 6,
-        "model": "doc_codes.doccodemodel",
+        "model": "doc_codes.documenttyperule",
         "fields": {
             "regex": "[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{4}",
             "description": "[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{4}",

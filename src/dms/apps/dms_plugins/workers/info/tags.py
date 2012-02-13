@@ -45,7 +45,7 @@ class TagsUpdatePlugin(Plugin, BeforeUpdatePluginPoint):
         remove_tag_string = document.get_remove_tag_string()
         remove_tag_string = remove_tag_string.strip()
         doc_model, created = Document.objects.get_or_create(name = document.get_filename(),
-                                                                doccode = document.get_doccode().get_id())
+                                                                doccode = document.get_docrule().get_id())
         if tag_string or remove_tag_string:
             if tag_string:
                 tags = parse_tags(tag_string)

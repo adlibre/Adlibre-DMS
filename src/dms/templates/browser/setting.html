@@ -25,7 +25,7 @@
   {% for rule in rule_list %}
   <tr>
       <td>{{ forloop.counter }}</td>
-      <td>{{ rule.get_doccode.title }} - {{ rule.get_doccode.description }}</td>
+      <td>{{ rule.get_docrule.title }} - {{ rule.get_docrule.description }}</td>
       <td>
           <h4>Pre-Storage Workflow</h4>
           {% with rule.get_before_storage_plugins as plugins %}
