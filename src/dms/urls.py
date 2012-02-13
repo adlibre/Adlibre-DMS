@@ -25,8 +25,7 @@ urlpatterns += patterns('',
     url(r'^docs/', include('docs.urls')),
     url(r'^ui/', include('ui.urls')),
     url(r'^mdtui/', include('mdtui.urls')),
-    (r'^$', 'browser.views.index'),
-    
+
     # Uncomment the next line to enable the admin:
     (r'^admin/', include(admin.site.urls)),
     url(r'^accounts/login/$', 'django.contrib.auth.views.login', name='login'),
