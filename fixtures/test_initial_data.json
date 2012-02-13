@@ -834,6 +834,7 @@
         "fields": {
             "regex": "",
             "description": "This doccode is assigned to the files that have no other suitable doccode.",
+            "sequence_last": 0,
             "title": "No doccode",
             "split_string": "",
             "active": true,
@@ -848,6 +849,7 @@
         "fields": {
             "regex": "[a-z]{5}[0-9]{3}",
             "description": "[a-z]{5}[0-9]{3}",
+            "sequence_last": 0,
             "title": "Test PDFs",
             "split_string": "0:5,5:8",
             "active": true,
@@ -862,6 +864,7 @@
         "fields": {
             "regex": "ADL-[0-9]{4}",
             "description": "ADL-[0-9]{4}]",
+            "sequence_last": 0,
             "title": "Adlibre Invoices",
             "split_string": "0:3,4:8",
             "active": true,
@@ -876,6 +879,7 @@
         "fields": {
             "regex": "[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{1,9}",
             "description": "[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{1,9}",
+            "sequence_last": 0,
             "title": "Fax Tiff documents",
             "split_string": "0:4,5:7,8:10,11:20",
             "active": true,
@@ -890,6 +894,7 @@
         "fields": {
             "regex": "[0-9]{1,6}",
             "description": "[0-9]{1,6}",
+            "sequence_last": 0,
             "title": "Project Gutenberg eBooks",
             "split_string": "",
             "active": true,
@@ -904,6 +909,7 @@
         "fields": {
             "regex": "[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{4}",
             "description": "[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{4}",
+            "sequence_last": 0,
             "title": "Credit Card Scans",
             "split_string": "",
             "active": true,
