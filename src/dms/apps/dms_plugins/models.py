@@ -8,18 +8,18 @@ from plugins.models import Plugin
 from taggit.managers import TaggableManager
 
 from dms_plugins import pluginpoints
-from doc_codes import DoccodeManagerInstance
-from doc_codes.models import DoccodeModel
+from doc_codes.models import DocumentTypeRuleManagerInstance
+from doc_codes.models import DocumentTypeRule
 
 try:
-    DOCCODE_CHOICES = map(lambda doccode: (str(doccode.doccode_id), doccode.title), DoccodeModel.objects.all())
+    DOCRULE_CHOICES = map(lambda doccode: (str(doccode.doccode_id), doccode.title), DocumentTypeRule.objects.all())
 except:
-    # HACK: syncdb or no initial DoccodeModel exists...
-    DOCCODE_CHOICES = [('1000', 'No Doccode'),]
+    # HACK: syncdb or no initial DocumentTypeRule exists...
+    DOCRULE_CHOICES = [('1000', 'No Doccode'),]
     pass
 
 class DoccodePluginMapping(models.Model):
-    doccode = models.CharField(choices = DOCCODE_CHOICES, max_length = 64)
+    doccode = models.CharField(choices = DOCRULE_CHOICES, max_length = 64)
     #if changing *_plugins names please change dms_plugins.pluginpoints correspondingly
     before_storage_plugins = ManyPluginField(   pluginpoints.BeforeStoragePluginPoint, 
                                                 related_name = 'settings_before_storage',
@@ -49,19 +49,19 @@ class DoccodePluginMapping(models.Model):
     def get_name(self):
         doccode_name = "No name given"
         try:
-            doccode_name = DoccodeModel.objects.get(doccode_id=self.doccode).title
+            doccode_name = DocumentTypeRule.objects.get(doccode_id=self.doccode).title
         except (KeyError, AttributeError):
             pass
         return unicode(doccode_name)
     name = property(get_name)
 
-    def get_doccode(self):
-        doccodes = DoccodeManagerInstance.get_doccodes()
+    def get_docrule(self):
+        docrules = DocumentTypeRuleManagerInstance.get_docrules()
         try:
-            doccode = doccodes[int(self.doccode)]
+            docrule = docrules[int(self.doccode)]
         except:
-            doccode = doccodes.filter(doccode_id=self.doccode)[0]
-        return doccode
+            docrule = docrules.filter(doccode_id=self.doccode)[0]
+        return docrule
 
     def get_before_storage_plugins(self):
         return self.before_storage_plugins.all().order_by('index')
@@ -92,7 +92,7 @@ class Document(models.Model):
         A model that represents Document for maintainig database relations.
     """
     name = models.CharField(max_length = 128)
-    doccode = models.CharField(max_length = 63, choices = DOCCODE_CHOICES)
+    doccode = models.CharField(max_length = 63, choices = DOCRULE_CHOICES)
     tags = TaggableManager()
 
     def get_tag_list(self):

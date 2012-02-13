@@ -29,7 +29,7 @@ class DocumentManager(object):
         return mapping
 
     def get_plugin_mapping(self, document):
-        doccode = document.get_doccode()
+        doccode = document.get_docrule()
         #print "DOCCODE: %s" % doccode
         mapping = models.DoccodePluginMapping.objects.filter(
                     doccode = str(doccode.doccode_id),
@@ -177,8 +177,8 @@ class DocumentManager(object):
                             tags = [], filter_date = None):
         storage = self.get_storage(doccode_plugin_mapping)
         metadata = self.get_metadata(doccode_plugin_mapping)
-        doccode = doccode_plugin_mapping.get_doccode()
-        doc_models = TagsPlugin().get_doc_models(doccode = doccode_plugin_mapping.get_doccode(), tags = tags)
+        doccode = doccode_plugin_mapping.get_docrule()
+        doc_models = TagsPlugin().get_doc_models(doccode = doccode_plugin_mapping.get_docrule(), tags = tags)
         doc_names = map(lambda x: x.name, doc_models)
         if metadata:
             document_directories = metadata.worker.get_directories(doccode, filter_date = filter_date)

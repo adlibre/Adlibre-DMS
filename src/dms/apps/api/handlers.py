@@ -17,7 +17,7 @@ from piston.utils import rc
 
 from document_manager import DocumentManager
 from dms_plugins import models
-from doc_codes import DoccodeManagerInstance
+from doc_codes.models import DocumentTypeRuleManagerInstance
 
 class BaseFileHandler(BaseHandler):
     def get_file_info(self, request):
@@ -52,7 +52,7 @@ class FileInfoHandler(BaseFileHandler):
         info = document.get_dict()
         info['document_list_url'] = reverse('ui_document_list', kwargs = {'id_rule': mapping.pk})
         info['tags'] = document.get_tags()
-        info['no_doccode'] = document.get_doccode().no_doccode
+        info['no_doccode'] = document.get_docrule().no_doccode
         response = HttpResponse(json.dumps(info))
         return response
 
@@ -198,7 +198,7 @@ class TagsHandler(BaseHandler):
         try:
             manager = DocumentManager()
             mapping = manager.get_plugin_mapping_by_kwargs(pk = id_rule)
-            tags = manager.get_all_tags(doccode = mapping.get_doccode())
+            tags = manager.get_all_tags(doccode = mapping.get_docrule())
             return map(lambda x: x.name, tags)
         except Exception:
             if settings.DEBUG:
@@ -213,7 +213,7 @@ class RevisionCountHandler(BaseHandler):
     def read(self, request, document):
         document, extension = os.path.splitext(document)
         try:
-            doccode = DoccodeManagerInstance.find_for_string(document)
+            doccode = DocumentTypeRuleManagerInstance.find_for_string(document)
             if doccode:
                 try:
                     mapping = models.DoccodePluginMapping.objects.get(doccode = doccode.get_id())
@@ -242,7 +242,7 @@ class RulesHandler(BaseHandler):
         manager = DocumentManager()
         mappings = manager.get_plugin_mappings()
         rules = list(map(lambda x: {
-                            'doccode': x.get_doccode().get_title(),
+                            'doccode': x.get_docrule().get_title(),
                             'id': x.pk,
                             'ui_url': reverse('ui_document_list', kwargs = {'id_rule': x.pk})
                                 }, mappings))

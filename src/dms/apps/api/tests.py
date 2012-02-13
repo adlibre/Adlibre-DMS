@@ -11,7 +11,7 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from plugins import models
 
-from doc_codes import DoccodeManagerInstance
+from doc_codes.models import DocumentTypeRuleManagerInstance
 from dms_plugins.models import DoccodePluginMapping
 
 from base_test import AdlibreTestCase
@@ -64,7 +64,7 @@ test_tag = 'test_tag'
 
 class MiscTest(AdlibreTestCase):
     def test_api_rule_detail(self):
-        doccode = DoccodeManagerInstance.get_doccode_by_name('Test PDFs')
+        doccode = DocumentTypeRuleManagerInstance.get_docrule_by_name('Test PDFs')
         mapping = DoccodePluginMapping.objects.get(doccode = doccode.get_id())
         #we don't really care if it crashes above, cause that means our database is imperfect
         url = reverse('api_rules_detail', kwargs = {'id_rule': 2, 'emitter_format': 'json'})
@@ -82,7 +82,7 @@ class MiscTest(AdlibreTestCase):
         self.assertContains(response, 'dms_plugins.workers.storage.local.LocalStoragePlugin')
 
     def test_api_files(self):
-        doccode = DoccodeManagerInstance.get_doccode_by_name('Adlibre Invoices')
+        doccode = DocumentTypeRuleManagerInstance.get_docrule_by_name('Adlibre Invoices')
         mapping = DoccodePluginMapping.objects.get(doccode = doccode.get_id())
         url = reverse("api_file_list", kwargs = {'id_rule': mapping.pk})
         response = self.client.get(url)

@@ -16,7 +16,7 @@ class LocalJSONMetadata(object):
         self.filesystem = LocalFilesystemManager()
 
     def store(self, request, document):
-        if document.get_doccode().no_doccode:
+        if document.get_docrule().no_doccode:
             return document
         directory = self.filesystem.get_or_create_document_directory(document)
         document = self.save_metadata(document, directory)
@@ -24,7 +24,7 @@ class LocalJSONMetadata(object):
 
     def retrieve(self, request, document):
         directory = self.filesystem.get_or_create_document_directory(document)
-        if document.get_doccode().no_doccode:
+        if document.get_docrule().no_doccode:
             revision = 'N/A'
             fake_metadata = self.get_fake_metadata(directory, document.get_full_filename())
             document.set_revision(revision)

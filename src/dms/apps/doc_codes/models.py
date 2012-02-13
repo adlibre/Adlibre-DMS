@@ -1,5 +1,5 @@
 """
-Module: DocCodes Model for Adlibre DMS
+Module: Document Type Rules Model for Adlibre DMS
 Project: Adlibre DMS
 Copyright: Adlibre Pty Ltd 2012
 License: See LICENSE for license information
@@ -15,9 +15,9 @@ DOCCODE_TYPES = [
     ('3', 'Book'),
 ]
 
-class DoccodeModel(models.Model):
+class DocumentTypeRule(models.Model):
     """
-    Main Model for Doccodes.
+    Main Model for Document Type Rules (Old Doccode).
     In order for an app to function Properly must contain:
     Basic model for storing "No doccode" Documents.
         - doccode_id = 1000 (or any no_doccode Id set)
@@ -28,10 +28,10 @@ class DoccodeModel(models.Model):
     For now DMS requires it to be like so.
     """
     doccode_type = models.CharField(choices = DOCCODE_TYPES, max_length = 64, default = '1')
-    doccode_id = models.IntegerField('Doccode ID')
+    doccode_id = models.IntegerField('Document Type Rule ID')
     sequence_last = models.IntegerField("Number of Documents", default=0)
     no_doccode = models.BooleanField(default = False)
-    title = models.CharField("Doccode Name", max_length=60)
+    title = models.CharField("Document Type Rule Name", max_length=60)
     description = models.TextField("Description", blank=True)
     regex = models.CharField("Filename Regex", max_length=100, blank=True,
         help_text="""
@@ -53,11 +53,11 @@ class DoccodeModel(models.Model):
     active = models.BooleanField(default=True)
 
     def __unicode__(self):
-        return u'Doccode:' + unicode(self.get_title())
+        return u'DocumentTypeRule:' + unicode(self.get_title())
 
     def validate(self, document_name):
         """
-        Validates doccode against available "document_name" string.
+        Validates DocumentTypeRule against available "document_name" string.
         Returns True if OK and False if not passed.
         """
 
@@ -76,7 +76,7 @@ class DoccodeModel(models.Model):
         Usage e.g.:
         File name:  abcde222.pdf (document_name = 'abcde222')
         Spliting method:  ['abcde', '222', 'abcde222']
-        In case of doccode == no_doccode returns current DATE
+        In case of document_type_rule == no_rule returns current DATE
         """
         if self.no_doccode or not document_name:
             # no Doccode spliting method
@@ -106,7 +106,7 @@ class DoccodeModel(models.Model):
                 split_method.append(document_name)
             if not split_method:
                 split_method=['Split_errors',] #folder name for improper doccdes!!!!!
-                print 'Splitting Errors exist! [DoccodeModel.split()]'
+                print 'Splitting Errors exist! [DocumentTypeRule.split()]'
             #print "Spliting method: ", split_method
             return split_method
 
@@ -124,8 +124,6 @@ class DoccodeModel(models.Model):
 
     def get_title(self):
         title = getattr(self, 'title', '')
-#        if not title:
-#            title = getattr(self, 'name', '')
         return title
 
     def get_directory_name(self):
@@ -152,3 +150,33 @@ class DoccodeModel(models.Model):
         self.sequence_last += 1
         self.save()
         return self
+
+
+class DocumentTypeRuleManager(object):
+    def __init__(self):
+        self.doccodes = DocumentTypeRule.objects.all()
+
+    def find_for_string(self, string):
+        res = DocumentTypeRule.objects.filter(no_doccode = True, active = True)[0]
+        for doccode in self.doccodes:
+            #print "%s is validated by %s: %s" % (string, doccode, doccode.validate(string))
+            if doccode.validate(string):
+                res = doccode
+                break
+        return res
+
+    def get_docrules(self):
+        return DocumentTypeRule.objects.all()
+
+    def get_docrule_by_name(self, name):
+        doccodes = self.get_docrules()
+        try:
+            doccode = doccodes.filter(title=name)[0]
+            return doccode
+        except: pass
+        for doccode in doccodes:
+            if doccode.get_title() == name:
+                return doccode
+        return None
+
+DocumentTypeRuleManagerInstance = DocumentTypeRuleManager()

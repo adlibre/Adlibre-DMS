@@ -39,7 +39,7 @@ class HashCodeValidationOnStoragePlugin(Plugin, BeforeStoragePluginPoint):
     form = HashForm
 
     def work(self, request, document):
-        method = self.get_option('method', document.get_doccode())
+        method = self.get_option('method', document.get_docrule())
         return HashCodeWorker(self.method).work_store(request, document, method)
 
 class HashCodeValidationOnRetrievalPlugin(Plugin, BeforeRetrievalPluginPoint):
@@ -52,7 +52,7 @@ class HashCodeValidationOnRetrievalPlugin(Plugin, BeforeRetrievalPluginPoint):
     form = HashForm
     
     def work(self, request, document):
-        method = self.get_option('method', document.get_doccode())
+        method = self.get_option('method', document.get_docrule())
         return HashCodeWorker(self.method).work_retrieve(request, document, method)
 
 class HashCodeWorker(object):
