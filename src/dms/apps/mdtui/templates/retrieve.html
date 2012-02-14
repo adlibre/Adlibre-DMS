@@ -1,20 +1,32 @@
 {% extends "base.html" %}
 
-{% block css %}
-
-{% endblock %}
-
 {% block body_content %}
-    <h1>{% block body_title %}Retrieval{% endblock %}</h1>
+    <h1>{% block body_title %}Retrieval / View{% endblock %}</h1>
 
     {# NB: Might want to factor out these steps into separate templates. Done this way for simplicity #}
 
     {% if step == "1" %}
         <h2>Step 1: Please choose your function</h2>
+
+        {#  list of doccodes by department #}
     {% endif %}
 
     {% if step == "2" %}
         <h2>Step 2: {{ xxxx }} Document Search</h2>
+
+        {# document search form eg #}
+
+        Document type
+
+        DAte
+
+        Key1
+
+        Key 2
+
+        Key 3
+
+        Desc
     {% endif %}
 
     {% if step == "3" %}

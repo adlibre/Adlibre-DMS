@@ -116,6 +116,8 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.media',
     'django.core.context_processors.static',
     'django.contrib.messages.context_processors.messages',
+    # For MDTUI
+    'django.core.context_processors.request',
     # Adlibre DMS custom
     'dms.context_processors.demo',
     'dms.context_processors.theme_name',
