@@ -9,6 +9,7 @@ import json
 
 from django.core.urlresolvers import reverse
 from django.views.generic.simple import direct_to_template
+from django.http import HttpResponse
 
 from ui.forms import CalendarForm
 from api.handlers import FileHandler
