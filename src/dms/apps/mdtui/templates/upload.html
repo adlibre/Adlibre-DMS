@@ -3,6 +3,14 @@
 {% block body_content %}
     <h1>{% block body_title %}Index / Upload{% endblock %}</h1>
 
+    {# Use this for a progress / step indicator / navigation #}
+    <ul class="nav nav-pills">
+        <li class="active"><a href="#">Associate File</a></li>
+        <li><a href="#">Index Details</a></li>
+        <li><a href="#">Confirmation</a></li>
+    </ul>
+
+
     {# NB: Might want to factor out these steps into separate templates. Done this way for simplicity #}
 
     {% if step == "1" %}

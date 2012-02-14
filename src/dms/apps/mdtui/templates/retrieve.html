@@ -3,6 +3,13 @@
 {% block body_content %}
     <h1>{% block body_title %}Retrieval / View{% endblock %}</h1>
 
+    {# Use this for a progress / step indicator / navigation #}
+    <ul class="nav nav-pills">
+        <li class="active"><a href="#">Document Type</a></li>
+        <li><a href="#">Search</a></li>
+        <li><a href="#">Results</a></li>
+    </ul>
+
     {# NB: Might want to factor out these steps into separate templates. Done this way for simplicity #}
 
     {% if step == "1" %}
@@ -31,10 +38,25 @@
 
     {% if step == "3" %}
         <h2>Step 3: View Results</h2>
+
+        {# Let's use pagination like this #}
+        <div class="pagination">
+            <ul>
+                <li><a href="#">Prev</a></li>
+                <li class="active">
+                    <a href="#">1</a>
+                </li>
+                <li><a href="#">2</a></li>
+                <li><a href="#">3</a></li>
+                <li><a href="#">4</a></li>
+                <li><a href="#">Next</a></li>
+            </ul>
+        </div>
     {% endif %}
 
     {% if step == "4" %}
         <h2>Step 4: View Document</h2>
+        {# don't actually display this step, just pop up a document. #}
     {% endif %}
 
 {% endblock %}
