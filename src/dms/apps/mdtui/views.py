@@ -17,5 +17,8 @@ def retrieve(request, step=None, template='retrieve.html'):
 
 def upload(request, step=None, template='upload.html'):
 
+    if request.REQUEST.get('step'):
+        step = request.REQUEST.get('step')
+
     context = { 'step': step, }
     return render_to_response(template, context, context_instance=RequestContext(request))
