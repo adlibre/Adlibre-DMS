@@ -64,3 +64,22 @@ class Main_DMS_UI_Test(AdlibreTestCase):
             response = self._ui_upload(filename)
             self.assertNotEqual(response.status_code, 500)
             self.assertContains(response, upload_form_html)
+
+    def test_z_cleaup(self):
+        # Name of this test should be alphabetically last
+        # to be ran after all tests finished
+
+        # files cleanup using API
+        url = reverse("api_file")
+
+        for doc in test_document_files:
+            data = { 'filename': doc, }
+            response = self.client.delete(url, data)
+            self.assertEqual(response.status_code, 204)
+
+        # MAC specific cleanup:
+        try:
+         data = { 'filename': '.DS_Store' }
+         response = self.client.delete(url, data)
+        except:
+         pass
