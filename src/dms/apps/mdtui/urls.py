@@ -15,7 +15,7 @@ urlpatterns = patterns('mdtui.views',
     url(r'^$', direct_to_template, {'template': 'home.html'}, name='mdtui-home'),
     url(r'^retrieve/$', 'retrieve', name='mdtui-retrieve'),
     url(r'^upload/$', 'upload', name='mdtui-index'),
-
+   # url(r'^upload/step-(?P<step>\d+)/$', 'upload'),
 
 
 )

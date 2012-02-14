@@ -1,32 +1,112 @@
 {% extends "base.html" %}
 
 {% block body_content %}
-    <h1>{% block body_title %}Index / Upload{% endblock %}</h1>
+    <h1>{% block body_title %}Document Indexing{% endblock %}</h1>
 
     {# Use this for a progress / step indicator / navigation #}
     <ul class="nav nav-pills">
-        <li class="active"><a href="#">Associate File</a></li>
-        <li><a href="#">Index Details</a></li>
-        <li><a href="#">Confirmation</a></li>
+        <li class="active"><a href="?step=1">Step 1: File Source</a></li>
+        <li><a href="?step=2">Step 2: Index Details</a></li>
+        <li><a href="?step=3">Step 3: Confirmation</a></li>
     </ul>
 
-
+    {% if step == None %}
+    <p>This is where it begins...</p>
+    <a class="btn btn-primary" href="?step=1">Start <i class="icon-chevron-right icon-white"></i></a>
+    {% endif %}
+    
+    
     {# NB: Might want to factor out these steps into separate templates. Done this way for simplicity #}
 
     {% if step == "1" %}
-        <h2>Step 1: Associate File</h2>
-    {% endif %}
+
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="#upload-file-tab" data-toggle="tab">Upload File</a></li>
+        <li><a href="#associate-file-tab" data-toggle="tab">Associate File</a></li>
+        <li><a href="#print-barcode-tab" data-toggle="tab">Print Barcode</a></li>
+    </ul>
+
+    <form class="form-horizontal">
+
+        <div class="tab-content">
+            <div class="tab-pane active" id="upload-file-tab">
+
+                <fieldset>
+                    <legend>Choose File</legend>
+                    <div class="control-group">
+                        <label class="control-label" for="fileInput">File input</label>
+                        <div class="controls">
+                            <input class="input-file" id="fileInput" type="file">
+                        </div>
+                    </div>
+                </fieldset>
+
+            </div>
+            <div class="tab-pane" id="associate-file-tab">
+
+                <fieldset>
+                    <legend>Choose File</legend>
+                    <div class="control-group">
+                        <label class="control-label" for="select01">Select uncategorized file</label>
+                        <div class="controls">
+                            <select id="select01">
+                                <option>something</option>
+                                <option>2</option>
+                                <option>3</option>
+                                <option>4</option>
+                                <option>5</option>
+                            </select>
+                        </div>
+                    </div>
+                </fieldset>
+
+            </div>
+            <div class="tab-pane" id="print-barcode-tab">
+
+                <fieldset>
+                    <legend>Print Barcode</legend>
+
+                    <div class="control-group">
+
+                        <button class="btn">
+                            <i class="icon-barcode"></i> Print Barcode
+                        </button>
+                    </div>
+                </fieldset>
+
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Continue <i class="icon-chevron-right icon-white"></i></button>
+        </div>
+
+    </form>
+
+    {% endif %} {# end step 1 #}
 
     {% if step == "2" %}
         <h2>Step 2: Index Details</h2>
-    {% endif %}
+    {% endif %} {# end step 2 #}
 
     {% if step == "3" %}
         <h2>Step 3: Confirmation</h2>
-    {% endif %}
+    {% endif %} {# end step 3 #}
 
     {% if step == "4" %}
         <h2>Step 4: Thank you{# or print barcode if barcode required #}</h2>
-    {% endif %}
+    {% endif %} {# end step 4 #}
 
+{% endblock %}
+
+{% block js_extra %}
+<script type="text/javascript">
+    $(document).ready(function(){
+        //$(".collapse").collapse();
+    });
+
+    $(function () {
+        //$('.tabs a:last').tab('show')
+    })
+</script>
 {% endblock %}
