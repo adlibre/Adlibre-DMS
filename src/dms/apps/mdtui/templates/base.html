@@ -1,53 +1,86 @@
 <!DOCTYPE html>
-<!--[if lt IE 7 ]> <html class="ie ie6 no-js" lang="en"> <![endif]-->
-<!--[if IE 7 ]>    <html class="ie ie7 no-js" lang="en"> <![endif]-->
-<!--[if IE 8 ]>    <html class="ie ie8 no-js" lang="en"> <![endif]-->
-<!--[if IE 9 ]>    <html class="ie ie9 no-js" lang="en"> <![endif]-->
-<!--[if gt IE 9]><!--><html class="no-js" lang="en"><!--<![endif]-->
-	<head>
-		<meta charset="UTF-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"> 
-        <title></title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="shortcut icon" href="{{ STATIC_URL }}favicon.ico">
-        <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/demo.css" />
-		<link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
-        {% block css %}{% endblock %}
-    </head>
-    <body>
-        <div class="container">
-			<header>
-                <h1>Adlibre DMS <span>MDTUI</span></h1>
-                <h2>with magic</h2>
-                <nav class="codrops-demos">
-					<a class="current" href="index.html">Item 1</a>
-					<a href="index2.html">Item 2</a>
-					<a href="index3.html">Item 3</a>
-					<a href="index4.html">Item 4</a>
-					<a href="index5.html">Item 5</a>
-                <nav>
-			</header>
-			<section>
-                {% block body_content %}
-                <div id="container_buttons">
-                    <p>
-                        <a href="#" class="a_demo_one">
-                            Click me!
-                        </a>
-                    </p>
-                    <p>
-                        <a href="#" class="a_demo_one">
-                            Come on, don't be afraid
-                        </a>
-                    </p>
-                    <p>
-                        <a href="#" class="a_demo_one">
-                            You can make this as wide as you want ;)
-                        </a>
-                    </p>
-                </div>
-                {% endblock %}
-			</section>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block page_title %}{% endblock %}</title>
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="{{ STATIC_URL }}css/bootstrap.css" rel="stylesheet">
+    {% block css %}
+    <style>
+        body {
+            padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+        }
+    </style>
+    <link href="{{ STATIC_URL }}css/bootstrap-responsive.css" rel="stylesheet">
+    {% endblock %}
+
+    <!-- Le fav and touch icons -->
+    <link rel="shortcut icon" href="{{ STATIC_URL }}favicon.ico">
+    <link rel="apple-touch-icon" href="{{ STATIC_URL }}dms-57.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="{{ STATIC_URL }}dms-72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="{{ STATIC_URL }}dms-114.png">
+</head>
+
+{% block template_body %}
+<body>
+
+
+    <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+            <div class="container">
+                <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </a>
+                <a class="brand" href="{% url home %}">Adlibre DMS</a>
+                <div class="nav-collapse">
+                    <ul class="nav">
+                        {% url mdtui-home as url %}
+                        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}"><i class="icon-home"></i> Home</a></li>
+                        {% url mdtui-retrieve as url %}
+                        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}"><i class="icon-search"></i> Retrieval</a></li>
+                        {% url mdtui-index as url %}
+                        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}"><i class="icon-upload"></i> Index</a></li>
+                    </ul>
+                </div><!--/.nav-collapse -->
+            </div>
         </div>
-    </body>
+    </div>
+
+    <div class="container">
+        {% block body_content %}
+
+        <h1>Adlibre DMS UI</h1>
+        <p>Welcome to the Adlibre DMS MDT UI<br />Please choose an option from the top menu to continue</p>
+        {% endblock %}
+
+    </div> <!-- /container -->
+
+    {% block js_footer %}
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="{{ STATIC_URL }}js/jquery.js"></script>
+    <script src="{{ STATIC_URL }}js/bootstrap-transition.js"></script>
+    <script src="{{ STATIC_URL }}js/bootstrap-alert.js"></script>
+    <script src="{{ STATIC_URL }}js/bootstrap-modal.js"></script>
+    <script src="{{ STATIC_URL }}js/bootstrap-dropdown.js"></script>
+    <script src="{{ STATIC_URL }}js/bootstrap-scrollspy.js"></script>
+    <script src="{{ STATIC_URL }}js/bootstrap-tab.js"></script>
+    <script src="{{ STATIC_URL }}js/bootstrap-tooltip.js"></script>
+    <script src="{{ STATIC_URL }}js/bootstrap-popover.js"></script>
+    <script src="{{ STATIC_URL }}js/bootstrap-button.js"></script>
+    <script src="{{ STATIC_URL }}js/bootstrap-collapse.js"></script>
+    <script src="{{ STATIC_URL }}js/bootstrap-carousel.js"></script>
+    <script src="{{ STATIC_URL }}js/bootstrap-typeahead.js"></script>
+    {% endblock %}
+</body>
+{% endblock %}
 </html>
