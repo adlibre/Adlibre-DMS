@@ -12,11 +12,16 @@ from django.template import RequestContext, loader
 
 def retrieve(request, step=None, template='retrieve.html'):
 
+    # Hack to make the navigation work for testing the templates
+    if request.POST:
+        step = str(int(step) + 1)
+        return HttpResponseRedirect(reverse('mdtui-retrieve-' + step))
+
     context = { 'step': step, }
     return render_to_response(template, context, context_instance=RequestContext(request))
 
 
-def upload(request, step=None, template='upload.html'):
+def upload(request, step=None, template='indexing.html'):
 
 #    if request.REQUEST.get('step'):
 #        step = request.REQUEST.get('step')

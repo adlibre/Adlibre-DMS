@@ -1,43 +1,126 @@
 {% extends "base.html" %}
 
 {% block body_content %}
-    <h1>{% block body_title %}Retrieval / View{% endblock %}</h1>
+    <h1>{% block body_title %}Document Retrieval{% endblock %}</h1>
 
     {# Use this for a progress / step indicator / navigation #}
+    {# Use this for a progress / step indicator / navigation #}
     <ul class="nav nav-pills">
-        <li class="active"><a href="#">Document Type</a></li>
-        <li><a href="#">Search</a></li>
-        <li><a href="#">Results</a></li>
+        {% url mdtui-retrieve-1 as url %}
+        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 1: Options <i class="icon-chevron-right icon-white"></i></a></li>
+        {% url mdtui-retrieve-2 as url %}
+        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 2: Results <i class="icon-chevron-right icon-white"></i></a></li>
     </ul>
 
-    {# NB: Might want to factor out these steps into separate templates. Done this way for simplicity #}
+
+    {% if step == None %}
+        <p>This is where it begins...</p>
+        <a class="btn btn-primary" href="{% url mdtui-retrieve-1 %}">Start <i class="icon-chevron-right icon-white"></i></a>
+    {% endif %}
+
 
     {% if step == "1" %}
-        <h2>Step 1: Please choose your function</h2>
 
         {#  list of doccodes by department #}
+
+
+
+
+
+        <form class="form-horizontal" action="{{ request.path }}" method="post">
+            {% csrf_token %}
+            <fieldset>
+                <legend>Step 1: Search Options</legend>
+
+                <div class="control-group">
+                    <label class="control-label" for="optionsCheckboxList">Document Types</label>
+                    <div class="controls">
+                        <label class="checkbox">
+                            <input type="checkbox" name="optionsCheckboxList1" value="option1">
+                            Employee Forms
+                        </label>
+                        <label class="checkbox">
+                            <input type="checkbox" name="optionsCheckboxList2" value="option2">
+                            Legal Documents
+                        </label>
+                        <label class="checkbox">
+                            <input type="checkbox" name="optionsCheckboxList3" value="option3">
+                            Tax Declarations
+                        </label>
+                        <p class="help-block"><strong>Note:</strong> Some help text.</p>
+                    </div>
+                </div>
+
+                {# NB, these date selectors could be better done. Eg see http://addyosmani.github.com/jquery-ui-bootstrap/ #}
+                <div class="control-group">
+                    <label class="control-label" for="dateselect_from">From Date</label>
+                    <div class="input">
+                        <div class="controls">
+                            <div class="input-prepend">
+                                <span class="add-on"><i class="icon-calendar"></i></span>
+                                <input data-datepicker="datepicker" class="input-medium" type="text" value="" id="dateselect_from" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="control-group">
+                    <label class="control-label" for="dateselect_to">To Date</label>
+                    <div class="input">
+                        <div class="controls">
+                            <div class="input-prepend">
+                                <span class="add-on"><i class="icon-calendar"></i></span>
+                                <input data-datepicker="datepicker" class="input-medium" type="text" value="" id="dateselect_to" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label" for="input01">Key 1 Label</label>
+                    <div class="controls">
+                        <input type="text" class="input-medium" id="input01">
+                        <p class="help-block">Key 1 Desc</p>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label" for="input01">Key 2 Label</label>
+                    <div class="controls">
+                        <input type="text" class="input-medium" id="input02">
+                        <p class="help-block">Key 2 Desc</p>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label" for="input01">Key 3 Label</label>
+                    <div class="controls">
+                        <input type="text" class="input-medium" id="input03">
+                        <p class="help-block">Key 3 Desc</p>
+                    </div>
+                </div>
+
+
+            </fieldset>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-danger"><i class="icon-repeat icon-white"></i> Reset</button>
+                <button type="submit" class="btn btn-primary">Search <i class="icon-search icon-white"></i></button>
+            </div>
+        </form>
+
+
+
+
+
+
+
+
     {% endif %}
 
     {% if step == "2" %}
-        <h2>Step 2: {{ xxxx }} Document Search</h2>
-
-        {# document search form eg #}
-
-        Document type
-
-        DAte
-
-        Key1
-
-        Key 2
-
-        Key 3
-
-        Desc
-    {% endif %}
-
-    {% if step == "3" %}
-        <h2>Step 3: View Results</h2>
+        <h2>Step 2: View Results</h2>
 
         {# Let's use pagination like this #}
         <div class="pagination">
@@ -54,8 +137,8 @@
         </div>
     {% endif %}
 
-    {% if step == "4" %}
-        <h2>Step 4: View Document</h2>
+    {% if step == "3" %}
+        <h2>Step 3: View Document</h2>
         {# don't actually display this step, just pop up a document. #}
     {% endif %}
 
