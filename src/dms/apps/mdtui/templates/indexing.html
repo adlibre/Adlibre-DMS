@@ -6,16 +6,16 @@
     {# Use this for a progress / step indicator / navigation #}
     <ul class="nav nav-pills">
         {% url mdtui-index-1 as url %}
-        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 1: File Source <i class="icon-chevron-right icon-white"></i></a></li>
+        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 1: Select Source <i class="icon-chevron-right icon-white"></i></a></li>
         {% url mdtui-index-2 as url %}
         <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 2: Index Details <i class="icon-chevron-right icon-white"></i></a></li>
         {% url mdtui-index-3 as url %}
-        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 3: Confirmation <i class="icon-chevron-right icon-white"></i></a></li>
+        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 3: Confirm <i class="icon-chevron-right icon-white"></i></a></li>
     </ul>
 
     {% if step == None %}
     <p>This is where it begins...</p>
-    <a class="btn btn-primary" href="1">Start <i class="icon-chevron-right icon-white"></i></a>
+    <a class="btn btn-primary" href="{% url mdtui-index-1 %}">Start <i class="icon-chevron-right icon-white"></i></a>
     {% endif %}
     
     
@@ -81,6 +81,7 @@
         </div>
 
         <div class="form-actions">
+            <button type="submit" class="btn btn-danger"><i class="icon-trash icon-white"></i> Cancel</button>
             <button type="submit" class="btn btn-primary">Continue <i class="icon-chevron-right icon-white"></i></button>
         </div>
 
@@ -154,6 +155,7 @@
             </fieldset>
 
             <div class="form-actions">
+                <button type="submit" class="btn btn-danger"><i class="icon-trash icon-white"></i> Cancel</button>
                 <button type="submit" class="btn btn-primary">Continue <i class="icon-chevron-right icon-white"></i></button>
             </div>
         </form>
@@ -162,19 +164,21 @@
     {% endif %} {# end step 2 #}
 
     {% if step == "3" %}
-        <h2>Step 3: Confirmation</h2>
-
+        <h2>Step 3: Confirmation Required</h2>
 
         <form class="form-horizontal" action="{{ request.path }}" method="post">
             {% csrf_token %}
         <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Continue <i class="icon-chevron-right icon-white"></i></button>
+            <button type="submit" class="btn"><i class="icon-chevron-left icon-whitex"></i> Back</button>
+            <button type="submit" class="btn btn-success"><i class="icon-ok icon-white"></i> Save</button>
         </div>
         </form>
     {% endif %} {# end step 3 #}
 
     {% if step == "4" %}
         <h2>Step 4: Thank you{# or print barcode if barcode required #}</h2>
+        <a class="btn btn-primary" href="{% url mdtui-index-1 %}">Start Again <i class="icon-chevron-right icon-white"></i></a>
+
     {% endif %} {# end step 4 #}
 
 {% endblock %}
@@ -189,5 +193,4 @@
         //$('.tabs a:last').tab('show')
     })
 </script>
-<script src="{{ STATIC_URL }}js/bootstrap-datepicker.js"></script>
 {% endblock %}

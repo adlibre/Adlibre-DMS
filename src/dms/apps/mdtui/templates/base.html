@@ -44,10 +44,10 @@
                     <ul class="nav">
                         {% url mdtui-home as url %}
                         <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}"><i class="icon-home"></i> Home</a></li>
+                         {% url mdtui-index as url %}
+                        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}"><i class="icon-upload"></i> Indexing</a></li>
                         {% url mdtui-retrieve as url %}
                         <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}"><i class="icon-search"></i> Retrieval</a></li>
-                        {% url mdtui-index as url %}
-                        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}"><i class="icon-upload"></i> Index</a></li>
                     </ul>
                 </div><!--/.nav-collapse -->
             </div>
@@ -80,6 +80,7 @@
     <script src="{{ STATIC_URL }}js/bootstrap-collapse.js"></script>
     <script src="{{ STATIC_URL }}js/bootstrap-carousel.js"></script>
     <script src="{{ STATIC_URL }}js/bootstrap-typeahead.js"></script>
+    <script src="{{ STATIC_URL }}js/bootstrap-datepicker.js"></script>
     {% endblock %}
     {% block js_extra %}{% endblock %}
 
