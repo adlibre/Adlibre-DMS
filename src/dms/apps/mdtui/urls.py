@@ -17,10 +17,10 @@ urlpatterns = patterns('mdtui.views',
     url(r'^retrieve/options$', 'retrieve', {'step':'1',}, name='mdtui-retrieve-1'),
     url(r'^retrieve/results$', 'retrieve', {'step':'2',},name='mdtui-retrieve-2'),
 
-    url(r'^upload/$', 'upload', name='mdtui-index'),
-    url(r'^upload/1$', 'upload', {'step':'1',}, name='mdtui-index-1'),
-    url(r'^upload/2$', 'upload', {'step':'2',}, name='mdtui-index-2'),
-    url(r'^upload/3$', 'upload', {'step':'3',}, name='mdtui-index-3'),
-    url(r'^upload/4$', 'upload', {'step':'4',}, name='mdtui-index-4'),
+    url(r'^indexing/$', 'indexing', name='mdtui-index'),
+    url(r'^indexing/1$', 'indexing', {'step':'1',}, name='mdtui-index-1'),
+    url(r'^indexing/2$', 'indexing', {'step':'2',}, name='mdtui-index-2'),
+    url(r'^indexing/3$', 'indexing', {'step':'3',}, name='mdtui-index-3'),
+    url(r'^indexing/4$', 'indexing', {'step':'4',}, name='mdtui-index-4'),
 
 )
