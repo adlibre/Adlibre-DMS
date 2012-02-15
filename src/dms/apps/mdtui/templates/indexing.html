@@ -3,15 +3,18 @@
 {% block body_content %}
     <h1>{% block body_title %}Document Indexing{% endblock %}</h1>
 
+    {% if step != None %}
     {# Use this for a progress / step indicator / navigation #}
-    <ul class="nav nav-pills">
+    <ul class="pager x-progress-tracker">
         {% url mdtui-index-1 as url %}
-        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 1: Index Details <i class="icon-chevron-right icon-white"></i></a></li>
+        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 1: Index Details &rarr;</a></li>
         {% url mdtui-index-2 as url %}
-        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 2: Select Source <i class="icon-chevron-right icon-white"></i></a></li>
+        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 2: Select Source &rarr;</a></li>
         {% url mdtui-index-3 as url %}
-        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 3: Confirm <i class="icon-chevron-right icon-white"></i></a></li>
+        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 3: Confirm &rarr;</a></li>
+        <li><a>Finished</a></li>
     </ul>
+    {% endif %}
 
     {% if step == None %}
     <p>This is where it begins...</p>
