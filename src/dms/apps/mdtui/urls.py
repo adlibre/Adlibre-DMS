@@ -13,9 +13,9 @@ import mdtui.views
 
 urlpatterns = patterns('mdtui.views',
     url(r'^$', direct_to_template, {'template': 'home.html'}, name='mdtui-home'),
-    url(r'^retrieve/$', 'retrieve', name='mdtui-retrieve'),
-    url(r'^retrieve/options$', 'retrieve', {'step':'1',}, name='mdtui-retrieve-1'),
-    url(r'^retrieve/results$', 'retrieve', {'step':'2',},name='mdtui-retrieve-2'),
+    url(r'^search/$', 'search', name='mdtui-search'),
+    url(r'^search/options$', 'search', {'step':'1',}, name='mdtui-search-1'),
+    url(r'^search/results$', 'search', {'step':'2',},name='mdtui-search-2'),
 
     url(r'^indexing/$', 'indexing', name='mdtui-index'),
     url(r'^indexing/1$', 'indexing', {'step':'1',}, name='mdtui-index-1'),

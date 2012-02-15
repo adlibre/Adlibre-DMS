@@ -10,12 +10,12 @@ from django.shortcuts import render_to_response, HttpResponseRedirect, get_objec
 from django.template import RequestContext, loader
 
 
-def retrieve(request, step=None, template='retrieve.html'):
+def search(request, step=None, template='search.html'):
 
     # Hack to make the navigation work for testing the templates
     if request.POST:
         step = str(int(step) + 1)
-        return HttpResponseRedirect(reverse('mdtui-retrieve-' + step))
+        return HttpResponseRedirect(reverse('mdtui-search-' + step))
 
     context = { 'step': step, }
     return render_to_response(template, context, context_instance=RequestContext(request))

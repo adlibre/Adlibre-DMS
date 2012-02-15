@@ -63,8 +63,8 @@
                         <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}"><i class="icon-home icon-white"></i> Home</a></li>
                          {% url mdtui-index as url %}
                         <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}"><i class="icon-barcode icon-white"></i> Indexing</a></li>
-                        {% url mdtui-retrieve as url %}
-                        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}"><i class="icon-search icon-white"></i> Retrieval</a></li>
+                        {% url mdtui-search as url %}
+                        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}"><i class="icon-search icon-white"></i> Search</a></li>
                     </ul>
                 </div><!--/.nav-collapse -->
             </div>
