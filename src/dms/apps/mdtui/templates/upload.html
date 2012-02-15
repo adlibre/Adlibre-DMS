@@ -5,14 +5,17 @@
 
     {# Use this for a progress / step indicator / navigation #}
     <ul class="nav nav-pills">
-        <li class="active"><a href="?step=1">Step 1: File Source</a></li>
-        <li><a href="?step=2">Step 2: Index Details</a></li>
-        <li><a href="?step=3">Step 3: Confirmation</a></li>
+        {% url mdtui-index-1 as url %}
+        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 1: File Source <i class="icon-chevron-right icon-white"></i></a></li>
+        {% url mdtui-index-2 as url %}
+        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 2: Index Details <i class="icon-chevron-right icon-white"></i></a></li>
+        {% url mdtui-index-3 as url %}
+        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 3: Confirmation <i class="icon-chevron-right icon-white"></i></a></li>
     </ul>
 
     {% if step == None %}
     <p>This is where it begins...</p>
-    <a class="btn btn-primary" href="?step=1">Start <i class="icon-chevron-right icon-white"></i></a>
+    <a class="btn btn-primary" href="1">Start <i class="icon-chevron-right icon-white"></i></a>
     {% endif %}
     
     
@@ -26,8 +29,8 @@
         <li><a href="#print-barcode-tab" data-toggle="tab">Print Barcode</a></li>
     </ul>
 
-    <form class="form-horizontal">
-
+    <form class="form-horizontal" action="{{ request.path }}" method="post">
+        {% csrf_token %}
         <div class="tab-content">
             <div class="tab-pane active" id="upload-file-tab">
 
@@ -86,11 +89,88 @@
     {% endif %} {# end step 1 #}
 
     {% if step == "2" %}
-        <h2>Step 2: Index Details</h2>
+
+        <form class="form-horizontal" action="{{ request.path }}" method="post">
+            {% csrf_token %}
+            <fieldset>
+                <legend>Step 2: Index Details</legend>
+
+                <div class="control-group">
+                    <label class="control-label" for="select_doc_type">Document Type</label>
+                    <div class="controls">
+                        <select id="select_doc_type">
+                            <option></option>
+                            <option>Legal</option>
+                            <option>HR</option>
+                            <option>Contracts</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label" for="dateselect">Date</label>
+                    <div class="input">
+                        <div class="controls">
+                            <div class="input-prepend">
+                                <span class="add-on"><i class="icon-calendar"></i></span>
+                                <input data-datepicker="datepicker" class="input-medium" type="text" value="" id="dateselect" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label" for="input01">Key 1 Label</label>
+                    <div class="controls">
+                        <input type="text" class="input-medium" id="input01">
+                        <p class="help-block">Key 1 Desc</p>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label" for="input01">Key 2 Label</label>
+                    <div class="controls">
+                        <input type="text" class="input-medium" id="input02">
+                        <p class="help-block">Key 2 Desc</p>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label" for="input01">Key 3 Label</label>
+                    <div class="controls">
+                        <input type="text" class="input-medium" id="input03">
+                        <p class="help-block">Key 3 Desc</p>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label" for="input01">Description</label>
+                    <div class="controls">
+                        <input type="text" class="input-xxlarge" id="inputdesc">
+                        <p class="help-block">Freeform description of the document</p>
+                    </div>
+                </div>
+
+            </fieldset>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Continue <i class="icon-chevron-right icon-white"></i></button>
+            </div>
+        </form>
+
+
     {% endif %} {# end step 2 #}
 
     {% if step == "3" %}
         <h2>Step 3: Confirmation</h2>
+
+
+        <form class="form-horizontal" action="{{ request.path }}" method="post">
+            {% csrf_token %}
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Continue <i class="icon-chevron-right icon-white"></i></button>
+        </div>
+        </form>
     {% endif %} {# end step 3 #}
 
     {% if step == "4" %}
@@ -109,4 +189,5 @@
         //$('.tabs a:last').tab('show')
     })
 </script>
+<script src="{{ STATIC_URL }}js/bootstrap-datepicker.js"></script>
 {% endblock %}
