@@ -21,7 +21,7 @@ def retrieve(request, step=None, template='retrieve.html'):
     return render_to_response(template, context, context_instance=RequestContext(request))
 
 
-def upload(request, step=None, template='indexing.html'):
+def indexing(request, step=None, template='indexing.html'):
 
 #    if request.REQUEST.get('step'):
 #        step = request.REQUEST.get('step')

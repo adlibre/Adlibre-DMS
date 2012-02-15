@@ -6,9 +6,9 @@
     {# Use this for a progress / step indicator / navigation #}
     <ul class="nav nav-pills">
         {% url mdtui-index-1 as url %}
-        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 1: Select Source <i class="icon-chevron-right icon-white"></i></a></li>
+        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 1: Index Details <i class="icon-chevron-right icon-white"></i></a></li>
         {% url mdtui-index-2 as url %}
-        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 2: Index Details <i class="icon-chevron-right icon-white"></i></a></li>
+        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 2: Select Source <i class="icon-chevron-right icon-white"></i></a></li>
         {% url mdtui-index-3 as url %}
         <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 3: Confirm <i class="icon-chevron-right icon-white"></i></a></li>
     </ul>
@@ -17,84 +17,13 @@
     <p>This is where it begins...</p>
     <a class="btn btn-primary" href="{% url mdtui-index-1 %}">Start <i class="icon-chevron-right icon-white"></i></a>
     {% endif %}
-    
-    
-    {# NB: Might want to factor out these steps into separate templates. Done this way for simplicity #}
 
     {% if step == "1" %}
-
-    <ul class="nav nav-tabs">
-        <li class="active"><a href="#upload-file-tab" data-toggle="tab">Upload File</a></li>
-        <li><a href="#associate-file-tab" data-toggle="tab">Associate File</a></li>
-        <li><a href="#print-barcode-tab" data-toggle="tab">Print Barcode</a></li>
-    </ul>
-
-    <form class="form-horizontal" action="{{ request.path }}" method="post">
-        {% csrf_token %}
-        <div class="tab-content">
-            <div class="tab-pane active" id="upload-file-tab">
-
-                <fieldset>
-                    <legend>Choose File</legend>
-                    <div class="control-group">
-                        <label class="control-label" for="fileInput">File input</label>
-                        <div class="controls">
-                            <input class="input-file" id="fileInput" type="file">
-                        </div>
-                    </div>
-                </fieldset>
-
-            </div>
-            <div class="tab-pane" id="associate-file-tab">
-
-                <fieldset>
-                    <legend>Choose File</legend>
-                    <div class="control-group">
-                        <label class="control-label" for="select01">Select uncategorized file</label>
-                        <div class="controls">
-                            <select id="select01">
-                                <option>something</option>
-                                <option>2</option>
-                                <option>3</option>
-                                <option>4</option>
-                                <option>5</option>
-                            </select>
-                        </div>
-                    </div>
-                </fieldset>
-
-            </div>
-            <div class="tab-pane" id="print-barcode-tab">
-
-                <fieldset>
-                    <legend>Print Barcode</legend>
-
-                    <div class="control-group">
-
-                        <button class="btn">
-                            <i class="icon-barcode"></i> Print Barcode
-                        </button>
-                    </div>
-                </fieldset>
-
-            </div>
-        </div>
-
-        <div class="form-actions">
-            <button type="submit" class="btn btn-danger"><i class="icon-trash icon-white"></i> Cancel</button>
-            <button type="submit" class="btn btn-primary">Continue <i class="icon-chevron-right icon-white"></i></button>
-        </div>
-
-    </form>
-
-    {% endif %} {# end step 1 #}
-
-    {% if step == "2" %}
 
         <form class="form-horizontal" action="{{ request.path }}" method="post">
             {% csrf_token %}
             <fieldset>
-                <legend>Step 2: Index Details</legend>
+                <legend>Step {{ step }}: Index Details</legend>
 
                 <div class="control-group">
                     <label class="control-label" for="select_doc_type">Document Type</label>
@@ -160,6 +89,80 @@
             </div>
         </form>
 
+    {% endif %} {# end step 1 #}
+
+
+    {% if step == "2" %}
+
+    <ul class="nav nav-tabs">
+        <li><a href="#upload-file-tab" data-toggle="tab">Upload File</a></li>
+        <li><a href="#associate-file-tab" data-toggle="tab">Associate File</a></li>
+        <li><a href="#print-barcode-tab" data-toggle="tab">Print Barcode</a></li>
+    </ul>
+
+    <form class="form-horizontal" action="{{ request.path }}" method="post">
+        {% csrf_token %}
+        <div class="tab-content">
+            <div class="tab-pane" id="upload-file-tab">
+
+                <fieldset>
+                    <legend>Choose File</legend>
+                    <div class="control-group">
+                        <label class="control-label" for="fileInput">File input</label>
+                        <div class="controls">
+                            <input class="input-file" id="fileInput" type="file">
+                        </div>
+                    </div>
+                </fieldset>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-danger"><i class="icon-trash icon-white"></i> Cancel</button>
+                    <button type="submit" class="btn btn-primary">Continue <i class="icon-chevron-right icon-white"></i></button>
+                </div>
+            </div>
+
+            <div class="tab-pane" id="associate-file-tab">
+                <fieldset>
+                    <legend>Choose File</legend>
+                    <div class="control-group">
+                        <label class="control-label" for="select01">Select uncategorized file</label>
+                        <div class="controls">
+                            <select id="select01">
+                                <option>something</option>
+                                <option>2</option>
+                                <option>3</option>
+                                <option>4</option>
+                                <option>5</option>
+                            </select>
+                        </div>
+                    </div>
+                </fieldset>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-danger"><i class="icon-trash icon-white"></i> Cancel</button>
+                    <button type="submit" class="btn btn-primary">Continue <i class="icon-chevron-right icon-white"></i></button>
+                </div>
+            </div>
+
+            <div class="tab-pane" id="print-barcode-tab">
+                <fieldset>
+                    <legend>Print Barcode</legend>
+
+                    <div class="control-group">
+
+                        <button class="btn">
+                            <i class="icon-barcode"></i> Print Barcode
+                        </button>
+                    </div>
+                </fieldset>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-danger"><i class="icon-trash icon-white"></i> Cancel</button>
+                    <button type="submit" class="btn btn-primary">Continue <i class="icon-chevron-right icon-white"></i></button>
+                </div>
+            </div>
+
+        </div>
+
+
+    </form>
 
     {% endif %} {# end step 2 #}
 
