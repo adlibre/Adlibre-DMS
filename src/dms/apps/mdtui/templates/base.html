@@ -20,20 +20,22 @@
     <link href="{{ STATIC_URL }}css/bootstrap-responsive.css" rel="stylesheet">
     {% endblock %}
 
-    {% block css_extra %}
-        <style type="text/css">
-            .x-progress-tracker a {
-                background-color: #FFF;
-            }
-            .x-progress-tracker li.active a {
-                background-color: #f5f5f5;
-            }
-            .x-progress-tracker {
-                text-align: left;
-            }
-            .x-progress-tracker { padding-top: 20px;}
-        </style>
-    {% endblock %}
+    <style type="text/css">
+        .x-progress-tracker a {
+            background-color: #FFF;
+        }
+        .x-progress-tracker li.active a {
+            background-color: #f5f5f5;
+        }
+        .x-progress-tracker {
+            text-align: left;
+            padding-top: 15px;
+        }
+        .x-progress-tracker li { padding-bottom: 5px; display: inline-block;}
+
+    </style>
+
+    {% block css_extra %}{% endblock %}
 
     <!-- Le fav and touch icons -->
     <link rel="shortcut icon" href="{{ STATIC_URL }}favicon.ico">

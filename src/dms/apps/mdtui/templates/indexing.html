@@ -12,13 +12,14 @@
         <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 2: Select Source &rarr;</a></li>
         {% url mdtui-index-3 as url %}
         <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 3: Confirm &rarr;</a></li>
-        <li><a>Finished</a></li>
+        {% url mdtui-index-4 as url %}
+        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Finished</a></li>
     </ul>
     {% endif %}
 
     {% if step == None %}
     <p>This is where it begins...</p>
-    <a class="btn btn-primary" href="{% url mdtui-index-1 %}">Start <i class="icon-chevron-right icon-white"></i></a>
+    <a class="btn btn-primary btn-large" href="{% url mdtui-index-1 %}">Start <i class="icon-chevron-right icon-white"></i></a>
     {% endif %}
 
     {% if step == "1" %}
@@ -80,7 +81,7 @@
                     <label class="control-label" for="input01">Description</label>
                     <div class="controls">
                         <input type="text" class="input-xxlarge" id="inputdesc">
-                        <p class="help-block">Freeform description of the document</p>
+                        <p class="help-block">Short description of the document</p>
                     </div>
                 </div>
 
@@ -96,6 +97,11 @@
 
 
     {% if step == "2" %}
+        <fieldset>
+            <legend>Step {{ step }}: Select Source</legend>
+        </fieldset>
+
+        <br />
 
     <ul class="nav nav-tabs">
         <li><a href="#upload-file-tab" data-toggle="tab">Upload File</a></li>
@@ -170,7 +176,10 @@
     {% endif %} {# end step 2 #}
 
     {% if step == "3" %}
-        <h2>Step 3: Confirmation Required</h2>
+        <fieldset>
+            <legend>Step {{ step }}: Confirmation Required</legend>
+        </fieldset>
+
 
         <form class="form-horizontal" action="{{ request.path }}" method="post">
             {% csrf_token %}
@@ -182,7 +191,10 @@
     {% endif %} {# end step 3 #}
 
     {% if step == "4" %}
-        <h2>Step 4: Thank you{# or print barcode if barcode required #}</h2>
+        <fieldset>
+            <legend>Step {{ step }}: Thank you{# or print barcode if barcode required #}</legend>
+        </fieldset>
+        <br />
         <a class="btn btn-primary" href="{% url mdtui-index-1 %}">Start Again <i class="icon-chevron-right icon-white"></i></a>
 
     {% endif %} {# end step 4 #}

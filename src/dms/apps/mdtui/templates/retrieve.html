@@ -16,14 +16,14 @@
 
     {% if step == None %}
         <p>This is where it begins...</p>
-        <a class="btn btn-primary" href="{% url mdtui-retrieve-1 %}">Start <i class="icon-chevron-right icon-white"></i></a>
+        <a class="btn btn-primary btn-large" href="{% url mdtui-retrieve-1 %}">Start <i class="icon-chevron-right icon-white"></i></a>
     {% endif %}
 
     {% if step == "1" %}
         <form class="form-horizontal" action="{{ request.path }}" method="post">
             {% csrf_token %}
             <fieldset>
-                <legend>Step 1: Search Options</legend>
+                <legend>Search Options</legend>
 
                 <div class="control-group">
                     <label class="control-label" for="optionsCheckboxList">Document Types</label>
@@ -94,7 +94,6 @@
                     </div>
                 </div>
 
-
             </fieldset>
 
             <div class="form-actions">
@@ -102,18 +101,39 @@
                 <button type="submit" class="btn btn-primary">Search <i class="icon-search icon-white"></i></button>
             </div>
         </form>
-
-
-
-
-
-
-
-
     {% endif %}
 
     {% if step == "2" %}
-        <h2>Step 2: View Results</h2>
+        <fieldset>
+            <legend>Results</legend>
+        </fieldset>
+
+
+        <table class="table table-striped" id="results-table">
+            <caption>(Details of search query parameters)</caption>
+            <thead>
+                <tr>
+                    <th>View</th>
+                    <th>Key 1</th>
+                    <th>Key 2</th>
+                    <th>Key 3</th>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Edit</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><a href="http://slashdot.org/" title="View Document"><i class="icon-zoom-in"></i></a></td>
+                    <td>…</td>
+                    <td>…</td>
+                    <td>…</td>
+                    <td>…</td>
+                    <td>…</td>
+                    <td>{# Admin only #}<a href="" title="Edit Metadata"><i class="icon-edit"></i></a></td>
+                </tr>
+            </tbody>
+        </table>
 
         {# Let's use pagination like this #}
         <div class="pagination">
@@ -128,6 +148,9 @@
                 <li><a href="#">Next</a></li>
             </ul>
         </div>
+        
+        <a href="" title="Download Results to CSV" class="btn"><i class="icon-download-alt"></i> Export Results</a>
+
     {% endif %}
 
     {% if step == "3" %}
@@ -135,4 +158,34 @@
         {# don't actually display this step, just pop up a document. #}
     {% endif %}
 
+{% endblock %}
+
+{% block css_extra %}
+    <style type="text/css">
+        #results-table tbody tr.highlight { font-weight: bold; cursor: pointer; }
+    </style>
+{% endblock %}
+
+
+{% block js_extra %}
+    {% if step == "2" %}
+    <script type="text/javascript">
+        $(function() {
+            // Hide the first cell for JavaScript enabled browsers.
+            //$('#link-table td:first-child').hide();
+
+            // Apply a class on mouse over and remove it on mouse out.
+            $('#results-table tbody tr').hover(function() {
+                $(this).toggleClass('highlight');
+            });
+
+            // Assign a click handler that grabs the URL
+            // from the first cell and redirects the user.
+            $('#results-table tr').click(function() {
+                location.href = $(this).find('td a').attr('href');
+            });
+        });
+
+    </script>
+    {% endif %}
 {% endblock %}
