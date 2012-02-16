@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
@@ -29,7 +30,7 @@
         </ul>
     {% endif %}
         <ul id="ui_breadcrumbs">
-            <li><a href="{%url ui_rule_list%}">Rules</a></li>
+            <li><a href="{%url ui_rule_list%}">Document Types</a></li>
         </ul>
         <ul id="ui_upload_file_form_wrapper">
             <form id="ui_upload_file_form" enctype="multipart/form-data" action="{%url ui_upload_document%}" method="post">
@@ -57,7 +58,7 @@
         &middot; <a href="{% url about_documentation %}">About</a>
         &middot; <a href="{% url documentation_index %}">Docs</a>
         &middot; <a href="{% url upload %}">Upload</a>
-        <span>Version: 1.0 Beta. {% if user.is_authenticated %}Logged in as {{ user }}{% else %}Logged out{% endif %}.</span>
+        <span>{% trans 'Version' %}: {{ PRODUCT_VERSION }}. {% if user.is_authenticated %}Logged in as {{ user }}{% else %}Logged out{% endif %}.</span>
     </p>
 {% endblock %}
 	</div>
