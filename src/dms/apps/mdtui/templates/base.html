@@ -1,3 +1,4 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,6 +22,26 @@
     {% endblock %}
 
     <style type="text/css">
+        /* floating footer */
+        html, body {
+            height: 100%;
+        }
+        footer {
+            padding: 17px 0 18px 0;
+            margin: 0;
+            border-top: 1px solid #eee;
+        }
+        .wrapper {
+            min-height: 100%;
+            height: auto !important;
+            height: 100%;
+            margin: 0 auto -123px;
+        }
+        .push {
+            height: 123px;
+        }
+
+        /* progress tracker */
         .x-progress-tracker a {
             background-color: #FFF;
         }
@@ -32,7 +53,6 @@
             padding-top: 15px;
         }
         .x-progress-tracker li { padding-bottom: 5px; display: inline-block;}
-
     </style>
 
     {% block css_extra %}{% endblock %}
@@ -60,26 +80,31 @@
                     <ul class="nav">
                         {% url mdtui-home as url %}
                         <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}"><i class="icon-home icon-white"></i> Home</a></li>
-                         {% url mdtui-index as url %}
-                        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}"><i class="icon-barcode icon-white"></i> Indexing</a></li>
                         {% url mdtui-search as url %}
                         <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}"><i class="icon-search icon-white"></i> Search</a></li>
+                         {% url mdtui-index as url %}
+                        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}"><i class="icon-barcode icon-white"></i> Indexing</a></li>
                     </ul>
                 </div><!--/.nav-collapse -->
             </div>
         </div>
     </div>
 
-    <div class="container">
-        {% block body_content %}
+    <div class="wrapper">
+        <div class="container" id="body-content">
+            {% block body_content %}
+            <h1>Adlibre DMS UI</h1>
+            <p>Welcome to the Adlibre DMS MDT UI<br />Please choose an option from the top menu to continue</p>
+            {% endblock %}
+        </div> <!-- /container -->
+        <div class="push"><!--//--></div>
+    </div>
 
-        <h1>Adlibre DMS UI</h1>
-        <p>Welcome to the Adlibre DMS MDT UI<br />Please choose an option from the top menu to continue</p>
-        {% endblock %}
+    <footer class="container">
+        <p><a href="http://www.adlibre.com.au/">{% trans 'Adlibre DMS' %}</a> - &copy; Adlibre {% now "Y" %} </p>
+    </footer>
 
-    </div> <!-- /container -->
-
-    {% block js_footer %}
+{% block js_footer %}
     <!-- Le javascript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
@@ -97,9 +122,8 @@
     <script src="{{ STATIC_URL }}js/bootstrap-carousel.js"></script>
     <script src="{{ STATIC_URL }}js/bootstrap-typeahead.js"></script>
     <script src="{{ STATIC_URL }}js/bootstrap-datepicker.js"></script>
-    {% endblock %}
-    {% block js_extra %}{% endblock %}
-
+{% endblock %}
+{% block js_extra %}{% endblock %}
 </body>
 {% endblock %}
 </html>
