@@ -10,7 +10,7 @@ from django.shortcuts import render_to_response, HttpResponseRedirect, get_objec
 from django.template import RequestContext, loader
 
 
-def search(request, step=None, template='search.html'):
+def search(request, step=None, template='mdtui/search.html'):
 
     # Hack to make the navigation work for testing the templates
     if request.POST:
@@ -21,7 +21,7 @@ def search(request, step=None, template='search.html'):
     return render_to_response(template, context, context_instance=RequestContext(request))
 
 
-def indexing(request, step=None, template='indexing.html'):
+def indexing(request, step=None, template='mdtui/indexing.html'):
 
 #    if request.REQUEST.get('step'):
 #        step = request.REQUEST.get('step')

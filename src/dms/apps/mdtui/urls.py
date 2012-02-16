@@ -12,7 +12,7 @@ from django.views.generic.simple import redirect_to
 import mdtui.views
 
 urlpatterns = patterns('mdtui.views',
-    url(r'^$', direct_to_template, {'template': 'home.html'}, name='mdtui-home'),
+    url(r'^$', direct_to_template, {'template': 'mdtui/home.html'}, name='mdtui-home'),
 
     url(r'^search/$', 'search', {'step':'1',}, name='mdtui-search'),
     url(r'^search/options$', 'search', {'step':'1',}, name='mdtui-search-1'),

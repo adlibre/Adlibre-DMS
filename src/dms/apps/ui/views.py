@@ -28,19 +28,19 @@ def get_urls(id_rule = None, document_name = None):
     return json.dumps(c)
 
 def rule_list(request):
-    template_name = "rule_list.html"
+    template_name = "ui/rule_list.html"
     c = {   'communicator_options': get_urls(),}
     return direct_to_template(request, template_name, c)
 
 def document_list(request, id_rule):
-    template_name = "document_list.html"
+    template_name = "ui/document_list.html"
     c = {'communicator_options': get_urls(id_rule = id_rule),
         'rule_id': id_rule,
         'calendar_form': CalendarForm()}
     return direct_to_template(request, template_name, c)
 
 def document(request, document_name):
-    template_name = "document.html"
+    template_name = "ui/document.html"
     c = {'communicator_options': get_urls(document_name = document_name),
         'document_name': document_name}
     return direct_to_template(request, template_name, c)
