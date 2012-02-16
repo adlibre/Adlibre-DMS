@@ -10,6 +10,7 @@ import json
 from django.core.urlresolvers import reverse
 from django.views.generic.simple import direct_to_template
 from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
 
 from ui.forms import CalendarForm
 from api.handlers import FileHandler
@@ -27,11 +28,13 @@ def get_urls(id_rule = None, document_name = None):
                     })
     return json.dumps(c)
 
+@login_required
 def rule_list(request):
     template_name = "ui/rule_list.html"
     c = {   'communicator_options': get_urls(),}
     return direct_to_template(request, template_name, c)
 
+@login_required
 def document_list(request, id_rule):
     template_name = "ui/document_list.html"
     c = {'communicator_options': get_urls(id_rule = id_rule),
@@ -39,12 +42,14 @@ def document_list(request, id_rule):
         'calendar_form': CalendarForm()}
     return direct_to_template(request, template_name, c)
 
+@login_required
 def document(request, document_name):
     template_name = "ui/document.html"
     c = {'communicator_options': get_urls(document_name = document_name),
         'document_name': document_name}
     return direct_to_template(request, template_name, c)
 
+@login_required
 def upload_document(request):
     document_name = FileHandler().create(request)
     if type(document_name) == unicode:
