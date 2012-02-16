@@ -1,16 +1,19 @@
 {% extends "base.html" %}
 
 {% block body_content %}
-    <h1>{% block body_title %}Home{% endblock %}</h1>
-    <p>Some nice text about how awesome this all is...</p>
-    <br />
 
     <div class="row">
+        <div class="span12">
+            <h1>{% block body_title %}Home{% endblock %}</h1>
+            <p>To continue choose from the options below:</p>
+            <br />
+        </div>
+    </div>
 
+    <div class="row">
         <div class="span6" style="text-align: center;">
             <p><a href="{% url mdtui-search %}"><img src="{{ STATIC_URL }}search.png" /></a></p>
             <p><a href="{% url mdtui-search %}" class="btn btn-primary btn-large"><i class="icon-search icon-white"></i> Search</a></p>
-            
         </div>
         <div class="span6" style="text-align: center;">
             <p><a href="{% url mdtui-index %}"><img src="{{ STATIC_URL }}barcode.png" /></a></p>
