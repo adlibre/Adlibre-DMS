@@ -156,6 +156,7 @@ def save_doccode_model(plugins_sorted_dict, input_post_data, pk = False):
         mapping.before_retrieval_plugins = []
         mapping.before_removal_plugins = []
         mapping.before_update_plugins = []
+        mapping.database_storage_plugins = []
     else:
         mapping = DoccodePluginMapping()
     mapping.active = input_post_data.has_key('active')
@@ -223,6 +224,7 @@ def get_plugins_for_doccode(instance, plugins_queryset = False):
     plg_s.append(instance.get_before_retrieval_plugins())
     plg_s.append(instance.get_before_removal_plugins())
     plg_s.append(instance.get_before_update_plugins())
+    plg_s.append(instance.get_database_storage_plugins())
     for queryset in plg_s:
         for plugin in queryset:
             plugins_dict.append(plugin.pk)

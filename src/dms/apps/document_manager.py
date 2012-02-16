@@ -62,7 +62,7 @@ class DocumentManager(object):
         #print "Plugins: %s" % plugins
         for plugin in plugins:
             try:
-                #print "begin processing %s:" % plugin
+                print "begin processing %s:" % plugin
                 document = plugin.work(request, document)
                 #print "Processed %s:" % plugin
                 #print "Here is document: \n%s" % document.__dict__
@@ -91,7 +91,9 @@ class DocumentManager(object):
         #process before storage plugins
         doc = self.process_pluginpoint(pluginpoints.BeforeStoragePluginPoint, request, document = doc)
         #process storage plugins
-        return self.process_pluginpoint(pluginpoints.StoragePluginPoint, request, document = doc)
+        self.process_pluginpoint(pluginpoints.StoragePluginPoint, request, document = doc)
+        #process DatabaseStorage plugins
+        return self.process_pluginpoint(pluginpoints.DatabaseStoragePluginPoint, request, document = doc)
 
     def rename(self, request, document_name, new_name, extension, parent_directory = None):
         doc = self.retrieve(request, document_name, extension = extension, parent_directory = parent_directory)
