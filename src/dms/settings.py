@@ -166,16 +166,18 @@ INSTALLED_APPS = (
     'piston',
     'plugins',
     'taggit',
-    'couchdbkit.ext.django', #needed for CouchDB usage
-    # DMS
+    'couchdbkit.ext.django', # needed for CouchDB usage
+    # DMS Core
     'api',
     'docs',
     'browser',
     'dms_plugins',
-    'ui',
     'doc_codes',
-    'mdtui',
     'dmscouch', # temporary couchapp
+    # DMS Standalone
+    'ui',
+    'mdtui',
+    'bcp',
 )
 
 # A sample logging configuration. The only tangible logging
