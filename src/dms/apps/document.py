@@ -30,6 +30,7 @@ class Document(object):
         self.tag_string = ''
         self.remove_tag_string = ''
         self.requested_extension = None
+        self.db_info = {}
 
     def get_name(self):
         name = self.get_filename()

@@ -6,6 +6,10 @@ class BeforeStoragePluginPoint(object):
     __metaclass__ = PluginMount
     settings_field_name = 'before_storage_plugins'
 
+class DatabaseStoragePluginPoint(object):
+    __metaclass__ = PluginMount
+    settings_field_name = 'database_storage_plugins'
+
 class StoragePluginPoint(object):
     __metaclass__ = PluginMount
     settings_field_name = 'storage_plugins'

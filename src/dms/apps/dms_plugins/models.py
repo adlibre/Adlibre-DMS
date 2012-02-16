@@ -25,6 +25,10 @@ class DoccodePluginMapping(models.Model):
                                                 related_name = 'settings_before_storage',
                                                 blank = True,
                                                 verbose_name = "Pre-Storage Workflow")
+    database_storage_plugins = ManyPluginField(   pluginpoints.DatabaseStoragePluginPoint,
+                                                related_name = 'settings_database_storage',
+                                                blank = True,
+                                                verbose_name = "Storage Workflow")
     storage_plugins = ManyPluginField(   pluginpoints.StoragePluginPoint, 
                                                 related_name = 'settings_storage',
                                                 blank = True,
@@ -77,6 +81,9 @@ class DoccodePluginMapping(models.Model):
 
     def get_before_update_plugins(self):
         return self.before_update_plugins.all().order_by('index')
+
+    def get_database_storage_plugins(self):
+        return self.database_storage_plugins.all().order_by('index')
 
 class PluginOption(models.Model):
     pluginmapping = models.ForeignKey(DoccodePluginMapping)
