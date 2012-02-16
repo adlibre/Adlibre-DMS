@@ -1,21 +1,18 @@
 {% extends "base.html" %}
 
 {% block body_content %}
+    <header class="hero-unit">
+        <h1>{% block body_title %}Adlibre Document Management System{% endblock %}</h1>
+        <p>To continue choose from the options below:</p>
+        <br />
+    </header>
 
     <div class="row">
-        <div class="span12">
-            <h1>{% block body_title %}Adlibre Document Management System{% endblock %}</h1>
-            <p>To continue choose from the options below:</p>
-            <br />
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="span4" style="text-align: center;">
+        <div class="span6" style="text-align: center;">
             <p><a href="{% url mdtui-search %}"><img src="{{ STATIC_URL }}search.png" /></a></p>
             <p><a href="{% url mdtui-search %}" class="btn btn-primary btn-large"><i class="icon-search icon-white"></i> Search</a></p>
         </div>
-        <div class="span4" style="text-align: center;">
+        <div class="span6" style="text-align: center;">
             <p><a href="{% url mdtui-index %}"><img src="{{ STATIC_URL }}barcode.png" /></a></p>
             <p><a href="{% url mdtui-index %}" class="btn btn-primary btn-large"><i class="icon-barcode icon-white"></i> Index</a></p>
         </div>
