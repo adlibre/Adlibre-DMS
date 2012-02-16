@@ -14,7 +14,7 @@
     </ul>
     {% endif %}
 
-    {% if step == None %}
+    {% if step == None %} {# This step will no long be visible #}
         <p>This is where it begins...</p>
         <a class="btn btn-primary btn-large" href="{% url mdtui-search-1 %}">Start <i class="icon-chevron-right icon-white"></i></a>
     {% endif %}
@@ -24,6 +24,11 @@
             {% csrf_token %}
             <fieldset>
                 <legend>Search Options</legend>
+
+                <div class="alert alert-error">
+                    <a class="close">×</a>
+                    <strong>Error!</strong> Form validation errors go here! (field validation errors go along each field below)
+                </div>
 
                 <div class="control-group">
                     <label class="control-label" for="optionsCheckboxList">Document Types</label>
@@ -114,10 +119,10 @@
             <thead>
                 <tr>
                     <th>View</th>
+                    <th><a href="{# sort on this#}">Date</a></th>
                     <th><a href="{# sort on this#}">Key 1</a></th>
                     <th><a href="{# sort on this#}">Key 2</a></th>
                     <th><a href="{# sort on this#}">Key 3</a></th>
-                    <th><a href="{# sort on this#}">Date</a></th>
                     <th><a href="{# sort on this#}">Type</a></th>
                     <th>Edit</th>
                 </tr>
@@ -163,9 +168,13 @@
 {% block css_extra %}
     <style type="text/css">
         #results-table tbody tr.highlight { font-weight: bold; cursor: pointer; }
+        body {
+            background-image: url("{{ STATIC_URL }}search-background.png");
+            background-repeat: no-repeat;
+            background-position: 100px 200px;
+        }
     </style>
 {% endblock %}
-
 
 {% block js_extra %}
     {% if step == "2" %}
