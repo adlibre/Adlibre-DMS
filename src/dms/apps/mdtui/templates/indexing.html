@@ -28,7 +28,7 @@
             {% csrf_token %}
             <fieldset>
                 <legend>Step {{ step }}: Index Details</legend>
-
+                <br />
                 <div class="alert alert-error">
                     <a class="close">×</a>
                     <strong>Error!</strong> Form validation errors go here! (field validation errors go along each field below)
@@ -185,6 +185,8 @@
             <legend>Step {{ step }}: Confirmation</legend>
         </fieldset>
 
+        <br />
+
         <div class="alert">
             <a class="close">×</a>
             <strong>Warning!</strong> Warnings go here. (eg creating a new parallel key)
@@ -217,7 +219,7 @@
     #body-content {
         background-image: url("{{ STATIC_URL }}barcode-background.png");
         background-repeat: no-repeat;
-        background-position: 100px 100px;
+        background-position: 100px 198px;
     }
 </style>
 {% endblock %}
