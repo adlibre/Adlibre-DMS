@@ -3,8 +3,7 @@
 {% block body_content %}
     <header class="hero-unit">
         <h1>{% block body_title %}Adlibre Document Management System{% endblock %}</h1>
-        <p>To continue choose from the options below:</p>
-        <br />
+        <p>To continue, choose from the options below:</p>
     </header>
 
     <div class="row">
@@ -18,4 +17,10 @@
         </div>
     </div>
 
+{% endblock %}
+
+{% block css_extra %}
+<style type="text/css">
+    a img:hover { opacity: 0.8;}
+</style>
 {% endblock %}

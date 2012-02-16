@@ -46,9 +46,9 @@
         }
         .x-progress-tracker {
             text-align: left;
-            padding-top: 15px;
+            padding-top: 19px;
         }
-        .x-progress-tracker li { padding-bottom: 5px; display: inline-block;}
+        .x-progress-tracker li { padding-bottom: 4px; display: inline-block;}
     </style>
     {% endblock %}
 
@@ -73,7 +73,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </a>
-                <a class="brand" href="{% url home %}">Adlibre DMS</a>
+                <a class="brand" href="{% url mdtui-home %}">Adlibre DMS</a>
                 <div class="nav-collapse">
                     <ul class="nav">
                         {% url mdtui-home as url %}
@@ -81,7 +81,7 @@
                         {% url mdtui-search as url %}
                         <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}"><i class="icon-search icon-white"></i> Search</a></li>
                          {% url mdtui-index as url %}
-                        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}"><i class="icon-barcode icon-white"></i> Indexing</a></li>
+                        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}"><i class="icon-barcode icon-white"></i> Index</a></li>
                     </ul>
                 </div><!--/.nav-collapse -->
             </div>
@@ -91,8 +91,6 @@
     <div class="wrapper">
         <div class="container" id="body-content">
             {% block body_content %}
-            <h1>Adlibre DMS UI</h1>
-            <p>Welcome to the Adlibre DMS MDT UI<br />Please choose an option from the top menu to continue</p>
             {% endblock %}
         </div> <!-- /container -->
         <div class="push"><!--//--></div>
