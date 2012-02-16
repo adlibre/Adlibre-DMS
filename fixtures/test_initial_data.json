@@ -655,144 +655,144 @@
                 9, 
                 15, 
                 17
-            ], 
+            ],
             "before_removal_plugins": [
-                12, 
+                12,
                 13,
                 20
-            ], 
+            ],
             "before_storage_plugins": [
-                1, 
-                2, 
+                1,
+                2,
                 3
-            ], 
+            ],
             "storage_plugins": [
-                4, 
+                4,
                 14
-            ], 
+            ],
             "before_update_plugins": [
                 19,
                 21
-            ], 
+            ],
             "doccode": "2"
         }
-    }, 
+    },
     {
-        "pk": 2, 
-        "model": "dms_plugins.doccodepluginmapping", 
+        "pk": 2,
+        "model": "dms_plugins.doccodepluginmapping",
         "fields": {
-            "active": true, 
+            "active": true,
             "before_retrieval_plugins": [
-                5, 
-                6, 
-                7, 
-                9, 
-                11, 
-                15, 
+                5,
+                6,
+                7,
+                9,
+                11,
+                15,
                 17
-            ], 
+            ],
             "before_removal_plugins": [
-                12, 
+                12,
                 13,
                 20
-            ], 
+            ],
             "before_storage_plugins": [
-                1, 
-                2, 
-                3, 
+                1,
+                2,
+                3,
                 10
-            ], 
+            ],
             "storage_plugins": [
-                4, 
+                4,
                 14
-            ], 
+            ],
             "before_update_plugins": [
                 19,
                 21
-            ], 
+            ],
             "doccode": "1"
         }
-    }, 
+    },
     {
-        "pk": 3, 
-        "model": "dms_plugins.doccodepluginmapping", 
+        "pk": 3,
+        "model": "dms_plugins.doccodepluginmapping",
         "fields": {
-            "active": true, 
+            "active": true,
             "before_retrieval_plugins": [
-                6, 
-                7, 
-                15, 
+                6,
+                7,
+                15,
                 17
-            ], 
+            ],
             "before_removal_plugins": [
-                12, 
+                12,
                 13,
                 20
-            ], 
+            ],
             "storage_plugins": [
-                4, 
+                4,
                 14
-            ], 
+            ],
             "before_update_plugins": [
                 19,
                 21
-            ], 
+            ],
             "doccode": "3"
         }
-    }, 
+    },
     {
-        "pk": 4, 
-        "model": "dms_plugins.doccodepluginmapping", 
+        "pk": 4,
+        "model": "dms_plugins.doccodepluginmapping",
         "fields": {
-            "active": true, 
+            "active": true,
             "before_retrieval_plugins": [
-                6, 
-                7, 
-                15, 
+                6,
+                7,
+                15,
                 17
-            ], 
+            ],
             "before_removal_plugins": [
-                12, 
+                12,
                 13,
                 20
-            ], 
+            ],
             "before_storage_plugins": [
                 2
-            ], 
+            ],
             "storage_plugins": [
-                4, 
+                4,
                 14
-            ], 
+            ],
             "before_update_plugins": [
                 19,
                 21
-            ], 
+            ],
             "doccode": "4"
         }
-    }, 
+    },
     {
-        "pk": 5, 
-        "model": "dms_plugins.doccodepluginmapping", 
+        "pk": 5,
+        "model": "dms_plugins.doccodepluginmapping",
         "fields": {
-            "active": true, 
+            "active": true,
             "before_retrieval_plugins": [
-                6, 
-                7, 
-                15, 
+                6,
+                7,
+                15,
                 17
-            ], 
+            ],
             "before_removal_plugins": [
-                12, 
+                12,
                 13,
                 20
-            ], 
+            ],
             "before_storage_plugins": [
                 2
-            ], 
+            ],
             "storage_plugins": [
-                4, 
+                4,
                 14
-            ], 
+            ],
             "before_update_plugins": [
                 19,
                 21
@@ -817,11 +817,11 @@
             ], 
             "before_storage_plugins": [
                 3
-            ], 
+            ],
             "storage_plugins": [
-                4, 
+                4,
                 14
-            ], 
+            ],
             "before_update_plugins": [
                 21
             ], 

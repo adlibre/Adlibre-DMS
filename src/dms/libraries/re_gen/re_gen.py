@@ -22,6 +22,7 @@ help must be expanded:
 .
 .
 .
+to run test simply run "python re_gen.py" on this file.
 """
 
 import re
