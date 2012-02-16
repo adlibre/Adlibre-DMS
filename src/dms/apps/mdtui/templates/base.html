@@ -13,15 +13,11 @@
     <!-- Le styles -->
     {% block css %}
     <link href="{{ STATIC_URL }}css/bootstrap.css" rel="stylesheet">
-    <style>
-        body {
-            padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
-        }
-    </style>
     <link href="{{ STATIC_URL }}css/bootstrap-responsive.css" rel="stylesheet">
-    {% endblock %}
-
     <style type="text/css">
+        /* 60px to make the container go all the way to the bottom of the topbar */
+        #body-content { padding-top: 60px;  }
+
         /* floating footer */
         html, body {
             height: 100%;
@@ -35,10 +31,10 @@
             min-height: 100%;
             height: auto !important;
             height: 100%;
-            margin: 0 auto -123px;
+            margin: 0 auto -63px;
         }
         .push {
-            height: 123px;
+            height: 63px;
         }
 
         /* progress tracker */
@@ -54,6 +50,8 @@
         }
         .x-progress-tracker li { padding-bottom: 5px; display: inline-block;}
     </style>
+    {% endblock %}
+
 
     {% block css_extra %}{% endblock %}
 
