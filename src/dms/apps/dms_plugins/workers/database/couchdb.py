@@ -25,14 +25,30 @@ class CouchDBMetadata(object):
         couchdoc=CouchDocument()
         couchdoc.populate_from_dms(request, document)
         couchdoc.save(force_update=True)
-        print "Storing Document into DB", document
+        #print "Storing Document into DB", document
         return document
 
     def update_metadata_after_removal(self, request, document):
-        print "Deleting Document in DB", document
+        """
+        Updates document CouchDB metadata on removal. (Removes CocuhDB document)
+        """
+        if not document:
+            #doc is fully deleted
+            if request.method == 'DELETE':
+                #precaution to only delete on delete not on 'PUT'
+                doc_name = request.GET["filename"]
+                couchdoc = CouchDocument.get(docid=doc_name)
+                couchdoc.delete()
+        #print "Deleted Document in DB", document
 
     def retrieve(self, request, document):
-        print "Getting Document from DB", document
+        # doing nothing for no doccode documents
+        if document.get_docrule().no_doccode:
+            return document
+        doc_name = document.get_stripped_filename()
+        couchdoc = CouchDocument.get(docid=doc_name)
+        document = couchdoc.populate_into_dms(request, document)
+        #print "Populating Document from DB", document
         return document
 
     """
