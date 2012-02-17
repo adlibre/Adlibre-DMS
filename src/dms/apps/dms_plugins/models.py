@@ -94,13 +94,18 @@ class PluginOption(models.Model):
     def __unicode__(self):
         return "%s: %s" % (self.name, self.value)
 
+# TODO: Refactor this to more suitable name (without using verbose_name)
 class Document(models.Model):
     """
-        A model that represents Document for maintainig database relations.
+        A model that represents Document for maintainig Tag relations.
     """
     name = models.CharField(max_length = 128)
     doccode = models.CharField(max_length = 63, choices = DOCRULE_CHOICES)
     tags = TaggableManager()
+
+    class Meta:
+        verbose_name = "Document > Tags mapping"
+        verbose_name_plural = "Document > Tags mappings"
 
     def get_tag_list(self):
         return map(lambda x: x.name, self.tags.all())
