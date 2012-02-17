@@ -18,6 +18,9 @@ class CouchDocument(Document):
         app_label = "dmscouch"
 
     def populate_from_dms(self, request, document):
+        """
+        Populates CocuhDB Document fields from DMS Document object.
+        """
         # setting document ID, based on filename. Using stripped (pure doccode regex readable) filename if possible.
         # TODO: to save no_docrule documents properly we need to generate metadata.
         if document.get_stripped_filename():
@@ -43,3 +46,27 @@ class CouchDocument(Document):
         self.search_keywords = [] # not implemented yet
         self.revisions = document.metadata
 
+    def populate_into_dms(self, request, document):
+        """
+        Updates DMS Document object with CouchDB fields data.
+        """
+        document.metadata = self.revisions
+        document.tags = self.tags
+        document.stripped_filename = self.id
+        document.db_info = self.construct_db_info()
+        return document
+
+    def construct_db_info(self, db_info = None):
+        """
+        Method to populate additional database info from CouchDB into DMS Document object.
+        """
+        if not db_info:
+            db_info={}
+        db_info["description"] = self.metadata_description
+        db_info["tags"] = self.tags
+        db_info["metadata_doc_type_rule_id"] = self.metadata_doc_type_rule_id
+        db_info["metadata_user_id"] = self.metadata_user_id
+        db_info["metadata_user_name"] = self.metadata_user_name
+        db_info["metadata_created_date"] = self.metadata_created_date
+        db_info["mdt_indexes"] = self.mdt_indexes
+        return db_info
