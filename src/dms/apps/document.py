@@ -248,3 +248,9 @@ class Document(object):
     def set_remove_tag_string(self, tag_string):
         if tag_string:
             self.remove_tag_string = tag_string
+
+    def get_db_info(self):
+        return self.db_info
+
+    def set_db_info(self, db_info):
+        self.db_info = db_info

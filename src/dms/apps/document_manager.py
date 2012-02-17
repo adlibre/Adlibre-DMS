@@ -62,7 +62,7 @@ class DocumentManager(object):
         #print "Plugins: %s" % plugins
         for plugin in plugins:
             try:
-                print "begin processing %s:" % plugin
+                #print "begin processing %s:" % plugin
                 document = plugin.work(request, document)
                 #print "Processed %s:" % plugin
                 #print "Here is document: \n%s" % document.__dict__
