@@ -65,7 +65,8 @@ class CouchDocument(Document):
         db_info["description"] = self.metadata_description
         db_info["tags"] = self.tags
         db_info["metadata_doc_type_rule_id"] = self.metadata_doc_type_rule_id
-        db_info["metadata_user_id"] = self.metadata_user_id
+        # TODO: not implemented and needed for exposure till implementation of Permissions/Ldap plugin.
+        #db_info["metadata_user_id"] = self.metadata_user_id
         db_info["metadata_user_name"] = self.metadata_user_name
         db_info["metadata_created_date"] = self.metadata_created_date
         db_info["mdt_indexes"] = self.mdt_indexes
