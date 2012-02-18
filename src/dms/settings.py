@@ -6,6 +6,7 @@ import socket
 
 PROJECT_PATH = os.path.abspath(os.path.split(__file__)[0])
 sys.path.append(os.path.join(PROJECT_PATH, 'apps'))
+sys.path.append(os.path.join(PROJECT_PATH, 'couchapps'))
 sys.path.append(os.path.join(PROJECT_PATH, 'libraries'))
 sys.path.append(os.path.join(PROJECT_PATH, 'dmsplugins'))
 
@@ -31,6 +32,7 @@ DATABASES = {
 
 COUCHDB_DATABASES = (
          ('dmscouch', 'http://127.0.0.1:5984/dmscouch'),
+         ('mdtcouch', 'http://127.0.0.1:5984/mdtcouch'),
 )
 
 # Local time zone for this installation. Choices can be found here:
@@ -128,7 +130,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+#    'django.middleware.csrf.CsrfViewMiddleware',                      # WARNING! DISABLED FOR MDT-s dev
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
@@ -173,7 +175,8 @@ INSTALLED_APPS = (
     'browser',
     'dms_plugins',
     'doc_codes',
-    'dmscouch', # temporary couchapp
+    'dmscouch', # main couchapp
+    'mdtcouch', # Metadata Templates app
     # DMS Standalone
     'ui',
     'mdtui',

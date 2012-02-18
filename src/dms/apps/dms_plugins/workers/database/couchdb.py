@@ -1,14 +1,22 @@
+"""
+Module: DMS CocuhDB Plugin
+Project: Adlibre DMS
+Copyright: Adlibre Pty Ltd 2011
+License: See LICENSE for license information
+Author: Iurii Garmash
+"""
+
 from dms_plugins.pluginpoints import BeforeRetrievalPluginPoint, BeforeRemovalPluginPoint, DatabaseStoragePluginPoint
 from dms_plugins.models import Document as DocTags #needs refactoring of name
 from dms_plugins.workers import Plugin, PluginError, BreakPluginChain
 from document_manager import DocumentManager
-from couch_manager import CouchDocument
+from dmscouch.couchdocs_manager import CouchDocument
 
 
 class CouchDBMetadata(object):
     """
         Stores metadata in CouchDB DatabaseManager.
-        Handles required logic for metadata <> Document(object) manipulations.
+        Handles required logic for metadata <==> Document(object) manipulations.
     """
 
     def store(self, request, document):

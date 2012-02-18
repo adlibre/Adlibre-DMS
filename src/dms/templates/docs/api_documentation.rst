@@ -56,3 +56,17 @@ Plugins
 -  **URL:** http://www.example.com/api/plugins.*format*
 -  **Method(s):** GET
 -  **Returns:** file
+
+Metadata Templates
+__________________
+
+-  **URL:** http://www.example.com/api/mdts.*docrule_id*
+-  **Method(s):** GET
+-  **Returns:** Metadata Template
+
+-  **URL:** http://www.example.com/api/mdt/
+-  **Method(s):** POST
+-  **Parameters:** mdt
+-  **Returns:** status
+
+Parameter "mdt" must be JSON for metadata template
