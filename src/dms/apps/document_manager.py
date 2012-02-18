@@ -1,3 +1,10 @@
+"""
+Module: DMS core Document Manager
+Project: Adlibre DMS
+Copyright: Adlibre Pty Ltd 2011
+License: See LICENSE for license information
+"""
+
 import os, plugins
 
 from django.conf import settings

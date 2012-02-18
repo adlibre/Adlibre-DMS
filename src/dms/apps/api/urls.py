@@ -17,6 +17,7 @@ rules_handler = Resource(handlers.RulesHandler)
 rules_detail_handler = Resource(handlers.RulesDetailHandler)
 plugins_handler = Resource(handlers.PluginsHandler)
 tags_handler = Resource(handlers.TagsHandler)
+mdt_handler = Resource(handlers.MetaDataTemplateHandler)
 
 urlpatterns = patterns('',
    url(r'^file/', file_handler, name = "api_file"),
@@ -27,5 +28,7 @@ urlpatterns = patterns('',
    url(r'^rules/(?P<id_rule>\d+)\.(?P<emitter_format>.+)$', rules_detail_handler, name = "api_rules_detail"),
    url(r'^tags-(?P<id_rule>\d+)\.(?P<emitter_format>.+)$', tags_handler, name = "api_tags"),
    url(r'^plugins\.(?P<emitter_format>.+)$', plugins_handler, name = "api_plugins"),
+   url(r'^mdts/(?P<docrule_id>\w+)$', mdt_handler, name = "api_mdt"),
+   url(r'^mdt/$', mdt_handler, name = "api_mdt"),
 )
 

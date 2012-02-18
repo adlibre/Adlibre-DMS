@@ -1,4 +1,11 @@
-from django.db import models
+"""
+Module: DMS CocuhDB Documents manager
+Project: Adlibre DMS
+Copyright: Adlibre Pty Ltd 2011
+License: See LICENSE for license information
+Author: Iurii Garmash
+"""
+
 from datetime import datetime
 from couchdbkit.ext.django.schema import *
 

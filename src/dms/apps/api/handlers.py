@@ -18,6 +18,7 @@ from piston.utils import rc
 from document_manager import DocumentManager
 from dms_plugins import models
 from doc_codes.models import DocumentTypeRuleManagerInstance
+from mdt_manager import MetaDataTemplateManager
 
 class BaseFileHandler(BaseHandler):
     def get_file_info(self, request):
@@ -286,3 +287,30 @@ class PluginsHandler(BaseHandler):
             else:
                 return rc.BAD_REQUEST
         return plugin_list
+
+class MetaDataTemplateHandler(BaseHandler):
+    allowed_methods = ('GET','POST')
+
+#    verbose_name = 'mdt'
+#    verbose_name_plural = "mdts"
+
+    def read(self, request, docrule_id=None):
+        if not docrule_id:
+            return rc.BAD_REQUEST
+        manager = MetaDataTemplateManager()
+        manager.docrule_id = docrule_id
+        mdts_dict = manager.get_mdts_for_docrule()
+        return mdts_dict
+
+    def create(self, request):
+        manager = MetaDataTemplateManager()
+        try:
+            mdt = request.POST['mdt']
+            data = json.loads(str(mdt))
+        except:
+             return rc.BAD_REQUEST
+        status = manager.store(data)
+        return status
+
+
+
