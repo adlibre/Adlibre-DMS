@@ -28,7 +28,7 @@ urlpatterns = patterns('',
    url(r'^rules/(?P<id_rule>\d+)\.(?P<emitter_format>.+)$', rules_detail_handler, name = "api_rules_detail"),
    url(r'^tags-(?P<id_rule>\d+)\.(?P<emitter_format>.+)$', tags_handler, name = "api_tags"),
    url(r'^plugins\.(?P<emitter_format>.+)$', plugins_handler, name = "api_plugins"),
-   url(r'^mdts/(?P<docrule_id>\w+)$', mdt_handler, name = "api_mdt"),
+   url(r'^mdts/(?P<docrule_id>\w+)$', mdt_handler, name = "api_mdts"),
    url(r'^mdt/$', mdt_handler, name = "api_mdt"),
 )
 
