@@ -31,8 +31,9 @@ DATABASES = {
 }
 
 COUCHDB_DATABASES = (
-         ('dmscouch', 'http://127.0.0.1:5984/dmscouch'),
          ('mdtcouch', 'http://127.0.0.1:5984/mdtcouch'),
+         ('dmscouch', 'http://127.0.0.1:5984/dmscouch'),
+
 )
 
 # Local time zone for this installation. Choices can be found here:
@@ -175,8 +176,8 @@ INSTALLED_APPS = (
     'browser',
     'dms_plugins',
     'doc_codes',
-    'dmscouch', # main couchapp
     'mdtcouch', # Metadata Templates app
+    'dmscouch', # main couchapp
     # DMS Standalone
     'ui',
     'mdtui',

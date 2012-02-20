@@ -22,8 +22,11 @@ class MetaDataTemplateManager(object):
     def get_mdts_for_docrule(self):
         if not self.docrule_id:
             return None
-        mdts = MetaDataTemplate.get(docid=self.docrule_id)
-        mdts_dict = json.dumps(mdts._doc)
+        try:
+            mdts = MetaDataTemplate.get(docid=self.docrule_id)
+            mdts_dict = json.dumps(mdts._doc)
+        except:
+            mdts_dict = {"status": ("No such Metadata Templates for Document rule id=%s" % self.docrule_id) }
         return mdts_dict
 
     def store(self, mdt_data):
