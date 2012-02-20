@@ -1,8 +1,10 @@
-import urllib2
-import urllib
 import json
+from django.test import TestCase
+from django.core.urlresolvers import reverse
 
-# TODO: refactor this script to normal Django tests...
+# auth user
+username = 'admin'
+password = 'admin'
 
 api = 'http://127.0.0.1:8000/api/mdt/'
 template = {
@@ -26,19 +28,21 @@ template = {
     }
 }
 
-mdt = json.dumps(template)
-data = urllib.urlencode({"mdt": mdt})
-request = urllib2.Request(api)
-print 'Request method before data:', request.get_method()
+class MetadataCouchDB(TestCase):
+    def setUp(self):
+        # We-re using only logged in client in this test
+        self.client.login(username=username, password=password)
 
-request.add_data(data)
-print 'Request method after data :', request.get_method()
-request.add_header('User-agent', 'Django Tests Runner (http://www.doughellmann.com/PyMOTW/)')
+    def test_mdt_adding(self):
+        """
+        Posts Example MDT's to CouchDB through API
+        Does test sending Metadata Template through API
+        """
+        mdt = json.dumps(template)
 
-print
-print 'OUTGOING DATA:'
-print request.get_data()
+        url = reverse('api_mdt')
+        response = self.client.post(url, {"mdt": mdt})
+        self.assertContains(response, "ok")
+        self.assertEqual(response.status_code, 200)
 
-print
-print 'SERVER RESPONSE:'
-print urllib2.urlopen(request).read()
+

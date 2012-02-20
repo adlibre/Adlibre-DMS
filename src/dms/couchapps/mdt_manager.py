@@ -6,7 +6,7 @@ License: See LICENSE for license information
 Author: Iurii Garmash
 """
 
-from mdtcouch.mdts_manager import MetaDataTemplate
+from mdtcouch.models import MetaDataTemplate
 import json
 
 class MetaDataTemplateManager(object):
