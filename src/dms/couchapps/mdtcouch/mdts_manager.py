@@ -6,7 +6,7 @@ License: See LICENSE for license information
 Author: Iurii Garmash
 """
 
-from datetime import datetime
+#from datetime import datetime
 from couchdbkit.ext.django.schema import *
 
 class MetaDataTemplate(Document):
