@@ -36,7 +36,7 @@ class MetaDataTemplateManager(object):
         try:
             mdt.populate_from_DMS(mdt_data)
             mdt.save()
-            return {"status": "ok"}
+            return {"status": "ok", "_id": "%s" %mdt._doc._id}
         except:
             return {"status": "Error storing MDT into DB"}
 
