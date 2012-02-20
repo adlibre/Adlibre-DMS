@@ -1,5 +1,5 @@
 """
-Module: MDT UI Views
+Module: Metadata Template UI Views
 Project: Adlibre DMS
 Copyright: Adlibre Pty Ltd 2012
 License: See LICENSE for license information
