@@ -39,10 +39,10 @@ class MetadataCouchDB(TestCase):
         Does test sending Metadata Template through API
         """
         mdt = json.dumps(template)
-
         url = reverse('api_mdt')
         response = self.client.post(url, {"mdt": mdt})
-        self.assertContains(response, "ok")
+        self.assertContains(response, '"status": "ok"')
         self.assertEqual(response.status_code, 200)
+        print response
 
 
