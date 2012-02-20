@@ -82,6 +82,7 @@
                         <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}"><i class="icon-search icon-white"></i> Search</a></li>
                          {% url mdtui-index as url %}
                         <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}"><i class="icon-barcode icon-white"></i> Index</a></li>
+                        {# <li><a href="{{ url }}"><i class="icon-list icon-white"></i> Admin</a></li>  #}
                     </ul>
                 </div><!--/.nav-collapse -->
             </div>
