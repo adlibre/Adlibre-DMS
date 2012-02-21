@@ -60,13 +60,51 @@ Plugins
 Metadata Templates
 __________________
 
--  **URL:** http://www.example.com/api/mdts.*docrule_id*
+List Metadata Templates for Document Type Rule "id" provided
+
+-  **URL:** http://www.example.com/api/mdts/<docrule_id>
 -  **Method(s):** GET
 -  **Returns:** Metadata Template
+
+Store Metadata Template
 
 -  **URL:** http://www.example.com/api/mdt/
 -  **Method(s):** POST
 -  **Parameters:** mdt
 -  **Returns:** status
 
-Parameter "mdt" must be JSON for metadata template
+Parameter "mdt" must be JSON for metadata template.
+Example MDT:
+
+::
+
+        {
+            "docrule_id": "used to assign this to document type rules",
+            "description": "<-- description of this metadata template -->",
+            "fields": {
+                // examples:
+                "<-- field number -->":
+                     {
+                       "type": "string|integer|date",
+                       "length": "<--optional-->",
+                       "field_name":"<-- field name used in UI -->",
+                       "description": "<-- description used in UI -->"
+                },
+                "1": {
+                       "type": "integer",
+                       "field_name": "Employee ID",
+                       "description": "Unique (Staff) ID of the person"
+                },
+                "2": {
+                       "type": "string",
+                       "length": 60,
+                       "field_name": "Employee Name",
+                       "description": "Name of the person associated with the document"
+                }
+            },
+            // parallel fields mapping
+            "parallel": {
+                "<-- set id -->": ["<-- fist 'field' -->", "<-- second 'field' -->"]
+                "1": [ "1", "2"],
+            }
+        }

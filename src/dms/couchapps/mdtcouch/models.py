@@ -16,7 +16,7 @@ class MetaDataTemplate(Document):
     """
     docrule_id = StringProperty(default = "")
     description = StringProperty(default = "")
-    fieldss = DictProperty(default = {})
+    fields = DictProperty(default = {})
     parallel_keys = DictProperty(default = {})
 
     class Meta:
