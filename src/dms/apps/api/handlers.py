@@ -289,28 +289,50 @@ class PluginsHandler(BaseHandler):
         return plugin_list
 
 class MetaDataTemplateHandler(BaseHandler):
-    allowed_methods = ('GET','POST')
+    allowed_methods = ('GET','POST', 'DELETE')
 
-#    verbose_name = 'mdt'
-#    verbose_name_plural = "mdts"
-
-    def read(self, request, docrule_id=None):
-        if not docrule_id:
+    def read(self, request):
+        if not request.user.is_authenticated():
+            return rc.FORBIDDEN
+        try:
+            docrule_id = request.GET['docrule_id']
+        except:
             return rc.BAD_REQUEST
         manager = MetaDataTemplateManager()
         manager.docrule_id = docrule_id
-        mdts_dict = manager.get_mdts_for_docrule()
+        mdts_dict = manager.get_mdts_for_docrule(manager.docrule_id)
+        if mdts_dict == 'error':
+            return rc.NOT_FOUND
         return mdts_dict
 
     def create(self, request):
-        manager = MetaDataTemplateManager()
+        if not request.user.is_authenticated():
+            return rc.FORBIDDEN
         try:
             mdt = request.POST['mdt']
             data = json.loads(str(mdt))
         except:
-             return rc.BAD_REQUEST
+            return rc.BAD_REQUEST
+        manager = MetaDataTemplateManager()
+        if not manager.validate_mdt(mdt):
+            return rc.BAD_REQUEST
         status = manager.store(data)
+        if status == 'error':
+            return rc.BAD_REQUEST
         return status
 
+    def delete(self, request):
+        if not request.user.is_authenticated():
+            return rc.FORBIDDEN
+        try:
+            mdt_id = request.REQUEST.get('mdt_id')
+        except:
+            return rc.BAD_REQUEST
+        manager = MetaDataTemplateManager()
+        mdt_resp = manager.delete_mdt(mdt_id)
+        if mdt_resp == 'done':
+            return rc.DELETED
+        else:
+            return rc.NOT_FOUND
 
 
