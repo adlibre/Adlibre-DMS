@@ -49,6 +49,7 @@ class Document(object):
         return self.get_name()
 
     def get_docrule(self):
+        #print "before: ", self.doccode
         if self.doccode is None:
             self.doccode = DocumentTypeRuleManagerInstance.find_for_string(self.get_stripped_filename())
             if self.doccode is None:
@@ -86,6 +87,8 @@ class Document(object):
 
     def set_filename(self, filename):
         self.file_name = filename
+        # Need to renew docrule on document receives name
+        self.doccode = self.get_docrule()
 
     def get_current_metadata(self):
         if not self.current_metadata and self.get_metadata() and self.get_revision():
