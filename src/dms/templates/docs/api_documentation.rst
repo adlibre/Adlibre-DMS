@@ -62,9 +62,17 @@ __________________
 
 List Metadata Templates for Document Type Rule "id" provided
 
--  **URL:** http://www.example.com/api/mdts/<docrule_id>
+-  **URL:** http://www.example.com/api/mdts/
 -  **Method(s):** GET
+-  **Parameters:** docrule_id
 -  **Returns:** Metadata Template
+
+Delete Metadata Templates with "mdt_id"
+
+-  **URL:** http://www.example.com/api/mdts/
+-  **Method(s):** DELETE
+-  **Parameters:** mdt_id
+-  **Returns:** Status code: 204 (Deleted)
 
 Store Metadata Template
 

@@ -6,8 +6,8 @@ License: See LICENSE for license information
 Author: Iurii Garmash
 """
 
+from django.conf import settings
 from mdtcouch.models import MetaDataTemplate
-import json
 
 class MetaDataTemplateManager(object):
     """
@@ -18,8 +18,9 @@ class MetaDataTemplateManager(object):
     def __init__(self):
         self.mdt = {}
         self.docrule_id = None
+        self.delete = False
 
-    def get_mdts_for_docrule(self):
+    def get_mdts_for_docrule(self, docrule_id):
         """
         Method to construct response with MDT's for docrule provided.
         Manager must have docrule assigned ( MetaDataTemplateManager.docrule_id = 1 )
@@ -29,15 +30,17 @@ class MetaDataTemplateManager(object):
         """
         mdts_list = {}
         # validating
-        if self.mdt_call_valid():
+        if self.mdt_read_call_valid(docrule_id):
             try:
+
                 # getting MDT's from DB
-                mdts_view = MetaDataTemplate.view('mdtcouch/docrule', key=self.docrule_id)
+                mdts_view = MetaDataTemplate.view('mdtcouch/docrule', key=docrule_id)
                 # constructing MDT's response dict
                 id = 1
                 for row in mdts_view:
                     mdts_list[str(id)] = row._doc
-                    # cleaning up _id and _rev from response
+                    # cleaning up _id and _rev from response to unify response
+                    mdts_list[str(id)]["mdt_id"] = mdts_list[str(id)]['_id']
                     del mdts_list[str(id)]['_id']
                     del mdts_list[str(id)]['_rev']
                     id+=1
@@ -45,7 +48,7 @@ class MetaDataTemplateManager(object):
                 pass
         # something not valid response:
         if not mdts_list:
-            mdts_list = {"status": ("No such Metadata Templates for Document rule id=%s" % self.docrule_id) }
+            mdts_list = 'error'
         return mdts_list
 
     def store(self, mdt_data):
@@ -74,21 +77,36 @@ class MetaDataTemplateManager(object):
         }
 
         """
-        if not self.validate_mdt(mdt_data):
-            return {"status": "Wrong MDT received. Document did not validate."}
         mdt = MetaDataTemplate()
+        if self.validate_mdt(mdt_data):
+            try:
+                mdt.populate_from_DMS(mdt_data)
+                mdt.save()
+                return {"status": "ok", "mdt_id": "%s" %mdt._doc._id}
+            except Exception, e:
+                if settings.DEBUG:
+                    print "Exception: ", e
+                    raise
+                else:
+                    pass
+        else:
+            return 'error'
+
+
+    def delete_mdt(self, mdt):
+        #print 'Deleting mdt: %s' %mdt
         try:
-            mdt.populate_from_DMS(mdt_data)
-            mdt.save()
-            return {"status": "ok", "_id": "%s" %mdt._doc._id}
+            mdt = MetaDataTemplate.get(docid=mdt)
+            mdt.delete()
         except:
-            return {"status": "Error storing MDT into DB"}
+            return "error"
+        return 'done'
 
     def validate_mdt(self, mdt):
         # todo: MDT validation sequence here
         return True
 
-    def mdt_call_valid(self):
+    def mdt_read_call_valid(self, docrule_id):
         """
         Simple type validation of docrule_id provided.
         """

@@ -156,7 +156,7 @@ class ViewTest(AdlibreTestCase):
             self.assertContains(response, '', status_code = 200)
 
         
-        # TODO fix this it will break...
+        # TODO: fix this it will break...
         for d in documents_missing_hash:
             url = '/get/%s?hashcode=%s' % (d[0], d[1])
             response = self.client.get(url)
