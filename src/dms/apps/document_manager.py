@@ -149,6 +149,8 @@ class DocumentManager(object):
     def remove(self, request, document_name, revision = None, full_filename = None, 
                     parent_directory = None, extension = None):
         doc = Document()
+        # Hack to fix manager file
+        doc.__init__()
         doc.set_filename(document_name)
         if extension:
             doc.set_requested_extension(extension)

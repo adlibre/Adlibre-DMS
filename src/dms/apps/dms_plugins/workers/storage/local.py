@@ -165,13 +165,17 @@ class Local(object):
         elif document.get_revision():
             filename = document.get_filename_with_revision()
         if filename:
+            #print "Deleting Filename: ", filename
+            #print "In directory: ", directory
             try:
                 os.unlink(os.path.join(directory, filename))
             except Exception, e:
                 raise PluginError(str(e), 500)
 
         if not filename or (document.get_docrule().no_doccode and len(os.listdir(directory)) == 0) or\
-                len(os.listdir(directory)) <= 1: # delete everything or no files at all or only metadata file
+                (not document.get_docrule().no_doccode and len(os.listdir(directory)) <= 1):
+                # delete everything or no files at all or only metadata file
+                # except no_doccode files which may have 1 file in the directory
             try:
                 shutil.rmtree(directory)
             except Exception, e:
