@@ -172,6 +172,8 @@ class Local(object):
             except Exception, e:
                 raise PluginError(str(e), 500)
 
+        # TODO: Fix this. Not all usecases may be covered...
+        #check if only '.json' file left in the directory for e.g.
         if not filename or (document.get_docrule().no_doccode and len(os.listdir(directory)) == 0) or\
                 (not document.get_docrule().no_doccode and len(os.listdir(directory)) <= 1):
                 # delete everything or no files at all or only metadata file
