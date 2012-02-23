@@ -212,7 +212,9 @@ APPEND_SLASH = False # Stop Django from adding slashes to urls
 
 RESTRUCTUREDTEXT_FILTER_SETTINGS = { 'doctitle_xform': 0, } # stop first heading being munged for page title.
 
+#
 # Adlibre DMS Specific Settings
+#
 
 PRODUCT_VERSION = '1.0'
 
@@ -224,6 +226,7 @@ DATE_FORMAT = "%Y-%m-%d"
 
 DEMO = True
 NEW_SYSTEM = False
+
 try:
     from settings_local import *
 except ImportError:
