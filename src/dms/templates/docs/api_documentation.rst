@@ -112,7 +112,7 @@ Example MDT:
             },
             // parallel fields mapping
             "parallel": {
-                "<-- set id -->": ["<-- fist 'field' -->", "<-- second 'field' -->"]
+                "<-- set id -->": ["<-- first 'field' -->", "<-- second 'field' -->"]
                 "1": [ "1", "2"],
             }
         }
