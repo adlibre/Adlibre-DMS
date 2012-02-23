@@ -1,7 +1,7 @@
 """
 Module: DMS CocuhDB Plugin
 Project: Adlibre DMS
-Copyright: Adlibre Pty Ltd 2011
+Copyright: Adlibre Pty Ltd 2012
 License: See LICENSE for license information
 Author: Iurii Garmash
 """
@@ -10,8 +10,8 @@ from dms_plugins.pluginpoints import BeforeRetrievalPluginPoint, BeforeRemovalPl
 from dms_plugins.models import Document as DocTags #TODO: needs refactoring of name
 from dms_plugins.workers import Plugin, PluginError, BreakPluginChain
 from document_manager import DocumentManager
-from dmscouch.couchdocs_manager import CouchDocument
-
+from dmscouch.models import CouchDocument
+import os
 
 class CouchDBMetadata(object):
     """
@@ -20,21 +20,28 @@ class CouchDBMetadata(object):
     """
 
     def store(self, request, document):
+        docrule = document.get_docrule()
         # doing nothing for no doccode documents
-        if document.get_docrule().no_doccode:
+        if docrule.no_doccode:
             return document
-        # if not exists all required metadata getting them from doccode retrieve sequence
-        if not document.metadata:
+        else:
             manager = DocumentManager()
-            document = manager.retrieve(request, document.file_name, only_metadata=True)
-        # updating tags to sync with Django DB
-        self.sync_document_tags(document)
-        # assuming no document with this _id exists. SAVING
-        couchdoc=CouchDocument()
-        couchdoc.populate_from_dms(request, document)
-        couchdoc.save(force_update=True)
-        #print "Storing Document into DB", document
-        return document
+            mapping = manager.get_plugin_mapping(document)
+            # doing nothing for documents without mapping has DB plugins
+            if not mapping.get_database_storage_plugins():
+                return document
+            else:
+                # if not exists all required metadata getting them from doccode retrieve sequence
+                if not document.metadata:
+                    document = manager.retrieve(request, document.file_name, only_metadata=True)
+                # updating tags to sync with Django DB
+                self.sync_document_tags(document)
+                # assuming no document with this _id exists. SAVING
+                couchdoc=CouchDocument()
+                couchdoc.populate_from_dms(request, document)
+                couchdoc.save(force_update=True)
+                #print "Storing Document into DB", document
+                return document
 
     def update_metadata_after_removal(self, request, document):
         """
@@ -45,19 +52,31 @@ class CouchDBMetadata(object):
             if request.method == 'DELETE':
                 #precaution to only delete on delete not on 'PUT'
                 doc_name = request.GET["filename"]
-                couchdoc = CouchDocument.get(docid=doc_name)
+                # fix not to fail on deleting certain document with extension
+                stripped_filename=doc_name
+                if '.' in doc_name:
+                    stripped_filename = os.path.splitext(doc_name)[0]
+                couchdoc = CouchDocument.get(docid=stripped_filename)
                 couchdoc.delete()
         #print "Deleted Document in DB", document
 
     def retrieve(self, request, document):
+
+        manager = DocumentManager()
+        mapping = manager.get_plugin_mapping(document)
         # doing nothing for no doccode documents
+        # doing nothing for documents without mapping has DB plugins
         if document.get_docrule().no_doccode:
             return document
-        doc_name = document.get_stripped_filename()
-        couchdoc = CouchDocument.get(docid=doc_name)
-        document = couchdoc.populate_into_dms(request, document)
-        #print "Populating Document from DB", document
-        return document
+        else:
+            if not mapping.get_database_storage_plugins():
+                return document
+            else:
+                doc_name = document.get_stripped_filename()
+                couchdoc = CouchDocument.get(docid=doc_name)
+                document = couchdoc.populate_into_dms(request, document)
+                #print "Populating Document from DB", document
+                return document
 
     """
     Helper managers:
