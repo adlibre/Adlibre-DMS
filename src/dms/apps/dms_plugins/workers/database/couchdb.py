@@ -7,7 +7,7 @@ Author: Iurii Garmash
 """
 
 from dms_plugins.pluginpoints import BeforeRetrievalPluginPoint, BeforeRemovalPluginPoint, DatabaseStoragePluginPoint
-from dms_plugins.models import Document as DocTags #needs refactoring of name
+from dms_plugins.models import Document as DocTags #TODO: needs refactoring of name
 from dms_plugins.workers import Plugin, PluginError, BreakPluginChain
 from document_manager import DocumentManager
 from dmscouch.couchdocs_manager import CouchDocument
@@ -38,7 +38,7 @@ class CouchDBMetadata(object):
 
     def update_metadata_after_removal(self, request, document):
         """
-        Updates document CouchDB metadata on removal. (Removes CocuhDB document)
+        Updates document CouchDB metadata on removal. (Removes CouchDB document)
         """
         if not document:
             #doc is fully deleted
