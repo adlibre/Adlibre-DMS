@@ -13,9 +13,9 @@ Role: Authenticates, Applies filters, Downloads messages, Deletes from server
 
 """
 
-from libraries.fetchmail.app_settings import ENCRYPTION_EXISTS, DEFAULT_POP3_SSL_PORT, ENCRYPTION_ABSENT, DEFAULT_POP3_PORT
-from libraries.fetchmail.app_settings import DEFAULT_FILTER_SENDER_NAME, DEFAULT_FILTER_SUBJECT_NAME, DEFAULT_FILTER_FILENAME_NAME
-from libraries.fetchmail.processor import process_single_letter
+from adlibre.fetchmail.app_settings import ENCRYPTION_EXISTS, DEFAULT_POP3_SSL_PORT, ENCRYPTION_ABSENT, DEFAULT_POP3_PORT
+from adlibre.fetchmail.app_settings import DEFAULT_FILTER_SENDER_NAME, DEFAULT_FILTER_SUBJECT_NAME, DEFAULT_FILTER_FILENAME_NAME
+from adlibre.fetchmail.processor import process_single_letter
 import poplib
 import rfc822, string, StringIO
 

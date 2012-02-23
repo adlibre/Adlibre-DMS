@@ -44,8 +44,8 @@ and follow comments there. They must help you to understand most use cases.
 
 """
 
-from libraries.fetchmail.fetchmail_lib import *
-from libraries.fetchmail.app_settings import *
+from adlibre.fetchmail.fetchmail_lib import *
+from adlibre.fetchmail.app_settings import *
 
 class Fetcher_object(object):
     """

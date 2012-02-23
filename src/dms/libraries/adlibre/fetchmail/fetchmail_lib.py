@@ -20,10 +20,10 @@ Please see app_settings.py documentation for useful settings to be set
 
 """
 
-from libraries.fetchmail.app_settings import PROTOCOL_TYPE_IMAP4, PROTOCOL_TYPE_POP3
-from libraries.fetchmail.settings_reader import read_settings
-from libraries.fetchmail.handler_imap import connect_imap4, imap_email_processor, imap_discover_folders, process_letters_imap
-from libraries.fetchmail.handler_pop3 import connect_pop3, select_letters_pop3, download_letters_pop3, process_letters_pop3, delete_pop3_messages
+from adlibre.fetchmail.app_settings import PROTOCOL_TYPE_IMAP4, PROTOCOL_TYPE_POP3
+from adlibre.fetchmail.settings_reader import read_settings
+from adlibre.fetchmail.handler_imap import connect_imap4, imap_email_processor, imap_discover_folders, process_letters_imap
+from adlibre.fetchmail.handler_pop3 import connect_pop3, select_letters_pop3, download_letters_pop3, process_letters_pop3, delete_pop3_messages
 
 def process_email(email_obj=None, quiet=False):
     """
