@@ -28,6 +28,7 @@ class FileTypeValidationPlugin(Plugin, BeforeStoragePluginPoint):
         filebuffer = document.get_file_obj()
         if filebuffer is None:
             raise PluginError('File buffer not initialized', 500)
+        # TODO: FIXME: This does not actually validate the mimetype! filebuffer is not actually used!
         #mime = magic.Magic( mime = True )
         #content = ''
         #for line in filebuffer:
