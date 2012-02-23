@@ -10,8 +10,8 @@ Details: Main Settings Processor
 Role: Converts settings from easy readable to "library suitable" format.
 
 """
-from libraries.fetchmail.models import Email_object, Filter_object
-from libraries.fetchmail.app_settings import USE_ALL_FILTERS_STRING, FETCH_EMAILS, FETCH_FILTERS
+from adlibre.fetchmail.models import Email_object, Filter_object
+from adlibre.fetchmail.app_settings import USE_ALL_FILTERS_STRING, FETCH_EMAILS, FETCH_FILTERS
 
 def read_settings(quiet=False):
     """

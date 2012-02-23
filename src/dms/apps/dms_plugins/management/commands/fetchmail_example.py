@@ -13,7 +13,7 @@ Author: Iurii Garmash (yuri@adlibre.com.au)
 """
 
 from django.core.management.base import BaseCommand
-from libraries.fetchmail.models import Fetcher_object, Email_object, Filter_object
+from adlibre.fetchmail.models import Fetcher_object, Email_object, Filter_object
 from optparse import make_option
 
 class Command(BaseCommand):

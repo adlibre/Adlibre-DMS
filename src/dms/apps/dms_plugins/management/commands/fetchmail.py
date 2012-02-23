@@ -15,7 +15,7 @@ Author: Iurii Garmash (yuri@adlibre.com.au)
 """
 
 from django.core.management.base import BaseCommand
-from libraries.fetchmail.fetchmail_lib import process_email
+from adlibre.fetchmail.fetchmail_lib import process_email
 from optparse import make_option
 
 class Command(BaseCommand):

@@ -18,7 +18,7 @@ specified in settings
 """
 
 import email, os
-from libraries.fetchmail.app_settings import STORE_FILES_PATH, FILENAME_EXISTS_CHANGE_SYMBOL
+from adlibre.fetchmail.app_settings import STORE_FILES_PATH, FILENAME_EXISTS_CHANGE_SYMBOL
 
 def process_single_letter(msg, filter_filename=False, quiet=False):
     """

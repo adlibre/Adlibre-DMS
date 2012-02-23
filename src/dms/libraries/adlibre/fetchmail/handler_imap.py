@@ -12,10 +12,10 @@ Handler for IMAP4 protocol.
 Role: Authenticates, Applies filters, Downloads messages, Deletes from server
 
 """
-from libraries.fetchmail.app_settings import ENCRYPTION_EXISTS, DEFAULT_IMAP4_SSL_PORT, ENCRYPTION_ABSENT
-from libraries.fetchmail.app_settings import DEFAULT_IMAP4_PORT, DEFAULT_FILTER_SENDER_NAME, DEFAULT_FILTER_SUBJECT_NAME
-from libraries.fetchmail.app_settings import DEFAULT_FILTER_FILENAME_NAME, DEFAULT_EMAIL_FOLDER_NAME
-from libraries.fetchmail.processor import process_single_letter
+from adlibre.fetchmail.app_settings import ENCRYPTION_EXISTS, DEFAULT_IMAP4_SSL_PORT, ENCRYPTION_ABSENT
+from adlibre.fetchmail.app_settings import DEFAULT_IMAP4_PORT, DEFAULT_FILTER_SENDER_NAME, DEFAULT_FILTER_SUBJECT_NAME
+from adlibre.fetchmail.app_settings import DEFAULT_FILTER_FILENAME_NAME, DEFAULT_EMAIL_FOLDER_NAME
+from adlibre.fetchmail.processor import process_single_letter
 import imaplib
 
 def connect_imap4(email_obj):
