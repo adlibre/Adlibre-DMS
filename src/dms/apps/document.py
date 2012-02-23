@@ -1,3 +1,10 @@
+"""
+Module: DMS core Document Object
+Project: Adlibre DMS
+Copyright: Adlibre Pty Ltd 2012
+License: See LICENSE for license information
+"""
+
 import datetime
 import os
 import magic
@@ -53,7 +60,7 @@ class Document(object):
         if self.doccode is None:
             self.doccode = DocumentTypeRuleManagerInstance.find_for_string(self.get_stripped_filename())
             if self.doccode is None:
-                raise DmsException("No doccode found for file " + self.get_full_filename(), 404)
+                raise DmsException("No document type rule found for file " + self.get_full_filename(), 404)
         #print "DOCCODE: %s" % self.doccode #TODO: log.debug this
         return self.doccode
 
@@ -120,7 +127,7 @@ class Document(object):
                 try:
                     if '.' in ext:
                         dot, ext = ext.split(".",1)
-                except:
+                except: #FIXME: Except WHAT?
                     pass # file type conversion is in progress failing gracefully
                 if ext:
                     name = "%s.%s" % (name, ext)

@@ -9,6 +9,8 @@ Author: Iurii Garmash
 from django.db import models
 import re
 
+# HACK: For allowing for extended validation / splitting.
+# TODO: Refactor this requirement out.
 DOCCODE_TYPES = [
     ('1', 'Default'),
     ('2', 'Credit Card'),
