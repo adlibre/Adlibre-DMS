@@ -34,7 +34,6 @@ urlpatterns += patterns('',
     url(r'^mdtui/', include('mdtui.urls')),
     url(r'^bcp/', include('bcp.urls')),
 
-
     # This needs to be last
     url(r'^', include('browser.urls')),
 )
