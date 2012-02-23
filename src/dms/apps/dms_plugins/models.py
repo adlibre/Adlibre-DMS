@@ -1,7 +1,7 @@
 """
 Module: DMS Plugins DB connections module
 Project: Adlibre DMS
-Copyright: Adlibre Pty Ltd 2011
+Copyright: Adlibre Pty Ltd 2012
 License: See LICENSE for license information
 """
 
@@ -75,21 +75,39 @@ class DoccodePluginMapping(models.Model):
         return docrule
 
     def get_before_storage_plugins(self):
+        """
+        Method to get active 'before_storage_plugins' plugins for Doccode Plugin Mapping instance
+        """
         return self.before_storage_plugins.all().order_by('index')
 
     def get_storage_plugins(self):
+        """
+        Method to get active 'storage_plugins' plugins for Doccode Plugin Mapping instance
+        """
         return self.storage_plugins.all().order_by('index')
 
     def get_before_retrieval_plugins(self):
+        """
+        Method to get active 'before_retrieval_plugins' plugins for Doccode Plugin Mapping instance
+        """
         return self.before_retrieval_plugins.all().order_by('index')
 
     def get_before_removal_plugins(self):
+        """
+        Method to get active 'before_removal_plugins' plugins for Doccode Plugin Mapping instance
+        """
         return self.before_removal_plugins.all().order_by('index')
 
     def get_before_update_plugins(self):
+        """
+        Method to get active 'before_update_plugins' plugins for Doccode Plugin Mapping instance
+        """
         return self.before_update_plugins.all().order_by('index')
 
     def get_database_storage_plugins(self):
+        """
+        Method to get active 'database_storage_plugins' plugins for Doccode Plugin Mapping instance
+        """
         return self.database_storage_plugins.all().order_by('index')
 
 class PluginOption(models.Model):

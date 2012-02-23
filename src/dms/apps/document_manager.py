@@ -100,7 +100,10 @@ class DocumentManager(object):
         #process storage plugins
         self.process_pluginpoint(pluginpoints.StoragePluginPoint, request, document = doc)
         #process DatabaseStorage plugins
-        return self.process_pluginpoint(pluginpoints.DatabaseStoragePluginPoint, request, document = doc)
+        doc = self.process_pluginpoint(pluginpoints.DatabaseStoragePluginPoint, request, document = doc)
+        #mapping = self.get_plugin_mapping(doc)
+        #for plugin in mapping.get_database_storage_plugins(): print 'Mapping has plugin: ', plugin
+        return doc
 
     def rename(self, request, document_name, new_name, extension, parent_directory = None):
         doc = self.retrieve(request, document_name, extension = extension, parent_directory = parent_directory)
@@ -148,19 +151,17 @@ class DocumentManager(object):
 
     def remove(self, request, document_name, revision = None, full_filename = None, 
                     parent_directory = None, extension = None):
-        doc = Document()
-        # Hack to fix manager file
-        doc.__init__()
-        doc.set_filename(document_name)
+        docum = Document()
+        docum.set_filename(document_name)
         if extension:
-            doc.set_requested_extension(extension)
+            docum.set_requested_extension(extension)
         if full_filename:
-            doc.set_full_filename(full_filename)
+            docum.set_full_filename(full_filename)
         if revision:
-            doc.set_revision(revision)
+            docum.set_revision(revision)
         if parent_directory:
-            doc.set_option('parent_directory', parent_directory)
-        return self.process_pluginpoint(pluginpoints.BeforeRemovalPluginPoint, request, document = doc)
+            docum.set_option('parent_directory', parent_directory)
+        return self.process_pluginpoint(pluginpoints.BeforeRemovalPluginPoint, request, document = docum)
 
     def get_plugins_by_type(self, doccode_plugin_mapping, plugin_type, pluginpoint = pluginpoints.BeforeStoragePluginPoint):
         plugins = self.get_plugins_from_mapping(doccode_plugin_mapping, pluginpoint, plugin_type = plugin_type)

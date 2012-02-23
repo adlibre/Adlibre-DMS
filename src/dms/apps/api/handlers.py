@@ -121,6 +121,8 @@ class FileHandler(BaseFileHandler):
             else:
                 return rc.BAD_REQUEST
         if len(manager.errors) > 0:
+            if settings.DEBUG:
+                print manager.errors
             return rc.BAD_REQUEST
         return rc.DELETED
 

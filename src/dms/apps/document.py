@@ -57,7 +57,7 @@ class Document(object):
 
     def get_docrule(self):
         #print "before: ", self.doccode
-        if self.doccode is None:
+        if self.doccode is None and self.get_filename():
             self.doccode = DocumentTypeRuleManagerInstance.find_for_string(self.get_stripped_filename())
             if self.doccode is None:
                 raise DmsException("No document type rule found for file " + self.get_full_filename(), 404)

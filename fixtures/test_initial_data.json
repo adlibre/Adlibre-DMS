@@ -444,7 +444,15 @@
             "status": 0, 
             "name": "dms_plugins.pluginpoints.StoragePluginPoint"
         }
-    }, 
+    },
+    {
+        "pk": 6,
+        "model": "plugins.pluginpoint",
+        "fields": {
+            "status": 0,
+            "name": "dms_plugins.pluginpoints.DatabaseStoragePluginPoint"
+        }
+    },
     {
         "pk": 1, 
         "model": "plugins.plugin", 
@@ -642,7 +650,40 @@
             "name": "dms_plugins.workers.storage.local.LocalUpdatePlugin", 
             "point": 4
         }
-    }, 
+    },
+    {
+        "pk": 22,
+        "model": "plugins.plugin",
+        "fields": {
+            "status": 0,
+            "index": 31,
+            "_order": 3,
+            "name": "dms_plugins.workers.database.couchdb.CouchDBMetadataRemovalPlugin",
+            "point": 3
+        }
+    },
+        {
+        "pk": 23,
+        "model": "plugins.plugin",
+        "fields": {
+            "status": 0,
+            "index": 46,
+            "_order": 8,
+            "name": "dms_plugins.workers.database.couchdb.CouchDBMetadataStoragePlugin",
+            "point": 6
+        }
+    },
+    {
+        "pk": 24,
+        "model": "plugins.plugin",
+        "fields": {
+            "status": 0,
+            "index": 46,
+            "_order": 7,
+            "name": "dms_plugins.workers.database.couchdb.CouchDBMetadataRetrievalPlugin",
+            "point": 2
+        }
+    },
     {
         "pk": 1, 
         "model": "dms_plugins.doccodepluginmapping", 
@@ -654,17 +695,22 @@
                 7, 
                 9, 
                 15, 
-                17
+                17,
+                24
             ],
             "before_removal_plugins": [
                 12,
                 13,
-                20
+                20,
+                22
             ],
             "before_storage_plugins": [
                 1,
                 2,
                 3
+            ],
+            "database_storage_plugins": [
+                23
             ],
             "storage_plugins": [
                 4,
