@@ -43,7 +43,7 @@ class CouchDBMetadata(object):
                 #print "Storing Document into DB", document
                 return document
 
-    def update_metadata_after_removal(self, request, document):
+    def update_metadata_after_removal(self, request, document): # FIXME: Request object should not be used here, as it violates separation of API barrier.
         """
         Updates document CouchDB metadata on removal. (Removes CouchDB document)
         """
