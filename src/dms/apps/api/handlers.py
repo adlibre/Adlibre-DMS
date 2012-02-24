@@ -107,7 +107,8 @@ class FileHandler(BaseFileHandler):
 
         revision = request.REQUEST.get("r", None) # TODO: TestMe
         full_filename = request.REQUEST.get('full_filename', None)
-        parent_directory = request.GET.get('parent_directory', None) # FIXME: Why are we allowing this with the API?
+        parent_directory = None
+        #parent_directory = request.GET.get('parent_directory', None) # FIXME: Why are we allowing this with the API?
 
         manager = DocumentManager()
         try:
