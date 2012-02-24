@@ -7,7 +7,7 @@ License: See LICENSE for license information
 
 from django.core.urlresolvers import reverse
 
-from base_test import AdlibreTestCase
+from django.test import TestCase
 
 """
 Test data
@@ -23,7 +23,7 @@ barcode_test_data = [
     ('code39', '123456789'),
 ]
 
-class BarCodeTest(AdlibreTestCase):
+class BarCodeTest(TestCase):
 
     def test_generate_barcode(self):
         for barcode in barcode_test_data:
