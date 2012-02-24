@@ -151,17 +151,17 @@ class DocumentManager(object):
 
     def remove(self, request, document_name, revision = None, full_filename = None, 
                     parent_directory = None, extension = None):
-        docum = Document()
-        docum.set_filename(document_name)
+        doc = Document()
+        doc.set_filename(document_name)
         if extension:
-            docum.set_requested_extension(extension)
+            doc.set_requested_extension(extension)
         if full_filename:
-            docum.set_full_filename(full_filename)
+            doc.set_full_filename(full_filename)
         if revision:
-            docum.set_revision(revision)
+            doc.set_revision(revision)
         if parent_directory:
-            docum.set_option('parent_directory', parent_directory)
-        return self.process_pluginpoint(pluginpoints.BeforeRemovalPluginPoint, request, document = docum)
+            doc.set_option('parent_directory', parent_directory)
+        return self.process_pluginpoint(pluginpoints.BeforeRemovalPluginPoint, request, document = doc)
 
     def get_plugins_by_type(self, doccode_plugin_mapping, plugin_type, pluginpoint = pluginpoints.BeforeStoragePluginPoint):
         plugins = self.get_plugins_from_mapping(doccode_plugin_mapping, pluginpoint, plugin_type = plugin_type)
