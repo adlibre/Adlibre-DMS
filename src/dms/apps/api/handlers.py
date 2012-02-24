@@ -258,7 +258,8 @@ class RulesDetailHandler(BaseHandler):
     fields = ['id', 'name', ('before_storage_plugins', ('name',)), 
                             ('storage_plugins', ('name',)), 
                             ('before_retrieval_plugins', ('name',)), 
-                            ('before_removal_plugins', ('name',))]
+                            ('before_removal_plugins', ('name',)),
+                            ('database_storage_plugins', ('name',)),]
 
     verbose_name = 'rule'
     verbose_name_plural = 'rules'
