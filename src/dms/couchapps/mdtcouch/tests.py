@@ -1,3 +1,11 @@
+"""
+Module: Metadata Template UI Views
+Project: Adlibre DMS
+Copyright: Adlibre Pty Ltd 2012
+License: See LICENSE for license information
+Author: Iurii Garmash
+"""
+
 import json
 from django.test import TestCase
 from django.core.urlresolvers import reverse
@@ -147,7 +155,7 @@ class MetadataCouchDB(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 400)
 
-    def test_mdt_removing_wrond_id(self):
+    def test_mdt_removing_wrong_id(self):
         """
         Testing wrond deletion calls
         """
@@ -163,7 +171,7 @@ class MetadataCouchDB(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 400)
 
-    def test_mdt_z_proper_removing(self):
+    def _test_mdt_z_proper_removing(self):
         """
         Deleting all- test MDT's (with doccode 10000).
 
