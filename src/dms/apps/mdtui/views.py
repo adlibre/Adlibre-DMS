@@ -51,25 +51,54 @@ def indexing(request, step=None, template='mdtui/indexing.html'):
                 request.session['docrule_id'] = docrule
                 return HttpResponseRedirect(reverse('mdtui-index-' + step))
             # else: return form on current step with errors
+        if step == "3":
+            form=initDocumentIndexForm(request)
+            if form.validation_ok():
+                secondary_indexes = {}
+                for key, field in form.fields.iteritems():
+                    try:
+                        # for native form fields
+                        secondary_indexes[field.field_name] = form.data[unicode(key)]
+                    except:
+                        # for dynamical form fields
+                        secondary_indexes[key] = form.data[unicode(key)]
+                print secondary_indexes
+                if secondary_indexes:
+                    request.session["document_keys_dict"] = secondary_indexes
+
     else:
         if step == "1":
             form = DocumentTypeSelectForm()
         if step == "2":
-            try:
-                docrule = request.session['docrule_id']
-            except:
-                # This error only should appear if something breaks
-                return HttpResponse(INDEXING_ERROR_STRINGS[1])
-            details = get_mdts_for_docrule(request.session['docrule_id'])
-            form = DocumentIndexForm()
-            if not details == 'error':
-                # MDT's exist for ths docrule adding fields to form
-                fields = render_fields_from_docrules(details)
-                #print fields
-                if fields:
-                    form.setFields(fields)
-
+            form=initDocumentIndexForm(request)
+            
     context.update( { 'step': step,
-                      'form': form
+                      'form': form,
+                      'document_keys': request.session["document_keys_dict"]
                     })
     return render_to_response(template, context, context_instance=RequestContext(request))
+
+def initDocumentIndexForm(request):
+        """
+        DocumentIndexForm initialization for different purposes HELPER.
+        in case of GET returns an empty base form,
+        in case of POST returns populated (from request) form instance.
+        in both cases form is rendered with additional (MDT's defined) fields
+        """
+        try:
+            docrule = request.session['docrule_id']
+        except:
+            # This error only should appear if something breaks
+            return HttpResponse(INDEXING_ERROR_STRINGS[1])
+        details = get_mdts_for_docrule(request.session['docrule_id'])
+
+        form = DocumentIndexForm()
+        if not details == 'error':
+            # MDT's exist for ths docrule adding fields to form
+            fields = render_fields_from_docrules(details)
+            #print fields
+            if fields:
+                form.setFields(fields)
+        if request.POST:
+            form.setData(request.POST)
+        return form
