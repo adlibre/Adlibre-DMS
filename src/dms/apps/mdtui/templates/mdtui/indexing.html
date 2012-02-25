@@ -126,6 +126,7 @@
                     <label class="control-label">{{ field.label }}</label>
                     <div class="controls">
                         {{ field }}
+                        <p class="help-block">{{ field.help_text }}</p>
                     </div>
                 </div>
                 {%  else %}
@@ -144,9 +145,11 @@
                             <div class="input-prepend">
                                 <span class="add-on"><i class="icon-calendar"></i></span>
                                 <input id="id_date" type="text" value="{{ field.value|date:'Y-m-d' }}" name="{{ field.name }}" data-datepicker="datepicker">
+                                <p class="help-block">{{ field.help_text }}</p>
                             </div>
                         </div>
                     </div>
+
                 </div>
                 {%  endif %}
                 {%  endfor %}
