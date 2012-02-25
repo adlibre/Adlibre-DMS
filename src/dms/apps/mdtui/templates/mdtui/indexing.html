@@ -7,12 +7,14 @@
     {# Use this for a progress / step indicator / navigation #}
     <ul class="pager x-progress-tracker">
         {% url mdtui-index-1 as url %}
-        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 1: Index Details &rarr;</a></li>
+        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 1: Select Type &rarr;</a></li>
         {% url mdtui-index-2 as url %}
-        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 2: Select Source &rarr;</a></li>
+        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 2: Index Details &rarr;</a></li>
         {% url mdtui-index-3 as url %}
-        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 3: Confirm &rarr;</a></li>
+        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 2: Select Source &rarr;</a></li>
         {% url mdtui-index-4 as url %}
+        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 3: Confirm &rarr;</a></li>
+        {% url mdtui-index-5 as url %}
         <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Finished</a></li>
     </ul>
     {% endif %}
@@ -27,11 +29,29 @@
         <form class="form-horizontal" action="{{ request.path }}" method="post">
             {% csrf_token %}
             <fieldset>
+                <legend>Step {{ step }}: Select Document Type</legend>
+            {{ form }}
+            </fieldset>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-danger"><i class="icon-trash icon-white"></i> Cancel</button>
+                <button type="submit" class="btn btn-primary">Continue <i class="icon-chevron-right icon-white"></i></button>
+            </div>
+        </form>
+    {% endif %} {# end step 1 #}
+
+    {% if step == "2" %}
+
+        <form class="form-horizontal" action="{{ request.path }}" method="post">
+            {% csrf_token %}
+            <fieldset>
                 <legend>Step {{ step }}: Index Details</legend>
                 <br />
+
+                {% comment %}
                 <div class="alert alert-error">
                     <a class="close">×</a>
-                    <strong>Error!</strong> Form validation errors go here! (field validation errors go along each field below)
+                    <strong>Error!</strong> No errors for now
                 </div>
 
                 <div class="control-group">
@@ -89,6 +109,49 @@
                         <p class="help-block">Short description of the document</p>
                     </div>
                 </div>
+                {% endcomment %}
+
+                {# INDEX DETAILS FORM RENDERING #}
+                {% for field in form %}
+                {%  if not field.name = "date" %}
+                <div class="control-group">
+                    {%  if field.errors %}
+                    {%  for error in field.errors %}
+                    <div class="alert alert-error">
+                        <a class="close">×</a>
+                        <strong>{{ error }}</strong>
+                    </div>
+                    {%  endfor %}
+                    {%  endif %}
+                    <label class="control-label">{{ field.label }}</label>
+                    <div class="controls">
+                        {{ field }}
+                    </div>
+                </div>
+                {%  else %}
+                <div class="control-group">
+                    {%  if field.errors %}
+                    {%  for error in field.errors %}
+                    <div class="alert alert-error">
+                        <a class="close">×</a>
+                        <strong>{{ error }}</strong>
+                    </div>
+                    {%  endfor %}
+                    {%  endif %}
+                    <label class="control-label" for="dateselect">Creation Date</label>
+                    <div class="input">
+                        <div class="controls">
+                            <div class="input-prepend">
+                                <span class="add-on"><i class="icon-calendar"></i></span>
+                                <input id="id_date" type="text" value="{{ field.value|date:'Y-m-d' }}" name="{{ field.name }}" data-datepicker="datepicker">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {%  endif %}
+                {%  endfor %}
+
+
 
             </fieldset>
 
@@ -98,10 +161,13 @@
             </div>
         </form>
 
-    {% endif %} {# end step 1 #}
 
 
-    {% if step == "2" %}
+
+    {% endif %} {# end step 2 #}
+
+
+    {% if step == "3" %}
         <fieldset>
             <legend>Step {{ step }}: Select Source</legend>
         </fieldset>
@@ -178,9 +244,9 @@
 
     </form>
 
-    {% endif %} {# end step 2 #}
+    {% endif %} {# end step 3 #}
 
-    {% if step == "3" %}
+    {% if step == "4" %}
         <fieldset>
             <legend>Step {{ step }}: Confirmation</legend>
         </fieldset>
@@ -200,16 +266,16 @@
             <button type="submit" class="btn btn-success"><i class="icon-ok icon-white"></i> Save</button>
         </div>
         </form>
-    {% endif %} {# end step 3 #}
+    {% endif %} {# end step 4 #}
 
-    {% if step == "4" %}
+    {% if step == "5" %}
         <fieldset>
             <legend>Step {{ step }}: Thank you{# or print barcode if barcode required #}</legend>
         </fieldset>
         <br />
         <a class="btn btn-primary" href="{% url mdtui-index-1 %}">Start Again <i class="icon-chevron-right icon-white"></i></a>
 
-    {% endif %} {# end step 4 #}
+    {% endif %} {# end step 5 #}
 
 {% endblock %}
 
