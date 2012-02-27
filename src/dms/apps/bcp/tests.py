@@ -25,7 +25,7 @@ barcode_test_data = [
 
 class BarCodeTest(TestCase):
 
-    def _test_generate_barcode(self):
+    def test_generate_barcode(self):
         for barcode in barcode_test_data:
             url = reverse('bcp-generate', kwargs = {'barcode_type': barcode[0], 'code': barcode[1], })
             response = self.client.get(url)
