@@ -71,10 +71,15 @@ def indexing(request, step=None, template='mdtui/indexing.html'):
             form = DocumentTypeSelectForm()
         if step == "2":
             form=initDocumentIndexForm(request)
-            
+
+    try:
+        document_keys = request.session["document_keys_dict"]
+    except KeyError:
+        document_keys = None
+
     context.update( { 'step': step,
                       'form': form,
-                      'document_keys': request.session["document_keys_dict"]
+                      'document_keys': document_keys,
                     })
     return render_to_response(template, context, context_instance=RequestContext(request))
 
