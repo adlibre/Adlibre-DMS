@@ -17,10 +17,13 @@ username = 'admin'
 password = 'admin'
 
 barcode_test_data = [
-  # ('type', 'barcode'),
+    # ('type', 'barcode'),
     ('Standard39', 'ABC1234'),
     ('Standard39', 'ABC-1234'),
     ('Standard39', '123456789'),
+    ('Code128', 'ABC1234'),
+    ('Code128', 'ABC-1234'),
+    ('Code128', '123456789'),
 ]
 
 class BarCodeTest(TestCase):
