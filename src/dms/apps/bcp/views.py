@@ -41,18 +41,19 @@ def generate(request, code, barcode_type='Standard39',):
     except KeyError, e:
         return HttpResponseBadRequest('Barcode Generation Failed: %s' % (e))
 
-    # register the OCRA font
+    # Register the OCRA font
     pdfmetrics.registerFont(TTFont('OCRA', font_path))
 
-    # position for our text
-    x = bc.width/2
-    y = -font_size  # or (bar_height + font_size) if placing on top
-    # the textual barcode
-    text = String(x,y, code, textAnchor='middle', fontName='OCRA', fontSize=font_size)
+    # Position for our text
+    x = bc.width / 2
+    y = - font_size  # or (bar_height + font_size) if placing on top
+    # The textual barcode
+    text = String(x, y, code, textAnchor='middle', fontName='OCRA', fontSize=font_size)
     bc.add(text)
     bc = bc.resized() # resize barcode drawing object to accommodate text added
+
     buffer = StringIO() # buffer for the output
-    renderPDF.drawToFile(bc,buffer,autoSize=1) # write PDF to buffer
+    renderPDF.drawToFile(bc, buffer, autoSize=1) # write PDF to buffer
 
     # Get the value of the StringIO buffer and write it to the response.
     pdf = buffer.getvalue()
