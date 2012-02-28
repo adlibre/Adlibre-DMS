@@ -84,7 +84,7 @@ class DocumentManager(object):
                 break
         return document
 
-    def store(self, request, uploaded_file):
+    def store(self, request, uploaded_file, index_info=None):
         """
         Process all storage plugins
         uploaded file is http://docs.djangoproject.com/en/1.3/topics/http/file-uploads/#django.core.files.uploadedfile.UploadedFile
@@ -95,6 +95,9 @@ class DocumentManager(object):
         doc.set_filename(os.path.basename(uploaded_file.name))
         if hasattr(uploaded_file, 'content_type'):
             doc.set_mimetype(uploaded_file.content_type)
+        # TODO: MAKE THIS WORK!
+#        if index_info:
+#            doc.set_index_data(index_info)
         #process before storage plugins
         doc = self.process_pluginpoint(pluginpoints.BeforeStoragePluginPoint, request, document = doc)
         #process storage plugins
