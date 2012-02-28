@@ -1,4 +1,5 @@
 {% extends "mdtui/base.html" %}
+{% load index_keys %}
 
 {% block body_content %}
     <h1>{% block body_title %}Document Indexing{% endblock %}</h1>
@@ -11,11 +12,9 @@
         {% url mdtui-index-2 as url %}
         <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 2: Index Details &rarr;</a></li>
         {% url mdtui-index-3 as url %}
-        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 2: Select Source &rarr;</a></li>
+        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 3: Select Source &rarr;</a></li>
         {% url mdtui-index-4 as url %}
-        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 3: Confirm &rarr;</a></li>
-        {% url mdtui-index-5 as url %}
-        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Finished</a></li>
+        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 4: Finish &rarr;</a></li>
     </ul>
     {% endif %}
 
@@ -40,6 +39,10 @@
         </form>
     {% endif %} {# end step 1 #}
 
+    {% if step == "3" or step == "4" %}
+
+    {% endif %}
+
     {% if step == "2" %}
 
         <form class="form-horizontal" action="{{ request.path }}" method="post">
@@ -48,6 +51,7 @@
                 <legend>Step {{ step }}: Index Details</legend>
                 <br />
 
+                <div>
                 {% comment %}
                 <div class="alert alert-error">
                     <a class="close">×</a>
@@ -110,6 +114,7 @@
                     </div>
                 </div>
                 {% endcomment %}
+                </div>
 
                 {# INDEX DETAILS FORM RENDERING #}
                 {% for field in form %}
@@ -173,7 +178,13 @@
     {% if step == "3" %}
         <fieldset>
             <legend>Step {{ step }}: Select Source</legend>
+            <legend>Your document's indexing keys:</legend>
         </fieldset>
+        <ul class="metainfo">
+            {% for item in document_keys %}
+            <li>{%  get_key_li_item document_keys item %}</li>
+            {% endfor %}
+        </ul>
         <br />
         <p>Choose a document source:</p>
 
@@ -183,19 +194,39 @@
         <li><a href="#print-barcode-tab" data-toggle="tab" class="btn"><i class="icon-print"></i> Print Barcode</a></li>
     </ul>
 
-    <form class="form-horizontal" action="{{ request.path }}" method="post">
+
+        
+    <form class="form-horizontal" enctype="multipart/form-data" action="{{ request.path }}" method="post">
         {% csrf_token %}
         <div class="tab-content">
             <div class="tab-pane" id="upload-file-tab">
-
                 <fieldset>
                     <legend>Upload File</legend>
+                    {% comment %}
                     <div class="control-group">
                         <label class="control-label" for="fileInput">File input</label>
                         <div class="controls">
                             <input class="input-file" id="fileInput" type="file">
                         </div>
                     </div>
+                    {% endcomment %}
+                {% for field in form %}
+                <div class="control-group">
+                    {%  if field.errors %}
+                    {%  for error in field.errors %}
+                    <div class="alert alert-error">
+                        <a class="close">×</a>
+                        <strong>{{ error }}</strong>
+                    </div>
+                    {%  endfor %}
+                    {%  endif %}
+                    <label class="control-label">{{ field.label }}</label>
+                    <div class="controls">
+                        {{ field }}
+                        <p class="help-block">{{ field.help_text }}</p>
+                    </div>
+                </div>
+                {% endfor %}
                 </fieldset>
                 <div class="form-actions">
                     <button type="submit" class="btn btn-danger"><i class="icon-trash icon-white"></i> Cancel</button>
@@ -251,35 +282,45 @@
 
     {% if step == "4" %}
         <fieldset>
-            <legend>Step {{ step }}: Confirmation</legend>
+            <legend>Step {{ step }}: Thank you{# or print barcode if barcode required #}</legend>
+            <legend>Your document's indexing keys:</legend>
         </fieldset>
 
         <br />
+
+        <ul class="metainfo">
+            {% for item in document_keys %}
+            <li>{%  get_key_li_item document_keys item %}</li>
+            {% endfor %}
+        </ul>
 
         <div class="alert">
             <a class="close">×</a>
             <strong>Warning!</strong> Warnings go here. (eg creating a new parallel key)
         </div>
-
-
+        <p>Your document have just been indexed successfully! </p>
+        <a class="btn btn-primary" href="{% url mdtui-index-1 %}">Start Again <i class="icon-chevron-right icon-white"></i></a>
+        {%  comment %}
         <form class="form-horizontal" action="{{ request.path }}" method="post">
             {% csrf_token %}
         <div class="form-actions">
-            <button type="submit" class="btn"><i class="icon-chevron-left icon-whitex"></i> Back</button>
-            <button type="submit" class="btn btn-success"><i class="icon-ok icon-white"></i> Save</button>
+            <button type="submit" class="btn btn-success"><i class="icon-ok icon-white"></i> OK</button>
+            <button type="submit" class="btn btn-success"><i class="icon-ok icon-white"></i> Print Barcode</button>
         </div>
         </form>
+        {%  endcomment %}
     {% endif %} {# end step 4 #}
 
+    {%  comment %}
     {% if step == "5" %}
         <fieldset>
             <legend>Step {{ step }}: Thank you{# or print barcode if barcode required #}</legend>
         </fieldset>
         <br />
-        <a class="btn btn-primary" href="{% url mdtui-index-1 %}">Start Again <i class="icon-chevron-right icon-white"></i></a>
+
 
     {% endif %} {# end step 5 #}
-
+    {%  endcomment %}
 {% endblock %}
 
 {% block css_extra %}

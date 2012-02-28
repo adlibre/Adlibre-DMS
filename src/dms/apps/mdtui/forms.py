@@ -10,9 +10,13 @@ from django import forms
 import datetime
 
 from dms_plugins.models import DOCRULE_CHOICES
+from django.core.exceptions import ValidationError
 
 class DocumentTypeSelectForm(forms.Form):
     docrule = forms.ChoiceField(choices = DOCRULE_CHOICES, label="Document Type")
+
+class DocumentUploadForm(forms.Form):
+    file = forms.FileField()
 
 class DocumentIndexForm(forms.Form):
     """
@@ -52,8 +56,30 @@ class DocumentIndexForm(forms.Form):
         """
         Form validation sequence overridden here.
         validates only one field as far as it is critical for now.
-        """
 
+        WARNING! if changing/adding form fields names please update validation accordingly
+        """
+        for field in self.fields:
+            #print 'NOT VALID ', field
+            cur_field = self.fields[field]
+            #print cur_field
+            try:
+                cleaned_value = cur_field.validate(self.data[unicode(field)])
+#                if error:
+#                    self._errors += error
+                #print cleaned_value
+            except Exception, e:
+                print e
+                #return False
+                pass
+#            try:
+#                field_data = cur_field.clean(field)
+#                print field_data
+#            except Exception, e:
+#                self._errors += {field: e}
+
+        if not self.data["date"]:
+            return False
 #        if not self.data['docrule'] == u'':
         return True
 #        else:
