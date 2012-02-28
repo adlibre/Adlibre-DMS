@@ -33,7 +33,10 @@ class CouchDBMetadata(object):
             else:
                 # if not exists all required metadata getting them from doccode retrieve sequence
                 if not document.metadata:
+                    # HACK: Preserving db_info here... (May be Solution!!!)
+                    db_info = document.get_db_info()
                     document = manager.retrieve(request, document.file_name, only_metadata=True)
+                    document.set_db_info(db_info)
                 # updating tags to sync with Django DB
                 self.sync_document_tags(document)
                 # assuming no document with this _id exists. SAVING

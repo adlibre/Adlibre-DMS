@@ -40,17 +40,24 @@ class CouchDocument(Document):
             self.metadata_user_name = request.user.first_name + u'' + request.user.last_name
         else:
             self.metadata_user_name = request.user.username
-        # setting document current revision metadata date, except not exist's using now() instead.
+        self.set_doc_date(document)
+        # adding description if exists
         try:
-            revision = unicode(document.revision)
-            self.metadata_created_date = document.metadata[revision][u'created_date']
-        except: pass
-        try:
-            self.metadata_description = document.db_info["description"] or "" # not implemented yet
-        except: pass
+            self.metadata_description = document.db_info["description"]
+        except:
+            self.metadata_description = ""
+            pass
         self.tags = document.tags
-        self.mdt_indexes = {} # not implemented yet
-        self.search_keywords = [] # not implemented yet
+        # populating secondary indexes
+        if document.db_info:
+            try:
+                db_info = document.db_info
+                del db_info["date"]
+                del db_info["description"]
+                self.mdt_indexes = db_info
+                # failing gracefully due to ability to save files with API (without metadata)
+            except: pass
+        self.search_keywords = [] # TODO: not implemented yet
         self.revisions = document.metadata
 
     def populate_into_dms(self, request, document):
@@ -78,3 +85,25 @@ class CouchDocument(Document):
         db_info["metadata_created_date"] = self.metadata_created_date
         db_info["mdt_indexes"] = self.mdt_indexes
         return db_info
+
+    def set_doc_date(self, document):
+        """
+        Unifies DB storage of date object received from document.
+        """
+        # TODO: Standartize DATE parsign here!!!
+        doc_date = None
+        # trying to get date from db_info dict first
+        try:
+            doc_date = datetime.strptime(str(document.db_info["date"]), "%Y-%m-%d")
+        except Exception:
+            pass
+        if doc_date:
+            self.metadata_created_date = doc_date
+        else:
+            # setting document current revision metadata date, except not exist's using now() instead.
+            try:
+                revision = unicode(document.revision)
+                self.metadata_created_date = document.metadata[revision][u'created_date']
+            except Exception:
+                # if not provided model stores default "utcnow" date
+                pass

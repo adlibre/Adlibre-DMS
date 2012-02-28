@@ -95,9 +95,8 @@ class DocumentManager(object):
         doc.set_filename(os.path.basename(uploaded_file.name))
         if hasattr(uploaded_file, 'content_type'):
             doc.set_mimetype(uploaded_file.content_type)
-        # TODO: MAKE THIS WORK!
-#        if index_info:
-#            doc.set_index_data(index_info)
+        if index_info:
+            doc.set_db_info(index_info)
         #process before storage plugins
         doc = self.process_pluginpoint(pluginpoints.BeforeStoragePluginPoint, request, document = doc)
         #process storage plugins

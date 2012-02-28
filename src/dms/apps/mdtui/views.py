@@ -108,7 +108,7 @@ def uploading(request, step=None, template='mdtui/indexing.html'):
         if request.POST:
             if form.is_valid():
                 manager = DocumentManager()
-                manager.store(request, form.files['file'])
+                manager.store(request, form.files['file'], request.session["document_keys_dict"])
                 if not manager.errors:
                     step = str(int(step) + 1)
                 else:
