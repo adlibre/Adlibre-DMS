@@ -33,21 +33,22 @@ def generate(request, code, barcode_type='Standard39',):
     response['Content-Disposition'] = 'inline; filename=%s.pdf' % (code,)
 
     # Config
-    font_size=8
-    font = os.path.join(os.path.split(__file__)[0], 'fonts', 'OCRA.ttf',)
+    font_size=10
+    bar_height=30
+    font_path = os.path.join(os.path.split(__file__)[0], 'fonts', 'OCRA.ttf',)
     try:
-        bc = createBarcodeDrawing(barcode_type, value=code, checksum=False,)
+        bc = createBarcodeDrawing(barcode_type, barHeight=bar_height, value=code, checksum=False,)
     except KeyError, e:
         return HttpResponseBadRequest('Barcode Generation Failed: %s' % (e))
 
     # register the OCRA font
-    pdfmetrics.registerFont(TTFont('OCRA', font))
+    pdfmetrics.registerFont(TTFont('OCRA', font_path))
 
     # position for our text
     x = bc.width/2
-    y = bc.height-(font_size*1.2) # Hack: 1.2 is a fudge factor alignment
+    y = -font_size  # or (bar_height + font_size) if placing on top
     # the textual barcode
-    text = String(x,-y, code, textAnchor='middle', fontName='OCRA', fontSize=font_size)
+    text = String(x,y, code, textAnchor='middle', fontName='OCRA', fontSize=font_size)
     bc.add(text)
     bc = bc.resized() # resize barcode drawing object to accommodate text added
     buffer = StringIO() # buffer for the output
