@@ -25,13 +25,42 @@ INDEXING_ERROR_STRINGS = {
 
 def search(request, step=None, template='mdtui/search.html'):
 
+    context = { 'step': step, }
+
     # Hack to make the navigation work for testing the templates
     if request.POST:
-        step = str(int(step) + 1)
-        return HttpResponseRedirect(reverse('mdtui-search-' + step))
 
-    context = { 'step': step, }
+        if step == "1":
+            form = DocumentTypeSelectForm(request.POST)
+            # TODO: needs proper validation
+            if form.is_valid():
+                try:
+                    docrule = form.data["docrule"]
+                except:
+                    return HttpResponse(INDEXING_ERROR_STRINGS[1])
+                    # TODO: refactor this (unright but quick)
+                request.session['current_step'] = step
+                request.session['docrule_id'] = docrule
+                step = str(int(step) + 1)
+                return HttpResponseRedirect(reverse('mdtui-search-' + step))
+                # else: return form on current step with errors
+        elif step == "2":
+            # Do something with the form post data
+            pass
+        else:
+            step = str(int(step) + 1)
+            return HttpResponseRedirect(reverse('mdtui-search-' + step))
+
+    else:
+        if step == "1":
+            form = DocumentTypeSelectForm()
+            context.update({ 'form': form, })
+        elif step == "2":
+            form = None #FIXME MDTSearchForm()
+            context.update({ 'form': form, })
+
     return render_to_response(template, context, context_instance=RequestContext(request))
+
 
 def search_results(request, step=None, template='mdtui/search.html'):
 

@@ -7,9 +7,11 @@
     {# Use this for a progress / step indicator / navigation #}
     <ul class="pager x-progress-tracker">
         {% url mdtui-search-1 as url %}
-        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 1: Options &rarr;</a></li>
+        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 1: Select Type &rarr;</a></li>
         {% url mdtui-search-2 as url %}
-        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 2: Results &rarr;</a></li>
+        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 2: Options &rarr;</a></li>
+        {% url mdtui-search-3 as url %}
+        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 3: Results &rarr;</a></li>
         <li><a>Finished</a></li>
     </ul>
     {% endif %}
@@ -20,6 +22,22 @@
     {% endif %}
 
     {% if step == "1" %}
+
+        <form class="form-horizontal" action="{{ request.path }}" method="post">
+            {% csrf_token %}
+            <fieldset>
+                <legend>Step {{ step }}: Select Document Type</legend>
+                {{ form }}
+            </fieldset>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-danger"><i class="icon-trash icon-white"></i> Cancel</button>
+                <button type="submit" class="btn btn-primary">Continue <i class="icon-chevron-right icon-white"></i></button>
+            </div>
+        </form>
+    {% endif %} {# end step 1 #}
+
+    {% if step == "2" %}
         <form class="form-horizontal" action="{{ request.path }}" method="post">
             {% csrf_token %}
             <fieldset>
@@ -32,6 +50,7 @@
                     <strong>Error!</strong> Form validation errors go here! (field validation errors go along each field below)
                 </div>
 
+{% comment %}
                 <div class="control-group">
                     <label class="control-label" for="optionsCheckboxList">Document Types</label>
                     <div class="controls">
@@ -50,6 +69,7 @@
                         <p class="help-block"><strong>Note:</strong> Specify document types or leave blank to search all types.</p>
                     </div>
                 </div>
+{% endcomment %}
 
                 {# NB, these date selectors could be better done. Eg see http://addyosmani.github.com/jquery-ui-bootstrap/ #}
                 <div class="control-group">
@@ -63,7 +83,6 @@
                         </div>
                     </div>
                 </div>
-
 
                 <div class="control-group">
                     <label class="control-label" for="dateselect_to">To Date</label>
@@ -110,11 +129,10 @@
         </form>
     {% endif %}
 
-    {% if step == "2" %}
+    {% if step == "3" %}
         <fieldset>
             <legend>Results</legend>
         </fieldset>
-
 
         <table class="table table-striped" id="results-table">
             <caption>(Details of search query parameters)</caption>
@@ -174,8 +192,8 @@
 
     {% endif %}
 
-    {% if step == "3" %}
-        <h2>Step 3: View Document</h2>
+    {% if step == "4" %}
+        <h2>Step 4: View Document</h2>
         {# don't actually display this step, just pop up a document. #}
     {% endif %}
 
