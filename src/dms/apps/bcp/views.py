@@ -7,6 +7,9 @@ License: See LICENSE for license information
 
 from django.http import HttpResponse
 from django.http import HttpResponseBadRequest
+from django.core.urlresolvers import reverse
+from django.shortcuts import render_to_response
+from django.template import RequestContext
 
 from django.conf import settings
 
@@ -14,6 +17,15 @@ try:
     from cStringIO import StringIO
 except ImportError:
     from StringIO import StringIO
+
+
+def print_barcode(request, code, barcode_type):
+
+    pdf_url = reverse('bcp-generate', kwargs = {'barcode_type': barcode_type, 'code': code, })
+
+    template = 'bcp/print.html'
+    context = { 'pdf_url': pdf_url, }
+    return render_to_response(template, context, context_instance=RequestContext(request))
 
 
 def generate(request, code, barcode_type='Standard39',):
@@ -29,12 +41,19 @@ def generate(request, code, barcode_type='Standard39',):
     from reportlab.pdfbase import pdfmetrics
     from reportlab.pdfbase.ttfonts import TTFont
 
+    # TODO: Investigate embedding Javascript to force printing.
+    #from reportlab.pdfbase.pdfdoc import PDFCatalog
+    #PDFCatalog.__Defaults__['JavaScript'] = '<script type="text/javascript">print();</script>'
+    # this.print({bUI: false, bSilent: true, bShrinkToFit: true});
+    # http://livedocs.adobe.com/acrobat_sdk/9.1/Acrobat9_1_HTMLHelp/wwhelp/wwhimpl/common/html/wwhelp.htm?context=Acrobat9_HTMLHelp&file=JS_Dev_PrintProduction.75.4.html
+    # http://stackoverflow.com/questions/687675/can-a-pdf-files-print-dialog-be-opened-with-javascript
+
     response = HttpResponse(mimetype='application/pdf')
     response['Content-Disposition'] = 'inline; filename=%s.pdf' % (code,)
 
     # Config
-    font_size=10
-    bar_height=30
+    font_size = 10
+    bar_height = 30
     font_path = os.path.join(os.path.split(__file__)[0], 'fonts', 'OCRA.ttf',)
     try:
         bc = createBarcodeDrawing(barcode_type, barHeight=bar_height, value=str(code), checksum=False,)

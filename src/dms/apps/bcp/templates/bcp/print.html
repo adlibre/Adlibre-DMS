@@ -1,0 +1,41 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Print PDF</title>
+    <script type="text/javascript" language="javascript" charset="utf-8" src="{{ STATIC_URL }}js/pdfobject.min.js"></script>
+
+    <script type='text/javascript'>
+
+        function embedPDF(){
+
+            var myPDF = new PDFObject({
+
+                url: '{{ pdf_url }}',
+                pdfOpenParams: { view: 'Fit', scrollbars: '0', toolbar: '0', statusbar: '0', messages: '0', navpanes: '0' }
+
+            }).embed('pdfobj');
+
+        }
+
+        window.onload = embedPDF; //Feel free to replace window.onload if needed.
+
+    </script>
+
+    <script type="text/javascript">
+        function printTrigger(elementId) {
+            var getMyFrame = document.getElementById(elementId);
+            getMyFrame.focus();
+            getMyFrame.contentWindow.print();
+        }
+    </script>
+
+</head>
+<body>
+<div id="pdfobj"></div>
+
+<input type="button" value="Print" onclick="printTrigger('iFramePdf');" />
+<iframe id="iFramePdf" src="{{ pdf_url }}" style="display:none;"></iframe>
+
+</body>
+</html>
