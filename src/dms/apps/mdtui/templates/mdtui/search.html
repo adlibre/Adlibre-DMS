@@ -49,7 +49,7 @@
                     <a class="close">×</a>
                     <strong>Error!</strong> Form validation errors go here! (field validation errors go along each field below)
                 </div>
-
+<div>
 {% comment %}
                 <div class="control-group">
                     <label class="control-label" for="optionsCheckboxList">Document Types</label>
@@ -70,7 +70,7 @@
                     </div>
                 </div>
 {% endcomment %}
-
+{% comment %}
                 {# NB, these date selectors could be better done. Eg see http://addyosmani.github.com/jquery-ui-bootstrap/ #}
                 <div class="control-group">
                     <label class="control-label" for="dateselect_from">From Date</label>
@@ -119,7 +119,51 @@
                         <p class="help-block">Key 3 Desc</p>
                     </div>
                 </div>
+{% endcomment %}
+</div>
 
+                {# SEARCH INDEX DETAILS FORM RENDERING #}
+                {% for field in form %}
+                {%  if not field.name = "date" %}
+                <div class="control-group">
+                    {%  if field.errors %}
+                    {%  for error in field.errors %}
+                    <div class="alert alert-error">
+                        <a class="close">×</a>
+                        <strong>{{ error }}</strong>
+                    </div>
+                    {%  endfor %}
+                    {%  endif %}
+                    <label class="control-label">{{ field.label }}</label>
+                    <div class="controls">
+                        {{ field }}
+                        <p class="help-block">{{ field.help_text }}</p>
+                    </div>
+                </div>
+                {%  else %}
+                <div class="control-group">
+                    {%  if field.errors %}
+                    {%  for error in field.errors %}
+                    <div class="alert alert-error">
+                        <a class="close">×</a>
+                        <strong>{{ error }}</strong>
+                    </div>
+                    {%  endfor %}
+                    {%  endif %}
+                    <label class="control-label" for="dateselect">Creation Date</label>
+                    <div class="input">
+                        <div class="controls">
+                            <div class="input-prepend">
+                                <span class="add-on"><i class="icon-calendar"></i></span>
+                                <input id="id_date" type="text" value="{{ field.value|date:'Y-m-d' }}" name="{{ field.name }}" data-datepicker="datepicker">
+                                <p class="help-block">{{ field.help_text }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                {%  endif %}
+                {%  endfor %}
             </fieldset>
 
             <div class="form-actions">

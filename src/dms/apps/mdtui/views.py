@@ -24,41 +24,39 @@ INDEXING_ERROR_STRINGS = {
 
 
 def search(request, step=None, template='mdtui/search.html'):
-
-    context = { 'step': step, }
-
+    context = {}
+    form = DocumentTypeSelectForm(request.POST or None)
     # Hack to make the navigation work for testing the templates
     if request.POST:
-
         if step == "1":
-            form = DocumentTypeSelectForm(request.POST)
-            # TODO: needs proper validation
             if form.is_valid():
                 try:
                     docrule = form.data["docrule"]
                 except:
                     return HttpResponse(INDEXING_ERROR_STRINGS[1])
                     # TODO: refactor this (unright but quick)
-                request.session['current_step'] = step
                 request.session['docrule_id'] = docrule
                 step = str(int(step) + 1)
                 return HttpResponseRedirect(reverse('mdtui-search-' + step))
                 # else: return form on current step with errors
         elif step == "2":
-            # Do something with the form post data
-            pass
-        else:
-            step = str(int(step) + 1)
-            return HttpResponseRedirect(reverse('mdtui-search-' + step))
+            secondary_indexes = processDocumentIndexForm(request)
+            if secondary_indexes:
+                    request.session["document_keys_dict"] = secondary_indexes
+                    step = str(int(step) + 1)
+#        else:
+#            step = str(int(step) - 1)
+#            return HttpResponseRedirect(reverse('mdtui-search-' + step))
 
     else:
         if step == "1":
             form = DocumentTypeSelectForm()
-            context.update({ 'form': form, })
         elif step == "2":
-            form = None #FIXME MDTSearchForm()
-            context.update({ 'form': form, })
+            form = initDocumentIndexForm(request)
 
+    context.update({ 'form': form,
+                    'step': step,
+                    })
     return render_to_response(template, context, context_instance=RequestContext(request))
 
 
@@ -117,18 +115,8 @@ def indexing(request, step=None, template='mdtui/indexing.html'):
                 return HttpResponseRedirect(reverse('mdtui-index-' + step))
             # else: return form on current step with errors
         if step == "2":
-            form = initDocumentIndexForm(request)
-            if form.validation_ok():
-                secondary_indexes = {}
-                for key, field in form.fields.iteritems():
-                    try:
-                        # for native form fields
-                        secondary_indexes[field.field_name] = form.data[unicode(key)]
-                    except:
-                        # for dynamical form fields
-                        secondary_indexes[key] = form.data[unicode(key)]
-                #print secondary_indexes
-                if secondary_indexes:
+            secondary_indexes = processDocumentIndexForm(request)
+            if secondary_indexes:
                     request.session["document_keys_dict"] = secondary_indexes
                     step = str(int(step) + 1)
             else:
@@ -212,3 +200,20 @@ def initDocumentIndexForm(request):
         if request.POST:
             form.setData(request.POST)
         return form
+
+def processDocumentIndexForm(request):
+        form = initDocumentIndexForm(request)
+        secondary_indexes = {}
+        if form.validation_ok():
+            for key, field in form.fields.iteritems():
+                try:
+                    # for native form fields
+                    secondary_indexes[field.field_name] = form.data[unicode(key)]
+                except:
+                    # for dynamical form fields
+                    secondary_indexes[key] = form.data[unicode(key)]
+            #print secondary_indexes
+            if secondary_indexes:
+                return secondary_indexes
+            else:
+                return None
