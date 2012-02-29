@@ -17,9 +17,10 @@ from forms_representator import get_mdts_for_docrule, render_fields_from_docrule
 from document_manager import DocumentManager
 
 
-INDEXING_ERROR_STRINGS = {
+MDTUI_ERROR_STRINGS = {
     1:'{"status": "Error. You have not selected Doccument Type Rule."}',
     2:'{"status": "Error. You have not entered Document Indexing Data."}',
+    3:'{"status": "Error. You have not defined Document Searching Keys."}',
 }
 
 
@@ -33,7 +34,7 @@ def search(request, step=None, template='mdtui/search.html'):
                 try:
                     docrule = form.data["docrule"]
                 except:
-                    return HttpResponse(INDEXING_ERROR_STRINGS[1])
+                    return HttpResponse(MDTUI_ERROR_STRINGS[1])
                     # TODO: refactor this (unright but quick)
                 request.session['docrule_id'] = docrule
                 step = str(int(step) + 1)
@@ -44,6 +45,7 @@ def search(request, step=None, template='mdtui/search.html'):
             if secondary_indexes:
                     request.session["document_keys_dict"] = secondary_indexes
                     step = str(int(step) + 1)
+                    return HttpResponseRedirect(reverse('mdtui-search-' + step))
 #        else:
 #            step = str(int(step) - 1)
 #            return HttpResponseRedirect(reverse('mdtui-search-' + step))
@@ -61,7 +63,11 @@ def search(request, step=None, template='mdtui/search.html'):
 
 
 def search_results(request, step=None, template='mdtui/search.html'):
-
+    document_keys = None
+    try:
+        document_keys = request.session["document_keys_dict"]
+    except KeyError:
+        return HttpResponse(MDTUI_ERROR_STRINGS[3])
     # FIXME, move the db connection to helper function
     # Connect to Couch
     server = Server()
@@ -87,6 +93,7 @@ def search_results(request, step=None, template='mdtui/search.html'):
     context = { 'step': step,
                 'mdt_indexes': mdt_indexes,
                 'documents': documents,
+                'document_keys': document_keys,
                 }
     return render_to_response(template, context, context_instance=RequestContext(request))
 
@@ -107,7 +114,7 @@ def indexing(request, step=None, template='mdtui/indexing.html'):
                 try:
                     docrule = form.data["docrule"]
                 except:
-                    return HttpResponse(INDEXING_ERROR_STRINGS[1])
+                    return HttpResponse(MDTUI_ERROR_STRINGS[1])
                 # TODO: refactor this (unright but quick)
                 request.session['current_step'] = step
                 request.session['docrule_id'] = docrule
@@ -131,7 +138,7 @@ def indexing(request, step=None, template='mdtui/indexing.html'):
                 docrule = request.session['docrule_id']
             except KeyError:
                 # This error only should appear if something breaks
-                return HttpResponse(INDEXING_ERROR_STRINGS[1])
+                return HttpResponse(MDTUI_ERROR_STRINGS[1])
             if not request.POST:
                 form = initDocumentIndexForm(request)
 
@@ -152,7 +159,7 @@ def uploading(request, step=None, template='mdtui/indexing.html'):
     try:
         document_keys = request.session["document_keys_dict"]
     except KeyError:
-        return HttpResponse(INDEXING_ERROR_STRINGS[2])
+        return HttpResponse(MDTUI_ERROR_STRINGS[2])
     form = DocumentUploadForm(request.POST or None, request.FILES or None)
     if step == "3":
         if request.POST:
