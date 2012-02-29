@@ -19,11 +19,10 @@ except ImportError:
     from StringIO import StringIO
 
 
-def print_barcode(request, code, barcode_type):
+def print_barcode(request, code, barcode_type, template='bcp/print.html'):
 
     pdf_url = reverse('bcp-generate', kwargs = {'barcode_type': barcode_type, 'code': code, })
 
-    template = 'bcp/print.html'
     context = { 'pdf_url': pdf_url, }
     return render_to_response(template, context, context_instance=RequestContext(request))
 
