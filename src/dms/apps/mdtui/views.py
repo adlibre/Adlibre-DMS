@@ -9,13 +9,17 @@ from django.core.urlresolvers import reverse, resolve
 from django.http import HttpResponse
 from django.shortcuts import render_to_response, HttpResponseRedirect, get_object_or_404
 from django.template import RequestContext, loader
+
+from couchdbkit import *
+
 from forms import DocumentIndexForm, DocumentTypeSelectForm, DocumentUploadForm
 from forms_representator import get_mdts_for_docrule, render_fields_from_docrules
 from document_manager import DocumentManager
 
+
 INDEXING_ERROR_STRINGS = {
     1:'{"status": "Error. You have not selected Doccument Type Rule."}',
-    2:'{"status": "Error. You havew not entered Document Indexing Data."}'
+    2:'{"status": "Error. You have not entered Document Indexing Data."}',
 }
 
 
@@ -29,14 +33,43 @@ def search(request, step=None, template='mdtui/search.html'):
     context = { 'step': step, }
     return render_to_response(template, context, context_instance=RequestContext(request))
 
+def search_results(request, step=None, template='mdtui/search.html'):
+
+    # FIXME, move the db connection to helper function
+    # Connect to Couch
+    server = Server()
+    try:
+        db = server.get_or_create_db('dmscouch') # FIXME, settings.py
+    except:
+        raise
+
+    Document.set_db(db) # Using base Document class from couchdbkit
+    documents = Document.view('dmscouch/all')
+
+    # Copy _id to id to prevent template variable name issue
+    # http://stackoverflow.com/questions/6676045/accessing-couchdbs-uuid-in-django-templates
+    for d in documents:
+        setattr(d, 'id', d._id)
+
+    # these should be set by the metadata template
+    mdt_indexes = { 'key1': 'Key 1',
+                'key2': 'Key 2',
+                'CodeSomething': 'Some Code',
+                }
+
+    context = { 'step': step,
+                'mdt_indexes': mdt_indexes,
+                'documents': documents,
+                }
+    return render_to_response(template, context, context_instance=RequestContext(request))
+
+
 
 def indexing(request, step=None, template='mdtui/indexing.html'):
     # Context init
     context = {}
     document_keys = None
     form = DocumentTypeSelectForm()
-#    if request.REQUEST.get('step'):
-#        step = request.REQUEST.get('step')
 
     # Hack to make the navigation work for testing the templates
     if request.POST:
@@ -55,7 +88,7 @@ def indexing(request, step=None, template='mdtui/indexing.html'):
                 return HttpResponseRedirect(reverse('mdtui-index-' + step))
             # else: return form on current step with errors
         if step == "2":
-            form=initDocumentIndexForm(request)
+            form = initDocumentIndexForm(request)
             if form.validation_ok():
                 secondary_indexes = {}
                 for key, field in form.fields.iteritems():
@@ -71,7 +104,7 @@ def indexing(request, step=None, template='mdtui/indexing.html'):
                     step = str(int(step) + 1)
             else:
                 #going backwards
-                step=str(int(step)-1)
+                step = str(int(step)-1)
             return HttpResponseRedirect(reverse('mdtui-index-' + step))
     else:
         if step == "1":
@@ -83,7 +116,7 @@ def indexing(request, step=None, template='mdtui/indexing.html'):
                 # This error only should appear if something breaks
                 return HttpResponse(INDEXING_ERROR_STRINGS[1])
             if not request.POST:
-                form=initDocumentIndexForm(request)
+                form = initDocumentIndexForm(request)
 
     try:
         document_keys = request.session["document_keys_dict"]
@@ -133,10 +166,10 @@ def barcode(request):
 
 def initDocumentIndexForm(request):
         """
-        DocumentIndexForm initialization for different purposes HELPER.
+        DocumentIndexForm initialization
         in case of GET returns an empty base form,
         in case of POST returns populated (from request) form instance.
-        in both cases form is rendered with additional (MDT's defined) fields
+        in both cases form is rendered with MDT index fields
         """
         details = get_mdts_for_docrule(request.session['docrule_id'])
 
