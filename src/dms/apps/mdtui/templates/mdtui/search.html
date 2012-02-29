@@ -189,9 +189,8 @@
                 <tr>
                     <th>View</th>
                     <th><a href="{# sort on this#}">Date</a></th>
-                {% for index, desc in mdt_indexes.items %}
-                    <th><a href="{# sort on this#} {{ index }}">{{ desc }}</a></th>
-                {% endfor %}
+                    <th><a href="{# sort on this#}">Keys</a></th>
+                    <th><a href="{# sort on this#}">Description</a></th>
                     <th><a href="{# sort on this#}">Type</a></th>
                     <th>Edit</th>
                 </tr>
@@ -199,12 +198,16 @@
             <tbody>
             {% for doc in documents %}
                 <tr>
-                    <td><a href="http://slashdot.org/" title="View Document"><i class="icon-download"></i></a></td>
-                    <td>{{ doc.date }}</td>
-                    {% for index, desc in mdt_indexes.items %}
-                        <td>{{ doc.mdt_indexes.index }} {# FIXME, wrong syntax #}</td>
+                    <td><a href="{% url api_file %}?filename={{ doc.id }}" title="View Document"><i class="icon-download"></i>{{ doc.id }}</a></td>
+                    <td>{{ doc.metadata_created_date|date:"Y-m-d" }}</td>
+                    <td>
+                    {% for key in doc.mdt_indexes %}
+                       <p> {% get_key_li_item doc.mdt_indexes key %} </p>
                     {% endfor %}
-                    <td>…</td>
+                    </td>
+                    <td>{{ doc.metadata_description }}</td>
+                    {# need contexrt processor here to convert docrule_id into docrule name #}
+                    <td>{{ doc.metadata_doc_type_rule_id }}</td>
                     <td>{# Admin only #}<a href="" title="Edit Metadata"><i class="icon-edit"></i></a></td>
                 </tr>
             {% endfor %}
@@ -213,7 +216,7 @@
 
         <hr />
 
-
+{% comment %}
         {% for doc in documents %}
             <p>{{ doc.id }} :
                 {% for key, value in doc %}
@@ -221,7 +224,7 @@
                 {% endfor %} </p>
             <hr />
         {% endfor %}
-
+{% endcomment %}
 
         {# Let's use pagination like this #}
         <div class="pagination">
