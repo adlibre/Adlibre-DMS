@@ -41,7 +41,7 @@ class FileInfoHandler(BaseFileHandler):
             document_name, extension, revision, hashcode = self.get_file_info(request)
         except ValueError:
             return rc.BAD_REQUEST
-        parent_directory = request.GET.get('parent_directory', None)
+        parent_directory = request.GET.get('parent_directory', None) # TODO: this is wrong!!!!!! security breach...
         manager = DocumentManager()
         document = manager.retrieve(request, document_name, hashcode = hashcode, revision = revision, only_metadata = True, 
                         extension = extension, parent_directory = parent_directory)
@@ -67,7 +67,7 @@ class FileHandler(BaseFileHandler):
             if settings.DEBUG:
                 raise
             return rc.BAD_REQUEST
-        parent_directory = request.GET.get('parent_directory', None)
+        parent_directory = request.GET.get('parent_directory', None) # TODO: this is wrong!!!!!! security breach...
         manager = DocumentManager()
         try:
             mimetype, filename, content = manager.get_file(request, document_name, hashcode, 

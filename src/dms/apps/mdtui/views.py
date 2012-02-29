@@ -11,6 +11,7 @@ from django.shortcuts import render_to_response, HttpResponseRedirect, get_objec
 from django.template import RequestContext, loader
 
 from couchdbkit import *
+from dmscouch.models import CouchDocument
 
 from forms import DocumentIndexForm, DocumentTypeSelectForm, DocumentUploadForm
 from forms_representator import get_mdts_for_docrule, render_fields_from_docrules
@@ -43,7 +44,7 @@ def search(request, step=None, template='mdtui/search.html'):
         elif step == "2":
             secondary_indexes = processDocumentIndexForm(request)
             if secondary_indexes:
-                    request.session["document_keys_dict"] = secondary_indexes
+                    request.session["document_search_dict"] = secondary_indexes
                     step = str(int(step) + 1)
                     return HttpResponseRedirect(reverse('mdtui-search-' + step))
 #        else:
@@ -65,33 +66,18 @@ def search(request, step=None, template='mdtui/search.html'):
 def search_results(request, step=None, template='mdtui/search.html'):
     document_keys = None
     try:
-        document_keys = request.session["document_keys_dict"]
+        document_keys = request.session["document_search_dict"]
     except KeyError:
         return HttpResponse(MDTUI_ERROR_STRINGS[3])
-    # FIXME, move the db connection to helper function
-    # Connect to Couch
-    server = Server()
-    try:
-        db = server.get_or_create_db('dmscouch') # FIXME, settings.py
-    except:
-        raise
 
-    Document.set_db(db) # Using base Document class from couchdbkit
-    documents = Document.view('dmscouch/all')
+    documents =  CouchDocument.view('dmscouch/all')
 
     # Copy _id to id to prevent template variable name issue
     # http://stackoverflow.com/questions/6676045/accessing-couchdbs-uuid-in-django-templates
     for d in documents:
         setattr(d, 'id', d._id)
 
-    # these should be set by the metadata template
-    mdt_indexes = { 'key1': 'Key 1',
-                'key2': 'Key 2',
-                'CodeSomething': 'Some Code',
-                }
-
     context = { 'step': step,
-                'mdt_indexes': mdt_indexes,
                 'documents': documents,
                 'document_keys': document_keys,
                 }
