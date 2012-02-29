@@ -12,5 +12,6 @@ from django.views.generic.simple import redirect_to
 import mdtui.views
 
 urlpatterns = patterns('bcp.views',
-    url(r'^(?P<barcode_type>[\d\w]+)/(?P<code>.+)$', 'generate', name='bcp-generate'),
+    url(r'^(?P<barcode_type>[\d\w]+)/(?P<code>[\w-]+)$', 'generate', name='bcp-generate'),
+    url(r'^(?P<barcode_type>[\d\w]+)/(?P<code>[\w-]+)/print$', 'print_barcode', name='bcp-print'),
 )

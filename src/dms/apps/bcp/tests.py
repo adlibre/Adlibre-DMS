@@ -33,3 +33,9 @@ class BarCodeTest(TestCase):
             url = reverse('bcp-generate', kwargs = {'barcode_type': barcode[0], 'code': barcode[1], })
             response = self.client.get(url)
             self.assertEqual(response.status_code, 200)
+
+    def test_print_barcode(self):
+        for barcode in barcode_test_data:
+            url = reverse('bcp-print', kwargs = {'barcode_type': barcode[0], 'code': barcode[1], })
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, 200)
