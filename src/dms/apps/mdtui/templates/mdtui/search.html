@@ -1,4 +1,5 @@
 {% extends "mdtui/base.html" %}
+{% load index_keys %}
 
 {% block body_content %}
     <h1>{% block body_title %}Document Search{% endblock %}</h1>
@@ -160,7 +161,6 @@
                             </div>
                         </div>
                     </div>
-
                 </div>
                 {%  endif %}
                 {%  endfor %}
@@ -176,8 +176,13 @@
     {% if step == "3" %}
         <fieldset>
             <legend>Results</legend>
+            <legend>Search with keys:</legend>
         </fieldset>
-
+        <ul class="metainfo">
+            {% for item in document_keys %}
+            <li>{%  get_key_li_item document_keys item %}</li>
+            {% endfor %}
+        </ul>
         <table class="table table-striped" id="results-table">
             <caption>(Details of search query parameters)</caption>
             <thead>
