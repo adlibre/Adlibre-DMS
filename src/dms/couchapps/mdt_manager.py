@@ -26,7 +26,8 @@ class MetaDataTemplateManager(object):
         Manager must have docrule assigned ( MetaDataTemplateManager.docrule_id = 1 )
         in order for manager to work properly.
 
-        returns dict of MDT's for docrule_id provided/or error message.
+        returns dict of MDT's for docrule_id provided/or 'error' string to indicate failure in operation.
+        Main concept is to validate if manager method output is not == 'error' string while using in code.
         """
         mdts_list = {}
         # validating
