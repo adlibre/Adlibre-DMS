@@ -122,25 +122,39 @@
                 <tr>
                     <th>View</th>
                     <th><a href="{# sort on this#}">Date</a></th>
-                    <th><a href="{# sort on this#}">Key 1</a></th>
-                    <th><a href="{# sort on this#}">Key 2</a></th>
-                    <th><a href="{# sort on this#}">Key 3</a></th>
+                {% for index, desc in mdt_indexes.items %}
+                    <th><a href="{# sort on this#} {{ index }}">{{ desc }}</a></th>
+                {% endfor %}
                     <th><a href="{# sort on this#}">Type</a></th>
                     <th>Edit</th>
                 </tr>
             </thead>
             <tbody>
+            {% for doc in documents %}
                 <tr>
                     <td><a href="http://slashdot.org/" title="View Document"><i class="icon-download"></i></a></td>
-                    <td>…</td>
-                    <td>…</td>
-                    <td>…</td>
-                    <td>…</td>
+                    <td>{{ doc.date }}</td>
+                    {% for index, desc in mdt_indexes.items %}
+                        <td>{{ doc.mdt_indexes.index }} {# FIXME, wrong syntax #}</td>
+                    {% endfor %}
                     <td>…</td>
                     <td>{# Admin only #}<a href="" title="Edit Metadata"><i class="icon-edit"></i></a></td>
                 </tr>
+            {% endfor %}
             </tbody>
         </table>
+
+        <hr />
+
+
+        {% for doc in documents %}
+            <p>{{ doc.id }} :
+                {% for key, value in doc %}
+                <br />{{ key }} = {{ value }}
+                {% endfor %} </p>
+            <hr />
+        {% endfor %}
+
 
         {# Let's use pagination like this #}
         <div class="pagination">

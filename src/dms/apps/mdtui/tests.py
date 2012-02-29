@@ -1,5 +1,10 @@
-
-
+"""
+Module: Metadata Template UI tests
+Project: Adlibre DMS
+Copyright: Adlibre Pty Ltd 2012
+License: See LICENSE for license information
+Author: Iurii Garmash
+"""
 
 import json
 from django.test import TestCase
