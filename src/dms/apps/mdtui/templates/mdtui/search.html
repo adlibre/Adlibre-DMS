@@ -13,7 +13,7 @@
         <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 2: Options &rarr;</a></li>
         {% url mdtui-search-results as url %}
         <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 3: Results &rarr;</a></li>
-        <li><a>Finished</a></li>
+        <li{% if step == "view" %} class="active"{% endif %}><a>Finished</a></li>
     </ul>
     {% endif %}
 
@@ -182,7 +182,7 @@
             <caption>Search with keys:
                 <ul class="metainfo">
                 {% for item in document_keys %}
-                        <li>{%  get_key_li_item document_keys item %}</li>
+                        <li>{% get_key_li_item document_keys item %}</li>
                 {% endfor %}
                 </ul>
             </caption>
@@ -199,7 +199,7 @@
             <tbody>
             {% for doc in documents %}
                 <tr>
-                    <td><a href="{% url api_file %}?filename={{ doc.id }}" title="View Document"><i class="icon-download"></i> {{ doc.id }}</a></td>
+                    <td><a href="{% url mdtui-search-view doc.id %}" title="View Document"><i class="icon-download"></i> {{ doc.id }}</a></td>
                     <td>{{ doc.metadata_created_date|date:"Y-m-d" }}</td>
                     <td>
                     {# FIXME: These keys will need to be in separate table column to allow for sorting on those keys #}
@@ -247,8 +247,9 @@
     {% endif %}
 
     {% if step == "view" %}
-        <h2>Step 4: View Document</h2>
-        {# don't actually display this step, just pop up a document. #}
+        <h2>Step 4: Viewing Document &ldquo;{{ code }}&rdquo;</h2>
+        {# Maybe, don't actually display this step, just pop up a document. #}
+        <div id="pdfobj"></div>
     {% endif %}
 
 {% endblock %}
@@ -284,6 +285,18 @@
             });
         });
 
+    </script>
+    {% endif %}
+    {% if step == "view" %}
+    <script type="text/javascript" language="javascript" charset="utf-8" src="{{ STATIC_URL }}js/pdfobject.min.js"></script>
+    <script type='text/javascript'>
+        function embedPDF(){
+            var myPDF = new PDFObject({
+                url: '{% url api_file %}?filename={{ code }}',
+                pdfOpenParams: { view: 'Fit', scrollbars: '0', toolbar: '0', statusbar: '0', messages: '0', navpanes: '0' }
+            }).embed('pdfobj');
+        }
+        window.onload = embedPDF; //Feel free to replace window.onload if needed.
     </script>
     {% endif %}
 {% endblock %}
