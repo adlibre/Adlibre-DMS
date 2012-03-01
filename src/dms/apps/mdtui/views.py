@@ -72,6 +72,7 @@ def search_results(request, step=None, template='mdtui/search.html'):
 
     # Copy _id to id to prevent template variable name issue
     # http://stackoverflow.com/questions/6676045/accessing-couchdbs-uuid-in-django-templates
+    # FIXME: Move to dmscouch.models.CouchDocument
     for d in documents:
         setattr(d, 'id', d._id)
 
