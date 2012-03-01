@@ -13,7 +13,7 @@
         <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 2: Options &rarr;</a></li>
         {% url mdtui-search-results as url %}
         <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 3: Results &rarr;</a></li>
-        <li{% if step == "view" %} class="active"{% endif %}><a>Finished</a></li>
+        <li{% if step == "view" %} class="active"{% endif %}><a>Step 4: View</a></li>
     </ul>
     {% endif %}
 
@@ -247,7 +247,9 @@
     {% endif %}
 
     {% if step == "view" %}
-        <h2>Step 4: Viewing Document &ldquo;{{ code }}&rdquo;</h2>
+        <fieldset>
+            <legend>Step 4: Viewing Document &ldquo;{{ code }}&rdquo;</legend>
+        <fieldset
         {# Maybe, don't actually display this step, just pop up a document. #}
         <div id="pdfobj"></div>
     {% endif %}
