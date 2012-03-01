@@ -82,6 +82,13 @@ def search_results(request, step=None, template='mdtui/search.html'):
     return render_to_response(template, context, context_instance=RequestContext(request))
 
 
+def search_viewer(request, code, step, template='mdtui/search.html'):
+    context = { 'step': step,
+                'code': code,
+                }
+    return render_to_response(template, context, context_instance=RequestContext(request))
+
+
 
 def indexing(request, step=None, template='mdtui/indexing.html'):
     # Context init
