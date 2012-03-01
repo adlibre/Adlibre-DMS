@@ -125,7 +125,7 @@
 
                 {# SEARCH INDEX DETAILS FORM RENDERING #}
                 {% for field in form %}
-                {%  if not field.name = "date" %}
+                {%  if not field.name == "date" %}
                 <div class="control-group">
                     {%  if field.errors %}
                     {%  for error in field.errors %}
@@ -176,15 +176,16 @@
     {% if step == "3" %}
         <fieldset>
             <legend>Results</legend>
-            <legend>Search with keys:</legend>
         </fieldset>
-        <ul class="metainfo">
-            {% for item in document_keys %}
-            <li>{%  get_key_li_item document_keys item %}</li>
-            {% endfor %}
-        </ul>
+
         <table class="table table-striped" id="results-table">
-            <caption>(Details of search query parameters)</caption>
+            <caption>Search with keys:
+                <ul class="metainfo">
+                {% for item in document_keys %}
+                        <li>{%  get_key_li_item document_keys item %}</li>
+                {% endfor %}
+                </ul>
+            </caption>
             <thead>
                 <tr>
                     <th>View</th>
@@ -198,9 +199,10 @@
             <tbody>
             {% for doc in documents %}
                 <tr>
-                    <td><a href="{% url api_file %}?filename={{ doc.id }}" title="View Document"><i class="icon-download"></i>{{ doc.id }}</a></td>
+                    <td><a href="{% url api_file %}?filename={{ doc.id }}" title="View Document"><i class="icon-download"></i> {{ doc.id }}</a></td>
                     <td>{{ doc.metadata_created_date|date:"Y-m-d" }}</td>
                     <td>
+                    {# FIXME: These keys will need to be in separate table column to allow for sorting on those keys #}
                     {% for key in doc.mdt_indexes %}
                        <p> {% get_key_li_item doc.mdt_indexes key %} </p>
                     {% endfor %}
@@ -253,19 +255,20 @@
 
 {% block css_extra %}
     <style type="text/css">
-        #results-table tbody tr.highlight { font-weight: bold; cursor: pointer; }
+        #results-table tbody tr.highlight { text-decoration: underline; cursor: pointer; }
         #body-content {
             background-image: url("{{ STATIC_URL }}search-background.png");
             background-repeat: no-repeat;
             background-position: 100px 166px;
         }
+        .metainfo { list-style: none; border-collapse: collapse; }
     </style>
 {% endblock %}
 
 {% block js_extra %}
-    {% if step == "2" %}
+    {% if step == "3" %}
     <script type="text/javascript">
-        $(function() {
+        $(document).ready(function(){
             // Hide the first cell for JavaScript enabled browsers.
             //$('#link-table td:first-child').hide();
 
