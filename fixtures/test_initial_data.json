@@ -916,7 +916,9 @@
             "active": true,
             "doccode_type": "1",
             "doccode_id": 2,
-            "no_doccode": false
+            "no_doccode": false,
+            "barcode_format": "ADL-%s",
+            "barcode_zfill": 4
         }
     },
     {
