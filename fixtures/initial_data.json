@@ -697,148 +697,148 @@
                 15, 
                 17,
                 24
-            ], 
+            ],
             "before_removal_plugins": [
-                12, 
+                12,
                 13,
                 20,
                 22
-            ], 
+            ],
             "before_storage_plugins": [
-                1, 
-                2, 
+                1,
+                2,
                 3
             ],
             "database_storage_plugins": [
                 23
             ],
             "storage_plugins": [
-                4, 
+                4,
                 14
-            ], 
+            ],
             "before_update_plugins": [
                 19,
                 21
-            ], 
+            ],
             "doccode": "2"
         }
-    }, 
+    },
     {
-        "pk": 2, 
-        "model": "dms_plugins.doccodepluginmapping", 
+        "pk": 2,
+        "model": "dms_plugins.doccodepluginmapping",
         "fields": {
-            "active": true, 
+            "active": true,
             "before_retrieval_plugins": [
-                5, 
-                6, 
-                7, 
-                9, 
-                11, 
-                15, 
+                5,
+                6,
+                7,
+                9,
+                11,
+                15,
                 17
-            ], 
+            ],
             "before_removal_plugins": [
-                12, 
+                12,
                 13,
                 20
-            ], 
+            ],
             "before_storage_plugins": [
-                1, 
-                2, 
-                3, 
+                1,
+                2,
+                3,
                 10
-            ], 
+            ],
             "storage_plugins": [
                 4,
                 14
-            ], 
+            ],
             "before_update_plugins": [
                 19,
                 21
-            ], 
+            ],
             "doccode": "1"
         }
-    }, 
+    },
     {
-        "pk": 3, 
-        "model": "dms_plugins.doccodepluginmapping", 
+        "pk": 3,
+        "model": "dms_plugins.doccodepluginmapping",
         "fields": {
-            "active": true, 
+            "active": true,
             "before_retrieval_plugins": [
-                6, 
-                7, 
-                15, 
+                6,
+                7,
+                15,
                 17
-            ], 
+            ],
             "before_removal_plugins": [
-                12, 
+                12,
                 13,
                 20
-            ], 
+            ],
             "storage_plugins": [
                 4,
                 14
-            ], 
+            ],
             "before_update_plugins": [
                 19,
                 21
-            ], 
+            ],
             "doccode": "3"
         }
-    }, 
+    },
     {
-        "pk": 4, 
-        "model": "dms_plugins.doccodepluginmapping", 
+        "pk": 4,
+        "model": "dms_plugins.doccodepluginmapping",
         "fields": {
-            "active": true, 
+            "active": true,
             "before_retrieval_plugins": [
-                6, 
-                7, 
-                15, 
+                6,
+                7,
+                15,
                 17
-            ], 
+            ],
             "before_removal_plugins": [
-                12, 
+                12,
                 13,
                 20
-            ], 
+            ],
             "before_storage_plugins": [
                 2
-            ], 
+            ],
             "storage_plugins": [
                 4,
                 14
-            ], 
+            ],
             "before_update_plugins": [
                 19,
                 21
-            ], 
+            ],
             "doccode": "4"
         }
-    }, 
+    },
     {
-        "pk": 5, 
-        "model": "dms_plugins.doccodepluginmapping", 
+        "pk": 5,
+        "model": "dms_plugins.doccodepluginmapping",
         "fields": {
-            "active": true, 
+            "active": true,
             "before_retrieval_plugins": [
-                6, 
-                7, 
-                15, 
+                6,
+                7,
+                15,
                 17
-            ], 
+            ],
             "before_removal_plugins": [
-                12, 
+                12,
                 13,
                 20
-            ], 
+            ],
             "before_storage_plugins": [
                 2
-            ], 
+            ],
             "storage_plugins": [
                 4,
                 14
-            ], 
+            ],
             "before_update_plugins": [
                 19,
                 21
@@ -863,11 +863,11 @@
             ], 
             "before_storage_plugins": [
                 3
-            ], 
+            ],
             "storage_plugins": [
-                4, 
+                4,
                 14
-            ], 
+            ],
             "before_update_plugins": [
                 21
             ], 
@@ -879,8 +879,8 @@
         "model": "doc_codes.documenttyperule",
         "fields": {
             "regex": "",
-            "sequence_last": 0,
             "description": "This doccode is assigned to the files that have no other suitable doccode.",
+            "sequence_last": 0,
             "title": "No doccode",
             "split_string": "",
             "active": true,
@@ -916,7 +916,9 @@
             "active": true,
             "doccode_type": "1",
             "doccode_id": 2,
-            "no_doccode": false
+            "no_doccode": false,
+            "barcode_format": "ADL-%s",
+            "barcode_zfill": 4
         }
     },
     {
@@ -954,8 +956,8 @@
         "model": "doc_codes.documenttyperule",
         "fields": {
             "regex": "[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{4}",
-            "sequence_last": 0,
             "description": "[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{4}",
+            "sequence_last": 0,
             "title": "Credit Card Scans",
             "split_string": "",
             "active": true,
