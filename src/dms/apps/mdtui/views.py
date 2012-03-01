@@ -10,7 +10,6 @@ from django.http import HttpResponse
 from django.shortcuts import render_to_response, HttpResponseRedirect, get_object_or_404
 from django.template import RequestContext, loader
 
-from couchdbkit import *
 from dmscouch.models import CouchDocument
 
 from forms import DocumentIndexForm, DocumentTypeSelectForm, DocumentUploadForm
@@ -25,12 +24,10 @@ MDTUI_ERROR_STRINGS = {
 }
 
 
-def search(request, step=None, template='mdtui/search.html'):
-    context = {}
+def search_type(request, step, template='mdtui/search.html'):
+    context = { 'step': step, }
     form = DocumentTypeSelectForm(request.POST or None)
-    # Hack to make the navigation work for testing the templates
     if request.POST:
-        if step == "1":
             if form.is_valid():
                 try:
                     docrule = form.data["docrule"]
@@ -38,28 +35,29 @@ def search(request, step=None, template='mdtui/search.html'):
                     return HttpResponse(MDTUI_ERROR_STRINGS[1])
                     # TODO: refactor this (unright but quick)
                 request.session['docrule_id'] = docrule
-                step = str(int(step) + 1)
-                return HttpResponseRedirect(reverse('mdtui-search-' + step))
-                # else: return form on current step with errors
-        elif step == "2":
-            secondary_indexes = processDocumentIndexForm(request)
-            if secondary_indexes:
-                    request.session["document_search_dict"] = secondary_indexes
-                    step = str(int(step) + 1)
-                    return HttpResponseRedirect(reverse('mdtui-search-' + step))
-#        else:
-#            step = str(int(step) - 1)
-#            return HttpResponseRedirect(reverse('mdtui-search-' + step))
-
+                return HttpResponseRedirect(reverse('mdtui-search-options'))
+            else:
+                pass
+                # TODO: return form on current step with errors
     else:
-        if step == "1":
-            form = DocumentTypeSelectForm()
-        elif step == "2":
-            form = initDocumentIndexForm(request)
+        form = DocumentTypeSelectForm()
 
-    context.update({ 'form': form,
-                    'step': step,
-                    })
+    context.update({ 'form': form, })
+    return render_to_response(template, context, context_instance=RequestContext(request))
+
+
+def search_options(request, step, template='mdtui/search.html'):
+    context = { 'step': step, }
+    form = DocumentIndexForm(request.POST or None)
+    if request.POST:
+        secondary_indexes = processDocumentIndexForm(request)
+        if secondary_indexes:
+            request.session["document_search_dict"] = secondary_indexes
+            return HttpResponseRedirect(reverse('mdtui-search-results'))
+    else:
+        form = initDocumentIndexForm(request)
+
+    context.update({ 'form': form, })
     return render_to_response(template, context, context_instance=RequestContext(request))
 
 
@@ -70,7 +68,7 @@ def search_results(request, step=None, template='mdtui/search.html'):
     except KeyError:
         return HttpResponse(MDTUI_ERROR_STRINGS[3])
 
-    documents =  CouchDocument.view('dmscouch/all')
+    documents = CouchDocument.view('dmscouch/all')
 
     # Copy _id to id to prevent template variable name issue
     # http://stackoverflow.com/questions/6676045/accessing-couchdbs-uuid-in-django-templates
