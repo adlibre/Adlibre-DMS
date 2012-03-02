@@ -171,7 +171,7 @@ class MetadataCouchDB(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 400)
 
-    def _test_mdt_z_proper_removing(self):
+    def test_mdt_z_proper_removing(self):
         """
         Deleting all- test MDT's (with doccode 10000).
 

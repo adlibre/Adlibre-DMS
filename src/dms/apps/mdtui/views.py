@@ -4,6 +4,7 @@ Project: Adlibre DMS
 Copyright: Adlibre Pty Ltd 2012
 License: See LICENSE for license information
 """
+import datetime
 
 from django.core.urlresolvers import reverse, resolve
 from django.http import HttpResponse
@@ -56,6 +57,9 @@ def search_options(request, step, template='mdtui/search.html'):
             return HttpResponseRedirect(reverse('mdtui-search-results'))
     else:
         form = initDocumentIndexForm(request)
+        # excluding description from search form
+        del form.fields["description"]
+        del form.base_fields["description"]
 
     context.update({ 'form': form, })
     return render_to_response(template, context, context_instance=RequestContext(request))
@@ -63,19 +67,38 @@ def search_options(request, step, template='mdtui/search.html'):
 
 def search_results(request, step=None, template='mdtui/search.html'):
     document_keys = None
+    docrule_id = None
+    documents = None
     try:
         document_keys = request.session["document_search_dict"]
+        docrule_id = request.session['docrule_id']
     except KeyError:
         return HttpResponse(MDTUI_ERROR_STRINGS[3])
 
-    documents = CouchDocument.view('dmscouch/all')
+    # turning document_search dict into something useful for the couch request
+    cleaned_document_keys  = cleanup_document_keys(document_keys)
+    if "date" in cleaned_document_keys.keys() and cleaned_document_keys.__len__() == 1:
+        # only one crytheria 'date' in search request, requesting another view
+        print 'searching only by date: ', str_date_to_couch(cleaned_document_keys["date"]), ' docrule:', docrule_id
+        documents = CouchDocument.view('dmscouch/search_date', key=[str_date_to_couch(cleaned_document_keys["date"]), docrule_id], include_docs=True )
+    else:
+        print 'multiple keys search'
+        couch_req_params = convert_to_search_keys(cleaned_document_keys, docrule_id)
+        if couch_req_params:
+            documents = CouchDocument.view('dmscouch/search', keys=couch_req_params, include_docs=True )
+            # docuents now returns ANY search type results.
+            # we need to convert it to ALL
 
+
+
+    # we do not need this... every doc has an "id" already
+    """
     # Copy _id to id to prevent template variable name issue
     # http://stackoverflow.com/questions/6676045/accessing-couchdbs-uuid-in-django-templates
     # FIXME: Move to dmscouch.models.CouchDocument
     for d in documents:
         setattr(d, 'id', d._id)
-
+    """
     context = { 'step': step,
                 'documents': documents,
                 'document_keys': document_keys,
@@ -216,3 +239,35 @@ def processDocumentIndexForm(request):
                 return secondary_indexes
             else:
                 return None
+
+def convert_to_search_keys(document_keys, docrule_id):
+    req_params = []
+    for key, value in document_keys.iteritems():
+        if key != "date":
+            if not "date" in document_keys.keys():
+                req_params.append([key, value, docrule_id],)
+            else:
+                req_params.append([key, value, docrule_id, str_date_to_couch(document_keys["date"])],)
+    print req_params
+    return req_params
+
+def cleanup_document_keys(document_keys):
+    # cleaning up key/value pairs that have empty values from couchdb search request
+    del_list = []
+    for key, value in document_keys.iteritems():
+        if not value:
+            del_list.append(key)
+    for key in del_list:
+        del document_keys[key]
+    return document_keys
+
+def str_date_to_couch(from_date):
+    """
+    Converts date from form date widget generated format, like '2012-03-02'
+    To CouchDocument stored date. E.g.: '2012-03-02T00:00:00Z'
+    """
+    # TODO: HACK: normal datetime conversions here
+    couch_date = from_date + 'T00:00:00Z'
+#    date = datetime.datetime.strptime(from_date, "%Y-%m-%d")
+#    couch_date = datetime.datetime.now()
+    return couch_date
