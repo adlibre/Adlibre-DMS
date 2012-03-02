@@ -207,4 +207,14 @@ class DocumentTypeRuleManager(object):
                 return doccode
         return None
 
+    def get_docrule_by_id(self, id):
+        """
+        Works without making requests to DB. (when used with instance variable)
+        """
+        docrules = self.doccodes
+        docrule_instance = docrules.get(doccode_id=id)
+        return docrule_instance
+
+# TODO: FIXME: We need to reinitialize this on saving new Document Type Rule. (Internal list of them is not updated)
+# Bug #657
 DocumentTypeRuleManagerInstance = DocumentTypeRuleManager()

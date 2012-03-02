@@ -209,7 +209,7 @@
                     </td>
                     <td>{{ doc.metadata_description }}</td>
                     {# need contexrt processor here to convert docrule_id into docrule name #}
-                    <td>{{ doc.metadata_doc_type_rule_id }}</td>
+                    <td>{% get_docrule_name_by_id doc.metadata_doc_type_rule_id %}</td>
                     <td>{# Admin only #}<a href="" title="Edit Metadata"><i class="icon-edit"></i></a></td>
                 </tr>
             {% endfor %}
