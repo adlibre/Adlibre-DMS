@@ -22,6 +22,7 @@ MDTUI_ERROR_STRINGS = {
     1:'{"status": "Error. You have not selected Doccument Type Rule."}',
     2:'{"status": "Error. You have not entered Document Indexing Data."}',
     3:'{"status": "Error. You have not defined Document Searching Keys."}',
+    4:'{"status": "Error. You have not defined Document Type Rule. Search form can not be created."}'
 }
 
 
@@ -35,7 +36,7 @@ def search_type(request, step, template='mdtui/search.html'):
                 except:
                     return HttpResponse(MDTUI_ERROR_STRINGS[1])
                     # TODO: refactor this (unright but quick)
-                request.session['docrule_id'] = docrule
+                request.session['docrule'] = docrule
                 return HttpResponseRedirect(reverse('mdtui-search-options'))
             else:
                 pass
@@ -49,17 +50,28 @@ def search_type(request, step, template='mdtui/search.html'):
 
 def search_options(request, step, template='mdtui/search.html'):
     context = { 'step': step, }
-    form = DocumentIndexForm(request.POST or None)
+    try:
+        docrule = request.session["docrule"]
+    except KeyError:
+        return HttpResponse(MDTUI_ERROR_STRINGS[4])
+
+    form = initDocumentIndexForm(request)
+    # excluding description from search form
+    try:
+        del form.fields["description"]
+    except: pass
+    try:
+        del form.base_fields["description"]
+    except: pass
+
     if request.POST:
         secondary_indexes = processDocumentIndexForm(request)
         if secondary_indexes:
             request.session["document_search_dict"] = secondary_indexes
             return HttpResponseRedirect(reverse('mdtui-search-results'))
     else:
-        form = initDocumentIndexForm(request)
-        # excluding description from search form
-        del form.fields["description"]
-        del form.base_fields["description"]
+        # date field should be empty
+        form.fields["date"].initial = None
 
     context.update({ 'form': form, })
     return render_to_response(template, context, context_instance=RequestContext(request))
@@ -69,9 +81,10 @@ def search_results(request, step=None, template='mdtui/search.html'):
     document_keys = None
     docrule_id = None
     documents = None
+    search_res = None
     try:
         document_keys = request.session["document_search_dict"]
-        docrule_id = request.session['docrule_id']
+        docrule_id = request.session['docrule']
     except KeyError:
         return HttpResponse(MDTUI_ERROR_STRINGS[3])
 
@@ -79,29 +92,23 @@ def search_results(request, step=None, template='mdtui/search.html'):
     cleaned_document_keys  = cleanup_document_keys(document_keys)
     if "date" in cleaned_document_keys.keys() and cleaned_document_keys.__len__() == 1:
         # only one crytheria 'date' in search request, requesting another view
-        print 'searching only by date: ', str_date_to_couch(cleaned_document_keys["date"]), ' docrule:', docrule_id
+        #print 'searching only by date: ', str_date_to_couch(cleaned_document_keys["date"]), ' docrule:', docrule_id
         documents = CouchDocument.view('dmscouch/search_date', key=[str_date_to_couch(cleaned_document_keys["date"]), docrule_id], include_docs=True )
     else:
-        print 'multiple keys search'
+        #print 'multiple keys search'
         couch_req_params = convert_to_search_keys(cleaned_document_keys, docrule_id)
         if couch_req_params:
-            documents = CouchDocument.view('dmscouch/search', keys=couch_req_params, include_docs=True )
+            search_res = CouchDocument.view('dmscouch/search', keys=couch_req_params )
             # docuents now returns ANY search type results.
             # we need to convert it to ALL
+            docs_list = convert_search_res(search_res, couch_req_params.__len__())
+            documents = CouchDocument.view('_all_docs', keys=docs_list, include_docs=True )
+    mdts_list = get_mdts_for_documents(documents)
 
-
-
-    # we do not need this... every doc has an "id" already
-    """
-    # Copy _id to id to prevent template variable name issue
-    # http://stackoverflow.com/questions/6676045/accessing-couchdbs-uuid-in-django-templates
-    # FIXME: Move to dmscouch.models.CouchDocument
-    for d in documents:
-        setattr(d, 'id', d._id)
-    """
     context = { 'step': step,
                 'documents': documents,
                 'document_keys': document_keys,
+                'mdts': mdts_list,
                 }
     return render_to_response(template, context, context_instance=RequestContext(request))
 
@@ -120,6 +127,11 @@ def indexing(request, step=None, template='mdtui/indexing.html'):
     document_keys = None
     form = DocumentTypeSelectForm()
 
+    try:
+        # search done. Cleaning up session for indexing to avoid collisions in functions
+        del request.session["document_search_dict"]
+        del request.session['docrule']
+    except: pass
     # Hack to make the navigation work for testing the templates
     if request.POST:
         if step == "1":
@@ -210,7 +222,10 @@ def initDocumentIndexForm(request):
         in case of POST returns populated (from request) form instance.
         in both cases form is rendered with MDT index fields
         """
-        details = get_mdts_for_docrule(request.session['docrule_id'])
+        try:
+            details = get_mdts_for_docrule(request.session['docrule_id'])
+        except KeyError:
+            details = get_mdts_for_docrule(request.session['docrule'])
 
         form = DocumentIndexForm()
         if not details == 'error':
@@ -226,7 +241,11 @@ def initDocumentIndexForm(request):
 def processDocumentIndexForm(request):
         form = initDocumentIndexForm(request)
         secondary_indexes = {}
-        if form.validation_ok():
+        search = None
+        try:
+            search = request.session["docrule"]
+        except: pass
+        if form.validation_ok() or search:
             for key, field in form.fields.iteritems():
                 try:
                     # for native form fields
@@ -240,6 +259,19 @@ def processDocumentIndexForm(request):
             else:
                 return None
 
+def convert_search_res(search_res, match_len):
+    docs_list = {}
+    matched_docs = []
+    for row in search_res:
+        if row.get_id in docs_list.keys():
+            docs_list[row.get_id] += 1
+        else:
+            docs_list[row.get_id] = 1
+    for doc_id, mention_count in docs_list.iteritems():
+        if int(mention_count) >= int(match_len):
+            matched_docs.append(doc_id)
+    return matched_docs
+
 def convert_to_search_keys(document_keys, docrule_id):
     req_params = []
     for key, value in document_keys.iteritems():
@@ -248,7 +280,6 @@ def convert_to_search_keys(document_keys, docrule_id):
                 req_params.append([key, value, docrule_id],)
             else:
                 req_params.append([key, value, docrule_id, str_date_to_couch(document_keys["date"])],)
-    print req_params
     return req_params
 
 def cleanup_document_keys(document_keys):
@@ -271,3 +302,12 @@ def str_date_to_couch(from_date):
 #    date = datetime.datetime.strptime(from_date, "%Y-%m-%d")
 #    couch_date = datetime.datetime.now()
     return couch_date
+
+def get_mdts_for_documents(documents):
+    indexes = {}
+    if documents:
+        for document in documents:
+            xes = document.mdt_indexes
+            for ind in xes:
+                indexes[ind] = "index"
+    return indexes.keys()

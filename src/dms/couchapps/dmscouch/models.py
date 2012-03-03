@@ -52,8 +52,13 @@ class CouchDocument(Document):
         if document.db_info:
             try:
                 db_info = document.db_info
-                del db_info["date"]
-                del db_info["description"]
+                # trying to cleanup date and description if exist...
+                try:
+                    del db_info["date"]
+                except: pass
+                try:
+                    del db_info["description"]
+                except: pass
                 self.mdt_indexes = db_info
                 # failing gracefully due to ability to save files with API (without metadata)
             except: pass
