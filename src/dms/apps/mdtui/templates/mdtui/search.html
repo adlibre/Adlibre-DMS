@@ -45,11 +45,13 @@
                 <legend>Search Options</legend>
 
                 <br />
-
+                {% comment %}
                 <div class="alert alert-error">
+
                     <a class="close">×</a>
                     <strong>Error!</strong> Form validation errors go here! (field validation errors go along each field below)
                 </div>
+                {% endcomment %}
 <div>
 {% comment %}
                 <div class="control-group">
@@ -190,7 +192,9 @@
                 <tr>
                     <th>View</th>
                     <th><a href="{# sort on this#}">Date</a></th>
-                    <th><a href="{# sort on this#}">Keys</a></th>
+                    {% for key in mdts %}
+                    <th><a href="{# sort on this#}">{{ key }}</a></th>
+                    {% endfor %}
                     <th><a href="{# sort on this#}">Description</a></th>
                     <th><a href="{# sort on this#}">Type</a></th>
                     <th>Edit</th>
@@ -199,16 +203,14 @@
             <tbody>
             {% for doc in documents %}
                 <tr>
-                    <td><a href="{% url mdtui-search-view doc.id %}" title="View Document"><i class="icon-download"></i> {{ doc.id }}</a></td>
+                    <td><a href="{#{% url mdtui-search-view doc.id %}#}{% url api_file %}?filename={{ doc.id }}" title="View Document"><i class="icon-download"></i> {{ doc.id }}</a></td>
                     <td>{{ doc.metadata_created_date|date:"Y-m-d" }}</td>
-                    <td>
-                    {# FIXME: These keys will need to be in separate table column to allow for sorting on those keys #}
+                    
                     {% for key in doc.mdt_indexes %}
-                       <p> {% get_key_li_item doc.mdt_indexes key %} </p>
+                    <td>{% get_sec_key_for_doc doc.mdt_indexes mdts key %}</td>
                     {% endfor %}
-                    </td>
+
                     <td>{{ doc.metadata_description }}</td>
-                    {# need contexrt processor here to convert docrule_id into docrule name #}
                     <td>{% get_docrule_name_by_id doc.metadata_doc_type_rule_id %}</td>
                     <td>{# Admin only #}<a href="" title="Edit Metadata"><i class="icon-edit"></i></a></td>
                 </tr>
@@ -217,17 +219,6 @@
         </table>
 
         <hr />
-
-{% comment %}
-        {% for doc in documents %}
-            <p>{{ doc.id }} :
-                {% for key, value in doc %}
-                <br />{{ key }} = {{ value }}
-                {% endfor %} </p>
-            <hr />
-        {% endfor %}
-{% endcomment %}
-
         {# Let's use pagination like this #}
         <div class="pagination">
             <ul>
@@ -249,9 +240,10 @@
     {% if step == "view" %}
         <fieldset>
             <legend>Step 4: Viewing Document &ldquo;{{ code }}&rdquo;</legend>
-        <fieldset
+        </fieldset>
         {# Maybe, don't actually display this step, just pop up a document. #}
         <div id="pdfobj"></div>
+            <a href="{% url api_file %}?filename={{ code }}">DOWNLOAD document &ldquo;{{ code }}&rdquo;</a>
     {% endif %}
 
 {% endblock %}
