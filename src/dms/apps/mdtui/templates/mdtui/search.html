@@ -206,8 +206,8 @@
                     <td><a href="{#{% url mdtui-search-view doc.id %}#}{% url api_file %}?filename={{ doc.id }}" title="View Document"><i class="icon-download"></i> {{ doc.id }}</a></td>
                     <td>{{ doc.metadata_created_date|date:"Y-m-d" }}</td>
                     
-                    {% for key in doc.mdt_indexes %}
-                    <td>{% get_sec_key_for_doc doc.mdt_indexes mdts key %}</td>
+                    {% for key in mdts %}
+                    <td>{% get_sec_key_for_doc doc.mdt_indexes key %}</td>
                     {% endfor %}
 
                     <td>{{ doc.metadata_description }}</td>
