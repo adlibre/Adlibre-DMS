@@ -83,30 +83,24 @@ def do_sec_key_for_doc_mdtkey(parser, token):
     """
     try:
         # splitings args provided
-        tag_name, keys_dict, mdt_dict, key_item = token.split_contents()
+        tag_name, doc_keys_dict, key_item = token.split_contents()
     except ValueError:
-        raise template.TemplateSyntaxError("%r tag requires exactly two arguments" % token.contents.split()[0])
-    return ProvideSecKey(keys_dict, mdt_dict, key_item)
+        raise template.TemplateSyntaxError("%r tag requires exactly 2 arguments" % token.contents.split()[0])
+    return ProvideSecKey(doc_keys_dict, key_item)
 
 class ProvideSecKey(template.Node):
-    def __init__(self, keys_dict, mdt_dict, key_item):
-        self.keys_dict = template.Variable(keys_dict)
-        self.mdt_dict = template.Variable(mdt_dict)
+    def __init__(self, doc_keys_dict, key_item):
+        self.doc_keys_dict = template.Variable(doc_keys_dict)
         self.key_item = template.Variable(key_item)
 
     def render(self, context):
         try:
             key_item = self.key_item.resolve(context)
-            mdt_dict = self.mdt_dict.resolve(context)
-            keys_dict = self.keys_dict.resolve(context)
-            
-            # TODO: DEVELOP THIS FEATURE
-
-            # COMPLEX RENDERING!
-            # we need to count calls here. How many calls mean rendering of key number.
-            # then check with 'mdts' list that is in the context if this is a proper position.
-            # return mdt_dict[key_item] or '' if no key for this doc exist.
-
-            return mdt_dict[key_item]
+            doc_keys_dict = self.doc_keys_dict.resolve(context)
+            try:
+                value = doc_keys_dict[key_item]
+            except:
+                value = ''
+            return value
         except template.VariableDoesNotExist:
             return ''
