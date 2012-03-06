@@ -6,9 +6,10 @@ License: See LICENSE for license information
 Author: Iurii Garmash
 """
 
-import json, time
+import json, os
 from django.test import TestCase
 from django.core.urlresolvers import reverse
+from django.conf import settings
 import re
 
 # auth user
@@ -71,6 +72,8 @@ doc1_dict = {
     'Friends Name': 'Andrew',
 }
 
+doc1 = 'ADL-1111.pdf'
+
 
 
 class MDTUI(TestCase):
@@ -124,21 +127,6 @@ class MDTUI(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, '<label class="control-label">Description</label>')
         self.assertContains(response, 'Creation Date')
-
-#    def test_4_setp1_form_selected_when_returning(self):
-#        print 4
-#        """
-#        MDTUI Indexing Docrule selection form preselected to
-#        previous value when turning back from later steps.
-#        """
-#        url = reverse('mdtui-index')
-#        response = self.client.post(url, {'docrule': test_mdt_docrule_id})
-#        self.assertEqual(response.status_code, 302)
-#        url = reverse('mdtui-index')
-#        response = self.client.get(url)
-#        print response
-#        #self.assertContains(response, '<option selected="selected" value="2">Adlibre Invoices</option>')
-#        self.assertEqual(response.status_code, 200)
 
     def test_5_indexing_step2_proper_form_rendering(self):
         """
@@ -197,8 +185,10 @@ class MDTUI(TestCase):
         self.assertContains(response, 'Creation Date: 2012-03-06')
         self.assertContains(response, 'Employee ID: 123456')
         self.assertContains(response, 'Employee Name: Iurii Garmash')
+        # Contains Upload form
+        self.assertContains(response, 'Upload File')
+        self.assertContains(response, 'id_file')
         self.assertEqual(response.status_code, 200)
-
 
 
     def test_6_rendering_form_without_first_step(self):
@@ -209,12 +199,44 @@ class MDTUI(TestCase):
         response = self.client.get(url)
         self.assertContains(response, "You have not entered Document Indexing Data.")
 
+    def test_7_posting_document_with_all_keys(self):
+        # Selecting Document Type Rule
+        url = reverse('mdtui-index-1')
+        response = self.client.post(url, {'docrule': test_mdt_docrule_id})
+        self.assertEqual(response.status_code, 302)
+        # Getting indexes form and matching form Indexing Form fields names
+        url = reverse('mdtui-index-2')
+        response = self.client.get(url)
+        rows_dict = self._read_indexes_form(response)
+        post_dict = self._convert_doc_to_post_dict(rows_dict, doc1_dict)
+        # Adding Document Indexes
+        response = self.client.post(url, post_dict)
+        self.assertEqual(response.status_code, 302)
+        url = reverse('mdtui-index-3')
+        response = self.client.get(url)
+        self.assertContains(response, 'Friends ID: 123')
+        self.assertEqual(response.status_code, 200)
+        # Make the file upload
+        file = os.path.join(settings.FIXTURE_DIRS[0], 'testdata', doc1)
+        data = { 'file': open(file, 'r'), 'filename':doc1}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Your document have just been indexed successfully!')
+        self.assertContains(response, 'Friends Name: Andrew')
+        self.assertContains(response, 'Start Again')
+
+    def test_8_searching_uploaded_documents(self):
+        pass
+
     def test_z_cleanup(self):
         """
         Cleaning up after all tests finished.
         Must be ran after all tests in this test suite.
         """
         # TODO: Proper cleanup after tests passed.
+
+        # Delete 2 MDTs here
+        # Delete file ADL-1111.pdf
         pass
 
     def _read_indexes_form(self, response):
