@@ -17,18 +17,23 @@ def initDocumentIndexForm(request):
         in case of POST returns populated (from request) form instance.
         in both cases form is rendered with MDT index fields
         """
+        details = None
         try:
-            details = get_mdts_for_docrule(request.session['docrule_id'])
+            try:
+                details = get_mdts_for_docrule(request.session['docrule_id'])
+            except KeyError:
+                details = get_mdts_for_docrule(request.session['docrule'])
         except KeyError:
-            details = get_mdts_for_docrule(request.session['docrule'])
+            pass
 
         form = DocumentIndexForm()
-        if not details == 'error':
-            # MDT's exist for ths docrule adding fields to form
-            fields = render_fields_from_docrules(details)
-            #print fields
-            if fields:
-                form.setFields(fields)
+        if details:
+            if not details == 'error':
+                # MDT's exist for ths docrule adding fields to form
+                fields = render_fields_from_docrules(details)
+                #print fields
+                if fields:
+                    form.setFields(fields)
         if request.POST:
             form.setData(request.POST)
         return form
@@ -100,10 +105,15 @@ def str_date_to_couch(from_date):
     return couch_date
 
 def get_mdts_for_documents(documents):
+    """
+
+    """
     indexes = {}
+    resp = None
     if documents:
         for document in documents:
             xes = document.mdt_indexes
             for ind in xes:
                 indexes[ind] = ""
-    return indexes.keys()
+        resp = indexes.keys()
+    return resp
