@@ -6,7 +6,7 @@ License: See LICENSE for license information
 Author: Iurii Garmash
 """
 
-import json, os
+import json, os, urllib, datetime
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from django.conf import settings
@@ -16,12 +16,14 @@ import re
 username = 'admin'
 password = 'admin'
 
-test_mdt_docrule_id = 2
+couchdb_url = 'http://127.0.0.1:5984'
+
+test_mdt_docrule_id = 2 # should be properly assigned to fixtures docrule that uses CouchDB plugins
 
 indexes_form_match_pattern = '(Employee ID|Employee Name|Friends ID|Friends Name).+?name=\"(\d+)\"'
 
 mdt1 = {
-    "docrule_id": "2",
+    "docrule_id": str(test_mdt_docrule_id),
     "description": "Tests MDT number 1",
     "fields": {
        "1": {
@@ -42,7 +44,7 @@ mdt1 = {
 }
 
 mdt2 = {
-    "docrule_id": "2",
+    "docrule_id": str(test_mdt_docrule_id),
     "description": "Tests MDT number 2",
     "fields": {
        "1": {
@@ -72,16 +74,16 @@ doc1_dict = {
     'Friends Name': 'Andrew',
 }
 
-doc1 = 'ADL-1111.pdf'
+doc1 = 'ADL-1111'
 
 
-
+# TODO: Expand this (espetially search). Need to add at least 1 more docs...
 class MDTUI(TestCase):
     def setUp(self):
         # We-re using only logged in client in this test
         self.client.login(username=username, password=password)
 
-    def _test_0_setup_initial(self):
+    def _test_00_setup_initial(self):
         """
         Setup for those test suite. Made like standalone test because we need it to be run only once
         """
@@ -94,7 +96,7 @@ class MDTUI(TestCase):
         response = self.client.post(url, {"mdt": mdt})
         self.assertEqual(response.status_code, 200)
 
-    def test_1_opens_app(self):
+    def test_01_opens_app(self):
         """
         If MDTUI app opens normally at least
         """
@@ -103,7 +105,7 @@ class MDTUI(TestCase):
         self.assertContains(response, 'To continue, choose from the options below')
         self.assertEqual(response.status_code, 200)
 
-    def test_2_step1(self):
+    def test_02_step1(self):
         """
         MDTUI Indexing has step 1 rendered properly.
         """
@@ -113,22 +115,20 @@ class MDTUI(TestCase):
         self.assertContains(response, 'Adlibre Invoices')
         self.assertEqual(response.status_code, 200)
     
-    def test_3_step1_post_redirect(self):
+    def test_03_step1_post_redirect(self):
         """
         MDTUI Displays Step 2 Properly (after proper call)
         """
         url = reverse('mdtui-index-1')
         response = self.client.post(url, {'docrule': test_mdt_docrule_id})
         self.assertEqual(response.status_code, 302)
-
-        #getting redirect url by regexp expression
-        new_url = re.search("(?P<url>https?://[^\s]+)", str(response)).group("url")
+        new_url = self._retrieve_redirect_response_url(response)
         response = self.client.get(new_url)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, '<label class="control-label">Description</label>')
         self.assertContains(response, 'Creation Date')
 
-    def test_5_indexing_step2_proper_form_rendering(self):
+    def test_04_indexing_step2_proper_form_rendering(self):
         """
         MDTUI renders Indexing form according to MDT's exist for testsuite's Docrule
         Step 2. Indexing Form contains MDT fields required.
@@ -157,11 +157,11 @@ class MDTUI(TestCase):
         self.assertContains(response, "Name of the person associated with the document")
         #print response
 
-    def test_5_adding_indexes(self):
+    def test_05_adding_indexes(self):
         """
         MDTUI Indexing Form parses data properly.
         Step 3 Displays appropriate indexes fro document will be uploaded.
-        POsting to Indexing Step 3 returns proper data.
+        Posting to Indexing Step 3 returns proper data.
         """
         # Selecting Document Type Rule
         url = reverse('mdtui-index-1')
@@ -175,8 +175,7 @@ class MDTUI(TestCase):
         # Adding Document Indexes
         response = self.client.post(url, post_dict)
         self.assertEqual(response.status_code, 302)
-        #getting redirect url by regexp expression
-        new_url = re.search("(?P<url>https?://[^\s]+)", str(response)).group("url")
+        new_url = self._retrieve_redirect_response_url(response)
         response = self.client.get(new_url)
         # Response contains proper document indexes
         self.assertContains(response, 'Friends ID: 123')
@@ -190,8 +189,7 @@ class MDTUI(TestCase):
         self.assertContains(response, 'id_file')
         self.assertEqual(response.status_code, 200)
 
-
-    def test_6_rendering_form_without_first_step(self):
+    def test_06_rendering_form_without_first_step(self):
         """
         Indexing Page 3 without populating previous forms contains proper warnings.
         """
@@ -199,7 +197,10 @@ class MDTUI(TestCase):
         response = self.client.get(url)
         self.assertContains(response, "You have not entered Document Indexing Data.")
 
-    def test_7_posting_document_with_all_keys(self):
+    def test_07_posting_document_with_all_keys(self):
+        """
+        Uploading File though MDTUI, adding all Secondary indexes accordingly.
+        """
         # Selecting Document Type Rule
         url = reverse('mdtui-index-1')
         response = self.client.post(url, {'docrule': test_mdt_docrule_id})
@@ -217,7 +218,7 @@ class MDTUI(TestCase):
         self.assertContains(response, 'Friends ID: 123')
         self.assertEqual(response.status_code, 200)
         # Make the file upload
-        file = os.path.join(settings.FIXTURE_DIRS[0], 'testdata', doc1)
+        file = os.path.join(settings.FIXTURE_DIRS[0], 'testdata', doc1+'.pdf')
         data = { 'file': open(file, 'r'), 'filename':doc1}
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 200)
@@ -225,19 +226,180 @@ class MDTUI(TestCase):
         self.assertContains(response, 'Friends Name: Andrew')
         self.assertContains(response, 'Start Again')
 
-    def test_8_searching_uploaded_documents(self):
-        pass
+    def test_08_metadata_exists_for_uploaded_documents(self):
+        """
+        Document now exists in couchDB
+        Querring Couchdb itself to test docs exist.
+        """
+        url = couchdb_url + '/dmscouch/'+doc1+'?revs_info=true'
+        # HACK: faking 'request' object here
+        r = self.client.get(url)
+        cou = urllib.urlopen(url)
+        resp = cou.read()
+        r.status_code = 200
+        r.content = resp
+        self.assertContains(r, 'ADL-1111')
+        self.assertContains(r, 'Iurii Garmash')
+
+    def test_09_searh_works(self):
+        """
+        Testing Search part opens.
+        """
+        url = reverse('mdtui-search')
+        response = self.client.get(url)
+        self.assertContains(response, 'Adlibre Invoices')
+        self.assertContains(response, 'Document Search')
+        self.assertEqual(response.status_code, 200)
+
+    def test_10_searh_indexes_warning(self):
+        """
+        Testing Search part Warning for indexes.
+        """
+        url = reverse('mdtui-search-options')
+        response = self.client.get(url)
+        self.assertContains(response, 'You have not defined Document Type Rule')
+        self.assertEqual(response.status_code, 200)
+
+    def test_11_searh_results_warning(self):
+        """
+        Testing Search part  warning for results.
+        """
+        url = reverse('mdtui-search-results')
+        response = self.client.get(url)
+        self.assertContains(response, 'You have not defined Document Searching Options')
+        self.assertEqual(response.status_code, 200)
+
+    def test_12_search_docrule_select_improper_call(self):
+        """
+        Makes wrong request to view. Response returns back to docrule selection.
+        """
+        url = reverse('mdtui-search-type')
+        response = self.client.post(url)
+        self.assertContains(response, 'Adlibre Invoices')
+        self.assertEqual(response.status_code, 200)
+
+    def test_13_search_docrule_selection(self):
+        """
+        Proper Indexing call.
+        """
+        url = reverse('mdtui-search-type')
+        data = {'docrule': test_mdt_docrule_id}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        # checking for proper fields rendering
+        self.assertContains(response, "Creation Date")
+        self.assertContains(response, "Employee ID")
+        self.assertContains(response, "Employee Name")
+        self.assertContains(response, "Friends ID")
+        self.assertContains(response, "Friends Name")
+        self.assertNotContains(response, "Description</label>")
+        self.assertNotContains(response, "You have not selected Doccument Type Rule")
+        self.assertEqual(response.status_code, 200)
+
+    def test_14_search_by_date_proper(self):
+        """
+        Proper call to search by date.
+        MDTUI Search By Index Form parses data properly.
+        Search Step 3 displays proper captured indexes.
+        """
+        # setting docrule
+        url = reverse('mdtui-search-type')
+        data = {'docrule': test_mdt_docrule_id}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        url = reverse('mdtui-search-options')
+        # Searching by Document 1 Indexes
+        response = self.client.post(url, {'date': doc1_dict["date"], '0':'', '1':'', '2':'', '3':''})
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        self.assertEqual(response.status_code, 200)
+        # no errors appeared
+        self.assertNotContains(response, "You have not defined Document Searching Options")
+        # document found
+        self.assertContains(response, doc1)
+        self.assertContains(response, doc1_dict['description'])
+        # context processors provide docrule name
+        self.assertContains(response, "Adlibre Invoices")
+
+    def test_15_search_by_key_proper(self):
+        """
+        Proper call to search by secondary index key.
+        Search Step 3 displays proper captured indexes.
+        """
+        # setting docrule
+        url = reverse('mdtui-search-type')
+        data = {'docrule': test_mdt_docrule_id}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        # assigning form fields
+        url = reverse('mdtui-search-options')
+        response = self.client.get(url)
+        # Getting indexes form and matching form Indexing Form fields names
+        rows_dict = self._read_indexes_form(response)
+        search_dict = doc1_dict
+        # Searching without date
+        search_dict["date"] = ''
+        post_dict = self._convert_doc_to_post_dict(rows_dict, search_dict)
+        response = self.client.post(url, post_dict)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        self.assertEqual(response.status_code, 200)
+        # no errors appeared
+        self.assertNotContains(response, "You have not defined Document Searching Options")
+        # document found
+        self.assertContains(response, doc1)
+        self.assertContains(response, doc1_dict['description'])
+        # context processors provide docrule name
+        self.assertContains(response, "Adlibre Invoices")
+
+    def test_16_search_by_date_improper(self):
+        """
+        Imroper call to search by date.
+        Search Step 3 does not display doc1.
+        """
+        # using today's date to avoid doc exists.
+        date_req = datetime.datetime.now()
+        date_str = datetime.datetime.strftime(date_req, "%Y-%m-%d")
+        # setting docrule
+        url = reverse('mdtui-search-type')
+        data = {'docrule': test_mdt_docrule_id}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        url = reverse('mdtui-search-options')
+        # Searching by Document 1 Indexes
+        response = self.client.post(url, {'date': date_str, '0':'', '1':'', '2':'', '3':''})
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        self.assertEqual(response.status_code, 200)
+        # no errors appeared
+        self.assertNotContains(response, "You have not defined Document Searching Options")
+        # document not found
+        self.assertNotContains(response, doc1)
 
     def test_z_cleanup(self):
         """
         Cleaning up after all tests finished.
         Must be ran after all tests in this test suite.
         """
-        # TODO: Proper cleanup after tests passed.
+        #Deleting all- test MDT's (with doccode from var "test_mdt_docrule_id") using MDT's API.
+        url = reverse('api_mdt')
+        response = self.client.get(url, {"docrule_id": str(test_mdt_docrule_id)})
+        data = json.loads(str(response.content))
+        for key, value in data.iteritems():
+            mdt_id =  data[key]["mdt_id"]
+            response = self.client.delete(url, {"mdt_id": mdt_id})
+            self.assertEqual(response.status_code, 204)
 
-        # Delete 2 MDTs here
-        # Delete file ADL-1111.pdf
-        pass
+        # Delete file "doc1"
+        url = reverse("api_file")
+        data = { 'filename': doc1, }
+        response = self.client.delete(url, data)
+        self.assertEqual(response.status_code, 204)
 
     def _read_indexes_form(self, response):
         """
@@ -261,3 +423,14 @@ class MDTUI(TestCase):
             else:
                 post_doc_dict[key] = value
         return post_doc_dict
+
+    def _retrieve_redirect_response_url(self, response):
+        """
+        helper parses 302 response object.
+        Returns redirect url, parsed by regex.
+        """
+        self.assertEqual(response.status_code, 302)
+        new_url = re.search("(?P<url>https?://[^\s]+)", str(response)).group("url")
+        return new_url
+
+
