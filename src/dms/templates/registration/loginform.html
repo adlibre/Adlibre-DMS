@@ -3,7 +3,8 @@
 <div id="login">
 <form action="{% url django.contrib.auth.views.login %}" method="post" id="login-form">
 
-{% csrf_token %}
+    {% csrf_token %}
+    <p>{{ form.non_field_errors }}</p>
 
 {% if not DEMO %}
     <dl class="line">
@@ -24,7 +25,6 @@
     </script>
 
 {% else %}
-
     <dl class="line">
         <dt><label for="id_username">{% trans 'Username' %}</label></dt>
         <dd><input id="id_username" name="username" type="text" value="admin" class="input" /></dd>
@@ -37,7 +37,7 @@
     <div class="buttons">
         <input name="" type="submit" value="Try Demo Now" class="submit" />
     </div>
-
 {% endif %}
+    <input type="hidden" name="next" value="{{ next }}" />
 </form>
 </div>
