@@ -165,6 +165,7 @@ label {
 	
 	/* Login */
 	#login{
+        color: white;
 		padding:10px 15px;
 		width:288px;
 		background-color:#3D4143;
