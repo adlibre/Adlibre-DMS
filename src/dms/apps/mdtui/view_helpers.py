@@ -36,6 +36,7 @@ def initDocumentIndexForm(request):
                     form.setFields(fields)
         if request.POST:
             form.setData(request.POST)
+            form.validation_ok()
         return form
 
 def processDocumentIndexForm(request):

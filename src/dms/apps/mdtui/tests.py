@@ -83,7 +83,7 @@ class MDTUI(TestCase):
         # We-re using only logged in client in this test
         self.client.login(username=username, password=password)
 
-    def _test_00_setup_initial(self):
+    def test_00_setup_initial(self):
         """
         Setup for those test suite. Made like standalone test because we need it to be run only once
         """

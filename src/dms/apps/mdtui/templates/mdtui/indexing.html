@@ -131,10 +131,10 @@
                 {%  if not field.name = "date" %}
                 <div class="control-group">
                     {%  if field.errors %}
-                    {%  for error in field.errors %}
+                    {%  for message in field.errors.messages %}
                     <div class="alert alert-error">
                         <a class="close">×</a>
-                        <strong>{{ error }}</strong>
+                        <strong>{{ message }}</strong>
                     </div>
                     {%  endfor %}
                     {%  endif %}
@@ -147,10 +147,10 @@
                 {%  else %}
                 <div class="control-group">
                     {%  if field.errors %}
-                    {%  for error in field.errors %}
+                    {%  for message in field.errors.messages %}
                     <div class="alert alert-error">
                         <a class="close">×</a>
-                        <strong>{{ error }}</strong>
+                        <strong>{{ message }}</strong>
                     </div>
                     {%  endfor %}
                     {%  endif %}

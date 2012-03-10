@@ -152,6 +152,7 @@ def indexing(request, step=None, template='mdtui/indexing.html'):
     if request.POST:
         if step == "1":
             form = DocumentTypeSelectForm(request.POST)
+
             # TODO: needs proper validation
             if form.is_valid():
                 try:
@@ -170,8 +171,11 @@ def indexing(request, step=None, template='mdtui/indexing.html'):
                     step = str(int(step) + 1)
             else:
                 #going backwards
-                step = str(int(step)-1)
-            return HttpResponseRedirect(reverse('mdtui-index-' + step))
+                #step = str(int(step)-1)
+                form = initDocumentIndexForm(request)
+                print form.is_valid()
+                pass
+            #return HttpResponseRedirect(reverse('mdtui-index-' + step))
     else:
         if step == "1":
             # form initing with docrule set if it was done previous
@@ -237,6 +241,18 @@ def uploading(request, step=None, template='mdtui/indexing.html'):
             del request.session["document_keys_dict"]
     return render_to_response(template, context, context_instance=RequestContext(request))
 
+from parallell_keys import ParallelKeysManager
+
+def parallel_keys(request):
+    """
+    Returns parallel keys suggestions for autocomplete.
+    """
+    # Hardcoded for testing
+    key = u'Employee ID'
+    manager = ParallelKeysManager()
+    pkeys = manager.get_keys_for_docrule("2")
+    result = manager.get_parallel_keys_for_key(pkeys, key)
+    return HttpResponse(result)
 
 def barcode(request):
     return HttpResponse('Barcode Printing')

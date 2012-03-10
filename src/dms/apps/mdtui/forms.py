@@ -52,6 +52,17 @@ class DocumentIndexForm(forms.Form):
         for k in keys:
             self.data[k] = kwds[k]
 
+#    def clean(self):
+#        try:
+#            # do validation here
+#            pass
+#        except ValidationError, e:
+#            if blame_field:
+#            self._errors[blame_field] = e.messages
+#            else:
+#                raise e
+
+
     def validation_ok(self):
         """
         Form validation sequence overridden here.
@@ -60,31 +71,17 @@ class DocumentIndexForm(forms.Form):
         WARNING! if changing/adding form fields names please update validation accordingly
         """
         for field in self.fields:
-            #print 'NOT VALID ', field
             cur_field = self.fields[field]
             #print cur_field
             try:
                 cleaned_value = cur_field.validate(self.data[unicode(field)])
-#                if error:
-#                    self._errors += error
-                #print cleaned_value
             except Exception, e:
                 print e
-                #return False
-                pass
-#            try:
-#                field_data = cur_field.clean(field)
-#                print field_data
-#            except Exception, e:
-#                self._errors += {field: e}
+                # appending error to form errors
+                self.errors[field] = e
+                self._errors[field] = e
 
-        if not self.data["date"]:
+            # TODO: dynamic data (type based validation here)
+        if self.errors:
             return False
-#        if not self.data['docrule'] == u'':
         return True
-#        else:
-#            msg = u"You have forgotten to select Docrule in order to set a mapping"
-#
-#            if not self._errors: self._errors = {}
-#            self._errors["doccode"] = self.error_class([msg])
-#            return False
