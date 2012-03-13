@@ -43,12 +43,12 @@ class ParallelKeysManager(object):
                         temp_list = []
         return pkeys
 
-    def get_parallel_keys_for_key(self, pkeys_list, key):
+    def get_parallel_keys_for_key(self, pkeys_list, key_name):
         """
         Retrieves parallel keys for given key
         """
         for pkeys in pkeys_list:
             for db_field in pkeys:
-                if db_field[u'field_name'] == unicode(key):
+                if db_field[u'field_name'] == unicode(key_name):
                     return pkeys
         return None
