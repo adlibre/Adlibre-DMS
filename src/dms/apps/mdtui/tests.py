@@ -119,7 +119,7 @@ class MDTUI(TestCase):
         """
         MDTUI Displays Step 2 Properly (after proper call)
         """
-        url = reverse('mdtui-index-1')
+        url = reverse('mdtui-index-type')
         response = self.client.post(url, {'docrule': test_mdt_docrule_id})
         self.assertEqual(response.status_code, 302)
         new_url = self._retrieve_redirect_response_url(response)
@@ -134,11 +134,11 @@ class MDTUI(TestCase):
         Step 2. Indexing Form contains MDT fields required.
         """
         # Selecting Document Type Rule
-        url = reverse('mdtui-index-1')
+        url = reverse('mdtui-index-type')
         response = self.client.post(url, {'docrule': test_mdt_docrule_id})
         self.assertEqual(response.status_code, 302)
         # Checking Step 2 Form
-        url = reverse("mdtui-index-2")
+        url = reverse("mdtui-index-details")
         response = self.client.get(url)
         # contains Date field
         self.assertEqual(response.status_code, 200)
@@ -164,10 +164,10 @@ class MDTUI(TestCase):
         Posting to Indexing Step 3 returns proper data.
         """
         # Selecting Document Type Rule
-        url = reverse('mdtui-index-1')
+        url = reverse('mdtui-index-type')
         response = self.client.post(url, {'docrule': test_mdt_docrule_id})
         self.assertEqual(response.status_code, 302)
-        url = reverse("mdtui-index-2")
+        url = reverse("mdtui-index-details")
         # Getting indexes form and matching form Indexing Form fields names
         response = self.client.get(url)
         rows_dict = self._read_indexes_form(response)
@@ -193,7 +193,7 @@ class MDTUI(TestCase):
         """
         Indexing Page 3 without populating previous forms contains proper warnings.
         """
-        url = reverse("mdtui-index-3")
+        url = reverse("mdtui-index-source")
         response = self.client.get(url)
         self.assertContains(response, "You have not entered Document Indexing Data.")
 
@@ -202,18 +202,18 @@ class MDTUI(TestCase):
         Uploading File though MDTUI, adding all Secondary indexes accordingly.
         """
         # Selecting Document Type Rule
-        url = reverse('mdtui-index-1')
+        url = reverse('mdtui-index-type')
         response = self.client.post(url, {'docrule': test_mdt_docrule_id})
         self.assertEqual(response.status_code, 302)
         # Getting indexes form and matching form Indexing Form fields names
-        url = reverse('mdtui-index-2')
+        url = reverse('mdtui-index-details')
         response = self.client.get(url)
         rows_dict = self._read_indexes_form(response)
         post_dict = self._convert_doc_to_post_dict(rows_dict, doc1_dict)
         # Adding Document Indexes
         response = self.client.post(url, post_dict)
         self.assertEqual(response.status_code, 302)
-        url = reverse('mdtui-index-3')
+        url = reverse('mdtui-index-source')
         response = self.client.get(url)
         self.assertContains(response, 'Friends ID: 123')
         self.assertEqual(response.status_code, 200)
