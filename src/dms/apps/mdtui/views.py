@@ -238,7 +238,7 @@ def indexing_details(request, step=None, template='mdtui/indexing.html'):
         except KeyError:
             warnings.append(MDTUI_ERROR_STRINGS[1])
         form = initDocumentIndexForm(request)
-        #autocomplete_list = extract_secondary_keys_from_form(form)
+        autocomplete_list = extract_secondary_keys_from_form(form)
 
     try:
         document_keys = request.session["document_keys_dict"]

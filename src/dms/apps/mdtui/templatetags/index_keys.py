@@ -129,7 +129,7 @@ class ProvideIDForSecKey(template.Node):
             try:
                 for field_id, field in form.fields.iteritems():
                     try:
-                        print field.field_name
+                        #print field.field_name
                         if field.field_name == key_item:
                             return "#id_"+str(field_id)
                     except AttributeError:
