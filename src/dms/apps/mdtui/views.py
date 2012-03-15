@@ -140,7 +140,7 @@ def indexing(request, step=None, template='mdtui/indexing.html'):
     context = {}
     docrule = None
     document_keys = None
-    autocomplete_dict = {}
+    autocomplete_list = []
     warnings = []
     form = DocumentTypeSelectForm()
 
@@ -190,6 +190,7 @@ def indexing(request, step=None, template='mdtui/indexing.html'):
             except KeyError:
                 warnings.append(MDTUI_ERROR_STRINGS[1])
             form = initDocumentIndexForm(request)
+            autocomplete_list = exctract_secondary_keys_from_form(form)
 
     try:
         document_keys = request.session["document_keys_dict"]
@@ -199,7 +200,7 @@ def indexing(request, step=None, template='mdtui/indexing.html'):
     context.update( { 'step': step,
                       'form': form,
                       'document_keys': document_keys,
-                      'autocomplete_dict': autocomplete_dict,
+                      'autocomplete_fields': autocomplete_list,
                       'warnings': warnings,
                     })
     return render_to_response(template, context, context_instance=RequestContext(request))
