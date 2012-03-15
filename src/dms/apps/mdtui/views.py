@@ -283,7 +283,7 @@ def barcode(request):
     """
     return HttpResponse('Barcode Printing')
 
-def parallel_keys(request):
+def p_keys(request):
     """
     Returns parallel keys suggestions for autocomplete.
     """
