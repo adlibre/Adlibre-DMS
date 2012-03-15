@@ -278,7 +278,7 @@ def indexing_uploading(request, step=None, template='mdtui/indexing.html'):
                 return HttpResponseRedirect(reverse('mdtui-index-finished'))
             else:
                 # Fixme: dodgy error handling
-                return HttpResponse(request, "; ".join(map(lambda x: x[0], manager.errors)))
+                return HttpResponse(str(manager.errors))
 
     context.update( { 'step': step,
                       'form': form,
