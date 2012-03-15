@@ -119,7 +119,7 @@ def get_mdts_for_documents(documents):
         resp = indexes.keys()
     return resp
 
-def exctract_secondary_keys_from_form(form):
+def extract_secondary_keys_from_form(form):
     """
     Extracts secondary keys list from Indexes form.
     """
