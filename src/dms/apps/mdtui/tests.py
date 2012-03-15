@@ -77,7 +77,7 @@ doc1_dict = {
 doc1 = 'ADL-1111'
 
 
-# TODO: Expand this (espetially search). Need to add at least 1 more docs...
+# TODO: Expand this (especially search). Need to add at least 1 more docs...
 class MDTUI(TestCase):
     def setUp(self):
         # We-re using only logged in client in this test
