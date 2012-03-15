@@ -293,16 +293,18 @@
     {% if step == "4" %}
         <fieldset>
             <legend>Step {{ step }}: Thank you{# or print barcode if barcode required #}</legend>
-            <legend>Your document's indexing keys:</legend>
+
         </fieldset>
 
-        <br />
+        {% if document_keys %}
+        <p>Your document's indexing keys:</p>
 
         <ul class="metainfo">
             {% for item in document_keys %}
             <li>{%  get_key_li_item document_keys item %}</li>
             {% endfor %}
         </ul>
+        {% endif %}
         
         <p>Your document have just been indexed successfully! </p>
         <a class="btn btn-primary" href="{% url mdtui-index-1 %}">Start Again <i class="icon-chevron-right icon-white"></i></a>
@@ -344,33 +346,7 @@
 <script type="text/javascript">
 // autocomplete connecting
 	$(function() {
-		var availableTags = [
-			"ActionScript",
-			"AppleScript",
-			"Asp",
-			"BASIC",
-			"C",
-			"C++",
-			"Clojure",
-			"COBOL",
-			"ColdFusion",
-			"Erlang",
-			"Fortran",
-			"Groovy",
-			"Haskell",
-			"Java",
-			"JavaScript",
-			"Lisp",
-			"Perl",
-			"PHP",
-			"Python",
-			"Ruby",
-			"Scala",
-			"Scheme"
-		];
-		$( "#id_0" ).autocomplete({
-			source: availableTags
-		});
+    // TODO: Write Magic
 	});
 </script>
 {% endblock %}
