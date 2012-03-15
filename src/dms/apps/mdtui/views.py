@@ -239,7 +239,7 @@ def uploading(request, step=None, template='mdtui/indexing.html'):
             del request.session["document_keys_dict"]
     return render_to_response(template, context, context_instance=RequestContext(request))
 
-from parallell_keys import ParallelKeysManager
+from parallel_keys import ParallelKeysManager
 
 def parallel_keys(request):
     """
