@@ -1,5 +1,5 @@
 """
-Module: DMS Parallell Keys manager
+Module: DMS Parallel Keys manager
 Project: Adlibre DMS
 Copyright: Adlibre Pty Ltd 2012
 License: See LICENSE for license information
