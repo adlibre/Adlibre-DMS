@@ -104,3 +104,37 @@ class ProvideSecKey(template.Node):
             return value
         except template.VariableDoesNotExist:
             return ''
+
+@register.tag(name="get_form_id_for_key")
+def get_field_id_from_form_by_name(parser, token):
+    """
+    Returns Form #id for Secondary Key field provided. Uses Indexes form to retrieve dependency.
+    """
+    try:
+        # splitings args provided
+        tag_name, form, key_item = token.split_contents()
+    except ValueError:
+        raise template.TemplateSyntaxError("%r tag requires exactly 2 arguments" % token.contents.split()[0])
+    return ProvideIDForSecKey(form, key_item)
+
+class ProvideIDForSecKey(template.Node):
+    def __init__(self, form, key_item):
+        self.form = template.Variable(form)
+        self.key_item = template.Variable(key_item)
+
+    def render(self, context):
+        try:
+            key_item = self.key_item.resolve(context)
+            form = self.form.resolve(context)
+            try:
+                for field_id, field in form.fields.iteritems():
+                    try:
+                        print field.field_name
+                        if field.field_name == key_item:
+                            return "#id_"+str(field_id)
+                    except AttributeError:
+                        pass
+            except:
+                return ''
+        except template.VariableDoesNotExist:
+            return ''

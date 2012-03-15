@@ -140,6 +140,7 @@ def indexing(request, step=None, template='mdtui/indexing.html'):
     context = {}
     docrule = None
     document_keys = None
+    autocomplete_dict = {}
     warnings = []
     form = DocumentTypeSelectForm()
 
@@ -168,7 +169,8 @@ def indexing(request, step=None, template='mdtui/indexing.html'):
             secondary_indexes = processDocumentIndexForm(request)
             if secondary_indexes:
                     request.session["document_keys_dict"] = secondary_indexes
-                    step = str(int(step) + 1)
+                    #step = str(int(step) + 1)
+                    return HttpResponseRedirect(reverse('mdtui-index-3'))
             else:
                 # validation rendering...
                 form = initDocumentIndexForm(request)
@@ -186,7 +188,6 @@ def indexing(request, step=None, template='mdtui/indexing.html'):
             try:
                 docrule = request.session['docrule_id']
             except KeyError:
-                # This error only should appear if something breaks
                 warnings.append(MDTUI_ERROR_STRINGS[1])
             form = initDocumentIndexForm(request)
 
@@ -198,6 +199,7 @@ def indexing(request, step=None, template='mdtui/indexing.html'):
     context.update( { 'step': step,
                       'form': form,
                       'document_keys': document_keys,
+                      'autocomplete_dict': autocomplete_dict,
                       'warnings': warnings,
                     })
     return render_to_response(template, context, context_instance=RequestContext(request))
@@ -243,28 +245,40 @@ def parallel_keys(request):
     """
     Returns parallel keys suggestions for autocomplete.
     """
-    # Hardcoded for testing
+    valid_call = True
+    autocomplete_req = None
+    docrule_id = None
+    key_name = None
     resp = {}
-    docrule_id = "2"
-    key_name = u'Employee ID'
-    autocomplete_req = u'123'
-    manager = ParallelKeysManager()
-    mdts = manager.get_keys_for_docrule(docrule_id)
-    pkeys = manager.get_parallel_keys_for_key(mdts, key_name)
-    # db call to search in docs
-    # TODO: emit unique keys
-    # TODO: search only for this django user...
-    documents = CouchDocument.view(
-        'dmscouch/search_autocomplete',
-        startkey=[docrule_id, key_name, autocomplete_req],
-        endkey=[docrule_id, key_name, unicode(autocomplete_req)+u'\ufff0' ],
-        include_docs=True
-    )
-    for doc in documents:
-        for pkey  in pkeys:
-            resp[pkey['field_name']] = doc.mdt_indexes[pkey['field_name']]
-    print resp
-    return HttpResponse([resp,],)
+    try:
+        docrule_id = request.session['docrule_id']
+    except:
+        valid_call = False
+
+    try:
+        key_name = request.GET[u'key_name']
+        autocomplete_req = request.GET[u'autocomplete_search']
+    except:
+        valid_call = False
+
+    if valid_call:
+        manager = ParallelKeysManager()
+        mdts = manager.get_keys_for_docrule(docrule_id)
+        pkeys = manager.get_parallel_keys_for_key(mdts, key_name)
+        # db call to search in docs
+        # TODO: emit unique keys
+        # TODO: search only for this django user...
+        documents = CouchDocument.view(
+            'dmscouch/search_autocomplete',
+            startkey=[docrule_id, key_name, autocomplete_req],
+            endkey=[docrule_id, key_name, unicode(autocomplete_req)+u'\ufff0' ],
+            include_docs=True
+        )
+        for doc in documents:
+            for pkey  in pkeys:
+                resp[pkey['field_name']] = doc.mdt_indexes[pkey['field_name']]
+        print resp
+    return HttpResponse([resp,])
 
 def barcode(request):
     return HttpResponse('Barcode Printing')
