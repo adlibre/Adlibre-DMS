@@ -97,11 +97,11 @@ class DocumentManager(object):
             doc.set_mimetype(uploaded_file.content_type)
         if index_info:
             doc.set_db_info(index_info)
-        #process before storage plugins
+        # Process before storage plugins
         doc = self.process_pluginpoint(pluginpoints.BeforeStoragePluginPoint, request, document = doc)
-        #process storage plugins
+        # Process storage plugins
         self.process_pluginpoint(pluginpoints.StoragePluginPoint, request, document = doc)
-        #process DatabaseStorage plugins
+        # Process DatabaseStorage plugins
         doc = self.process_pluginpoint(pluginpoints.DatabaseStoragePluginPoint, request, document = doc)
         #mapping = self.get_plugin_mapping(doc)
         #for plugin in mapping.get_database_storage_plugins(): print 'Mapping has plugin: ', plugin
