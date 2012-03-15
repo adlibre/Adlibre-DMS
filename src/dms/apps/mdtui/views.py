@@ -262,21 +262,23 @@ def indexing_uploading(request, step=None, template='mdtui/indexing.html'):
     document_keys = None
     context = {}
     warnings = []
+
     try:
         document_keys = request.session["document_keys_dict"]
     except KeyError:
         warnings.append(MDTUI_ERROR_STRINGS[2])
+
     form = DocumentUploadForm(request.POST or None, request.FILES or None)
-    if step == "3":
-        if request.POST:
-            if form.is_valid():
-                manager = DocumentManager()
-                manager.store(request, form.files['file'], request.session["document_keys_dict"])
-                if not manager.errors:
-                    return HttpResponseRedirect(reverse('mdtui-index-finished'))
-                else:
-                    step = str(int(step) - 1)
-                    return HttpResponse(request, "; ".join(map(lambda x: x[0], manager.errors)))
+
+    if request.POST:
+        if form.is_valid():
+            manager = DocumentManager()
+            manager.store(request, form.files['file'], request.session["document_keys_dict"])
+            if not manager.errors:
+                return HttpResponseRedirect(reverse('mdtui-index-finished'))
+            else:
+                # Fixme: dodgy error handling
+                return HttpResponse(request, "; ".join(map(lambda x: x[0], manager.errors)))
 
     context.update( { 'step': step,
                       'form': form,
