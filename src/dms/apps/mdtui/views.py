@@ -270,13 +270,14 @@ def indexing_uploading(request, step=None, template='mdtui/indexing.html'):
     form = DocumentUploadForm(request.POST or None, request.FILES or None)
 
     if request.POST:
-        if form.is_valid():
+        if form.is_valid(): # Must've uploaded a file
             manager = DocumentManager()
-            manager.store(request, form.files['file'], request.session["document_keys_dict"])
+            # TODO: Set allocate_barcode=True
+            manager.store(request, form.files['file'], index_info=request.session["document_keys_dict"], allocate_barcode=False)
             if not manager.errors:
                 return HttpResponseRedirect(reverse('mdtui-index-finished'))
             else:
-                # Fixme: dodgy error handling
+                # FIXME: dodgy error handling
                 return HttpResponse(str(manager.errors))
 
     context.update( { 'step': step,

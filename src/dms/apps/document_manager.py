@@ -84,7 +84,7 @@ class DocumentManager(object):
                 break
         return document
 
-    def store(self, request, uploaded_file, index_info=None):
+    def store(self, request, uploaded_file, index_info=None, allocate_barcode=False):
         """
         Process all storage plugins
         uploaded file is http://docs.djangoproject.com/en/1.3/topics/http/file-uploads/#django.core.files.uploadedfile.UploadedFile
@@ -92,7 +92,14 @@ class DocumentManager(object):
         """
         doc = Document()
         doc.set_file_obj(uploaded_file)
-        doc.set_filename(os.path.basename(uploaded_file.name))
+        if allocate_barcode:
+            # TODO: Complete me
+            # obj = DocumentTypeRule.objects.get(doccode_id=doccode_id)
+            # barcode = obj.generate_document_barcode()
+            # doc.set_filename(barcode)
+            raise Exception # Not implemented
+        else:
+            doc.set_filename(os.path.basename(uploaded_file.name))
         if hasattr(uploaded_file, 'content_type'):
             doc.set_mimetype(uploaded_file.content_type)
         if index_info:
