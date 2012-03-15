@@ -1,6 +1,10 @@
 {% extends 'site_base.html' %}
 {% load i18n %}
 
+{% block theme_css %}
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}theme/{{ THEME_NAME }}/style.css" />
+{% endblock %}
+
 {% block logo %}{% endblock %}
 
 {% block header %}

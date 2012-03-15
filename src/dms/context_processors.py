@@ -5,11 +5,14 @@ Copyright: Adlibre Pty Ltd 2012
 License: See LICENSE for license information
 """
 
+import os
+
 from django.conf import settings
 
 def theme_template_base(context):
     """ Returns Global Theme Base Template """
-    return {'THEME_TEMPLATE': settings.THEME_NAME+'_theme_base.html'}
+    template_path = os.path.join(settings.THEME_NAME, 'theme.html')
+    return {'THEME_TEMPLATE': template_path}
 
 def theme_name(context):
     """ Returns Global Theme Name """
