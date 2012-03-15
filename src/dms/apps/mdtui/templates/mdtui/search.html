@@ -212,7 +212,7 @@
             <tbody>
             {% for doc in documents %}
                 <tr>
-                    <td><a href="{#{% url mdtui-search-view doc.id %}#}{% url api_file %}?filename={{ doc.id }}" title="View Document"><i class="icon-download"></i> {{ doc.id }}</a></td>
+                    <td><a href="{% url mdtui-search-view doc.id %}" title="View Document"><i class="icon-download"></i> {{ doc.id }}</a></td>
                     <td>{{ doc.metadata_created_date|date:"Y-m-d" }}</td>
                     
                     {% for key in mdts %}
@@ -228,6 +228,7 @@
         </table>
 
         <hr />
+        <p>{# TODO: show number of results fount #} Showing 50 of 1,232,300 results matching query.</p>
         {# Let's use pagination like this #}
         <div class="pagination">
             <ul>
