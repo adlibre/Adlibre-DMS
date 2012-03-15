@@ -18,7 +18,7 @@ from doc_codes.models import DocumentTypeRuleManagerInstance
 
 class Document(object):
     """
-        Uploaded file is http://docs.djangoproject.com/en/1.3/topics/http/file-uploads/#django.core.files.uploadedfile.UploadedFile
+    DMS core Document Object
     """
     def __init__(self):
         self.options = {}
