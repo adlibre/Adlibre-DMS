@@ -73,9 +73,6 @@ def search_options(request, step, template='mdtui/search.html'):
     try:
         del form.fields["description"]
     except: pass
-    try:
-        del form.base_fields["description"]
-    except: pass
 
     if request.POST:
         secondary_indexes = processDocumentIndexForm(request)
