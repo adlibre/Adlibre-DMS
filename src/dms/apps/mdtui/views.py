@@ -7,16 +7,15 @@ License: See LICENSE for license information
 
 from django.core.urlresolvers import reverse, resolve
 from django.http import HttpResponse
-from django.shortcuts import render_to_response, HttpResponseRedirect, get_object_or_404
+from django.shortcuts import render, render_to_response, HttpResponseRedirect, get_object_or_404
 from django.template import RequestContext, loader
 from django.contrib.auth.decorators import login_required
 
 from dmscouch.models import CouchDocument
-
 from forms import DocumentTypeSelectForm, DocumentUploadForm
-
 from document_manager import DocumentManager
 from view_helpers import *
+from parallel_keys import ParallelKeysManager
 
 
 MDTUI_ERROR_STRINGS = {
@@ -26,8 +25,12 @@ MDTUI_ERROR_STRINGS = {
     4:'You have not defined Document Type Rule. Can only search by "Creation Date".',
 }
 
+
 @login_required
 def search_type(request, step, template='mdtui/search.html'):
+    """
+    Search Step 1: Select Search Type
+    """
     docrule = None
     form = DocumentTypeSelectForm(request.POST or None)
     if request.POST:
@@ -53,8 +56,12 @@ def search_type(request, step, template='mdtui/search.html'):
                }
     return render_to_response(template, context, context_instance=RequestContext(request))
 
+
 @login_required
 def search_options(request, step, template='mdtui/search.html'):
+    """
+    Search Step 2: Search Options
+    """
     warnings = []
     try:
         docrule = request.session["docrule"]
@@ -86,8 +93,12 @@ def search_options(request, step, template='mdtui/search.html'):
                }
     return render_to_response(template, context, context_instance=RequestContext(request))
 
+
 @login_required
 def search_results(request, step=None, template='mdtui/search.html'):
+    """
+    Search Step 3: Search Results
+    """
     document_keys = None
     docrule_id = None
     documents = None
@@ -126,8 +137,12 @@ def search_results(request, step=None, template='mdtui/search.html'):
                 }
     return render_to_response(template, context, context_instance=RequestContext(request))
 
+
 @login_required
 def search_viewer(request, code, step, template='mdtui/search.html'):
+    """
+   Search Step 4: View Document
+    """
     context = { 'step': step,
                 'code': code,
                 }
@@ -136,6 +151,9 @@ def search_viewer(request, code, step, template='mdtui/search.html'):
 
 @login_required
 def indexing(request, step=None, template='mdtui/indexing.html'):
+    """
+    Indexing: Step 1 & 2
+    """
     # Context init
     context = {}
     docrule = None
@@ -190,7 +208,7 @@ def indexing(request, step=None, template='mdtui/indexing.html'):
             except KeyError:
                 warnings.append(MDTUI_ERROR_STRINGS[1])
             form = initDocumentIndexForm(request)
-            autocomplete_list = exctract_secondary_keys_from_form(form)
+            #autocomplete_list = exctract_secondary_keys_from_form(form)
 
     try:
         document_keys = request.session["document_keys_dict"]
@@ -205,8 +223,12 @@ def indexing(request, step=None, template='mdtui/indexing.html'):
                     })
     return render_to_response(template, context, context_instance=RequestContext(request))
 
+
 @login_required
 def uploading(request, step=None, template='mdtui/indexing.html'):
+    """
+    Indexing: Step 3: Upload File / Associate File / Print Barcode
+    """
     document_keys = None
     context = {}
     warnings = []
@@ -221,7 +243,7 @@ def uploading(request, step=None, template='mdtui/indexing.html'):
                 manager = DocumentManager()
                 manager.store(request, form.files['file'], request.session["document_keys_dict"])
                 if not manager.errors:
-                    step = str(int(step) + 1)
+                    return HttpResponseRedirect(reverse('mdtui-index-finished'))
                 else:
                     step = str(int(step) - 1)
                     return HttpResponse(request, "; ".join(map(lambda x: x[0], manager.errors)))
@@ -231,16 +253,35 @@ def uploading(request, step=None, template='mdtui/indexing.html'):
                       'document_keys': document_keys,
                       'warnings': warnings,
                     })
-    if step == "4":
-        if request.POST:
-            # document uploaded forget everything
-            request.session["document_keys_dict"] = None
-            request.session['docrule_id'] = None
-            del request.session['docrule_id']
-            del request.session["document_keys_dict"]
+
     return render_to_response(template, context, context_instance=RequestContext(request))
 
-from parallel_keys import ParallelKeysManager
+
+def finished(request, step=None, template='mdtui/indexing.html'):
+    """
+    Indexing: Step 4: Finished
+    """
+    context = { 'step': step,  }
+
+    try:
+        context.update({'document_keys':request.session["document_keys_dict"],})
+    except KeyError:
+        pass
+
+    # document uploaded forget everything
+    request.session["document_keys_dict"] = None
+    request.session['docrule_id'] = None
+    del request.session['docrule_id']
+    del request.session["document_keys_dict"]
+
+    return render(request, template, context)
+
+
+def barcode(request):
+    """
+    Indexing: Step X: Print Barcode
+    """
+    return HttpResponse('Barcode Printing')
 
 def parallel_keys(request):
     """
@@ -281,8 +322,7 @@ def parallel_keys(request):
         print resp
     return HttpResponse([resp,])
 
-def barcode(request):
-    return HttpResponse('Barcode Printing')
+
 
 
 

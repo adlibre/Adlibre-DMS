@@ -13,7 +13,7 @@
         <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 2: Index Details &rarr;</a></li>
         {% url mdtui-index-3 as url %}
         <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 3: Select Source &rarr;</a></li>
-        {% url mdtui-index-4 as url %}
+        {% url mdtui-index-finished as url %}
         <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 4: Finish &rarr;</a></li>
     </ul>
     {% endif %}
