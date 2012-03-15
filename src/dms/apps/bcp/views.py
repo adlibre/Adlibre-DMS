@@ -86,6 +86,7 @@ def generate_elephe(request, code, barcode_type='code39',):
      Returns a PDF Barcode.
      NB, Barcode generation with Elephe is somewhat unreliable. This code is kept here incase it is required in future
      otherwise we'll use the report lab method above
+     TODO: Remove this code after we've decided it's not required
     """
     # NB FIXME: Same error? http://code.google.com/p/elaphe/issues/detail?id=9
 
