@@ -221,7 +221,10 @@ class MDTUI(TestCase):
         file = os.path.join(settings.FIXTURE_DIRS[0], 'testdata', doc1+'.pdf')
         data = { 'file': open(file, 'r'), 'filename':doc1}
         response = self.client.post(url, data)
-        self.assertEqual(response.status_code, 200)
+        # Follow Redirect
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
         self.assertContains(response, 'Your document have just been indexed successfully!')
         self.assertContains(response, 'Friends Name: Andrew')
         self.assertContains(response, 'Start Again')
@@ -229,7 +232,7 @@ class MDTUI(TestCase):
     def test_08_metadata_exists_for_uploaded_documents(self):
         """
         Document now exists in couchDB
-        Querring Couchdb itself to test docs exist.
+        Querying CouchDB itself to test docs exist.
         """
         url = couchdb_url + '/dmscouch/'+doc1+'?revs_info=true'
         # HACK: faking 'request' object here
@@ -241,7 +244,7 @@ class MDTUI(TestCase):
         self.assertContains(r, 'ADL-1111')
         self.assertContains(r, 'Iurii Garmash')
 
-    def test_09_searh_works(self):
+    def test_09_search_works(self):
         """
         Testing Search part opens.
         """
@@ -251,7 +254,7 @@ class MDTUI(TestCase):
         self.assertContains(response, 'Document Search')
         self.assertEqual(response.status_code, 200)
 
-    def test_10_searh_indexes_warning(self):
+    def test_10_search_indexes_warning(self):
         """
         Testing Search part Warning for indexes.
         """
@@ -260,7 +263,7 @@ class MDTUI(TestCase):
         self.assertContains(response, 'You have not defined Document Type Rule')
         self.assertEqual(response.status_code, 200)
 
-    def test_11_searh_results_warning(self):
+    def test_11_search_results_warning(self):
         """
         Testing Search part  warning for results.
         """
