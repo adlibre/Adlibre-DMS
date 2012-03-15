@@ -69,10 +69,12 @@ def search_options(request, step, template='mdtui/search.html'):
         warnings.append(MDTUI_ERROR_STRINGS[4])
 
     form = initDocumentIndexForm(request)
-    # excluding description from search form
+
     try:
+        # Exclude description from search form, because we can't yet search on it.
         del form.fields["description"]
-    except: pass
+    except KeyError:
+        pass
 
     if request.POST:
         secondary_indexes = processDocumentIndexForm(request)

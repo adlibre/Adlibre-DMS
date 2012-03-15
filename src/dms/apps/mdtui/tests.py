@@ -354,6 +354,7 @@ class MDTUI(TestCase):
         # no errors appeared
         self.assertNotContains(response, "You have not defined Document Searching Options")
         # document found
+        print "FIXME: This test broken. Due to bug uncovered with commit #464"
         self.assertContains(response, doc1)
         self.assertContains(response, doc1_dict['description'])
         # context processors provide docrule name
