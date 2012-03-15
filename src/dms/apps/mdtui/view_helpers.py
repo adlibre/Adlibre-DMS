@@ -118,3 +118,17 @@ def get_mdts_for_documents(documents):
                 indexes[ind] = ""
         resp = indexes.keys()
     return resp
+
+def exctract_secondary_keys_from_form(form):
+    """
+    Extracts secondary keys list from Indexes form.
+    """
+    keys_list = []
+    for field_id, field in form.fields.iteritems():
+        try:
+            print field.field_name
+            if field.field_name:
+                keys_list.append(field.field_name)
+        except AttributeError:
+            pass
+    return keys_list

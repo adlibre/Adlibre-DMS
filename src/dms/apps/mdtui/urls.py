@@ -24,5 +24,5 @@ urlpatterns = patterns('mdtui.views',
     url(r'^indexing/4$', 'finished', {'step':'4',}, name='mdtui-index-finished'),
     url(r'^indexing/5$', 'barcode', {'step':'5',}, name='mdtui-index-5'),
 
-    url(r'^parallel/$', 'parallel_keys', name='parallel'),
+    url(r'^parallel/$', 'p_keys', name='parallel'),
 )
