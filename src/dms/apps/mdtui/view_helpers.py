@@ -39,27 +39,33 @@ def initDocumentIndexForm(request):
             form.validation_ok()
         return form
 
+
 def processDocumentIndexForm(request):
         form = initDocumentIndexForm(request)
         secondary_indexes = {}
         search = None
         try:
             search = request.session["docrule"]
-        except Exception:
+        except KeyError:
             pass
         if form.validation_ok() or search:
             for key, field in form.fields.iteritems():
+                # FIXME: Nested exceptions.. bad
                 try:
-                    # for dynamical form fields
+                    # For dynamic form fields
                     secondary_indexes[field.field_name] = form.data[unicode(key)]
-                except Exception:
-                    # for native form fields
-                    secondary_indexes[key] = form.data[unicode(key)]
-            #print secondary_indexes
+                except (AttributeError, KeyError):
+                    try:
+                        # For native form fields
+                        secondary_indexes[key] = form.data[unicode(key)]
+                    except KeyError:
+                        pass
+
             if secondary_indexes:
                 return secondary_indexes
             else:
                 return None
+
 
 def convert_search_res(search_res, match_len):
     docs_list = {}
@@ -74,6 +80,7 @@ def convert_search_res(search_res, match_len):
             matched_docs.append(doc_id)
     return matched_docs
 
+
 def convert_to_search_keys(document_keys, docrule_id):
     req_params = []
     for key, value in document_keys.iteritems():
@@ -83,6 +90,7 @@ def convert_to_search_keys(document_keys, docrule_id):
             else:
                 req_params.append([key, value, docrule_id, str_date_to_couch(document_keys["date"])],)
     return req_params
+
 
 def cleanup_document_keys(document_keys):
     # cleaning up key/value pairs that have empty values from couchdb search request
@@ -94,6 +102,7 @@ def cleanup_document_keys(document_keys):
         del document_keys[key]
     return document_keys
 
+
 def str_date_to_couch(from_date):
     """
     Converts date from form date widget generated format, like '2012-03-02'
@@ -104,6 +113,7 @@ def str_date_to_couch(from_date):
 #    date = datetime.datetime.strptime(from_date, "%Y-%m-%d")
 #    couch_date = datetime.datetime.now()
     return couch_date
+
 
 def get_mdts_for_documents(documents):
     """
@@ -118,6 +128,7 @@ def get_mdts_for_documents(documents):
                 indexes[ind] = ""
         resp = indexes.keys()
     return resp
+
 
 def extract_secondary_keys_from_form(form):
     """
