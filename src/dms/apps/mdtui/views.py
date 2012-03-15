@@ -150,9 +150,9 @@ def search_viewer(request, code, step, template='mdtui/search.html'):
 
 
 @login_required
-def indexing(request, step=None, template='mdtui/indexing.html'):
+def indexing_select_type(request, step=None, template='mdtui/indexing.html'):
     """
-    Indexing: Step 1 & 2
+    Indexing: Step 1 : Select Document Type
     """
     # Context init
     context = {}
@@ -160,55 +160,85 @@ def indexing(request, step=None, template='mdtui/indexing.html'):
     document_keys = None
     autocomplete_list = []
     warnings = []
-    form = DocumentTypeSelectForm()
+    form = DocumentTypeSelectForm(request.POST or None)
 
     try:
         # search done. Cleaning up session for indexing to avoid collisions in functions
         del request.session["document_search_dict"]
         del request.session['docrule']
-    except: pass
+    except KeyError:
+        pass
+
+    if request.POST:
+
+        # TODO: needs proper validation
+        if form.is_valid():
+            try:
+                docrule = form.data["docrule"]
+            except:
+                return HttpResponse(MDTUI_ERROR_STRINGS[1])
+            request.session['current_step'] = step
+            request.session['docrule_id'] = docrule
+            return HttpResponseRedirect(reverse('mdtui-index-2'))
+    else:
+        # form initing with docrule set if it was done previous
+        try:
+            docrule = request.session["docrule_id"]
+        except:
+            pass
+        form = DocumentTypeSelectForm()
+        if docrule:
+            form = DocumentTypeSelectForm({'docrule': docrule})
+
+    try:
+        document_keys = request.session["document_keys_dict"]
+    except KeyError:
+        pass
+
+    context.update( { 'step': step,
+                      'form': form,
+                      'document_keys': document_keys,
+                      'autocomplete_fields': autocomplete_list,
+                      'warnings': warnings,
+                      })
+    return render_to_response(template, context, context_instance=RequestContext(request))
+
+
+@login_required
+def indexing_details(request, step=None, template='mdtui/indexing.html'):
+    """
+    Indexing: Step 2 : Index Details
+    """
+    # Context init
+    context = {}
+    docrule = None
+    document_keys = None
+    autocomplete_list = []
+    warnings = []
+
+    try:
+        # search done. Cleaning up session for indexing to avoid collisions in functions
+        del request.session["document_search_dict"]
+        del request.session['docrule']
+    except KeyError:
+        pass
+
     # Hack to make the navigation work for testing the templates
     if request.POST:
-        if step == "1":
-            form = DocumentTypeSelectForm(request.POST)
-
-            # TODO: needs proper validation
-            if form.is_valid():
-                try:
-                    docrule = form.data["docrule"]
-                except:
-                    return HttpResponse(MDTUI_ERROR_STRINGS[1])
-                request.session['current_step'] = step
-                request.session['docrule_id'] = docrule
-                step = str(int(step) + 1)
-                return HttpResponseRedirect(reverse('mdtui-index-' + step))
-            # else: return form on current step with errors
-        if step == "2":
-            secondary_indexes = processDocumentIndexForm(request)
-            if secondary_indexes:
-                    request.session["document_keys_dict"] = secondary_indexes
-                    #step = str(int(step) + 1)
-                    return HttpResponseRedirect(reverse('mdtui-index-3'))
-            else:
-                # validation rendering...
-                form = initDocumentIndexForm(request)
-    else:
-        if step == "1":
-            # form initing with docrule set if it was done previous
-            try:
-                docrule = request.session["docrule_id"]
-            except:
-                pass
-            form = DocumentTypeSelectForm()
-            if docrule:
-                form = DocumentTypeSelectForm({'docrule': docrule})
-        if step == "2":
-            try:
-                docrule = request.session['docrule_id']
-            except KeyError:
-                warnings.append(MDTUI_ERROR_STRINGS[1])
+        secondary_indexes = processDocumentIndexForm(request)
+        if secondary_indexes:
+                request.session["document_keys_dict"] = secondary_indexes
+                return HttpResponseRedirect(reverse('mdtui-index-3'))
+        else:
+            # validation rendering...
             form = initDocumentIndexForm(request)
-            #autocomplete_list = exctract_secondary_keys_from_form(form)
+    else:
+        try:
+            docrule = request.session['docrule_id']
+        except KeyError:
+            warnings.append(MDTUI_ERROR_STRINGS[1])
+        form = initDocumentIndexForm(request)
+        #autocomplete_list = extract_secondary_keys_from_form(form)
 
     try:
         document_keys = request.session["document_keys_dict"]
@@ -225,7 +255,7 @@ def indexing(request, step=None, template='mdtui/indexing.html'):
 
 
 @login_required
-def uploading(request, step=None, template='mdtui/indexing.html'):
+def indexing_uploading(request, step=None, template='mdtui/indexing.html'):
     """
     Indexing: Step 3: Upload File / Associate File / Print Barcode
     """
@@ -257,7 +287,7 @@ def uploading(request, step=None, template='mdtui/indexing.html'):
     return render_to_response(template, context, context_instance=RequestContext(request))
 
 
-def finished(request, step=None, template='mdtui/indexing.html'):
+def indexing_finished(request, step=None, template='mdtui/indexing.html'):
     """
     Indexing: Step 4: Finished
     """
@@ -277,15 +307,16 @@ def finished(request, step=None, template='mdtui/indexing.html'):
     return render(request, template, context)
 
 
-def barcode(request):
+def indexing_barcode(request):
     """
     Indexing: Step X: Print Barcode
     """
     return HttpResponse('Barcode Printing')
 
-def p_keys(request):
+def mdt_parallel_keys(request):
     """
     Returns parallel keys suggestions for autocomplete.
+    NB, Don't rename this to parallel_keys. It conflicts with imported lib of same name.
     """
     valid_call = True
     autocomplete_req = None
