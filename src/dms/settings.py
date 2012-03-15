@@ -177,6 +177,10 @@ INSTALLED_APPS = (
     'ui',
     'mdtui',
     'bcp',
+    # DMS Themes
+    'theme.adlibre',
+    'theme.basic',
+    'theme.solid',
 )
 
 # A sample logging configuration. The only tangible logging

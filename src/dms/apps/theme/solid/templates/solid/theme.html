@@ -1,8 +1,12 @@
 {% extends 'site_base.html' %}
 {% load i18n %}
 
+{% block theme_css %}
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}theme/{{ THEME_NAME }}/style.css" />
+{% endblock %}
+
 {% block logo %}
-    <a href="/"><img src="{{ MEDIA_URL }}themes/solid/adlibre-dms-logo.png" title="{% trans 'Adlibre DMS' %}" alt="{% trans 'Adlibre DMS' %}" /></a>
+    <a href="/"><img src="{{ STATIC_URL }}theme/{{ THEME_NAME }}/adlibre-dms-logo.png" title="{% trans 'Adlibre DMS' %}" alt="{% trans 'Adlibre DMS' %}" /></a>
 {% endblock %}
 
 {% block header %}
@@ -13,8 +17,10 @@
                 <li class="files"><a href="{% url files_index %}">{% trans 'Files' %}</a></li>
                 <li class="settings"><a href="{% url setting %}">{% trans 'Settings' %}</a></li>
                 <li class="plugins"><a href="{% url plugins %}">{% trans 'Plugins' %}</a></li>
+                <li class="ui"><a href="{% url ui_rule_list %}">{% trans 'Admin UI' %}</a></li>
             {% endif %}
             {% if user.is_authenticated %}
+                <li class="mdtui"><a href="{% url mdtui-home %}">{% trans 'MDTUI' %}</a></li>
                 <li class="logout"><a href="{% url logout %}">{% trans 'Log out' %}</a></li>
             {% else %}
                 <li class="login"><a href="{% url login %}">{% trans 'Log in' %}</a></li>
