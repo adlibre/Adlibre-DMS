@@ -315,6 +315,8 @@ def indexing_barcode(request):
     """
     return HttpResponse('Barcode Printing')
 
+import json
+
 def mdt_parallel_keys(request):
     """
     Returns parallel keys suggestions for autocomplete.
@@ -324,16 +326,17 @@ def mdt_parallel_keys(request):
     autocomplete_req = None
     docrule_id = None
     key_name = None
-    resp = {}
+    resp = []
+
     try:
         docrule_id = request.session['docrule_id']
     except:
         valid_call = False
 
     try:
-        key_name = request.GET[u'key_name']
-        autocomplete_req = request.GET[u'autocomplete_search']
-    except:
+        key_name = request.POST[u'key_name']
+        autocomplete_req = request.POST[u'autocomplete_search']
+    except KeyError:
         valid_call = False
 
     if valid_call:
@@ -350,10 +353,12 @@ def mdt_parallel_keys(request):
             include_docs=True
         )
         for doc in documents:
+            resp_array = {}
             for pkey  in pkeys:
-                resp[pkey['field_name']] = doc.mdt_indexes[pkey['field_name']]
-        print resp
-    return HttpResponse([resp,])
+                resp_array[pkey['field_name']] = doc.mdt_indexes[pkey['field_name']]
+            resp.append(json.dumps(resp_array))
+    #print resp
+    return HttpResponse(json.dumps(resp))
 
 
 

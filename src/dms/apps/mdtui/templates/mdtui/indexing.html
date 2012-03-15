@@ -178,10 +178,6 @@
                 <button type="submit" class="btn btn-primary">Continue <i class="icon-chevron-right icon-white"></i></button>
             </div>
         </form>
-
-
-
-
     {% endif %} {# end step 2 #}
 
 
@@ -344,9 +340,50 @@
 
 {% block js_extra %}
 <script type="text/javascript">
-// autocomplete connecting
-	$(function() {
-    // TODO: Write Magic
-	});
+{% if step == "2" %}
+    // adding manual browser autocomplete disabling
+    {% for document_key in autocomplete_fields %}
+    $( "{% get_form_id_for_key form document_key %}" ).attr('autocomplete', 'off');
+    {% endfor %}
+    // autocomplete connecting
+
+    // TODO: delete after reading... ;)
+    // bootstrap typehead used from https://gist.github.com/2030277
+    // idea from here https://gist.github.com/1866577 
+    {% for document_key in autocomplete_fields %}
+        {% if document_key != "data" or document_key != "description" %}
+        // autocomplete for field {{ document_key }}
+            $(function() {
+                $( "{% get_form_id_for_key form document_key %}" ).typeahead({
+                    source: function get_data(typeahead, query) {
+                         var return_list = []
+                         return_list = $.post(
+                                '{% url mdtui-parallel-keys %}',
+                                {
+                                    key_name: "{{ document_key }}",
+                                    autocomplete_search: query,
+                                // csrf fixing
+                                    csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').attr("value")
+                                },
+                                function (data) {
+                                    return typeahead.process(JSON.parse($.makeArray( data )));
+                                });
+                        return return_list;
+                    },
+                    onselect: function(obj) { populate_indexes_form(obj); },
+                    autoselect: false
+                });
+        });
+        {% endif %}
+    {% endfor %}
+    // form populating
+    function populate_indexes_form(array) {
+        var fields_data = JSON.parse(array);
+        for (var item in fields_data) {
+            // update corresponding form element
+            $('label.control-label:contains('+item+')').parent().find(':input').val(fields_data[item]);
+        };// for
+    } // function
+{% endif %} {# end step 2 #}
 </script>
 {% endblock %}
