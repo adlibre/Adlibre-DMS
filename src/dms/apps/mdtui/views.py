@@ -179,7 +179,7 @@ def indexing_select_type(request, step=None, template='mdtui/indexing.html'):
                 return HttpResponse(MDTUI_ERROR_STRINGS[1])
             request.session['current_step'] = step
             request.session['docrule_id'] = docrule
-            return HttpResponseRedirect(reverse('mdtui-index-2'))
+            return HttpResponseRedirect(reverse('mdtui-index-details'))
     else:
         # form initing with docrule set if it was done previous
         try:
@@ -228,7 +228,7 @@ def indexing_details(request, step=None, template='mdtui/indexing.html'):
         secondary_indexes = processDocumentIndexForm(request)
         if secondary_indexes:
                 request.session["document_keys_dict"] = secondary_indexes
-                return HttpResponseRedirect(reverse('mdtui-index-3'))
+                return HttpResponseRedirect(reverse('mdtui-index-source'))
         else:
             # validation rendering...
             form = initDocumentIndexForm(request)

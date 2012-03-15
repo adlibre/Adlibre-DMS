@@ -7,14 +7,14 @@
     {% if step != None %}
     {# Use this for a progress / step indicator / navigation #}
     <ul class="pager x-progress-tracker">
-        {% url mdtui-index-1 as url %}
+        {% url mdtui-index-type as url %}
         <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 1: Select Type &rarr;</a></li>
-        {% url mdtui-index-2 as url %}
+        {% url mdtui-index-details as url %}
         <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 2: Index Details &rarr;</a></li>
-        {% url mdtui-index-3 as url %}
+        {% url mdtui-index-source as url %}
         <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 3: Select Source &rarr;</a></li>
         {% url mdtui-index-finished as url %}
-        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 4: Finish &rarr;</a></li>
+        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 4: Finish</a></li>
     </ul>
     {% endif %}
 
@@ -30,7 +30,7 @@
 
     {% if step == None %} {# This step will no long be visible #}
     <p>This is where it begins...</p>
-    <a class="btn btn-primary btn-large" href="{% url mdtui-index-1 %}">Start <i class="icon-chevron-right icon-white"></i></a>
+    <a class="btn btn-primary btn-large" href="{% url mdtui-index-type %}">Start <i class="icon-chevron-right icon-white"></i></a>
     {% endif %}
 
     {% if step == "1" %}
@@ -307,7 +307,7 @@
         {% endif %}
         
         <p>Your document have just been indexed successfully! </p>
-        <a class="btn btn-primary" href="{% url mdtui-index-1 %}">Start Again <i class="icon-chevron-right icon-white"></i></a>
+        <a class="btn btn-primary" href="{% url mdtui-index %}">Start Again <i class="icon-chevron-right icon-white"></i></a>
         {%  comment %}
         <form class="form-horizontal" action="{{ request.path }}" method="post">
             {% csrf_token %}
