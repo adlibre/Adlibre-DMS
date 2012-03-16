@@ -165,6 +165,7 @@
         if (!that.strings)
             item = item[that.options.property]
         i.find('a').html(that.highlighter(item))
+        i.find('a').html(json_represent(i[0].textContent))
         return i[0]
       })
 
@@ -324,5 +325,9 @@
       $this.typeahead($this.data())
     })
   })
+
+   function json_represent(item) {
+          return item.replace(/[\{\}"]/g, "")
+      }
 
 }( window.jQuery );
