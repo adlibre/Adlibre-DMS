@@ -1,5 +1,5 @@
 """
-Module: DMS CocuhDB Plugin
+Module: DMS CouchDB Plugin
 Project: Adlibre DMS
 Copyright: Adlibre Pty Ltd 2012
 License: See LICENSE for license information
@@ -96,7 +96,7 @@ class CouchDBMetadata(object):
         return document.tags
 
 class CouchDBMetadataRetrievalPlugin(Plugin, BeforeRetrievalPluginPoint):
-    title = "CocuhDB Metadata Retrieval"
+    title = "CouchDB Metadata Retrieval"
     description = "Loads document metadata from CouchDB"
 
     plugin_type = 'database'

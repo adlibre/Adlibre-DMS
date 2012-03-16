@@ -1,5 +1,5 @@
 """
-Module: DMS CocuhDB Metadata Templates Model
+Module: DMS CouchDB Metadata Templates Model
 Project: Adlibre DMS
 Copyright: Adlibre Pty Ltd 2012
 License: See LICENSE for license information

@@ -1,5 +1,5 @@
 """
-Module: DMS CocuhDB Documents manager
+Module: DMS CouchDB Documents manager
 Project: Adlibre DMS
 Copyright: Adlibre Pty Ltd 2012
 License: See LICENSE for license information
@@ -26,7 +26,7 @@ class CouchDocument(Document):
 
     def populate_from_dms(self, request, document):
         """
-        Populates CocuhDB Document fields from DMS Document object.
+        Populates CouchDB Document fields from DMS Document object.
         """
         # setting document ID, based on filename. Using stripped (pure doccode regex readable) filename if possible.
         # TODO: to save no_docrule documents properly we need to generate metadata.
