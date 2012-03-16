@@ -584,7 +584,7 @@
             "is_active": true, 
             "is_superuser": true, 
             "is_staff": true, 
-            "last_login": "2012-03-15 23:11:44", 
+            "last_login": "2012-03-16 16:35:38", 
             "groups": [
                 1
             ], 
@@ -703,7 +703,9 @@
             "before_storage_plugins": [
                 1, 
                 2, 
-                3
+                3, 
+                4, 
+                14
             ]
         }
     }, 
@@ -739,7 +741,9 @@
             "before_storage_plugins": [
                 1, 
                 2, 
-                3
+                3, 
+                4, 
+                14
             ]
         }
     }, 
@@ -775,7 +779,9 @@
             "before_storage_plugins": [
                 1, 
                 2, 
-                3
+                3, 
+                4, 
+                14
             ]
         }
     }, 
@@ -811,7 +817,9 @@
             "before_storage_plugins": [
                 1, 
                 2, 
-                3
+                3, 
+                4, 
+                14
             ]
         }
     }, 
@@ -851,11 +859,11 @@
             "regex": "", 
             "sequence_last": 0, 
             "description": "This doccode is assigned to the files that have no other suitable doccode.", 
-            "title": "No doccode", 
+            "title": "Unclassified", 
             "barcode_zfill": 0, 
             "split_string": "", 
             "active": true, 
-            "barcode_format": "", 
+            "barcode_format": "%s", 
             "doccode_type": "1", 
             "doccode_id": 1000, 
             "no_doccode": true
