@@ -69,7 +69,7 @@ def search_options(request, step, template='mdtui/search.html'):
         warnings.append(MDTUI_ERROR_STRINGS[4])
 
     form = initDocumentIndexForm(request)
-
+    autocomplete_list = extract_secondary_keys_from_form(form)
     try:
         # Exclude description from search form, because we can't yet search on it.
         del form.fields["description"]
@@ -89,6 +89,7 @@ def search_options(request, step, template='mdtui/search.html'):
                 'form': form,
                 'warnings': warnings,
                 'step': step,
+                'autocomplete_fields': autocomplete_list,
                }
     return render_to_response(template, context, context_instance=RequestContext(request))
 
