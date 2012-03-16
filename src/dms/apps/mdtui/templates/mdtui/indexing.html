@@ -348,32 +348,32 @@
 {% if step == "2" %}
     // adding manual browser autocomplete disabling
     {% for document_key in autocomplete_fields %}
-    $( "{% get_form_id_for_key form document_key %}" ).attr('autocomplete', 'off');
+    $("{% get_form_id_for_key form document_key %}").attr('autocomplete', 'off');
     {% endfor %}
     // autocomplete connecting
     {% for document_key in autocomplete_fields %}
         {% if document_key != "data" or document_key != "description" %}
         // autocomplete for field {{ document_key }}
-            $(function() {
-                $( "{% get_form_id_for_key form document_key %}" ).typeahead({
-                    source: function get_data(typeahead, query) {
-                         var return_list = []
-                         return_list = $.post(
-                                '{% url mdtui-parallel-keys %}',
-                                {
-                                    key_name: "{{ document_key }}",
-                                    autocomplete_search: query,
-                                    csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').attr("value")
-                                },
-                                function (data) {
-                                    return typeahead.process(JSON.parse($.makeArray( data )));
-                                });
-                        return return_list;
-                    },
-                    onselect: function(obj) { populate_indexes_form(obj); },
-                    autoselect: false,
-                    autowidth: true
-                });
+        $(document).ready(function() {
+            $( "{% get_form_id_for_key form document_key %}" ).typeahead({
+                source: function get_data(typeahead, query) {
+                     var return_list = []
+                     return_list = $.post(
+                            '{% url mdtui-parallel-keys %}',
+                            {
+                                key_name: "{{ document_key }}",
+                                autocomplete_search: query,
+                                csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').attr("value")
+                            },
+                            function (data) {
+                                return typeahead.process(JSON.parse($.makeArray( data )));
+                            });
+                    return return_list;
+                },
+                onselect: function(obj) { populate_indexes_form(obj); },
+                autoselect: false,
+                autowidth: true
+            });
         });
         {% endif %}
     {% endfor %}
