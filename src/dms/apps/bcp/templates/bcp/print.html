@@ -3,39 +3,43 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Print PDF</title>
+    <script type="text/javascript" language="javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
     <script type="text/javascript" language="javascript" charset="utf-8" src="{{ STATIC_URL }}js/pdfobject.min.js"></script>
 
     <script type='text/javascript'>
 
-        function embedPDF(){
-
+        function embedPDF(elementId){
             var myPDF = new PDFObject({
 
                 url: '{{ pdf_url }}',
                 pdfOpenParams: { view: 'Fit', scrollbars: '0', toolbar: '0', statusbar: '0', messages: '0', navpanes: '0' }
 
-            }).embed('pdfobj');
-
+            }).embed(elementId);
         }
 
-        window.onload = embedPDF; //Feel free to replace window.onload if needed.
-
-    </script>
-
-    <script type="text/javascript">
         function printTrigger(elementId) {
             var getMyFrame = document.getElementById(elementId);
             getMyFrame.focus();
             getMyFrame.contentWindow.print();
         }
+        {# TODO: FIXME This is still not working right in non chrome browsers... #}
+        $(document).ready(function() {
+            printTrigger('iFramePdf'); // Chrome
+            //embedPDF('pdfobj'); // Non Chrome
+        });
+
     </script>
 
 </head>
 <body>
-<div id="pdfobj"></div>
 
+{% comment %}
 <input type="button" value="Print" onclick="printTrigger('iFramePdf');" />
-<iframe id="iFramePdf" src="{{ pdf_url }}" style="display:none;"></iframe>
+{% endcomment %}
+
+<div id="pdfobj">
+    <iframe id="iFramePdf" src="{{ pdf_url }}" style="display:none;"></iframe>
+</div>
 
 </body>
 </html>

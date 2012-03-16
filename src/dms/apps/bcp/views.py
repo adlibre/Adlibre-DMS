@@ -8,8 +8,7 @@ License: See LICENSE for license information
 from django.http import HttpResponse
 from django.http import HttpResponseBadRequest
 from django.core.urlresolvers import reverse
-from django.shortcuts import render_to_response
-from django.template import RequestContext
+from django.shortcuts import render
 
 from django.conf import settings
 
@@ -19,12 +18,22 @@ except ImportError:
     from StringIO import StringIO
 
 
+def print_barcode_embed_example(request, code, barcode_type, template='bcp/embed_example.html'):
+    """
+    This is a test page showing how you can embed a request to print a barcode
+    """
+    bcp_url = reverse('bcp-print', kwargs = {'barcode_type': barcode_type, 'code': code, })
+    context = { 'bcp_url': bcp_url, }
+    return render(request, template, context)
+
+
 def print_barcode(request, code, barcode_type, template='bcp/print.html'):
-
+    """
+    This page causes the browser to request the barcode be printed
+    """
     pdf_url = reverse('bcp-generate', kwargs = {'barcode_type': barcode_type, 'code': code, })
-
     context = { 'pdf_url': pdf_url, }
-    return render_to_response(template, context, context_instance=RequestContext(request))
+    return render(request, template, context)
 
 
 def generate(request, code, barcode_type='Standard39',):

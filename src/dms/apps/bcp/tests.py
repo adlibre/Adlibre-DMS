@@ -39,3 +39,10 @@ class BarCodeTest(TestCase):
             url = reverse('bcp-print', kwargs = {'barcode_type': barcode[0], 'code': barcode[1], })
             response = self.client.get(url)
             self.assertEqual(response.status_code, 200)
+
+    def test_embed_example(self):
+        for barcode in barcode_test_data:
+            url = reverse('bcp-embed-example', kwargs = {'barcode_type': barcode[0], 'code': barcode[1], })
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, 200)
+            self.assertContains(response, barcode[1])
