@@ -79,20 +79,28 @@ doc1 = 'ADL-1111'
 
 # TODO: Expand this (especially search). Need to add at least 1 more docs...
 class MDTUI(TestCase):
+
     def setUp(self):
-        # We-re using only logged in client in this test
+        # We are using only logged in client in this test
         self.client.login(username=username, password=password)
 
-    def test_00_setup_initial(self):
+    def test_00_setup_mdt1(self):
         """
-        Setup for those test suite. Made like standalone test because we need it to be run only once
+        Setup MDT 1 for the test suite. Made like standalone test because we need it to be run only once
         """
         # adding our MDT's required through API. (MDT API should be working)
         mdt = json.dumps(mdt1)
         url = reverse('api_mdt')
         response = self.client.post(url, {"mdt": mdt})
         self.assertEqual(response.status_code, 200)
+
+    def test_00_setup_mdt2(self):
+        """
+        Setup MDT 2 for the test suite. Made like standalone test because we need it to be run only once
+        """
+        # adding our MDT's required through API. (MDT API should be working)
         mdt = json.dumps(mdt2)
+        url = reverse('api_mdt')
         response = self.client.post(url, {"mdt": mdt})
         self.assertEqual(response.status_code, 200)
 
