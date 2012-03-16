@@ -1,0 +1,26 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Print PDF</title>
+    <script type="text/javascript" language="javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+
+    <script type='text/javascript'>
+
+        $(document).ready(function() {
+            $('#barcode').load('{{ bcp_url }}');
+        });
+
+    </script>
+
+</head>
+<body>
+<h1>This is a test showing how we can dynamically request a barcode to be printed from our page.</h1>
+<p>URL: {{ bcp_url }}</p>
+
+<div id="barcode">
+This content will be replaced
+</div>
+
+</body>
+</html>
