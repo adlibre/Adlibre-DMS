@@ -233,7 +233,7 @@ class MDTUI(TestCase):
         self.assertEqual(response.status_code, 302)
         new_url = self._retrieve_redirect_response_url(response)
         response = self.client.get(new_url)
-        self.assertContains(response, 'Your document have just been indexed successfully!')
+        self.assertContains(response, 'Your document has been indexed successfully')
         self.assertContains(response, 'Friends Name: Andrew')
         self.assertContains(response, 'Start Again')
 
