@@ -22,7 +22,7 @@
     {% if warnings %}
     {% for warning in warnings %}
     <div class="alert">
-        <a class="close">×</a>
+        <a class="close">×</a> {# TODO: Bind close event #}
         <strong>{{ warning }}</strong>
     </div>
     {% endfor %}
@@ -195,7 +195,7 @@
                 {% endfor %}
             </ul>
         {% endif %}
-        
+
         <br />
         <p>Choose a document source:</p>
 
@@ -307,7 +307,7 @@
         </ul>
         {% endif %}
         
-        <p>Your document have just been indexed successfully! </p>
+        <p>Your document has been indexed successfully!</p>
         <a class="btn btn-primary" href="{% url mdtui-index %}">Start Again <i class="icon-chevron-right icon-white"></i></a>
         {%  comment %}
         <form class="form-horizontal" action="{{ request.path }}" method="post">
@@ -367,7 +367,7 @@
                                 {
                                     key_name: "{{ document_key }}",
                                     autocomplete_search: query,
-                                // csrf fixing
+                                    // csrf fixing
                                     csrfmiddlewaretoken: $('input[name="csrfmiddlewaretoken"]').attr("value")
                                 },
                                 function (data) {
