@@ -19,10 +19,10 @@ from parallel_keys import ParallelKeysManager
 
 
 MDTUI_ERROR_STRINGS = {
-    1:'You have not selected Doccument Type Rule.',
+    1:'You have not selected the Document Type.',
     2:'You have not entered Document Indexing Data. Document will not be searchable by indexes.',
     3:'You have not defined Document Searching Options.',
-    4:'You have not defined Document Type Rule. Can only search by "Creation Date".',
+    4:'You have not defined Document Type. Can only search by "Creation Date".',
 }
 
 
@@ -114,7 +114,7 @@ def search_results(request, step=None, template='mdtui/search.html'):
         # turning document_search dict into something useful for the couch request
         cleaned_document_keys  = cleanup_document_keys(document_keys)
         if "date" in cleaned_document_keys.keys() and cleaned_document_keys.__len__() == 1:
-            # only one crytheria 'date' in search request, requesting another view
+            # only one criterion 'date' in search request, requesting another view
             #print 'searching only by date: ', str_date_to_couch(cleaned_document_keys["date"]), ' docrule:', docrule_id
             documents = CouchDocument.view('dmscouch/search_date', key=[str_date_to_couch(cleaned_document_keys["date"]), docrule_id], include_docs=True )
         else:
@@ -122,7 +122,7 @@ def search_results(request, step=None, template='mdtui/search.html'):
             couch_req_params = convert_to_search_keys(cleaned_document_keys, docrule_id)
             if couch_req_params:
                 search_res = CouchDocument.view('dmscouch/search', keys=couch_req_params )
-                # docuents now returns ANY search type results.
+                # documents now returns ANY search type results.
                 # we need to convert it to ALL
                 docs_list = convert_search_res(search_res, couch_req_params.__len__())
                 documents = CouchDocument.view('_all_docs', keys=docs_list, include_docs=True )
@@ -271,14 +271,21 @@ def indexing_uploading(request, step=None, template='mdtui/indexing.html'):
 
     if request.POST:
         if form.is_valid(): # Must've uploaded a file
-            manager = DocumentManager()
-            # TODO: Set allocate_barcode=True
-            manager.store(request, form.files['file'], index_info=request.session["document_keys_dict"], allocate_barcode=False)
-            if not manager.errors:
-                return HttpResponseRedirect(reverse('mdtui-index-finished'))
-            else:
-                # FIXME: dodgy error handling
-                return HttpResponse(str(manager.errors))
+
+            try:
+                docrule = request.session['docrule_id']
+            except KeyError:
+                warnings.append(MDTUI_ERROR_STRINGS[1])
+
+            if not warnings:
+                manager = DocumentManager()
+                manager.store(request, form.files['file'], index_info=request.session["document_keys_dict"], allocate_barcode=docrule or None)
+
+                if not manager.errors:
+                    return HttpResponseRedirect(reverse('mdtui-index-finished'))
+                else:
+                    # FIXME: dodgy error handling
+                    return HttpResponse(str(manager.errors))
 
     context.update( { 'step': step,
                       'form': form,

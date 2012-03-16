@@ -161,19 +161,18 @@ class DocumentTypeRule(models.Model):
         """
         self.sequence_last += 1
         self.save()
-        return self
+        return self._generate_document_barcode(self.sequence_last)
 
-    def generate_document_barcode(self):
+    def _generate_document_barcode(self, sequence):
         """
         Function generates next barcode in sequence. As soon as it is generated, it must be assumed to be used to avoid race.
         """
         # HACK: Ideally we shouldn't need a 'barcode_format' field, as that could be inferred from the regex. (maybe?) along with the
         # integer padding required? eg assume a fixed length integer portion of a regex is padded
         # TODO: Validate the generated code to ensure it's valid, and not invalid according to the regex.
-        # TODO: Zero pad the integer
 
         if len(self.barcode_format) > 0:
-            n = str(self.sequence_last + 1)
+            n = str(sequence)
             n = n.zfill(self.barcode_zfill)
             return self.barcode_format % (n)
         else:

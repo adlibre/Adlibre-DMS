@@ -17,6 +17,9 @@ from dms_plugins import pluginpoints
 
 from document import Document
 
+from doc_codes.models import DocumentTypeRule
+
+
 class ConfigurationError(Exception):
     pass
 
@@ -84,7 +87,7 @@ class DocumentManager(object):
                 break
         return document
 
-    def store(self, request, uploaded_file, index_info=None, allocate_barcode=False):
+    def store(self, request, uploaded_file, index_info=None, allocate_barcode=None):
         """
         Process all storage plugins
         uploaded file is http://docs.djangoproject.com/en/1.3/topics/http/file-uploads/#django.core.files.uploadedfile.UploadedFile
@@ -92,12 +95,13 @@ class DocumentManager(object):
         """
         doc = Document()
         doc.set_file_obj(uploaded_file)
-        if allocate_barcode:
-            # TODO: Complete me
-            # obj = DocumentTypeRule.objects.get(doccode_id=doccode_id)
-            # barcode = obj.generate_document_barcode()
-            # doc.set_filename(barcode)
-            raise Exception # Not implemented
+        if allocate_barcode is not None: # Allocate barcode from rule id
+            # get barcode from our dtr object
+            dtr = DocumentTypeRule.objects.get(doccode_id=allocate_barcode)
+            # FIXME: Barcode is allocated, but there is no transaction around this :(
+            barcode = dtr.add_new_document()
+            doc.set_filename(barcode)
+            #print "Allocated Barcode %s" % (barcode,)
         else:
             doc.set_filename(os.path.basename(uploaded_file.name))
         if hasattr(uploaded_file, 'content_type'):

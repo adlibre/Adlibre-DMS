@@ -74,7 +74,7 @@ doc1_dict = {
     'Friends Name': 'Andrew',
 }
 
-doc1 = 'ADL-1111'
+doc1 = 'ADL-0001'
 
 
 # TODO: Expand this (especially search). Need to add at least 1 more docs...
@@ -249,7 +249,7 @@ class MDTUI(TestCase):
         resp = cou.read()
         r.status_code = 200
         r.content = resp
-        self.assertContains(r, 'ADL-1111')
+        self.assertContains(r, doc1)
         self.assertContains(r, 'Iurii Garmash')
 
     def test_09_search_works(self):
@@ -268,7 +268,7 @@ class MDTUI(TestCase):
         """
         url = reverse('mdtui-search-options')
         response = self.client.get(url)
-        self.assertContains(response, 'You have not defined Document Type Rule')
+        self.assertContains(response, 'You have not defined Document Type.')
         self.assertEqual(response.status_code, 200)
 
     def test_11_search_results_warning(self):
