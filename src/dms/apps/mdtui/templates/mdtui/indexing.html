@@ -184,13 +184,18 @@
     {% if step == "3" %}
         <fieldset>
             <legend>Step {{ step }}: Select Source</legend>
-            <legend>Your document's indexing keys:</legend>
         </fieldset>
-        <ul class="metainfo">
-            {% for item in document_keys %}
-            <li>{%  get_key_li_item document_keys item %}</li>
-            {% endfor %}
-        </ul>
+
+        {% if document_keys %}
+            <p>Your document's indexing keys:</p>
+
+            <ul class="metainfo">
+                {% for item in document_keys %}
+                    <li>{%  get_key_li_item document_keys item %}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        
         <br />
         <p>Choose a document source:</p>
 
