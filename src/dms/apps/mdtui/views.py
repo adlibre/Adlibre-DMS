@@ -270,23 +270,36 @@ def indexing_uploading(request, step=None, template='mdtui/indexing.html'):
 
     form = DocumentUploadForm(request.POST or None, request.FILES or None)
 
-    if request.POST:
-        if form.is_valid(): # Must've uploaded a file
+    if request.POST: # or Something else eg barcode printer
 
-            try:
-                docrule = request.session['docrule_id']
-            except KeyError:
-                warnings.append(MDTUI_ERROR_STRINGS[1])
+        try:
+            index_info = request.session["document_keys_dict"]
+        except KeyError:
+            warnings.append(MDTUI_ERROR_STRINGS[3])
+
+        try:
+            docrule = request.session['docrule_id']
+        except KeyError:
+            warnings.append(MDTUI_ERROR_STRINGS[1])
+
+        if form.is_valid(): # Must've uploaded a file
 
             if not warnings:
                 manager = DocumentManager()
-                manager.store(request, form.files['file'], index_info=request.session["document_keys_dict"], allocate_barcode=docrule or None)
+                manager.store(request, form.files['file'], index_info=index_info or None, allocate_barcode=docrule or None)
 
                 if not manager.errors:
                     return HttpResponseRedirect(reverse('mdtui-index-finished'))
                 else:
                     # FIXME: dodgy error handling
                     return HttpResponse(str(manager.errors))
+
+        #elif: # Something else, eg barcode printer
+            # Allocate Empty Barcode
+            # manager = DocumentManager()
+            # manager.store(request, index_info=index_info or None, allocate_barcode=docrule or None)
+            # NB need to modify DocumentManager to set_db_info and not require a file
+            # Print barcode
 
     context.update( { 'step': step,
                       'form': form,
