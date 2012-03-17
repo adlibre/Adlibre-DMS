@@ -76,7 +76,7 @@ class DocumentIndexForm(forms.Form):
             try:
                 cleaned_value = cur_field.validate(self.data[unicode(field)])
             except Exception, e:
-                print e
+                #print e
                 # appending error to form errors
                 self.errors[field] = e
                 self._errors[field] = e
