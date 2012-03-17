@@ -8,10 +8,10 @@ License: See LICENSE for license information
 import os
 
 from plugins import models as plugin_models
+from plugins.models import Plugin
 
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.views.generic.simple import direct_to_template
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
@@ -20,13 +20,9 @@ from django.shortcuts import get_object_or_404
 from django.template import RequestContext, loader
 
 from dms_plugins import models, forms, representator
-from dms.settings import DEBUG
 from document_manager import DocumentManager
 from browser.forms import UploadForm
 
-# regrouped form requires
-from plugins.models import Plugin
-from dms_plugins.representator import save_PluginSelectorForm, create_form_fields
 
 def handlerError(request, httpcode, message):
     t = loader.get_template(str(httpcode)+'_custom.html')
@@ -178,14 +174,14 @@ def setting(request, template_name='browser/setting.html',
     """
     mappings = models.DoccodePluginMapping.objects.all()
     plugins = Plugin.objects.all()
-    kwargs = create_form_fields(plugins)
+    kwargs = representator.create_form_fields(plugins)
     form = forms.PluginSelectorForm()
     form.setFields(kwargs)
     
     if request.method == 'POST':
         form.setData(request.POST)
         if form.validation_ok():
-            save_PluginSelectorForm(request.POST, plugins)
+            representator.save_PluginSelectorForm(request.POST, plugins)
             return HttpResponseRedirect('.')
     extra_context['form'] = form
     extra_context['rule_list'] = mappings
@@ -197,14 +193,14 @@ def edit_setting(request, rule_id, template_name='browser/edit_setting.html',
     mapping = get_object_or_404(models.DoccodePluginMapping, id=rule_id)
     instance = representator.serialize_model_for_PluginSelectorForm(mapping)
     plugins = Plugin.objects.all()
-    kwargs = create_form_fields(plugins)
+    kwargs = representator.create_form_fields(plugins)
     form = forms.PluginSelectorForm(initial = instance)
     form.setFields(kwargs)
     
     if request.method == 'POST':
         form.setData(request.POST)
         if form.validation_ok():
-            save_PluginSelectorForm(request.POST, plugins, rule_id)
+            representator.save_PluginSelectorForm(request.POST, plugins, rule_id)
             return HttpResponseRedirect('.')
     extra_context['rule'] = mapping
     extra_context['form'] = form
