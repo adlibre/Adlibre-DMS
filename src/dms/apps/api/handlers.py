@@ -20,6 +20,7 @@ from dms_plugins import models
 from doc_codes.models import DocumentTypeRuleManagerInstance
 from mdt_manager import MetaDataTemplateManager
 
+
 class BaseFileHandler(BaseHandler):
     def get_file_info(self, request):
         filename = request.GET.get('filename')
@@ -33,6 +34,7 @@ class BaseFileHandler(BaseHandler):
         
         return document_name, extension, revision, hashcode
 
+
 class FileInfoHandler(BaseFileHandler):
     allowed_methods = ('GET',)
     
@@ -44,8 +46,8 @@ class FileInfoHandler(BaseFileHandler):
         parent_directory = None
         #parent_directory = request.GET.get('parent_directory', None) # FIXME TODO: this is wrong!!!!!! security breach...
         manager = DocumentManager()
-        document = manager.retrieve(request, document_name, hashcode = hashcode, revision = revision, only_metadata = True,
-                        extension = extension, parent_directory = parent_directory)
+        document = manager.retrieve(request, document_name, hashcode=hashcode, revision=revision, only_metadata=True,
+                        extension=extension, parent_directory=parent_directory)
         mapping = manager.get_plugin_mapping(document)
         if manager.errors:
             if settings.DEBUG:
@@ -57,6 +59,7 @@ class FileInfoHandler(BaseFileHandler):
         info['no_doccode'] = document.get_docrule().no_doccode
         response = HttpResponse(json.dumps(info))
         return response
+
 
 class FileHandler(BaseFileHandler):
     allowed_methods = ('GET', 'POST', 'DELETE', 'PUT')
@@ -73,7 +76,7 @@ class FileHandler(BaseFileHandler):
         manager = DocumentManager()
         try:
             mimetype, filename, content = manager.get_file(request, document_name, hashcode, 
-            extension, revision = revision, parent_directory = parent_directory)
+                    extension, revision=revision, parent_directory=parent_directory)
         except Exception, e:
             if settings.DEBUG:
                 import traceback
@@ -88,9 +91,7 @@ class FileHandler(BaseFileHandler):
         response = HttpResponse(content, mimetype=mimetype)
         response["Content-Length"] = len(content)
         response['Content-Disposition'] = 'filename=%s' % filename
-
         return response
-
 
     def create(self, request):
         document, extension = os.path.splitext(request.FILES['file'].name)
@@ -113,8 +114,8 @@ class FileHandler(BaseFileHandler):
         #parent_directory = request.GET.get('parent_directory', None) # FIXME: Why are we allowing this with the API?
         manager = DocumentManager()
         try:
-            manager.delete_file(request, document, revision = revision, full_filename = full_filename,
-                parent_directory = parent_directory, extension = extension)
+            manager.delete_file(request, document, revision=revision, full_filename=full_filename,
+                    parent_directory=parent_directory, extension=extension)
         except Exception, e:
             if settings.DEBUG:
                 print "Exception: %s" % e
@@ -129,35 +130,36 @@ class FileHandler(BaseFileHandler):
         return rc.DELETED
 
     def update(self, request):
-      try:
         try:
-            document_name, extension, revision, hashcode = self.get_file_info(request)
-        except ValueError:
-            return rc.BAD_REQUEST
-        parent_directory = None
-        #parent_directory = request.PUT.get('parent_directory', None)
+            try:
+                document_name, extension, revision, hashcode = self.get_file_info(request)
+            except ValueError:
+                return rc.BAD_REQUEST
+            parent_directory = None
+            #parent_directory = request.PUT.get('parent_directory', None)
 
-        tag_string = request.PUT.get('tag_string', None)
-        remove_tag_string = request.PUT.get('remove_tag_string', None)
+            tag_string = request.PUT.get('tag_string', None)
+            remove_tag_string = request.PUT.get('remove_tag_string', None)
 
-        new_name = request.PUT.get('new_name', None)
+            new_name = request.PUT.get('new_name', None)
 
-        manager = DocumentManager()
-        if new_name:
-            document = manager.rename(request, document_name, new_name, extension, parent_directory = parent_directory)
-        else:
-            document = manager.update(request, document_name, tag_string = tag_string, remove_tag_string = remove_tag_string,
-                                    parent_directory = parent_directory, extension = extension)
-        if len(manager.errors) > 0:
-            return rc.BAD_REQUEST
-        return HttpResponse(json.dumps( document.get_dict() ))
-      except Exception, e:
-        if settings.DEBUG:
-            print "Exception: %s" % e
-            traceback.print_exc()
-            raise
-        else:
-            return rc.BAD_REQUEST
+            manager = DocumentManager()
+            if new_name:
+                document = manager.rename(request, document_name, new_name, extension, parent_directory=parent_directory)
+            else:
+                document = manager.update(request, document_name, tag_string=tag_string, remove_tag_string=remove_tag_string,
+                        parent_directory=parent_directory, extension=extension)
+            if len(manager.errors) > 0:
+                return rc.BAD_REQUEST
+            return HttpResponse(json.dumps( document.get_dict() ))
+        except Exception, e: # FIXME
+            if settings.DEBUG:
+                print "Exception: %s" % e
+                traceback.print_exc()
+                raise
+            else:
+                return rc.BAD_REQUEST
+
 
 class FileListHandler(BaseHandler):
     allowed_methods = ('GET','POST')
@@ -179,7 +181,7 @@ class FileListHandler(BaseHandler):
                     finish = int(finish)
             except ValueError:
                 pass
-            file_list = manager.get_file_list(mapping, start, finish, order, searchword, tags = [tag],
+            file_list = manager.get_file_list(mapping, start, finish, order, searchword, tags=[tag],
                                                 filter_date = filter_date)
             for item in file_list:
                 ui_url = reverse('ui_document', kwargs = {'document_name': item['name']})
@@ -197,16 +199,17 @@ class FileListHandler(BaseHandler):
             else:
                 return rc.BAD_REQUEST
 
+
 class TagsHandler(BaseHandler):
     allowed_methods = ('GET',)
 
     def read(self, request, id_rule):
         try:
             manager = DocumentManager()
-            mapping = manager.get_plugin_mapping_by_kwargs(pk = id_rule)
-            tags = manager.get_all_tags(doccode = mapping.get_docrule())
+            mapping = manager.get_plugin_mapping_by_kwargs(pk=id_rule)
+            tags = manager.get_all_tags(doccode=mapping.get_docrule())
             return map(lambda x: x.name, tags)
-        except Exception:
+        except Exception: #FIXME
             if settings.DEBUG:
                 raise
             else:
@@ -222,12 +225,12 @@ class RevisionCountHandler(BaseHandler):
             doccode = DocumentTypeRuleManagerInstance.find_for_string(document)
             if doccode:
                 try:
-                    mapping = models.DoccodePluginMapping.objects.get(doccode = doccode.get_id())
+                    mapping = models.DoccodePluginMapping.objects.get(doccode=doccode.get_id())
                 except models.DoccodePluginMapping.DoesNotExist:
                     raise
                 manager = DocumentManager()
                 rev_count = manager.get_revision_count(document, mapping)
-                if rev_count <= 0: # document without revisions is broken
+                if rev_count <= 0: # document without revisions is broken FIXME: In future this is ok!
                     raise
                 return rev_count
             else:
@@ -237,6 +240,7 @@ class RevisionCountHandler(BaseHandler):
                 raise
             else:
                 return rc.BAD_REQUEST
+
 
 class RulesHandler(BaseHandler):
     allowed_methods = ('GET','POST')
@@ -254,6 +258,7 @@ class RulesHandler(BaseHandler):
                                 }, mappings))
         return rules
 
+
 class RulesDetailHandler(BaseHandler):
     allowed_methods = ('GET','POST')
 
@@ -269,13 +274,14 @@ class RulesDetailHandler(BaseHandler):
     def read(self, request, id_rule):
         manager = DocumentManager()
         try:
-            mapping = manager.get_plugin_mapping_by_kwargs(pk = id_rule)
+            mapping = manager.get_plugin_mapping_by_kwargs(pk=id_rule)
         except Exception:
             if settings.DEBUG:
                 raise
             else:
                 return rc.BAD_REQUEST
         return mapping
+
 
 class PluginsHandler(BaseHandler):
     allowed_methods = ('GET','POST')
@@ -293,6 +299,7 @@ class PluginsHandler(BaseHandler):
             else:
                 return rc.BAD_REQUEST
         return plugin_list
+
 
 class MetaDataTemplateHandler(BaseHandler):
     allowed_methods = ('GET','POST', 'DELETE')
@@ -340,5 +347,3 @@ class MetaDataTemplateHandler(BaseHandler):
             return rc.DELETED
         else:
             return rc.NOT_FOUND
-
-
