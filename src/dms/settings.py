@@ -151,8 +151,8 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.markup',
     'django.contrib.sessions',
-    'django.contrib.sites',
-    'django.contrib.flatpages',
+#    'django.contrib.sites',
+#    'django.contrib.flatpages',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # Uncomment the next line to enable the admin:
