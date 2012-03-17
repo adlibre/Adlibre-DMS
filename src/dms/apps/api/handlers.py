@@ -41,9 +41,10 @@ class FileInfoHandler(BaseFileHandler):
             document_name, extension, revision, hashcode = self.get_file_info(request)
         except ValueError:
             return rc.BAD_REQUEST
-        parent_directory = request.GET.get('parent_directory', None) # TODO: this is wrong!!!!!! security breach...
+        parent_directory = None
+        #parent_directory = request.GET.get('parent_directory', None) # FIXME TODO: this is wrong!!!!!! security breach...
         manager = DocumentManager()
-        document = manager.retrieve(request, document_name, hashcode = hashcode, revision = revision, only_metadata = True, 
+        document = manager.retrieve(request, document_name, hashcode = hashcode, revision = revision, only_metadata = True,
                         extension = extension, parent_directory = parent_directory)
         mapping = manager.get_plugin_mapping(document)
         if manager.errors:
@@ -67,7 +68,8 @@ class FileHandler(BaseFileHandler):
             if settings.DEBUG:
                 raise
             return rc.BAD_REQUEST
-        parent_directory = request.GET.get('parent_directory', None) # TODO: this is wrong!!!!!! security breach...
+        parent_directory = None
+        #parent_directory = request.GET.get('parent_directory', None) # FIXME TODO: this is wrong!!!!!! security breach...
         manager = DocumentManager()
         try:
             mimetype, filename, content = manager.get_file(request, document_name, hashcode, 
@@ -109,7 +111,6 @@ class FileHandler(BaseFileHandler):
         full_filename = request.REQUEST.get('full_filename', None)
         parent_directory = None
         #parent_directory = request.GET.get('parent_directory', None) # FIXME: Why are we allowing this with the API?
-
         manager = DocumentManager()
         try:
             manager.delete_file(request, document, revision = revision, full_filename = full_filename,
@@ -133,7 +134,8 @@ class FileHandler(BaseFileHandler):
             document_name, extension, revision, hashcode = self.get_file_info(request)
         except ValueError:
             return rc.BAD_REQUEST
-        parent_directory = request.PUT.get('parent_directory', None)
+        parent_directory = None
+        #parent_directory = request.PUT.get('parent_directory', None)
 
         tag_string = request.PUT.get('tag_string', None)
         remove_tag_string = request.PUT.get('remove_tag_string', None)
@@ -225,7 +227,7 @@ class RevisionCountHandler(BaseHandler):
                     raise
                 manager = DocumentManager()
                 rev_count = manager.get_revision_count(document, mapping)
-                if rev_count <= 0: #document without revisions is broken
+                if rev_count <= 0: # document without revisions is broken
                     raise
                 return rev_count
             else:
