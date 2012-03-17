@@ -4,8 +4,6 @@ from django.conf import settings
 from django.core.management import call_command
 from django.test import TestCase
 
-from plugins import models
-
 class AdlibreTestCase(TestCase):
     fixtures = ['test_initial_data.json',]
     
