@@ -45,13 +45,7 @@ and the following for converter.py to function (libtiff, poppler, a2ps, ghostscr
 # port install a2ps
 # port install ghostscript
 
-NB. On OS X there is a bug with building ctypes. You will need to implement
-this workaround https://trac.macports.org/ticket/22418
-and if you get this error: 
->     env: /users/user/django/virtualenvs/dmsmerge/build/ctypes/source/libffi/configure: Permission denied
-You'll need to make sure that _build/ctypes/source/libffi/configure_ is executable. (chmod +x if necessary).
-
-NB. Has a bug while installing from pip-req.txt. "pip install -r deployment/pip-req.txt" breaks with error.
+NB. django-plugins has a bug while installing from pip-req.txt. "pip install -r deployment/pip-req.txt" breaks with error.
 You have to manually change setup.py of that package. It says about the line with error.
 Something called long_description. Change it to whatever string you like in the predownloaded package.
 And run "pip install -r deployment/pip-req.txt" again
