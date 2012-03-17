@@ -6,12 +6,13 @@ License: See LICENSE for license information
 Author: Iurii Garmash
 """
 
-from django import forms
 from plugins.models import Plugin, PluginPoint
+
+from django import forms
 from django.utils.importlib import import_module
+
 from .models import DoccodePluginMapping
 
-from django.shortcuts import get_object_or_404
 
 def create_form_fields(plugins_param = ''):
     """
