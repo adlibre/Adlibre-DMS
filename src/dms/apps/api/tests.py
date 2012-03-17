@@ -108,20 +108,21 @@ class MiscTest(AdlibreTestCase):
                 raise self.failureException('Invalid response: %s' % response.content)
 
     def test_api_rename(self):
-        #login
+        # Login
         self.client.login(username = username, password = password)
-        #upload no doccode
+        # Upload no doccode
         response = self._upload_file(no_doccode_name)
         self.assertContains(response, '', status_code = 200)
-        #do rename
-        url = reverse('api_file')
-        data = {'new_name': adl_invoice_name, 'filename': no_doccode_name + ".pdf"}
+        # Do rename
+        filename = no_doccode_name + ".pdf"
+        url = reverse('api_file') + '?filename=%s' % filename
+        data = {'filename': filename, 'new_name': adl_invoice_name,}
         response = self.client.put(url, data)
         self.assertContains(response, '', status_code = 200)
-        #fetch renamed file
+        # Fetch renamed file
         url = reverse('api_file') + '?filename=%s.pdf' % adl_invoice_name
         response = self.client.get(url)
-        #fail to fetch old file
+        # Fail to fetch old file
         url = reverse('api_file') + '?filename=%s.pdf' % no_doccode_name
         response = self.client.get(url)
         self.assertContains(response, '', status_code = 400)
@@ -134,7 +135,7 @@ class MiscTest(AdlibreTestCase):
         response = self._upload_file(filename)
         self.assertContains(response, '', status_code = 200)
         #remove tag
-        url = reverse('api_file')
+        url = reverse('api_file') + '?filename=%s' % filename
         data = {'filename': filename, 'remove_tag_string': test_tag}
         response = self.client.put(url, data)
         self.assertContains(response, '', status_code = 200)
@@ -144,7 +145,7 @@ class MiscTest(AdlibreTestCase):
         response = self.client.get(url, data)
         self.assertNotContains(response, test_tag, status_code = 200)
         #set tags
-        url = reverse('api_file')
+        url = reverse('api_file') + '?filename=%s' % filename
         data = {'filename': filename, 'tag_string': test_tag}
         response = self.client.put(url, data)
         self.assertContains(response, '', status_code = 200)
