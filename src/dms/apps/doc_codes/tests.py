@@ -45,5 +45,6 @@ class CoreModelTest(TestCase):
 
         for doccode_id, result in generated_barcodes:
             obj = DocumentTypeRule.objects.get(doccode_id=doccode_id)
-            obj.sequence_last = 1000
-            self.assertEquals(obj.generate_document_barcode(), result)
+            obj.set_last_document_number(1000)
+            self.assertEquals(obj.add_new_document(), result)
+            self.assertEquals(obj.get_last_document_number(), 1001)
