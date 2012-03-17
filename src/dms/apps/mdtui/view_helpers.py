@@ -137,7 +137,7 @@ def extract_secondary_keys_from_form(form):
     keys_list = []
     for field_id, field in form.fields.iteritems():
         try:
-            print field.field_name
+            #print field.field_name
             if field.field_name:
                 keys_list.append(field.field_name)
         except AttributeError:
