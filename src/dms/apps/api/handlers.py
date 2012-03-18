@@ -62,7 +62,7 @@ class FileInfoHandler(BaseFileHandler):
                         extension=extension, parent_directory=parent_directory)
         mapping = manager.get_plugin_mapping(document)
         if manager.errors:
-            log.error(whoami('FileInfoHandler.read errors: %s' % manager.errors))
+            log.error('FileInfoHandler.read errors: %s' % manager.errors)
             if settings.DEBUG:
                 raise Exception('FileInfoHandler.read manager.errors')
             else:
