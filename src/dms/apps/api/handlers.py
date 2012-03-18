@@ -6,6 +6,7 @@ License: See LICENSE for license information
 """
 
 import json, os, traceback
+import logging
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
@@ -21,17 +22,24 @@ from doc_codes.models import DocumentTypeRuleManagerInstance
 from mdt_manager import MetaDataTemplateManager
 
 
+log = logging.getLogger('dms.api.handlers')
+
 class BaseFileHandler(BaseHandler):
     def get_file_info(self, request):
+
         filename = request.GET.get('filename')
+
         if not filename:
-            raise ValueError("No filename")
+            log.error('No filename passed to get_file_info')
+            raise ValueError('No filename')
+
         document_name, extension = os.path.splitext(filename)
         extension = extension.strip(".")
 
-        revision = request.GET.get("r", None)
-        hashcode = request.GET.get("h", None)
-        
+        revision = request.GET.get('r', None)
+        hashcode = request.GET.get('h', None)
+
+        log.debug('BaseFileHandler.get_file_info returned: %s : %s : %s : %s.' % (document_name, extension, revision, hashcode))
         return document_name, extension, revision, hashcode
 
 
@@ -42,7 +50,11 @@ class FileInfoHandler(BaseFileHandler):
         try:
             document_name, extension, revision, hashcode = self.get_file_info(request)
         except ValueError:
-            return rc.BAD_REQUEST
+            log.error('FileInfoHandler.read ValueError')
+            if settings.DEBUG:
+                raise
+            else:
+                return rc.BAD_REQUEST
         parent_directory = None
         #parent_directory = request.GET.get('parent_directory', None) # FIXME TODO: this is wrong!!!!!! security breach...
         manager = DocumentManager()
@@ -50,9 +62,11 @@ class FileInfoHandler(BaseFileHandler):
                         extension=extension, parent_directory=parent_directory)
         mapping = manager.get_plugin_mapping(document)
         if manager.errors:
+            log.error(whoami('FileInfoHandler.read errors: %s' % manager.errors))
             if settings.DEBUG:
-                print "MANAGER ERRORS: %s" % manager.errors
-            return rc.BAD_REQUEST
+                raise Exception('FileInfoHandler.read manager.errors')
+            else:
+                return rc.BAD_REQUEST
         info = document.get_dict()
         info['document_list_url'] = reverse('ui_document_list', kwargs = {'id_rule': mapping.pk})
         info['tags'] = document.get_tags()
@@ -68,9 +82,11 @@ class FileHandler(BaseFileHandler):
         try:
             document_name, extension, revision, hashcode = self.get_file_info(request)
         except ValueError:
+            log.error('FileHandler.read ValueError')
             if settings.DEBUG:
                 raise
-            return rc.BAD_REQUEST
+            else:
+                return rc.BAD_REQUEST
         parent_directory = None
         #parent_directory = request.GET.get('parent_directory', None) # FIXME TODO: this is wrong!!!!!! security breach...
         manager = DocumentManager()
@@ -78,10 +94,8 @@ class FileHandler(BaseFileHandler):
             mimetype, filename, content = manager.get_file(request, document_name, hashcode, 
                     extension, revision=revision, parent_directory=parent_directory)
         except Exception, e:
+            log.error('FileHandler.read exception %s' % e)
             if settings.DEBUG:
-                import traceback
-                print "Exception: %s" % e
-                traceback.print_exc()
                 raise
             else:
                 return rc.BAD_REQUEST
@@ -100,6 +114,7 @@ class FileHandler(BaseFileHandler):
         manager = DocumentManager()
         document = manager.store(request, request.FILES['file'])
         if len(manager.errors) > 0:
+            log.error('FileHandler.create manager errors: %s' % manager.errors)
             return rc.BAD_REQUEST
         return document.get_filename()
 
@@ -117,9 +132,8 @@ class FileHandler(BaseFileHandler):
             manager.delete_file(request, document, revision=revision, full_filename=full_filename,
                     parent_directory=parent_directory, extension=extension)
         except Exception, e:
+            log.error('FileHandler.delete exception %s' % e)
             if settings.DEBUG:
-                print "Exception: %s" % e
-                traceback.print_exc()
                 raise
             else:
                 return rc.BAD_REQUEST
@@ -134,7 +148,11 @@ class FileHandler(BaseFileHandler):
             try:
                 document_name, extension, revision, hashcode = self.get_file_info(request)
             except ValueError:
-                return rc.BAD_REQUEST
+                log.error('FileHandler.update ValueError')
+                if settings.DEBUG:
+                    raise
+                else:
+                    return rc.BAD_REQUEST
             parent_directory = None
             #parent_directory = request.PUT.get('parent_directory', None)
 
@@ -150,12 +168,15 @@ class FileHandler(BaseFileHandler):
                 document = manager.update(request, document_name, tag_string=tag_string, remove_tag_string=remove_tag_string,
                         parent_directory=parent_directory, extension=extension)
             if len(manager.errors) > 0:
-                return rc.BAD_REQUEST
+                log.error('FileHandler.update manager errors %s' % manager.errors)
+                if settings.DEBUG:
+                    raise Exception('FileHandler.update manager errors')
+                else:
+                    return rc.BAD_REQUEST
             return HttpResponse(json.dumps( document.get_dict() ))
         except Exception, e: # FIXME
+            log.error('FileHandler.update exception %s' % e)
             if settings.DEBUG:
-                print "Exception: %s" % e
-                traceback.print_exc()
                 raise
             else:
                 return rc.BAD_REQUEST
@@ -179,8 +200,12 @@ class FileListHandler(BaseHandler):
                 filter_date = request.GET.get('created_date', None)
                 if finish:
                     finish = int(finish)
-            except ValueError:
-                pass
+            except ValueError, e:
+                log.error('FileListHandler.read ValueError %s' % e)
+                if settings.DEBUG:
+                    raise
+                else:
+                    pass
             file_list = manager.get_file_list(mapping, start, finish, order, searchword, tags=[tag],
                                                 filter_date = filter_date)
             for item in file_list:
@@ -191,10 +216,9 @@ class FileListHandler(BaseHandler):
                                 'rule': mapping.get_name(),
                             })
             return file_list
-        except Exception:
+        except Exception, e:
+            log.error('FileListHandler.read Exception %s' % e)
             if settings.DEBUG:
-                import traceback
-                traceback.print_exc()
                 raise
             else:
                 return rc.BAD_REQUEST
@@ -209,7 +233,8 @@ class TagsHandler(BaseHandler):
             mapping = manager.get_plugin_mapping_by_kwargs(pk=id_rule)
             tags = manager.get_all_tags(doccode=mapping.get_docrule())
             return map(lambda x: x.name, tags)
-        except Exception: #FIXME
+        except Exception, e: # FIXME
+            log.error('TagsHandler.read Exception %s' % e)
             if settings.DEBUG:
                 raise
             else:
@@ -227,15 +252,19 @@ class RevisionCountHandler(BaseHandler):
                 try:
                     mapping = models.DoccodePluginMapping.objects.get(doccode=doccode.get_id())
                 except models.DoccodePluginMapping.DoesNotExist:
+                    log.error('RevisionCountHandler.read DoccodePluginMapping.DoesNotExist exception raised')
                     raise
                 manager = DocumentManager()
                 rev_count = manager.get_revision_count(document, mapping)
                 if rev_count <= 0: # document without revisions is broken FIXME: In future this is ok!
-                    raise
+                    log.info('RevisionCountHandler.read rev_count %s.' % str(rev_count))
+                    raise Exception('No document revisions')
                 return rev_count
             else:
-                raise Exception("No Doccode")
-        except Exception, e:
+                log.error('RevisionCountHandler.read No Doccode')
+                raise Exception('No Doccode')
+        except Exception, e: # FIXME
+            log.error('RevisionCountHandler.read Exception %s' % e)
             if settings.DEBUG:
                 raise
             else:
@@ -275,7 +304,8 @@ class RulesDetailHandler(BaseHandler):
         manager = DocumentManager()
         try:
             mapping = manager.get_plugin_mapping_by_kwargs(pk=id_rule)
-        except Exception:
+        except Exception, e: # FIXME
+            log.error('RulesDetailHandler.read Exception %s' % e)
             if settings.DEBUG:
                 raise
             else:
@@ -293,7 +323,8 @@ class PluginsHandler(BaseHandler):
         manager = DocumentManager()
         try:
             plugin_list = manager.get_plugin_list()
-        except Exception:
+        except Exception, e: # FIXME
+            log.error('PluginsHandler.read Exception %s' % e)
             if settings.DEBUG:
                 raise
             else:
@@ -309,38 +340,54 @@ class MetaDataTemplateHandler(BaseHandler):
             return rc.FORBIDDEN
         try:
             docrule_id = request.GET['docrule_id']
-        except:
-            return rc.BAD_REQUEST
+        except Exception, e: # FIXME
+            log.error('MetaDataTemplateHandler.read Exception %s' % e)
+            if settings.DEBUG:
+                raise
+            else:
+                return rc.BAD_REQUEST
         manager = MetaDataTemplateManager()
         manager.docrule_id = docrule_id
         mdts_dict = manager.get_mdts_for_docrule(manager.docrule_id)
         if mdts_dict == 'error':
+            log.error('MetaDataTemplateHandler.read mdts_dict==error')
             return rc.NOT_FOUND
         return mdts_dict
 
     def create(self, request):
         if not request.user.is_authenticated():
+            log.info('MetaDataTemplateHandler.create unauthenticated user')
             return rc.FORBIDDEN
         try:
             mdt = request.POST['mdt']
             data = json.loads(str(mdt))
-        except:
-            return rc.BAD_REQUEST
+        except Exception, e: # FIXME
+            log.error('MetaDataTemplateHandler.create Exception %s' % e)
+            if settings.DEBUG:
+                raise
+            else:
+                return rc.BAD_REQUEST
         manager = MetaDataTemplateManager()
         if not manager.validate_mdt(mdt):
             return rc.BAD_REQUEST
         status = manager.store(data)
         if status == 'error':
+            log.error('MetaDataTemplateHandler.create status==error')
             return rc.BAD_REQUEST
         return status
 
     def delete(self, request):
         if not request.user.is_authenticated():
+            log.info('MetaDataTemplateHandler.delete unauthenticated user')
             return rc.FORBIDDEN
         try:
             mdt_id = request.REQUEST.get('mdt_id')
-        except:
-            return rc.BAD_REQUEST
+        except Exception, e:
+            log.error('MetaDataTemplateHandler.delete Exception %s' % e)
+            if settings.DEBUG:
+                raise
+            else:
+                return rc.BAD_REQUEST
         manager = MetaDataTemplateManager()
         mdt_resp = manager.delete_mdt(mdt_id)
         if mdt_resp == 'done':
