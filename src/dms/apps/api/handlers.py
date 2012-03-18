@@ -1,7 +1,7 @@
 """
 Module: Piston API Handlers
 Project: Adlibre DMS
-Copyright: Adlibre Pty Ltd 2011
+Copyright: Adlibre Pty Ltd 2011, 2012
 License: See LICENSE for license information
 """
 
@@ -49,6 +49,7 @@ class FileInfoHandler(BaseFileHandler):
     def read(self, request):
         try:
             document_name, extension, revision, hashcode = self.get_file_info(request)
+            log.debug('FileInfoHandler.read request begin for %s, ext %s, rev %s, hash %s' % (document_name, extension, revision, hashcode))
         except ValueError:
             log.error('FileInfoHandler.read ValueError')
             if settings.DEBUG:
@@ -72,6 +73,7 @@ class FileInfoHandler(BaseFileHandler):
         info['tags'] = document.get_tags()
         info['no_doccode'] = document.get_docrule().no_doccode
         response = HttpResponse(json.dumps(info))
+        log.info('FileInfoHandler.read request fulfilled for %s, ext %s, rev %s, hash %s' % (document_name, extension, revision, hashcode))
         return response
 
 
@@ -81,6 +83,7 @@ class FileHandler(BaseFileHandler):
     def read(self, request):
         try:
             document_name, extension, revision, hashcode = self.get_file_info(request)
+            log.debug('FileHandler.read request begin for %s, ext %s, rev %s, hash %s' % (document_name, extension, revision, hashcode))
         except ValueError:
             log.error('FileHandler.read ValueError')
             if settings.DEBUG:
@@ -105,6 +108,7 @@ class FileHandler(BaseFileHandler):
         response = HttpResponse(content, mimetype=mimetype)
         response["Content-Length"] = len(content)
         response['Content-Disposition'] = 'filename=%s' % filename
+        log.info('FileHandler.read request fulfilled for %s, ext %s, rev %s, hash %s' % (document_name, extension, revision, hashcode))
         return response
 
     def create(self, request):
@@ -116,20 +120,21 @@ class FileHandler(BaseFileHandler):
         if len(manager.errors) > 0:
             log.error('FileHandler.create manager errors: %s' % manager.errors)
             return rc.BAD_REQUEST
+        log.info('FileHandler.create request fulfilled for %s' % document.get_filename())
         return document.get_filename()
 
     def delete(self, request):
         filename = request.REQUEST.get('filename')
-        document, extension = os.path.splitext(filename)
+        document_name, extension = os.path.splitext(filename)
         extension = extension.strip(".")
-
+        hashcode = None # FIXME, why is this not supported for delete?
         revision = request.REQUEST.get("r", None) # TODO: TestMe
         full_filename = request.REQUEST.get('full_filename', None)
         parent_directory = None
         #parent_directory = request.GET.get('parent_directory', None) # FIXME: Why are we allowing this with the API?
         manager = DocumentManager()
         try:
-            manager.delete_file(request, document, revision=revision, full_filename=full_filename,
+            manager.delete_file(request, document_name, revision=revision, full_filename=full_filename,
                     parent_directory=parent_directory, extension=extension)
         except Exception, e:
             log.error('FileHandler.delete exception %s' % e)
@@ -141,6 +146,7 @@ class FileHandler(BaseFileHandler):
             if settings.DEBUG:
                 print manager.errors
             return rc.BAD_REQUEST
+        log.info('FileHandler.delete request fulfilled for %s, ext %s, rev %s, hash %s' % (document_name, extension, revision, hashcode))
         return rc.DELETED
 
     def update(self, request):
@@ -173,6 +179,7 @@ class FileHandler(BaseFileHandler):
                     raise Exception('FileHandler.update manager errors')
                 else:
                     return rc.BAD_REQUEST
+            log.info('FileHandler.update request fulfilled for %s, ext %s, rev %s, hash %s' % (document_name, extension, revision, hashcode))
             return HttpResponse(json.dumps( document.get_dict() ))
         except Exception, e: # FIXME
             log.error('FileHandler.update exception %s' % e)
@@ -215,6 +222,8 @@ class FileListHandler(BaseHandler):
                 item.update({   'ui_url': ui_url,
                                 'rule': mapping.get_name(),
                             })
+            log.info('FileListHandler.read request fulfilled for start %s, finish %s, order %s, searchword %s, tag %s, filter_date %s.'
+                                    % (start, finish, order, searchword, tag, filter_date))
             return file_list
         except Exception, e:
             log.error('FileListHandler.read Exception %s' % e)
@@ -232,6 +241,7 @@ class TagsHandler(BaseHandler):
             manager = DocumentManager()
             mapping = manager.get_plugin_mapping_by_kwargs(pk=id_rule)
             tags = manager.get_all_tags(doccode=mapping.get_docrule())
+            log.info('TagsHandler.read request fulfilled for rule %s' % (id_rule))
             return map(lambda x: x.name, tags)
         except Exception, e: # FIXME
             log.error('TagsHandler.read Exception %s' % e)
@@ -259,6 +269,7 @@ class RevisionCountHandler(BaseHandler):
                 if rev_count <= 0: # document without revisions is broken FIXME: In future this is ok!
                     log.info('RevisionCountHandler.read rev_count %s.' % str(rev_count))
                     raise Exception('No document revisions')
+                log.info('RevisionCountHandler.read request fulfilled for document %s, extension %s' % (document, extension))
                 return rev_count
             else:
                 log.error('RevisionCountHandler.read No Doccode')
@@ -285,6 +296,7 @@ class RulesHandler(BaseHandler):
                             'id': x.pk,
                             'ui_url': reverse('ui_document_list', kwargs = {'id_rule': x.pk})
                                 }, mappings))
+        log.info('RulesHandler.read request fulfilled')
         return rules
 
 
@@ -310,6 +322,7 @@ class RulesDetailHandler(BaseHandler):
                 raise
             else:
                 return rc.BAD_REQUEST
+        log.info('RulesDetailHandler.read request fulfilled for rule %s' % id_rule)
         return mapping
 
 
@@ -329,6 +342,7 @@ class PluginsHandler(BaseHandler):
                 raise
             else:
                 return rc.BAD_REQUEST
+        log.info('PluginsHandler.read request fulfilled')
         return plugin_list
 
 
@@ -339,7 +353,7 @@ class MetaDataTemplateHandler(BaseHandler):
         if not request.user.is_authenticated():
             return rc.FORBIDDEN
         try:
-            docrule_id = request.GET['docrule_id']
+            docrule_id = request.GET['docrule_id'] # FIXME: Need to standardize the arguments / nomenclature
         except Exception, e: # FIXME
             log.error('MetaDataTemplateHandler.read Exception %s' % e)
             if settings.DEBUG:
@@ -352,6 +366,7 @@ class MetaDataTemplateHandler(BaseHandler):
         if mdts_dict == 'error':
             log.error('MetaDataTemplateHandler.read mdts_dict==error')
             return rc.NOT_FOUND
+        log.info('MetaDataTemplateHandler.read request fulfilled for docrule_id %s' % docrule_id)
         return mdts_dict
 
     def create(self, request):
@@ -374,6 +389,7 @@ class MetaDataTemplateHandler(BaseHandler):
         if status == 'error':
             log.error('MetaDataTemplateHandler.create status==error')
             return rc.BAD_REQUEST
+        log.info('MetaDataTemplateHandler.create request fulfilled')
         return status
 
     def delete(self, request):
@@ -391,6 +407,8 @@ class MetaDataTemplateHandler(BaseHandler):
         manager = MetaDataTemplateManager()
         mdt_resp = manager.delete_mdt(mdt_id)
         if mdt_resp == 'done':
+            log.info('MetaDataTemplateHandler.delete request fulfilled for mdt_id %s' % mdt_id)
             return rc.DELETED
         else:
+            log.info('MetaDataTemplateHandler.delete request not found for mdt_id %s' % mdt_id)
             return rc.NOT_FOUND
