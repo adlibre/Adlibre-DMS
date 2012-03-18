@@ -240,7 +240,7 @@ LOGGING = {
         'dms.api': {
             'handlers': ['console', 'file'],
             'level': 'DEBUG',
-            'propagate': True,
+            'propagate': False,
         },
         # Django 500 error logger
         'django.request': {
