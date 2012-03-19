@@ -199,8 +199,8 @@ label {
 #menu ul li a {
     padding-top: 5px;
     padding-bottom: 3px;
-    padding-left:40px;
-    padding-right:40px;
+    padding-left: 25px;
+    padding-right: 25px;
     text-decoration: none;
 }
 #menu ul li a:hover {

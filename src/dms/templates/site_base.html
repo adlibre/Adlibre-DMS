@@ -17,7 +17,25 @@
         {% block logo %}{% endblock %}
     </div>
     <div id="header">
-        {% block header %}{% endblock %}
+        {% block header %}
+        <div id="menu">
+            <ul>
+                <li class="home"><a href="{% url home %}">{% trans 'Home' %}</a></li>
+                {% if user.is_staff %}
+                <li class="files"><a href="{% url files_index %}">{% trans 'Files' %}</a></li>
+                <li class="settings"><a href="{% url setting %}">{% trans 'Settings' %}</a></li>
+                <li class="plugins"><a href="{% url plugins %}">{% trans 'Plugins' %}</a></li>
+                <li class="ui"><a href="{% url ui_rule_list %}">{% trans 'Admin UI' %}</a></li>
+                {% endif %}
+                {% if user.is_authenticated %}
+                <li class="mdtui"><a href="{% url mdtui-home %}">{% trans 'MUI' %}</a></li>
+                <li class="logout"><a href="{% url logout %}">{% trans 'Log out' %}</a></li>
+                {% else %}
+                <li class="login"><a href="{% url login %}">{% trans 'Log in' %}</a></li>
+                {% endif %}
+            </ul>
+        </div>
+        {% endblock %}
     </div>
     <div id="container">
         {% block body %}{% endblock %}
