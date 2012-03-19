@@ -10,7 +10,6 @@ import magic
 from django.conf import settings
 from django.core.urlresolvers import reverse
 
-from base_test import AdlibreTestCase
 from django.test import TestCase
 
 
