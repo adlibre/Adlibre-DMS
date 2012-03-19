@@ -23,6 +23,7 @@ test_mdt_docrule_id = 2 # should be properly assigned to fixtures docrule that u
 indexes_form_match_pattern = '(Employee ID|Employee Name|Friends ID|Friends Name).+?name=\"(\d+)\"'
 
 mdt1 = {
+    "_id": 'mdt1',
     "docrule_id": str(test_mdt_docrule_id),
     "description": "Tests MDT number 1",
     "fields": {
@@ -44,6 +45,7 @@ mdt1 = {
 }
 
 mdt2 = {
+    "_id": 'mdt2',
     "docrule_id": str(test_mdt_docrule_id),
     "description": "Tests MDT number 2",
     "fields": {

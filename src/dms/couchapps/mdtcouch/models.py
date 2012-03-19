@@ -23,6 +23,7 @@ class MetaDataTemplate(Document):
         app_label = "mdtcouch"
 
     def populate_from_DMS(self, mdt_data):
+        self._id = mdt_data["_id"] # Set CouchDB document id from mdt
         self.docrule_id = mdt_data["docrule_id"]
         self.description = mdt_data["description"]
         self.fields = mdt_data["fields"]
