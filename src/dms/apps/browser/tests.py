@@ -19,7 +19,7 @@ Test data
 username = 'admin'
 password = 'admin'
 
-documents_pdf = ('ADL-1111', 'ADL-1234', 'ADL-2222',)
+documents_pdf = ('ADL-0001', 'ADL-0002', 'ADL-1111', 'ADL-1234', 'ADL-2222',)
 documents_txt = ('10001', '10006', '101',)
 documents_tif = ('2011-01-27-1', '2011-01-28-12',)
 documents_missing = ('ADL-8888', 'ADL-9999',)
@@ -70,14 +70,14 @@ class ViewTest(AdlibreTestCase):
          cleanup_docs_list = []
          for doc in documents_pdf, documents_tif, documents_txt:
              cleanup_docs_list.append(doc)
-         #cleaning up simple docs
+         # cleaning up simple docs
          for list in cleanup_docs_list:
              for doc in list:
                  data = { 'filename': doc, }
                  response = self.client.delete(url, data)
                  self.assertEqual(response.status_code, 204)
 
-         #building proper list for docs that contain HASH
+         # building proper list for docs that contain HASH
          cleanup_docs_list = []
          for doc in documents_hash, documents_missing_hash:
              cleanup_docs_list.append(doc)
