@@ -25,9 +25,9 @@
     {% endif %}
     <div id="content">
     <div id="ui_page_header_wrapper">
-    {% if THEME_NAME == 'solid' %}
+    {% if THEME_NAME == 'solid' %}{# FIXME Don't reference theme in template. this is a hack! #}
         <ul id="logotype">
-            <a href="/ui/"><img src="{{ STATIC_URL }}theme/{{ THEME_NAME }}/adlibre-dms-logo.png" title="Adlibre DMS" alt="Adlibre DMS" /></a>
+            <a href="{% url home %}"><img src="{{ STATIC_URL }}theme/{{ THEME_NAME }}/adlibre-dms-logo.png" title="Adlibre DMS" alt="Adlibre DMS" /></a>
         </ul>
     {% endif %}
         <ul id="ui_breadcrumbs">
