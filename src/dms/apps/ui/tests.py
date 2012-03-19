@@ -12,15 +12,10 @@ Basic UI tests
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from base_test import AdlibreTestCase
+from adlibre.dms.base_test import DMSTestCase
 
 import os
 
-# auth user
-username = 'admin'
-password = 'admin'
-
-test_document_files_dir = settings.FIXTURE_DIRS[0] + '/testdata/'
 
 test_document_files = [
     '10001.txt',
@@ -42,24 +37,26 @@ test_document_files = [
     'test_no_doccode.pdf',
 ]
 
-test_document_files_missing = ['ADL-8888.pdf', 'ADL-9999.pdf',]
-
 upload_form_html = """<form id="ui_upload_file_form" enctype="multipart/form-data" action="/ui/upload-document/" method="post">"""
 
-class Main_DMS_UI_Test(AdlibreTestCase):
+class Main_DMS_UI_Test(DMSTestCase):
+
     def setUp(self):
-        # We-re using only logged in client in this test
-        self.client.login(username=username, password=password)
+        # We-re using only a logged in client in this tests
+        self.client.login(username=self.username, password=self.password)
+
+        # Load Test Data
+        self.loadTestDocuments()
 
     def _ui_upload(self, filename):
         # upload helper
         url = reverse('ui_upload_document')
-        data = { 'file': open(os.path.join(test_document_files_dir, filename), 'r'), }
+        data = { 'file': open(os.path.join(self.test_document_files_dir, filename), 'r'), }
         response = self.client.post(url, data)
         return response
 
     def test_upload_through_ui(self):
-        #testing upload by all Document Type Rule test files
+        # Test upload of all test documents, covering all Document Type Rules
         for filename in test_document_files:
             response = self._ui_upload(filename)
             self.assertNotEqual(response.status_code, 500)
@@ -76,10 +73,3 @@ class Main_DMS_UI_Test(AdlibreTestCase):
             data = { 'filename': doc, }
             response = self.client.delete(url, data)
             self.assertEqual(response.status_code, 204)
-
-        # MAC specific cleanup:
-        try:
-         data = { 'filename': '.DS_Store' }
-         response = self.client.delete(url, data)
-        except:
-         pass
