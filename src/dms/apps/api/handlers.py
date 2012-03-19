@@ -373,16 +373,17 @@ class MetaDataTemplateHandler(BaseHandler):
 
         # Retrieve MDT from docrule_id
         manager = MetaDataTemplateManager()
-        manager.docrule_id = docrule_id            # FIXME should be on initialised with correct id
-        mdts_dict = manager.get_mdts_for_docrule(manager.docrule_id)
+        manager.docrule_id = docrule_id            # TODO: FIXME Manager should be initialised with correct id
+        result = manager.get_mdts_for_docrule(manager.docrule_id)
 
-        log.debug('MetaDataTemplateHandler.read mdts_dict: %s.' % mdts_dict)
+        log.debug('MetaDataTemplateHandler.read result: %s.' % result)
 
-        if mdts_dict == False:
+        if result is False:
             log.error('MetaDataTemplateHandler.read error with docrule_id %s' % docrule_id)
             return rc.NOT_FOUND
+
         log.info('MetaDataTemplateHandler.read request fulfilled for docrule_id %s' % docrule_id)
-        return mdts_dict
+        return result
 
     def create(self, request):
 
@@ -416,13 +417,13 @@ class MetaDataTemplateHandler(BaseHandler):
             return rc.BAD_REQUEST
 
         # Store MDT
-        status = manager.store(data)
-        if status == False:
+        result = manager.store(data)
+        if result is False:
             log.error('MetaDataTemplateHandler.create error occurred on store.')
             return rc.BAD_REQUEST
 
         log.info('MetaDataTemplateHandler.create request fulfilled.')
-        return status
+        return result
 
     def delete(self, request):
         if not request.user.is_authenticated():
@@ -446,8 +447,8 @@ class MetaDataTemplateHandler(BaseHandler):
 
         # Delete MDT via Manager
         manager = MetaDataTemplateManager()
-        mdt_resp = manager.delete_mdt(mdt_id)
-        if mdt_resp == True:
+        result = manager.delete_mdt(mdt_id)
+        if result is True:
             log.info('MetaDataTemplateHandler.delete request fulfilled for mdt_id %s' % mdt_id)
             return rc.DELETED
         else:
