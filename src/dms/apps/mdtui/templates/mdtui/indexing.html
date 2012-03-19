@@ -1,5 +1,6 @@
 {% extends "mdtui/base.html" %}
 {% load index_keys %}
+{% load widget_tweaks %}
 
 {% block body_content %}
     <h1>{% block body_title %}Document Indexing{% endblock %}</h1>
@@ -140,7 +141,7 @@
                     {%  endif %}
                     <label class="control-label">{{ field.label }}</label>
                     <div class="controls">
-                        {{ field }}
+                        {{ field|attr:'class:input-xxlarge' }}
                         <p class="help-block">{{ field.help_text }}</p>
                     </div>
                 </div>
@@ -168,7 +169,6 @@
                 </div>
                 {%  endif %}
                 {%  endfor %}
-
 
 
             </fieldset>

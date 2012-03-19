@@ -165,6 +165,7 @@ INSTALLED_APPS = (
     'plugins',
     'taggit',
     'couchdbkit.ext.django', # needed for CouchDB usage
+    'widget_tweaks', # used by MUI templates
     # DMS Core
     'api',
     'docs',
