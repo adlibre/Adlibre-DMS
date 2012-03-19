@@ -16,6 +16,7 @@ password = 'admin'
 
 api = 'http://127.0.0.1:8000/api/mdt/'
 template = {
+    "_id": "mytesttemplate",
     "docrule_id": "10000",
     "description": "<-- description of this metadata template -->",
     "fields": {
@@ -141,7 +142,7 @@ class MetadataCouchDB(TestCase):
 
     def test_mdt_getting_improper_call(self):
         """
-        Tries to get not existing MDT from API
+        Tries to get non existent MDT from API
         """
         url = reverse('api_mdt')
         response = self.client.get(url, {"docrule_id": "10000000"})
@@ -157,25 +158,25 @@ class MetadataCouchDB(TestCase):
 
     def test_mdt_removing_wrong_id(self):
         """
-        Testing wrond deletion calls
+        Testing wrong deletion calls
         """
         url = reverse('api_mdt')
-        response = self.client.get(url, {"docrule_id": "10000000"})
+        response = self.client.delete(url, {"mdt_id": "10000000"})
         self.assertEqual(response.status_code, 404)
 
     def test_mdt_removing_improper_call(self):
         """
-        Testing wrond deletion calls
+        Testing wrong deletion calls
         """
         url = reverse('api_mdt')
-        response = self.client.get(url)
+        response = self.client.delete(url)
         self.assertEqual(response.status_code, 400)
 
     def test_mdt_z_proper_removing(self):
         """
-        Deleting all- test MDT's (with doccode 10000).
+        Deleting all test MDT's (with doccode 10000).
 
-        NOTE: NAme of test should be in the end not to fail other tests...
+        NOTE: Name of test should be in the end not to fail other tests...
         """
         url = reverse('api_mdt')
         response = self.client.get(url, {"docrule_id": "10000"})
@@ -189,9 +190,9 @@ class MetadataTemplateExternalUser(TestCase):
 
     def test_mdt_remove_not_logged_in(self):
         """
-        Deleting all- test MDT's (with doccode 10000).
+        Deleting all test MDT's (with doccode 10000).
 
-        NOTE: NAme of test should be in the end not to fail other tests...
+        NOTE: Name of test should be in the end not to fail other tests...
         """
         url = reverse('api_mdt')
         response = self.client.get(url, {"docrule_id": "10000"})

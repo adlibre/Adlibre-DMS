@@ -349,64 +349,105 @@ class PluginsHandler(BaseHandler):
 class MetaDataTemplateHandler(BaseHandler):
     allowed_methods = ('GET','POST', 'DELETE')
 
+    """
+    docrule_id is used for read
+    mdt_id is use for delete
+    """
+
     def read(self, request):
         if not request.user.is_authenticated():
+            log.error('MetaDataTemplateHandler.read attempted with unauthenticated user.')
             return rc.FORBIDDEN
+
+        # Catch get with no payload
         try:
             docrule_id = request.GET['docrule_id'] # FIXME: Need to standardize the arguments / nomenclature
-        except Exception, e: # FIXME
-            log.error('MetaDataTemplateHandler.read Exception %s' % e)
+        except KeyError, e:
+            log.error('MetaDataTemplateHandler.read attempted with no payload.')
             if settings.DEBUG:
                 raise
             else:
                 return rc.BAD_REQUEST
+
+        log.debug('MetaDataTemplateHandler.read underway with docrule_id %s.' % docrule_id)
+
+        # Retrieve MDT from docrule_id
         manager = MetaDataTemplateManager()
-        manager.docrule_id = docrule_id
+        manager.docrule_id = docrule_id            # FIXME should be on initialised with correct id
         mdts_dict = manager.get_mdts_for_docrule(manager.docrule_id)
-        if mdts_dict == 'error':
-            log.error('MetaDataTemplateHandler.read mdts_dict==error')
+
+        log.debug('MetaDataTemplateHandler.read mdts_dict: %s.' % mdts_dict)
+
+        if mdts_dict == False:
+            log.error('MetaDataTemplateHandler.read error with docrule_id %s' % docrule_id)
             return rc.NOT_FOUND
         log.info('MetaDataTemplateHandler.read request fulfilled for docrule_id %s' % docrule_id)
         return mdts_dict
 
     def create(self, request):
+
         if not request.user.is_authenticated():
-            log.info('MetaDataTemplateHandler.create unauthenticated user')
+            log.error('MetaDataTemplateHandler.create attempted with unauthenticated user.')
             return rc.FORBIDDEN
+
+        # Catch post with no payload
         try:
             mdt = request.POST['mdt']
-            data = json.loads(str(mdt))
-        except Exception, e: # FIXME
-            log.error('MetaDataTemplateHandler.create Exception %s' % e)
+        except KeyError, e:
+            log.error('MetaDataTemplateHandler.create attempted with no payload.')
             if settings.DEBUG:
                 raise
             else:
                 return rc.BAD_REQUEST
+
+        # Catch improper MDT payload
+        try:
+            data = json.loads(str(mdt))
+        except ValueError, e:
+            log.error('MetaDataTemplateHandler.create attempted with bad json payload. %s' % e)
+            if settings.DEBUG:
+                raise
+            else:
+                return rc.BAD_REQUEST
+
+        # Try and validate MDT
         manager = MetaDataTemplateManager()
         if not manager.validate_mdt(mdt):
             return rc.BAD_REQUEST
+
+        # Store MDT
         status = manager.store(data)
-        if status == 'error':
-            log.error('MetaDataTemplateHandler.create status==error')
+        if status == False:
+            log.error('MetaDataTemplateHandler.create error occurred on store.')
             return rc.BAD_REQUEST
-        log.info('MetaDataTemplateHandler.create request fulfilled')
+
+        log.info('MetaDataTemplateHandler.create request fulfilled.')
         return status
 
     def delete(self, request):
         if not request.user.is_authenticated():
-            log.info('MetaDataTemplateHandler.delete unauthenticated user')
+            log.error('MetaDataTemplateHandler.delete attempted with unauthenticated user.')
             return rc.FORBIDDEN
+
+        # Catch improper mdt_id in request
         try:
             mdt_id = request.REQUEST.get('mdt_id')
-        except Exception, e:
-            log.error('MetaDataTemplateHandler.delete Exception %s' % e)
+            log.info('MetaDataTemplateHandler.delete attempted with valid request %s' % mdt_id)
+        except KeyError, e:
+            log.error('MetaDataTemplateHandler.delete attempted with invalid request %s' % e)
             if settings.DEBUG:
                 raise
             else:
                 return rc.BAD_REQUEST
+
+        # Catch mdt_id is None
+        if mdt_id is None:
+            return rc.BAD_REQUEST
+
+        # Delete MDT via Manager
         manager = MetaDataTemplateManager()
         mdt_resp = manager.delete_mdt(mdt_id)
-        if mdt_resp == 'done':
+        if mdt_resp == True:
             log.info('MetaDataTemplateHandler.delete request fulfilled for mdt_id %s' % mdt_id)
             return rc.DELETED
         else:
