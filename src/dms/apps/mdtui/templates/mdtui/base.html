@@ -80,7 +80,7 @@
                         <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}"><i class="icon-home icon-white"></i> {% trans 'Home' %}</a></li>
                         {% url mdtui-search as url %}
                         <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}"><i class="icon-search icon-white"></i> {% trans 'Search' %}</a></li>
-                         {% url mdtui-index as url %}
+                        {% url mdtui-index as url %}
                         <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}"><i class="icon-barcode icon-white"></i> {% trans 'Index' %}</a></li>
                         {# <li><a href="{{ url }}"><i class="icon-list icon-white"></i> {% trans 'Admin' %}</a></li>  #}
                         {% if user.is_authenticated %}
