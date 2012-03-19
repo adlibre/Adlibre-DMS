@@ -73,16 +73,21 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </a>
-                <a class="brand" href="{% url mdtui-home %}">Adlibre DMS</a>
+                <a class="brand" href="{% url mdtui-home %}">{% trans 'Adlibre DMS' %}</a>
                 <div class="nav-collapse">
                     <ul class="nav">
                         {% url mdtui-home as url %}
-                        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}"><i class="icon-home icon-white"></i> Home</a></li>
+                        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}"><i class="icon-home icon-white"></i> {% trans 'Home' %}</a></li>
                         {% url mdtui-search as url %}
-                        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}"><i class="icon-search icon-white"></i> Search</a></li>
+                        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}"><i class="icon-search icon-white"></i> {% trans 'Search' %}</a></li>
                          {% url mdtui-index as url %}
-                        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}"><i class="icon-barcode icon-white"></i> Index</a></li>
-                        {# <li><a href="{{ url }}"><i class="icon-list icon-white"></i> Admin</a></li>  #}
+                        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}"><i class="icon-barcode icon-white"></i> {% trans 'Index' %}</a></li>
+                        {# <li><a href="{{ url }}"><i class="icon-list icon-white"></i> {% trans 'Admin' %}</a></li>  #}
+                        {% if user.is_authenticated %}
+                        <li class="logout"><a href="{% url logout %}?next={{ request.path }}"><i class="icon-user icon-white"></i> {% trans 'Log out' %}</a></li>
+                        {% else %}
+                        <li class="login"><a href="{% url login %}?next={{ request.path }}"><i class="icon-user icon-white"></i> {% trans 'Log in' %}</a></li>
+                        {% endif %}
                     </ul>
                 </div><!--/.nav-collapse -->
             </div>
