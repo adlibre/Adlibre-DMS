@@ -161,13 +161,7 @@ def indexing_select_type(request, step=None, template='mdtui/indexing.html'):
     autocomplete_list = []
     warnings = []
     form = DocumentTypeSelectForm(request.POST or None)
-
-    try:
-        # search done. Cleaning up session for indexing to avoid collisions in functions
-        del request.session["document_search_dict"]
-        del request.session['docrule']
-    except KeyError:
-        pass
+    cleanup_search_session(request)
 
     if request.POST:
 
@@ -215,13 +209,7 @@ def indexing_details(request, step=None, template='mdtui/indexing.html'):
     document_keys = None
     autocomplete_list = []
     warnings = []
-
-    try:
-        # search done. Cleaning up session for indexing to avoid collisions in functions
-        del request.session["document_search_dict"]
-        del request.session['docrule']
-    except KeyError:
-        pass
+    cleanup_search_session(request)
 
     # Hack to make the navigation work for testing the templates
     if request.POST:
@@ -315,18 +303,12 @@ def indexing_finished(request, step=None, template='mdtui/indexing.html'):
     Indexing: Step 4: Finished
     """
     context = { 'step': step,  }
-
     try:
         context.update({'document_keys':request.session["document_keys_dict"],})
     except KeyError:
         pass
-
     # document uploaded forget everything
-    request.session["document_keys_dict"] = None
-    request.session['docrule_id'] = None
-    del request.session['docrule_id']
-    del request.session["document_keys_dict"]
-
+    cleanup_indexing_session(request)
     return render(request, template, context)
 
 

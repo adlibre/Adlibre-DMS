@@ -49,19 +49,12 @@ class DocumentIndexForm(forms.Form):
         """
         keys = kwds.keys()
         keys.sort()
+        self.is_bound = True
         for k in keys:
             self.data[k] = kwds[k]
-
-#    def clean(self):
-#        try:
-#            # do validation here
-#            pass
-#        except ValidationError, e:
-#            if blame_field:
-#            self._errors[blame_field] = e.messages
-#            else:
-#                raise e
-
+            # populating form fields
+            #print kwds[k]
+            #self.fields[k].value = kwds[k]
 
     def validation_ok(self):
         """
