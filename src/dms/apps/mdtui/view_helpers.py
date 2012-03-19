@@ -143,3 +143,29 @@ def extract_secondary_keys_from_form(form):
         except AttributeError:
             pass
     return keys_list
+
+def cleanup_search_session(request):
+    """
+    Makes MDTUI forget abut searching keys entered before.
+    """
+    try:
+        # search done. Cleaning up session for indexing to avoid collisions in functions
+        request.session["document_search_dict"] = None
+        request.session['docrule'] = None
+        del request.session["document_search_dict"]
+        del request.session['docrule']
+    except KeyError:
+        pass
+
+def cleanup_indexing_session(request):
+    """
+    Makes MDTUI forget abut indexing keys entered before.
+    """
+    try:
+        # Index done. Cleaning up session for future indexing to avoid collisions
+        request.session["document_keys_dict"] = None
+        request.session['docrule_id'] = None
+        del request.session["document_keys_dict"]
+        del request.session['docrule_id']
+    except KeyError:
+        pass
