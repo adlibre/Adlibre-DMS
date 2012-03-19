@@ -6,14 +6,19 @@ License: See LICENSE for license information
 Author: Iurii Garmash
 """
 
+import logging
+
 from django.conf import settings
 from mdtcouch.models import MetaDataTemplate
+
+
+log = logging.getLogger('dms.mdtcouch.mdt_manager')
 
 class MetaDataTemplateManager(object):
     """
     Main DMS manager for operating with Metadata Templates.
 
-    Uses only couchDB storage implemntationfor now.
+    Uses only CouchDB storage implementation for now.
     """
     def __init__(self):
         self.mdt = {}
@@ -26,37 +31,42 @@ class MetaDataTemplateManager(object):
         Manager must have docrule assigned ( MetaDataTemplateManager.docrule_id = 1 )
         in order for manager to work properly.
 
-        returns dict of MDT's for docrule_id provided/or 'error' string to indicate failure in operation.
-        Main concept is to validate if manager method output is not == 'error' string while using in code.
+        Returns dict of MDT's for docrule_id provided/or False to indicate failure in operation.
         """
         mdts_list = {}
         # validating
         if self.mdt_read_call_valid(docrule_id):
             try:
-
                 # getting MDT's from DB
                 mdts_view = MetaDataTemplate.view('mdtcouch/docrule', key=docrule_id)
                 # constructing MDT's response dict
                 id = 1
-                for row in mdts_view:
+                for row in mdts_view: #FIXME use key,row??
                     mdts_list[str(id)] = row._doc
                     # cleaning up _id and _rev from response to unify response
                     mdts_list[str(id)]["mdt_id"] = mdts_list[str(id)]['_id']
                     del mdts_list[str(id)]['_id']
                     del mdts_list[str(id)]['_rev']
                     id+=1
-            except:
-                pass
-        # something not valid response:
-        if not mdts_list:
-            mdts_list = 'error'
-        return mdts_list
+            except Exception: # FIXME
+                # Not a valid response
+                mdts_list = False
+
+            # FIXME: The fact that this is required is indicative that the above code is troublesome
+            if mdts_list == {}:
+                return False
+            else:
+                return mdts_list
+
+        else:
+            return False
 
     def store(self, mdt_data):
         """
         Method to store MDT into DB. Uses JSON provided.
         Example MDT:
         {
+            "_id": "mymdt",
             "docrule_id": "1",
             "description": "description of this metadata template",
             "fields": {
@@ -84,27 +94,27 @@ class MetaDataTemplateManager(object):
                 mdt.populate_from_DMS(mdt_data)
                 mdt.save()
                 return {"status": "ok", "mdt_id": "%s" %mdt._doc._id}
-            except Exception, e:
+            except AttributeError, e: # FIXME: This is always being hit, even though save() is successful
+                log.error('MetaDataTemplateManager.store Exception: %s' % e)
                 if settings.DEBUG:
-                    print "Exception: ", e
                     raise
                 else:
                     pass
         else:
-            return 'error'
-
+            log.error('MetaDataTemplateManager.store did not validate')
+            return False
 
     def delete_mdt(self, mdt):
-        #print 'Deleting mdt: %s' %mdt
+        log.info('delete_mdt %s' % mdt)
         try:
             mdt = MetaDataTemplate.get(docid=mdt)
             mdt.delete()
-        except:
-            return "error"
-        return 'done'
+        except Exception: # FIXME
+            return False
+        return True
 
     def validate_mdt(self, mdt):
-        # todo: MDT validation sequence here
+        # TODO: MDT validation sequence here
         return True
 
     def mdt_read_call_valid(self, docrule_id):
@@ -117,5 +127,5 @@ class MetaDataTemplateManager(object):
             int(self.docrule_id)
             str(self.docrule_id)
             return True
-        except:
+        except Exception: # FIXME
             return False

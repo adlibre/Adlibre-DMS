@@ -25,7 +25,7 @@ indexes_form_match_pattern = '(Employee ID|Employee Name|Friends ID|Friends Name
 mdt1 = {
     "_id": 'mdt1',
     "docrule_id": str(test_mdt_docrule_id),
-    "description": "Tests MDT number 1",
+    "description": "Test MDT Number 1",
     "fields": {
        "1": {
            "type": "integer",
@@ -47,7 +47,7 @@ mdt1 = {
 mdt2 = {
     "_id": 'mdt2',
     "docrule_id": str(test_mdt_docrule_id),
-    "description": "Tests MDT number 2",
+    "description": "Test MDT Number 2",
     "fields": {
        "1": {
            "type": "integer",
@@ -400,7 +400,7 @@ class MDTUI(TestCase):
         Cleaning up after all tests finished.
         Must be ran after all tests in this test suite.
         """
-        #Deleting all- test MDT's (with doccode from var "test_mdt_docrule_id") using MDT's API.
+        # Deleting all- test MDT's (with doccode from var "test_mdt_docrule_id") using MDT's API.
         url = reverse('api_mdt')
         response = self.client.get(url, {"docrule_id": str(test_mdt_docrule_id)})
         data = json.loads(str(response.content))
