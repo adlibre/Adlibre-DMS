@@ -40,7 +40,7 @@ unlisted_files_used = [
 ]
 
 adlibre_invoices_rule_id = 1
-documents = ('ADL-1111', 'ADL-1234', 'ADL-2222',)
+documents = ('ADL-0001', 'ADL-0002', 'ADL-1111', 'ADL-1234', 'ADL-2222',)
 documents_missing = ()
 
 documents_hash = [
