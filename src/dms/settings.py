@@ -189,6 +189,21 @@ INSTALLED_APPS = (
 # the site admins on every HTTP 500 error.
 # See http://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.
+
+import logging
+class NoMessageFailuresFilter(logging.Filter):
+    """
+    Filter django message failures during unit tests!
+    """
+    def filter(self, record):
+        if record.exc_info:
+            from django.contrib.messages.api import MessageFailure
+            exception = record.exc_info[1]
+            if isinstance(exception, MessageFailure):
+                # Remove MessageFailure Exceptions
+                return False
+        return True
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -224,6 +239,11 @@ LOGGING = {
             'class': 'django.utils.log.AdminEmailHandler',
         }
     },
+    'filters': {
+        'no_message_failures': {
+            '()': NoMessageFailuresFilter,
+            },
+        },
     'loggers': {
         # Filter out restkit to null
         'restkit': {
@@ -235,6 +255,7 @@ LOGGING = {
         '': {
             'handlers': ['console', 'file'],
             'level': 'INFO',
+            'filters': ['no_message_failures'],
             'propagate': True,
         },
         # API logger
@@ -248,6 +269,7 @@ LOGGING = {
             'handlers': ['mail_admins'],
             'level': 'ERROR',
             'propagate': True,
+            'filters': ['no_message_failures'],
         },
 
     }
