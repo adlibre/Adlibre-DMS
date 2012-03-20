@@ -352,7 +352,7 @@ class MDTUI(TestCase):
         response = self.client.get(url)
         # Getting indexes form and matching form Indexing Form fields names
         rows_dict = self._read_indexes_form(response)
-        search_dict = doc1_dict
+        search_dict = self._createa_search_dict(doc1_dict)
         # Search without a description (we can't yet search on this field)
         del search_dict['description']
         # Searching without date
@@ -394,6 +394,38 @@ class MDTUI(TestCase):
         self.assertNotContains(response, "You have not defined Document Searching Options")
         # document not found
         self.assertNotContains(response, doc1)
+
+    def test_17_add_indexes_unvalidated_form_preserves_prepopulated_data(self):
+        """
+        MDTUI Indexing Form .
+        Step 2 adding indexes into several fields instead of all required
+        returns prepopulated form with errors.
+        """
+        # Selecting Document Type Rule
+        url = reverse('mdtui-index-type')
+        response = self.client.post(url, {'docrule': test_mdt_docrule_id})
+        self.assertEqual(response.status_code, 302)
+        url = reverse("mdtui-index-details")
+        # Getting indexes form and matching form Indexing Form fields names
+        response = self.client.get(url)
+        rows_dict = self._read_indexes_form(response)
+        post_dict = self._convert_doc_to_post_dict(rows_dict, doc1_dict)
+        # Modifying post to brake it
+        post_dict["description"]=u''
+        post_dict["0"] = u''
+        # Adding Document Indexes
+        response = self.client.post(url, post_dict)
+        self.assertEqual(response.status_code, 200)
+        # Response contains proper validation data
+        self.assertContains(response, 'Brief Document Description') # form fields help exists
+        self.assertContains(response, 'Name of tests person')
+        self.assertContains(response, '2012-03-06') # docs data populated into form
+        self.assertContains(response, 'Andrew')
+        self.assertContains(response, '123456')
+        self.assertContains(response, 'Iurii Garmash')
+        self.assertContains(response, '// autocomplete for field Friends ID') # autocomplete (typehead) scripts rendered
+        self.assertContains(response, '// autocomplete for field Friends Name')
+        self.assertContains(response, 'This field is required') # form renders errors
 
     def test_z_cleanup(self):
         """
@@ -446,5 +478,14 @@ class MDTUI(TestCase):
         self.assertEqual(response.status_code, 302)
         new_url = re.search("(?P<url>https?://[^\s]+)", str(response)).group("url")
         return new_url
+
+    def _createa_search_dict(self, doc_dict):
+        """
+        Creates a search dict to avoid rewriting document dict constants.
+        """
+        search_dict = {}
+        for key in doc_dict.keys():
+            search_dict[key] = doc_dict[key]
+        return search_dict
 
 
