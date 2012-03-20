@@ -5,7 +5,7 @@
 {% block title %}Documents{% endblock %}
 
 {%block head_includes%}
-<style type="text/css">@import "{{MEDIA_URL}}css/datepick/jquery.datepick.css";</style> 
+<style type="text/css">@import "{{ MEDIA_URL }}css/datepick/jquery.datepick.css";</style>
 
 {%endblock%}
 
@@ -57,7 +57,7 @@
 
 {%block javascript%}
 {{block.super}}
-<script type="text/javascript" src="{{MEDIA_URL}}js/datepick/jquery.datepick.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}js/datepick/jquery.datepick.js"></script>
 <script type="text/javascript" language="javascript" src="{{ MEDIA_URL }}js/jquery-endless-scroll-1.3.js"></script>
 <script type="text/javascript" language="javascript">
 $(document).ready(function(){

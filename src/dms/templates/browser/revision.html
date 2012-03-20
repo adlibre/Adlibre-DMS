@@ -5,27 +5,25 @@
 {% block content %}
 <div>
     {% if fileinfo_db %}
-      <h1>Revision of {{ document_name }}</h1>
-    
-      <table id="rules">
-      <tr>
-          <th>Name</th>
-          <th>Filename</th>
-          <th>Created Date</th>
-          <th>Download</th>
-      </tr>
-      {% for fileinfo in fileinfo_db %}
+    <h1>Revision of {{ document_name }}</h1>
+
+    <table id="rules">
         <tr>
-          <td>{{ fileinfo.revision }}</td>
-          <td>{{ fileinfo.name }}</td>
-          <td>{{ fileinfo.created_date }}</td>
-          <td>
-            <a href="/get/{{ document_name }}{%if fileinfo.args%}{{ fileinfo.args }}{%endif%}">Download</a>
-          </td>
+            <th>Name</th>
+            <th>Filename</th>
+            <th>Created Date</th>
+            <th>Download</th>
         </tr>
-      {% endfor %}
-      </table>
-    {%endif%}
+    {% for fileinfo in fileinfo_db %}
+        <tr>
+            <td>{{ fileinfo.revision }}</td>
+            <td>{{ fileinfo.name }}</td>
+            <td>{{ fileinfo.created_date }}</td>
+            <td><a href="/get/{{ document_name }}{%if fileinfo.args%}{{ fileinfo.args }}{%endif%}">Download</a></td>
+        </tr>
+    {% endfor %}
+    </table>
+    {% endif %}
 </div>
 {% endblock %}
 
