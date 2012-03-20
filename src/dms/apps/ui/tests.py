@@ -42,11 +42,9 @@ upload_form_html = """<form id="ui_upload_file_form" enctype="multipart/form-dat
 class Main_DMS_UI_Test(DMSTestCase):
 
     def setUp(self):
-        # We-re using only a logged in client in this tests
+        # NB This is run before EVERY test
+        # Create Logged in Client. We-re using only a logged in client in this tests
         self.client.login(username=self.username, password=self.password)
-
-        # Load Test Data
-        self.loadTestDocuments()
 
     def _ui_upload(self, filename):
         # upload helper
@@ -59,7 +57,7 @@ class Main_DMS_UI_Test(DMSTestCase):
         # Test upload of all test documents, covering all Document Type Rules
         for filename in test_document_files:
             response = self._ui_upload(filename)
-            self.assertNotEqual(response.status_code, 500)
+            self.assertEqual(response.status_code, 200)
             self.assertContains(response, upload_form_html)
 
     def test_z_cleaup(self):
