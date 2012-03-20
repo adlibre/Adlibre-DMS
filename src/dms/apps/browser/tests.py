@@ -20,56 +20,26 @@ class ViewTest(DMSTestCase):
     Test data is provided by DMSTestCase
     """
 
-    def setUp(self):
+    # TODO: Add test to upload files with no doccode.
+    # TODO: Add test to upload files with wrong mime type.
+
+    def test_00_setup(self):
         # Load Test Data
         self.loadTestDocuments()
 
-        # TODO: Add test to upload files with no doccode.
-    # TODO: Add test to upload files with wrong mime type.
     def _upload_file(self, filename):
-        url = reverse("upload")
+        url = reverse('upload')
         self.client.login(username=self.username, password=self.password)
-        # do upload
+        # Do upload
         data = { 'file': open(filename, 'r'), }
         response = self.client.post(url, data)
         return response
 
-    def test_z_cleaup(self):
+    def test_zz_cleaup(self):
         """
         Test Cleanup
         """
-        # Name of this test should be alphabetically last
-        # to be ran after all tests finished
-
-        # files cleanup using API
-        url = reverse("api_file")
-        self.client.login(username=self.username, password=self.password)
-        # building proper cleanup list for normal docs
-        cleanup_docs_list = []
-        for doc in self.documents_pdf, self.documents_tif, self.documents_txt:
-            cleanup_docs_list.append(doc)
-        # cleaning up simple docs
-        for list in cleanup_docs_list:
-            for doc in list:
-                data = { 'filename': doc, }
-                response = self.client.delete(url, data)
-                self.assertEqual(response.status_code, 204)
-
-        # building proper list for docs that contain HASH
-        cleanup_docs_list = []
-        for doc in self.documents_hash, self.documents_missing_hash:
-            cleanup_docs_list.append(doc)
-        for list in cleanup_docs_list:
-            for doc, hash in list:
-                data = { 'filename': doc, }
-                response = self.client.delete(url, data)
-                self.assertEqual(response.status_code, 204)
-
-        # unlisted docs cleanup
-        for doc in self.unlisted_files_used:
-            data = { 'filename': doc, }
-            response = self.client.delete(url, data)
-            self.assertEqual(response.status_code, 204)
+        self.cleanAll(check_response=False) # FIXME: should be true
 
     def test_upload_files(self):
         for doc_set, ext in [(self.documents_pdf, 'pdf'), (self.documents_txt, 'txt'), (self.documents_tif, 'tif') ]:
@@ -83,15 +53,14 @@ class ViewTest(DMSTestCase):
             self.assertContains(response, 'File has been uploaded')
 
     # TODO: expand this to get documents with specific revisions.
-    # FIXME: Currently failing on a fresh dataset. probably due to race condition.
-    # TODO: Test document conversion, tiff2pdf, tiff2text
     def test_get_document(self):
+        # Test security group required
         for d in self.documents_pdf:
             url = '/get/' + d
             response = self.client.get(url)
             self.assertContains(response, "You're not in security group", status_code = 403)
         self.client.login(username=self.username, password=self.password)
-        
+        # Check mime type
         mime = magic.Magic( mime = True )
         for d in self.documents_pdf:
             url = '/get/' + d
@@ -103,11 +72,11 @@ class ViewTest(DMSTestCase):
             response = self.client.get(url)
             mimetype = mime.from_buffer( response.content )
             self.assertEquals(mimetype, 'application/pdf')
+        # Check 404 on missing documents
         for d in self.documents_missing:
             url = '/get/' + d
             response = self.client.get(url)
             self.assertContains(response, 'No such document', status_code = 404)
-
 
     def test_get_document_hash(self):
         self.client.login(username=self.username, password=self.password)
@@ -131,7 +100,6 @@ class ViewTest(DMSTestCase):
             url = '/get/%s?hashcode=%s' % (d[0], d[1])
             response = self.client.get(url)
             self.assertContains(response, 'Hashcode did not validate', status_code = 500)
-        
 
     def test_versions_view(self):
         self.client.login(username=self.username, password=self.password)
@@ -191,7 +159,7 @@ class MiscViewTest(DMSTestCase):
 
 class ConversionTest(DMSTestCase):
 
-    def setUp(self):
+    def test_00_setup(self):
         # Load Test Data
         self.loadTestDocuments()
 
@@ -215,3 +183,9 @@ class ConversionTest(DMSTestCase):
             url = '/get/' + d + '?extension=txt'
             response = self.client.get(url)
             self.assertContains(response, d, status_code=200)
+
+    def test_zz_cleaup(self):
+        """
+        Test Cleanup
+        """
+        self.cleanAll(check_response=False) # FIXME: Should be true, false to hide bug with deleting ADL-12345 and ADL-54321

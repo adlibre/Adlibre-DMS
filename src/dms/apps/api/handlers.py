@@ -124,16 +124,20 @@ class FileHandler(BaseFileHandler):
         return document.get_filename()
 
     def delete(self, request):
+        # FIXME, should return 404 if file not found, 400 if no docrule exists.
+        # fixme should be using get_file_info from parent class.
         filename = request.REQUEST.get('filename')
         document_name, extension = os.path.splitext(filename)
         extension = extension.strip(".")
         hashcode = None # FIXME, why is this not supported for delete?
         revision = request.REQUEST.get("r", None) # TODO: TestMe
-        full_filename = request.REQUEST.get('full_filename', None)
-        parent_directory = None
+        full_filename = request.REQUEST.get('full_filename', None) # what is this?
+        parent_directory = None # FIXME parent_directory is used by /ui/ for nodoccode, but still seems to work
         #parent_directory = request.GET.get('parent_directory', None) # FIXME: Why are we allowing this with the API?
         manager = DocumentManager()
         try:
+            log.debug('FileHandler.delete attempt for document_name:%s, revision:%s, full_filename:%s, parent_directory:%s, extension:%s.'
+                    % (document_name, revision, full_filename, parent_directory, extension))
             manager.delete_file(request, document_name, revision=revision, full_filename=full_filename,
                     parent_directory=parent_directory, extension=extension)
         except Exception, e:
