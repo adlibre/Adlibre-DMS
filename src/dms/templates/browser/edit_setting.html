@@ -7,12 +7,12 @@
 {% block content %}
 <h1>Edit for rule {{ rule.get_docrule.title }}</h1>
 <form action="" method="post">
-  {{ form.as_p }}
-  {%csrf_token%}
-  <p>
-  <label>&nbsp;</label>
-  <input type="submit" value="Continue &rarr;" />
-  </p>
+    {{ form.as_p }}
+    {% csrf_token %}
+    <p>
+        <label>&nbsp;</label>
+        <input type="submit" value="Continue &rarr;" />
+    </p>
 </form>
 {% endblock %}
 

@@ -4,7 +4,7 @@
 {% block title %}{% trans 'Upload' %}{% endblock %}
 
 {% block extra_head %}
-    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/uploadfile.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}browser/uploadfile.css" />
 {%endblock%}
 
 {% block content %}
@@ -15,7 +15,7 @@
     <input type="file" id="upload_file_fileinput" name="file" size="40">
     <input type="text" id="upload_file_fake_filename" readonly="readonly" class="textareas" />
     <input type="button" class="simple_button" id="upload_file_fake_browse" value="{% trans 'Browse' %}" />
-    <input type="submit" class="simple_button upload_btn" id="ui_upload_file_submit" name="" value="{% trans 'Upload' %}" title="" />
+    <input type="submit" class="simple_button upload_btn" id="ui_upload_file_submit" name="" value="{% trans 'Upload' %}" title="{% trans 'Upload' %}" />
     {% csrf_token %}
 </form>
 
@@ -23,5 +23,5 @@
 {% endblock %}
 
 {% block javascript %}
-    <script type="text/javascript" language="javascript" src="{{MEDIA_URL}}js/uploadfile.js"></script>
+    <script type="text/javascript" language="javascript" src="{{STATIC_URL}}browser/uploadfile.js"></script>
 {% endblock %}

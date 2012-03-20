@@ -29,14 +29,15 @@
         {% include "registration/loginform.html" %}
     </div>
     {% else %}
-        <img src="{{ MEDIA_URL }}images/cloud.png" width="317" height="289" class="" style="padding-bottom:20px;" />
+        <img src="{{ STATIC_URL }}browser/cloud.png" width="317" height="289" class="" style="padding-bottom:20px;" />
     {% endif %}
 </div>
 {% else %}
     {# not a demo #}
-    <img src="{{ MEDIA_URL }}images/cloud.png" width="317" height="289" class="alignright" />
+    <img src="{{ STATIC_URL }}browser/cloud.png" width="317" height="289" class="alignright" />
     <h1>Adlibre DMS</h1>
     <p>The lightweight document and media management system for the cloud.</p>
+    <p>Select a menu option to continue.</p>
 {% endif %}
 
 {% endblock %}

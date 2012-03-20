@@ -4,7 +4,7 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<title>{% block title %}{% endblock %} - Adlibre DMS</title>
-    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/uploadfile.css" />
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}browser/uploadfile.css" />
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/ui.css" />
     {# TODO FIXME: Should not import site theme CSS.. either import global site base template, or don't require theme styles #}
 	<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}theme/{{ THEME_NAME }}/style.css" />
@@ -66,10 +66,10 @@
 {%block javascript%}
 <script type="text/javascript" language="javascript" charset="utf-8" src="{{ MEDIA_URL }}js/jquery-1.4.2.min.js"></script>
 <script type="text/javascript" language="javascript" src="{{ MEDIA_URL }}js/jquery.ba-bbq.js"></script>
-<script type="text/javascript" language="javascript" src="{{MEDIA_URL}}/js/ui/communicator.js"></script>
-<script type="text/javascript" language="javascript" src="{{MEDIA_URL}}/js/ui/renderer.js"></script>
-<script type="text/javascript" language="javascript" src="{{MEDIA_URL}}/js/ui/manager.js"></script>
-<script type="text/javascript" language="javascript" src="{{MEDIA_URL}}/js/uploadfile.js"></script>
+<script type="text/javascript" language="javascript" src="{{ MEDIA_URL }}js/ui/communicator.js"></script>
+<script type="text/javascript" language="javascript" src="{{ MEDIA_URL }}js/ui/renderer.js"></script>
+<script type="text/javascript" language="javascript" src="{{ MEDIA_URL }}js/ui/manager.js"></script>
+<script type="text/javascript" language="javascript" src="{{ STATIC_URL }}browser/uploadfile.js"></script>
 <script type="text/javascript" language="javascript">
 var UI_URLS = {{communicator_options|safe}};
 var manager = new UIManager();

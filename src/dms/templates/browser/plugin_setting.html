@@ -11,13 +11,13 @@
 
 <h3>{{ plugin.title }}'s Configuration </h3>
 <form action="" method="post">
-  {{ form.as_p }}
-  {%csrf_token%}
-  <p>
-  <label>&nbsp;</label>
-  <input type="submit" value="Submit &rarr;" />
-  </p>
+    {{ form.as_p }}
+    {% csrf_token %}
+    <p>
+        <label>&nbsp;</label>
+        <input type="submit" value="Submit &rarr;" />
+    </p>
 </form>
-<a href="{% url setting %}">Back to setting</a>
+<a href="{% url setting %}">Back to settings</a>
 {% endblock %}
 

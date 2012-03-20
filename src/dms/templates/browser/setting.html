@@ -8,10 +8,10 @@
 <h1>Settings</h1>
   <form action="" method="post" id="new-rule-form" {% if not form.errors %}class="hide"{% endif %}>
       {{ form.as_p }}
-      {%csrf_token%}
+      {% csrf_token %}
       <p>
-      <label>&nbsp;</label>
-      <input type="submit" value="Continue &rarr;" />
+          <label>&nbsp;</label>
+          <input type="submit" value="Continue &rarr;" />
       </p>
   </form>
   <table id="settings">
@@ -29,28 +29,28 @@
       <td>
           <h4>Pre-Storage Workflow</h4>
           {% with rule.get_before_storage_plugins as plugins %}
-              {%include "browser/include/workflow_plugins.html"%}
-          {%endwith%}
+              {% include "browser/include/workflow_plugins.html" %}
+          {% endwith %}
 
           <h4>Storage Workflow</h4>
           {% with rule.get_storage_plugins as plugins %}
-              {%include "browser/include/workflow_plugins.html"%}
-          {%endwith%}
+              {% include "browser/include/workflow_plugins.html" %}
+          {% endwith %}
 
           <h4>Retrieval Workflow</h4>
           {% with rule.get_before_retrieval_plugins as plugins %}
-              {%include "browser/include/workflow_plugins.html"%}
-          {%endwith%}
+              {% include "browser/include/workflow_plugins.html" %}
+          {% endwith %}
 
           <h4>Modification Workflow</h4>
           {% with rule.get_before_update_plugins as plugins %}
-              {%include "browser/include/workflow_plugins.html"%}
-          {%endwith%}
+              {%include "browser/include/workflow_plugins.html" %}
+          {% endwith %}
 
           <h4>Removal Workflow</h4>
           {% with rule.get_before_removal_plugins as plugins %}
-              {%include "browser/include/workflow_plugins.html"%}
-          {%endwith%}
+              {% include "browser/include/workflow_plugins.html" %}
+          {% endwith %}
       </td>
       <td>{{ rule.active }} | <a href="{% url toggle_rule_state rule.id %}">toggle</a></td>
       <td><a href="{% url edit_setting rule.id %}">Edit</a></td>
@@ -58,6 +58,7 @@
   {% endfor %}
 </table>
 
+{# TODO: Add this link #}
 <a href="" id="new-rule">Add new rule</a>
 
 {% endblock %}
