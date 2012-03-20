@@ -5,13 +5,12 @@ Copyright: Adlibre Pty Ltd 2011, 2012
 License: See LICENSE for license information
 """
 
-import json, os, traceback
+import json, os
 import logging
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
 
 from piston.handler import BaseHandler
 from piston.utils import rc
@@ -44,6 +43,9 @@ class BaseFileHandler(BaseHandler):
 
 
 class FileInfoHandler(BaseFileHandler):
+    """
+    Returns document metadata
+    """
     allowed_methods = ('GET',)
     
     def read(self, request):
@@ -72,12 +74,14 @@ class FileInfoHandler(BaseFileHandler):
         info['document_list_url'] = reverse('ui_document_list', kwargs = {'id_rule': mapping.pk})
         info['tags'] = document.get_tags()
         info['no_doccode'] = document.get_docrule().no_doccode
-        response = HttpResponse(json.dumps(info))
         log.info('FileInfoHandler.read request fulfilled for %s, ext %s, rev %s, hash %s' % (document_name, extension, revision, hashcode))
-        return response
+        return HttpResponse(json.dumps(info))
 
 
 class FileHandler(BaseFileHandler):
+    """
+    CRUD Methods for documents
+    """
     allowed_methods = ('GET', 'POST', 'DELETE', 'PUT')
 
     def read(self, request):
@@ -121,7 +125,7 @@ class FileHandler(BaseFileHandler):
             log.error('FileHandler.create manager errors: %s' % manager.errors)
             return rc.BAD_REQUEST
         log.info('FileHandler.create request fulfilled for %s' % document.get_filename())
-        return document.get_filename()
+        return document.get_filename() # FIXME, should be rc.CREATED
 
     def delete(self, request):
         # FIXME, should return 404 if file not found, 400 if no docrule exists.
@@ -184,7 +188,7 @@ class FileHandler(BaseFileHandler):
                 else:
                     return rc.BAD_REQUEST
             log.info('FileHandler.update request fulfilled for %s, ext %s, rev %s, hash %s' % (document_name, extension, revision, hashcode))
-            return HttpResponse(json.dumps( document.get_dict() ))
+            return HttpResponse(json.dumps( document.get_dict() )) # FIXME should be rc.ALL_OK
         except Exception, e: # FIXME
             log.error('FileHandler.update exception %s' % e)
             if settings.DEBUG:
@@ -194,6 +198,9 @@ class FileHandler(BaseFileHandler):
 
 
 class FileListHandler(BaseHandler):
+    """
+    Provides list of documents to facilitate browsing via document type rule id.
+    """
     allowed_methods = ('GET','POST')
 
     def read(self, request, id_rule):
@@ -238,6 +245,9 @@ class FileListHandler(BaseHandler):
 
 
 class TagsHandler(BaseHandler):
+    """
+    Provides list of tags for id_rule
+    """
     allowed_methods = ('GET',)
 
     def read(self, request, id_rule):
@@ -254,8 +264,10 @@ class TagsHandler(BaseHandler):
             else:
                 return rc.BAD_REQUEST
 
-# How many files do we have for a document.
 class RevisionCountHandler(BaseHandler):
+    """
+    Returns revision count for a document
+    """
     allowed_methods = ('GET','POST')
 
     def read(self, request, document):
@@ -287,6 +299,9 @@ class RevisionCountHandler(BaseHandler):
 
 
 class RulesHandler(BaseHandler):
+    """
+    Returns list of all doc type rules in the system
+    """
     allowed_methods = ('GET','POST')
 
     verbose_name = 'rule'
@@ -305,6 +320,9 @@ class RulesHandler(BaseHandler):
 
 
 class RulesDetailHandler(BaseHandler):
+    """
+    Returns detailed information about a doc type rule
+    """
     allowed_methods = ('GET','POST')
 
     fields = ['id', 'name', ('before_storage_plugins', ('name',)), 
@@ -331,6 +349,9 @@ class RulesDetailHandler(BaseHandler):
 
 
 class PluginsHandler(BaseHandler):
+    """
+    Returns a list of plugins installed in the system
+    """
     allowed_methods = ('GET','POST')
 
     verbose_name = 'plugin'
@@ -351,6 +372,9 @@ class PluginsHandler(BaseHandler):
 
 
 class MetaDataTemplateHandler(BaseHandler):
+    """
+    Read / Create / Delete Meta Data Templates
+    """
     allowed_methods = ('GET','POST', 'DELETE')
 
     """
