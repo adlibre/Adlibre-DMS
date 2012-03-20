@@ -34,7 +34,7 @@ test_tag = 'test_tag'
 
 class APITest(DMSTestCase):
 
-    def test_00_api_setup(self):
+    def test_00_setup(self):
         """
         Load Test Data
         """
@@ -148,17 +148,17 @@ class APITest(DMSTestCase):
     def test_upload_files(self):
         for f in self.documents_pdf:
             response = self._upload_file(f)
-            self.assertContains(response, f, status_code = 200)
+            self.assertContains(response, f, status_code=200)
 
     def _delete_documents(self, delete_doc, remain_doc):
         url = reverse('api_file') + '?filename=' + delete_doc + '.pdf'
         self.client.login(username=self.username, password=self.password)
         response = self.client.delete(url)
-        self.assertContains(response, '', status_code = 204)
+        self.assertContains(response, '', status_code=204)
 
         url = reverse('api_file') + '?filename=%s.pdf' % remain_doc
         response = self.client.get(url)
-        self.assertContains(response, '', status_code = 200)
+        self.assertContains(response, '', status_code=200)
 
     def test_delete_documents(self):
         delete_doc = self.documents_pdf[0]
@@ -185,7 +185,8 @@ class APITest(DMSTestCase):
         response = self.client.get(url)
         self.assertContains(response, 'Bad Request', status_code = 400)
 
-    def test_z_cleanup(self):
+    def test_zz_cleanup(self):
+        # FIXME: use cleanup from base class
         # Test should be alphabetically last
         # and run after all tests finished
 
@@ -229,4 +230,3 @@ class APITest(DMSTestCase):
             data = { 'filename': doc }
             response = self.client.delete(url, data)
             self.assertEqual(response.status_code, 204)
-

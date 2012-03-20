@@ -35,11 +35,11 @@ class ViewTest(DMSTestCase):
         response = self.client.post(url, data)
         return response
 
-    def test_zz_cleaup(self):
+    def test_zz_cleanup(self):
         """
         Test Cleanup
         """
-        self.cleanAll(check_response=False) # FIXME: should be true
+        self.cleanAll(check_response=True)
 
     def test_upload_files(self):
         for doc_set, ext in [(self.documents_pdf, 'pdf'), (self.documents_txt, 'txt'), (self.documents_tif, 'tif') ]:
@@ -184,8 +184,8 @@ class ConversionTest(DMSTestCase):
             response = self.client.get(url)
             self.assertContains(response, d, status_code=200)
 
-    def test_zz_cleaup(self):
+    def test_zz_cleanup(self):
         """
         Test Cleanup
         """
-        self.cleanAll(check_response=False) # FIXME: Should be true, false to hide bug with deleting ADL-12345 and ADL-54321
+        self.cleanAll(check_response=True)

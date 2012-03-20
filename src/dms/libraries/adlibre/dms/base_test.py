@@ -30,9 +30,9 @@ class DMSTestCase(TestCase):
         self.documents_txt = ('10001', '10006', '101',)
         self.documents_tif = ('2011-01-27-1', '2011-01-28-12',)
         self.documents_missing = ('ADL-8888', 'ADL-9999',)
-        self.documents_norule = ('ADL-54321', 'ADL-12345',) # too long to match ADL invoices
+        self.documents_norule = ('ADL-54321', 'ADL-12345', ) # too long to match ADL invoices
         # These are documents that are not tested, yet exist in ./fixtures/testdata/
-        self.unlisted_files_used = ( 'test_document_template.odt', 'test_no_doccode.pdf', )
+        self.unlisted_files_used = ('test_document_template.odt', 'test_no_doccode.pdf', )
 
         # Documents that exist, and have valid hash
         self.documents_hash = [
@@ -82,7 +82,12 @@ class DMSTestCase(TestCase):
         self.cleanUp(self.documents_pdf, check_response=check_response)
         self.cleanUp(self.documents_tif, check_response=check_response)
         self.cleanUp(self.documents_txt, check_response=check_response)
-        self.cleanUp(self.documents_norule, check_response=check_response)
+
+        cleanup_docs_list = []
+        # no doc code documents require full filename in order to delete FIXME!
+        for doc in self.documents_norule:
+            cleanup_docs_list.append('%s.pdf' % doc)
+        self.cleanUp(cleanup_docs_list, check_response=check_response)
 
         # Cleanup hashed dicts
         # (I'm sure there is a more elegant way to do this)
