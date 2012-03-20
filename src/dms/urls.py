@@ -5,7 +5,7 @@ from django.conf.urls.defaults import patterns, include, url
 from django.contrib import admin
 admin.autodiscover()
 
-# custom 500 with MEDIA_URL context
+# Custom 500 with MEDIA_URL context
 handler500 = 'dms.views.server_error'
 
 urlpatterns = []
@@ -24,9 +24,9 @@ urlpatterns += patterns('',
     url(r'^accounts/login/$', 'django.contrib.auth.views.login', name='login'),
     url(r'^accounts/logout/$', 'django.contrib.auth.views.logout_then_login', name='logout'),
 
-    # robots
+    # Robots
     url(r'^robots.txt$', 'django.views.generic.simple.direct_to_template', {'template': 'robots.txt', 'mimetype' : 'text/plain'}),
-    # favicon
+    # Favicon
     url(r'^favicon.ico$', 'django.views.generic.simple.redirect_to', {'url': settings.MEDIA_URL+'favicon.ico'}),
 
     # Independent DMS Apps
@@ -35,6 +35,6 @@ urlpatterns += patterns('',
     url(r'^bcp/', include('bcp.urls')),
 
     # This needs to be last
-    url(r'^', include('browser.urls')),
+    url(r'', include('browser.urls')),
 )
 
