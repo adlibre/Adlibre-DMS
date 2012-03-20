@@ -49,19 +49,25 @@ class DocumentIndexForm(forms.Form):
         """
         keys = kwds.keys()
         keys.sort()
-        self.is_bound = True
+
+        self.is_valid()
         for k in keys:
             self.data[k] = kwds[k]
-            # populating form fields
-            #print kwds[k]
-            #self.fields[k].value = kwds[k]
+            try:
+                self.initial[k] = int(kwds[k])
+            except ValueError:
+                try:
+                    # TODO: test/debug this DATE type fields are yet not tested
+                    self.fields[k].initial = datetime.datetime.strptime(kwds[k], "%Y-%m-%d")
+                except ValueError:
+                    try:
+                        self.initial[k] = kwds[k]
+                    except ValueError:
+                        pass
 
     def validation_ok(self):
         """
         Form validation sequence overridden here.
-        validates only one field as far as it is critical for now.
-
-        WARNING! if changing/adding form fields names please update validation accordingly
         """
         for field in self.fields:
             cur_field = self.fields[field]

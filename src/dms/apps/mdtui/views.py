@@ -211,14 +211,13 @@ def indexing_details(request, step=None, template='mdtui/indexing.html'):
     warnings = []
     cleanup_search_session(request)
 
-    # Hack to make the navigation work for testing the templates
     if request.POST:
         secondary_indexes = processDocumentIndexForm(request)
         if secondary_indexes:
                 request.session["document_keys_dict"] = secondary_indexes
                 return HttpResponseRedirect(reverse('mdtui-index-source'))
         else:
-            # validation rendering...
+            # Return validation with errrors...
             form = initDocumentIndexForm(request)
     else:
         try:
@@ -226,13 +225,12 @@ def indexing_details(request, step=None, template='mdtui/indexing.html'):
         except KeyError:
             warnings.append(MDTUI_ERROR_STRINGS[1])
         form = initDocumentIndexForm(request)
-        autocomplete_list = extract_secondary_keys_from_form(form)
 
+    autocomplete_list = extract_secondary_keys_from_form(form)
     try:
         document_keys = request.session["document_keys_dict"]
     except KeyError:
         pass
-    
     context.update( { 'step': step,
                       'form': form,
                       'document_keys': document_keys,

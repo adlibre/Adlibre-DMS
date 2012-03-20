@@ -30,7 +30,7 @@ def initDocumentIndexForm(request):
         if details:
             if not details == 'error':
                 # MDT's exist for ths docrule adding fields to form
-                fields = render_fields_from_docrules(details)
+                fields = render_fields_from_docrules(details, request.POST or None)
                 #print fields
                 if fields:
                     form.setFields(fields)
@@ -41,30 +41,34 @@ def initDocumentIndexForm(request):
 
 
 def processDocumentIndexForm(request):
-        form = initDocumentIndexForm(request)
-        secondary_indexes = {}
-        search = None
-        try:
-            search = request.session["docrule"]
-        except KeyError:
-            pass
-        if form.validation_ok() or search:
-            for key, field in form.fields.iteritems():
-                # FIXME: Nested exceptions.. bad
+    """
+    Handles document index form validation/population/data handling
+    Works for search/indexing calls
+    """
+    form = initDocumentIndexForm(request)
+    secondary_indexes = {}
+    search = None
+    try:
+        search = request.session["docrule"]
+    except KeyError:
+        pass
+    if form.validation_ok() or search:
+        for key, field in form.fields.iteritems():
+            # FIXME: Nested exceptions.. bad
+            try:
+                # For dynamic form fields
+                secondary_indexes[field.field_name] = form.data[unicode(key)]
+            except (AttributeError, KeyError):
                 try:
-                    # For dynamic form fields
-                    secondary_indexes[field.field_name] = form.data[unicode(key)]
-                except (AttributeError, KeyError):
-                    try:
-                        # For native form fields
-                        secondary_indexes[key] = form.data[unicode(key)]
-                    except KeyError:
-                        pass
+                    # For native form fields
+                    secondary_indexes[key] = form.data[unicode(key)]
+                except KeyError:
+                    pass
 
-            if secondary_indexes:
-                return secondary_indexes
-            else:
-                return None
+        if secondary_indexes:
+            return secondary_indexes
+        else:
+            return None
 
 
 def convert_search_res(search_res, match_len):
