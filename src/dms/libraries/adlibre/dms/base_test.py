@@ -1,10 +1,11 @@
 import os
+import base64
 
 from django.conf import settings
 from django.core.management import call_command
 from django.core.urlresolvers import reverse
 from django.test import TestCase
-from django.contrib.auth.models import User
+from django.test.client import Client
 
 
 class DMSTestCase(TestCase):
@@ -109,3 +110,51 @@ class DMSTestCase(TestCase):
         # Cleanup
         # NB This is called once for every test, not just test case before the tests are run!
         pass
+
+
+class BasicAuthClient(Client):
+    """
+    Basic HTTP Authentication Client
+    user for testing Piston API
+    """
+
+    def auth(self, username, password):
+        auth = '%s:%s' % (username, password)
+        auth = 'Basic %s' % base64.encodestring(auth)
+        auth = auth.strip()
+        self.extra = {
+            'HTTP_AUTHORIZATION': auth,
+            }
+
+    # Pass auth **extra to every method
+    def get(self, *args, **kwargs):
+        return super(BasicAuthClient, self).get(*args, **self.extra)
+
+    def post(self, *args, **kwargs):
+        return super(BasicAuthClient, self).post(*args, **self.extra)
+
+    def head(self, *args, **kwargs):
+        return super(BasicAuthClient, self).head(*args, **self.extra)
+
+    def options(self, *args, **kwargs):
+        return super(BasicAuthClient, self).options(*args, **self.extra)
+
+    def put(self, *args, **kwargs):
+        return super(BasicAuthClient, self).put(*args, **self.extra)
+
+    def delete(self, *args, **kwargs):
+        return super(BasicAuthClient, self).delete(*args, **self.extra)
+
+class DMSBasicAuthenticatedTestCase(DMSTestCase):
+    """
+    Basic HTTP Authentication for our API Tests
+    """
+
+    client_class = BasicAuthClient
+
+    def setUp(self, *args, **kwargs):
+        super(DMSBasicAuthenticatedTestCase, self).setUp(*args, **kwargs)
+        # Create Auth data
+        self.client.auth(self.username, self.password)
+
+
