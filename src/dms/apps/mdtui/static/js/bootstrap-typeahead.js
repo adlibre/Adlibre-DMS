@@ -165,7 +165,9 @@
         if (!that.strings)
             item = item[that.options.property]
         i.find('a').html(that.highlighter(item))
-        i.find('a').html(json_represent(i[0].textContent))
+        /*
+        FIXME: This is broken in IE8 i[0].textContent is undefined.
+        i.find('a').html(json_represent(i[0].textContent))*/
         return i[0]
       })
 
