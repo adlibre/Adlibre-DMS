@@ -253,7 +253,7 @@
         </fieldset>
         {# Maybe, don't actually display this step, just pop up a document. #}
         <div id="pdfobj"></div>
-        <p><a href="{% url api_file %}?filename={{ code }}" title="{% trans 'Download Document' %}" class="btn"><i class="icon-download-alt"></i> Download document &ldquo;{{ code }}&rdquo;</a></p>
+        <p><a href="{% url mdtui-download-pdf code %}" title="{% trans 'Download Document' %}" class="btn"><i class="icon-download-alt"></i> Download document &ldquo;{{ code }}&rdquo;</a></p>
 
     {% endif %}
 
@@ -298,7 +298,7 @@
     <script type='text/javascript'>
         function embedPDF(){
             var myPDF = new PDFObject({
-                url: '{% url api_file %}?filename={{ code }}.pdf', //This assumes source is convertible to a PDF
+                url: '{% url mdtui-download-pdf code %}', //This assumes source is convertible to a PDF
                 pdfOpenParams: { view: 'Fit', scrollbars: '0', toolbar: '0', statusbar: '0', messages: '0', navpanes: '0' }
             }).embed('pdfobj');
         }
