@@ -5,9 +5,11 @@ Copyright: Adlibre Pty Ltd 2012
 License: See LICENSE for license information
 """
 
+import json
+
 from django.core.urlresolvers import reverse, resolve
 from django.http import HttpResponse
-from django.shortcuts import render, render_to_response, HttpResponseRedirect, get_object_or_404
+from django.shortcuts import render, redirect, render_to_response, HttpResponseRedirect, get_object_or_404
 from django.template import RequestContext, loader
 from django.contrib.auth.decorators import login_required
 
@@ -178,7 +180,7 @@ def indexing_select_type(request, step=None, template='mdtui/indexing.html'):
         # form initing with docrule set if it was done previous
         try:
             docrule = request.session["docrule_id"]
-        except:
+        except KeyError:
             pass
         form = DocumentTypeSelectForm()
         if docrule:
@@ -296,6 +298,7 @@ def indexing_uploading(request, step=None, template='mdtui/indexing.html'):
     return render_to_response(template, context, context_instance=RequestContext(request))
 
 
+@login_required
 def indexing_finished(request, step=None, template='mdtui/indexing.html'):
     """
     Indexing: Step 4: Finished
@@ -316,8 +319,8 @@ def indexing_barcode(request):
     """
     return HttpResponse('Barcode Printing')
 
-import json
 
+@login_required
 def mdt_parallel_keys(request):
     """
     Returns parallel keys suggestions for autocomplete.
@@ -331,7 +334,7 @@ def mdt_parallel_keys(request):
 
     try:
         docrule_id = request.session['docrule_id']
-    except:
+    except KeyError:
         valid_call = False
 
     try:
@@ -346,23 +349,26 @@ def mdt_parallel_keys(request):
         pkeys = manager.get_parallel_keys_for_key(mdts, key_name)
         # db call to search in docs
         # TODO: emit unique keys
-        # TODO: search only for this django user...
+        # TODO: search only for this django user... <-- AC: Huh?
         documents = CouchDocument.view(
-            'dmscouch/search_autocomplete',
+            'dmscouch/search_autocomplete',  # FIXME: hardcoded url
             startkey=[docrule_id, key_name, autocomplete_req],
-            endkey=[docrule_id, key_name, unicode(autocomplete_req)+u'\ufff0' ],
+            endkey=[docrule_id, key_name, unicode(autocomplete_req)+u'\ufff0' ], # FIXME: AC: What's this magic?
             include_docs=True
         )
         for doc in documents:
             resp_array = {}
-            for pkey  in pkeys:
+            for pkey in pkeys:
                 resp_array[pkey['field_name']] = doc.mdt_indexes[pkey['field_name']]
             resp.append(json.dumps(resp_array))
-    #print resp
     return HttpResponse(json.dumps(resp))
 
 
-
-
-
-
+@login_required
+def download_pdf(request, code):
+    """
+    Returns Document For Download
+    """
+    # right now we just redirect to API, but in future we might want to decouple from API app.
+    url = reverse('api_file')
+    return redirect('%s?filename=%s.pdf' %(url, code))
