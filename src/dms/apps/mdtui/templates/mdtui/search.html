@@ -136,23 +136,23 @@
 
                 {# SEARCH INDEX DETAILS FORM RENDERING #}
                 {% for field in form %}
-                {%  if not field.name == "date" %}
+                {% if not field.name == "date" %}
                 <div class="control-group">
-                    {%  if field.errors %}
-                    {%  for error in field.errors %}
+                    {% if field.errors %}
+                    {% for error in field.errors %}
                     <div class="alert alert-error">
                         <a class="close">×</a>
                         <strong>{{ error }}</strong>
                     </div>
-                    {%  endfor %}
-                    {%  endif %}
+                    {% endfor %}
+                    {% endif %}
                     <label class="control-label">{{ field.label }}</label>
                     <div class="controls">
                         {{ field|attr:'class:input-xxlarge' }}
                         <p class="help-block">{{ field.help_text }}</p>
                     </div>
                 </div>
-                {%  else %}
+                {% else %}
                 <div class="control-group">
                     {%  if field.errors %}
                     {%  for error in field.errors %}
@@ -160,8 +160,8 @@
                         <a class="close">×</a>
                         <strong>{{ error }}</strong>
                     </div>
-                    {%  endfor %}
-                    {%  endif %}
+                    {% endfor %}
+                    {% endif %}
                     <label class="control-label" for="dateselect">Creation Date</label>
                     <div class="input">
                         <div class="controls">
@@ -173,8 +173,8 @@
                         </div>
                     </div>
                 </div>
-                {%  endif %}
-                {%  endfor %}
+                {% endif %}
+                {% endfor %}
             </fieldset>
 
             <div class="form-actions">
@@ -243,7 +243,7 @@
             </ul>
         </div>
         
-        <a href="" title="Download Results to CSV" class="btn"><i class="icon-download-alt"></i> Export Results</a>
+        <a href="{# FIXME #}" title="Download Results to CSV" class="btn"><i class="icon-download-alt"></i> Export Results</a>
 
     {% endif %}
 
