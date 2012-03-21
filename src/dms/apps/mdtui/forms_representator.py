@@ -41,7 +41,7 @@ def render_fields_from_docrules(mdts_dict, init_dict=None):
                 if field_value["type"]==u'integer':
                     if unicode(counter) in init_dict and init_dict[unicode(counter)]:
                         # Has initial value
-                        form_field = forms.IntegerField(label=field_value["field_name"], help_text=field_value["description"], initial=int(init_dict[unicode(counter)]))
+                        form_field = forms.IntegerField(label=field_value["field_name"], help_text=field_value["description"], initial=init_dict[unicode(counter)])
                     else:
                         # Blank field
                         form_field = forms.IntegerField(label=field_value["field_name"], help_text=field_value["description"])
