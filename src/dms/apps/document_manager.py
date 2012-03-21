@@ -4,8 +4,7 @@ Project: Adlibre DMS
 Copyright: Adlibre Pty Ltd 2011
 License: See LICENSE for license information
 """
-# TODO: Delint this file
-# TODO: AC: I think this should be refactored so that 'request' is not used here. Plugin points should be executed elsewhere.
+
 import os
 import plugins
 
@@ -18,9 +17,10 @@ from dms_plugins.workers.info.tags import TagsPlugin
 from dms_plugins import pluginpoints
 
 from document import Document
-
 from doc_codes.models import DocumentTypeRule
 
+# TODO: Delint this file
+# TODO: AC: I think this should be refactored so that 'request' is not used here. Plugin points should be executed elsewhere.
 
 class ConfigurationError(Exception):
     pass

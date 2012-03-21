@@ -224,10 +224,10 @@ class Document(object):
     def get_creation_time(self):
         metadata = self.get_current_metadata()
         if metadata:
-            time = metadata.get('creation_time', None)
+            creation_time = metadata.get('creation_time', None)
         else:
-            time = time.strftime(settings.DATETIME_FORMAT, time.localtime(os.stat(self.get_fullpath()).st_ctime))
-        return time
+            creation_time = time.strftime(settings.DATETIME_FORMAT, time.localtime(os.stat(self.get_fullpath()).st_ctime))
+        return creation_time
 
     def get_dict(self):
         d = {}
