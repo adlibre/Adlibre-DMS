@@ -1,5 +1,7 @@
 {% extends "mdtui/base.html" %}
+{% load i18n %}
 {% load index_keys %}
+{% load widget_tweaks %}
 
 {% block body_content %}
     <h1>{% block body_title %}Document Search{% endblock %}</h1>
@@ -18,14 +20,12 @@
     {% endif %}
 
     {# WARNINGS HANDLER #}
-    {% if warnings %}
     {% for warning in warnings %}
     <div class="alert">
         <a class="close">×</a>
         <strong>{{ warning }}</strong>
     </div>
     {% endfor %}
-    {% endif %}
 
     {% if step == None %} {# This step will no long be visible #}
         <p>This is where it begins...</p>
@@ -148,7 +148,7 @@
                     {%  endif %}
                     <label class="control-label">{{ field.label }}</label>
                     <div class="controls">
-                        {{ field }}
+                        {{ field|attr:'class:input-xxlarge' }}
                         <p class="help-block">{{ field.help_text }}</p>
                     </div>
                 </div>
@@ -253,7 +253,8 @@
         </fieldset>
         {# Maybe, don't actually display this step, just pop up a document. #}
         <div id="pdfobj"></div>
-            <a href="{% url api_file %}?filename={{ code }}">DOWNLOAD document &ldquo;{{ code }}&rdquo;</a>
+        <p><a href="{% url api_file %}?filename={{ code }}" title="{% trans 'Download Document' %}" class="btn"><i class="icon-download-alt"></i> Download document &ldquo;{{ code }}&rdquo;</a></p>
+
     {% endif %}
 
 {% endblock %}
