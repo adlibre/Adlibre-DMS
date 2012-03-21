@@ -165,9 +165,8 @@
         if (!that.strings)
             item = item[that.options.property]
         i.find('a').html(that.highlighter(item))
-        /*
-        FIXME: This is broken in IE8 i[0].textContent is undefined.
-        i.find('a').html(json_represent(i[0].textContent))*/
+        /* cleanup response representation for our needs */
+        i.find('a').html(json_represent(item))
         return i[0]
       })
 
