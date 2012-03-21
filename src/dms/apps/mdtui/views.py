@@ -84,7 +84,7 @@ def search_options(request, step, template='mdtui/search.html'):
             request.session["document_search_dict"] = secondary_indexes
             return HttpResponseRedirect(reverse('mdtui-search-results'))
     else:
-        # date field should be empty
+        # Date field should be empty for search needs
         form.fields["date"].initial = None
 
     context = {
@@ -331,9 +331,15 @@ def mdt_parallel_keys(request):
     docrule_id = None
     key_name = None
     resp = []
-
+    # Trying to get docrule for indexing calls
     try:
         docrule_id = request.session['docrule_id']
+    except KeyError:
+        valid_call = False
+    # Trying to get docrule for searching calls
+    try:
+        docrule_id = request.session['docrule']
+        valid_call = True
     except KeyError:
         valid_call = False
 
@@ -348,14 +354,16 @@ def mdt_parallel_keys(request):
         mdts = manager.get_keys_for_docrule(docrule_id)
         pkeys = manager.get_parallel_keys_for_key(mdts, key_name)
         # db call to search in docs
-        # TODO: emit unique keys
-        # TODO: search only for this django user... <-- AC: Huh?
+        # TODO: emit unique keys (Reduce fucntion for this view)
+        # TODO: search only for this django user... <-- AC: Huh? (YG: Each document has django user id assigned (creator)
+        # This way we may only suggest indexes for this user.
         documents = CouchDocument.view(
             'dmscouch/search_autocomplete',  # FIXME: hardcoded url
             startkey=[docrule_id, key_name, autocomplete_req],
             endkey=[docrule_id, key_name, unicode(autocomplete_req)+u'\ufff0' ], # FIXME: AC: What's this magic?
             include_docs=True
         )
+        # Adding each selected value to suggestions list
         for doc in documents:
             resp_array = {}
             for pkey in pkeys:
