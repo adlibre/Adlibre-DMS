@@ -20,14 +20,14 @@ tags_handler = Resource(handlers.TagsHandler)
 mdt_handler = Resource(handlers.MetaDataTemplateHandler)
 
 urlpatterns = patterns('',
-   url(r'^file/', file_handler, name='api_file'),
-   url(r'^file-info/', file_info_handler, name='api_file_info'),
-   url(r'^files/(?P<id_rule>\d+)/$', file_list_handler, name='api_file_list'),
-   url(r'^revision_count/(?P<document>[\w_-]+)$', revision_count_handler, name='api_revision_count'),
-   url(r'^rules\.(?P<emitter_format>.+)$', rules_handler, name='api_rules'),
-   url(r'^rules/(?P<id_rule>\d+)\.(?P<emitter_format>.+)$', rules_detail_handler, name='api_rules_detail'),
-   url(r'^tags-(?P<id_rule>\d+)\.(?P<emitter_format>.+)$', tags_handler, name='api_tags'),
-   url(r'^plugins\.(?P<emitter_format>.+)$', plugins_handler, name='api_plugins'),
-   url(r'^mdt/$', mdt_handler, name='api_mdt'),
+    url(r'^file/', file_handler, name='api_file'),
+    url(r'^file-info/', file_info_handler, name='api_file_info'),
+    url(r'^files/(?P<id_rule>\d+)/$', file_list_handler, name='api_file_list'),
+    url(r'^revision_count/(?P<document>[\w_-]+)$', revision_count_handler, name='api_revision_count'),
+    url(r'^rules\.(?P<emitter_format>.+)$', rules_handler, name='api_rules'),
+    url(r'^rules/(?P<id_rule>\d+)\.(?P<emitter_format>.+)$', rules_detail_handler, name='api_rules_detail'),
+    url(r'^tags-(?P<id_rule>\d+)\.(?P<emitter_format>.+)$', tags_handler, name='api_tags'),
+    url(r'^plugins\.(?P<emitter_format>.+)$', plugins_handler, name='api_plugins'),
+    url(r'^mdt/$', mdt_handler, name='api_mdt'),
 )
 
