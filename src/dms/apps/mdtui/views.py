@@ -339,10 +339,11 @@ def mdt_parallel_keys(request):
         valid_call = False
     # Trying to get docrule for searching calls
     try:
-        docrule_id = request.session['docrule']
-        valid_call = True
+        if not docrule_id:
+            docrule_id = request.session['docrule']
+            valid_call = True
     except KeyError:
-        valid_call = False
+        pass
 
     try:
         key_name = request.POST[u'key_name']
