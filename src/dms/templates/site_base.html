@@ -6,9 +6,6 @@
 	<title>{% block title %}{% trans 'Welcome' %}{% endblock %} - {% trans 'Adlibre DMS' %}</title>
     {% block theme_css %}{% endblock %}
     <link rel="shortcut icon" href="{{ MEDIA_URL }}favicon.ico" />
-    <script type="text/javascript" language="javascript" charset="utf-8" src="{{ MEDIA_URL }}js/jquery-1.4.2.min.js"></script>
-    <script type="text/javascript" language="javascript" charset="utf-8" src="{{ MEDIA_URL }}js/jquery.tools.min.js"></script>
-    <script type="text/javascript" language="javascript" charset="utf-8" src="{{ MEDIA_URL }}js/script.js"></script>
     {%block extra_head%}{%endblock%}
 </head>
 <body class="{% block body_class %}{% endblock %}">
@@ -52,9 +49,7 @@
         {% endblock %}
 	</div>
 
-    {% block javascript %}
-
-    {% endblock %}
+{% block javascript %}{% endblock %}
 </div>
 </body>
 </html>

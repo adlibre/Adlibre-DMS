@@ -1,0 +1,36 @@
+.simple_button {
+    -moz-border-bottom-colors: none;
+    -moz-border-image: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    background-color: #EEEEEE;
+    border-color: #EEEEEE #B2B2B2 #7F7F7F #EEEEEE;
+    border-style: solid;
+    border-width: 2px;
+    font-size: 14px;
+    margin-left: 5px;
+    padding: 5px;
+    cursor: pointer;
+    /* IE7 specific */
+    *overflow: visible;
+    /* IE specific */
+    padding-left: 10px\9;
+    padding-right: 10px\9;
+}
+
+#upload_file_fileinput {
+    /* type:hidden; emulation
+    because of OPERA and Netscape */
+    width: 1px;
+    height: 1px;
+    visibility: hidden;
+    /* IE Specific */
+    position: absolute\9;
+}
+
+#upload_file_fake_filename {
+    /* height: 25px;
+    width: 200px;*/
+    font-size: 14px;
+}

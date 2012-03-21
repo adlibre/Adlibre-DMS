@@ -4,7 +4,7 @@
 {% block title %}{% trans 'Upload' %}{% endblock %}
 
 {% block extra_head %}
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}browser/uploadfile.css" />
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}browser/uploadfile.css" />
 {%endblock%}
 
 {% block content %}
@@ -23,5 +23,20 @@
 {% endblock %}
 
 {% block javascript %}
-    <script type="text/javascript" language="javascript" src="{{STATIC_URL}}browser/uploadfile.js"></script>
+<script type="text/javascript" language="javascript" charset="utf-8" src="{{ STATIC_URL }}browser/jquery-1.4.2.min.js"></script>
+<script type="text/javascript">
+// emulating browse call for hidden file input
+$('#upload_file_fake_browse').click(function(){
+    $('#upload_file_fileinput').click();
+});
+//emulating Mac behavior
+$('#upload_file_fake_filename').click(function(){
+    $('#upload_file_fileinput').click();
+});
+
+// changing function for fileinput value
+$('#upload_file_fileinput').change(function(){
+    $('#upload_file_fake_filename').val($(this).val());
+});//DjangoCon 2008_
+</script>
 {% endblock %}
