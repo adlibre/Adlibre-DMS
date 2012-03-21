@@ -34,6 +34,7 @@ def search_type(request, step, template='mdtui/search.html'):
     Search Step 1: Select Search Type
     """
     docrule = None
+    cleanup_indexing_session(request)
     form = DocumentTypeSelectForm(request.POST or None)
     if request.POST:
             if form.is_valid():
