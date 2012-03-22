@@ -78,6 +78,21 @@ doc1_dict = {
 
 doc1 = 'ADL-0001'
 
+# Proper for doc1
+typehead_call1 = {
+                'key_name': "Friends ID",
+                "autocomplete_search": "1"
+                }
+typehead_call2 = {
+                'key_name': "Employee ID",
+                "autocomplete_search": "12"
+                }
+
+# Improper for doc1
+typehead_call3 = {
+                'key_name': "Employee ID",
+                "autocomplete_search": "And"
+                }
 
 # TODO: Expand this (especially search). Need to add at least 1 more docs...
 class MDTUI(TestCase):
@@ -426,6 +441,129 @@ class MDTUI(TestCase):
         self.assertContains(response, '// autocomplete for field Friends ID') # autocomplete (typehead) scripts rendered
         self.assertContains(response, '// autocomplete for field Friends Name')
         self.assertContains(response, 'This field is required') # form renders errors
+
+    def test_18_parallel_keys_indexing_proper(self):
+        """
+        Testing Parallel keys lookup for recently uploaded document
+        """
+        # Selecting Document Type Rule
+        url = reverse('mdtui-index-type')
+        response = self.client.post(url, {'docrule': test_mdt_docrule_id})
+        self.assertEqual(response.status_code, 302)
+        url = reverse("mdtui-parallel-keys")
+        response = self.client.post(url, typehead_call1)
+        self.assertEqual(response.status_code, 200)
+        # Response contains proper data
+        self.assertNotContains(response, '<html>') # json but not html response
+        self.assertContains(response, 'Friends ID') # Proper keys
+        self.assertContains(response, '123')
+        self.assertContains(response, 'Friends Name')
+        self.assertContains(response, 'Andrew')
+        self.assertNotContains(response, 'Iurii Garmash') # Improper key
+        self.assertNotContains(response, 'Employee Name')
+
+    def test_19_parallel_keys_indexing_wrong(self):
+        """
+        Testing Parallel keys lookup for recently uploaded document
+        """
+        # Selecting Document Type Rule
+        url = reverse('mdtui-index-type')
+        response = self.client.post(url, {'docrule': test_mdt_docrule_id})
+        self.assertEqual(response.status_code, 302)
+        url = reverse("mdtui-parallel-keys")
+        response = self.client.post(url, typehead_call3)
+        self.assertEqual(response.status_code, 200)
+        # Response contains proper data
+        self.assertNotContains(response, '<html>')
+        self.assertNotContains(response, 'Friends ID')
+        self.assertNotContains(response, '123')
+        self.assertNotContains(response, 'Friends Name')
+        self.assertNotContains(response, 'Andrew')
+        self.assertNotContains(response, 'Iurii Garmash')
+        self.assertNotContains(response, 'Employee Name')
+
+    def test_20_parallel_keys_indexing_set2_proper(self):
+        """
+        Testing Parallel keys lookup for recently uploaded document
+        """
+        # Selecting Document Type Rule
+        url = reverse('mdtui-index-type')
+        response = self.client.post(url, {'docrule': test_mdt_docrule_id})
+        self.assertEqual(response.status_code, 302)
+        url = reverse("mdtui-parallel-keys")
+        response = self.client.post(url, typehead_call2)
+        self.assertEqual(response.status_code, 200)
+        # Response contains proper data
+        self.assertNotContains(response, '<html>')
+        self.assertNotContains(response, 'Friends ID')
+        self.assertNotContains(response, 'Friends Name')
+        self.assertNotContains(response, 'Andrew')
+        self.assertContains(response, 'Iurii Garmash')
+        self.assertContains(response, 'Employee Name')
+        self.assertContains(response, 'Employee ID')
+        self.assertContains(response, '123456')
+
+    def test_21_parallel_keys_search_proper(self):
+        """
+        Testing Parallel keys lookup for recently uploaded document
+        """
+        # Selecting Document Type Rule
+        url = reverse('mdtui-search-type')
+        response = self.client.post(url, {'docrule': test_mdt_docrule_id})
+        self.assertEqual(response.status_code, 302)
+        url = reverse("mdtui-parallel-keys")
+        # Adding Document Indexes
+        response = self.client.post(url, typehead_call1)
+        self.assertEqual(response.status_code, 200)
+        # Response contains proper data
+        self.assertNotContains(response, '<html>') # json but not html response
+        self.assertContains(response, 'Friends ID') # Proper keys
+        self.assertContains(response, '123')
+        self.assertContains(response, 'Friends Name')
+        self.assertContains(response, 'Andrew')
+        self.assertNotContains(response, 'Iurii Garmash') # Improper key
+        self.assertNotContains(response, 'Employee Name')
+
+    def test_22_parallel_keys_searching_set2_proper(self):
+        """
+        Testing Parallel keys lookup for recently uploaded document
+        """
+        # Selecting Document Type Rule
+        url = reverse('mdtui-search-type')
+        response = self.client.post(url, {'docrule': test_mdt_docrule_id})
+        self.assertEqual(response.status_code, 302)
+        url = reverse("mdtui-parallel-keys")
+        response = self.client.post(url, typehead_call2)
+        self.assertEqual(response.status_code, 200)
+        # Response contains proper data
+        self.assertNotContains(response, '<html>')
+        self.assertNotContains(response, 'Friends ID')
+        self.assertNotContains(response, 'Friends Name')
+        self.assertNotContains(response, 'Andrew')
+        self.assertContains(response, 'Iurii Garmash')
+        self.assertContains(response, 'Employee Name')
+        self.assertContains(response, 'Employee ID')
+        self.assertContains(response, '123456')
+
+    def test_23_parallel_keys_indexing_wrong(self):
+        """
+        Testing Parallel keys lookup for recently uploaded document
+        """
+        # Selecting Document Type Rule
+        url = reverse('mdtui-search-type')
+        response = self.client.post(url, {'docrule': test_mdt_docrule_id})
+        self.assertEqual(response.status_code, 302)
+        url = reverse("mdtui-parallel-keys")
+        response = self.client.post(url, typehead_call3)
+        self.assertEqual(response.status_code, 200)
+        # Response contains proper data
+        self.assertNotContains(response, '<html>')
+        self.assertNotContains(response, 'Friends ID')
+        self.assertNotContains(response, '123')
+        self.assertNotContains(response, 'Friends Name')
+        self.assertNotContains(response, 'Andrew')
+        self.assertNotContains(response, 'Iurii Garmash')
+        self.assertNotContains(response, 'Employee Name')
 
     def test_z_cleanup(self):
         """

@@ -6,6 +6,7 @@ License: See LICENSE for license information
 """
 
 import json
+import logging
 
 from django.core.urlresolvers import reverse, resolve
 from django.http import HttpResponse
@@ -19,6 +20,7 @@ from document_manager import DocumentManager
 from view_helpers import *
 from parallel_keys import ParallelKeysManager
 
+log = logging.getLogger('dms')
 
 MDTUI_ERROR_STRINGS = {
     1:'You have not selected the Document Type.',
@@ -311,6 +313,8 @@ def indexing_finished(request, step=None, template='mdtui/indexing.html'):
         pass
     # document uploaded forget everything
     cleanup_indexing_session(request)
+    log.debug('mdtui.views.indexing_finished called with: step: "%s", document_keys_dict: "%s",' %
+              (step, context['document_keys']))
     return render(request, template, context)
 
 
@@ -351,6 +355,9 @@ def mdt_parallel_keys(request):
     except KeyError:
         valid_call = False
 
+    log.debug('mdtui.views.mdt_parallel_keys call with: docrule_id: "%s", key_name: "%s", autocomplete_req: "%s" Call is valid: "%s".' %
+              (docrule_id, key_name, autocomplete_req, valid_call))
+
     if valid_call:
         manager = ParallelKeysManager()
         mdts = manager.get_keys_for_docrule(docrule_id)
@@ -371,6 +378,7 @@ def mdt_parallel_keys(request):
             for pkey in pkeys:
                 resp_array[pkey['field_name']] = doc.mdt_indexes[pkey['field_name']]
             resp.append(json.dumps(resp_array))
+    log.debug('mdtui.views.mdt_parallel_keys response: %s' % resp)
     return HttpResponse(json.dumps(resp))
 
 
