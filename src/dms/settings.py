@@ -277,6 +277,9 @@ LOGGING = {
     }
 }
 
+LOGGING_TEST = {}
+
+
 LOGIN_REDIRECT_URL = '/'
 
 APPEND_SLASH = False # Stop Django from adding slashes to urls
@@ -284,10 +287,10 @@ APPEND_SLASH = False # Stop Django from adding slashes to urls
 RESTRUCTUREDTEXT_FILTER_SETTINGS = { 'doctitle_xform': 0, } # stop first heading being munged for page title.
 
 # Compressor
-COMPRESS_URL=STATIC_URL
-COMPRESS_ROOT=STATIC_ROOT
-COMPRESS_OUTPUT_DIR='cache'
-COMPRESS=True
+COMPRESS_URL = STATIC_URL
+COMPRESS_ROOT = STATIC_ROOT
+COMPRESS_OUTPUT_DIR = 'cache'
+COMPRESS_ENABLED = False
 
 #
 # Adlibre DMS Specific Settings
