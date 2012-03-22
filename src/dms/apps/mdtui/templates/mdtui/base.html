@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load compress %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,10 +8,11 @@
 
     <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
     <!--[if lt IE 9]>
-      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
     <!-- Le styles -->
+    {% compress css %}
     {% block css %}
     <link href="{{ STATIC_URL }}css/bootstrap.css" rel="stylesheet">
     <link href="{{ STATIC_URL }}css/bootstrap-responsive.css" rel="stylesheet">
@@ -51,6 +53,7 @@
         .x-progress-tracker li { padding-bottom: 4px; display: inline-block;}
     </style>
     {% endblock %}
+    {% endcompress %}
 
 
     {% block css_extra %}{% endblock %}
@@ -111,12 +114,18 @@
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="{{ STATIC_URL }}js/jquery-1.7.1.min.js "></script>
+    {% compress js %}
     <script src="{{ STATIC_URL }}js/bootstrap-collapse.js"></script>
     <script src="{{ STATIC_URL }}js/bootstrap-tab.js"></script>
     <script src="{{ STATIC_URL }}js/bootstrap-typeahead.js"></script>
     <script src="{{ STATIC_URL }}js/bootstrap-datepicker.js"></script>
+    {% endcompress %}
 {% endblock %}
+
+{% compress js %}
 {% block js_extra %}{% endblock %}
+{% endcompress %}
+
 </body>
 {% endblock %}
 </html>
