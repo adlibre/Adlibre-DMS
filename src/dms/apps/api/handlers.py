@@ -188,7 +188,7 @@ class FileHandler(BaseFileHandler):
                 else:
                     return rc.BAD_REQUEST
             log.info('FileHandler.update request fulfilled for %s, ext %s, rev %s, hash %s' % (document_name, extension, revision, hashcode))
-            return rc.ALL_OK #HttpResponse(json.dumps( document.get_dict() )) # AC Changed API behaviour hope this doesn't break /ui/
+            return HttpResponse(json.dumps( document.get_dict() )) # FIXME should be rc.ALL_OK
         except Exception, e: # FIXME
             log.error('FileHandler.update exception %s' % e)
             if settings.DEBUG:
