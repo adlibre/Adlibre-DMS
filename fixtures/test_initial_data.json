@@ -1,29 +1,29 @@
 [
     {
-        "pk": 22, 
+        "pk": 19, 
         "model": "auth.permission", 
         "fields": {
-            "codename": "add_logentry", 
-            "name": "Can add log entry", 
-            "content_type": 8
+            "codename": "add_site", 
+            "name": "Can add site", 
+            "content_type": 7
         }
     }, 
     {
-        "pk": 23, 
+        "pk": 20, 
         "model": "auth.permission", 
         "fields": {
-            "codename": "change_logentry", 
-            "name": "Can change log entry", 
-            "content_type": 8
+            "codename": "change_site", 
+            "name": "Can change site", 
+            "content_type": 7
         }
     }, 
     {
-        "pk": 24, 
+        "pk": 21, 
         "model": "auth.permission", 
         "fields": {
-            "codename": "delete_logentry", 
-            "name": "Can delete log entry", 
-            "content_type": 8
+            "codename": "delete_site", 
+            "name": "Can delete site", 
+            "content_type": 7
         }
     }, 
     {
@@ -162,114 +162,6 @@
         }
     }, 
     {
-        "pk": 28, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "add_rule", 
-            "name": "Can add rule", 
-            "content_type": 10
-        }
-    }, 
-    {
-        "pk": 29, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "change_rule", 
-            "name": "Can change rule", 
-            "content_type": 10
-        }
-    }, 
-    {
-        "pk": 30, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "delete_rule", 
-            "name": "Can delete rule", 
-            "content_type": 10
-        }
-    }, 
-    {
-        "pk": 25, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "add_flatpage", 
-            "name": "Can add flat page", 
-            "content_type": 9
-        }
-    }, 
-    {
-        "pk": 26, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "change_flatpage", 
-            "name": "Can change flat page", 
-            "content_type": 9
-        }
-    }, 
-    {
-        "pk": 27, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "delete_flatpage", 
-            "name": "Can delete flat page", 
-            "content_type": 9
-        }
-    }, 
-    {
-        "pk": 37, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "add_consumer", 
-            "name": "Can add consumer", 
-            "content_type": 13
-        }
-    }, 
-    {
-        "pk": 38, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "change_consumer", 
-            "name": "Can change consumer", 
-            "content_type": 13
-        }
-    }, 
-    {
-        "pk": 39, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "delete_consumer", 
-            "name": "Can delete consumer", 
-            "content_type": 13
-        }
-    }, 
-    {
-        "pk": 31, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "add_nonce", 
-            "name": "Can add nonce", 
-            "content_type": 11
-        }
-    }, 
-    {
-        "pk": 32, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "change_nonce", 
-            "name": "Can change nonce", 
-            "content_type": 11
-        }
-    }, 
-    {
-        "pk": 33, 
-        "model": "auth.permission", 
-        "fields": {
-            "codename": "delete_nonce", 
-            "name": "Can delete nonce", 
-            "content_type": 11
-        }
-    }, 
-    {
         "pk": 34, 
         "model": "auth.permission", 
         "fields": {
@@ -324,6 +216,222 @@
         }
     }, 
     {
+        "pk": 37, 
+        "model": "auth.permission", 
+        "fields": {
+            "codename": "add_consumer", 
+            "name": "Can add consumer", 
+            "content_type": 13
+        }
+    }, 
+    {
+        "pk": 38, 
+        "model": "auth.permission", 
+        "fields": {
+            "codename": "change_consumer", 
+            "name": "Can change consumer", 
+            "content_type": 13
+        }
+    }, 
+    {
+        "pk": 39, 
+        "model": "auth.permission", 
+        "fields": {
+            "codename": "delete_consumer", 
+            "name": "Can delete consumer", 
+            "content_type": 13
+        }
+    }, 
+    {
+        "pk": 43, 
+        "model": "auth.permission", 
+        "fields": {
+            "codename": "add_documenttyperule", 
+            "name": "Can add document type rule", 
+            "content_type": 15
+        }
+    }, 
+    {
+        "pk": 44, 
+        "model": "auth.permission", 
+        "fields": {
+            "codename": "change_documenttyperule", 
+            "name": "Can change document type rule", 
+            "content_type": 15
+        }
+    }, 
+    {
+        "pk": 45, 
+        "model": "auth.permission", 
+        "fields": {
+            "codename": "delete_documenttyperule", 
+            "name": "Can delete document type rule", 
+            "content_type": 15
+        }
+    }, 
+    {
+        "pk": 52, 
+        "model": "auth.permission", 
+        "fields": {
+            "codename": "add_consumer", 
+            "name": "Can add consumer", 
+            "content_type": 18
+        }
+    }, 
+    {
+        "pk": 53, 
+        "model": "auth.permission", 
+        "fields": {
+            "codename": "change_consumer", 
+            "name": "Can change consumer", 
+            "content_type": 18
+        }
+    }, 
+    {
+        "pk": 54, 
+        "model": "auth.permission", 
+        "fields": {
+            "codename": "delete_consumer", 
+            "name": "Can delete consumer", 
+            "content_type": 18
+        }
+    }, 
+    {
+        "pk": 46, 
+        "model": "auth.permission", 
+        "fields": {
+            "codename": "add_nonce", 
+            "name": "Can add nonce", 
+            "content_type": 16
+        }
+    }, 
+    {
+        "pk": 47, 
+        "model": "auth.permission", 
+        "fields": {
+            "codename": "change_nonce", 
+            "name": "Can change nonce", 
+            "content_type": 16
+        }
+    }, 
+    {
+        "pk": 48, 
+        "model": "auth.permission", 
+        "fields": {
+            "codename": "delete_nonce", 
+            "name": "Can delete nonce", 
+            "content_type": 16
+        }
+    }, 
+    {
+        "pk": 49, 
+        "model": "auth.permission", 
+        "fields": {
+            "codename": "add_resource", 
+            "name": "Can add resource", 
+            "content_type": 17
+        }
+    }, 
+    {
+        "pk": 50, 
+        "model": "auth.permission", 
+        "fields": {
+            "codename": "change_resource", 
+            "name": "Can change resource", 
+            "content_type": 17
+        }
+    }, 
+    {
+        "pk": 51, 
+        "model": "auth.permission", 
+        "fields": {
+            "codename": "delete_resource", 
+            "name": "Can delete resource", 
+            "content_type": 17
+        }
+    }, 
+    {
+        "pk": 55, 
+        "model": "auth.permission", 
+        "fields": {
+            "codename": "add_token", 
+            "name": "Can add token", 
+            "content_type": 19
+        }
+    }, 
+    {
+        "pk": 56, 
+        "model": "auth.permission", 
+        "fields": {
+            "codename": "change_token", 
+            "name": "Can change token", 
+            "content_type": 19
+        }
+    }, 
+    {
+        "pk": 57, 
+        "model": "auth.permission", 
+        "fields": {
+            "codename": "delete_token", 
+            "name": "Can delete token", 
+            "content_type": 19
+        }
+    }, 
+    {
+        "pk": 25, 
+        "model": "auth.permission", 
+        "fields": {
+            "codename": "add_flatpage", 
+            "name": "Can add flat page", 
+            "content_type": 9
+        }
+    }, 
+    {
+        "pk": 26, 
+        "model": "auth.permission", 
+        "fields": {
+            "codename": "change_flatpage", 
+            "name": "Can change flat page", 
+            "content_type": 9
+        }
+    }, 
+    {
+        "pk": 27, 
+        "model": "auth.permission", 
+        "fields": {
+            "codename": "delete_flatpage", 
+            "name": "Can delete flat page", 
+            "content_type": 9
+        }
+    }, 
+    {
+        "pk": 22, 
+        "model": "auth.permission", 
+        "fields": {
+            "codename": "add_logentry", 
+            "name": "Can add log entry", 
+            "content_type": 8
+        }
+    }, 
+    {
+        "pk": 23, 
+        "model": "auth.permission", 
+        "fields": {
+            "codename": "change_logentry", 
+            "name": "Can change log entry", 
+            "content_type": 8
+        }
+    }, 
+    {
+        "pk": 24, 
+        "model": "auth.permission", 
+        "fields": {
+            "codename": "delete_logentry", 
+            "name": "Can delete log entry", 
+            "content_type": 8
+        }
+    }, 
+    {
         "pk": 16, 
         "model": "auth.permission", 
         "fields": {
@@ -351,30 +459,57 @@
         }
     }, 
     {
-        "pk": 19, 
+        "pk": 28, 
         "model": "auth.permission", 
         "fields": {
-            "codename": "add_site", 
-            "name": "Can add site", 
-            "content_type": 7
+            "codename": "add_rule", 
+            "name": "Can add rule", 
+            "content_type": 10
         }
     }, 
     {
-        "pk": 20, 
+        "pk": 29, 
         "model": "auth.permission", 
         "fields": {
-            "codename": "change_site", 
-            "name": "Can change site", 
-            "content_type": 7
+            "codename": "change_rule", 
+            "name": "Can change rule", 
+            "content_type": 10
         }
     }, 
     {
-        "pk": 21, 
+        "pk": 30, 
         "model": "auth.permission", 
         "fields": {
-            "codename": "delete_site", 
-            "name": "Can delete site", 
-            "content_type": 7
+            "codename": "delete_rule", 
+            "name": "Can delete rule", 
+            "content_type": 10
+        }
+    }, 
+    {
+        "pk": 31, 
+        "model": "auth.permission", 
+        "fields": {
+            "codename": "add_nonce", 
+            "name": "Can add nonce", 
+            "content_type": 11
+        }
+    }, 
+    {
+        "pk": 32, 
+        "model": "auth.permission", 
+        "fields": {
+            "codename": "change_nonce", 
+            "name": "Can change nonce", 
+            "content_type": 11
+        }
+    }, 
+    {
+        "pk": 33, 
+        "model": "auth.permission", 
+        "fields": {
+            "codename": "delete_nonce", 
+            "name": "Can delete nonce", 
+            "content_type": 11
         }
     }, 
     {
@@ -382,6 +517,14 @@
         "model": "auth.group", 
         "fields": {
             "name": "security", 
+            "permissions": []
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "auth.group", 
+        "fields": {
+            "name": "api", 
             "permissions": []
         }
     }, 
@@ -395,16 +538,315 @@
             "is_active": true, 
             "is_superuser": true, 
             "is_staff": true, 
-            "last_login": "2011-03-26 17:41:14", 
+            "last_login": "2012-03-22 19:45:44", 
             "groups": [
-                1
+                1, 
+                2
             ], 
             "user_permissions": [], 
             "password": "sha1$90c1d$b19c7957811191cefea85adbe89223c7735266e9", 
             "email": "a@b.cc", 
             "date_joined": "2010-11-05 06:01:20"
         }
-    },
+    }, 
+    {
+        "pk": 1, 
+        "model": "dms_plugins.doccodepluginmapping", 
+        "fields": {
+            "before_retrieval_plugins": [
+                5, 
+                6, 
+                7, 
+                9, 
+                15, 
+                17, 
+                24
+            ], 
+            "doccode": "2", 
+            "storage_plugins": [
+                4, 
+                14
+            ], 
+            "database_storage_plugins": [
+                23
+            ], 
+            "before_removal_plugins": [
+                12, 
+                13, 
+                20, 
+                22
+            ], 
+            "before_update_plugins": [
+                19, 
+                21
+            ], 
+            "active": true, 
+            "before_storage_plugins": [
+                1, 
+                2, 
+                3
+            ]
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "dms_plugins.doccodepluginmapping", 
+        "fields": {
+            "before_retrieval_plugins": [
+                5, 
+                6, 
+                7, 
+                9, 
+                11, 
+                15, 
+                17
+            ], 
+            "doccode": "1", 
+            "storage_plugins": [
+                4, 
+                14
+            ], 
+            "database_storage_plugins": [], 
+            "before_removal_plugins": [
+                12, 
+                13, 
+                20
+            ], 
+            "before_update_plugins": [
+                19, 
+                21
+            ], 
+            "active": true, 
+            "before_storage_plugins": [
+                1, 
+                2, 
+                3, 
+                10
+            ]
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "dms_plugins.doccodepluginmapping", 
+        "fields": {
+            "before_retrieval_plugins": [
+                6, 
+                7, 
+                15, 
+                17
+            ], 
+            "doccode": "3", 
+            "storage_plugins": [
+                4, 
+                14
+            ], 
+            "database_storage_plugins": [], 
+            "before_removal_plugins": [
+                12, 
+                13, 
+                20
+            ], 
+            "before_update_plugins": [
+                19, 
+                21
+            ], 
+            "active": true, 
+            "before_storage_plugins": []
+        }
+    }, 
+    {
+        "pk": 4, 
+        "model": "dms_plugins.doccodepluginmapping", 
+        "fields": {
+            "before_retrieval_plugins": [
+                6, 
+                7, 
+                15, 
+                17
+            ], 
+            "doccode": "4", 
+            "storage_plugins": [
+                4, 
+                14
+            ], 
+            "database_storage_plugins": [], 
+            "before_removal_plugins": [
+                12, 
+                13, 
+                20
+            ], 
+            "before_update_plugins": [
+                19, 
+                21
+            ], 
+            "active": true, 
+            "before_storage_plugins": [
+                2
+            ]
+        }
+    }, 
+    {
+        "pk": 5, 
+        "model": "dms_plugins.doccodepluginmapping", 
+        "fields": {
+            "before_retrieval_plugins": [
+                6, 
+                7, 
+                15, 
+                17
+            ], 
+            "doccode": "5", 
+            "storage_plugins": [
+                4, 
+                14
+            ], 
+            "database_storage_plugins": [], 
+            "before_removal_plugins": [
+                12, 
+                13, 
+                20
+            ], 
+            "before_update_plugins": [
+                19, 
+                21
+            ], 
+            "active": true, 
+            "before_storage_plugins": [
+                2
+            ]
+        }
+    }, 
+    {
+        "pk": 6, 
+        "model": "dms_plugins.doccodepluginmapping", 
+        "fields": {
+            "before_retrieval_plugins": [
+                6, 
+                7, 
+                15
+            ], 
+            "doccode": "1000", 
+            "storage_plugins": [
+                4, 
+                14
+            ], 
+            "database_storage_plugins": [], 
+            "before_removal_plugins": [
+                12, 
+                13, 
+                20
+            ], 
+            "before_update_plugins": [
+                21
+            ], 
+            "active": true, 
+            "before_storage_plugins": [
+                3
+            ]
+        }
+    }, 
+    {
+        "pk": 1, 
+        "model": "doc_codes.documenttyperule", 
+        "fields": {
+            "regex": "", 
+            "sequence_last": 0, 
+            "description": "This doccode is assigned to the files that have no other suitable doccode.", 
+            "title": "No doccode", 
+            "barcode_zfill": 0, 
+            "split_string": "", 
+            "active": true, 
+            "barcode_format": "", 
+            "doccode_type": "1", 
+            "doccode_id": 1000, 
+            "no_doccode": true
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "doc_codes.documenttyperule", 
+        "fields": {
+            "regex": "[a-z]{5}[0-9]{3}", 
+            "sequence_last": 0, 
+            "description": "[a-z]{5}[0-9]{3}", 
+            "title": "Test PDFs", 
+            "barcode_zfill": 0, 
+            "split_string": "0:5,5:8", 
+            "active": true, 
+            "barcode_format": "", 
+            "doccode_type": "1", 
+            "doccode_id": 1, 
+            "no_doccode": false
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "doc_codes.documenttyperule", 
+        "fields": {
+            "regex": "ADL-[0-9]{4}", 
+            "sequence_last": 0, 
+            "description": "ADL-[0-9]{4}]", 
+            "title": "Adlibre Invoices", 
+            "barcode_zfill": 4, 
+            "split_string": "0:3,4:8", 
+            "active": true, 
+            "barcode_format": "ADL-%s", 
+            "doccode_type": "1", 
+            "doccode_id": 2, 
+            "no_doccode": false
+        }
+    }, 
+    {
+        "pk": 4, 
+        "model": "doc_codes.documenttyperule", 
+        "fields": {
+            "regex": "[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{1,9}", 
+            "sequence_last": 0, 
+            "description": "[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{1,9}", 
+            "title": "Fax Tiff documents", 
+            "barcode_zfill": 0, 
+            "split_string": "0:4,5:7,8:10,11:20", 
+            "active": true, 
+            "barcode_format": "", 
+            "doccode_type": "1", 
+            "doccode_id": 4, 
+            "no_doccode": false
+        }
+    }, 
+    {
+        "pk": 5, 
+        "model": "doc_codes.documenttyperule", 
+        "fields": {
+            "regex": "[0-9]{1,6}", 
+            "sequence_last": 0, 
+            "description": "[0-9]{1,6}", 
+            "title": "Project Gutenberg eBooks", 
+            "barcode_zfill": 0, 
+            "split_string": "", 
+            "active": true, 
+            "barcode_format": "", 
+            "doccode_type": "3", 
+            "doccode_id": 3, 
+            "no_doccode": false
+        }
+    }, 
+    {
+        "pk": 6, 
+        "model": "doc_codes.documenttyperule", 
+        "fields": {
+            "regex": "[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{4}", 
+            "sequence_last": 0, 
+            "description": "[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{4}", 
+            "title": "Credit Card Scans", 
+            "barcode_zfill": 0, 
+            "split_string": "", 
+            "active": true, 
+            "barcode_format": "", 
+            "doccode_type": "2", 
+            "doccode_id": 5, 
+            "no_doccode": false
+        }
+    }, 
     {
         "pk": 1, 
         "model": "plugins.pluginpoint", 
@@ -444,15 +886,15 @@
             "status": 0, 
             "name": "dms_plugins.pluginpoints.StoragePluginPoint"
         }
-    },
+    }, 
     {
-        "pk": 6,
-        "model": "plugins.pluginpoint",
+        "pk": 6, 
+        "model": "plugins.pluginpoint", 
         "fields": {
-            "status": 0,
+            "status": 0, 
             "name": "dms_plugins.pluginpoints.DatabaseStoragePluginPoint"
         }
-    },
+    }, 
     {
         "pk": 1, 
         "model": "plugins.plugin", 
@@ -461,39 +903,6 @@
             "index": 40, 
             "_order": 0, 
             "name": "dms_plugins.workers.transfer.gzip.GzipOnStorePlugin", 
-            "point": 1
-        }
-    }, 
-    {
-        "pk": 2, 
-        "model": "plugins.plugin", 
-        "fields": {
-            "status": 0, 
-            "index": 10, 
-            "_order": 1, 
-            "name": "dms_plugins.workers.validators.filetype.FileTypeValidationPlugin", 
-            "point": 1
-        }
-    }, 
-    {
-        "pk": 3, 
-        "model": "plugins.plugin", 
-        "fields": {
-            "status": 0, 
-            "index": 0, 
-            "_order": 2, 
-            "name": "dms_plugins.workers.security.groups.GroupSecurityStore", 
-            "point": 1
-        }
-    }, 
-    {
-        "pk": 4, 
-        "model": "plugins.plugin", 
-        "fields": {
-            "status": 0, 
-            "index": 50, 
-            "_order": 3, 
-            "name": "dms_plugins.workers.storage.local.LocalStoragePlugin", 
             "point": 1
         }
     }, 
@@ -509,6 +918,50 @@
         }
     }, 
     {
+        "pk": 12, 
+        "model": "plugins.plugin", 
+        "fields": {
+            "status": 0, 
+            "index": 20, 
+            "_order": 0, 
+            "name": "dms_plugins.workers.storage.local.LocalRemovalPlugin", 
+            "point": 3
+        }
+    }, 
+    {
+        "pk": 19, 
+        "model": "plugins.plugin", 
+        "fields": {
+            "status": 0, 
+            "index": 10, 
+            "_order": 0, 
+            "name": "dms_plugins.workers.info.tags.TagsUpdatePlugin", 
+            "point": 4
+        }
+    }, 
+    {
+        "pk": 23, 
+        "model": "plugins.plugin", 
+        "fields": {
+            "status": 0, 
+            "index": 46, 
+            "_order": 0, 
+            "name": "dms_plugins.workers.database.couchdb.CouchDBMetadataStoragePlugin", 
+            "point": 6
+        }
+    }, 
+    {
+        "pk": 2, 
+        "model": "plugins.plugin", 
+        "fields": {
+            "status": 0, 
+            "index": 10, 
+            "_order": 1, 
+            "name": "dms_plugins.workers.validators.filetype.FileTypeValidationPlugin", 
+            "point": 1
+        }
+    }, 
+    {
         "pk": 6, 
         "model": "plugins.plugin", 
         "fields": {
@@ -517,6 +970,39 @@
             "_order": 1, 
             "name": "dms_plugins.workers.security.groups.GroupSecurityRetrieval", 
             "point": 2
+        }
+    }, 
+    {
+        "pk": 13, 
+        "model": "plugins.plugin", 
+        "fields": {
+            "status": 0, 
+            "index": 10, 
+            "_order": 1, 
+            "name": "dms_plugins.workers.security.groups.GroupSecurityRemoval", 
+            "point": 3
+        }
+    }, 
+    {
+        "pk": 21, 
+        "model": "plugins.plugin", 
+        "fields": {
+            "status": 0, 
+            "index": 5, 
+            "_order": 1, 
+            "name": "dms_plugins.workers.storage.local.LocalUpdatePlugin", 
+            "point": 4
+        }
+    }, 
+    {
+        "pk": 3, 
+        "model": "plugins.plugin", 
+        "fields": {
+            "status": 0, 
+            "index": 0, 
+            "_order": 2, 
+            "name": "dms_plugins.workers.security.groups.GroupSecurityStore", 
+            "point": 1
         }
     }, 
     {
@@ -531,14 +1017,47 @@
         }
     }, 
     {
+        "pk": 20, 
+        "model": "plugins.plugin", 
+        "fields": {
+            "status": 0, 
+            "index": 30, 
+            "_order": 2, 
+            "name": "dms_plugins.workers.storage.metadata.local_json.LocalJSONMetadataRemovalPlugin", 
+            "point": 3
+        }
+    }, 
+    {
+        "pk": 4, 
+        "model": "plugins.plugin", 
+        "fields": {
+            "status": 0, 
+            "index": 50, 
+            "_order": 3, 
+            "name": "dms_plugins.workers.storage.local.LocalStoragePlugin", 
+            "point": 1
+        }
+    }, 
+    {
         "pk": 9, 
         "model": "plugins.plugin", 
         "fields": {
             "status": 0, 
             "index": 90, 
-            "_order": 4, 
+            "_order": 3, 
             "name": "dms_plugins.workers.transfer.convert.ConvertFileTypePlugin", 
             "point": 2
+        }
+    }, 
+    {
+        "pk": 22, 
+        "model": "plugins.plugin", 
+        "fields": {
+            "status": 0, 
+            "index": 31, 
+            "_order": 3, 
+            "name": "dms_plugins.workers.database.couchdb.CouchDBMetadataRemovalPlugin", 
+            "point": 3
         }
     }, 
     {
@@ -558,31 +1077,9 @@
         "fields": {
             "status": 0, 
             "index": 80, 
-            "_order": 5, 
+            "_order": 4, 
             "name": "dms_plugins.workers.validators.hashcode.HashCodeValidationOnRetrievalPlugin", 
             "point": 2
-        }
-    }, 
-    {
-        "pk": 12, 
-        "model": "plugins.plugin", 
-        "fields": {
-            "status": 0, 
-            "index": 20, 
-            "_order": 0, 
-            "name": "dms_plugins.workers.storage.local.LocalRemovalPlugin", 
-            "point": 3
-        }
-    }, 
-    {
-        "pk": 13, 
-        "model": "plugins.plugin", 
-        "fields": {
-            "status": 0, 
-            "index": 10, 
-            "_order": 1, 
-            "name": "dms_plugins.workers.security.groups.GroupSecurityRemoval", 
-            "point": 3
         }
     }, 
     {
@@ -613,357 +1110,20 @@
         "fields": {
             "status": 0, 
             "index": 40, 
-            "_order": 7, 
+            "_order": 6, 
             "name": "dms_plugins.workers.info.tags.TagsPlugin", 
             "point": 2
         }
-    },
-    {
-        "pk": 19, 
-        "model": "plugins.plugin", 
-        "fields": {
-            "status": 0, 
-            "index": 10, 
-            "_order": 0, 
-            "name": "dms_plugins.workers.info.tags.TagsUpdatePlugin", 
-            "point": 4
-        }
     }, 
     {
-        "pk": 20, 
+        "pk": 24, 
         "model": "plugins.plugin", 
         "fields": {
             "status": 0, 
-            "index": 30, 
-            "_order": 0, 
-            "name": "dms_plugins.workers.storage.metadata.local_json.LocalJSONMetadataRemovalPlugin", 
-            "point": 3
-        }
-    }, 
-    {
-        "pk": 21, 
-        "model": "plugins.plugin", 
-        "fields": {
-            "status": 0, 
-            "index": 5, 
-            "_order": 0, 
-            "name": "dms_plugins.workers.storage.local.LocalUpdatePlugin", 
-            "point": 4
-        }
-    },
-    {
-        "pk": 22,
-        "model": "plugins.plugin",
-        "fields": {
-            "status": 0,
-            "index": 31,
-            "_order": 3,
-            "name": "dms_plugins.workers.database.couchdb.CouchDBMetadataRemovalPlugin",
-            "point": 3
-        }
-    },
-        {
-        "pk": 23,
-        "model": "plugins.plugin",
-        "fields": {
-            "status": 0,
-            "index": 46,
-            "_order": 8,
-            "name": "dms_plugins.workers.database.couchdb.CouchDBMetadataStoragePlugin",
-            "point": 6
-        }
-    },
-    {
-        "pk": 24,
-        "model": "plugins.plugin",
-        "fields": {
-            "status": 0,
-            "index": 46,
-            "_order": 7,
-            "name": "dms_plugins.workers.database.couchdb.CouchDBMetadataRetrievalPlugin",
+            "index": 46, 
+            "_order": 7, 
+            "name": "dms_plugins.workers.database.couchdb.CouchDBMetadataRetrievalPlugin", 
             "point": 2
-        }
-    },
-    {
-        "pk": 1, 
-        "model": "dms_plugins.doccodepluginmapping", 
-        "fields": {
-            "active": true, 
-            "before_retrieval_plugins": [
-                5, 
-                6, 
-                7, 
-                9, 
-                15, 
-                17,
-                24
-            ],
-            "before_removal_plugins": [
-                12,
-                13,
-                20,
-                22
-            ],
-            "before_storage_plugins": [
-                1,
-                2,
-                3
-            ],
-            "database_storage_plugins": [
-                23
-            ],
-            "storage_plugins": [
-                4,
-                14
-            ],
-            "before_update_plugins": [
-                19,
-                21
-            ],
-            "doccode": "2"
-        }
-    },
-    {
-        "pk": 2,
-        "model": "dms_plugins.doccodepluginmapping",
-        "fields": {
-            "active": true,
-            "before_retrieval_plugins": [
-                5,
-                6,
-                7,
-                9,
-                11,
-                15,
-                17
-            ],
-            "before_removal_plugins": [
-                12,
-                13,
-                20
-            ],
-            "before_storage_plugins": [
-                1,
-                2,
-                3,
-                10
-            ],
-            "storage_plugins": [
-                4,
-                14
-            ],
-            "before_update_plugins": [
-                19,
-                21
-            ],
-            "doccode": "1"
-        }
-    },
-    {
-        "pk": 3,
-        "model": "dms_plugins.doccodepluginmapping",
-        "fields": {
-            "active": true,
-            "before_retrieval_plugins": [
-                6,
-                7,
-                15,
-                17
-            ],
-            "before_removal_plugins": [
-                12,
-                13,
-                20
-            ],
-            "storage_plugins": [
-                4,
-                14
-            ],
-            "before_update_plugins": [
-                19,
-                21
-            ],
-            "doccode": "3"
-        }
-    },
-    {
-        "pk": 4,
-        "model": "dms_plugins.doccodepluginmapping",
-        "fields": {
-            "active": true,
-            "before_retrieval_plugins": [
-                6,
-                7,
-                15,
-                17
-            ],
-            "before_removal_plugins": [
-                12,
-                13,
-                20
-            ],
-            "before_storage_plugins": [
-                2
-            ],
-            "storage_plugins": [
-                4,
-                14
-            ],
-            "before_update_plugins": [
-                19,
-                21
-            ],
-            "doccode": "4"
-        }
-    },
-    {
-        "pk": 5,
-        "model": "dms_plugins.doccodepluginmapping",
-        "fields": {
-            "active": true,
-            "before_retrieval_plugins": [
-                6,
-                7,
-                15,
-                17
-            ],
-            "before_removal_plugins": [
-                12,
-                13,
-                20
-            ],
-            "before_storage_plugins": [
-                2
-            ],
-            "storage_plugins": [
-                4,
-                14
-            ],
-            "before_update_plugins": [
-                19,
-                21
-            ], 
-            "doccode": "5"
-        }
-    }, 
-    {
-        "pk": 6, 
-        "model": "dms_plugins.doccodepluginmapping", 
-        "fields": {
-            "active": true, 
-            "before_retrieval_plugins": [
-                6, 
-                7,
-                15
-            ], 
-            "before_removal_plugins": [
-                12, 
-                13,
-                20
-            ], 
-            "before_storage_plugins": [
-                3
-            ],
-            "storage_plugins": [
-                4,
-                14
-            ],
-            "before_update_plugins": [
-                21
-            ], 
-            "doccode": "1000"
-        }
-    },
-    {
-        "pk": 1,
-        "model": "doc_codes.documenttyperule",
-        "fields": {
-            "regex": "",
-            "description": "This doccode is assigned to the files that have no other suitable doccode.",
-            "sequence_last": 0,
-            "title": "No doccode",
-            "split_string": "",
-            "active": true,
-            "doccode_type": "1",
-            "doccode_id": 1000,
-            "no_doccode": true
-        }
-    },
-    {
-        "pk": 2,
-        "model": "doc_codes.documenttyperule",
-        "fields": {
-            "regex": "[a-z]{5}[0-9]{3}",
-            "description": "[a-z]{5}[0-9]{3}",
-            "sequence_last": 0,
-            "title": "Test PDFs",
-            "split_string": "0:5,5:8",
-            "active": true,
-            "doccode_type": "1",
-            "doccode_id": 1,
-            "no_doccode": false
-        }
-    },
-    {
-        "pk": 3,
-        "model": "doc_codes.documenttyperule",
-        "fields": {
-            "regex": "ADL-[0-9]{4}",
-            "description": "ADL-[0-9]{4}]",
-            "sequence_last": 0,
-            "title": "Adlibre Invoices",
-            "split_string": "0:3,4:8",
-            "active": true,
-            "doccode_type": "1",
-            "doccode_id": 2,
-            "no_doccode": false,
-            "barcode_format": "ADL-%s",
-            "barcode_zfill": 4
-        }
-    },
-    {
-        "pk": 4,
-        "model": "doc_codes.documenttyperule",
-        "fields": {
-            "regex": "[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{1,9}",
-            "description": "[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{1,9}",
-            "sequence_last": 0,
-            "title": "Fax Tiff documents",
-            "split_string": "0:4,5:7,8:10,11:20",
-            "active": true,
-            "doccode_type": "1",
-            "doccode_id": 4,
-            "no_doccode": false
-        }
-    },
-    {
-        "pk": 5,
-        "model": "doc_codes.documenttyperule",
-        "fields": {
-            "regex": "[0-9]{1,6}",
-            "description": "[0-9]{1,6}",
-            "sequence_last": 0,
-            "title": "Project Gutenberg eBooks",
-            "split_string": "",
-            "active": true,
-            "doccode_type": "3",
-            "doccode_id": 3,
-            "no_doccode": false
-        }
-    },
-    {
-        "pk": 6,
-        "model": "doc_codes.documenttyperule",
-        "fields": {
-            "regex": "[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{4}",
-            "description": "[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{4}",
-            "sequence_last": 0,
-            "title": "Credit Card Scans",
-            "split_string": "",
-            "active": true,
-            "doccode_type": "2",
-            "doccode_id": 5,
-            "no_doccode": false
         }
     }
 ]

@@ -23,6 +23,8 @@ Test data
 # TODO: Create a test document code, and a set of test documents at the start of test
 # TODO: Test self.rules, self.rules_missing, self.documents_missing
 # TODO: Write a test that checks these methods for ALL doctypes that are currently installed :)
+# TODO: Run all of these tests for different auth. Plain, Django, and none!
+# TODO: Test with and without correct permissions.
 
 adlibre_invoices_rule_id = 1 # FIXME, we should have a dict of rules and ids provided by DMSTestCase
 
@@ -41,6 +43,7 @@ class APITest(DMSTestCase):
         self.loadTestDocuments()
 
     def test_api_rule_detail(self):
+        self.client.login(username=self.username, password=self.password)
         doccode = DocumentTypeRuleManagerInstance.get_docrule_by_name('Test PDFs')
         mapping = DoccodePluginMapping.objects.get(doccode = doccode.get_id())
         #we don't really care if it crashes above, cause that means our database is imperfect
@@ -49,16 +52,19 @@ class APITest(DMSTestCase):
         self.assertContains(response, 'Test PDFs')
 
     def test_api_rules(self):
+        self.client.login(username=self.username, password=self.password)
         url = reverse('api_rules', kwargs = {'emitter_format': 'json'})
         response = self.client.get(url)
         self.assertContains(response, 'Test PDFs')
 
     def test_api_plugins(self):
+        self.client.login(username=self.username, password=self.password)
         url = reverse('api_plugins', kwargs = {'emitter_format': 'json'})
         response = self.client.get(url)
         self.assertContains(response, 'dms_plugins.workers.storage.local.LocalStoragePlugin')
 
     def test_api_files(self):
+        self.client.login(username=self.username, password=self.password)
         doccode = DocumentTypeRuleManagerInstance.get_docrule_by_name('Adlibre Invoices')
         mapping = DoccodePluginMapping.objects.get(doccode = doccode.get_id())
         url = reverse("api_file_list", kwargs = {'id_rule': mapping.pk})
@@ -181,6 +187,7 @@ class APITest(DMSTestCase):
                 raise self.failureException('Invalid response: %s' % response.content)
 
     def test_get_bad_rev_count(self):
+        self.client.login(username=self.username, password=self.password)
         url = reverse('api_revision_count', kwargs = {'document': 'sdfdsds42333333333333333333333333432423'})
         response = self.client.get(url)
         self.assertContains(response, 'Bad Request', status_code = 400)
