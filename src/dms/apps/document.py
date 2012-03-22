@@ -10,11 +10,16 @@ import os
 import magic
 import mimetypes
 import time
+import logging
 
 from django.conf import settings
 
 from dms_plugins.workers import DmsException
 from doc_codes.models import DocumentTypeRuleManagerInstance
+
+
+log = logging.getLogger('dms.document')
+
 
 class Document(object):
     """
@@ -56,12 +61,13 @@ class Document(object):
         return self.get_name()
 
     def get_docrule(self):
-        #print "before: ", self.doccode
+        log.debug('get_docrule for %s.' % self.doccode)
         if self.doccode is None and self.get_filename():
             self.doccode = DocumentTypeRuleManagerInstance.find_for_string(self.get_stripped_filename())
             if self.doccode is None:
+                log.error('get_docrule. doccode is None!')
                 raise DmsException("No document type rule found for file " + self.get_full_filename(), 404)
-        #print "DOCCODE: %s" % self.doccode #TODO: log.debug this
+        log.debug('get_docrule finished for %s.' % self.doccode)
         return self.doccode
 
     def get_mimetype(self):
@@ -70,7 +76,7 @@ class Document(object):
         if not self.mimetype and self.get_file_obj():
             mime = magic.Magic( mime = True )
             self.mimetype = mime.from_buffer( self.get_file_obj().read() )
-            #print "GUESSED MIMETYPE: %s" % self.mimetype
+            log.debug('get_mimetype guessed mimetype: %s.' % self.mimetype)
         return self.mimetype
 
     def set_mimetype(self, mimetype):
@@ -123,11 +129,12 @@ class Document(object):
                     name = "%s.%s" % (name, self.get_requested_extension())
             elif not os.path.splitext(name)[1][1:]:
                 ext = self.get_extension_by_mimetype()
-                #Fixes extension format 2 dots in API output filename (Bug #588)
+                # Fixes extension format 2 dots in API output filename (Bug #588)
                 try:
                     if '.' in ext:
                         dot, ext = ext.split(".",1)
-                except: #FIXME: Except WHAT?
+                except Exception, e: #FIXME: Except WHAT?
+                    log.error('get_full_filename Exception %s' % e)
                     pass # file type conversion is in progress failing gracefully
                 if ext:
                     name = "%s.%s" % (name, ext)
