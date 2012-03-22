@@ -5,7 +5,8 @@ Copyright: Adlibre Pty Ltd 2011, 2012
 License: See LICENSE for license information
 """
 
-import json, os
+import json
+import os
 import logging
 
 from django.conf import settings
