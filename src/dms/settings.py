@@ -10,6 +10,7 @@ sys.path.append(os.path.join(PROJECT_PATH, 'couchapps'))
 sys.path.append(os.path.join(PROJECT_PATH, 'libraries'))
 sys.path.append(os.path.join(PROJECT_PATH, 'dmsplugins'))
 
+TEST = ['manage.py', 'test'] == [os.path.basename(sys.argv[0]), sys.argv[1],]  # Define TEST Variable if running unit tests
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -206,79 +207,128 @@ class NoMessageFailuresFilter(logging.Filter):
                 return False
         return True
 
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'simple': {
-            'format': '[%(levelname)s] %(name)s %(message)s'
-        },
-        'verbose': {
-            'format': '%(asctime)s [%(levelname)s] %(name)s %(message)s'
-        },
-    },
-    'handlers': {
-        'null': {
-            'level': 'DEBUG',
-            'class': 'django.utils.log.NullHandler',
-        },
-        'console':{
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-            'formatter': 'simple'
-        },
-        'file': {
-            'level': 'DEBUG',
-            'class': 'logging.handlers.TimedRotatingFileHandler',
-            'filename': os.path.join(PROJECT_PATH, '..', '..', 'log', 'dms.log'),
-            'when': 'midnight',
-            'interval': 1, # 1 day
-            'backupCount': 14, # two weeks
-            'formatter': 'verbose',
-        },
-        'mail_admins': {
-            'level': 'ERROR',
-            'class': 'django.utils.log.AdminEmailHandler',
-        }
-    },
-    'filters': {
-        'no_message_failures': {
-            '()': NoMessageFailuresFilter,
+# Different logging for running test units.
+if TEST:
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'formatters': {
+            'simple': {
+                'format': '[%(levelname)s] %(name)s %(message)s'
+            },
+            'verbose': {
+                'format': '%(asctime)s [%(levelname)s] %(name)s %(message)s'
             },
         },
-    'loggers': {
-        # Filter out restkit to null
-        'restkit': {
-            'handlers': ['null',],
-            'level': 'DEBUG',
-            'propagate': False,
+        'handlers': {
+            'null': {
+                'level': 'DEBUG',
+                'class': 'django.utils.log.NullHandler',
+            },
+            'console':{
+                'level': 'DEBUG',
+                'class': 'logging.StreamHandler',
+                'formatter': 'simple'
+            },
         },
-        # Default logger
-        '': {
-            'handlers': ['console', 'file'],
-            'level': 'INFO',
-            'filters': ['no_message_failures'],
-            'propagate': True,
+        'filters': {
+            'no_message_failures': {
+                '()': NoMessageFailuresFilter,
+            },
         },
-        # API logger
-        'dms.api': {
-            'handlers': ['console', 'file'],
-            'level': 'DEBUG',
-            'propagate': False,
-        },
-        # Django 500 error logger
-        'django.request': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
-            'propagate': True,
-            'filters': ['no_message_failures'],
-        },
-
+        'loggers': {
+            # Filter out restkit to null
+            'restkit': {
+                'handlers': ['null',],
+                'level': 'DEBUG',
+                'propagate': False,
+            },
+            # Default logger, ERRORS Only
+            '': {
+                'handlers': ['console',],
+                'level': 'ERROR',
+                'filters': ['no_message_failures'],
+                'propagate': True,
+            },
+            # Django error logger
+            'django.request': {
+                'handlers': ['null'],
+                'level': 'ERROR',
+                'propagate': True,
+                'filters': ['no_message_failures'],
+            },
+        }
     }
-}
-
-LOGGING_TEST = {}
-
+else:
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'formatters': {
+            'simple': {
+                'format': '[%(levelname)s] %(name)s %(message)s'
+            },
+            'verbose': {
+                'format': '%(asctime)s [%(levelname)s] %(name)s %(message)s'
+            },
+        },
+        'handlers': {
+            'null': {
+                'level': 'DEBUG',
+                'class': 'django.utils.log.NullHandler',
+            },
+            'console':{
+                'level': 'DEBUG',
+                'class': 'logging.StreamHandler',
+                'formatter': 'simple'
+            },
+            'file': {
+                'level': 'DEBUG',
+                'class': 'logging.handlers.TimedRotatingFileHandler',
+                'filename': os.path.join(PROJECT_PATH, '..', '..', 'log', 'dms.log'),
+                'when': 'midnight',
+                'interval': 1, # 1 day
+                'backupCount': 14, # two weeks
+                'formatter': 'verbose',
+            },
+            'mail_admins': {
+                'level': 'ERROR',
+                'class': 'django.utils.log.AdminEmailHandler',
+            }
+        },
+        'filters': {
+            'no_message_failures': {
+                '()': NoMessageFailuresFilter,
+            },
+        },
+        'loggers': {
+            # Filter out restkit to null
+            'restkit': {
+                'handlers': ['null',],
+                'level': 'DEBUG',
+                'propagate': False,
+            },
+            # Default logger
+            '': {
+                'handlers': ['console', 'file'],
+                'level': 'INFO',
+                'filters': ['no_message_failures'],
+                'propagate': True,
+            },
+            # API logger
+            'dms.api': {
+                'handlers': ['console', 'file'],
+                'level': 'DEBUG',
+                'propagate': False,
+            },
+            # Django 500 error logger
+            'django.request': {
+                'handlers': ['mail_admins'],
+                'level': 'ERROR',
+                'propagate': True,
+                'filters': ['no_message_failures'],
+            },
+        }
+    }
 
 LOGIN_REDIRECT_URL = '/'
 
