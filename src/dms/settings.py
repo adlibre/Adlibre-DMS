@@ -10,7 +10,10 @@ sys.path.append(os.path.join(PROJECT_PATH, 'couchapps'))
 sys.path.append(os.path.join(PROJECT_PATH, 'libraries'))
 sys.path.append(os.path.join(PROJECT_PATH, 'dmsplugins'))
 
-TEST = ['manage.py', 'test'] == [os.path.basename(sys.argv[0]), sys.argv[1],]  # Define TEST Variable if running unit tests
+if len(sys.argv) > 1:
+    TEST = ['manage.py', 'test'] == [os.path.basename(sys.argv[0]), sys.argv[1],]  # Define TEST Variable if running unit tests
+else:
+    TEST = False
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -136,6 +139,12 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
 #    'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
+    'django.contrib.auth.middleware.RemoteUserMiddleware',  # Support for Basic Auth in API
+)
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'django.contrib.auth.backends.RemoteUserBackend',
 )
 
 ROOT_URLCONF = 'dms.urls'
@@ -314,8 +323,8 @@ else:
                 'filters': ['no_message_failures'],
                 'propagate': True,
             },
-            # API logger
-            'dms.api': {
+            # DMS logger
+            'dms': {
                 'handlers': ['console', 'file'],
                 'level': 'DEBUG',
                 'propagate': False,

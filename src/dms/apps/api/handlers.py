@@ -15,6 +15,10 @@ from django.http import HttpResponse
 from piston.handler import BaseHandler
 from piston.utils import rc
 
+from django.utils.decorators import method_decorator
+from api.decorators.auth import logged_in_or_basicauth
+from api.decorators.group_required import group_required
+
 from document_manager import DocumentManager
 from dms_plugins import models
 from doc_codes.models import DocumentTypeRuleManagerInstance
@@ -22,6 +26,8 @@ from mdt_manager import MetaDataTemplateManager
 
 
 log = logging.getLogger('dms.api.handlers')
+
+AUTH_REALM = 'Adlibre DMS'
 
 class BaseFileHandler(BaseHandler):
     def get_file_info(self, request):
@@ -47,7 +53,9 @@ class FileInfoHandler(BaseFileHandler):
     Returns document metadata
     """
     allowed_methods = ('GET',)
-    
+
+    @method_decorator(logged_in_or_basicauth(AUTH_REALM))
+    @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def read(self, request):
         try:
             document_name, extension, revision, hashcode = self.get_file_info(request)
@@ -84,6 +92,8 @@ class FileHandler(BaseFileHandler):
     """
     allowed_methods = ('GET', 'POST', 'DELETE', 'PUT')
 
+    @method_decorator(logged_in_or_basicauth(AUTH_REALM))
+    @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def read(self, request):
         try:
             document_name, extension, revision, hashcode = self.get_file_info(request)
@@ -108,13 +118,15 @@ class FileHandler(BaseFileHandler):
                 return rc.BAD_REQUEST
         if manager.errors:
             #print "Manager errors: %s" % manager.errors
-            return rc.BAD_REQUEST
+            return rc.BAD_REQUEST # FIXME: file non existent, returns rc.BAD_REQUEST. should be reading RC code from plugin exception.
         response = HttpResponse(content, mimetype=mimetype)
         response["Content-Length"] = len(content)
         response['Content-Disposition'] = 'filename=%s' % filename
         log.info('FileHandler.read request fulfilled for %s, ext %s, rev %s, hash %s' % (document_name, extension, revision, hashcode))
         return response
 
+    @method_decorator(logged_in_or_basicauth(AUTH_REALM))
+    @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def create(self, request):
         document, extension = os.path.splitext(request.FILES['file'].name)
         extension = extension.strip(".")
@@ -127,6 +139,8 @@ class FileHandler(BaseFileHandler):
         log.info('FileHandler.create request fulfilled for %s' % document.get_filename())
         return document.get_filename() # FIXME, should be rc.CREATED
 
+    @method_decorator(logged_in_or_basicauth(AUTH_REALM))
+    @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def delete(self, request):
         # FIXME, should return 404 if file not found, 400 if no docrule exists.
         # fixme should be using get_file_info from parent class.
@@ -157,6 +171,8 @@ class FileHandler(BaseFileHandler):
         log.info('FileHandler.delete request fulfilled for %s, ext %s, rev %s, hash %s' % (document_name, extension, revision, hashcode))
         return rc.DELETED
 
+    @method_decorator(logged_in_or_basicauth(AUTH_REALM))
+    @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def update(self, request):
         try:
             try:
@@ -203,6 +219,8 @@ class FileListHandler(BaseHandler):
     """
     allowed_methods = ('GET','POST')
 
+    @method_decorator(logged_in_or_basicauth(AUTH_REALM))
+    @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def read(self, request, id_rule):
         try:
             manager = DocumentManager()
@@ -250,6 +268,8 @@ class TagsHandler(BaseHandler):
     """
     allowed_methods = ('GET',)
 
+    @method_decorator(logged_in_or_basicauth(AUTH_REALM))
+    @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def read(self, request, id_rule):
         try:
             manager = DocumentManager()
@@ -270,6 +290,8 @@ class RevisionCountHandler(BaseHandler):
     """
     allowed_methods = ('GET','POST')
 
+    @method_decorator(logged_in_or_basicauth(AUTH_REALM))
+    @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def read(self, request, document):
         document, extension = os.path.splitext(document)
         try:
@@ -307,6 +329,8 @@ class RulesHandler(BaseHandler):
     verbose_name = 'rule'
     verbose_name_plural = 'rules'
 
+    @method_decorator(logged_in_or_basicauth(AUTH_REALM))
+    @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def read(self, request):
         manager = DocumentManager()
         mappings = manager.get_plugin_mappings()
@@ -334,6 +358,8 @@ class RulesDetailHandler(BaseHandler):
     verbose_name = 'rule'
     verbose_name_plural = 'rules'
 
+    @method_decorator(logged_in_or_basicauth(AUTH_REALM))
+    @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def read(self, request, id_rule):
         manager = DocumentManager()
         try:
@@ -357,6 +383,8 @@ class PluginsHandler(BaseHandler):
     verbose_name = 'plugin'
     verbose_name_plural = 'plugins'
 
+    @method_decorator(logged_in_or_basicauth(AUTH_REALM))
+    @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def read(self, request):
         manager = DocumentManager()
         try:
@@ -382,6 +410,8 @@ class MetaDataTemplateHandler(BaseHandler):
     mdt_id is use for delete
     """
 
+    @method_decorator(logged_in_or_basicauth(AUTH_REALM))
+    @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def read(self, request):
         if not request.user.is_authenticated():
             log.error('MetaDataTemplateHandler.read attempted with unauthenticated user.')
@@ -413,6 +443,8 @@ class MetaDataTemplateHandler(BaseHandler):
         log.info('MetaDataTemplateHandler.read request fulfilled for docrule_id %s' % docrule_id)
         return result
 
+    @method_decorator(logged_in_or_basicauth(AUTH_REALM))
+    @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def create(self, request):
 
         if not request.user.is_authenticated():
@@ -453,6 +485,8 @@ class MetaDataTemplateHandler(BaseHandler):
         log.info('MetaDataTemplateHandler.create request fulfilled.')
         return result
 
+    @method_decorator(logged_in_or_basicauth(AUTH_REALM))
+    @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def delete(self, request):
         if not request.user.is_authenticated():
             log.error('MetaDataTemplateHandler.delete attempted with unauthenticated user.')
