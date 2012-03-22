@@ -97,6 +97,7 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    'compressor.finders.CompressorFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -166,6 +167,7 @@ INSTALLED_APPS = (
     'taggit',
     'couchdbkit.ext.django', # needed for CouchDB usage
     'widget_tweaks', # used by MUI templates
+    'compressor', # MUI js / css compression
     # DMS Core
     'api',
     'docs',
@@ -280,6 +282,12 @@ LOGIN_REDIRECT_URL = '/'
 APPEND_SLASH = False # Stop Django from adding slashes to urls
 
 RESTRUCTUREDTEXT_FILTER_SETTINGS = { 'doctitle_xform': 0, } # stop first heading being munged for page title.
+
+# Compressor
+COMPRESS_URL=STATIC_URL
+COMPRESS_ROOT=STATIC_ROOT
+COMPRESS_OUTPUT_DIR='cache'
+COMPRESS=True
 
 #
 # Adlibre DMS Specific Settings
