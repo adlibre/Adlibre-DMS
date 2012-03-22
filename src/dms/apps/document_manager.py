@@ -75,7 +75,7 @@ class DocumentManager(object):
 
     def process_pluginpoint(self, pluginpoint, request, document=None):
         plugins = self.get_plugins(pluginpoint, document)
-        log.info('process_pluginpoint: %s with %s plugins.' % (pluginpoint, plugins))
+        log.debug('process_pluginpoint: %s with %s plugins.' % (pluginpoint, plugins))
         for plugin in plugins:
             try:
                 log.debug('process_pluginpoint begin processing: %s.' % plugin)
