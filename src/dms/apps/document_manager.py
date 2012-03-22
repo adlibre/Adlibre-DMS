@@ -6,6 +6,8 @@ License: See LICENSE for license information
 """
 
 import os
+import logging
+
 import plugins
 
 from django.conf import settings
@@ -18,6 +20,9 @@ from dms_plugins import pluginpoints
 
 from document import Document
 from doc_codes.models import DocumentTypeRule
+
+
+log = logging.getLogger('dms.document_manager')
 
 # TODO: Delint this file
 # TODO: AC: I think this should be refactored so that 'request' is not used here. Plugin points should be executed elsewhere.
@@ -42,7 +47,7 @@ class DocumentManager(object):
 
     def get_plugin_mapping(self, document):
         doccode = document.get_docrule()
-        #print "DOCCODE: %s" % doccode
+        log.info('get_plugin_mapping for: %s.' % doccode)
         mapping = models.DoccodePluginMapping.objects.filter(
                     doccode = str(doccode.doccode_id),
                     active=True)
@@ -70,18 +75,16 @@ class DocumentManager(object):
 
     def process_pluginpoint(self, pluginpoint, request, document=None):
         plugins = self.get_plugins(pluginpoint, document)
-        #print "Pluginpoint: %s" % pluginpoint
-        #print "Plugins: %s" % plugins
+        log.info('process_pluginpoint: %s with %s plugins.' % (pluginpoint, plugins))
         for plugin in plugins:
             try:
-                #print "begin processing %s:" % plugin
+                log.debug('process_pluginpoint begin processing: %s.' % plugin)
                 document = plugin.work(request, document)
-                #print "Processed %s:" % plugin
-                #print "Here is document: \n%s" % document.__dict__
+                log.debug('process_pluginpoint begin processed: %s.' % plugin)
             except PluginError, e: # if some plugin throws an exception, stop processing and store the error message
                 self.errors.append(e)
                 if settings.DEBUG:
-                    print "ERROR: %s" % e.parameter
+                    log.error('process_pluginpoint: %s.' % e) # e.parameter, e.code
                 break
             except PluginWarning, e:
                 self.warnings.append(str(e))
@@ -103,7 +106,7 @@ class DocumentManager(object):
             # FIXME: Barcode is allocated, but there is no transaction around this :(
             barcode = dtr.add_new_document()
             doc.set_filename(barcode)
-            #print "Allocated Barcode %s" % (barcode,)
+            log.debug('Allocated Barcode %s.' % barcode)
         else:
             doc.set_filename(os.path.basename(uploaded_file.name))
         if hasattr(uploaded_file, 'content_type'):
