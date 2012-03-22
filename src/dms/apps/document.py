@@ -229,16 +229,15 @@ class Document(object):
             creation_time = time.strftime(settings.DATETIME_FORMAT, time.localtime(os.stat(self.get_fullpath()).st_ctime))
         return creation_time
 
-# AC: This was used in the API update method. But don't believe it is required
-#    def get_dict(self):
-#        d = {}
-#        d['metadata'] = self.get_metadata()
-#        d['current_metadata'] = self.get_current_metadata()
-#        doccode = self.get_docrule()
-#        d['doccode'] = {'title': doccode.get_title(), 'id': doccode.get_id()}
-#        d['document_name'] = self.get_filename()
-#        d['tags'] = self.get_tags()
-#        return d
+    def get_dict(self):
+        d = {}
+        d['metadata'] = self.get_metadata()
+        d['current_metadata'] = self.get_current_metadata()
+        doccode = self.get_docrule()
+        d['doccode'] = {'title': doccode.get_title(), 'id': doccode.get_id()}
+        d['document_name'] = self.get_filename()
+        d['tags'] = self.get_tags()
+        return d
 
     def get_tags(self):
         return self.tags
