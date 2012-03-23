@@ -46,21 +46,16 @@ class CouchDBMetadata(object):
                 #print "Storing Document into DB", document
                 return document
 
-    def update_metadata_after_removal(self, request, document): # FIXME: Request object should not be used here, as it violates separation of API barrier.
+    def update_metadata_after_removal(self, request, document):
         """
         Updates document CouchDB metadata on removal. (Removes CouchDB document)
         """
-        if not document:
-            #doc is fully deleted
-            if request.method == 'DELETE':
-                #precaution to only delete on delete not on 'PUT'
-                doc_name = request.GET["filename"]
-                # fix not to fail on deleting certain document with extension
-                stripped_filename=doc_name
-                if '.' in doc_name:
-                    stripped_filename = os.path.splitext(doc_name)[0]
-                couchdoc = CouchDocument.get(docid=stripped_filename)
-                couchdoc.delete()
+        if not document.get_file_obj():
+            #doc is fully deleted from fs
+            stripped_filename=document.get_stripped_filename()
+            couchdoc = CouchDocument.get(docid=stripped_filename)
+            couchdoc.delete()
+        return document
         #print "Deleted Document in DB", document
 
     def retrieve(self, request, document):
