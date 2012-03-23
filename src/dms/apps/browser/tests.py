@@ -166,21 +166,21 @@ class ConversionTest(DMSTestCase):
     def test_tif2pdf_conversion(self):
         self.client.login(username=self.username, password=self.password)
         for d in self.documents_tif:
-            url = '/get/' + d + '?extension=pdf'
+            url = reverse('get_file', kwargs={'code': d, 'suggested_format': 'pdf',})
             response = self.client.get(url)
             self.assertContains(response, '', status_code=200)
 
     def test_txt2pdf_conversion(self):
         self.client.login(username=self.username, password=self.password)
         for d in self.documents_txt:
-            url = '/get/' + d + '?extension=pdf'
+            url = reverse('get_file', kwargs={'code': d, 'suggested_format': 'pdf',})
             response = self.client.get(url)
             self.assertContains(response, '', status_code=200)
 
     def test_pdf2txt_conversion(self):
         self.client.login(username=self.username, password=self.password)
         for d in self.documents_pdf:
-            url = '/get/' + d + '?extension=txt'
+            url = reverse('get_file', kwargs={'code': d, 'suggested_format': 'txt',})
             response = self.client.get(url)
             self.assertContains(response, d, status_code=200)
 

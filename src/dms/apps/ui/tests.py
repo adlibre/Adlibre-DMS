@@ -65,9 +65,8 @@ class Main_DMS_UI_Test(DMSTestCase):
         # to be ran after all tests finished
 
         # files cleanup using API
-        url = reverse("api_file")
-
         for doc in test_document_files:
-            data = { 'filename': doc, }
-            response = self.client.delete(url, data)
+            code, suggested_format = os.path.splitext(doc)
+            url = reverse('api_file', kwargs={'code': code,})
+            response = self.client.delete(url)
             self.assertEqual(response.status_code, 204)

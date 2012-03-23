@@ -20,8 +20,14 @@ tags_handler = Resource(handlers.TagsHandler)
 mdt_handler = Resource(handlers.MetaDataTemplateHandler)
 
 urlpatterns = patterns('',
-    url(r'^file/', file_handler, name='api_file'),
-    url(r'^file-info/', file_info_handler, name='api_file_info'),
+    # /api/file/ABC1234
+    url(r'^file/(?P<code>[\w_-]+)$', file_handler, name='api_file'),
+    # /api/file/ABC1234.pdf
+    url(r'^file/(?P<code>[\w_-]+)\.(?P<suggested_format>[\w_-]+)$', file_handler, name='api_file'),
+    # /api/file-info/ABC1234
+    url(r'^file-info/(?P<code>[\w_-]+)$', file_info_handler, name='api_file_info'),
+    # /api/file-info/ABC1234.pdf
+    url(r'^file-info/(?P<code>[\w_-]+)\.(?P<suggested_format>[\w_-]+)', file_info_handler, name='api_file_info'),
     url(r'^files/(?P<id_rule>\d+)/$', file_list_handler, name='api_file_list'),
     url(r'^revision_count/(?P<document>[\w_-]+)$', revision_count_handler, name='api_revision_count'),
     url(r'^rules\.(?P<emitter_format>.+)$', rules_handler, name='api_rules'),

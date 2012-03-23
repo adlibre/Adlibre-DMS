@@ -70,12 +70,10 @@ def error_response(errors):
     response.status_code = error.code
     return response
 
-def get_file(request, document):
-    parent_directory = request.GET.get('dir', None)
-    extension = request.GET.get('extension', None)
-    hashcode = request.GET.get('hashcode', None)
+def get_file(request, code, suggested_format=None):
+    hashcode = request.GET.get('hashcode', None) # Refactor me out
     manager = DocumentManager()
-    mimetype, filename, content = manager.get_file(request, document, hashcode, extension, parent_directory = parent_directory)
+    mimetype, filename, content = manager.get_file(request, code, hashcode, suggested_format, parent_directory=None)
     if manager.errors:
         return error_response(manager.errors)
     response = HttpResponse(content, mimetype = mimetype)

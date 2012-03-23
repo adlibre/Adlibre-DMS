@@ -158,6 +158,8 @@ class Local(object):
         return doccodes
 
     def remove(self, request, document):
+        # TODO: FIXME: Refactor this method so it's safer!
+
         directory = self.filesystem.get_document_directory(document)
         filename = None
         if document.get_docrule().no_doccode:

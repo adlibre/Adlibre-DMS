@@ -65,13 +65,13 @@ class DMSTestCase(TestCase):
         """
         Cleanup Helper
         """
-        url = reverse("api_file")
         self.client.login(username=self.username, password=self.password)
         for doc in documents:
-            data = { 'filename': doc, }
-            response = self.client.delete(url, data)
+            code, suggested_format = os.path.splitext(doc)
+            url = reverse('api_file', kwargs={'code': code,})
+            response = self.client.delete(url)
             if response.status_code is not 204:
-                print "ERROR DATA: %s, %s" % (data, response.status_code)
+                print "ERROR DATA: %s, %s" % (code, response.status_code)
             if check_response:
                 self.assertEqual(response.status_code, 204)
 
