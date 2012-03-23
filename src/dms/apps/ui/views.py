@@ -5,6 +5,7 @@ Copyright: Adlibre Pty Ltd 2011
 License: See LICENSE for license information
 """
 
+import os
 import json
 
 from django.core.urlresolvers import reverse
@@ -23,8 +24,10 @@ def get_urls(id_rule = None, document_name = None):
             'tags_url': reverse('api_tags', kwargs = {'emitter_format': 'json', 'id_rule': id_rule}),
             })
     if document_name:
-        c.update({  'document_url': reverse("api_file") + "?filename=%s" % document_name,
-                    'document_info_url': reverse("api_file_info") + "?filename=%s" % document_name
+        code, suggested_format = os.path.splitext(document_name)
+        suggested_format = suggested_format[1:] # Remove . from file ext
+        c.update({  'document_url': reverse('api_file', kwargs={'code': code,'suggested_format': suggested_format,}),
+                    'document_info_url': reverse('api_file', kwargs={'code': code,'suggested_format': suggested_format,}),
                     })
     return json.dumps(c)
 
@@ -51,7 +54,8 @@ def document(request, document_name):
 
 @login_required
 def upload_document(request):
-    document_name = FileHandler().create(request)
+    # FIXME: Refactor out this direct calling of api.
+    document_name = FileHandler().create(request, None, None)
     if type(document_name) == unicode:
         return document(request, document_name)
     return HttpResponse(str(document_name))

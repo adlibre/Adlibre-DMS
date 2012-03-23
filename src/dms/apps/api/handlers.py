@@ -31,22 +31,13 @@ log = logging.getLogger('dms.api.handlers')
 AUTH_REALM = 'Adlibre DMS'
 
 class BaseFileHandler(BaseHandler):
-    def get_file_info(self, request):
 
-        filename = request.GET.get('filename')
-
-        if not filename:
-            log.error('No filename passed to get_file_info')
-            raise ValueError('No filename')
-
-        document_name, extension = os.path.splitext(filename)
-        extension = extension.strip(".")
-
+    def _get_info(self, request):
         revision = request.GET.get('r', None)
         hashcode = request.GET.get('h', None)
-
-        log.debug('BaseFileHandler.get_file_info returned: %s : %s : %s : %s.' % (document_name, extension, revision, hashcode))
-        return document_name, extension, revision, hashcode
+        extra = request.REQUEST
+        log.debug('BaseFileHandler._get_info returned: %s : %s : %s.' % (revision, hashcode, extra))
+        return revision, hashcode, extra
 
 
 class FileInfoHandler(BaseFileHandler):
@@ -57,21 +48,11 @@ class FileInfoHandler(BaseFileHandler):
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
     @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
-    def read(self, request):
-        try:
-            document_name, extension, revision, hashcode = self.get_file_info(request)
-            log.debug('FileInfoHandler.read request begin for %s, ext %s, rev %s, hash %s' % (document_name, extension, revision, hashcode))
-        except ValueError:
-            log.error('FileInfoHandler.read ValueError')
-            if settings.DEBUG:
-                raise
-            else:
-                return rc.BAD_REQUEST
-        parent_directory = None
-        #parent_directory = request.GET.get('parent_directory', None) # FIXME TODO: this is wrong!!!!!! security breach...
+    def read(self, request, code, suggested_format=None):
+        revision, hashcode, extra = self._get_info(request)
         manager = DocumentManager()
-        document = manager.retrieve(request, document_name, hashcode=hashcode, revision=revision, only_metadata=True,
-                        extension=extension, parent_directory=parent_directory)
+        document = manager.retrieve(request, code, hashcode=hashcode, revision=revision, only_metadata=True,
+                        extension=suggested_format, parent_directory=None)
         mapping = manager.get_plugin_mapping(document)
         if manager.errors:
             log.error('FileInfoHandler.read errors: %s' % manager.errors)
@@ -79,11 +60,12 @@ class FileInfoHandler(BaseFileHandler):
                 raise Exception('FileInfoHandler.read manager.errors')
             else:
                 return rc.BAD_REQUEST
+        # FIXME This is ugly
         info = document.get_dict()
-        info['document_list_url'] = reverse('ui_document_list', kwargs = {'id_rule': mapping.pk})
+        info['document_list_url'] = reverse('ui_document_list', kwargs={'id_rule': mapping.pk})
         info['tags'] = document.get_tags()
         info['no_doccode'] = document.get_docrule().no_doccode
-        log.info('FileInfoHandler.read request fulfilled for %s, ext %s, rev %s, hash %s' % (document_name, extension, revision, hashcode))
+        log.info('FileInfoHandler.read request fulfilled for %s, ext %s, rev %s, hash %s' % (code, suggested_format, revision, hashcode))
         return HttpResponse(json.dumps(info))
 
 
@@ -95,22 +77,12 @@ class FileHandler(BaseFileHandler):
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
     @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
-    def read(self, request):
-        try:
-            document_name, extension, revision, hashcode = self.get_file_info(request)
-            log.debug('FileHandler.read request begin for %s, ext %s, rev %s, hash %s' % (document_name, extension, revision, hashcode))
-        except ValueError:
-            log.error('FileHandler.read ValueError')
-            if settings.DEBUG:
-                raise
-            else:
-                return rc.BAD_REQUEST
-        parent_directory = None
-        #parent_directory = request.GET.get('parent_directory', None) # FIXME TODO: this is wrong!!!!!! security breach...
+    def read(self, request, code, suggested_format=None):
+        revision, hashcode, extra = self._get_info(request)
         manager = DocumentManager()
         try:
-            mimetype, filename, content = manager.get_file(request, document_name, hashcode, 
-                    extension, revision=revision, parent_directory=parent_directory)
+            mimetype, filename, content = manager.get_file(request, code, hashcode,
+                    suggested_format, revision=revision, parent_directory=None)
         except Exception, e:
             log.error('FileHandler.read exception %s' % e)
             if settings.DEBUG:
@@ -118,20 +90,18 @@ class FileHandler(BaseFileHandler):
             else:
                 return rc.BAD_REQUEST
         if manager.errors:
-            #print "Manager errors: %s" % manager.errors
+            log.error('FileHandler.read manager errors: %s' % manager.errors)
             return rc.BAD_REQUEST # FIXME: file non existent, returns rc.BAD_REQUEST. should be reading RC code from plugin exception.
         response = HttpResponse(content, mimetype=mimetype)
         response["Content-Length"] = len(content)
         response['Content-Disposition'] = 'filename=%s' % filename
-        log.info('FileHandler.read request fulfilled for %s, ext %s, rev %s, hash %s' % (document_name, extension, revision, hashcode))
+        log.info('FileHandler.read request fulfilled for code: %s, format: %s, rev %s, hash: %s.' % (code, suggested_format, revision, hashcode))
         return response
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
     @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
-    def create(self, request):
-        document, extension = os.path.splitext(request.FILES['file'].name)
-        extension = extension.strip(".")
-
+    def create(self, request, code, suggested_format=None):
+        # FIXME... code and file stream should be passed in separately!
         manager = DocumentManager()
         document = manager.store(request, request.FILES['file'])
         if len(manager.errors) > 0:
@@ -142,23 +112,16 @@ class FileHandler(BaseFileHandler):
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
     @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
-    def delete(self, request):
+    def delete(self, request, code, suggested_format=None):
         # FIXME, should return 404 if file not found, 400 if no docrule exists.
-        # fixme should be using get_file_info from parent class.
-        filename = request.REQUEST.get('filename')
-        document_name, extension = os.path.splitext(filename)
-        extension = extension.strip(".")
-        hashcode = None # FIXME, why is this not supported for delete?
-        revision = request.REQUEST.get("r", None) # TODO: TestMe
-        full_filename = request.REQUEST.get('full_filename', None) # what is this?
-        parent_directory = None # FIXME parent_directory is used by /ui/ for nodoccode, but still seems to work
-        #parent_directory = request.GET.get('parent_directory', None) # FIXME: Why are we allowing this with the API?
+#        full_filename = request.REQUEST.get('full_filename', None) # what is this?
+#        parent_directory = request.REQUEST.get('parent_directory', None) # FIXME! Used by no doccode!
+        revision, hashcode, extra = self._get_info(request)
         manager = DocumentManager()
         try:
-            log.debug('FileHandler.delete attempt for document_name:%s, revision:%s, full_filename:%s, parent_directory:%s, extension:%s.'
-                    % (document_name, revision, full_filename, parent_directory, extension))
-            manager.delete_file(request, document_name, revision=revision, full_filename=full_filename,
-                    parent_directory=parent_directory, extension=extension)
+            log.debug('FileHandler.delete attempt with %s %s' % (code, revision))
+            manager.delete_file(request, code, revision=revision, full_filename=None,
+                    parent_directory=None, extension=suggested_format)
         except Exception, e:
             log.error('FileHandler.delete exception %s' % e)
             if settings.DEBUG:
@@ -167,44 +130,34 @@ class FileHandler(BaseFileHandler):
                 return rc.BAD_REQUEST
         if len(manager.errors) > 0:
             if settings.DEBUG:
-                print manager.errors
+                log.error('Manager Errors encountered %s' % manager.errors)
             return rc.BAD_REQUEST
-        log.info('FileHandler.delete request fulfilled for %s, ext %s, rev %s, hash %s' % (document_name, extension, revision, hashcode))
+        log.info('FileHandler.delete request fulfilled for code: %s, format: %s, rev: %s, hash: %s.' % (code, suggested_format, revision, hashcode))
         return rc.DELETED
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
     @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
-    def update(self, request):
+    def update(self, request, code, suggested_format=None):
+        revision, hashcode, extra = self._get_info(request)
+        # TODO refactor these verbs
+        tag_string = request.PUT.get('tag_string', None)
+        remove_tag_string = request.PUT.get('remove_tag_string', None)
+        new_name = request.PUT.get('new_name', None)
+
         try:
-            try:
-                document_name, extension, revision, hashcode = self.get_file_info(request)
-            except ValueError:
-                log.error('FileHandler.update ValueError')
-                if settings.DEBUG:
-                    raise
-                else:
-                    return rc.BAD_REQUEST
-            parent_directory = None
-            #parent_directory = request.PUT.get('parent_directory', None)
-
-            tag_string = request.PUT.get('tag_string', None)
-            remove_tag_string = request.PUT.get('remove_tag_string', None)
-
-            new_name = request.PUT.get('new_name', None)
-
             manager = DocumentManager()
             if new_name:
-                document = manager.rename(request, document_name, new_name, extension, parent_directory=parent_directory)
+                document = manager.rename(request, code, new_name, suggested_format, parent_directory=None) #FIXME hashcode?
             else:
-                document = manager.update(request, document_name, tag_string=tag_string, remove_tag_string=remove_tag_string,
-                        parent_directory=parent_directory, extension=extension)
+                document = manager.update(request, code, tag_string=tag_string, remove_tag_string=remove_tag_string,
+                        parent_directory=None, extension=suggested_format) #FIXME hashcode missing?
             if len(manager.errors) > 0:
                 log.error('FileHandler.update manager errors %s' % manager.errors)
                 if settings.DEBUG:
                     raise Exception('FileHandler.update manager errors')
                 else:
                     return rc.BAD_REQUEST
-            log.info('FileHandler.update request fulfilled for %s, ext %s, rev %s, hash %s' % (document_name, extension, revision, hashcode))
+            log.info('FileHandler.update request fulfilled for code: %s, format: %s, rev: %s, hash: %s.' % (code, suggested_format, revision, hashcode))
             return HttpResponse(json.dumps( document.get_dict() )) # FIXME should be rc.ALL_OK
         except Exception, e: # FIXME
             log.error('FileHandler.update exception %s' % e)

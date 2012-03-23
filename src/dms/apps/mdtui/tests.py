@@ -580,9 +580,8 @@ class MDTUI(TestCase):
             self.assertEqual(response.status_code, 204)
 
         # Delete file "doc1"
-        url = reverse("api_file")
-        data = { 'filename': doc1, }
-        response = self.client.delete(url, data)
+        url = reverse('api_file', kwargs={'code': doc1,})
+        response = self.client.delete(url)
         self.assertEqual(response.status_code, 204)
 
     def _read_indexes_form(self, response):
