@@ -175,6 +175,7 @@ class LocalJSONMetadata(object):
             self.write_metadata(fileinfo_db, document, directory)
         else:
             pass # our directory with all metadata has just been deleted %)
+        return document
 
 class LocalJSONMetadataRetrievalPlugin(Plugin, BeforeRetrievalPluginPoint):
     title = "Local Metadata Retrieval"
