@@ -364,7 +364,7 @@ def mdt_parallel_keys(request):
         pkeys = manager.get_parallel_keys_for_key(mdts, key_name)
         # db call to search in docs
         # TODO: emit unique keys (Reduce fucntion for this view)
-        # TODO: search only for this django user... <-- AC: Huh? (YG: Each document has django user id assigned (creator)
+        # TODO: search only for this django user... <-- AC: Huh? (YG: Each document has django user id assigned (creator). AC. Ok we don't need that.
         # This way we may only suggest indexes for this user.
         documents = CouchDocument.view(
             'dmscouch/search_autocomplete',  # FIXME: hardcoded url
