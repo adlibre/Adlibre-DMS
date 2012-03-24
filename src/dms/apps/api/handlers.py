@@ -114,14 +114,14 @@ class FileHandler(BaseFileHandler):
     @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def delete(self, request, code, suggested_format=None):
         # FIXME, should return 404 if file not found, 400 if no docrule exists.
-#        full_filename = request.REQUEST.get('full_filename', None) # what is this?
-#        parent_directory = request.REQUEST.get('parent_directory', None) # FIXME! Used by no doccode!
+        full_filename = request.REQUEST.get('full_filename', None) # what is this?
+        parent_directory = request.REQUEST.get('parent_directory', None) # FIXME! Used by no doccode!
         revision, hashcode, extra = self._get_info(request)
         manager = DocumentManager()
         try:
             log.debug('FileHandler.delete attempt with %s %s' % (code, revision))
-            manager.delete_file(request, code, revision=revision, full_filename=None,
-                    parent_directory=None, extension=suggested_format)
+            manager.delete_file(request, code, revision=revision, full_filename=full_filename,
+                    parent_directory=parent_directory, extension=suggested_format)
         except Exception, e:
             log.error('FileHandler.delete exception %s' % e)
             if settings.DEBUG:

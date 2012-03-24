@@ -17,7 +17,7 @@ from adlibre.dms.base_test import DMSTestCase
 import os
 
 
-test_document_files = [
+regular_documents = [
     '10001.txt',
     '10006.txt',
     '101.txt',
@@ -25,14 +25,17 @@ test_document_files = [
     '2011-01-28-12.tif',
     'ADL-1111.pdf',
     'ADL-1234.pdf',
-    'ADL-12345.pdf',
     'ADL-2222.pdf',
-    'ADL-54321.pdf',
     'abcde111.pdf',
     'abcde123.pdf',
     'abcde222.pdf',
     'abcde888.pdf',
     'abcde999.pdf',
+]
+
+nodoccode_documents = [
+    'ADL-12345.pdf',
+    'ADL-54321.pdf',
     'test_document_template.odt',
     'test_no_doccode.pdf',
 ]
@@ -54,19 +57,34 @@ class Main_DMS_UI_Test(DMSTestCase):
         return response
 
     def test_upload_through_ui(self):
-        # Test upload of all test documents, covering all Document Type Rules
-        for filename in test_document_files:
+        # Test upload of test documents, covering all Regular Document Type Rules
+        for filename in regular_documents:
             response = self._ui_upload(filename)
             self.assertEqual(response.status_code, 200)
             self.assertContains(response, upload_form_html)
 
-    def test_z_cleaup(self):
+        # Test upload of test documents, covering all No Doc Code Type Rules
+        for filename in nodoccode_documents:
+            response = self._ui_upload(filename)
+            self.assertEqual(response.status_code, 200)
+            self.assertContains(response, upload_form_html)
+
+    def test_zz_cleaup(self):
         # Name of this test should be alphabetically last
         # to be ran after all tests finished
 
-        # files cleanup using API
-        for doc in test_document_files:
+        # Test delete of test documents, covering all Regular Document Type Rules
+        for doc in regular_documents:
             code, suggested_format = os.path.splitext(doc)
             url = reverse('api_file', kwargs={'code': code,})
             response = self.client.delete(url)
+            self.assertEqual(response.status_code, 204)
+
+        # Test delete of test documents, covering all No Doc Code Type Rules
+        for doc in nodoccode_documents:
+            code, suggested_format = os.path.splitext(doc)
+            url = reverse('api_file', kwargs={'code': code,})
+            from datetime import date # Hack
+            data = {'parent_directory': str(date.today()), 'full_filename': doc, } # hack
+            response = self.client.delete(url, data)
             self.assertEqual(response.status_code, 204)

@@ -61,7 +61,7 @@ class DMSTestCase(TestCase):
         # Load a copy of all our fixtures using the management command
         return call_command('import_documents', self.test_document_files_dir, silent=False)
 
-    def cleanUp(self, documents, check_response=True):
+    def cleanUp(self, documents, check_response=True, nodocrule=False, ):
         """
         Cleanup Helper
         """
@@ -69,7 +69,12 @@ class DMSTestCase(TestCase):
         for doc in documents:
             code, suggested_format = os.path.splitext(doc)
             url = reverse('api_file', kwargs={'code': code,})
-            response = self.client.delete(url)
+            if nodocrule:
+                from datetime import date # Hack
+                data = {'parent_directory': str(date.today()), 'full_filename': doc, } # hack
+            else:
+                data = {}
+            response = self.client.delete(url, data=data)
             if response.status_code is not 204:
                 print "ERROR DATA: %s, %s" % (code, response.status_code)
             if check_response:
@@ -89,7 +94,7 @@ class DMSTestCase(TestCase):
         # no doc code documents require full filename in order to delete FIXME!
         for doc in self.documents_norule:
             cleanup_docs_list.append('%s.pdf' % doc)
-        self.cleanUp(cleanup_docs_list, check_response=check_response)
+        self.cleanUp(cleanup_docs_list, check_response=check_response, nodocrule=True)
 
         # Cleanup hashed dicts
         # (I'm sure there is a more elegant way to do this)
@@ -101,7 +106,7 @@ class DMSTestCase(TestCase):
         self.cleanUp(cleanup_docs_list, check_response=check_response)
 
         # Un used file cleanup
-        self.cleanUp(self.unlisted_files_used, check_response=check_response)
+        self.cleanUp(self.unlisted_files_used, check_response=check_response, nodocrule=True)
 
     def setUp(self):
         # NB This is called once for every test, not just test case before the tests are run!
