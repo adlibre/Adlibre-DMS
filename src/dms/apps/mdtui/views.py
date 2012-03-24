@@ -37,11 +37,15 @@ def search_type(request, step, template='mdtui/search.html'):
     """
     docrule = None
     cleanup_indexing_session(request)
+    cleanup_mds(request)
     form = DocumentTypeSelectForm(request.POST or None)
     if request.POST:
             if form.is_valid():
                 docrule = form.data["docrule"]
                 request.session['docrule'] = docrule
+                mdts = get_mdts_for_docrule(docrule)
+                if mdts:
+                    request.session['mdts'] = mdts
                 return HttpResponseRedirect(reverse('mdtui-search-options'))
             else:
                 return HttpResponse(MDTUI_ERROR_STRINGS[1])
@@ -167,17 +171,16 @@ def indexing_select_type(request, step=None, template='mdtui/indexing.html'):
     warnings = []
     form = DocumentTypeSelectForm(request.POST or None)
     cleanup_search_session(request)
-
+    cleanup_mds(request)
+    
     if request.POST:
-
-        # TODO: needs proper validation
         if form.is_valid():
-            try:
-                docrule = form.data["docrule"]
-            except:
-                return HttpResponse(MDTUI_ERROR_STRINGS[1])
+            docrule = form.data["docrule"]
             request.session['current_step'] = step
             request.session['docrule_id'] = docrule
+            mdts = get_mdts_for_docrule(docrule)
+            if mdts:
+                request.session['mdts'] = mdts
             return HttpResponseRedirect(reverse('mdtui-index-details'))
     else:
         # form initing with docrule set if it was done previous
@@ -313,6 +316,7 @@ def indexing_finished(request, step=None, template='mdtui/indexing.html'):
         pass
     # document uploaded forget everything
     cleanup_indexing_session(request)
+    cleanup_mds(request)
     log.debug('indexing_finished called with: step: "%s", document_keys_dict: "%s",' %
               (step, context['document_keys']))
     return render(request, template, context)
@@ -335,6 +339,7 @@ def mdt_parallel_keys(request):
     autocomplete_req = None
     docrule_id = None
     key_name = None
+    mdts={}
     resp = []
     # Trying to get docrule for indexing calls
     try:
@@ -355,19 +360,27 @@ def mdt_parallel_keys(request):
     except KeyError:
         valid_call = False
 
-    log.debug('mdt_parallel_keys call with: docrule_id: "%s", key_name: "%s", autocomplete_req: "%s" Call is valid: "%s".' %
-              (docrule_id, key_name, autocomplete_req, valid_call))
+    try:
+        mdts = request.session["mdts"]
+    except KeyError:
+        pass
+
+    log.debug(
+        'mdt_parallel_keys call: docrule_id: "%s", key_name: "%s", autocomplete: "%s" Call is valid: "%s", MDTS: %s' %
+        (docrule_id, key_name, autocomplete_req, valid_call, mdts)
+    )
 
     if valid_call:
         manager = ParallelKeysManager()
-        mdts = manager.get_keys_for_docrule(docrule_id)
+        mdts = manager.get_keys_for_docrule(docrule_id, mdts)
         pkeys = manager.get_parallel_keys_for_key(mdts, key_name)
         # db call to search in docs
         documents = CouchDocument.view(
-            'dmscouch/search_autocomplete',  # FIXME: hardcoded url
+            'dmscouch/search_autocomplete', # Name of couch view "couchapps/dmscouch/_design/views/search_autocomplete"
             startkey=[docrule_id, key_name, autocomplete_req],
-            endkey=[docrule_id, key_name, unicode(autocomplete_req)+u'\ufff0' ], # FIXME: AC: What's this magic?
-            include_docs=True
+            endkey=[docrule_id, key_name, unicode(autocomplete_req)+u'\ufff0' ], # http://wiki.apache.org/couchdb/HTTP_view_API
+            include_docs=True # TODO: think about optimising this call (E.G. response with 10000 docs = 1MB request)
+                              # Maybe!!! add 1 more db view call to get docs with unique those secondary keys pairs...
         )
         # Adding each selected value to suggestions list
         for doc in documents:

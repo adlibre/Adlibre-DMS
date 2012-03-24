@@ -6,8 +6,6 @@ License: See LICENSE for license information
 Author: Iurii Garmash
 """
 
-from django.conf import settings
-from mdtcouch.models import MetaDataTemplate
 from mdt_manager import MetaDataTemplateManager
 
 class ParallelKeysManager(object):
@@ -17,13 +15,14 @@ class ParallelKeysManager(object):
         self.docrule_id = None
         self.keys = {}
 
-    def get_keys_for_docrule(self, docrule_id):
-        mdts, pkeys = {}, {}
+    def get_keys_for_docrule(self, docrule_id, mdts = None):
+        pkeys = {}
         mdt_manager = MetaDataTemplateManager()
         mdt_manager.docrule_id = docrule_id
         # valid Mdt id...
         if mdt_manager.mdt_read_call_valid(docrule_id):
-            mdts = mdt_manager.get_mdts_for_docrule(docrule_id)
+            if not mdts:
+                mdts = mdt_manager.get_mdts_for_docrule(docrule_id)
             pkeys = self.get_parallel_keys_for_mdts(mdts)
         return pkeys
 

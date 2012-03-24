@@ -19,12 +19,19 @@ def initDocumentIndexForm(request):
         """
         details = None
         try:
-            try:
-                details = get_mdts_for_docrule(request.session['docrule_id'])
-            except KeyError:
-                details = get_mdts_for_docrule(request.session['docrule'])
+            # Trying to use cached MDT's and instantiating if none exist.
+            details = request.session['mdts']
         except KeyError:
-            pass
+            # Getting MDT's from CouchDB
+            try:
+                try:
+                    details = get_mdts_for_docrule(request.session['docrule_id'])
+                except KeyError:
+                    details = get_mdts_for_docrule(request.session['docrule'])
+                # Storing MDT's into improvised cashe
+                request.session['mdts'] = details
+            except KeyError:
+                pass
 
         form = DocumentIndexForm()
         if details:
@@ -171,5 +178,15 @@ def cleanup_indexing_session(request):
         request.session['docrule_id'] = None
         del request.session["document_keys_dict"]
         del request.session['docrule_id']
+    except KeyError:
+        pass
+
+def cleanup_mds(request):
+    """
+    Cleanup MDT's in improvised cache.
+    """
+    try:
+        request.session['mdts'] = None
+        del request.session['mdts']
     except KeyError:
         pass
