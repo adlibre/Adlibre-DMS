@@ -74,7 +74,7 @@ class DocumentTypeRule(models.Model):
         """
 
         # TODO: expansion to validate document_name against "is_luhn_valid(self, cc)" for document_type:2 (credit Card)
-        regex = '^' + self.regex + '$'
+        regex = '^' + str(self.regex) + '$'
         if self.regex == '' and re.match(regex, document_name) and self.no_doccode:
             return True
         if not self.no_doccode and re.match(regex, document_name):
@@ -100,7 +100,7 @@ class DocumentTypeRule(models.Model):
                 # Based on self.split_string
                 if self.split_string:
                     #print 'Splitstring: ', self.split_string
-                    split_list=self.split_string.split(',')
+                    split_list = self.split_string.split(',')
                     split_method = []
                     for pair in split_list:
                         s,e = pair.split(':')
