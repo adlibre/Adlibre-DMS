@@ -401,5 +401,5 @@ def download_pdf(request, code):
     Returns Document For Download
     """
     # right now we just redirect to API, but in future we might want to decouple from API app.
-    url = reverse('api_file')
-    return redirect('%s?filename=%s.pdf' %(url, code))
+    url = reverse('api_file', kwargs={'code': code, 'suggested_format': 'pdf'},)
+    return redirect(url)
