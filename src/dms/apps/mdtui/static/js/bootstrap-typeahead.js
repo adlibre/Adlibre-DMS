@@ -328,7 +328,10 @@
   })
 
    function json_represent(item) {
-          return item.replace(/[\{\}"]/g, "")
+       /* removing json indentation */
+       var itemz = item.replace(/[\{\}"]/g, "")
+       /* comma >>> line break */
+       return itemz.replace(/,/g, "<br />")
       }
 
 }( window.jQuery );
