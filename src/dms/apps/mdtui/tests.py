@@ -387,7 +387,7 @@ class MDTUI(TestCase):
 
     def test_16_search_by_date_improper(self):
         """
-        Imroper call to search by date.
+        Improper call to search by date.
         Search Step 3 does not display doc1.
         """
         # using today's date to avoid doc exists.
@@ -624,5 +624,3 @@ class MDTUI(TestCase):
         for key in doc_dict.keys():
             search_dict[key] = doc_dict[key]
         return search_dict
-
-
