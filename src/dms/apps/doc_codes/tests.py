@@ -12,9 +12,11 @@ from django.core.urlresolvers import reverse
 
 from django.test import TestCase
 
-
 from doc_codes.models import DocumentTypeRule
+from document import Document
 
+
+# DocCodeModelTest Test Data
 MODELS = [DocumentTypeRule,]
 
 generated_barcodes = (
@@ -28,8 +30,10 @@ generated_barcodes = (
 )
 
 
-class CoreModelTest(TestCase):
-    "Test the models contained in the models."
+class DocCodeModelTest(TestCase):
+    """
+    DocCode Model Tests
+    """
     def setUp(self):
         'Populate test database with model instances.'
 
@@ -47,3 +51,23 @@ class CoreModelTest(TestCase):
             obj.set_last_document_number(1000)
             self.assertEquals(obj.add_new_document(), result)
             self.assertEquals(obj.get_last_document_number(), 1001)
+
+
+class DocumentObjectTest(TestCase):
+    """
+    Document Model Tests
+    (Temporarily Staged here to get around django unit test restrictions
+    """
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
+
+    def test_get_doccode(self):
+
+        doc = Document()
+	# TODO: Write some tests
+        #doc.doccode = 'ADL-1234'
+        #print doc.get_docrule()
+        #print doc
