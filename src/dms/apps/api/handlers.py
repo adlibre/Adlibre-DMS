@@ -52,7 +52,7 @@ class FileInfoHandler(BaseFileHandler):
         revision, hashcode, extra = self._get_info(request)
         manager = DocumentManager()
         document = manager.retrieve(request, code, hashcode=hashcode, revision=revision, only_metadata=True,
-                        extension=suggested_format, parent_directory=None)
+                        extension=suggested_format)
         mapping = manager.get_plugin_mapping(document)
         if manager.errors:
             log.error('FileInfoHandler.read errors: %s' % manager.errors)
@@ -82,7 +82,7 @@ class FileHandler(BaseFileHandler):
         manager = DocumentManager()
         try:
             mimetype, filename, content = manager.get_file(request, code, hashcode,
-                    suggested_format, revision=revision, parent_directory=None)
+                    suggested_format, revision=revision)
         except Exception, e:
             log.error('FileHandler.read exception %s' % e)
             if settings.DEBUG:
@@ -114,14 +114,13 @@ class FileHandler(BaseFileHandler):
     @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def delete(self, request, code, suggested_format=None):
         # FIXME, should return 404 if file not found, 400 if no docrule exists.
-        full_filename = request.REQUEST.get('full_filename', None) # what is this?
-        parent_directory = request.REQUEST.get('parent_directory', None) # FIXME! Used by no doccode!
+#        full_filename = request.REQUEST.get('full_filename', None) # what is this?
+#        parent_directory = request.REQUEST.get('parent_directory', None) # FIXME! Used by no doccode!
         revision, hashcode, extra = self._get_info(request)
         manager = DocumentManager()
         try:
             log.debug('FileHandler.delete attempt with %s %s' % (code, revision))
-            manager.delete_file(request, code, revision=revision, full_filename=full_filename,
-                    parent_directory=parent_directory, extension=suggested_format)
+            manager.delete_file(request, code, revision=revision, extension=suggested_format)
         except Exception, e:
             log.error('FileHandler.delete exception %s' % e)
             if settings.DEBUG:
@@ -147,10 +146,10 @@ class FileHandler(BaseFileHandler):
         try:
             manager = DocumentManager()
             if new_name:
-                document = manager.rename(request, code, new_name, suggested_format, parent_directory=None) #FIXME hashcode?
+                document = manager.rename(request, code, new_name, suggested_format) #FIXME hashcode?
             else:
                 document = manager.update(request, code, tag_string=tag_string, remove_tag_string=remove_tag_string,
-                        parent_directory=None, extension=suggested_format) #FIXME hashcode missing?
+                        extension=suggested_format) #FIXME hashcode missing?
             if len(manager.errors) > 0:
                 log.error('FileHandler.update manager errors %s' % manager.errors)
                 if settings.DEBUG:
@@ -200,8 +199,8 @@ class FileListHandler(BaseHandler):
                                                 filter_date = filter_date)
             for item in file_list:
                 ui_url = reverse('ui_document', kwargs = {'document_name': item['name']})
-                if 'directory' in item.keys():
-                    ui_url += "?parent_directory=" + item['directory']
+#                if 'directory' in item.keys():
+#                    ui_url += "?parent_directory=" + item['directory']
                 item.update({   'ui_url': ui_url,
                                 'rule': mapping.get_name(),
                             })

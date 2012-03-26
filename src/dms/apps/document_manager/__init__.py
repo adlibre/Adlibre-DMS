@@ -123,22 +123,20 @@ class DocumentManager(object):
         #for plugin in mapping.get_database_storage_plugins(): print 'Mapping has plugin: ', plugin
         return doc
 
-    def rename(self, request, document_name, new_name, extension, parent_directory=None):
-        doc = self.retrieve(request, document_name, extension=extension, parent_directory=parent_directory)
+    def rename(self, request, document_name, new_name, extension):
+        doc = self.retrieve(request, document_name, extension=extension)
         if new_name and new_name != doc.get_filename():
             name = new_name
             ufile = UploadedFile(doc.get_file_obj(), name, content_type=doc.get_mimetype())
             new_doc = self.store(request, ufile)
             if not self.errors:
-                self.remove(request, doc.get_filename(), parent_directory=parent_directory,
-                    extension = extension)
+                self.remove(request, doc.get_filename(), extension=extension)
 #            else:
 #                if settings.DEBUG:
 #                    print "ERRORS: %s" % self.errors
             return new_doc
 
-    def update(self, request, document_name, tag_string=None, remove_tag_string=None,
-                    parent_directory=None, extension=None):
+    def update(self, request, document_name, tag_string=None, remove_tag_string=None, extension=None):
         """
         Process update plugins.
         This is needed to update document properties like tags without re-storing document itself.
@@ -147,37 +145,29 @@ class DocumentManager(object):
         doc.set_filename(document_name)
         if extension:
             doc.set_requested_extension(extension)
-        if parent_directory:
-            doc.set_option('parent_directory', parent_directory)
         doc.set_tag_string(tag_string)
         doc.set_remove_tag_string(remove_tag_string)
         return self.process_pluginpoint(pluginpoints.BeforeUpdatePluginPoint, request, document=doc)
 
-    def retrieve(self, request, document_name, hashcode=None, revision=None, only_metadata=False,
-                        extension=None, parent_directory=None):
+    def retrieve(self, request, document_name, hashcode=None, revision=None, only_metadata=False, extension=None):
         doc = Document()
         doc.set_filename(document_name)
         doc.set_hashcode(hashcode)
         doc.set_revision(revision)
-        options = {'only_metadata': only_metadata, 'parent_directory': parent_directory}
+        options = {'only_metadata': only_metadata,}
         if extension:
             doc.set_requested_extension(extension)
         doc.update_options(options)
         doc = self.process_pluginpoint(pluginpoints.BeforeRetrievalPluginPoint, request, document=doc)
         return doc
 
-    def remove(self, request, document_name, revision=None, full_filename=None,
-                    parent_directory=None, extension=None):
+    def remove(self, request, document_name, revision=None, extension=None):
         doc = Document()
         doc.set_filename(document_name)
         if extension:
             doc.set_requested_extension(extension)
-        if full_filename:
-            doc.set_full_filename(full_filename)
         if revision:
             doc.set_revision(revision)
-        if parent_directory:
-            doc.set_option('parent_directory', parent_directory)
         return self.process_pluginpoint(pluginpoints.BeforeRemovalPluginPoint, request, document=doc)
 
     def get_plugins_by_type(self, doccode_plugin_mapping, plugin_type, pluginpoint=pluginpoints.BeforeStoragePluginPoint):
@@ -216,12 +206,8 @@ class DocumentManager(object):
         return storage.worker.get_list(doccode, document_directories, start, finish, order, searchword, 
                                         limit_to=doc_names)
 
-    def get_file(self, request, document_name, hashcode, extension, revision=None, parent_directory=None):
-        if not revision:
-            revision = request.REQUEST.get('revision', None)
-        document = self.retrieve(request, document_name, hashcode=hashcode, revision=revision,
-                                    extension=extension, parent_directory=parent_directory)
-
+    def get_file(self, request, document_name, hashcode, extension, revision=None):
+        document = self.retrieve(request, document_name, hashcode=hashcode, revision=revision, extension=extension,)
         mimetype, filename, content = (None, None, None)
         if not self.errors:
             document.get_file_obj().seek(0)
@@ -234,10 +220,8 @@ class DocumentManager(object):
                 filename = document.get_full_filename()
         return mimetype, filename, content
 
-    def delete_file(self, request, document_name, revision=None, full_filename=None,
-                parent_directory=None, extension=None):
-        document = self.remove(request, document_name, revision=revision, full_filename=full_filename,
-                                parent_directory=parent_directory, extension=extension)
+    def delete_file(self, request, document_name, revision=None, extension=None):
+        document = self.remove(request, document_name, revision=revision, extension=extension)
         return document
 
     def get_revision_count(self, document_name, doccode_plugin_mapping):

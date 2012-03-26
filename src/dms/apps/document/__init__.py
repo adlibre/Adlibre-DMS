@@ -24,18 +24,21 @@ log = logging.getLogger('dms.document')
 class Document(object):
     """
     DMS core Document Object
+
+    A "Document Object" represents an instance of document-version within a doc type.
+
     """
     def __init__(self):
         self.options = {}
         self.doccode = None
-        self.file_name = None
-        self.full_filename = None
-        self.stripped_filename = None
+        self.file_name = None # Refactor out, document_manager should have this, not document
+        self.full_filename = None # Refactor out, document_manager should have this, not document
+        self.stripped_filename = None # Refactor out, document_manager should have this, not document
         self.revision = None
         self.hashcode = None
         self.metadata = None
-        self.fullpath = None
-        self.file_obj = None
+        self.fullpath = None # Refactor out, document_manager should have this, not document
+        self.file_obj = None # Refactor out, document_manager should have this, not document
         self.current_metadata = {}
         self.mimetype = None
         self.tags = []
@@ -160,11 +163,11 @@ class Document(object):
 
     def get_revision(self):
         r = self.revision
-        if r: 
+        if r:
             try:
                 r = int(r)
             except ValueError:
-                pass
+                raise # or r = None, I'm not sure which is more correct behaviour
         return r
 
     def set_revision(self, revision):
@@ -212,20 +215,20 @@ class Document(object):
         directory = None
         doccode = self.get_docrule()
         if doccode:
-            saved_dir = self.get_option('parent_directory') or ''
-            if saved_dir or doccode.no_doccode:
-                doccode_dirs = doccode.split()
-                doccode_dirs = map(lambda x: x.replace('{{DATE}}', datetime.datetime.now().strftime(settings.DATE_FORMAT)),
-                                    doccode_dirs)
-                if saved_dir:
-                    doccode_dirs[-1] = saved_dir
-                args = [str(doccode.get_id())] + doccode_dirs
-                directory = os.path.join(*args)
-            else:
-                splitdir = ''
-                for d in doccode.split(self.get_stripped_filename()):
-                    splitdir = os.path.join(splitdir, d)
-                directory = os.path.join(str(doccode.get_id()), splitdir)
+#            saved_dir = self.get_option('parent_directory') or ''
+#            if saved_dir or doccode.no_doccode:
+#                doccode_dirs = doccode.split()
+#                doccode_dirs = map(lambda x: x.replace('{{DATE}}', datetime.datetime.now().strftime(settings.DATE_FORMAT)),
+#                                    doccode_dirs)
+#                if saved_dir:
+#                    doccode_dirs[-1] = saved_dir
+#                args = [str(doccode.get_id())] + doccode_dirs
+#                directory = os.path.join(*args)
+#            else:
+            splitdir = ''
+            for d in doccode.split(self.get_stripped_filename()):
+                splitdir = os.path.join(splitdir, d)
+            directory = os.path.join(str(doccode.get_id()), splitdir)
         return directory
 
     def get_creation_time(self):

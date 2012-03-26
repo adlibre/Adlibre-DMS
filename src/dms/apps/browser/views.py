@@ -73,7 +73,7 @@ def error_response(errors):
 def get_file(request, code, suggested_format=None):
     hashcode = request.GET.get('hashcode', None) # Refactor me out
     manager = DocumentManager()
-    mimetype, filename, content = manager.get_file(request, code, hashcode, suggested_format, parent_directory=None)
+    mimetype, filename, content = manager.get_file(request, code, hashcode, suggested_format)
     if manager.errors:
         return error_response(manager.errors)
     response = HttpResponse(content, mimetype = mimetype)
@@ -84,15 +84,12 @@ def get_file(request, code, suggested_format=None):
 @staff_member_required
 def revision_document(request, document):
     document_name = document
-    parent_directory = request.GET.get('dir', None)
     manager = DocumentManager()
-    document = manager.retrieve(request, document_name, only_metadata = True, parent_directory = parent_directory)
+    document = manager.retrieve(request, document_name, only_metadata=True)
     extra_context = {}
     metadata = document.get_metadata()
     def get_args(fileinfo):
         args = []
-        if parent_directory:
-            args.append('dir=%s' % parent_directory)
         for arg in ['revision', 'hashcode']:
             if fileinfo.get(arg, None):
                 args.append("%s=%s" % (arg, fileinfo[arg]))

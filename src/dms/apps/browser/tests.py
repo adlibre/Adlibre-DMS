@@ -25,15 +25,8 @@ class ViewTest(DMSTestCase):
 
     def test_00_setup(self):
         # Load Test Data
-        self.loadTestDocuments()
+        self.loadTestData()
 
-    def _upload_file(self, filename):
-        url = reverse('upload')
-        self.client.login(username=self.username, password=self.password)
-        # Do upload
-        data = { 'file': open(filename, 'r'), }
-        response = self.client.post(url, data)
-        return response
 
     def test_zz_cleanup(self):
         """
@@ -41,15 +34,24 @@ class ViewTest(DMSTestCase):
         """
         self.cleanAll(check_response=True)
 
+
+    def browser_upload_file(self, filename):
+        url = reverse('upload')
+        self.client.login(username=self.username, password=self.password)
+        # Do upload
+        data = { 'file': open(filename, 'r'), }
+        response = self.client.post(url, data)
+        return response
+
     def test_upload_files(self):
         for doc_set, ext in [(self.documents_pdf, 'pdf'), (self.documents_txt, 'txt'), (self.documents_tif, 'tif') ]:
             for f in doc_set:
-                response = self._upload_file(settings.FIXTURE_DIRS[0] + '/testdata/' + f + '.' + ext)
+                response = self.browser_upload_file(settings.FIXTURE_DIRS[0] + '/testdata/' + f + '.' + ext)
                 self.assertContains(response, 'File has been uploaded')
 
     def test_upload_files_hash(self):
         for f in self.documents_hash:
-            response = self._upload_file(settings.FIXTURE_DIRS[0] + '/testdata/' + f[0] + '.pdf')
+            response = self.browser_upload_file(settings.FIXTURE_DIRS[0] + '/testdata/' + f[0] + '.pdf')
             self.assertContains(response, 'File has been uploaded')
 
     # TODO: expand this to get documents with specific revisions.
@@ -161,7 +163,7 @@ class ConversionTest(DMSTestCase):
 
     def test_00_setup(self):
         # Load Test Data
-        self.loadTestDocuments()
+        self.loadTestData()
 
     def test_tif2pdf_conversion(self):
         self.client.login(username=self.username, password=self.password)
