@@ -32,9 +32,9 @@ class DMSTestCase(TestCase):
         self.documents_txt = ('10001', '10006', '101',)
         self.documents_tif = ('2011-01-27-1', '2011-01-28-12',)
         self.documents_missing = ('ADL-8888', 'ADL-9999',)
-        self.documents_norule = ('ADL-54321', 'ADL-12345', ) # too long to match ADL invoices
+        #self.documents_norule = ('ADL-54321', 'ADL-12345', ) # too long to match ADL invoices
         # These are documents that are not tested, yet exist in ./fixtures/testdata/
-        self.unlisted_files_used = ('test_document_template.odt', 'test_no_doccode.pdf', )
+        #self.unlisted_files_used = ('test_document_template.odt', 'test_no_doccode.pdf', )
 
         # Documents that exist, and have valid hash
         self.documents_hash = [
@@ -57,9 +57,35 @@ class DMSTestCase(TestCase):
         self.rules = (1, 2, 3, 4, 5,)
         self.rules_missing = (99,)
 
-    def loadTestDocuments(self):
+    def _upload_file(self, doc, suggested_format='pdf', hash=None, check_response=True):
+        self.client.login(username=self.username, password=self.password)
+        # Do upload
+        file_path = os.path.join(self.test_document_files_dir, doc + '.' + suggested_format)
+        data = { 'file': open(file_path, 'r'), }
+        url = reverse('api_file', kwargs={'code': doc, 'suggested_format': suggested_format,})
+        if hash:
+            # Add hash to payload
+            data['h'] = hash
+        response = self.client.post(url, data)
+        if check_response:
+            self.assertEqual(response.status_code, 200)
+        return response
+
+    def loadTestData(self, check_response=True):
         # Load a copy of all our fixtures using the management command
         return call_command('import_documents', self.test_document_files_dir, silent=False)
+
+#    def loadDocuments(self, documents, suggested_format='pdf', check_response=True):
+#
+#        for doc in documents:
+#            self._upload_file(self, doc, suggested_format=suggested_format, check_response=check_response)
+#
+#
+#        # Load Test Data
+#        self.loadDocuments(self.documents_pdf, suggested_format='pdf', check_response=check_response)
+#        self.loadDocuments(self.documents_tif, suggested_format='tif', check_response=check_response)
+#        self.loadDocuments(self.documents_txt, suggested_format='txt', check_response=check_response)
+
 
     def cleanUp(self, documents, check_response=True, nodocrule=False, ):
         """
@@ -91,10 +117,10 @@ class DMSTestCase(TestCase):
         self.cleanUp(self.documents_txt, check_response=check_response)
 
         cleanup_docs_list = []
-        # no doc code documents require full filename in order to delete FIXME!
-        for doc in self.documents_norule:
-            cleanup_docs_list.append('%s.pdf' % doc)
-        self.cleanUp(cleanup_docs_list, check_response=check_response, nodocrule=True)
+#        # no doc code documents require full filename in order to delete FIXME!
+#        for doc in self.documents_norule:
+#            cleanup_docs_list.append('%s.pdf' % doc)
+#        self.cleanUp(cleanup_docs_list, check_response=check_response, nodocrule=True)
 
         # Cleanup hashed dicts
         # (I'm sure there is a more elegant way to do this)
@@ -106,7 +132,7 @@ class DMSTestCase(TestCase):
         self.cleanUp(cleanup_docs_list, check_response=check_response)
 
         # Un used file cleanup
-        self.cleanUp(self.unlisted_files_used, check_response=check_response, nodocrule=True)
+#        self.cleanUp(self.unlisted_files_used, check_response=check_response, nodocrule=True)
 
     def setUp(self):
         # NB This is called once for every test, not just test case before the tests are run!

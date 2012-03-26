@@ -233,12 +233,13 @@ function UICommunicator(manager, renderer){
     this.get_document = function(params){
         if (!params){ params = {}; }
         params = $.param.querystring(document.location.href);
-        if (params.indexOf('parent_directory') != -1){
-            //this is a no-doccode file
-            self.renderer.render_document_link(self.get_url('document_url', params));
-        }else{
-            self.renderer.render_document(self.get_url('document_url', params)); //No ajax, using iframe
-        }
+        self.renderer.render_document(self.get_url('document_url', params)); //No ajax, using iframe
+//        if (params.indexOf('parent_directory') != -1){
+//            //this is a no-doccode file
+//            self.renderer.render_document_link(self.get_url('document_url', params));
+//        }else{
+//
+//        }
     }
     this.get_doccode_tags = function(){
         $.getJSON(self.get_url('tags_url'), function(tags){

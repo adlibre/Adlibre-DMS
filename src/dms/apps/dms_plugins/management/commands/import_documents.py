@@ -15,7 +15,7 @@ from document_manager import DocumentManager
 
 class FakeRequest(object):
     def __init__(self):
-        self.user = User.objects.filter(is_superuser = True)[0]
+        self.user = User.objects.filter(is_superuser=True)[0]
 
 class Command(BaseCommand):
     args = '<directory_name directory_name ...>'
@@ -44,7 +44,7 @@ class Command(BaseCommand):
                     file_obj.seek(0)
                     try:
                         manager.store(FakeRequest(), file_obj)
-                    except:
+                    except Exception:
                         self.stderr.write(traceback.format_exc() + "\n")
                     else:
                         if manager.errors:

@@ -90,37 +90,37 @@ class DocumentTypeRule(models.Model):
         Spliting method:  ['abcde', '222', 'abcde222']
         In case of document_type_rule == no_rule returns current DATE
         """
-        if self.no_doccode or not document_name:
-            # no Doccode spliting method
-            return ['{{DATE}}']
-        else:
-            split_method = False
-            if self.doccode_type == '1':
-                # Default Storing Documents
-                # Based on self.split_string
-                if self.split_string:
-                    #print 'Splitstring: ', self.split_string
-                    split_list = self.split_string.split(',')
-                    split_method = []
-                    for pair in split_list:
-                        s,e = pair.split(':')
-                        split_method.append(document_name[int(s):int(e)])
-                    split_method.append(document_name)
-
-            if self.doccode_type == '2':
-                split_method = [ document_name[0:4], document_name[5:9], document_name[10:13], document_name[14:18], document_name ]
-            if self.doccode_type == '3':
-                # Split document_name as per Project Gutenberg method for 'eBook number' not, eText
-                # http://www.gutenberg.org/dirs/00README.TXT
+#        if self.no_doccode or not document_name:
+#            # no Doccode spliting method
+#            return ['{{DATE}}']
+#        else:
+        split_method = False
+        if self.doccode_type == '1':
+            # Default Storing Documents
+            # Based on self.split_string
+            if self.split_string:
+                #print 'Splitstring: ', self.split_string
+                split_list = self.split_string.split(',')
                 split_method = []
-                for i in range(len(document_name)):
-                    split_method.append(document_name[i-1:i])
+                for pair in split_list:
+                    s,e = pair.split(':')
+                    split_method.append(document_name[int(s):int(e)])
                 split_method.append(document_name)
-            if not split_method:
-                split_method=['Split_errors',] #folder name for improper doccdes!!!!!
-                print 'Splitting Errors exist! [DocumentTypeRule.split()]'
-            #print "Spliting method: ", split_method
-            return split_method
+
+        if self.doccode_type == '2':
+            split_method = [ document_name[0:4], document_name[5:9], document_name[10:13], document_name[14:18], document_name ]
+        if self.doccode_type == '3':
+            # Split document_name as per Project Gutenberg method for 'eBook number' not, eText
+            # http://www.gutenberg.org/dirs/00README.TXT
+            split_method = []
+            for i in range(len(document_name)):
+                split_method.append(document_name[i-1:i])
+            split_method.append(document_name)
+        if not split_method:
+            split_method=['Split_errors',] #folder name for improper doccdes!!!!!
+            print 'Splitting Errors exist! [DocumentTypeRule.split()]'
+        #print "Spliting method: ", split_method
+        return split_method
 
     def is_luhn_valid(self, cc):
         """
