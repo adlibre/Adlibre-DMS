@@ -40,40 +40,23 @@ class BaseFileHandler(BaseHandler):
         return revision, hashcode, extra
 
 
-class FileInfoHandler(BaseFileHandler):
-    """
-    Returns document metadata
-    """
-    allowed_methods = ('GET',)
-
-    @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
-    def read(self, request, code, suggested_format=None):
-        revision, hashcode, extra = self._get_info(request)
-        manager = DocumentManager()
-        document = manager.retrieve(request, code, hashcode=hashcode, revision=revision, only_metadata=True,
-                        extension=suggested_format)
-        mapping = manager.get_plugin_mapping(document)
-        if manager.errors:
-            log.error('FileInfoHandler.read errors: %s' % manager.errors)
-            if settings.DEBUG:
-                raise Exception('FileInfoHandler.read manager.errors')
-            else:
-                return rc.BAD_REQUEST
-        # FIXME This is ugly
-        info = document.get_dict()
-        info['document_list_url'] = reverse('ui_document_list', kwargs={'id_rule': mapping.pk})
-        info['tags'] = document.get_tags()
-        info['no_doccode'] = document.get_docrule().no_doccode
-        log.info('FileInfoHandler.read request fulfilled for %s, ext %s, rev %s, hash %s' % (code, suggested_format, revision, hashcode))
-        return HttpResponse(json.dumps(info))
-
-
 class FileHandler(BaseFileHandler):
     """
     CRUD Methods for documents
     """
     allowed_methods = ('GET', 'POST', 'DELETE', 'PUT')
+
+    @method_decorator(logged_in_or_basicauth(AUTH_REALM))
+    @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
+    def create(self, request, code, suggested_format=None):
+        # FIXME... code and file stream should be passed in separately!
+        manager = DocumentManager()
+        document = manager.store(request, request.FILES['file'])
+        if len(manager.errors) > 0:
+            log.error('FileHandler.create manager errors: %s' % manager.errors)
+            return rc.BAD_REQUEST
+        log.info('FileHandler.create request fulfilled for %s' % document.get_filename())
+        return document.get_filename() # FIXME, should be rc.CREATED
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
     @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
@@ -97,42 +80,6 @@ class FileHandler(BaseFileHandler):
         response['Content-Disposition'] = 'filename=%s' % filename
         log.info('FileHandler.read request fulfilled for code: %s, format: %s, rev %s, hash: %s.' % (code, suggested_format, revision, hashcode))
         return response
-
-    @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
-    def create(self, request, code, suggested_format=None):
-        # FIXME... code and file stream should be passed in separately!
-        manager = DocumentManager()
-        document = manager.store(request, request.FILES['file'])
-        if len(manager.errors) > 0:
-            log.error('FileHandler.create manager errors: %s' % manager.errors)
-            return rc.BAD_REQUEST
-        log.info('FileHandler.create request fulfilled for %s' % document.get_filename())
-        return document.get_filename() # FIXME, should be rc.CREATED
-
-    @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
-    def delete(self, request, code, suggested_format=None):
-        # FIXME, should return 404 if file not found, 400 if no docrule exists.
-#        full_filename = request.REQUEST.get('full_filename', None) # what is this?
-#        parent_directory = request.REQUEST.get('parent_directory', None) # FIXME! Used by no doccode!
-        revision, hashcode, extra = self._get_info(request)
-        manager = DocumentManager()
-        try:
-            log.debug('FileHandler.delete attempt with %s %s' % (code, revision))
-            manager.delete_file(request, code, revision=revision, extension=suggested_format)
-        except Exception, e:
-            log.error('FileHandler.delete exception %s' % e)
-            if settings.DEBUG:
-                raise
-            else:
-                return rc.BAD_REQUEST
-        if len(manager.errors) > 0:
-            if settings.DEBUG:
-                log.error('Manager Errors encountered %s' % manager.errors)
-            return rc.BAD_REQUEST
-        log.info('FileHandler.delete request fulfilled for code: %s, format: %s, rev: %s, hash: %s.' % (code, suggested_format, revision, hashcode))
-        return rc.DELETED
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
     @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
@@ -164,6 +111,59 @@ class FileHandler(BaseFileHandler):
                 raise
             else:
                 return rc.BAD_REQUEST
+
+    @method_decorator(logged_in_or_basicauth(AUTH_REALM))
+    @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
+    def delete(self, request, code, suggested_format=None):
+    # FIXME, should return 404 if file not found, 400 if no docrule exists.
+    #        full_filename = request.REQUEST.get('full_filename', None) # what is this?
+    #        parent_directory = request.REQUEST.get('parent_directory', None) # FIXME! Used by no doccode!
+        revision, hashcode, extra = self._get_info(request)
+        manager = DocumentManager()
+        try:
+            log.debug('FileHandler.delete attempt with %s %s' % (code, revision))
+            manager.delete_file(request, code, revision=revision, extension=suggested_format)
+        except Exception, e:
+            log.error('FileHandler.delete exception %s' % e)
+            if settings.DEBUG:
+                raise
+            else:
+                return rc.BAD_REQUEST
+        if len(manager.errors) > 0:
+            if settings.DEBUG:
+                log.error('Manager Errors encountered %s' % manager.errors)
+            return rc.BAD_REQUEST
+        log.info('FileHandler.delete request fulfilled for code: %s, format: %s, rev: %s, hash: %s.' % (code, suggested_format, revision, hashcode))
+        return rc.DELETED
+
+
+class FileInfoHandler(BaseFileHandler):
+    """
+    Returns document metadata
+    """
+    allowed_methods = ('GET',)
+
+    @method_decorator(logged_in_or_basicauth(AUTH_REALM))
+    @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
+    def read(self, request, code, suggested_format=None):
+        revision, hashcode, extra = self._get_info(request)
+        manager = DocumentManager()
+        document = manager.retrieve(request, code, hashcode=hashcode, revision=revision, only_metadata=True,
+            extension=suggested_format)
+        mapping = manager.get_plugin_mapping(document)
+        if manager.errors:
+            log.error('FileInfoHandler.read errors: %s' % manager.errors)
+            if settings.DEBUG:
+                raise Exception('FileInfoHandler.read manager.errors')
+            else:
+                return rc.BAD_REQUEST
+            # FIXME This is ugly
+        info = document.get_dict()
+        info['document_list_url'] = reverse('ui_document_list', kwargs={'id_rule': mapping.pk})
+        info['tags'] = document.get_tags()
+        info['no_doccode'] = document.get_docrule().no_doccode
+        log.info('FileInfoHandler.read request fulfilled for %s, ext %s, rev %s, hash %s' % (code, suggested_format, revision, hashcode))
+        return HttpResponse(json.dumps(info))
 
 
 class FileListHandler(BaseHandler):
@@ -236,6 +236,7 @@ class TagsHandler(BaseHandler):
                 raise
             else:
                 return rc.BAD_REQUEST
+
 
 class RevisionCountHandler(BaseHandler):
     """
@@ -365,39 +366,6 @@ class MetaDataTemplateHandler(BaseHandler):
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
     @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
-    def read(self, request):
-        if not request.user.is_authenticated():
-            log.error('MetaDataTemplateHandler.read attempted with unauthenticated user.')
-            return rc.FORBIDDEN
-
-        # Catch get with no payload
-        try:
-            docrule_id = request.GET['docrule_id'] # FIXME: Need to standardize the arguments / nomenclature
-        except KeyError, e:
-            log.error('MetaDataTemplateHandler.read attempted with no payload.')
-            if settings.DEBUG:
-                raise
-            else:
-                return rc.BAD_REQUEST
-
-        log.debug('MetaDataTemplateHandler.read underway with docrule_id %s.' % docrule_id)
-
-        # Retrieve MDT from docrule_id
-        manager = MetaDataTemplateManager()
-        manager.docrule_id = docrule_id            # TODO: FIXME Manager should be initialised with correct id
-        result = manager.get_mdts_for_docrule(manager.docrule_id)
-
-        log.debug('MetaDataTemplateHandler.read result: %s.' % result)
-
-        if result is False:
-            log.error('MetaDataTemplateHandler.read error with docrule_id %s' % docrule_id)
-            return rc.NOT_FOUND
-
-        log.info('MetaDataTemplateHandler.read request fulfilled for docrule_id %s' % docrule_id)
-        return result
-
-    @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def create(self, request):
 
         if not request.user.is_authenticated():
@@ -436,6 +404,39 @@ class MetaDataTemplateHandler(BaseHandler):
             return rc.BAD_REQUEST
 
         log.info('MetaDataTemplateHandler.create request fulfilled.')
+        return result
+
+    @method_decorator(logged_in_or_basicauth(AUTH_REALM))
+    @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
+    def read(self, request):
+        if not request.user.is_authenticated():
+            log.error('MetaDataTemplateHandler.read attempted with unauthenticated user.')
+            return rc.FORBIDDEN
+
+        # Catch get with no payload
+        try:
+            docrule_id = request.GET['docrule_id'] # FIXME: Need to standardize the arguments / nomenclature
+        except KeyError, e:
+            log.error('MetaDataTemplateHandler.read attempted with no payload.')
+            if settings.DEBUG:
+                raise
+            else:
+                return rc.BAD_REQUEST
+
+        log.debug('MetaDataTemplateHandler.read underway with docrule_id %s.' % docrule_id)
+
+        # Retrieve MDT from docrule_id
+        manager = MetaDataTemplateManager()
+        manager.docrule_id = docrule_id            # TODO: FIXME Manager should be initialised with correct id
+        result = manager.get_mdts_for_docrule(manager.docrule_id)
+
+        log.debug('MetaDataTemplateHandler.read result: %s.' % result)
+
+        if result is False:
+            log.error('MetaDataTemplateHandler.read error with docrule_id %s' % docrule_id)
+            return rc.NOT_FOUND
+
+        log.info('MetaDataTemplateHandler.read request fulfilled for docrule_id %s' % docrule_id)
         return result
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
