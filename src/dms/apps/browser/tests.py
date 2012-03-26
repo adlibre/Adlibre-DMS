@@ -60,7 +60,7 @@ class ViewTest(DMSTestCase):
         for d in self.documents_pdf:
             url = '/get/' + d
             response = self.client.get(url)
-            self.assertContains(response, "You're not in security group", status_code = 403)
+            self.assertContains(response, "You're not in security group", status_code=403)
         self.client.login(username=self.username, password=self.password)
         # Check mime type
         mime = magic.Magic( mime = True )
@@ -78,30 +78,30 @@ class ViewTest(DMSTestCase):
         for d in self.documents_missing:
             url = '/get/' + d
             response = self.client.get(url)
-            self.assertContains(response, 'No such document', status_code = 404)
+            self.assertContains(response, 'No such document', status_code=404)
 
     def test_get_document_hash(self):
         self.client.login(username=self.username, password=self.password)
         for d in self.documents_hash:
             url = '/get/%s?hashcode=%s' % (d[0], d[1])
             response = self.client.get(url)
-            self.assertContains(response, '', status_code = 200)
+            self.assertContains(response, '', status_code=200)
         
         for d in self.documents_hash:
             url = '/get/%s.pdf?hashcode=%s' % (d[0], d[1])
             response = self.client.get(url)
-            self.assertContains(response, '', status_code = 200)
+            self.assertContains(response, '', status_code=200)
 
         for d in self.documents_hash:
             url = '/get/%s.pdf?hashcode=%s&extension=txt' % (d[0], d[1])
             response = self.client.get(url)
-            self.assertContains(response, '', status_code = 200)
+            self.assertContains(response, '', status_code=200)
 
         # TODO: fix this it will break...
         for d in self.documents_missing_hash:
             url = '/get/%s?hashcode=%s' % (d[0], d[1])
             response = self.client.get(url)
-            self.assertContains(response, 'Hashcode did not validate', status_code = 500)
+            self.assertContains(response, 'Hashcode did not validate', status_code=500)
 
     def test_versions_view(self):
         self.client.login(username=self.username, password=self.password)
