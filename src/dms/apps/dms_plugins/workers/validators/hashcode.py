@@ -59,7 +59,7 @@ class HashCodeWorker(object):
     def __init__(self, method):
         self.method = method
 
-    def get_hash(self, document, method, salt = settings.SECRET_KEY):
+    def get_hash(self, document, method, salt=settings.SECRET_KEY):
         h = hashlib.new(method)
         h.update(document)
         h.update(salt)
@@ -74,8 +74,6 @@ class HashCodeWorker(object):
     def work_retrieve(self, request, document, method):
         hashcode = document.get_hashcode()
         new_hashcode = self.get_hash(document.get_file_obj().read(), method)
-        #print "hadhcode = %s, new hashcode = %s" % (hashcode, new_hashcode)
         if hashcode and not (new_hashcode == hashcode):
-            raise PluginError("Hashcode did not validate.", 500)
-        #document.set_hashcode(new_hashcode) # should do this but it is meaningless :)
+            raise PluginError("Hashcode did not validate.", 500) #FIXME Should be 401, Access denied!
         return document
