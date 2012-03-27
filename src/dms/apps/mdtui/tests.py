@@ -20,7 +20,7 @@ couchdb_url = 'http://127.0.0.1:5984'
 
 test_mdt_docrule_id = 2 # should be properly assigned to fixtures docrule that uses CouchDB plugins
 
-indexes_form_match_pattern = '(Employee ID|Employee Name|Friends ID|Friends Name).+?name=\"(\d+)\"'
+indexes_form_match_pattern = '(Employee ID|Employee Name|Friends ID|Friends Name|Required Date).+?name=\"(\d+)\"'
 
 mdt1 = {
     "_id": 'mdt1',
@@ -37,6 +37,11 @@ mdt1 = {
            "length": 60,
            "field_name": "Friends Name",
            "description": "Name of tests person"
+       },
+       "3": {
+           "type": "date",
+           "field_name": "Required Date",
+           "description": "Testing Date Type Secondary Key"
        },
     },
     "parallel": {
@@ -71,6 +76,7 @@ doc1_dict = {
     'date': '2012-03-06',
     'description': 'Test Document Number 1',
     'Employee ID': '123456',
+    'Required Date': '2012-03-07',
     'Employee Name': 'Iurii Garmash',
     'Friends ID': '123',
     'Friends Name': 'Andrew',
@@ -173,6 +179,7 @@ class MDTUI(TestCase):
         self.assertContains(response, 'id_description')
         # MDT based Fields:
         self.assertContains(response, "Friends ID")
+        self.assertContains(response, "Required Date")
         self.assertContains(response, "ID of Friend for tests")
         self.assertContains(response, "Friends Name")
         self.assertContains(response, "Name of tests person")
@@ -180,7 +187,8 @@ class MDTUI(TestCase):
         self.assertContains(response, "Unique (Staff) ID of the person associated with the document")
         self.assertContains(response, "Employee Name")
         self.assertContains(response, "Name of the person associated with the document")
-        #print response
+        self.assertContains(response, "Required Date")
+        self.assertContains(response, "Testing Date Type Secondary Key")
 
     def test_05_adding_indexes(self):
         """
@@ -209,6 +217,7 @@ class MDTUI(TestCase):
         self.assertContains(response, 'Creation Date: 2012-03-06')
         self.assertContains(response, 'Employee ID: 123456')
         self.assertContains(response, 'Employee Name: Iurii Garmash')
+        self.assertContains(response, 'Required Date: 2012-03-07')
         # Contains Upload form
         self.assertContains(response, 'Upload File')
         self.assertContains(response, 'id_file')
@@ -244,7 +253,7 @@ class MDTUI(TestCase):
         self.assertEqual(response.status_code, 200)
         # Make the file upload
         file = os.path.join(settings.FIXTURE_DIRS[0], 'testdata', doc1+'.pdf')
-        data = { 'file': open(file, 'r'), 'filename':doc1}
+        data = { 'file': open(file, 'r'), 'filename':doc1+'.pdf'}
         response = self.client.post(url, data)
         # Follow Redirect
         self.assertEqual(response.status_code, 302)
@@ -322,6 +331,7 @@ class MDTUI(TestCase):
         self.assertContains(response, "Employee Name")
         self.assertContains(response, "Friends ID")
         self.assertContains(response, "Friends Name")
+        self.assertContains(response, "Required Date")
         self.assertNotContains(response, "Description</label>")
         self.assertNotContains(response, "You have not selected Doccument Type Rule")
         self.assertEqual(response.status_code, 200)
@@ -339,7 +349,7 @@ class MDTUI(TestCase):
         self.assertEqual(response.status_code, 302)
         url = reverse('mdtui-search-options')
         # Searching by Document 1 Indexes
-        response = self.client.post(url, {'date': doc1_dict["date"], '0':'', '1':'', '2':'', '3':''})
+        response = self.client.post(url, {'date': doc1_dict["date"], '0':'', '1':'', '2':'', '3':'', '4':''})
         self.assertEqual(response.status_code, 302)
         new_url = self._retrieve_redirect_response_url(response)
         response = self.client.get(new_url)
@@ -461,6 +471,7 @@ class MDTUI(TestCase):
         self.assertContains(response, 'Andrew')
         self.assertNotContains(response, 'Iurii Garmash') # Improper key
         self.assertNotContains(response, 'Employee Name')
+        self.assertNotContains(response, 'Required Date')
 
     def test_19_parallel_keys_indexing_wrong(self):
         """
@@ -481,6 +492,7 @@ class MDTUI(TestCase):
         self.assertNotContains(response, 'Andrew')
         self.assertNotContains(response, 'Iurii Garmash')
         self.assertNotContains(response, 'Employee Name')
+        self.assertNotContains(response, 'Required Date')
 
     def test_20_parallel_keys_indexing_set2_proper(self):
         """
@@ -498,6 +510,7 @@ class MDTUI(TestCase):
         self.assertNotContains(response, 'Friends ID')
         self.assertNotContains(response, 'Friends Name')
         self.assertNotContains(response, 'Andrew')
+        self.assertNotContains(response, 'Required Date')
         self.assertContains(response, 'Iurii Garmash')
         self.assertContains(response, 'Employee Name')
         self.assertContains(response, 'Employee ID')

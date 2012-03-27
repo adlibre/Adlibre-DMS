@@ -8,9 +8,9 @@ License: See LICENSE for license information
 import json
 import logging
 
-from django.core.urlresolvers import reverse, resolve
+from django.core.urlresolvers import reverse
 from django.http import HttpResponse
-from django.shortcuts import render, redirect, render_to_response, HttpResponseRedirect, get_object_or_404
+from django.shortcuts import render, redirect, render_to_response, HttpResponseRedirect
 from django.template import RequestContext, loader
 from django.contrib.auth.decorators import login_required
 

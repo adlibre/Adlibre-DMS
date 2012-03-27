@@ -62,8 +62,8 @@ class DocumentIndexForm(forms.Form):
                 self.initial[k] = int(kwds[k])
             except ValueError:
                 try:
-                    # TODO: test/debug this DATE type fields are yet not tested
-                    self.fields[k].initial = datetime.datetime.strptime(kwds[k], "%Y-%m-%d")
+                    dt = datetime.datetime.strptime(kwds[k], "%Y-%m-%d")
+                    self.initial[k] = dt
                 except ValueError:
                     try:
                         self.initial[k] = kwds[k]

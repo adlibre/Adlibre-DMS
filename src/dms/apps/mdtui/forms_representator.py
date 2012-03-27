@@ -5,7 +5,6 @@ Copyright: Adlibre Pty Ltd 2012
 License: See LICENSE for license information
 Author: Iurii Garmash
 """
-from django.conf import settings
 from django import forms
 from mdt_manager import MetaDataTemplateManager
 
@@ -57,8 +56,12 @@ def render_fields_from_docrules(mdts_dict, init_dict=None):
                         # Blank field
                         form_field = forms.CharField(label=field_value["field_name"], help_text=field_value["description"], max_length=max_length)
                 if field_value["type"]==u'date':
-                    # TODO: add initial data population ability to DATE field type
-                    form_field = forms.DateField(label=field_value["field_name"], help_text=field_value["description"])
+                    if unicode(counter) in init_dict and init_dict[unicode(counter)]:
+                        # Has initial value
+                        form_field = forms.DateField(label=field_value["field_name"], help_text=field_value["description"], initial=init_dict[unicode(counter)])
+                    else:
+                        # Blank field
+                        form_field = forms.DateField(label=field_value["field_name"], help_text=field_value["description"])
                 # Setting additional field name (required to use for parsing in future)
                 form_field.field_name = field_value["field_name"]
                 form_fields_list[counter] = form_field
