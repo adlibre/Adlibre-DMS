@@ -134,7 +134,7 @@
                     {%  endif %}
                 {% for field in form %}
                 {# Form fields #}
-                {% set_this_field_type field %} <= field.field.type
+                {% set_this_field_type field %}
                 {% if not this_field_type = "DateField" %}
                 <div class="control-group{%  if field.errors %} error{%  endif %}">
                     <label class="control-label">{{ field.label }}</label>
