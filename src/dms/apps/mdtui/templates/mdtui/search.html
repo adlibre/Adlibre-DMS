@@ -136,7 +136,8 @@
 
                 {# SEARCH INDEX DETAILS FORM RENDERING #}
                 {% for field in form %}
-                {% if not field.name == "date" %}
+                {% set_this_field_type field %} <= field.field.type
+                {% if not this_field_type = "DateField" %}
                 <div class="control-group">
                     {% if field.errors %}
                     {% for error in field.errors %}
@@ -162,7 +163,7 @@
                     </div>
                     {% endfor %}
                     {% endif %}
-                    <label class="control-label" for="dateselect">Creation Date</label>
+                    <label class="control-label" for="dateselect">{{ field.label }}</label>
                     <div class="input">
                         <div class="controls">
                             <div class="input-prepend">
