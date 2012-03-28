@@ -148,10 +148,12 @@ def extract_secondary_keys_from_form(form):
     keys_list = []
     for field_id, field in form.fields.iteritems():
         try:
-            #print field.field_name
+            # if field is dynamic
             if field.field_name:
-                keys_list.append(field.field_name)
+                if not field.__class__.__name__ == "DateField":
+                    keys_list.append(field.field_name)
         except AttributeError:
+            # standard field
             pass
     return keys_list
 
