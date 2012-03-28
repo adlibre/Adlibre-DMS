@@ -27,10 +27,13 @@ def get_urls(id_rule=None, document_name=None):
         code, suggested_format = os.path.splitext(document_name)
         suggested_format = suggested_format[1:] # Remove . from file ext
         if suggested_format == '':
-            suggested_format = None
-        c.update({  'document_url': reverse('api_file', kwargs={'code': code,'suggested_format': suggested_format,}),
-                    'document_info_url': reverse('api_file', kwargs={'code': code,'suggested_format': suggested_format,}),
-                    })
+            c.update({  'document_url': reverse('api_file', kwargs={'code': code,}),
+                        'document_info_url': reverse('api_file', kwargs={'code': code,}),
+                        })
+        else:
+            c.update({  'document_url': reverse('api_file', kwargs={'code': code,'suggested_format': suggested_format,}),
+                        'document_info_url': reverse('api_file', kwargs={'code': code,'suggested_format': suggested_format,}),
+                        })
     return json.dumps(c)
 
 @login_required
