@@ -27,7 +27,7 @@ urlpatterns += patterns('',
     # Robots
     url(r'^robots.txt$', 'django.views.generic.simple.direct_to_template', {'template': 'robots.txt', 'mimetype' : 'text/plain'}),
     # Favicon
-    url(r'^favicon.ico$', 'django.views.generic.simple.redirect_to', {'url': settings.MEDIA_URL+'favicon.ico'}),
+    url(r'^favicon.ico$', 'django.views.generic.simple.redirect_to', {'url': settings.STATIC_URL+'favicon.ico'}),
 
     # Independent DMS Apps
     url(r'^ui/', include('ui.urls')),
