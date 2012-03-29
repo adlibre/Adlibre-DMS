@@ -136,8 +136,7 @@
 
                 {# SEARCH INDEX DETAILS FORM RENDERING #}
                 {% for field in form %}
-                {% set_this_field_type field %}
-                {% if not this_field_type = "DateField" %}
+                {% if not field|field_type = "DateField" %}
                 <div class="control-group">
                     {% if field.errors %}
                     {% for error in field.errors %}

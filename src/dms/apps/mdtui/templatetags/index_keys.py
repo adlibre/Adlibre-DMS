@@ -139,11 +139,9 @@ class ProvideIDForSecKey(template.Node):
         except template.VariableDoesNotExist:
             return ''
 
-@register.simple_tag(takes_context=True)
-def set_this_field_type(context, field):
+@register.filter
+def field_type(field):
     """
-    Adds to context given field type variable
-    variable named "this_field_type"
+    Returns field type in 'str'
     """
-    context["this_field_type"] = field.field.__class__.__name__
-    return ''
+    return field.field.__class__.__name__
