@@ -34,6 +34,7 @@ class DocumentIndexForm(forms.Form):
 
     """
     date = forms.DateField(initial=datetime.datetime.now(), label="Creation Date", help_text="Date of the document added")
+    end_date = forms.DateField(required=False, label="To", help_text="Final possible document date")
     description = forms.CharField(max_length=100, label="Description", help_text="Brief Document Description")
 
     def __init__(self, *args, **kwargs):
