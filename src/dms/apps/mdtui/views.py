@@ -234,6 +234,12 @@ def indexing_details(request, step=None, template='mdtui/indexing.html'):
             warnings.append(MDTUI_ERROR_STRINGS[1])
         form = initDocumentIndexForm(request)
 
+    try:
+        # Exclude end_date from indexing form
+        del form.fields["end_date"]
+    except KeyError:
+        pass
+
     autocomplete_list = extract_secondary_keys_from_form(form)
     try:
         document_keys = request.session["document_keys_dict"]
