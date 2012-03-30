@@ -2,7 +2,7 @@
 Installation
 ============
 
-Adlibre DMS can be easily installed on any operating system provided that a recent copy of a Python 2.6 interpreter is
+Adlibre DMS can be easily installed on any operating system provided that a recent copy of a Python interpreter is
 available as well as any dependent system libraries.
 
 Linux Requirements
@@ -75,7 +75,7 @@ Initial Data
 
 Here is an info about how to populate DB with some
 initial data to play with. To do that copy initial test
-fixtures and make syncdb...
+fixtures and run syncdb.
 
 Do something like this at the fixtures directory,
 after that leave to source directory and sync your base:
@@ -97,7 +97,7 @@ Sample initial data include superuser:
 login:     admin
 password:  admin
 
-Good idea would be to delete that copied ".json" file, jus in case...
+Good idea would be to delete that copied ".json" file, just in case...
 
 Now you may add some test data to the system.
 DMS has test files in "fixtures/testdata" directory.
