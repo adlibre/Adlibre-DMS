@@ -35,6 +35,8 @@ class ProvideLiElement(template.Node):
             value = dict[item]
             if item == u'date':
                 item = u'Creation Date'
+            if item == u'end_date':
+                item = u'Creation Date to'
             if item == u'description':
                 item = u'Description'
             if item == u'docrule_id':

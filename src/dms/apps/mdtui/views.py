@@ -11,14 +11,27 @@ import logging
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, render_to_response, HttpResponseRedirect
-from django.template import RequestContext, loader
+from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 
 from dmscouch.models import CouchDocument
 from forms import DocumentTypeSelectForm, DocumentUploadForm
 from document_manager import DocumentManager
-from view_helpers import *
+from view_helpers import initDocumentIndexForm
+from view_helpers import processDocumentIndexForm
+from view_helpers import get_mdts_for_documents
+from view_helpers import extract_secondary_keys_from_form
+from view_helpers import cleanup_search_session
+from view_helpers import cleanup_indexing_session
+from view_helpers import cleanup_mdts
+from search_helpers import search_by_single_date
+from search_helpers import exact_date_with_keys_search
+from search_helpers import cleanup_document_keys
+from search_helpers import date_range_only_search
+from search_helpers import date_range_with_keys_search
+from forms_representator import get_mdts_for_docrule
 from parallel_keys import ParallelKeysManager
+
 
 log = logging.getLogger('dms.mdtui.views')
 
@@ -37,7 +50,7 @@ def search_type(request, step, template='mdtui/search.html'):
     """
     docrule = None
     cleanup_indexing_session(request)
-    cleanup_mds(request)
+    cleanup_mdts(request)
     form = DocumentTypeSelectForm(request.POST or None)
     if request.POST:
             if form.is_valid():
@@ -111,7 +124,6 @@ def search_results(request, step=None, template='mdtui/search.html'):
     document_keys = None
     docrule_id = None
     documents = None
-    search_res = None
     warnings = []
     mdts_list = None
     try:
@@ -119,23 +131,19 @@ def search_results(request, step=None, template='mdtui/search.html'):
         docrule_id = request.session['docrule']
     except KeyError:
         warnings.append(MDTUI_ERROR_STRINGS[3])
-
+    log.debug('search_results call: docrule_id: "%s", document_search_dict: "%s"' % (docrule_id, document_keys))
     if document_keys:
         # turning document_search dict into something useful for the couch request
         cleaned_document_keys  = cleanup_document_keys(document_keys)
-        if "date" in cleaned_document_keys.keys() and cleaned_document_keys.__len__() == 1:
-            # only one criterion 'date' in search request, requesting another view
-            #print 'searching only by date: ', str_date_to_couch(cleaned_document_keys["date"]), ' docrule:', docrule_id
-            documents = CouchDocument.view('dmscouch/search_date', key=[str_date_to_couch(cleaned_document_keys["date"]), docrule_id], include_docs=True )
+        keys = cleaned_document_keys.keys()
+        if "date" in keys and cleaned_document_keys.__len__() == 1 and not "end_date" in keys:
+            documents = search_by_single_date(cleaned_document_keys, docrule_id)
+        elif "date" in keys and "end_date" in keys and cleaned_document_keys.__len__() == 2:
+            documents = date_range_only_search(cleaned_document_keys, docrule_id)
+        elif "date" in keys and "end_date" in keys and not cleaned_document_keys.__len__() == 2:
+            documents = date_range_with_keys_search(cleaned_document_keys, docrule_id)
         else:
-            #print 'multiple keys search'
-            couch_req_params = convert_to_search_keys(cleaned_document_keys, docrule_id)
-            if couch_req_params:
-                search_res = CouchDocument.view('dmscouch/search', keys=couch_req_params )
-                # documents now returns ANY search type results.
-                # we need to convert it to ALL
-                docs_list = convert_search_res(search_res, couch_req_params.__len__())
-                documents = CouchDocument.view('_all_docs', keys=docs_list, include_docs=True )
+            documents = exact_date_with_keys_search(cleaned_document_keys, docrule_id)
         mdts_list = get_mdts_for_documents(documents)
 
     context = { 'step': step,
@@ -171,7 +179,7 @@ def indexing_select_type(request, step=None, template='mdtui/indexing.html'):
     warnings = []
     form = DocumentTypeSelectForm(request.POST or None)
     cleanup_search_session(request)
-    cleanup_mds(request)
+    cleanup_mdts(request)
     
     if request.POST:
         if form.is_valid():
@@ -324,7 +332,7 @@ def indexing_finished(request, step=None, template='mdtui/indexing.html'):
         pass
     # document uploaded forget everything
     cleanup_indexing_session(request)
-    cleanup_mds(request)
+    cleanup_mdts(request)
     return render(request, template, context)
 
 
