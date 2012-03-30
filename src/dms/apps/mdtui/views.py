@@ -318,13 +318,13 @@ def indexing_finished(request, step=None, template='mdtui/indexing.html'):
     context = { 'step': step,  }
     try:
         context.update({'document_keys':request.session["document_keys_dict"],})
+        log.debug('indexing_finished called with: step: "%s", document_keys_dict: "%s",' %
+                  (step, context['document_keys']))
     except KeyError:
         pass
     # document uploaded forget everything
     cleanup_indexing_session(request)
     cleanup_mds(request)
-    log.debug('indexing_finished called with: step: "%s", document_keys_dict: "%s",' %
-              (step, context['document_keys']))
     return render(request, template, context)
 
 
