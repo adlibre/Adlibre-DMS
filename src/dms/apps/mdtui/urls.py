@@ -21,7 +21,7 @@ urlpatterns = patterns('mdtui.views',
     url(r'^indexing/$', 'indexing_select_type', {'step':'1',}, name='mdtui-index'),
     url(r'^indexing/type$', 'indexing_select_type', {'step':'1',}, name='mdtui-index-type'),
     url(r'^indexing/details$', 'indexing_details', {'step':'2',}, name='mdtui-index-details'),
-    url(r'^indexing/source$', 'indexing_uploading', {'step':'3',}, name='mdtui-index-source'),
+    url(r'^indexing/source$', 'indexing_source', {'step':'3',}, name='mdtui-index-source'),
     url(r'^indexing/finished$', 'indexing_finished', {'step':'4',}, name='mdtui-index-finished'),
     url(r'^indexing/barcode$', 'indexing_barcode', {'step':'5',}, name='mdtui-index-barcode'),
     # Common

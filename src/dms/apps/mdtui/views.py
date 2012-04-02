@@ -263,7 +263,7 @@ def indexing_details(request, step=None, template='mdtui/indexing.html'):
 
 
 @login_required
-def indexing_uploading(request, step=None, template='mdtui/indexing.html'):
+def indexing_source(request, step=None, template='mdtui/indexing.html'):
     """
     Indexing: Step 3: Upload File / Associate File / Print Barcode
     """
