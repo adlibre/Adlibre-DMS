@@ -115,6 +115,7 @@ TEMPLATE_LOADERS = (
     'django.template.loaders.app_directories.Loader',
 #     'django.template.loaders.eggs.Loader',
     'adlibre.freeloader.load_template_source',
+    'apptemplates.Loader',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
