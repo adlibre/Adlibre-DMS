@@ -1,0 +1,32 @@
+{% load i18n %}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>View PDF</title>
+    <script type="text/javascript" language="javascript" charset="utf-8" src="{{ STATIC_URL }}js/pdfobject.min.js"></script>
+
+    <script type='text/javascript'>
+        window.onload = function (){
+            var myPDF = new PDFObject({
+                url: '{{ pdf_url }}',
+                pdfOpenParams: {
+                    view: 'Fit',
+                    scrollbars: '0',
+                    toolbar: '1',
+                    statusbar: '0',
+                    messages: '0',
+                    navpanes: '0',
+                    pagemode: 'thumbs'
+                }
+            }).embed();
+        }
+    </script>
+</head>
+<body>
+
+<div id="pdfobj"></div>
+<p><a href="{% url mdtui-download-pdf code %}" title="{% trans 'Download Document' %}" class="btn"><i class="icon-download-alt"></i> Download document &ldquo;{{ code }}&rdquo;</a></p>
+
+</body>
+</html>

@@ -15,7 +15,6 @@
         <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 2: Options &rarr;</a></li>
         {% url mdtui-search-results as url %}
         <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 3: Results &rarr;</a></li>
-        <li{% if step == "view" %} class="active"{% endif %}><a>Step 4: View</a></li>
     </ul>
     {% endif %}
 
@@ -314,16 +313,6 @@
         
         <a href="{# FIXME #}" title="Download Results to CSV" class="btn"><i class="icon-download-alt"></i> Export Results</a>
 {% endcomment %}
-    {% endif %}
-
-    {% if step == "view" %}
-        <fieldset>
-            <legend>Step 4: Viewing Document &ldquo;{{ code }}&rdquo;</legend>
-        </fieldset>
-        {# Maybe, don't actually display this step, just pop up a document. #}
-        <div id="pdfobj"></div>
-        <p><a href="{% url mdtui-download-pdf code %}" title="{% trans 'Download Document' %}" class="btn"><i class="icon-download-alt"></i> Download document &ldquo;{{ code }}&rdquo;</a></p>
-
     {% endif %}
 
 {% endblock %}
