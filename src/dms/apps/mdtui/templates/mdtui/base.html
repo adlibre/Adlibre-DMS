@@ -51,7 +51,30 @@
             padding-top: 19px;
         }
         .x-progress-tracker li { padding-bottom: 4px; display: inline-block;}
+
+        /* Rotate the heading and align to left page col */
+        h1#page-heading {
+            -webkit-transform: rotate(-90deg);
+            -moz-transform: rotate(-90deg);
+            -ms-transform: rotate(-90deg);
+            -o-transform: rotate(-90deg);
+
+            font-size: 52px;
+            color: #CCC;
+
+            text-align: right;
+            position: relative;
+            height: 0px;
+            left: -540px;
+            top: 488px;
+        }
+
     </style>
+    <!--[if lt IE 9]>
+    <style type="text/css">
+        h1#page-heading { filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3); }
+    </style>
+    <![endif]-->
     {% endblock %}
     {% endcompress %}
 
@@ -125,26 +148,6 @@
 {% compress js %}
 {% block js_extra %}{% endblock %}
 {% endcompress %}
-
-<style type="text/css">
-    /* Rotate the heading and align to left page col */
-    h1#page-heading {
-        -webkit-transform: rotate(-90deg);
-        -moz-transform: rotate(-90deg);
-        -ms-transform: rotate(-90deg);
-        -o-transform: rotate(-90deg);
-        filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
-
-        font-size: 52px;
-        color: #CCC;
-
-        text-align: right;
-        position: relative;
-        height: 0px;
-        left: -540px;
-        top: 488px;
-    }
-</style>
 
 </body>
 {% endblock %}
