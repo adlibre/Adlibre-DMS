@@ -71,16 +71,23 @@
             left: -540px;
             top: 488px;
         }
+    </style>
 
-    </style>
-    <!--[if lt IE 9]>
-    <style type="text/css">
-        h1#page-heading { filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3); }
-    </style>
-    <![endif]-->
     {% endblock %}
     {% endcompress %}
 
+    <!--[if lt IE 9]>
+    <style type="text/css">
+        h1#page-heading {
+            filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+            left: -60px;
+            top: 0;
+            height: -56px;
+            padding-bottom: 2px;
+            padding-top: 2px;
+        }
+    </style>
+    <![endif]-->
 
     {% block css_extra %}{% endblock %}
 
