@@ -273,7 +273,7 @@
                     {% endfor %}
                     <th><a href="{# sort on this#}">Description</a></th>
                     <th><a href="{# sort on this#}">Type</a></th>
-                    <th>Edit</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -288,12 +288,14 @@
 
                     <td>{{ doc.metadata_description }}</td>
                     <td>{% get_docrule_name_by_id doc.metadata_doc_type_rule_id %}</td>
-                    <td>{# Admin only #}<a href="" title="Edit Metadata"><i class="icon-edit"></i></a></td>
+                    <td><a href="{% url bcp-print 'Code128' doc.id %}" title="{% trans 'Reprint Barcode' %}"><i class="icon-barcode"></i></a> | {# TODO: Admin only #}<a href="" title="{% trans 'Edit Metadata' %}"><i class="icon-edit"></i></a></td>
                 </tr>
             {% endfor %}
             </tbody>
         </table>
 
+{% comment %}
+        TODO FINISH THIS
         <hr />
         <p>{# TODO: show number of results found #} Showing 50 of 1,232,300 results matching query.</p>
         {# Let's use pagination like this #}
@@ -311,7 +313,7 @@
         </div>
         
         <a href="{# FIXME #}" title="Download Results to CSV" class="btn"><i class="icon-download-alt"></i> Export Results</a>
-
+{% endcomment %}
     {% endif %}
 
     {% if step == "view" %}
