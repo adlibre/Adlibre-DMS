@@ -1,0 +1,29 @@
+{% extends "mdtui/base.html" %}
+{% load i18n %}
+
+{% block body_content %}
+
+
+<header class="hero-unit">
+    <img src="{{ STATIC_URL }}mdtui/jtg400.png" />
+    <h1>{% block body_title %}{% trans 'Document Management System' %}{% endblock %}</h1>
+    <p>{% trans 'To continue, choose from the options below' %}:</p>
+</header>
+
+<div class="row">
+    <div class="span6" style="text-align: center;">
+        <p><a href="{% url mdtui-search %}"><img src="{{ STATIC_URL }}search.png" /></a></p>
+        <p><a href="{% url mdtui-search %}" class="btn btn-primary btn-large"><i class="icon-search icon-white"></i> {% trans 'Search' %}</a></p>
+    </div>
+    <div class="span6" style="text-align: center;">
+        <p><a href="{% url mdtui-index %}"><img src="{{ STATIC_URL }}barcode.png" /></a></p>
+        <p><a href="{% url mdtui-index %}" class="btn btn-primary btn-large"><i class="icon-barcode icon-white"></i> {% trans 'Index' %}</a></p>
+    </div>
+</div>
+{% endblock %}
+
+{% block css_extra %}
+<style type="text/css">
+    a img:hover { opacity: 0.8;}
+</style>
+{% endblock %}
