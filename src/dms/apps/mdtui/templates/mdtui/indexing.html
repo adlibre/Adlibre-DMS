@@ -226,6 +226,7 @@
     <form class="form-horizontal" enctype="multipart/form-data" action="{{ request.path }}" method="post">
         {% csrf_token %}
         <div class="tab-content">
+
             <div class="tab-pane" id="upload-file-tab">
                 <fieldset>
                     <legend>Upload File</legend>
@@ -257,7 +258,7 @@
                 </fieldset>
                 <div class="form-actions">
                     <button type="submit" class="btn btn-danger"><i class="icon-trash icon-white"></i> Cancel</button>
-                    <button type="submit" class="btn btn-primary">Continue <i class="icon-chevron-right icon-white"></i></button>
+                    <button type="submit" class="btn btn-primary" value="upload">Continue <i class="icon-chevron-right icon-white"></i></button>
                 </div>
             </div>
 
@@ -267,21 +268,20 @@
 
                     <div class="control-group">
 
-                        <button class="btn">
-                            <i class="icon-barcode"></i> Print Barcode
-                        </button>
+                        <label class="checkbox">
+                            <input type="checkbox" checked="checked">Print Barcode
+                        </label>
                     </div>
                 </fieldset>
                 <div class="form-actions">
                     <button type="submit" class="btn btn-danger"><i class="icon-trash icon-white"></i> Cancel</button>
-                    <button type="submit" class="btn btn-primary">Continue <i class="icon-chevron-right icon-white"></i></button>
+                    <button type="submit" class="btn btn-primary" value="barcode">Continue <i class="icon-chevron-right icon-white"></i></button>
                 </div>
             </div>
 
         </div>
-
-
     </form>
+
 
     {% endif %} {# end step 3 #}
 
