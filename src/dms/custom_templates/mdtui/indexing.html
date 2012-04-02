@@ -1,6 +1,15 @@
 {% extends "mdtui:mdtui/indexing.html" %}
 
-{% block body_content %}
-<img src="{{ STATIC_URL }}mdtui/jtg400.png" />
+{% block custom_branding %}
+<img src="{{ STATIC_URL }}mdtui/jtg260.png" id="brand-logo" />
+{% endblock %}
+
+{% block css_extra %}
+<style type="text/css">
+    #brand-logo {
+        position: relative;
+        float: right;
+    }
+</style>
 {{ block.super }}
 {% endblock %}

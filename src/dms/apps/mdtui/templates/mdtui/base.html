@@ -126,6 +126,35 @@
 {% block js_extra %}{% endblock %}
 {% endcompress %}
 
+<style type="text/css">
+    /* TODO: Work in progress */
+    h1#sider {
+        /* Safari */
+        -webkit-transform: rotate(-90deg);
+
+        /* Firefox */
+        -moz-transform: rotate(-90deg);
+
+        /* IE */
+        -ms-transform: rotate(-90deg);
+
+        /* Opera */
+        -o-transform: rotate(-90deg);
+
+        /* Internet Explorer */
+        filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
+
+        text-align: right;
+        margin-left: -1260px;
+        padding-right: 1200px;
+
+        height: 0px;
+
+        font-size: 44px;
+        color: #CCC;
+    }
+</style>
+
 </body>
 {% endblock %}
 </html>
