@@ -194,6 +194,7 @@
 
 
     {% if step == "3" %}
+
         <fieldset>
             <legend>Step {{ step }}: Select Source</legend>
         </fieldset>
@@ -208,14 +209,19 @@
             </ul>
         {% endif %}
 
-        <br />
-        <p>Choose a document source:</p>
+    <h4>Choose document source:</h4>
 
-    <ul class="nav nav-tabs">
-        <li><a href="#upload-file-tab" data-toggle="tab" class="btn"><i class="icon-upload"></i> Upload File</a></li>
-        <li><a href="#associate-file-tab" data-toggle="tab" class="btn"><i class="icon-inbox"></i> Associate File</a></li>
-        <li><a href="#print-barcode-tab" data-toggle="tab" class="btn"><i class="icon-print"></i> Print Barcode</a></li>
-    </ul>
+    <div class="row">
+        <div class="span3" style="text-align: center;">
+            <a href="#upload-file-tab" data-toggle="tab"><img src="{{ STATIC_URL }}upload.png" /></a>
+            <p><a href="#upload-file-tab" data-toggle="tab" class="btn"><i class="icon-upload"></i> {% trans 'Upload File' %}</a></p>
+        </div>
+        <div class="span3" style="text-align: center;">
+            <a href="#print-barcode-tab" data-toggle="tab"><img src="{{ STATIC_URL }}printer.png" /></a>
+            <p><a href="#print-barcode-tab" data-toggle="tab" class="btn"><i class="icon-print"></i> {% trans 'Print Barcode' %}</a></p>
+        </div>
+    </div>
+
 
     <form class="form-horizontal" enctype="multipart/form-data" action="{{ request.path }}" method="post">
         {% csrf_token %}
@@ -248,28 +254,6 @@
                     </div>
                 </div>
                 {% endfor %}
-                </fieldset>
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-danger"><i class="icon-trash icon-white"></i> Cancel</button>
-                    <button type="submit" class="btn btn-primary">Continue <i class="icon-chevron-right icon-white"></i></button>
-                </div>
-            </div>
-
-            <div class="tab-pane" id="associate-file-tab">
-                <fieldset>
-                    <legend>Associate File</legend>
-                    <div class="control-group">
-                        <label class="control-label" for="select01">Select uncategorized file</label>
-                        <div class="controls">
-                            <select id="select01">
-                                <option>something</option>
-                                <option>2</option>
-                                <option>3</option>
-                                <option>4</option>
-                                <option>5</option>
-                            </select>
-                        </div>
-                    </div>
                 </fieldset>
                 <div class="form-actions">
                     <button type="submit" class="btn btn-danger"><i class="icon-trash icon-white"></i> Cancel</button>
