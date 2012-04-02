@@ -4,7 +4,8 @@
 {% load widget_tweaks %}
 
 {% block body_content %}
-    <h1>{% block body_title %}Document Indexing{% endblock %}</h1>
+
+    <h1 id="sider">{% block body_title %}Document Indexing{% endblock %}</h1>
 
     {% if step != None %}
     {# Use this for a progress / step indicator / navigation #}
@@ -19,6 +20,8 @@
         <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 4: Finish</a></li>
     </ul>
     {% endif %}
+
+    {% block custom_branding %}{% endblock %}
 
     {# WARNINGS HANDLER #}
     {% for warning in warnings %}
