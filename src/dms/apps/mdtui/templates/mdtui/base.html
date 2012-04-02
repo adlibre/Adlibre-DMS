@@ -15,7 +15,7 @@
     {% compress css %}
     {% block css %}
     <link href="{{ STATIC_URL }}css/bootstrap.css" rel="stylesheet">
-    <link href="{{ STATIC_URL }}css/bootstrap-responsive.css" rel="stylesheet">
+    <!--<link href="{{ STATIC_URL }}css/bootstrap-responsive.css" rel="stylesheet">-->
     <style type="text/css">
         /* 60px to make the container go all the way to the bottom of the topbar */
         #body-content { padding-top: 60px;  }
@@ -127,31 +127,22 @@
 {% endcompress %}
 
 <style type="text/css">
-    /* TODO: Work in progress */
-    h1#sider {
-        /* Safari */
+    /* Rotate the heading and align to left page col */
+    h1#page-heading {
         -webkit-transform: rotate(-90deg);
-
-        /* Firefox */
         -moz-transform: rotate(-90deg);
-
-        /* IE */
         -ms-transform: rotate(-90deg);
-
-        /* Opera */
         -o-transform: rotate(-90deg);
-
-        /* Internet Explorer */
         filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);
 
-        text-align: right;
-        margin-left: -1260px;
-        padding-right: 1200px;
-
-        height: 0px;
-
-        font-size: 44px;
+        font-size: 52px;
         color: #CCC;
+
+        text-align: right;
+        position: relative;
+        height: 0px;
+        left: -540px;
+        top: 488px;
     }
 </style>
 
