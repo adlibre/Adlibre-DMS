@@ -12,13 +12,13 @@ urlpatterns = patterns('mdtui.views',
     # Home
     url(r'^$', direct_to_template, {'template': 'mdtui/home.html'}, name='mdtui-home'),
     # Search
-    url(r'^search/$', 'search_type', {'step':'type',}, name='mdtui-search'),
+    url(r'^search/type$', 'search_type', {'step':'type',}, name='mdtui-search'),
     url(r'^search/type', 'search_type', {'step':'type',}, name='mdtui-search-type'),
     url(r'^search/options$', 'search_options', {'step':'options',}, name='mdtui-search-options'),
     url(r'^search/results$', 'search_results', {'step':'results',}, name='mdtui-search-results'),
     url(r'^search/view/(?P<code>[\w_-]+)$', 'search_viewer', {'step':'view',}, name='mdtui-search-view'),
     # Indexing
-    url(r'^indexing/$', 'indexing_select_type', {'step':'1',}, name='mdtui-index'),
+    url(r'^indexing/type$$', 'indexing_select_type', {'step':'1',}, name='mdtui-index'),
     url(r'^indexing/type$', 'indexing_select_type', {'step':'1',}, name='mdtui-index-type'),
     url(r'^indexing/details$', 'indexing_details', {'step':'2',}, name='mdtui-index-details'),
     url(r'^indexing/source$', 'indexing_source', {'step':'3',}, name='mdtui-index-source'),
