@@ -16,7 +16,7 @@ SEARCH TYPE VARIATIONS GENERAL SEARCH HELPERS
 """
 
 def search_by_single_date(cleaned_document_keys, docrule_id):
-    log.debug("only one criteria 'date' in search request, requesting another specific view")
+    log.debug("Single exact date search")
     documents = CouchDocument.view(
                                 'dmscouch/search_date',
                                 key=[str_date_to_couch(cleaned_document_keys["date"]),
@@ -24,13 +24,13 @@ def search_by_single_date(cleaned_document_keys, docrule_id):
                                 include_docs=True
                                 )
     log.debug(
-        'search results only by single date: "%s", docrule: "%s", documents: "%s"' %
+        'Search results by single date without keys: "%s", docrule: "%s", documents: "%s"' %
         (str_date_to_couch(cleaned_document_keys["date"]), docrule_id, map(lambda doc: doc["id"], documents))
     )
     return documents
 
 def exact_date_with_keys_search(cleaned_document_keys, docrule_id):
-    log.debug('multiple keys with exact date search')
+    log.debug('Multiple keys with exact date search')
     documents = None
     couch_req_params = convert_to_search_keys_for_single_date(cleaned_document_keys, docrule_id)
     if couch_req_params:
@@ -40,47 +40,45 @@ def exact_date_with_keys_search(cleaned_document_keys, docrule_id):
         docs_list = convert_search_res(search_res, couch_req_params.__len__())
         documents = CouchDocument.view('_all_docs', keys=docs_list, include_docs=True )
     log.debug(
-        'search results only by single date with keys set: "%s", docrule: "%s", documents: "%s"' %
+        'Search results only by single date with keys set: "%s", docrule: "%s", documents: "%s"' %
         (couch_req_params, docrule_id, map(lambda doc: doc["id"], documents))
     )
     return documents
 
 def date_range_only_search(cleaned_document_keys, docrule_id):
-    # TODO: implement this properly or debug this
-    log.debug('date range search only')
+    log.debug('Date range search only')
     documents = None
-    documents = CouchDocument.view(
-                            'dmscouch/search_date',
-                            start_key=[str_date_to_couch(cleaned_document_keys["date"]),
-                                       docrule_id],
-                            end_key=[str_date_to_couch(cleaned_document_keys["end_date"]),
-                                       docrule_id],
-                            include_docs=True
-                            )
+    startkey = [str_date_to_couch(cleaned_document_keys["date"]), docrule_id]
+    endkey = [str_date_to_couch(cleaned_document_keys["end_date"]), docrule_id]
+    documents = CouchDocument.view('dmscouch/search_date', startkey=startkey, endkey=endkey, include_docs=True)
     log.debug(
-        'search results by date range: from: "%s", to: "%s", docrule: "%s", documents: "%s"' %
-        (str_date_to_couch(cleaned_document_keys["date"]),
-         str_date_to_couch(cleaned_document_keys["end_date"]),
-         docrule_id,
-         map(lambda doc: doc["id"], documents))
+        'Search results by date range: from: "%s", to: "%s", docrule: "%s", documents: "%s"' %
+        (startkey[0], endkey[0], docrule_id, map(lambda doc: doc["id"], documents))
     )
     return documents
 
 def date_range_with_keys_search(cleaned_document_keys, docrule_id):
-    # TODO: implement this properly or debug this
-    log.debug('date range search with additional keys specified')
+    log.debug('Date range search with additional keys specified')
+    resp_set = []
     documents = None
-    startkey = convert_to_search_keys_for_date_range(cleaned_document_keys, docrule_id)
-    endkey = convert_to_search_keys_for_date_range(cleaned_document_keys, docrule_id, end=True)
-    if startkey and endkey:
-        search_res = CouchDocument.view('dmscouch/search', start_key=startkey, end_key=endkey )
-        # documents now returns ANY search type results.
-        # we need to convert it to ALL
-        # TODO: implemet this properly (cleanup results)
-        #docs_list = convert_search_res_for_range(search_res, start_match_len, end_match_len):
-        # Temporary dummy
-        docs_list = convert_search_res(search_res, endkey.__len__())
-        documents = CouchDocument.view('_all_docs', keys=docs_list, include_docs=True )
+    # Getting list of date range filtered docs for each provided secondary key
+    # Except for internal keys
+    for key, value in cleaned_document_keys.iteritems():
+        if not (key == 'date') and not (key == 'end_date'):
+            startkey = convert_to_search_keys_for_date_range(cleaned_document_keys, key, docrule_id)
+            endkey = convert_to_search_keys_for_date_range(cleaned_document_keys, key, docrule_id, end=True)
+            if startkey and endkey:
+                search_res = CouchDocument.view('dmscouch/search', startkey=startkey, endkey=endkey )
+                if search_res:
+                    resp_set.append(search_res)
+    # resp_set now returns ANY search type results.
+    # we need to convert it to ALL
+    docs_list = convert_search_res_for_range(resp_set)
+    documents = CouchDocument.view('_all_docs', keys=docs_list, include_docs=True )
+    log.debug(
+        'Search results by date range with additional keys: "%s", docrule: "%s", documents: "%s"' %
+        (cleaned_document_keys, docrule_id, map(lambda doc: doc["id"], documents))
+    )
     return documents
 
 """
@@ -100,6 +98,10 @@ def cleanup_document_keys(document_keys):
     return document_keys
 
 def convert_search_res(search_res, match_len):
+    """
+    Converts search results for multiple keys with single date request
+    from type ANY to type ALL (keys exist in document)
+    """
     docs_list = {}
     matched_docs = []
     for row in search_res:
@@ -108,13 +110,31 @@ def convert_search_res(search_res, match_len):
         else:
             docs_list[row.get_id] = 1
     for doc_id, mention_count in docs_list.iteritems():
-        if int(mention_count) >= int(match_len):
+        if mention_count >= match_len:
             matched_docs.append(doc_id)
     return matched_docs
 
-def convert_search_res_for_range(search_res, start_match_len, end_match_len):
-    # TODO: implement this
-    pass
+def convert_search_res_for_range(resp_set):
+    """
+    Converts search results for multiple keys with date range
+    from type ANY to type ALL (keys exist in document)
+    """
+    docs_ids_mentions = {}
+    docs_ids_list = []
+    # Each set
+    for set in resp_set:
+        # Each doc in set
+        for doc in set:
+            docname = doc.get_id
+            if docname in docs_ids_mentions.iterkeys():
+                docs_ids_mentions[docname] += 1
+            else:
+                docs_ids_mentions[docname] = 1
+    # Comparing search mentions and adding to response if all keys match
+    for key, value in docs_ids_mentions.iteritems():
+        if value >= resp_set.__len__():
+            docs_ids_list.append(key)
+    return docs_ids_list
 
 def convert_to_search_keys_for_single_date(document_keys, docrule_id):
     """
@@ -129,21 +149,18 @@ def convert_to_search_keys_for_single_date(document_keys, docrule_id):
                 req_params.append([key, value, docrule_id, str_date_to_couch(document_keys["date"])],)
     return req_params
 
-def convert_to_search_keys_for_date_range(document_keys, docrule_id, end=False):
+def convert_to_search_keys_for_date_range(document_keys, pkey, docrule_id, end=False):
     """
     Makes proper keys request set for 'dmscouch/search' CouchDB view.
     Takes date range into account.
     """
     req_params = []
     for key, value in document_keys.iteritems():
-        if key != "date" and key != "end_date":
-            if not "date" in document_keys.keys() or not "end_date" in document_keys.keys():
-                req_params.append([key, value, docrule_id],)
+        if key == pkey:
+            if not end:
+                req_params = [key, value, docrule_id, str_date_to_couch(document_keys["date"])]
             else:
-                if not end:
-                    req_params.append([key, value, docrule_id, str_date_to_couch(document_keys["date"])],)
-                else:
-                    req_params.append([key, value, docrule_id, str_date_to_couch(document_keys["end_date"])],)
+                req_params = [key, value, docrule_id, str_date_to_couch(document_keys["end_date"])]
     return req_params
 
 def str_date_to_couch(from_date):
