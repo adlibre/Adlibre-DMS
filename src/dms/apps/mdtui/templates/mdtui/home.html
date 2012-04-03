@@ -22,7 +22,10 @@
 {% endblock %}
 
 {% block css_extra %}
+<!--[if lt IE 9]>
 <style type="text/css">
-
+    /* Undo hack for rotated text */
+    #body-content { padding-top: 60px; }
 </style>
+<![endif]-->
 {% endblock %}
