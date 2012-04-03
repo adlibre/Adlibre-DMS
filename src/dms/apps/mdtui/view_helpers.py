@@ -7,45 +7,59 @@ Author: Iurii Garmash
 """
 
 from forms import DocumentIndexForm
+from forms import DocumentSearchOptionsForm
 from forms_representator import render_fields_from_docrules
 from forms_representator import get_mdts_for_docrule
 
 
 def initDocumentIndexForm(request):
-        """
-        DocumentIndexForm initialization
-        in case of GET returns an empty base form,
-        in case of POST returns populated (from request) form instance.
-        in both cases form is rendered with MDT index fields
-        """
-        details = None
-        try:
-            # Trying to use cached MDT's and instantiating if none exist.
-            details = request.session['mdts']
-        except KeyError:
-            # Getting MDT's from CouchDB
-            try:
-                try:
-                    details = get_mdts_for_docrule(request.session['docrule_id'])
-                except KeyError:
-                    details = get_mdts_for_docrule(request.session['docrule'])
-                # Storing MDT's into improvised cashe
-                request.session['mdts'] = details
-            except KeyError:
-                pass
+    """
+    DocumentIndexForm initialization
+    in case of GET returns an empty base form,
+    in case of POST returns populated (from request) form instance.
+    in both cases form is rendered with MDT index fields
+    """
+    details = None
+    # Determining which form to init
+    # HACK: determining if search by the url (MUST BE CHANGED IF RENAMING URL)
+    if 'search' in request.path:
+        search = True
+    else:
+        search = False
 
+    try:
+        # Trying to use cached MDT's and instantiating if none exist.
+        details = request.session['mdts']
+    except KeyError:
+        # Getting MDT's from CouchDB
+        try:
+            try:
+                details = get_mdts_for_docrule(request.session['docrule_id'])
+            except KeyError:
+                details = get_mdts_for_docrule(request.session['docrule'])
+                search = True
+            # Storing MDT's into improvised cashe
+            request.session['mdts'] = details
+        except KeyError:
+            pass
+
+    # Selecting proper form depending on request type
+    if search:
+        form = DocumentSearchOptionsForm()
+    else:
         form = DocumentIndexForm()
-        if details:
-            if not details == 'error':
-                # MDT's exist for ths docrule adding fields to form
-                fields = render_fields_from_docrules(details, request.POST or None)
-                #print fields
-                if fields:
-                    form.setFields(fields)
-        if request.POST:
-            form.setData(request.POST)
-            form.validation_ok()
-        return form
+
+    if details:
+        if not details == 'error':
+            # MDT's exist for ths docrule adding fields to form
+            fields = render_fields_from_docrules(details, request.POST or None)
+            #print fields
+            if fields:
+                form.setFields(fields)
+    if request.POST:
+        form.setData(request.POST)
+        form.validation_ok()
+    return form
 
 
 def processDocumentIndexForm(request):
@@ -55,11 +69,12 @@ def processDocumentIndexForm(request):
     """
     form = initDocumentIndexForm(request)
     secondary_indexes = {}
-    search = None
-    try:
-        search = request.session["docrule"]
-    except KeyError:
-        pass
+    # HACK: determining if search by the url (MUST BE CHANGED IF RENAMING URL)
+    if 'search' in request.path:
+        search = True
+    else:
+        search = False
+
     if form.validation_ok() or search:
         for key, field in form.fields.iteritems():
             # FIXME: Nested exceptions.. bad

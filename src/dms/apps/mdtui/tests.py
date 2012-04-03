@@ -61,7 +61,6 @@ mdt2 = {
        },
        "2": {
            "type": "string",
-           "length": 60,
            "field_name": "Employee Name",
            "description": "Name of the person associated with the document"
        },
@@ -326,7 +325,8 @@ class MDTUI(TestCase):
         new_url = self._retrieve_redirect_response_url(response)
         response = self.client.get(new_url)
         # checking for proper fields rendering
-        self.assertContains(response, "Creation Date")
+        self.assertContains(response, "Creation Date From")
+        self.assertContains(response, "To")
         self.assertContains(response, "Employee ID")
         self.assertContains(response, "Employee Name")
         self.assertContains(response, "Friends ID")
@@ -349,7 +349,7 @@ class MDTUI(TestCase):
         self.assertEqual(response.status_code, 302)
         url = reverse('mdtui-search-options')
         # Searching by Document 1 Indexes
-        response = self.client.post(url, {'date': doc1_dict["date"], '0':'', '1':'', '2':'', '3':'', '4':''})
+        response = self.client.post(url, {'date': doc1_dict["date"], 'end_date': '', '0':'', '1':'', '2':'', '3':'', '4':''})
         self.assertEqual(response.status_code, 302)
         new_url = self._retrieve_redirect_response_url(response)
         response = self.client.get(new_url)

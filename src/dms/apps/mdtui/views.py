@@ -86,26 +86,18 @@ def search_options(request, step, template='mdtui/search.html'):
     """
     warnings = []
     try:
-        docrule = request.session["docrule"]
+        request.session["docrule"]
     except KeyError:
         warnings.append(MDTUI_ERROR_STRINGS[4])
 
     form = initDocumentIndexForm(request)
     autocomplete_list = extract_secondary_keys_from_form(form)
-    try:
-        # Exclude description from search form, because we can't yet search on it.
-        del form.fields["description"]
-    except KeyError:
-        pass
 
     if request.POST:
         secondary_indexes = processDocumentIndexForm(request)
         if secondary_indexes:
             request.session["document_search_dict"] = secondary_indexes
             return HttpResponseRedirect(reverse('mdtui-search-results'))
-    else:
-        # Date field should be empty for search needs
-        form.fields["date"].initial = None
 
     context = {
                 'form': form,
@@ -158,11 +150,11 @@ def search_results(request, step=None, template='mdtui/search.html'):
 @login_required
 def search_viewer(request, code, step, template='mdtui/view.html'):
     """
-   Search Step 4: View Document
+    Search Step 4: View Document
     """
 
     pdf_url = reverse('mdtui-download-pdf', kwargs = { 'code': code, })
-    context = { 'pdf_url': pdf_url, 'code': code, }
+    context = { 'pdf_url': pdf_url, 'code': code, 'step':step }
     return render(request, template, context)
 
 
@@ -184,7 +176,6 @@ def indexing_select_type(request, step=None, template='mdtui/indexing.html'):
     if request.POST:
         if form.is_valid():
             docrule = form.data["docrule"]
-            request.session['current_step'] = step
             request.session['docrule_id'] = docrule
             mdts = get_mdts_for_docrule(docrule)
             if mdts:
@@ -221,9 +212,7 @@ def indexing_details(request, step=None, template='mdtui/indexing.html'):
     """
     # Context init
     context = {}
-    docrule = None
     document_keys = None
-    autocomplete_list = []
     warnings = []
     cleanup_search_session(request)
 
@@ -237,16 +226,10 @@ def indexing_details(request, step=None, template='mdtui/indexing.html'):
             form = initDocumentIndexForm(request)
     else:
         try:
-            docrule = request.session['docrule_id']
+            request.session['docrule_id']
         except KeyError:
             warnings.append(MDTUI_ERROR_STRINGS[1])
         form = initDocumentIndexForm(request)
-
-    try:
-        # Exclude end_date from indexing form
-        del form.fields["end_date"]
-    except KeyError:
-        pass
 
     autocomplete_list = extract_secondary_keys_from_form(form)
     try:
@@ -270,6 +253,8 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
     document_keys = None
     context = {}
     warnings = []
+    index_info = None
+    docrule = None
 
     try:
         document_keys = request.session["document_keys_dict"]
@@ -294,7 +279,7 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
 
             if not warnings:
                 manager = DocumentManager()
-                manager.store(request, form.files['file'], index_info=index_info or None, allocate_barcode=docrule or None)
+                manager.store(request, form.files['file'], index_info=index_info, allocate_barcode=docrule)
 
                 if not manager.errors:
                     return HttpResponseRedirect(reverse('mdtui-index-finished'))
