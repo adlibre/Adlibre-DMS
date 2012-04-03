@@ -1,5 +1,5 @@
 """
-Module: Metadata Template UI Views
+Module: SEARCH TYPE VARIATIONS GENERAL SEARCH HELPERS
 Project: Adlibre DMS
 Copyright: Adlibre Pty Ltd 2012
 License: See LICENSE for license information
@@ -11,10 +11,6 @@ import logging
 
 log = logging.getLogger('dms.mdtui.views')
 
-"""
-SEARCH TYPE VARIATIONS GENERAL SEARCH HELPERS
-"""
-
 def search_by_single_date(cleaned_document_keys, docrule_id):
     log.debug("Single exact date search")
     documents = CouchDocument.view(
@@ -23,10 +19,16 @@ def search_by_single_date(cleaned_document_keys, docrule_id):
                                     docrule_id],
                                 include_docs=True
                                 )
-    log.debug(
-        'Search results by single date without keys: "%s", docrule: "%s", documents: "%s"' %
-        (str_date_to_couch(cleaned_document_keys["date"]), docrule_id, map(lambda doc: doc["id"], documents))
-    )
+    if documents:
+        log.debug(
+            'Search results by single date without keys: "%s", docrule: "%s", documents: "%s"' %
+            (str_date_to_couch(cleaned_document_keys["date"]), docrule_id, map(lambda doc: doc["id"], documents) or None)
+        )
+    else:
+        log.debug(
+            'Search results by single date without keys: "%s", docrule: "%s", documents: None' %
+            (str_date_to_couch(cleaned_document_keys["date"]), docrule_id)
+        )
     return documents
 
 def exact_date_with_keys_search(cleaned_document_keys, docrule_id):
@@ -39,28 +41,38 @@ def exact_date_with_keys_search(cleaned_document_keys, docrule_id):
         # we need to convert it to ALL
         docs_list = convert_search_res(search_res, couch_req_params.__len__())
         documents = CouchDocument.view('_all_docs', keys=docs_list, include_docs=True )
-    log.debug(
-        'Search results only by single date with keys set: "%s", docrule: "%s", documents: "%s"' %
-        (couch_req_params, docrule_id, map(lambda doc: doc["id"], documents))
-    )
+    if documents:
+        log.debug(
+            'Search results only by single date with keys set: "%s", docrule: "%s", documents: "%s"' %
+            (couch_req_params, docrule_id, map(lambda doc: doc["id"], documents))
+        )
+    else:
+        log.debug(
+            'Search results only by single date with keys set: "%s", docrule: "%s", documents: None' %
+            (couch_req_params, docrule_id)
+        )
     return documents
 
 def date_range_only_search(cleaned_document_keys, docrule_id):
     log.debug('Date range search only')
-    documents = None
     startkey = [str_date_to_couch(cleaned_document_keys["date"]), docrule_id]
     endkey = [str_date_to_couch(cleaned_document_keys["end_date"]), docrule_id]
     documents = CouchDocument.view('dmscouch/search_date', startkey=startkey, endkey=endkey, include_docs=True)
-    log.debug(
-        'Search results by date range: from: "%s", to: "%s", docrule: "%s", documents: "%s"' %
-        (startkey[0], endkey[0], docrule_id, map(lambda doc: doc["id"], documents))
-    )
+    if documents:
+        log.debug(
+            'Search results by date range: from: "%s", to: "%s", docrule: "%s", documents: "%s"' %
+            (startkey[0], endkey[0], docrule_id, map(lambda doc: doc["id"], documents))
+        )
+    else:
+        log.debug(
+            'Search results by date range: from: "%s", to: "%s", docrule: "%s", documents: None' %
+            (startkey[0], endkey[0], docrule_id)
+        )
     return documents
 
 def date_range_with_keys_search(cleaned_document_keys, docrule_id):
     log.debug('Date range search with additional keys specified')
     resp_set = []
-    documents = None
     # Getting list of date range filtered docs for each provided secondary key
     # Except for internal keys
     for key, value in cleaned_document_keys.iteritems():
@@ -75,15 +87,17 @@ def date_range_with_keys_search(cleaned_document_keys, docrule_id):
     # we need to convert it to ALL
     docs_list = convert_search_res_for_range(resp_set)
     documents = CouchDocument.view('_all_docs', keys=docs_list, include_docs=True )
-    log.debug(
-        'Search results by date range with additional keys: "%s", docrule: "%s", documents: "%s"' %
-        (cleaned_document_keys, docrule_id, map(lambda doc: doc["id"], documents))
-    )
+    if documents:
+        log.debug(
+            'Search results by date range with additional keys: "%s", docrule: "%s", documents: "%s"' %
+            (cleaned_document_keys, docrule_id, map(lambda doc: doc["id"], documents))
+        )
+    else:
+        log.debug(
+            'Search results by date range with additional keys: "%s", docrule: "%s", documents: None' %
+            (cleaned_document_keys, docrule_id)
+        )
     return documents
-
-"""
-ANOTHER GENERAL SEARCH HELPERS
-"""
 
 def cleanup_document_keys(document_keys):
     """
