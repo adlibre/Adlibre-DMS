@@ -53,7 +53,10 @@
         .x-progress-tracker li { padding-bottom: 4px; display: inline-block;}
 
         /* make link images fade */
-        a img:hover { opacity: 0.8;}
+        a img:hover {
+            opacity: 0.8;
+            filter:alpha(opacity=80); /* For IE8 and earlier */
+        }
 
         /* Rotate the heading and align to left page col */
         h1#page-heading {
@@ -87,6 +90,7 @@
             height: 56px;
             padding-top: 2px;
         }
+        /* Hack to push page up the height of the rotated heading */
         #body-content { padding-top: 0; }
     </style>
     <![endif]-->
