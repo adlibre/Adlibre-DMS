@@ -3,7 +3,6 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Print PDF</title>
-    <script type="text/javascript" language="javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
     <script type="text/javascript" language="javascript" charset="utf-8" src="{{ STATIC_URL }}js/pdfobject.min.js"></script>
 
     <script type='text/javascript'>
@@ -17,16 +16,21 @@
             }).embed(elementId);
         }
 
+        {# TODO: FIXME This is still not working right in non chrome browsers... #}
+        {# however probably not needed anymore, as we can force print the PDF using embedded JavaScript #}
+        {% comment %}
         function printTrigger(elementId) {
             var getMyFrame = document.getElementById(elementId);
             getMyFrame.focus();
             getMyFrame.contentWindow.print();
         }
-        {# TODO: FIXME This is still not working right in non chrome browsers... #}
+
+        <script type="text/javascript" language="javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
         $(document).ready(function() {
             printTrigger('iFramePdf'); // Chrome
             //embedPDF('pdfobj'); // Non Chrome
         });
+        {% endcomment %}
 
     </script>
 
