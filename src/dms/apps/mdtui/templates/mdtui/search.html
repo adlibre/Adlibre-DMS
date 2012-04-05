@@ -275,8 +275,8 @@
             <tbody>
             {% for doc in documents %}
                 <tr>
-                    <td><a href="{% url mdtui-search-view doc.id %}" title="View Document"><i class="icon-download"></i> {{ doc.id }}</a></td>
-                    <td>{{ doc.metadata_created_date|date:"Y-m-d" }}</td>
+                    <td><a href="{% url mdtui-search-view doc.id %}" title="View Document"><i class="icon-download"></i>&nbsp;{{ doc.id }}</a></td>
+                    <td style="white-space: nowrap;">{{ doc.metadata_created_date|date:"Y-m-d" }}</td>
                     
                     {% for key in mdts %}
                     <td>{% get_sec_key_for_doc doc.mdt_indexes key %}</td>
