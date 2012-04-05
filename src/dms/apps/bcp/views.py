@@ -36,7 +36,7 @@ def print_barcode(request, code, barcode_type, template='bcp/print.html'):
     return render(request, template, context)
 
 
-def generate(request, code, barcode_type='Standard39',):
+def generate(request, code, barcode_type='Standard39', auto_print=True):
     """
      Returns a PDF Barcode using ReportLab
     """
@@ -46,15 +46,9 @@ def generate(request, code, barcode_type='Standard39',):
     from reportlab.graphics.shapes import String
     from reportlab.graphics import renderPDF
     from reportlab.graphics.barcode import createBarcodeDrawing
+    from reportlab.pdfbase import pdfdoc
     from reportlab.pdfbase import pdfmetrics
     from reportlab.pdfbase.ttfonts import TTFont
-
-    # TODO: Investigate embedding Javascript to force printing.
-    #from reportlab.pdfbase.pdfdoc import PDFCatalog
-    #PDFCatalog.__Defaults__['JavaScript'] = '<script type="text/javascript">print();</script>'
-    # this.print({bUI: false, bSilent: true, bShrinkToFit: true});
-    # http://livedocs.adobe.com/acrobat_sdk/9.1/Acrobat9_1_HTMLHelp/wwhelp/wwhimpl/common/html/wwhelp.htm?context=Acrobat9_HTMLHelp&file=JS_Dev_PrintProduction.75.4.html
-    # http://stackoverflow.com/questions/687675/can-a-pdf-files-print-dialog-be-opened-with-javascript
 
     response = HttpResponse(mimetype='application/pdf')
     response['Content-Disposition'] = 'inline; filename=%s.pdf' % (code,)
@@ -70,6 +64,11 @@ def generate(request, code, barcode_type='Standard39',):
 
     # Register the OCRA font
     pdfmetrics.registerFont(TTFont('OCRA', font_path))
+
+    # Set JS to Autoprint document
+    if auto_print:
+        pdfdoc.PDFCatalog.OpenAction = '<</S/JavaScript/JS(this.print\({bUI:true,bSilent:false,bShrinkToFit:true}\);)>>'
+        pdfdoc.PDFInfo.title = code # nicety :)
 
     # Position for our text
     x = bc.width / 2
