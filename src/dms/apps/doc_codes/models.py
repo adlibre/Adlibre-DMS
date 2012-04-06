@@ -8,6 +8,9 @@ Author: Iurii Garmash
 
 from django.db import models
 import re
+import logging
+
+log = logging.getLogger('dms')
 
 # HACK: For allowing for extended validation / splitting.
 # TODO: Refactor this requirement out.
@@ -159,6 +162,7 @@ class DocumentTypeRule(models.Model):
         """
         Function increments last document number for this Document Type Model by int(1)
         """
+        log.debug('doc_codes.models add_new_document. sequence_last: %s', self.sequence_last)
         self.sequence_last += 1
         self.save()
         return self._generate_document_barcode(self.sequence_last)
@@ -167,6 +171,7 @@ class DocumentTypeRule(models.Model):
         """
         Function generates next barcode in sequence. As soon as it is generated, it must be assumed to be used to avoid race.
         """
+        log.debug("doc_codes.models Generate document barcode called. sequence: %s", sequence)
         # HACK: Ideally we shouldn't need a 'barcode_format' field, as that could be inferred from the regex. (maybe?) along with the
         # integer padding required? eg assume a fixed length integer portion of a regex is padded
         # TODO: Validate the generated code to ensure it's valid, and not invalid according to the regex.
@@ -174,8 +179,10 @@ class DocumentTypeRule(models.Model):
         if len(self.barcode_format) > 0:
             n = str(sequence)
             n = n.zfill(self.barcode_zfill)
-            return self.barcode_format % (n)
+            log.debug('barcode: %s' % self.barcode_format % n)
+            return self.barcode_format % n
         else:
+            log.debug("False barcode")
             return False
 
 

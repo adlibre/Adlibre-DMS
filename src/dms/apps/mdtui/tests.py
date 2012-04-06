@@ -24,7 +24,7 @@ indexes_form_match_pattern = '(Employee ID|Employee Name|Friends ID|Friends Name
 
 mdt1 = {
     "_id": 'mdt1',
-    "docrule_id": str(test_mdt_docrule_id),
+    "docrule_id": [str(test_mdt_docrule_id),],
     "description": "Test MDT Number 1",
     "fields": {
        "1": {
@@ -51,7 +51,7 @@ mdt1 = {
 
 mdt2 = {
     "_id": 'mdt2',
-    "docrule_id": str(test_mdt_docrule_id),
+    "docrule_id": [str(test_mdt_docrule_id),],
     "description": "Test MDT Number 2",
     "fields": {
        "1": {
@@ -70,6 +70,32 @@ mdt2 = {
     }
 }
 
+mdt3 = {
+    "_id": 'mdt3',
+    "docrule_id": [str(test_mdt_docrule_id),],
+    "description": "Test MDT Number 1",
+    "fields": {
+        "1": {
+            "type": "string",
+            "length": 3,
+            "field_name": "Reporting Entity",
+            "description": "Reporting Entity (e.g. JTG, QH, etc)"
+        },
+        "2": {
+            "type": "string",
+            "length": 60,
+            "field_name": "Report Type",
+            "description": "Report Type (e.g. Reconciliation, Pay run etc)"
+        },
+        "3": {
+            "type": "date",
+            "field_name": "Report Date",
+            "description": "Date the report was generated"
+        },
+    },
+    "parallel": {}
+}
+
 # Static dictionary of document to be indexed.
 doc1_dict = {
     'date': '2012-03-06',
@@ -81,7 +107,29 @@ doc1_dict = {
     'Friends Name': 'Andrew',
 }
 
+doc2_dict = {
+    'date': '2012-03-20',
+    'description': 'Test Document Number 2',
+    'Employee ID': '111111',
+    'Required Date': '2012-03-21',
+    'Employee Name': 'Andrew Cutler',
+    'Friends ID': '321',
+    'Friends Name': 'Yuri',
+}
+
+doc3_dict = {
+    'date': '2012-03-28',
+    'description': 'Test Document Number 3',
+    'Employee ID': '111111',
+    'Required Date': '2012-03-29',
+    'Employee Name': 'Andrew Cutler',
+    'Friends ID': '222',
+    'Friends Name': 'Someone',
+}
+
 doc1 = 'ADL-0001'
+doc2 = 'ADL-0002'
+doc3 = 'ADL-1111'
 
 # Proper for doc1
 typehead_call1 = {
@@ -122,6 +170,16 @@ class MDTUI(TestCase):
         """
         # adding our MDT's required through API. (MDT API should be working)
         mdt = json.dumps(mdt2)
+        url = reverse('api_mdt')
+        response = self.client.post(url, {"mdt": mdt})
+        self.assertEqual(response.status_code, 200)
+
+    def test_00_setup_mdt3(self):
+        """
+        Setup MDT 3 for the test suite. Made like standalone test because we need it to be run only once
+        """
+        # adding our MDT's required through API. (MDT API should be working)
+        mdt = json.dumps(mdt3)
         url = reverse('api_mdt')
         response = self.client.post(url, {"mdt": mdt})
         self.assertEqual(response.status_code, 200)
@@ -252,7 +310,7 @@ class MDTUI(TestCase):
         self.assertEqual(response.status_code, 200)
         # Make the file upload
         file = os.path.join(settings.FIXTURE_DIRS[0], 'testdata', doc1+'.pdf')
-        data = { 'file': open(file, 'r'), 'filename':doc1+'.pdf'}
+        data = { 'file': open(file, 'rb'), 'post_data':'to make request post type'}
         response = self.client.post(url, data)
         # Follow Redirect
         self.assertEqual(response.status_code, 302)
@@ -577,6 +635,105 @@ class MDTUI(TestCase):
         self.assertNotContains(response, 'Andrew')
         self.assertNotContains(response, 'Iurii Garmash')
         self.assertNotContains(response, 'Employee Name')
+#
+#    def test_24_additional_docs_adding(self):
+#        """
+#        Adds additional document 2 and 3 for more complex tests.
+#        Those docs must be used farther for complex searches.
+#        """
+#        """
+#        Uploading File though MDTUI, adding all Secondary indexes accordingly.
+#        """
+#        # Selecting Document Type Rule
+#        url = reverse('mdtui-index-type')
+#        response = self.client.post(url, {'docrule': test_mdt_docrule_id})
+#        self.assertEqual(response.status_code, 302)
+#        # Getting indexes form and matching form Indexing Form fields names
+#        url = reverse('mdtui-index-details')
+#        response = self.client.get(url)
+#        rows_dict = self._read_indexes_form(response)
+#        post_dict = self._convert_doc_to_post_dict(rows_dict, doc2_dict)
+#        # Adding Document Indexes
+#        response = self.client.post(url, post_dict)
+#        self.assertEqual(response.status_code, 302)
+#        uurl = self._retrieve_redirect_response_url(response)
+#        response = self.client.get(uurl)
+#        print uurl
+#        #print response
+#        self.assertContains(response, 'Friends ID: 321')
+#        self.assertEqual(response.status_code, 200)
+#        # Make the file upload
+#        file = os.path.join(settings.FIXTURE_DIRS[0], 'testdata', doc2+'.pdf')
+#        print file
+#        data = { 'file': open(file, 'rb') , 'post_data':'to make this request post type'}
+#        print data
+#        response = self.client.post(uurl, data)
+#        # Follow Redirect
+#        self.assertEqual(response.status_code, 302)
+#        new_url = self._retrieve_redirect_response_url(response)
+#        response = self.client.get(new_url)
+#        self.assertContains(response, 'Your document has been indexed successfully')
+#        self.assertContains(response, 'Friends Name: Yuri')
+#        self.assertContains(response, 'Start Again')
+#
+#
+#        # Selecting Document Type Rule
+#        url = reverse('mdtui-index-type')
+#        response = self.client.post(url, {'docrule': test_mdt_docrule_id})
+#        self.assertEqual(response.status_code, 302)
+#        # Getting indexes form and matching form Indexing Form fields names
+#        url = reverse('mdtui-index-details')
+#        response = self.client.get(url)
+#        rows_dict = self._read_indexes_form(response)
+#        post_dict = self._convert_doc_to_post_dict(rows_dict, doc1_dict)
+#        # Adding Document Indexes
+#        response = self.client.post(url, post_dict)
+#        self.assertEqual(response.status_code, 302)
+#        uurl = self._retrieve_redirect_response_url(response)
+#        response = self.client.get(uurl)
+#        print uurl
+#        #print response
+#        self.assertContains(response, 'Friends ID: 123')
+#        self.assertEqual(response.status_code, 200)
+#        # Make the file upload
+#        file = os.path.join(settings.FIXTURE_DIRS[0], 'testdata', doc1+'.pdf')
+#        print file
+#        data = { 'file': open(file, 'rb') , 'post_data':'to make this request post type'}
+#        print data
+#        response = self.client.post(uurl, data)
+#        # Follow Redirect
+#        self.assertEqual(response.status_code, 302)
+#        new_url = self._retrieve_redirect_response_url(response)
+#        response = self.client.get(new_url)
+#        self.assertContains(response, 'Your document has been indexed successfully')
+#        self.assertContains(response, 'Friends Name: Andrew')
+#        self.assertContains(response, 'Start Again')
+#
+#    def test_25_search_by_date_range_only_proper(self):
+#        """
+#        Proper call to search by date range only.
+#        MDTUI Search By Index Form parses data properly.
+#        Search Step 3 displays proper captured indexes.
+#        """
+#        # setting docrule
+#        url = reverse('mdtui-search-type')
+#        data = {'docrule': test_mdt_docrule_id}
+#        response = self.client.post(url, data)
+#        self.assertEqual(response.status_code, 302)
+#        url = reverse('mdtui-search-options')
+#        # Searching by Document 1 Indexes
+#        response = self.client.post(url, {'date': '2012-03-05', 'end_date': '2012-03-07', '0':'', '1':'', '2':'', '3':'', '4':''})
+#        self.assertEqual(response.status_code, 302)
+#        new_url = self._retrieve_redirect_response_url(response)
+#        response = self.client.get(new_url)
+#        self.assertEqual(response.status_code, 200)
+#        # no errors appeared
+#        self.assertNotContains(response, "You have not defined Document Searching Options")
+#        # document found
+#        self.assertContains(response, doc1)
+#        self.assertContains(response, doc1_dict['description'])
+#        # context processors provide docrule name
+#        self.assertContains(response, "Adlibre Invoices")
 
     def test_z_cleanup(self):
         """

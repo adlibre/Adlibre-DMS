@@ -28,7 +28,7 @@ class CouchDocument(Document):
         """
         Populates CouchDB Document fields from DMS Document object.
         """
-        # setting document ID, based on filename. Using stripped (pure doccode regex readable) filename if possible.
+        # Setting document ID, based on filename. Using stripped (pure doccode regex readable) filename if possible.
         # TODO: to save no_docrule documents properly we need to generate metadata.
         if document.get_stripped_filename():
             self.id = document.get_stripped_filename()
@@ -95,7 +95,7 @@ class CouchDocument(Document):
         """
         Unifies DB storage of date object received from document.
         """
-        # TODO: Standartize DATE parsign here!!!
+        # TODO: Standartize DATE parsing here!!!
         doc_date = None
         # trying to get date from db_info dict first
         try:

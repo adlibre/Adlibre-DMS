@@ -20,7 +20,7 @@ class ParallelKeysManager(object):
         mdt_manager = MetaDataTemplateManager()
         mdt_manager.docrule_id = docrule_id
         # valid Mdt id...
-        if mdt_manager.mdt_read_call_valid(docrule_id):
+        if mdt_manager.mdt_read_call_valid():
             if not mdts:
                 mdts = mdt_manager.get_mdts_for_docrule(docrule_id)
             pkeys = self.get_parallel_keys_for_mdts(mdts)

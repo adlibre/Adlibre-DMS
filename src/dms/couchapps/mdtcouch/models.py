@@ -5,8 +5,6 @@ Copyright: Adlibre Pty Ltd 2012
 License: See LICENSE for license information
 Author: Iurii Garmash
 """
-
-#from datetime import datetime
 from couchdbkit.ext.django.schema import *
 
 class MetaDataTemplate(Document):
@@ -14,7 +12,7 @@ class MetaDataTemplate(Document):
     Base Metadata Template manager.
     Uses CouchDB for operating.
     """
-    docrule_id = StringProperty(default = "")
+    docrule_id = ListProperty(default = [])
     description = StringProperty(default = "")
     fields = DictProperty(default = {})
     parallel_keys = DictProperty(default = {})

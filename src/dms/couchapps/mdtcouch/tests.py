@@ -17,7 +17,7 @@ password = 'admin'
 api = 'http://127.0.0.1:8000/api/mdt/'
 template = {
     "_id": "mytesttemplate",
-    "docrule_id": "10000",
+    "docrule_id": ["10000",],
     "description": "<-- description of this metadata template -->",
     "fields": {
        "1": {
@@ -125,7 +125,8 @@ class MetadataCouchDB(TestCase):
         """
         url = reverse('api_mdt')
         response = self.client.get(url, {"docrule_id": "10000"})
-        self.assertContains(response, '"docrule_id": "10000"')
+        self.assertContains(response, '"docrule_id"')
+        self.assertContains(response, '"10000"')
         self.assertContains(response, '"description": "Name of the person associated with the document"')
         self.assertEqual(response.status_code, 200)
 
