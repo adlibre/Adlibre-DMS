@@ -427,12 +427,11 @@ class MetaDataTemplateHandler(BaseHandler):
 
         # Retrieve MDT from docrule_id
         manager = MetaDataTemplateManager()
-        manager.docrule_id = docrule_id            # TODO: FIXME Manager should be initialised with correct id
-        result = manager.get_mdts_for_docrule(manager.docrule_id)
+        result = manager.get_mdts_for_docrule(docrule_id)
 
         log.debug('MetaDataTemplateHandler.read result: %s.' % result)
 
-        if result is False:
+        if not result:
             log.error('MetaDataTemplateHandler.read error with docrule_id %s' % docrule_id)
             return rc.NOT_FOUND
 

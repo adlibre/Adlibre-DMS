@@ -1,5 +1,7 @@
 function(doc) {
      if (doc.doc_type == "MetaDataTemplate") {
-          emit(doc.docrule_id, doc);
+         for (var key in doc.docrule_id){
+            emit(doc.docrule_id[key], {rev: doc._rev});
+         }
      }
 }

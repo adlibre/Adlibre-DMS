@@ -98,13 +98,16 @@ class DocumentManager(object):
         uploaded file is http://docs.djangoproject.com/en/1.3/topics/http/file-uploads/#django.core.files.uploadedfile.UploadedFile
         or file object
         """
+        log.debug('Storing Document %s, index_info: %s, allocate_barcode: %s' % (uploaded_file, index_info, allocate_barcode))
         doc = Document()
         doc.set_file_obj(uploaded_file)
+        #print allocate_barcode
         if allocate_barcode is not None: # Allocate barcode from rule id
             # get barcode from our dtr object
             dtr = DocumentTypeRule.objects.get(doccode_id=allocate_barcode)
             # FIXME: Barcode is allocated, but there is no transaction around this :(
             barcode = dtr.add_new_document()
+            #print barcode
             doc.set_filename(barcode)
             log.debug('Allocated Barcode %s.' % barcode)
         else:
