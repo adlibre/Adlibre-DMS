@@ -56,9 +56,10 @@ def generate(request, code, barcode_type='Standard39', auto_print=True):
     # Config
     font_size = 10
     bar_height = 30
+    bar_width=0.75 # default is 0.54
     font_path = os.path.join(os.path.split(__file__)[0], 'fonts', 'OCRA.ttf',)
     try:
-        bc = createBarcodeDrawing(barcode_type, barHeight=bar_height, value=str(code), checksum=False,)
+        bc = createBarcodeDrawing(barcode_type, barHeight=bar_height, barWidth=bar_width, value=str(code), checksum=False,)
     except KeyError, e:
         return HttpResponseBadRequest('Barcode Generation Failed: %s' % (e))
 
