@@ -73,7 +73,7 @@ mdt2 = {
 mdt3 = {
     "_id": 'mdt3',
     "docrule_id": [str(test_mdt_docrule_id),],
-    "description": "Test MDT Number 1",
+    "description": "Test MDT Number 3",
     "fields": {
         "1": {
             "type": "string",
