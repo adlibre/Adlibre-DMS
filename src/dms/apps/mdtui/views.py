@@ -15,7 +15,7 @@ from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 
 from dmscouch.models import CouchDocument
-from forms import DocumentTypeSelectForm, DocumentUploadForm
+from forms import DocumentTypeSelectForm, DocumentUploadForm, DocumentSearchOptionsForm
 from document_manager import DocumentManager
 from view_helpers import initDocumentIndexForm
 from view_helpers import processDocumentIndexForm
@@ -32,6 +32,8 @@ from search_helpers import date_range_with_keys_search
 from forms_representator import get_mdts_for_docrule
 from parallel_keys import ParallelKeysManager
 
+from restkit.client import RequestError
+
 
 log = logging.getLogger('dms.mdtui.views')
 
@@ -40,6 +42,7 @@ MDTUI_ERROR_STRINGS = {
     2:'You have not entered Document Indexing Data. Document will not be searchable by indexes.',
     3:'You have not defined Document Searching Options.',
     4:'You have not defined Document Type. Can only search by "Creation Date".',
+    5:'Database Connection absent. Check CouchDB server connection.'
 }
 
 
@@ -49,19 +52,25 @@ def search_type(request, step, template='mdtui/search.html'):
     Search Step 1: Select Search Type
     """
     docrule = None
+    warnings = []
     cleanup_indexing_session(request)
     cleanup_mdts(request)
     form = DocumentTypeSelectForm(request.POST or None)
     if request.POST:
             if form.is_valid():
+                mdts = None
                 docrule = form.data["docrule"]
                 request.session['docrule'] = docrule
-                mdts = get_mdts_for_docrule(docrule)
+                # CouchDB connection Felt down warn user
+                try:
+                    mdts = get_mdts_for_docrule(docrule)
+                except RequestError:
+                    warnings.append(MDTUI_ERROR_STRINGS[5])
                 if mdts:
                     request.session['mdts'] = mdts
-                return HttpResponseRedirect(reverse('mdtui-search-options'))
+                    return HttpResponseRedirect(reverse('mdtui-search-options'))
             else:
-                return HttpResponse(MDTUI_ERROR_STRINGS[1])
+                warnings.append(MDTUI_ERROR_STRINGS[1])
     else:
         form = DocumentTypeSelectForm()
         # Trying to set docrule if previously selected
@@ -73,6 +82,7 @@ def search_type(request, step, template='mdtui/search.html'):
             form = DocumentTypeSelectForm({'docrule': docrule})
 
     context = {
+                'warnings': warnings,
                 'step': step,
                 'form': form,
                }
@@ -85,16 +95,27 @@ def search_options(request, step, template='mdtui/search.html'):
     Search Step 2: Search Options
     """
     warnings = []
+    autocomplete_list = None
     try:
         request.session["docrule"]
     except KeyError:
         warnings.append(MDTUI_ERROR_STRINGS[4])
 
-    form = initDocumentIndexForm(request)
-    autocomplete_list = extract_secondary_keys_from_form(form)
+    # CouchDB connection Felt down warn user
+    try:
+        form = initDocumentIndexForm(request)
+        autocomplete_list = extract_secondary_keys_from_form(form)
+    except (RequestError,AttributeError) :
+        form = DocumentSearchOptionsForm
+        warnings.append(MDTUI_ERROR_STRINGS[5])
 
     if request.POST:
-        secondary_indexes = processDocumentIndexForm(request)
+        try:
+            secondary_indexes = processDocumentIndexForm(request)
+        except RequestError:
+            secondary_indexes = None
+            warnings.append(MDTUI_ERROR_STRINGS[5])
+
         if secondary_indexes:
             request.session["document_search_dict"] = secondary_indexes
             return HttpResponseRedirect(reverse('mdtui-search-results'))
