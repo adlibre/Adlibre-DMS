@@ -423,21 +423,6 @@ def mdt_parallel_keys(request):
     log.debug('mdt_parallel_keys response: %s' % resp)
     return HttpResponse(json.dumps(resp))
 
-#@login_required
-#def download_csv_search_results(request):
-#    """
-#    Produces a CSV file from search results
-#    """
-#    log.debug('download_csv_search_results exporting found documents to CSV')
-#    try:
-#        documents = request.session['found_documents']
-#    except KeyError:
-#        documents = None
-#        HttpResponse(MDTUI_ERROR_STRINGS['NO_DOCUMENTS_FOUND'])
-#
-#    csv_file = export_to_csv(documents)
-#    return HttpResponse(csv_file)
-
 @login_required
 def download_pdf(request, code):
     """
