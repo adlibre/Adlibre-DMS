@@ -31,6 +31,7 @@ from search_helpers import date_range_only_search
 from search_helpers import date_range_with_keys_search
 from forms_representator import get_mdts_for_docrule
 from parallel_keys import ParallelKeysManager
+from data_exporter import export_to_csv
 
 from restkit.client import RequestError
 
@@ -42,7 +43,8 @@ MDTUI_ERROR_STRINGS = {
     2:'You have not entered Document Indexing Data. Document will not be searchable by indexes.',
     3:'You have not defined Document Searching Options.',
     4:'You have not defined Document Type. Can only search by "Creation Date".',
-    5:'Database Connection absent. Check CouchDB server connection.'
+    5:'Database Connection absent. Check CouchDB server connection.',
+    'NO_DOCUMENTS_FOUND': 'Nothing to export because of empty documents results.'
 }
 
 
@@ -158,6 +160,12 @@ def search_results(request, step=None, template='mdtui/search.html'):
         else:
             documents = exact_date_with_keys_search(cleaned_document_keys, docrule_id)
         mdts_list = get_mdts_for_documents(documents)
+
+    # Produces a CSV file from search results
+    if documents and step == 'export':
+        log.debug('search_results exporting found documents to CSV')
+        csv_response = export_to_csv(document_keys, mdts_list, documents)
+        return csv_response
 
     context = { 'step': step,
                 'documents': documents,
@@ -405,8 +413,9 @@ def mdt_parallel_keys(request):
         # Adding each selected value to suggestions list
         for doc in documents:
             resp_array = {}
-            for pkey in pkeys:
-                resp_array[pkey['field_name']] = doc.mdt_indexes[pkey['field_name']]
+            if pkeys:
+                for pkey in pkeys:
+                    resp_array[pkey['field_name']] = doc.mdt_indexes[pkey['field_name']]
             suggestion = json.dumps(resp_array)
             # filtering from existing results
             if not suggestion in resp:
@@ -414,6 +423,20 @@ def mdt_parallel_keys(request):
     log.debug('mdt_parallel_keys response: %s' % resp)
     return HttpResponse(json.dumps(resp))
 
+#@login_required
+#def download_csv_search_results(request):
+#    """
+#    Produces a CSV file from search results
+#    """
+#    log.debug('download_csv_search_results exporting found documents to CSV')
+#    try:
+#        documents = request.session['found_documents']
+#    except KeyError:
+#        documents = None
+#        HttpResponse(MDTUI_ERROR_STRINGS['NO_DOCUMENTS_FOUND'])
+#
+#    csv_file = export_to_csv(documents)
+#    return HttpResponse(csv_file)
 
 @login_required
 def download_pdf(request, code):

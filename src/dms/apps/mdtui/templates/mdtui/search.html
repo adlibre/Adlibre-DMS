@@ -136,9 +136,10 @@
                 <li><a href="#">Next</a></li>
             </ul>
         </div>
-        
-        <a href="{# FIXME #}" title="Download Results to CSV" class="btn"><i class="icon-download-alt"></i> Export Results</a>
 {% endcomment %}
+
+        <a href="{% url mdtui-search-export %}" title="Download Results to CSV" class="btn"><i class="icon-download-alt"></i> Export Results</a>
+
     {% endif %}
 
 {% endblock %}
