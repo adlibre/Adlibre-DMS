@@ -17,6 +17,7 @@ urlpatterns = patterns('mdtui.views',
     url(r'^search/options$', 'search_options', {'step':'options',}, name='mdtui-search-options'),
     url(r'^search/results$', 'search_results', {'step':'results',}, name='mdtui-search-results'),
     url(r'^search/view/(?P<code>[\w_-]+)$', 'search_viewer', {'step':'view',}, name='mdtui-search-view'),
+    url(r'^search/export/$', 'search_results', {'step':'export'}, name='mdtui-search-export'),
     # Indexing
     url(r'^indexing/type$$', 'indexing_select_type', {'step':'1',}, name='mdtui-index'),
     url(r'^indexing/type$', 'indexing_select_type', {'step':'1',}, name='mdtui-index-type'),
