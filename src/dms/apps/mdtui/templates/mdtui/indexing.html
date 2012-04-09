@@ -59,73 +59,7 @@
             <fieldset>
                 <legend>Step {{ step }}: Index Details</legend>
                 <br />
-                <div>
-                {% comment %}
-                <div class="alert alert-error">
-                    <a class="close">×</a>
-                    <strong>Error!</strong> No errors for now
-                </div>
-
-                <div class="control-group">
-                    <label class="control-label" for="select_doc_type">Document Type</label>
-                    <div class="controls">
-                        <select id="select_doc_type">
-                            <option></option>
-                            <option>Legal</option>
-                            <option>HR</option>
-                            <option>Contracts</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <label class="control-label" for="dateselect">Creation Date</label>
-                    <div class="input">
-                        <div class="controls">
-                            <div class="input-prepend">
-                                <span class="add-on"><i class="icon-calendar"></i></span>
-                                <input data-datepicker="datepicker" class="input-medium" type="text" value="" id="dateselect" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <label class="control-label" for="input01">Key 1 Label</label>
-                    <div class="controls">
-                        <input type="text" class="input-medium" id="input01">
-                        <p class="help-block">Key 1 Desc</p>
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <label class="control-label" for="input01">Key 2 Label</label>
-                    <div class="controls">
-                        <input type="text" class="input-medium" id="input02">
-                        <p class="help-block">Key 2 Desc</p>
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <label class="control-label" for="input01">Key 3 Label</label>
-                    <div class="controls">
-                        <input type="text" class="input-medium" id="input03">
-                        <p class="help-block">Key 3 Desc</p>
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <label class="control-label" for="input01">Description</label>
-                    <div class="controls">
-                        <input type="text" class="input-xxlarge" id="inputdesc">
-                        <p class="help-block">Short description of the document</p>
-                    </div>
-                </div>
-                {% endcomment %}
-                </div>
-
                 {# INDEX DETAILS FORM RENDERING #}
-
                 {#  Form non field errors dummy #}
                 {%  if form.non_field_errors %}
                     {%  for error in form.non_field_errors %}
