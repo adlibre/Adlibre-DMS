@@ -19,6 +19,7 @@ password = 'admin'
 couchdb_url = 'http://127.0.0.1:5984'
 
 test_mdt_docrule_id = 2 # should be properly assigned to fixtures docrule that uses CouchDB plugins
+test_mdt_docrule_id2 = 6 # should be properly assigned to fixtures docrule that uses CouchDB plugins
 
 indexes_form_match_pattern = '(Employee ID|Employee Name|Friends ID|Friends Name|Required Date).+?name=\"(\d+)\"'
 
@@ -72,7 +73,7 @@ mdt2 = {
 
 mdt3 = {
     "_id": 'mdt3',
-    "docrule_id": [str(test_mdt_docrule_id),],
+    "docrule_id": [str(test_mdt_docrule_id2),],
     "description": "Test MDT Number 3",
     "fields": {
         "1": {
@@ -192,15 +193,15 @@ class MDTUI(TestCase):
         response = self.client.post(url, {"mdt": mdt})
         self.assertEqual(response.status_code, 200)
 
-#    def test_00_setup_mdt3(self):
-#        """
-#        Setup MDT 3 for the test suite. Made like standalone test because we need it to be run only once
-#        """
-#        # adding our MDT's required through API. (MDT API should be working)
-#        mdt = json.dumps(mdt3)
-#        url = reverse('api_mdt')
-#        response = self.client.post(url, {"mdt": mdt})
-#        self.assertEqual(response.status_code, 200)
+    def test_00_setup_mdt3(self):
+        """
+        Setup MDT 3 for the test suite. Made like standalone test because we need it to be run only once
+        """
+        # adding our MDT's required through API. (MDT API should be working)
+        mdt = json.dumps(mdt3)
+        url = reverse('api_mdt')
+        response = self.client.post(url, {"mdt": mdt})
+        self.assertEqual(response.status_code, 200)
 
     def test_01_opens_app(self):
         """
@@ -1055,14 +1056,17 @@ class MDTUI(TestCase):
         Cleaning up after all tests finished.
         Must be ran after all tests in this test suite.
         """
-        # Deleting all- test MDT's (with doccode from var "test_mdt_docrule_id") using MDT's API.
+        # Deleting all test MDT's
+        # (with doccode from var "test_mdt_docrule_id" and "test_mdt_docrule_id2")
+        # using MDT's API.
         url = reverse('api_mdt')
-        response = self.client.get(url, {"docrule_id": str(test_mdt_docrule_id)})
-        data = json.loads(str(response.content))
-        for key, value in data.iteritems():
-            mdt_id =  data[key]["mdt_id"]
-            response = self.client.delete(url, {"mdt_id": mdt_id})
-            self.assertEqual(response.status_code, 204)
+        for mdt_ in [test_mdt_docrule_id, test_mdt_docrule_id2]:
+            response = self.client.get(url, {"docrule_id": str(mdt_)})
+            data = json.loads(str(response.content))
+            for key, value in data.iteritems():
+                mdt_id =  data[key]["mdt_id"]
+                response = self.client.delete(url, {"mdt_id": mdt_id})
+                self.assertEqual(response.status_code, 204)
 
         # Delete file "doc1"
         url = reverse('api_file', kwargs={'code': doc1,})
