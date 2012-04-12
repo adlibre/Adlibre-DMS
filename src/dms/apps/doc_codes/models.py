@@ -121,7 +121,7 @@ class DocumentTypeRule(models.Model):
             split_method.append(document_name)
         if not split_method:
             split_method=['Split_errors',] #folder name for improper doccdes!!!!!
-            print 'Splitting Errors exist! [DocumentTypeRule.split()]'
+            log.error('doc_codes.models.DocumentTypeRule.split Splitting Errors exist!')
         #print "Spliting method: ", split_method
         return split_method
 
