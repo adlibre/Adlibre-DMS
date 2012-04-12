@@ -13,12 +13,15 @@ log = logging.getLogger('dms.mdtui.views')
 
 def search_by_single_date(cleaned_document_keys, docrule_id):
     log.debug("Single exact date search")
-    documents = CouchDocument.view(
+    # Getting all documents withing for this date
+    all_docs = CouchDocument.view(
                                 'dmscouch/search_date',
                                 key=[str_date_to_couch(cleaned_document_keys["date"]),
-                                    docrule_id],
-                                include_docs=True
+                                     docrule_id]
                                 )
+    # Filtering by docrule_id and getting docs
+    resp_list = filter_couch_docs_by_docrule_id(all_docs, docrule_id)
+    documents = CouchDocument.view('_all_docs', keys=resp_list, include_docs=True )
     if documents:
         log.debug(
             'Search results by single date without keys: "%s", docrule: "%s", documents: "%s"' %
@@ -57,7 +60,11 @@ def date_range_only_search(cleaned_document_keys, docrule_id):
     log.debug('Date range search only')
     startkey = [str_date_to_couch(cleaned_document_keys["date"]), docrule_id]
     endkey = [str_date_to_couch(cleaned_document_keys["end_date"]), docrule_id]
-    documents = CouchDocument.view('dmscouch/search_date', startkey=startkey, endkey=endkey, include_docs=True)
+    # Getting all documents withing this date range
+    all_docs = CouchDocument.view('dmscouch/search_date', startkey=startkey, endkey=endkey)
+    # Filtering by docrule_id and getting docs
+    resp_list = filter_couch_docs_by_docrule_id(all_docs, docrule_id)
+    documents = CouchDocument.view('_all_docs', keys=resp_list, include_docs=True )
     if documents:
         log.debug(
             'Search results by date range: from: "%s", to: "%s", docrule: "%s", documents: "%s"' %
@@ -98,6 +105,16 @@ def date_range_with_keys_search(cleaned_document_keys, docrule_id):
             (cleaned_document_keys, docrule_id)
         )
     return documents
+
+def filter_couch_docs_by_docrule_id(documents, docrule_id):
+    """
+    Helper for date range search primary to filter documents by given docrule
+    """
+    doc_ids_list = []
+    for document in documents:
+        if document['metadata_doc_type_rule_id']==docrule_id:
+            doc_ids_list.append(document.get_id)
+    return doc_ids_list
 
 def cleanup_document_keys(document_keys):
     """
