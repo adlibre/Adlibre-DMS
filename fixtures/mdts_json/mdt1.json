@@ -1,0 +1,21 @@
+{
+    "_id": "mytesttemplate",
+    "docrule_id": ["100000"],
+    "description": "<-- description of this metadata template -->",
+    "fields": {
+        "1": {
+            "type": "integer",
+            "field_name": "Employee ID",
+            "description": "Unique (Staff) ID of the person associated with the document"
+        },
+        "2": {
+            "type": "string",
+            "length": 60,
+            "field_name": "Employee Name",
+            "description": "Name of the person associated with the document"
+        }
+    },
+    "parallel": {
+        "1": ["1", "2"]
+    }
+}
