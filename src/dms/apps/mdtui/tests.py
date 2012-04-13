@@ -21,6 +21,7 @@ couchdb_url = 'http://127.0.0.1:5984'
 
 test_mdt_docrule_id = 2 # should be properly assigned to fixtures docrule that uses CouchDB plugins
 test_mdt_docrule_id2 = 6 # should be properly assigned to fixtures docrule that uses CouchDB plugins
+test_mdt_docrule_id3 = 7 # should be properly assigned to fixtures docrule that uses CouchDB plugins
 
 indexes_form_match_pattern = '(Employee ID|Employee Name|Friends ID|Friends Name|Required Date|Reporting Entity|Report Date|Report Type).+?name=\"(\d+)\"'
 
@@ -95,6 +96,21 @@ mdt3 = {
             "description": "Date the report was generated"
         },
     },
+    "parallel": {}
+}
+
+mdt4 = {
+    "_id": 'mdt4',
+    "docrule_id": [str(test_mdt_docrule_id3),],
+    "description": "Test MDT Number 4",
+    "fields": {
+            "1": {
+                "type": "string",
+                "uppercase": "yes",
+                "field_name": "Tests Uppercase Field",
+                "description": "This field's value must be converted uppercase even if entered lowercase"
+            }
+        },
     "parallel": {}
 }
 
@@ -218,6 +234,16 @@ class MDTUI(TestCase):
         """
         # adding our MDT's required through API. (MDT API should be working)
         mdt = json.dumps(mdt3)
+        url = reverse('api_mdt')
+        response = self.client.post(url, {"mdt": mdt})
+        self.assertEqual(response.status_code, 200)
+
+    def test_00_setup_mdt4(self):
+        """
+        Setup MDT 4 for the test suite. Made like standalone test because we need it to be run only once
+        """
+        # adding our MDT's required through API. (MDT API should be working)
+        mdt = json.dumps(mdt4)
         url = reverse('api_mdt')
         response = self.client.post(url, {"mdt": mdt})
         self.assertEqual(response.status_code, 200)
@@ -1281,7 +1307,7 @@ class MDTUI(TestCase):
         # (with doccode from var "test_mdt_docrule_id" and "test_mdt_docrule_id2")
         # using MDT's API.
         url = reverse('api_mdt')
-        for mdt_ in [test_mdt_docrule_id, test_mdt_docrule_id2]:
+        for mdt_ in [test_mdt_docrule_id, test_mdt_docrule_id2, test_mdt_docrule_id3]:
             response = self.client.get(url, {"docrule_id": str(mdt_)})
             data = json.loads(str(response.content))
             for key, value in data.iteritems():
