@@ -344,6 +344,11 @@ def indexing_finished(request, step=None, template='mdtui/indexing.html'):
                   (step, context['document_keys']))
     except KeyError:
         pass
+
+    try:
+        context.update({'docrule_id':request.session["docrule_id"],})
+    except KeyError:
+        pass
     # document uploaded forget everything
     cleanup_indexing_session(request)
     cleanup_mdts(request)
