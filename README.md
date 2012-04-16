@@ -2,7 +2,7 @@
 
 Adlibre DMS is a web-centric media and Document Management System (DMS).
 
-Adlibre DMS liberates you from bulky, hard-copy paper systems by storing and managing soft-copies online.
+Adlibre DMS liberates you from hard-copy paper systems by storing and managing digital copies of your documents online.
 
 This is the perfect system for archiving and transaction oriented document workflows.
 
