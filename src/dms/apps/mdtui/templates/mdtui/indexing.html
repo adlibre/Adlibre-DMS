@@ -57,7 +57,7 @@
         <form class="form-horizontal" action="{{ request.path }}" method="post">
             {% csrf_token %}
             <fieldset>
-                <legend>Step {{ step }}: {% if request.session.docrule_id %}{% get_docrule_name_by_id request.session.docrule_id }{% endif %} Index Details</legend>
+                <legend>Step {{ step }}: {% if request.session.docrule_id %}{% get_docrule_name_by_id request.session.docrule_id %}{% endif %} Index Details</legend>
                 <br />
                 {# INDEX DETAILS FORM RENDERING #}
                 {#  Form non field errors dummy #}
@@ -68,7 +68,7 @@
                         <strong>{{ error.message }}</strong>
                     </div>
                     {%  endfor %}
-                    {%  endif %}
+                {%  endif %}
                 {% for field in form %}
                 {# Form fields #}
                 {% if not field|field_type = "DateField" %}
