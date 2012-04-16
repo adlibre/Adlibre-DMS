@@ -59,12 +59,11 @@
         <form class="form-horizontal" action="{{ request.path }}" method="post">
             {% csrf_token %}
             <fieldset>
-                <legend>Search Options{% if request.session.docrule%}. For document type: {% get_docrule_name_by_id request.session.docrule %}{% endif %}</legend>
+                <legend>{% if request.session.docrule %}{% get_docrule_name_by_id request.session.docrule %} {% endif %}Search Options</legend>
 
                 <br />
                 {% comment %}
                 <div class="alert alert-error">
-
                     <a class="close">×</a>
                     <strong>Error!</strong> Form validation errors go here! (field validation errors go along each field below)
                 </div>
@@ -85,7 +84,7 @@
 
     {% if step == "results" %}
         <fieldset>
-            <legend>Results{% if request.session.docrule%}. For document type: {% get_docrule_name_by_id request.session.docrule %}{% endif %}</legend>
+            <legend>{% if request.session.docrule %}{% get_docrule_name_by_id request.session.docrule %} {% endif %} Results</legend>
         </fieldset>
 
         <table class="table table-striped" id="results-table">
