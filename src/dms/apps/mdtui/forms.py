@@ -21,7 +21,7 @@ from forms_representator import setFormData
 CUSTOM_ERRORS = {
     'NUMBER': 'Must be Number. (example "123456")',
     'DATE': 'Must be in valid Date format. (example "2012-12-31")',
-    'UPPER': 'This field should be uppercase'
+    'UPPER': 'This field should be uppercase.'
 }
 
 class DocumentTypeSelectForm(forms.Form):
@@ -101,7 +101,6 @@ class DocumentIndexForm(forms.Form):
             # Uppercase validation
             try:
                 if cur_field.is_uppercase:
-                    print 'Validating uppercase field'
                     try:
                         if not self.data[unicode(field)].isupper():
                             # Wrong data entered adding type error
