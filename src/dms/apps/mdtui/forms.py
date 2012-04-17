@@ -19,8 +19,9 @@ from forms_representator import setFormFields
 from forms_representator import setFormData
 
 CUSTOM_ERRORS = {
-    0: 'Must be Number. (example "123456")',
-    1: 'Must be in valid Date format. (example "2012-12-31")'
+    'NUMBER': 'Must be Number. (example "123456")',
+    'DATE': 'Must be in valid Date format. (example "2012-12-31")',
+    'UPPER': 'This field should be uppercase'
 }
 
 class DocumentTypeSelectForm(forms.Form):
@@ -79,7 +80,7 @@ class DocumentIndexForm(forms.Form):
                         # appending error to form errors
                         if self.data[unicode(field)]:
                             # Wrong data entered adding type error
-                            e = ValidationError(CUSTOM_ERRORS[0])
+                            e = ValidationError(CUSTOM_ERRORS['NUMBER'])
                             self.errors[field] = e
                             self._errors[field] = e
                         pass
@@ -90,11 +91,27 @@ class DocumentIndexForm(forms.Form):
                         # appending error to form errors
                         if self.data[unicode(field)]:
                             # Wrong data entered adding type error
-                            e = ValidationError(CUSTOM_ERRORS[1])
+                            e = ValidationError(CUSTOM_ERRORS['DATE'])
                             self.errors[field] = e
                             self._errors[field] = e
                         pass
             except KeyError:
+                pass
+
+            # Uppercase validation
+            try:
+                if cur_field.is_uppercase:
+                    print 'Validating uppercase field'
+                    try:
+                        if not self.data[unicode(field)].isupper():
+                            # Wrong data entered adding type error
+                            e = ValidationError(CUSTOM_ERRORS['UPPER'])
+                            self.errors[field] = e
+                            self._errors[field] = e
+                            pass
+                    except ValueError:
+                        pass
+            except AttributeError:
                 pass
         if self.errors:
             return False
