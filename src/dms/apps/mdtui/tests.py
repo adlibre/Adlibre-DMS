@@ -195,6 +195,10 @@ date_range_with_keys_doc1 = {u'Employee ID': u'123456', u'Employee Name': u'Iuri
 date_range_with_keys_doc2 = {u'Employee Name': u'Andrew Cutler',} # Unique keys for docs 2 and 3
 date_type_key_doc1 = {u'Required Date': u'2012-03-07',} # Unique date type ley for doc 1
 
+# Uppercase fields
+upper_wrong_dict = {u'date': [u'2012-04-17'], u'0': [u'lowercase data'], u'description': [u'something usefull']}
+upper_right_dict = {u'date': [u'2012-04-17'], u'0': [u'UPPERCASE DATA'], u'description': [u'something usefull']}
+
 # TODO: test proper CSV export, even just simply, with date range and list of files present there
 
 # TODO: test posting docs to 2 different document type rules and mix out parallel keys and normal search here for proper behaviour:
@@ -1297,6 +1301,35 @@ class MDTUI(TestCase):
         for key in m2_doc1_dict.iterkeys():
             if not key=='date' and not key=='description':
                 self.assertNotContains(response, key)
+
+    def test_36_uppercase_fields(self):
+        """
+        Adds MDT indexes to test Uppercase fields behaviour.
+        """
+        # Selecting Document Type Rule
+        url = reverse('mdtui-index-type')
+        response = self.client.post(url, {'docrule': test_mdt_docrule_id3})
+        self.assertEqual(response.status_code, 302)
+        # Getting indexes form and matching form Indexing Form fields names
+        url = reverse('mdtui-index-details')
+        # Wrong uppercase field provided
+        post_dict = upper_wrong_dict
+        response = self.client.post(url, post_dict)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'This field should be uppercase.')
+
+        # Normal uppercase field rendering and using
+        post_dict = upper_right_dict
+        response = self.client.post(url, post_dict)
+        self.assertEqual(response.status_code, 302)
+        uurl = self._retrieve_redirect_response_url(response)
+        response = self.client.get(uurl)
+        # Assert Indexing file upload step rendered with all keys
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Creation Date: 2012-04-17')
+        self.assertContains(response, 'Description: something usefull')
+        self.assertContains(response, 'Tests Uppercase Field: UPPERCASE DATA')
+        self.assertContains(response, "Your document's indexing keys:")
 
     def test_z_cleanup(self):
         """
