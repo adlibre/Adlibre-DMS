@@ -69,6 +69,9 @@ def render_fields_from_docrules(mdts_dict, init_dict=None):
                     else:
                         # Blank field
                         form_field = forms.DateField(label=field_value["field_name"], help_text=field_value["description"])
+                if "uppercase" in field_value.iterkeys():
+                    if field_value["uppercase"]=="yes":
+                        form_field.is_uppercase = True
                 # Setting additional field name (required to use for parsing in templates)
                 form_field.field_name = field_value["field_name"]
                 form_fields_list[counter] = form_field
@@ -105,4 +108,5 @@ def setFormData(fm, kwds):
                 try:
                     fm.initial[k] = kwds[k]
                 except ValueError:
-                    pass
+                        pass
+
