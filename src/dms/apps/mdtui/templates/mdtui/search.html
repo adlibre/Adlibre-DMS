@@ -110,7 +110,7 @@
             <tbody>
             {% for doc in documents %}
                 <tr>
-                    <td style="white-space: nowrap;"><a href="{% url mdtui-search-view doc.id %}" title="View Document"><i class="icon-download"></i> {{ doc.id }}</a></td>
+                    <td style="white-space: nowrap;"><a href="{% url mdtui-search-view doc.id %}" title="View Document" target="_blank"><i class="icon-download"></i> {{ doc.id }}</a></td>
                     <td style="white-space: nowrap;">{{ doc.metadata_created_date|date:"Y-m-d" }}</td>
                     
                     {% for key in mdts %}
