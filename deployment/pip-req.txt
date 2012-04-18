@@ -9,7 +9,6 @@ django-plugins==0.1
 django-taggit==0.9.3
 django-widget-tweaks==1.0
 docutils==0.7
-elaphe==0.5.3
 ## FIXME: could not find svn URL in dependency_links for this package:
 flup==1.0.3.dev-20110111
 http-parser==0.7.4
