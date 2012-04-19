@@ -18,7 +18,7 @@ UMASK=007
 
 CWD=$(cd ${0%/*} && pwd -P)
 PROJDIR=$(cd $CWD/../ && pwd -P) # Root of our project
-SRCDIR=$(cd $CWD/../src/${PROJNAME}/ && pwd -P) # Path to manage.py
+SRCDIR=$(cd $CWD/../${PROJNAME}/ && pwd -P) # Path to manage.py
 BINDIR=$(cd $CWD/../bin/ && pwd -P) # Path to activate / virtualenv
 
 ############################################

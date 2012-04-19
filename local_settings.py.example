@@ -1,0 +1,18 @@
+# Turn off demo
+DEMO = False
+DEBUG = False
+TEMPLATE_DEBUG = DEBUG
+
+ADMINS = (
+#('Admin', 'admin@example.com'),
+)
+MANAGERS = ADMINS
+
+# Make this unique, and don't share it with anybody.
+#SECRET_KEY = 'change me'
+
+# specific timezone settings
+TIME_ZONE = None
+
+# remove fcgi script name from url (lighttpd)
+FORCE_SCRIPT_NAME = ''
