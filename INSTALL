@@ -65,7 +65,7 @@ You will need to specify Python version if more than one installed eg. --python 
 # mkvirtualenv --no-site-packages dms
 # workon dms
 # cdvirtualenv
-# svn co https://svn.adlibre.net/projects/fasttrack/HEAD/ ./
+# git clone git@github.com:adlibre/Adlibre-DMS.git ./
 # pip install -r deployment/pip-req.txt
 # ./src/dms/manage.py syncdb
 # ./src/dms/manage.py collectstatic
