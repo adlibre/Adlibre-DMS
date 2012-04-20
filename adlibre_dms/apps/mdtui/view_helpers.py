@@ -52,8 +52,10 @@ def initDocumentIndexForm(request):
     if details:
         if not details == 'error':
             # MDT's exist for ths docrule adding fields to form
-            fields = render_fields_from_docrules(details, request.POST or None)
-            #print fields
+            if search:
+                fields = render_fields_from_docrules(details, request.POST or None, search=True)
+            else:
+                fields = render_fields_from_docrules(details, request.POST or None)
             if fields:
                 form.setFields(fields)
     if request.POST:

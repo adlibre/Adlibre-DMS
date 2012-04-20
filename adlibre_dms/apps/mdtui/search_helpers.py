@@ -8,6 +8,7 @@ Author: Iurii Garmash
 
 from dmscouch.models import CouchDocument
 import logging
+from forms_representator import SEARCH_STRING_REPR
 
 log = logging.getLogger('dms.mdtui.views')
 
@@ -84,8 +85,15 @@ def date_range_with_keys_search(cleaned_document_keys, docrule_id):
     # Except for internal keys
     for key, value in cleaned_document_keys.iteritems():
         if not (key == 'date') and not (key == 'end_date'):
-            startkey = convert_to_search_keys_for_date_range(cleaned_document_keys, key, docrule_id)
-            endkey = convert_to_search_keys_for_date_range(cleaned_document_keys, key, docrule_id, end=True)
+            if not value.__class__.__name__ == 'tuple':
+                # Normal search
+                startkey = convert_to_search_keys_for_date_range(cleaned_document_keys, key, docrule_id)
+                endkey = convert_to_search_keys_for_date_range(cleaned_document_keys, key, docrule_id, end=True)
+            else:
+                # Got date range key
+                print 'date range!'
+                startkey = convert_to_search_keys_for_date_range(cleaned_document_keys, key, docrule_id, date_range=True)
+                endkey = convert_to_search_keys_for_date_range(cleaned_document_keys, key, docrule_id, end=True, date_range=True)
             if startkey and endkey:
                 search_res = CouchDocument.view('dmscouch/search', startkey=startkey, endkey=endkey )
                 if search_res:
@@ -127,6 +135,40 @@ def cleanup_document_keys(document_keys):
     for key in del_list:
         del document_keys[key]
     return document_keys
+
+def recognise_dates_in_search(cleaned_document_keys):
+    """
+    Finding ranges in cleaned keys and converting them to tuple pairs
+    """
+    proceed = False
+    keys_list = [key for key in cleaned_document_keys.iterkeys()]
+    # TODO: implement this
+    # Converting document date range to tuple fro consistency
+    if 'date' in keys_list and 'end_date' in keys_list:
+        print 'Refactor! date range in search conversion'
+
+    # Validating date fields (except main date field) exist in search query
+    # Simple iterator to optimise calls without dates
+    for key in keys_list:
+        if key.endswith(SEARCH_STRING_REPR['field_label_from'] or SEARCH_STRING_REPR['field_label_to']):
+            # we have to do this conversion
+            proceed = True
+    if proceed:
+        # Validating if date fields are really date ranges
+        for key in keys_list:
+            if key.endswith(SEARCH_STRING_REPR['field_label_from']):
+                # We have start of the dates sequence. Searching for an end key
+                # TODO: deprecated in python 3.0+ need to refactor to use regex and .format() method instead
+                pure_key = key.rstrip(SEARCH_STRING_REPR['field_label_from'])
+                desired_key = pure_key + SEARCH_STRING_REPR['field_label_to']
+                if desired_key in keys_list:
+                    # We have a date range. Constructing dates range tuple
+                    from_value = cleaned_document_keys[key]
+                    to_value = cleaned_document_keys[desired_key]
+                    del cleaned_document_keys[key]
+                    del cleaned_document_keys[desired_key]
+                    cleaned_document_keys[pure_key]=(from_value, to_value)
+    return cleaned_document_keys
 
 def convert_search_res(search_res, match_len):
     """
@@ -180,7 +222,7 @@ def convert_to_search_keys_for_single_date(document_keys, docrule_id):
                 req_params.append([key, value, docrule_id, str_date_to_couch(document_keys["date"])],)
     return req_params
 
-def convert_to_search_keys_for_date_range(document_keys, pkey, docrule_id, end=False):
+def convert_to_search_keys_for_date_range(document_keys, pkey, docrule_id, end=False, date_range=False):
     """
     Makes proper keys request set for 'dmscouch/search' CouchDB view.
     Takes date range into account.
@@ -188,10 +230,17 @@ def convert_to_search_keys_for_date_range(document_keys, pkey, docrule_id, end=F
     req_params = []
     for key, value in document_keys.iteritems():
         if key == pkey:
-            if not end:
-                req_params = [key, value, docrule_id, str_date_to_couch(document_keys["date"])]
+            if not date_range:
+                if not end:
+                    req_params = [key, value, docrule_id, str_date_to_couch(document_keys["date"])]
+                else:
+                    req_params = [key, value, docrule_id, str_date_to_couch(document_keys["end_date"])]
             else:
-                req_params = [key, value, docrule_id, str_date_to_couch(document_keys["end_date"])]
+                # Assuming date range is our date tuple
+                if not end:
+                    req_params = [key, str_date_to_couch(value[0]), docrule_id, str_date_to_couch(document_keys["date"])]
+                else:
+                    req_params = [key, str_date_to_couch(value[1]), docrule_id, str_date_to_couch(document_keys["end_date"])]
     return req_params
 
 def str_date_to_couch(from_date):

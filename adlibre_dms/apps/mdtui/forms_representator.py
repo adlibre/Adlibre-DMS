@@ -10,6 +10,13 @@ import datetime
 from django import forms
 from mdt_manager import MetaDataTemplateManager
 
+SEARCH_STRING_REPR = {
+    'field_label_from': u' From',
+    'field_label_to': u' To',
+    'id_from': u'_from',
+    'id_to': u'_to',
+    }
+
 log = logging.getLogger('dms.mdtui.views')
 
 def get_mdts_for_docrule(docrule_id):
@@ -28,12 +35,12 @@ def get_mdts_for_docrule(docrule_id):
         log.debug("No MDT's found")
     return mdts_dict
 
-def render_fields_from_docrules(mdts_dict, init_dict=None):
+def render_fields_from_docrules(mdts_dict, init_dict=None, search=False):
     """
     Create dictionary of additional fields for form, according to MDT's provided.
     Takes optional values dict to init prepopulated fields.
     """
-    log.debug('Rendering fields for docrules: "%s", init_dict: "%s"' % (mdts_dict, init_dict))
+    log.debug('Rendering fields for docrules: "%s", init_dict: "%s", search: "%s"'% (mdts_dict, init_dict, search))
     form_fields_list = {}
     if not init_dict:
         init_dict = {}
@@ -63,18 +70,47 @@ def render_fields_from_docrules(mdts_dict, init_dict=None):
                         # Blank field
                         form_field = forms.CharField(label=field_value["field_name"], help_text=field_value["description"], max_length=max_length)
                 if field_value["type"]==u'date':
-                    if unicode(counter) in init_dict and init_dict[unicode(counter)]:
-                        # Has initial value
-                        form_field = forms.DateField(label=field_value["field_name"], help_text=field_value["description"], initial=init_dict[unicode(counter)])
+                    if not search:
+                        # Normally adding only one field for indexing
+                        if unicode(counter) in init_dict and init_dict[unicode(counter)]:
+                            # Has initial value
+                            form_field = forms.DateField(label=field_value["field_name"], help_text=field_value["description"], initial=init_dict[unicode(counter)])
+                        else:
+                            # Blank field
+                            form_field = forms.DateField(label=field_value["field_name"], help_text=field_value["description"])
                     else:
-                        # Blank field
-                        form_field = forms.DateField(label=field_value["field_name"], help_text=field_value["description"])
+                        from_label = field_value["field_name"] + SEARCH_STRING_REPR['field_label_from']
+                        to_label = field_value["field_name"] + SEARCH_STRING_REPR['field_label_to']
+                        # Adding From/To fields
+                        print 'search:', search
+                        # Normally adding only from/to fields for indexing
+                        if unicode(counter) in init_dict and init_dict[unicode(counter)]:
+                            # Has initial value
+                            form_field = forms.DateField(label=from_label, help_text=field_value["description"], initial=init_dict[unicode(counter)])
+                            # Adding first field (From)
+                            form_field.field_name = field_value["field_name"] + SEARCH_STRING_REPR['field_label_from']
+                            form_fields_list[unicode(counter) + SEARCH_STRING_REPR['id_from']] = form_field
+                            counter += 1
+                            # Second field (To)
+                            form_field = forms.DateField(label=to_label, help_text=field_value["description"], initial=init_dict[unicode(counter)])
+                        else:
+                            # Blank field
+                            form_field = forms.DateField(label=from_label, help_text=field_value["description"])
+                            # Adding first field (From)
+                            form_field.field_name = field_value["field_name"] + SEARCH_STRING_REPR['field_label_from']
+                            form_fields_list[unicode(counter) + SEARCH_STRING_REPR['id_from']] = form_field
+                            # Second field (To)
+                            form_field = forms.DateField(label=to_label, help_text=field_value["description"])
                 if "uppercase" in field_value.iterkeys():
                     if field_value["uppercase"]=="yes":
                         form_field.is_uppercase = True
-                # Setting additional field name (required to use for parsing in templates)
-                form_field.field_name = field_value["field_name"]
-                form_fields_list[counter] = form_field
+                    # Setting additional field name (required to use for parsing in templates)
+                if search and field_value["type"]==u'date':
+                    form_field.field_name = field_value["field_name"] + SEARCH_STRING_REPR['field_label_to']
+                    form_fields_list[unicode(counter) + SEARCH_STRING_REPR['id_to']] = form_field
+                else:
+                    form_field.field_name = field_value["field_name"]
+                    form_fields_list[counter] = form_field
                 counter += 1
     log.debug('Rendered dynamic fields to add to form: ', form_fields_list)
     return form_fields_list
