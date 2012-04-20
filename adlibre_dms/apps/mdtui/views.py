@@ -29,6 +29,7 @@ from search_helpers import exact_date_with_keys_search
 from search_helpers import cleanup_document_keys
 from search_helpers import date_range_only_search
 from search_helpers import date_range_with_keys_search
+from search_helpers import recognise_dates_in_search
 from forms_representator import get_mdts_for_docrule
 from parallel_keys import ParallelKeysManager
 from data_exporter import export_to_csv
@@ -149,7 +150,8 @@ def search_results(request, step=None, template='mdtui/search.html'):
     log.debug('search_results call: docrule_id: "%s", document_search_dict: "%s"' % (docrule_id, document_keys))
     if document_keys:
         # turning document_search dict into something useful for the couch request
-        cleaned_document_keys  = cleanup_document_keys(document_keys)
+        clean_keys = cleanup_document_keys(document_keys)
+        cleaned_document_keys = recognise_dates_in_search(clean_keys)
         keys = cleaned_document_keys.keys()
         if "date" in keys and cleaned_document_keys.__len__() == 1 and not "end_date" in keys:
             documents = search_by_single_date(cleaned_document_keys, docrule_id)
