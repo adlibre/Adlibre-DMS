@@ -128,10 +128,10 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     # For MDTUI
     'django.core.context_processors.request',
     # Adlibre DMS custom
-    'dms.context_processors.demo',
-    'dms.context_processors.theme_name',
-    'dms.context_processors.theme_template_base',
-    'dms.context_processors.product_version',
+    'adlibre_dms.context_processors.demo',
+    'adlibre_dms.context_processors.theme_name',
+    'adlibre_dms.context_processors.theme_template_base',
+    'adlibre_dms.context_processors.product_version',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -149,7 +149,7 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.RemoteUserBackend',
 )
 
-ROOT_URLCONF = 'dms.urls'
+ROOT_URLCONF = 'adlibre_dms.urls'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
@@ -296,7 +296,7 @@ else:
             'file': {
                 'level': 'DEBUG',
                 'class': 'logging.handlers.TimedRotatingFileHandler',
-                'filename': os.path.join(PROJECT_PATH, '..', '..', 'log', 'dms.log'),
+                'filename': os.path.join(PROJECT_PATH, '..', 'log', 'dms.log'),
                 'when': 'midnight',
                 'interval': 1, # 1 day
                 'backupCount': 14, # two weeks

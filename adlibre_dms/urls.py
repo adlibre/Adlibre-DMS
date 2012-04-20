@@ -6,14 +6,14 @@ from django.contrib import admin
 admin.autodiscover()
 
 # Custom 500 with MEDIA_URL context
-handler500 = 'dms.views.server_error'
+handler500 = 'adlibre_dms.views.server_error'
 
 urlpatterns = []
 
 if settings.DEBUG:
     urlpatterns += patterns('',
         url(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT }),
-        url(r'^500/$', 'dms.views.server_error'),
+        url(r'^500/$', 'adlibre_dms.views.server_error'),
     )
 
 urlpatterns += patterns('',
