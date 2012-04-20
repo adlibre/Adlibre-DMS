@@ -10,8 +10,8 @@ from django.db import models
 """
 New models
 """
-from plugins.fields import PluginField, ManyPluginField
-from plugins.models import Plugin
+from djangoplugins.fields import PluginField, ManyPluginField
+from djangoplugins.models import Plugin
 from taggit.managers import TaggableManager
 
 from dms_plugins import pluginpoints
