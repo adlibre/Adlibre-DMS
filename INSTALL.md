@@ -1,12 +1,9 @@
-============
-Installation
-============
+# Adlibre DMS Installation
 
 Adlibre DMS can be easily installed on any operating system provided that a recent copy of a Python interpreter is
 available as well as any dependent system libraries.
 
-Linux Requirements
-------------------
+## Linux Requirements
 
 Installation under Linux is the most straight forward.
 
@@ -24,8 +21,7 @@ Supported Linux Distributions:
 * Ubuntu
 * CentOS / Red Hat
 
-OS X Requirements
------------------
+## OS X Requirements
 
 On OS X need the following will need to be installed using a 3rd party port / package manager.
 
@@ -35,69 +31,85 @@ You could, for example install the requirements using Mac Ports:
 
 For 'magic' based file type validation we require the following:
 
-# port install perl5
-# port install p5-file-libmagic
+<pre>
+port install perl5
+port install p5-file-libmagic
+</pre>
 
 and the following for converter.py to function (libtiff, poppler, a2ps, ghostscript)
 
-# port install tiff
-# port install poppler
-# port install a2ps
-# port install ghostscript
+<pre>
+port install tiff
+port install poppler
+port install a2ps
+port install ghostscript
+</pre>
 
 NB. django-plugins has a bug while installing from pip-req.txt. "pip install -r deployment/pip-req.txt" breaks with error.
 You have to manually change setup.py of that package. It says about the line with error.
 Something called long_description. Change it to whatever string you like in the predownloaded package.
 And run "pip install -r deployment/pip-req.txt" again
 
-Windows Requirements
---------------------
+## Windows Requirements
 
 For commercial Windows installation support. Please enquire at http://www.adlibre.com.au/
 
-Installation and Deployment
----------------------------
+## General Installation and Deployment
 
 We recommend deployment with _virtualenv_:
 
 You will need to specify Python version if more than one installed eg. --python /usr/bin/python2.6
 
-# mkvirtualenv --no-site-packages dms
-# workon dms
-# cdvirtualenv
-# git clone git@github.com:adlibre/Adlibre-DMS.git ./
-# pip install -r deployment/pip-req.txt
-# ./src/dms/manage.py syncdb
-# ./src/dms/manage.py collectstatic
+Development:
+<pre>
+mkvirtualenv --no-site-packages dms
+workon dms
+cdvirtualenv
+pip install -e git@github.com:adlibre/Adlibre-DMS.git#egg=dms
+./src/dms/adlibre_dms/manage.py syncdb
+./src/dms/adlibre_dms/manage.py collectstatic
+</pre>
 
-Initial Data
-------------
+Production:
+<pre>
+mkvirtualenv --no-site-packages dms
+workon dms
+cdvirtualenv
+pip install git@github.com:adlibre/Adlibre-DMS.git
+./adlibre_dms/manage.py syncdb
+./adlibre_dms/manage.py collectstatic
+</pre>
 
-Here is an info about how to populate DB with some
-initial data to play with. To do that copy initial test
-fixtures and run syncdb.
+Then setup your webserver to use a fastcgi socket.
+See _deployment_ directory for sample webserver configs and a _manage-fcgi.sh_ script for managing the python fcgi processes.
 
-Do something like this at the fixtures directory,
-after that leave to source directory and sync your base:
-$ cp test_initial_data.json initial_data.json
-$ cd ../src/dms
-$ python manage.py syncdb
+## Initial Data
+
+We have provided some initial data (fixtures).
+To use this data copy the fixtures and run _syncdb_:
+
+<pre>
+cp ./fixtures/test_initial_data.json ./fixtures/initial_data.json
+./adlibredms_/manage.py syncdb
+</pre>
 
 Output will be something like this:
+<pre>
 $ python manage.py syncdb
 Creating tables ...
 Installing custom SQL ...
 Installing indexes ...
 Installed 73 object(s) from 1 fixture(s)
+</pre>
 
 It will mean you have sample initial data installed to your DB.
 
 Sample initial data include superuser:
 
-login:     admin
-password:  admin
+* login:     admin
+* password:  admin
 
-Good idea would be to delete that copied ".json" file, just in case...
+It is also a good idea would be to delete that copied ".json" file, just in case someone runs syncdb again.
 
 Now you may add some test data to the system.
 DMS has test files in "fixtures/testdata" directory.
@@ -105,7 +117,9 @@ You can run builtin "import_documents" command,
 pointing out to this "testdata" directory.
 It may look something like this:
 
-$ python manage.py import_documents ../../fixtures/testdata/
+<pre>
+./adlibre_dms/manage.py import_documents ../../fixtures/testdata/
+</pre>
 
 This will populate documents folder with initial files,
 imported by console command. You may run it several times to get
