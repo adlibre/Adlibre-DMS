@@ -1,3 +1,5 @@
+# Settings file for when we install using pip in non development scenario
+
 from adlibre_dms.settings import *
 
 # HACK: Here be magic and import voodoo...
@@ -18,5 +20,14 @@ DATABASES = {
 
 MEDIA_ROOT = os.path.abspath(os.path.join(PROJECT_PATH, '..', 'www', 'media'))
 STATIC_ROOT = os.path.abspath(os.path.join(PROJECT_PATH, '..', 'www', 'static'))
+
+STATICFILES_DIRS = (
+    os.path.join(PROJECT_PATH, '..', 'custom_static'),
+)
+
+TEMPLATE_DIRS = (
+    os.path.join(PROJECT_PATH, '..', 'custom_templates'),
+    os.path.join(PROJECT_PATH, 'templates'),
+)
 
 ###

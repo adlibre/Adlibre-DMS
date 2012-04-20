@@ -1,3 +1,5 @@
+# Example custom settings for Adlibre DMS
+
 # Turn off demo
 DEMO = False
 DEBUG = False
