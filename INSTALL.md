@@ -66,7 +66,7 @@ Production:
     mkvirtualenv --no-site-packages dms
     workon dms
     cdvirtualenv
-    pip install git+git@github.com:adlibre/Adlibre-DMS.git
+    pip install git+git://github.com/adlibre/Adlibre-DMS.git
     ./adlibre_dms/manage.py syncdb
     ./adlibre_dms/manage.py collectstatic
 
