@@ -99,7 +99,7 @@ setup(name='adlibre_dms',
             # Tagging
             'django-taggit==0.9.3',
             # Adlibre Components
-            'bcp',
+            'django-bcp',
             'adlibre-plugins==0.1',
             # not sure if we directly require these
             'distribute==0.6.25',
@@ -110,7 +110,7 @@ setup(name='adlibre_dms',
             'flup==1.0.3.dev-20110405',
         ],
     dependency_links = [
-        "https://github.com/adlibre/django-bcp/tarball/master#egg=bcp",
+        "https://github.com/adlibre/django-bcp/tarball/master#egg=django-bcp",
         "https://github.com/adlibre/adlibre-plugins/tarball/master#egg=adlibre-plugins"
     ],
 )
