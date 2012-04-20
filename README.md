@@ -29,4 +29,4 @@ Adlibre DMS is also 100% commercially supported Open Source.
 
 ## Commercial Support
 
-Adlibre DMS is developed and commercially supported by [Adlibre Pty Ltd](www.adlibre.com.au).
+Adlibre DMS is developed and commercially supported by [Adlibre Pty Ltd](http://www.adlibre.com.au).
