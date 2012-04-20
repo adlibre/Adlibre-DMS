@@ -9,7 +9,7 @@ Installation under Linux is the most straight forward.
 
 The following system libraries are required:
 
-* Python 2.6
+* Python 2.6 or 2.7
 * libtiff,
 * poppler,
 * a2ps,
@@ -65,7 +65,7 @@ Development:
 mkvirtualenv --no-site-packages dms
 workon dms
 cdvirtualenv
-pip install -e git@github.com:adlibre/Adlibre-DMS.git#egg=dms
+pip install -e git+git@github.com:adlibre/Adlibre-DMS.git#egg=dms
 ./src/dms/adlibre_dms/manage.py syncdb
 ./src/dms/adlibre_dms/manage.py collectstatic
 </pre>
@@ -75,7 +75,7 @@ Production:
 mkvirtualenv --no-site-packages dms
 workon dms
 cdvirtualenv
-pip install git@github.com:adlibre/Adlibre-DMS.git
+pip install git+git@github.com:adlibre/Adlibre-DMS.git
 ./adlibre_dms/manage.py syncdb
 ./adlibre_dms/manage.py collectstatic
 </pre>
