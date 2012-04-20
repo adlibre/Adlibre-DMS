@@ -1,4 +1,4 @@
-# Adlibre DMS Installation
+# Adlibre DMS Installation and Requirements
 
 Adlibre DMS can be easily installed on any operating system provided that a recent copy of a Python interpreter is
 available as well as any dependent system libraries.
@@ -10,16 +10,16 @@ Installation under Linux is the most straight forward.
 The following system libraries are required:
 
 * Python 2.6 or 2.7
-* libtiff,
-* poppler,
-* a2ps,
-* ghostscript
+* libtiff
+* poppler
+* a2ps
+* ghostscript.
 
 Supported Linux Distributions:
 
 * Debian
 * Ubuntu
-* CentOS / Red Hat
+* CentOS / Red Hat.
 
 ## OS X Requirements
 
@@ -81,7 +81,7 @@ pip install git+git@github.com:adlibre/Adlibre-DMS.git
 </pre>
 
 Then setup your webserver to use a fastcgi socket.
-See _deployment_ directory for sample webserver configs and a _manage-fcgi.sh_ script for managing the python fcgi processes.
+See _deployment_ directory for sample webserver configs and a _manage-fcgi.sh_ script for managing the Python FCGI processes.
 
 ## Initial Data
 
@@ -124,5 +124,3 @@ It may look something like this:
 This will populate documents folder with initial files,
 imported by console command. You may run it several times to get
 as much revisions, as you run the command.
-
-Note, they will be deleted, storing with standard names on tests run at least once...
