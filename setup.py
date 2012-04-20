@@ -100,7 +100,7 @@ setup(name='adlibre_dms',
             'django-taggit==0.9.3',
             # Adlibre Components
             'django-bcp',
-            'adlibre-plugins==0.1',
+            'adlibre-plugins',
             # not sure if we directly require these
             'distribute==0.6.25',
             'django-appconf==0.5',
