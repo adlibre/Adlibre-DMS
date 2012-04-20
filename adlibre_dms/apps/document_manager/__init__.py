@@ -8,7 +8,7 @@ License: See LICENSE for license information
 import os
 import logging
 
-import plugins
+import djangoplugins
 
 from django.conf import settings
 from django.core.files.uploadedfile import UploadedFile
@@ -234,7 +234,7 @@ class DocumentManager(object):
         return storage.worker.get_revision_count(doc)
 
     def get_plugin_list(self):
-        all_plugins = plugins.models.Plugin.objects.all().order_by('point__name', 'index')
+        all_plugins = djangoplugins.models.Plugin.objects.all().order_by('point__name', 'index')
         return all_plugins
 
     def get_all_tags(self, doccode=None):

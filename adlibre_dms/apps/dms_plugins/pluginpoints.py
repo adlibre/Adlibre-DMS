@@ -1,4 +1,4 @@
-from plugins import PluginMount
+from djangoplugins import PluginMount
 
 #settings_field_name is the name of the collection of these plugins in base.models.DoccodePluginSettings
 

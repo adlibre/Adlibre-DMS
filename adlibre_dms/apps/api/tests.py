@@ -9,7 +9,7 @@ import os
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from plugins import models
+from djangoplugins import models
 
 from doc_codes.models import DocumentTypeRuleManagerInstance
 from dms_plugins.models import DoccodePluginMapping

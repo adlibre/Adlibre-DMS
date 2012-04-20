@@ -7,8 +7,8 @@ License: See LICENSE for license information
 
 import os
 
-from plugins import models as plugin_models
-from plugins.models import Plugin
+from djangoplugins import models as plugin_models
+from djangoplugins.models import Plugin
 
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.views.generic.simple import direct_to_template

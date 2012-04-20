@@ -6,7 +6,7 @@ License: See LICENSE for license information
 Author: Iurii Garmash
 """
 
-from plugins.models import Plugin, PluginPoint
+from djangoplugins.models import Plugin, PluginPoint
 
 from django import forms
 from django.utils.importlib import import_module

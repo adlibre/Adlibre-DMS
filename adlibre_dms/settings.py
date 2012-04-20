@@ -176,7 +176,7 @@ INSTALLED_APPS = (
     # 3rd party
     'docutils',
     'piston',
-    'plugins',
+    'djangoplugins',
     'taggit',
     'couchdbkit.ext.django', # needed for CouchDB usage
     'widget_tweaks', # used by MUI templates

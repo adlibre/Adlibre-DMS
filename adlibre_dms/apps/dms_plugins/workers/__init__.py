@@ -1,5 +1,5 @@
-from plugins.models import Plugin as DjangoPlugin, ENABLED
-from plugins.utils import get_plugin_name
+from djangoplugins.models import Plugin as DjangoPlugin, ENABLED
+from djangoplugins.utils import get_plugin_name
 
 from dms_plugins.models import PluginOption
 

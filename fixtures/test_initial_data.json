@@ -961,7 +961,7 @@
     },
     {
         "pk": 1, 
-        "model": "plugins.pluginpoint", 
+        "model": "djangoplugins.pluginpoint", 
         "fields": {
             "status": 0, 
             "name": "dms_plugins.pluginpoints.BeforeStoragePluginPoint"
@@ -969,7 +969,7 @@
     }, 
     {
         "pk": 2, 
-        "model": "plugins.pluginpoint", 
+        "model": "djangoplugins.pluginpoint", 
         "fields": {
             "status": 0, 
             "name": "dms_plugins.pluginpoints.BeforeRetrievalPluginPoint"
@@ -977,7 +977,7 @@
     }, 
     {
         "pk": 3, 
-        "model": "plugins.pluginpoint", 
+        "model": "djangoplugins.pluginpoint", 
         "fields": {
             "status": 0, 
             "name": "dms_plugins.pluginpoints.BeforeRemovalPluginPoint"
@@ -985,7 +985,7 @@
     }, 
     {
         "pk": 4, 
-        "model": "plugins.pluginpoint", 
+        "model": "djangoplugins.pluginpoint", 
         "fields": {
             "status": 0, 
             "name": "dms_plugins.pluginpoints.BeforeUpdatePluginPoint"
@@ -993,7 +993,7 @@
     }, 
     {
         "pk": 5, 
-        "model": "plugins.pluginpoint", 
+        "model": "djangoplugins.pluginpoint", 
         "fields": {
             "status": 0, 
             "name": "dms_plugins.pluginpoints.StoragePluginPoint"
@@ -1001,7 +1001,7 @@
     }, 
     {
         "pk": 6, 
-        "model": "plugins.pluginpoint", 
+        "model": "djangoplugins.pluginpoint", 
         "fields": {
             "status": 0, 
             "name": "dms_plugins.pluginpoints.DatabaseStoragePluginPoint"
@@ -1009,7 +1009,7 @@
     }, 
     {
         "pk": 1, 
-        "model": "plugins.plugin", 
+        "model": "djangoplugins.plugin", 
         "fields": {
             "status": 0, 
             "index": 40, 
@@ -1020,7 +1020,7 @@
     }, 
     {
         "pk": 5, 
-        "model": "plugins.plugin", 
+        "model": "djangoplugins.plugin", 
         "fields": {
             "status": 0, 
             "index": 60, 
@@ -1031,7 +1031,7 @@
     }, 
     {
         "pk": 12, 
-        "model": "plugins.plugin", 
+        "model": "djangoplugins.plugin", 
         "fields": {
             "status": 0, 
             "index": 20, 
@@ -1042,7 +1042,7 @@
     }, 
     {
         "pk": 19, 
-        "model": "plugins.plugin", 
+        "model": "djangoplugins.plugin", 
         "fields": {
             "status": 0, 
             "index": 10, 
@@ -1053,7 +1053,7 @@
     }, 
     {
         "pk": 23, 
-        "model": "plugins.plugin", 
+        "model": "djangoplugins.plugin", 
         "fields": {
             "status": 0, 
             "index": 46, 
@@ -1064,7 +1064,7 @@
     }, 
     {
         "pk": 2, 
-        "model": "plugins.plugin", 
+        "model": "djangoplugins.plugin", 
         "fields": {
             "status": 0, 
             "index": 10, 
@@ -1075,7 +1075,7 @@
     }, 
     {
         "pk": 6, 
-        "model": "plugins.plugin", 
+        "model": "djangoplugins.plugin", 
         "fields": {
             "status": 0, 
             "index": 0, 
@@ -1086,7 +1086,7 @@
     }, 
     {
         "pk": 13, 
-        "model": "plugins.plugin", 
+        "model": "djangoplugins.plugin", 
         "fields": {
             "status": 0, 
             "index": 10, 
@@ -1097,7 +1097,7 @@
     }, 
     {
         "pk": 21, 
-        "model": "plugins.plugin", 
+        "model": "djangoplugins.plugin", 
         "fields": {
             "status": 0, 
             "index": 5, 
@@ -1108,7 +1108,7 @@
     }, 
     {
         "pk": 3, 
-        "model": "plugins.plugin", 
+        "model": "djangoplugins.plugin", 
         "fields": {
             "status": 0, 
             "index": 0, 
@@ -1119,7 +1119,7 @@
     }, 
     {
         "pk": 7, 
-        "model": "plugins.plugin", 
+        "model": "djangoplugins.plugin", 
         "fields": {
             "status": 0, 
             "index": 50, 
@@ -1130,7 +1130,7 @@
     }, 
     {
         "pk": 20, 
-        "model": "plugins.plugin", 
+        "model": "djangoplugins.plugin", 
         "fields": {
             "status": 0, 
             "index": 30, 
@@ -1141,7 +1141,7 @@
     }, 
     {
         "pk": 4, 
-        "model": "plugins.plugin", 
+        "model": "djangoplugins.plugin", 
         "fields": {
             "status": 0, 
             "index": 50, 
@@ -1152,7 +1152,7 @@
     }, 
     {
         "pk": 9, 
-        "model": "plugins.plugin", 
+        "model": "djangoplugins.plugin", 
         "fields": {
             "status": 0, 
             "index": 90, 
@@ -1163,7 +1163,7 @@
     }, 
     {
         "pk": 22, 
-        "model": "plugins.plugin", 
+        "model": "djangoplugins.plugin", 
         "fields": {
             "status": 0, 
             "index": 31, 
@@ -1174,7 +1174,7 @@
     }, 
     {
         "pk": 10, 
-        "model": "plugins.plugin", 
+        "model": "djangoplugins.plugin", 
         "fields": {
             "status": 0, 
             "index": 30, 
@@ -1185,7 +1185,7 @@
     }, 
     {
         "pk": 11, 
-        "model": "plugins.plugin", 
+        "model": "djangoplugins.plugin", 
         "fields": {
             "status": 0, 
             "index": 80, 
@@ -1196,7 +1196,7 @@
     }, 
     {
         "pk": 14, 
-        "model": "plugins.plugin", 
+        "model": "djangoplugins.plugin", 
         "fields": {
             "status": 0, 
             "index": 45, 
@@ -1207,7 +1207,7 @@
     }, 
     {
         "pk": 15, 
-        "model": "plugins.plugin", 
+        "model": "djangoplugins.plugin", 
         "fields": {
             "status": 0, 
             "index": 45, 
@@ -1218,7 +1218,7 @@
     }, 
     {
         "pk": 17, 
-        "model": "plugins.plugin", 
+        "model": "djangoplugins.plugin", 
         "fields": {
             "status": 0, 
             "index": 40, 
@@ -1229,7 +1229,7 @@
     }, 
     {
         "pk": 24, 
-        "model": "plugins.plugin", 
+        "model": "djangoplugins.plugin", 
         "fields": {
             "status": 0, 
             "index": 46, 
