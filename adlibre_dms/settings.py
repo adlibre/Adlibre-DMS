@@ -369,7 +369,8 @@ DATE_FORMAT = "%Y-%m-%d"
 DEMO = True
 NEW_SYSTEM = False
 
+# This will import the local_settings in our virtual_env subdir next to manage.py.
 try:
-    from settings_local import *
+    from local_settings import *
 except ImportError:
     pass
