@@ -8,7 +8,7 @@
 # Version 2.2
 
 # Project Specific Config
-PROJNAME='dms'
+PROJNAME='adlibre_dms'
 WEB_USER='wwwpub'
 
 MAXSPARE=2
