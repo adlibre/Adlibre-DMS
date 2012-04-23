@@ -1,7 +1,5 @@
 # Example custom settings for Adlibre DMS
 
-from settings import * # import the secondary settings file
-
 # Turn off demo
 DEMO = False
 DEBUG = False
@@ -11,6 +9,9 @@ ADMINS = (
 #('Admin', 'admin@example.com'),
 )
 MANAGERS = ADMINS
+
+# Enable Compress
+COMPRESS_ENABLED = True
 
 # Make this unique, and don't share it with anybody.
 #SECRET_KEY = 'change me'
