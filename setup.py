@@ -83,7 +83,7 @@ setup(name='adlibre_dms',
                 ], # this should be done automatically
         },
     data_files=[
-        ('adlibre_dms', ['settings.py', 'local_settings.py.example', 'adlibre_dms/manage.py']),
+        ('adlibre_dms', ['settings_prod.py', 'local_settings.py.example', 'adlibre_dms/manage.py']),
         ('db', ['db/.gitignore']), # create empty dir
         ('deployment', find_files('deployment', '*')),
         ('log', ['log/.gitignore']), # create empty dir
