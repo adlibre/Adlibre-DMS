@@ -17,6 +17,7 @@ DATABASES = {
 
 MEDIA_ROOT = os.path.abspath(os.path.join(PROJECT_PATH, '..', 'www', 'media'))
 STATIC_ROOT = os.path.abspath(os.path.join(PROJECT_PATH, '..', 'www', 'static'))
+DOCUMENT_ROOT = os.path.join(PROJECT_PATH, '..', 'documents')
 COMPRESS_ROOT = STATIC_ROOT
 
 STATICFILES_DIRS = (
