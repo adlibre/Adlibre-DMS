@@ -1,14 +1,14 @@
 #!/bin/bash
 #
 # Manages the startup and shutdown of this projects processes
-# as well as runing various tasks.
+# as well as running various tasks.
 #
 # Uses UNIX sockets for FCGI
 #
 # Version 2.2
 
 # Project Specific Config
-PROJNAME='dms'
+PROJNAME='adlibre_dms'
 WEB_USER='wwwpub'
 
 MAXSPARE=2

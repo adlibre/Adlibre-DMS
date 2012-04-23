@@ -57,7 +57,7 @@ DISALLOWED_PATTERNS = [
     '\n',
 ]
 
-VALID_SEQUENCE_NUMBER_PATTERNS = {
+VALID_SEQUENCE_NUMBER_PATTERNS = [
     '{[0-9]}',
-    '{[0-9],[0-9]}'
-}
+    '{[0-9],[0-9]}',
+]

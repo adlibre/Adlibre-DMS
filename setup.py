@@ -58,6 +58,7 @@ setup(name='adlibre_dms',
                 'apps/mdtui/static/css/*.css',
                 'apps/mdtui/static/img/*.png',
                 'apps/mdtui/static/js/*.js',
+                'apps/mdtui/templates/mdtui/*.html',
                 # Themes
                 'apps/theme/*/static/theme/*/*.png',
                 'apps/theme/*/static/theme/*/*.css',
@@ -82,9 +83,10 @@ setup(name='adlibre_dms',
                 ], # this should be done automatically
         },
     data_files=[
-        ('adlibre_dms', ['settings.py', 'local_settings.py.example', 'adlibre_dms/manage.py']),
+        ('adlibre_dms', ['settings_prod.py', 'local_settings.py.example', 'adlibre_dms/manage.py']),
         ('db', ['db/.gitignore']), # create empty dir
         ('deployment', find_files('deployment', '*')),
+        ('log', ['log/.gitignore']), # create empty dir
         ('www', ['www/.gitignore']), # create empty dir
     ],
     install_requires=[
