@@ -10,6 +10,9 @@ ADMINS = (
 )
 MANAGERS = ADMINS
 
+# Enable Compress
+COMPRESS_ENABLED = True
+
 # Make this unique, and don't share it with anybody.
 #SECRET_KEY = 'change me'
 
