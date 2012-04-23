@@ -1,5 +1,7 @@
 # Example custom settings for Adlibre DMS
 
+from settings import * # import the secondary settings file
+
 # Turn off demo
 DEMO = False
 DEBUG = False
