@@ -27,9 +27,11 @@ from view_helpers import cleanup_mdts
 from search_helpers import search_by_single_date
 from search_helpers import exact_date_with_keys_search
 from search_helpers import cleanup_document_keys
-from search_helpers import date_range_only_search
-from search_helpers import date_range_with_keys_search
+from search_helpers import document_date_range_only_search
+from search_helpers import document_date_range_with_keys_search
 from search_helpers import recognise_dates_in_search
+from search_helpers import document_date_range_present_in_keys
+from search_helpers import dates_ranges_exist
 from forms_representator import get_mdts_for_docrule
 from parallel_keys import ParallelKeysManager
 from data_exporter import export_to_csv
@@ -152,15 +154,22 @@ def search_results(request, step=None, template='mdtui/search.html'):
         # turning document_search dict into something useful for the couch request
         clean_keys = cleanup_document_keys(document_keys)
         cleaned_document_keys = recognise_dates_in_search(clean_keys)
-        keys = cleaned_document_keys.keys()
-        if "date" in keys and cleaned_document_keys.__len__() == 1 and not "end_date" in keys:
+        keys = [key for key in cleaned_document_keys.iterkeys()]
+        dr_exist = dates_ranges_exist(cleaned_document_keys)
+        dd_range_keys = document_date_range_present_in_keys(keys)
+        keys_cnt = cleaned_document_keys.__len__()
+        # Selecting appropriate search method
+        if "date" in keys and keys_cnt == 1:
             documents = search_by_single_date(cleaned_document_keys, docrule_id)
-        elif "date" in keys and "end_date" in keys and cleaned_document_keys.__len__() == 2:
-            documents = date_range_only_search(cleaned_document_keys, docrule_id)
-        elif "date" in keys and "end_date" in keys and not cleaned_document_keys.__len__() == 2:
-            documents = date_range_with_keys_search(cleaned_document_keys, docrule_id)
-        else:
+        elif "date" in keys and not "end_date" in keys and not dd_range_keys:
             documents = exact_date_with_keys_search(cleaned_document_keys, docrule_id)
+        elif dd_range_keys and keys_cnt == 2:
+            documents = document_date_range_only_search(cleaned_document_keys, docrule_id)
+        elif not dd_range_keys and not dr_exist:
+            documents = document_date_range_with_keys_search(cleaned_document_keys, docrule_id)
+        else:
+            documents = document_date_range_with_keys_search(cleaned_document_keys, docrule_id)
+
         mdts_list = get_mdts_for_documents(documents)
 
     # Produces a CSV file from search results
