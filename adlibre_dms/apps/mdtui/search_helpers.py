@@ -57,7 +57,7 @@ def exact_date_with_keys_search(cleaned_document_keys, docrule_id):
         )
     return documents
 
-def date_range_only_search(cleaned_document_keys, docrule_id):
+def document_date_range_only_search(cleaned_document_keys, docrule_id):
     log.debug('Date range search only')
     startkey = [str_date_to_couch(cleaned_document_keys["date"]), docrule_id]
     endkey = [str_date_to_couch(cleaned_document_keys["end_date"]), docrule_id]
@@ -78,7 +78,7 @@ def date_range_only_search(cleaned_document_keys, docrule_id):
         )
     return documents
 
-def date_range_with_keys_search(cleaned_document_keys, docrule_id):
+def document_date_range_with_keys_search(cleaned_document_keys, docrule_id):
     log.debug('Date range search with additional keys specified')
     resp_set = []
     # Getting list of date range filtered docs for each provided secondary key
@@ -95,13 +95,14 @@ def date_range_with_keys_search(cleaned_document_keys, docrule_id):
                 startkey = convert_to_search_keys_for_date_range(cleaned_document_keys, key, docrule_id, date_range=True)
                 endkey = convert_to_search_keys_for_date_range(cleaned_document_keys, key, docrule_id, end=True, date_range=True)
             if startkey and endkey:
-                search_res = CouchDocument.view('dmscouch/search', startkey=startkey, endkey=endkey )
-                if search_res:
-                    resp_set.append(search_res)
+                search_res = CouchDocument.view('dmscouch/search', startkey=startkey, endkey=endkey)
+                resp_set.append(search_res)
     # resp_set now returns ANY search type results.
-    # we need to convert it to ALL
-    docs_list = convert_search_res_for_range(resp_set)
-    documents = CouchDocument.view('_all_docs', keys=docs_list, include_docs=True )
+    # we need to convert it to ALL keys
+    docs_list = convert_search_res_for_range(resp_set, cleaned_document_keys)
+    documents = CouchDocument.view('_all_docs', keys=docs_list, include_docs=True)
+    # Final results filtering to compare that all keys lie withing provided ranges
+#    documents = filer_couch_documents_by_keys(documents)
     if documents:
         log.debug(
             'Search results by date range with additional keys: "%s", docrule: "%s", documents: "%s"' %
@@ -113,6 +114,12 @@ def date_range_with_keys_search(cleaned_document_keys, docrule_id):
             (cleaned_document_keys, docrule_id)
         )
     return documents
+
+def filer_couch_documents_by_keys(documents, keys_list):
+    """
+    Filters all documents in provided range with keys
+    """
+
 
 def filter_couch_docs_by_docrule_id(documents, docrule_id):
     """
@@ -187,24 +194,29 @@ def convert_search_res(search_res, match_len):
             matched_docs.append(doc_id)
     return matched_docs
 
-def convert_search_res_for_range(resp_set):
+def convert_search_res_for_range(resp_set, cleaned_document_keys):
     """
-    Converts search results for multiple keys with date range
-    from type ANY to type ALL (keys exist in document)
+    Converts search results for set of keys CouchDB responses with optional date range
+    from type ANY to type ALL (evey key exist in document)
     """
-    docs_ids_mentions = {}
-    docs_ids_list = []
-    # Each set
+    set_list = []
+    all_docs = {}
+    # Extracting documents mentions ang grouping by set
     for set in resp_set:
-        # Each doc in set
+        docs_ids_mentions = []
         for doc in set:
             docname = doc.get_id
-            if docname in docs_ids_mentions.iterkeys():
-                docs_ids_mentions[docname] += 1
-            else:
-                docs_ids_mentions[docname] = 1
-    # Comparing search mentions and adding to response if all keys match
-    for key, value in docs_ids_mentions.iteritems():
+            docs_ids_mentions.append(docname)
+            all_docs[docname] = 0
+        set_list.append(docs_ids_mentions)
+        # Counting docs mentioned in all sets
+    for doc in all_docs:
+        for set in set_list:
+            if doc in set:
+                all_docs[doc] += 1
+        # Comparing search mentions and adding to response if all keys match
+    docs_ids_list = []
+    for key, value in all_docs.iteritems():
         if value >= resp_set.__len__():
             docs_ids_list.append(key)
     return docs_ids_list
@@ -228,20 +240,59 @@ def convert_to_search_keys_for_date_range(document_keys, pkey, docrule_id, end=F
     Takes date range into account.
     """
     req_params = []
+    dd_range = document_date_range_present_in_keys(document_keys)
     for key, value in document_keys.iteritems():
         if key == pkey:
             if not date_range:
-                if not end:
-                    req_params = [key, value, docrule_id, str_date_to_couch(document_keys["date"])]
+                # Simple key DB search request for document dates (or without document dates) range
+                if not dd_range:
+                    req_params = [key, value, docrule_id]
                 else:
-                    req_params = [key, value, docrule_id, str_date_to_couch(document_keys["end_date"])]
+                    if not end:
+                        req_params = [key, value, docrule_id, str_date_to_couch(document_keys["date"])]
+                    else:
+                        req_params = [key, value, docrule_id, str_date_to_couch(document_keys["end_date"])]
             else:
                 # Assuming date range is our date tuple
+                # Creating DB request for document dates (or without document dates) range
                 if not end:
-                    req_params = [key, str_date_to_couch(value[0]), docrule_id, str_date_to_couch(document_keys["date"])]
+                    if dd_range:
+                        req_params = [key, value[0], docrule_id, str_date_to_couch(document_keys["date"])]
+                    else:
+                        req_params = [key, value[0], docrule_id]
                 else:
-                    req_params = [key, str_date_to_couch(value[1]), docrule_id, str_date_to_couch(document_keys["end_date"])]
+                    if dd_range:
+                        req_params = [key, value[1], docrule_id, str_date_to_couch(document_keys["end_date"])]
+                    else:
+                        req_params = [key, value[1], docrule_id]
     return req_params
+
+def dates_ranges_exist(cleaned_keys):
+    """
+    Helper to detect date ranges present in cleaned search keys dict
+    Date range should be type: Tuple
+    """
+    dr_present = False
+    for key, value in cleaned_keys.iteritems():
+        if value.__class__.__name__ == 'tuple':
+            dr_present = True
+    return dr_present
+
+def document_date_range_present_in_keys(keys):
+    """
+    Helper to recognise document date range in search keys
+    """
+    dd_range_present = False
+    start = False
+    end = False
+    for key in keys:
+        if key == 'date':
+            start = True
+        elif key == 'end_date':
+            end = True
+    if start and end:
+        dd_range_present = True
+    return dd_range_present
 
 def str_date_to_couch(from_date):
     """
