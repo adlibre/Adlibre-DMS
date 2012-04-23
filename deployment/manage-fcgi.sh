@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Manages the startup and shutdown of this projects processes
-# as well as runing various tasks.
+# as well as running various tasks.
 #
 # Uses UNIX sockets for FCGI
 #
