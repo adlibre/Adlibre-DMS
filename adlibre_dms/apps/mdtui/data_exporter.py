@@ -61,5 +61,8 @@ def export_to_csv(search_keys, sec_keys_names, documents):
             id = value
             docrule = DocumentTypeRuleManagerInstance.get_docrule_by_id(id)
             value = docrule.get_title()
-        writer.writerow([unicode(item), unicode(value)])
+        if not value.__class__.__name__ == 'tuple':
+            writer.writerow([unicode(item), unicode(value)])
+        else:
+            writer.writerow(unicode(item) + u': (from: ' + unicode(value[0]) + u' to: ' + unicode(value[1]) + u')')
     return response
