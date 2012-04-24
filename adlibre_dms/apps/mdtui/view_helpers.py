@@ -79,14 +79,27 @@ def processDocumentIndexForm(request):
 
     if form.validation_ok() or search:
         for key, field in form.fields.iteritems():
+            # UPPERCASE Init if set attribute
+            upper = False
+            try:
+                if field.is_uppercase:
+                    upper = True
+            except AttributeError:
+                pass
             # FIXME: Nested exceptions.. bad
             try:
                 # For dynamic form fields
-                secondary_indexes[field.field_name] = form.data[unicode(key)]
+                if not upper:
+                    secondary_indexes[field.field_name] = form.data[unicode(key)]
+                else:
+                    secondary_indexes[field.field_name] = form.data[unicode(key)].upper()
             except (AttributeError, KeyError):
                 try:
                     # For native form fields
-                    secondary_indexes[key] = form.data[unicode(key)]
+                    if not upper:
+                        secondary_indexes[key] = form.data[unicode(key)]
+                    else:
+                        secondary_indexes[key] = form.data[unicode(key)].upper()
                 except KeyError:
                     pass
 
