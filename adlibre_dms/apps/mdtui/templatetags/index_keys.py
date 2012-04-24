@@ -44,7 +44,10 @@ class ProvideLiElement(template.Node):
                 id = value
                 docrule = DocumentTypeRuleManagerInstance.get_docrule_by_id(id)
                 value = docrule.get_title()
-            resp_string = unicode(item)+u': '+unicode(value)
+            if not value.__class__.__name__ == 'tuple':
+                resp_string = unicode(item) + u': ' + unicode(value)
+            else:
+                resp_string = unicode(item) + u': (from: ' + unicode(value[0]) + u' to: ' + unicode(value[1]) + u')'
             return resp_string
         except template.VariableDoesNotExist:
             return ''
