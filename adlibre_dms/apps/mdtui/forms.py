@@ -98,20 +98,20 @@ class DocumentIndexForm(forms.Form):
             except KeyError:
                 pass
 
-            # Uppercase validation
-            try:
-                if cur_field.is_uppercase:
-                    try:
-                        if not self.data[unicode(field)].isupper():
-                            # Wrong data entered adding type error
-                            e = ValidationError(CUSTOM_ERRORS['UPPER'])
-                            self.errors[field] = e
-                            self._errors[field] = e
-                            pass
-                    except ValueError:
-                        pass
-            except AttributeError:
-                pass
+#            # Uppercase validation
+#            try:
+#                if cur_field.is_uppercase:
+#                    try:
+#                        if not self.data[unicode(field)].isupper():
+#                            # Wrong data entered adding type error
+#                            e = ValidationError(CUSTOM_ERRORS['UPPER'])
+#                            self.errors[field] = e
+#                            self._errors[field] = e
+#                            pass
+#                    except ValueError:
+#                        pass
+#            except AttributeError:
+#                pass
         if self.errors:
             return False
         return True
