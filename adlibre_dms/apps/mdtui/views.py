@@ -453,12 +453,6 @@ def mdt_parallel_keys(request):
     log.debug('mdt_parallel_keys response: %s' % resp)
     return HttpResponse(json.dumps(resp))
 
-def autocomplete_single_key_search(request):
-    """
-    Returns suggestions for this key withing MDT it belongs.
-    """
-    return HttpResponse('autocomplete response')
-
 @login_required
 def download_pdf(request, code):
     """
