@@ -151,8 +151,8 @@ def recognise_dates_in_search(cleaned_document_keys):
     keys_list = [key for key in cleaned_document_keys.iterkeys()]
     # TODO: implement this
     # Converting document date range to tuple fro consistency
-    if 'date' in keys_list and 'end_date' in keys_list:
-        print 'Refactor! date range in search conversion'
+#    if 'date' in keys_list and 'end_date' in keys_list:
+#        print 'Refactor! date range in search conversion'
 
     # Validating date fields (except main date field) exist in search query
     # Simple iterator to optimise calls without dates

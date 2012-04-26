@@ -442,7 +442,7 @@ def mdt_parallel_keys(request):
                 'dmscouch/search_autocomplete',
                 startkey=[key_name, autocomplete_req],
                 endkey=[key_name, unicode(autocomplete_req)+u'\ufff0' ],
-                include_docs=True
+                include_docs=True # TODO: change indexes not to load the full document but required fields (MAYBE)
             )
             # Fetching unique responses to suggestion set
             for doc in documents:
