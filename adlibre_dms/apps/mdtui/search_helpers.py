@@ -91,18 +91,13 @@ def document_date_range_with_keys_search(cleaned_document_keys, docrule_id):
                 endkey = convert_to_search_keys_for_date_range(cleaned_document_keys, key, docrule_id, end=True)
             else:
                 # Got date range key
-                print 'date range!'
                 startkey = convert_to_search_keys_for_date_range(cleaned_document_keys, key, docrule_id, date_range=True)
                 endkey = convert_to_search_keys_for_date_range(cleaned_document_keys, key, docrule_id, end=True, date_range=True)
             if startkey and endkey:
                 search_res = CouchDocument.view('dmscouch/search', startkey=startkey, endkey=endkey)
                 resp_set.append(search_res)
-    # resp_set now returns ANY search type results.
-    # we need to convert it to ALL keys
     docs_list = convert_search_res_for_range(resp_set, cleaned_document_keys)
     documents = CouchDocument.view('_all_docs', keys=docs_list, include_docs=True)
-    # Final results filtering to compare that all keys lie withing provided ranges
-#    documents = filer_couch_documents_by_keys(documents)
     if documents:
         log.debug(
             'Search results by date range with additional keys: "%s", docrule: "%s", documents: "%s"' %
@@ -165,7 +160,6 @@ def recognise_dates_in_search(cleaned_document_keys):
         for key in keys_list:
             if key.endswith(SEARCH_STRING_REPR['field_label_from']):
                 # We have start of the dates sequence. Searching for an end key
-                # TODO: deprecated in python 3.0+ need to refactor to use regex and .format() method instead
                 pure_key = key.rstrip(SEARCH_STRING_REPR['field_label_from'])
                 desired_key = pure_key + SEARCH_STRING_REPR['field_label_to']
                 if desired_key in keys_list:
@@ -299,8 +293,5 @@ def str_date_to_couch(from_date):
     Converts date from form date widget generated format, like '2012-03-02'
     To CouchDocument stored date. E.g.: '2012-03-02T00:00:00Z'
     """
-    # TODO: HACK: normal datetime conversions here
     couch_date = from_date + 'T00:00:00Z'
-#    date = datetime.datetime.strptime(from_date, "%Y-%m-%d")
-#    couch_date = datetime.datetime.now()
     return couch_date
