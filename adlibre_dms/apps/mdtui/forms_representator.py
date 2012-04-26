@@ -81,8 +81,6 @@ def render_fields_from_docrules(mdts_dict, init_dict=None, search=False):
                     else:
                         from_label = field_value["field_name"] + SEARCH_STRING_REPR['field_label_from']
                         to_label = field_value["field_name"] + SEARCH_STRING_REPR['field_label_to']
-                        # Adding From/To fields
-                        print 'search:', search
                         # Normally adding only from/to fields for indexing
                         if unicode(counter) in init_dict and init_dict[unicode(counter)]:
                             # Has initial value
