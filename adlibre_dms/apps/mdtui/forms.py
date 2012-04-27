@@ -97,21 +97,6 @@ class DocumentIndexForm(forms.Form):
                         pass
             except KeyError:
                 pass
-
-#            # Uppercase validation
-#            try:
-#                if cur_field.is_uppercase:
-#                    try:
-#                        if not self.data[unicode(field)].isupper():
-#                            # Wrong data entered adding type error
-#                            e = ValidationError(CUSTOM_ERRORS['UPPER'])
-#                            self.errors[field] = e
-#                            self._errors[field] = e
-#                            pass
-#                    except ValueError:
-#                        pass
-#            except AttributeError:
-#                pass
         if self.errors:
             return False
         return True
@@ -134,7 +119,36 @@ class DocumentSearchOptionsForm(forms.Form):
         setFormData(self, kwds)
 
     def validation_ok(self):
-        # TODO: add validation. e.g. only end_date provided.
-        # TODO: add type validation
+        for field in self.fields:
+            cur_field = self.fields[field]
+            # Wrong type validation
+            try:
+                # Validate only if those keys exist
+                if cur_field.__class__.__name__ == "IntegerField":
+                    try:
+                        int(self.data[unicode(field)])
+                    except ValueError:
+                        # appending error to form errors
+                        if self.data[unicode(field)]:
+                            # Wrong data entered adding type error
+                            e = ValidationError(CUSTOM_ERRORS['NUMBER'])
+                            self.errors[field] = e
+                            self._errors[field] = e
+                        pass
+                if cur_field.__class__.__name__ == "DateField":
+                    try:
+                        datetime.datetime.strptime(self.data[unicode(field)], "%Y-%m-%d")
+                    except ValueError:
+                        # appending error to form errors
+                        if self.data[unicode(field)]:
+                            # Wrong data entered adding type error
+                            e = ValidationError(CUSTOM_ERRORS['DATE'])
+                            self.errors[field] = e
+                            self._errors[field] = e
+                        pass
+            except KeyError:
+                pass
+        if self.errors:
+            return False
         return True
 

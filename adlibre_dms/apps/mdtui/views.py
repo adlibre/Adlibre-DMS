@@ -17,7 +17,7 @@ from django.contrib.auth.decorators import login_required
 from dmscouch.models import CouchDocument
 from forms import DocumentTypeSelectForm, DocumentUploadForm, DocumentSearchOptionsForm
 from document_manager import DocumentManager
-from view_helpers import initDocumentIndexForm
+from view_helpers import initIndexesForm
 from view_helpers import processDocumentIndexForm
 from view_helpers import get_mdts_for_documents
 from view_helpers import extract_secondary_keys_from_form
@@ -108,7 +108,7 @@ def search_options(request, step, template='mdtui/search.html'):
 
     # CouchDB connection Felt down warn user
     try:
-        form = initDocumentIndexForm(request)
+        form = initIndexesForm(request)
         autocomplete_list = extract_secondary_keys_from_form(form)
     except (RequestError,AttributeError) :
         form = DocumentSearchOptionsForm
@@ -263,13 +263,13 @@ def indexing_details(request, step=None, template='mdtui/indexing.html'):
                 return HttpResponseRedirect(reverse('mdtui-index-source'))
         else:
             # Return validation with errrors...
-            form = initDocumentIndexForm(request)
+            form = initIndexesForm(request)
     else:
         try:
             request.session['docrule_id']
         except KeyError:
             warnings.append(MDTUI_ERROR_STRINGS[1])
-        form = initDocumentIndexForm(request)
+        form = initIndexesForm(request)
 
     autocomplete_list = extract_secondary_keys_from_form(form)
     try:
