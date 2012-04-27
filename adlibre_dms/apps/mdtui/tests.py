@@ -23,7 +23,7 @@ test_mdt_docrule_id = 2 # should be properly assigned to fixtures docrule that u
 test_mdt_docrule_id2 = 6 # should be properly assigned to fixtures docrule that uses CouchDB plugins
 test_mdt_docrule_id3 = 7 # should be properly assigned to fixtures docrule that uses CouchDB plugins
 
-indexes_form_match_pattern = '(Employee ID|Employee Name|Friends ID|Friends Name|Required Date|Reporting Entity|Report Date|Report Type).+?name=\"(\d+)\"'
+indexes_form_match_pattern = '(Employee ID|Employee Name|Friends ID|Friends Name|Required Date|Reporting Entity|Report Date|Report Type).+?name=\"(\d+|\d+_from|\d+_to)\"'
 
 mdt1 = {
     "_id": 'mdt1',
@@ -182,6 +182,17 @@ typehead_call3 = {
                 "autocomplete_search": "And"
                 }
 
+# Proper for single key
+typehead_call4 = {
+    'key_name': "Reporting Entity",
+    "autocomplete_search": "JT"
+}
+# Inproper for single key
+typehead_call5 = {
+    'key_name': "Reporting Entity",
+    "autocomplete_search": "11"
+}
+
 # Proper date range calls
 all3_docs_range = {u'end_date':u'2012-03-30', u'1':u'', u'0':u'', u'3':u'', u'2':u'', u'4':u'', u'date':u'2012-03-01',}
 all_docs_range = {u'end_date':u'2012-04-30', u'1':u'', u'0':u'', u'2':u'',u'date':u'2012-03-01',} # Search by docrule2 MDT3
@@ -193,13 +204,15 @@ date_range_none = {u'end_date':u'2012-03-31', u'1':u'', u'0':u'', u'3':u'', u'2'
 date_range_with_keys_3_docs = {u'date':u'2012-03-01', u'end_date':u'2012-03-30',} # Date range for 3 docs
 date_range_with_keys_doc1 = {u'Employee ID': u'123456', u'Employee Name': u'Iurii Garmash',} # Unique keys for doc1
 date_range_with_keys_doc2 = {u'Employee Name': u'Andrew Cutler',} # Unique keys for docs 2 and 3
-date_type_key_doc1 = {u'Required Date': u'2012-03-07',} # Unique date type ley for doc 1
+date_type_key_doc1 = {u'Required Date': u'2012-03-07',} # Unique date type key for doc 1
 
 # Uppercase fields
 upper_wrong_dict = {u'date': [u'2012-04-17'], u'0': [u'lowercase data'], u'description': [u'something usefull']}
 upper_right_dict = {u'date': [u'2012-04-17'], u'0': [u'UPPERCASE DATA'], u'description': [u'something usefull']}
 
 # TODO: test proper CSV export, even just simply, with date range and list of files present there
+# TODO: add tests fo date ranges searches.
+# TODO: add tests for Typehead suggests values between docrules
 
 # TODO: test posting docs to 2 different document type rules and mix out parallel keys and normal search here for proper behaviour:
 # THIS IS WRONG:
@@ -503,9 +516,7 @@ class MDTUI(TestCase):
         response = self.client.get(url)
         # Getting indexes form and matching form Indexing Form fields names
         rows_dict = self._read_indexes_form(response)
-        search_dict = self._createa_search_dict(doc1_dict)
-        # Search without a description (we can't yet search on this field)
-        del search_dict['description']
+        search_dict = self._create_search_dict_range_and_keys_for_search(doc1_dict, rows_dict)
         # Searching without date
         search_dict["date"] = ''
         post_dict = self._convert_doc_to_post_dict(rows_dict, search_dict)
@@ -1090,56 +1101,6 @@ class MDTUI(TestCase):
         self.assertNotContains(response, 'BBB-0001')
         self.assertNotContains(response, 'BBB-0002')
 
-    # TODO: this test must be refactored
-    # if issue with secondary key type 'date' will change logic into 'date range' instead of 'exact date', like it is now
-    def test_31_search_by_keys_only(self):
-        """
-        Proper call to search by secondary key exact date key.
-        MDTUI Search By Index Form parses data properly.
-        Search Step 'results' displays proper captured indexes.
-        Search displays full doc1 for given secondary key of 'date' type. (Proper)
-        And does not contain doc2 and doc3 unique values.
-        All docs render their indexes correctly.
-        """
-        # setting docrule
-        url = reverse('mdtui-search-type')
-        data = {'docrule': test_mdt_docrule_id}
-        response = self.client.post(url, data)
-        self.assertEqual(response.status_code, 302)
-        url = reverse('mdtui-search-options')
-        # Getting required indexes id's
-        response = self.client.get(url)
-        ids = self._read_indexes_form(response)
-        # Dict without actual date
-        data = self._create_search_dict_for_range_and_keys( date_type_key_doc1,
-                                                            ids )
-        # Searching date range with unique doc1 keys
-        response = self.client.post(url, data)
-        self.assertEqual(response.status_code, 302)
-        new_url = self._retrieve_redirect_response_url(response)
-        response = self.client.get(new_url)
-        self.assertEqual(response.status_code, 200)
-        # No errors appeared
-        self.assertNotContains(response, "You have not defined Document Searching Options")
-        # None of doc2 and doc3 present in response
-        self.assertNotContains(response, doc2)
-        self.assertNotContains(response, doc3)
-        self.assertNotContains(response, doc2_dict['description'])
-        self.assertNotContains(response, doc3_dict['description'])
-        # Searching keys exist in search results
-        for key, value in date_type_key_doc1.iteritems():
-            self.assertContains(response, value)
-        # doc1 data exist in response
-        for key, value in doc1_dict.iteritems():
-            self.assertContains(response, value)
-        self.assertContains(response, doc1)
-        # docs for mdt3 does not present in response
-        for doc_dict in [m2_doc1_dict, m2_doc2_dict]:
-            for key, value in doc_dict.iteritems():
-                self.assertNotContains(response, value)
-        self.assertNotContains(response, 'BBB-0001')
-        self.assertNotContains(response, 'BBB-0002')
-
     def test_32_additional_docs_adding_another_docrule(self):
         """
         Adds additional documents 1 and 2 for more complex tests
@@ -1302,23 +1263,33 @@ class MDTUI(TestCase):
             if not key=='date' and not key=='description':
                 self.assertNotContains(response, key)
 
-    def test_36_uppercase_fields(self):
+    def test_36_uppercase_fields_lowercase_data(self):
         """
         Adds MDT indexes to test Uppercase fields behaviour.
         """
-        # Selecting Document Type Rule
+        # Lowercase field provided
         url = reverse('mdtui-index-type')
         response = self.client.post(url, {'docrule': test_mdt_docrule_id3})
         self.assertEqual(response.status_code, 302)
         # Getting indexes form and matching form Indexing Form fields names
         url = reverse('mdtui-index-details')
-        # Wrong uppercase field provided
         post_dict = upper_wrong_dict
         response = self.client.post(url, post_dict)
+        self.assertEqual(response.status_code, 302)
+        uurl = self._retrieve_redirect_response_url(response)
+        response = self.client.get(uurl)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'This field should be uppercase.')
+        self.assertContains(response, 'Creation Date: 2012-04-17')
+        self.assertContains(response, 'Description: something usefull')
+        self.assertContains(response, 'Tests Uppercase Field: LOWERCASE DATA')
+        self.assertContains(response, "Your document's indexing keys:")
 
+    def test_37_uppercase_fields_UPPERCASE_DATA(self):
         # Normal uppercase field rendering and using
+        url = reverse('mdtui-index-type')
+        response = self.client.post(url, {'docrule': test_mdt_docrule_id3})
+        self.assertEqual(response.status_code, 302)
+        url = reverse('mdtui-index-details')
         post_dict = upper_right_dict
         response = self.client.post(url, post_dict)
         self.assertEqual(response.status_code, 302)
@@ -1330,6 +1301,99 @@ class MDTUI(TestCase):
         self.assertContains(response, 'Description: something usefull')
         self.assertContains(response, 'Tests Uppercase Field: UPPERCASE DATA')
         self.assertContains(response, "Your document's indexing keys:")
+
+    def test_38_search_by_keys_only_contains_secondary_date_range(self):
+        """
+        Proper call to search by secondary key date range key.
+        MDTUI Search By Search Form parses data properly.
+        Search Step 'results' displays proper captured indexes.
+        Search displays full doc1 for given secondary key of 'date' type. (Proper)
+        And does not contain doc2 and doc3 unique values.
+        All docs render their indexes correctly.
+        """
+        # setting docrule
+        url = reverse('mdtui-search-type')
+        data = {'docrule': test_mdt_docrule_id}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        url = reverse('mdtui-search-options')
+        # Getting required indexes id's
+        response = self.client.get(url)
+        ids = self._read_indexes_form(response)
+        # Dict without actual date
+        data = self._create_search_dict_range_and_keys_for_search( date_type_key_doc1,
+                                                            ids )
+        # Searching date range with unique doc1 keys
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        self.assertEqual(response.status_code, 200)
+        # No errors appeared
+        self.assertNotContains(response, "You have not defined Document Searching Options")
+        # None of doc2 and doc3 present in response
+        self.assertNotContains(response, doc2)
+        self.assertNotContains(response, doc3)
+        self.assertNotContains(response, doc2_dict['description'])
+        self.assertNotContains(response, doc3_dict['description'])
+        # Searching keys exist in search results
+        for key, value in date_type_key_doc1.iteritems():
+            self.assertContains(response, value)
+        # doc1 data exist in response
+        for key, value in doc1_dict.iteritems():
+            date_key = False
+            try:
+                date_key = datetime.datetime.strptime(value, "%Y-%m-%d")
+            except ValueError:
+                pass
+            if date_key and not key == 'date':
+                from_date = date_key - datetime.timedelta(days=1)
+                to_date = date_key + datetime.timedelta(days=1)
+                value1 = from_date.strftime("%Y-%m-%d")
+                value2 = to_date.strftime("%Y-%m-%d")
+                self.assertContains(response, value1)
+                self.assertContains(response, value2)
+            else:
+                self.assertContains(response, value)
+        self.assertContains(response, doc1)
+        # docs for mdt3 does not present in response
+        for doc_dict in [m2_doc1_dict, m2_doc2_dict]:
+            for key, value in doc_dict.iteritems():
+                self.assertNotContains(response, value)
+        self.assertNotContains(response, 'BBB-0001')
+        self.assertNotContains(response, 'BBB-0002')
+
+    def test_39_autoomplete_single_key(self):
+        """
+        Testing Parallel keys lookup for recently uploaded document
+        Single key must be returned.
+        Must render suggestion for this key only.
+        """
+        # Selecting Document Type Rule
+        url = reverse('mdtui-search-type')
+        response = self.client.post(url, {'docrule': test_mdt_docrule_id2})
+        self.assertEqual(response.status_code, 302)
+        url = reverse("mdtui-parallel-keys")
+        response = self.client.post(url, typehead_call4)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Reporting Entity')
+        self.assertContains(response, 'JTG')
+
+    def test_40_autoomplete_single_key_wrong(self):
+        """
+        Testing Parallel keys lookup for recently uploaded document
+        Single key must be returned.
+        Must render suggestion for this key only.
+        """
+        # Selecting Document Type Rule
+        url = reverse('mdtui-search-type')
+        response = self.client.post(url, {'docrule': test_mdt_docrule_id2})
+        self.assertEqual(response.status_code, 302)
+        url = reverse("mdtui-parallel-keys")
+        response = self.client.post(url, typehead_call5)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, 'Reporting Entity')
+        self.assertNotContains(response, 'JTG')
 
     def test_z_cleanup(self):
         """
@@ -1348,31 +1412,10 @@ class MDTUI(TestCase):
                 response = self.client.delete(url, {"mdt_id": mdt_id})
                 self.assertEqual(response.status_code, 204)
 
-        # TODO: figure out why running this with list and iteration produces bugs in splitting (doc_codes.models)
-        # Delete file "doc1"
-        url = reverse('api_file', kwargs={'code': doc1,})
-        response = self.client.delete(url)
-        self.assertEqual(response.status_code, 204)
-
-        # Delete file "doc2"
-        url = reverse('api_file', kwargs={'code': doc2,})
-        response = self.client.delete(url)
-        self.assertEqual(response.status_code, 204)
-
-        # Delete file "doc3"
-        url = reverse('api_file', kwargs={'code': 'ADL-0003',})
-        response = self.client.delete(url)
-        self.assertEqual(response.status_code, 204)
-
-        # Delete file "doc1" for mdt3
-        url = reverse('api_file', kwargs={'code': 'BBB-0001',})
-        response = self.client.delete(url)
-        self.assertEqual(response.status_code, 204)
-
-        # Delete file "doc2" for mdt3
-        url = reverse('api_file', kwargs={'code': 'BBB-0002',})
-        response = self.client.delete(url)
-        self.assertEqual(response.status_code, 204)
+        for argument in [doc1, doc2, 'ADL-0003', 'BBB-0001', 'BBB-0002']:
+            url = reverse('api_file', kwargs={'code': argument,})
+            response = self.client.delete(url)
+            self.assertEqual(response.status_code, 204)
 
         # Compacting CouchDB dmscouch/mdtcouch DB's after tests
         server = Server()
@@ -1390,7 +1433,12 @@ class MDTUI(TestCase):
         matches_set = prog.findall(str(response))
         matches = {}
         for key,value in matches_set:
-            matches[key]=value
+            if value.endswith('_from'):
+                matches[key+' From']=value
+            elif value.endswith('_to'):
+                matches[key+' To']=value
+            else:
+                matches[key]=value
         return matches
 
     def _convert_doc_to_post_dict(self, matches, doc):
@@ -1443,6 +1491,47 @@ class MDTUI(TestCase):
         temp_keys = {}
         for key, value in keys_dict.iteritems():
             temp_keys[form_ids_dict[key]] = value
+        # Finally adding converted form numeric field ids with values to request data dict
+        for key, value in temp_keys.iteritems():
+            request_dict[key] = value
+        return request_dict
+
+    def _create_search_dict_range_and_keys_for_search(self, keys_dict, form_ids_dict, date_range=None):
+        """
+        Creates a dict for custom keys to search for date range + some keys
+        Takes into account:
+          - form dynamic id's
+          - date range provided
+          - keys provided
+        """
+        request_dict = {}
+        # Adding dates to request
+        if date_range:
+            for key, value in date_range.iteritems():
+                request_dict[key] = value
+        else:
+            request_dict[u'date'] = u''
+            request_dict[u'end_date'] = u''
+        # Converting keys data to form id's view
+        temp_keys = {}
+        for key, value in keys_dict.iteritems():
+            date_key = False
+            try:
+                date_key = datetime.datetime.strptime(value, "%Y-%m-%d")
+            except ValueError:
+                pass
+            if date_key and not key == 'date' and not key == 'end_date':
+                key1 = key + ' From'
+                key2 = key + ' To'
+                from_date = date_key - datetime.timedelta(days=1)
+                to_date = date_key + datetime.timedelta(days=1)
+                value1 = from_date.strftime("%Y-%m-%d")
+                value2 = to_date.strftime("%Y-%m-%d")
+                temp_keys[form_ids_dict[key1]] = value1
+                temp_keys[form_ids_dict[key2]] = value2
+            else:
+                if not key == 'description'and not key == 'date' and not key == 'end_date':
+                    temp_keys[form_ids_dict[key]] = value
         # Finally adding converted form numeric field ids with values to request data dict
         for key, value in temp_keys.iteritems():
             request_dict[key] = value

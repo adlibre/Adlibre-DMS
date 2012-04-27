@@ -11,22 +11,15 @@ from forms import DocumentSearchOptionsForm
 from forms_representator import render_fields_from_docrules
 from forms_representator import get_mdts_for_docrule
 
-
-def initDocumentIndexForm(request):
+def initIndexesForm(request):
     """
-    DocumentIndexForm initialization
+    DocumentIndexForm/DocumentSearchForm initialization
     in case of GET returns an empty base form,
     in case of POST returns populated (from request) form instance.
     in both cases form is rendered with MDT index fields
     """
     details = None
-    # Determining which form to init
-    # HACK: determining if search by the url (MUST BE CHANGED IF RENAMING URL)
-    if 'search' in request.path:
-        search = True
-    else:
-        search = False
-
+    search = determine_search_req(request)
     try:
         # Trying to use cached MDT's and instantiating if none exist.
         details = request.session['mdts']
@@ -63,20 +56,14 @@ def initDocumentIndexForm(request):
         form.validation_ok()
     return form
 
-
 def processDocumentIndexForm(request):
     """
     Handles document index form validation/population/data handling
     Works for search/indexing calls
     """
-    form = initDocumentIndexForm(request)
+    form = initIndexesForm(request)
     secondary_indexes = {}
-    # HACK: determining if search by the url (MUST BE CHANGED IF RENAMING URL)
-    if 'search' in request.path:
-        search = True
-    else:
-        search = False
-
+    search = determine_search_req(request)
     if form.validation_ok() or search:
         for key, field in form.fields.iteritems():
             # UPPERCASE Init if set attribute
@@ -108,6 +95,19 @@ def processDocumentIndexForm(request):
         else:
             return None
 
+def determine_search_req(request):
+    """
+    Helper to finds out if provided request is search or indexing (not search) one
+    Returns Boolean search request
+    Currently determining if search by the url
+    Warning! (MUST BE CHANGED IF RENAMING SEARCH URL)
+    """
+    if 'search' in request.path:
+        search = True
+    else:
+        search = False
+    return search
+
 def get_mdts_for_documents(documents):
     """
     Returns list of mdts for provided documents list
@@ -121,7 +121,6 @@ def get_mdts_for_documents(documents):
                 indexes[ind] = ""
         resp = indexes.keys()
     return resp
-
 
 def extract_secondary_keys_from_form(form):
     """
