@@ -162,6 +162,14 @@ m2_doc2_dict = {
     'Report Type': 'Pay run',
 }
 
+ind_doc1 = {
+    'date': '2012-04-03',
+    'description': 'Test Document MDT 3 Number 2                                 ',
+    'Reporting Entity': 'FCB                                            ',
+    'Report Date': '2012-04-04',
+    'Report Type': '                     Pay run                           ',
+}
+
 doc1 = 'ADL-0001'
 doc2 = 'ADL-0002'
 doc3 = 'ADL-1111'
@@ -1394,6 +1402,30 @@ class MDTUI(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, 'Reporting Entity')
         self.assertNotContains(response, 'JTG')
+
+    def test_41_trim_whitespases_works_on_all_fields(self):
+        """
+        All fields should trim whitespaces upon submitting indexes form
+        """
+        # Selecting Document Type Rule
+        url = reverse('mdtui-index-type')
+        response = self.client.post(url, {'docrule': test_mdt_docrule_id2})
+        self.assertEqual(response.status_code, 302)
+        # Getting indexes form and matching form Indexing Form fields names
+        url = reverse('mdtui-index-details')
+        response = self.client.get(url)
+        rows_dict = self._read_indexes_form(response)
+        post_dict = self._convert_doc_to_post_dict(rows_dict, ind_doc1)
+        # Adding Document Indexes
+        response = self.client.post(url, post_dict)
+        self.assertEqual(response.status_code, 302)
+        uurl = self._retrieve_redirect_response_url(response)
+        response = self.client.get(uurl)
+        #print response
+        self.assertEqual(response.status_code, 200)
+        # Keys added to indexes
+        self.assertNotContains(response, 'Reporting Entity: '+ind_doc1['Reporting Entity'])
+        self.assertContains(response, 'Reporting Entity: '+ind_doc1['Reporting Entity'].strip(' \t\n\r'))
 
     def test_z_cleanup(self):
         """
