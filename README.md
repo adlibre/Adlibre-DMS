@@ -27,6 +27,16 @@ Adlibre DMS is also 100% commercially supported Open Source.
 * CouchDB meta-data backend
 * Very minimal hardware requirements.
 
+## Components
+
+Adlibre DMS is built in modular fashion and comprises the following components:
+
+* API
+* Plugin Manager
+* Metadata Template UI (MUI) - configuration driven indexing and retrieval interface
+* Admin UI - decoupled jQuery / Json graphical UI for administrative functions
+* Browser - provides wholistic interface for all components
+
 ## Status
 
 The source code here on _master_ is fast moving and evolving quickly. 
