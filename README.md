@@ -16,7 +16,7 @@ Adlibre DMS is also 100% commercially supported Open Source.
 ## Key Features
 
 * Web services API (REST) for all core functionality - easily integrated with 3rd party applications
-* Extensible architecture - easily add new features via plugins
+* Extensible plugin architecture - easily add new features via plugins
 * Cross Platform - mobile device ready
 * Scalable - designed to store 100's of millions of documents
 * Unlimited document indexes and meta-data. 
@@ -25,7 +25,7 @@ Adlibre DMS is also 100% commercially supported Open Source.
 
 * Built with Python & Django
 * CouchDB meta-data backend
-* Very minimal hardware requirements. 
+* Very minimal hardware requirements.
 
 ## Status
 
@@ -36,4 +36,6 @@ The code here can be considered the "community" version of Adlibre DMS.
 
 ## Commercial Support
 
-Adlibre DMS is developed and commercially supported by [Adlibre Pty Ltd](http://www.adlibre.com.au).
+Adlibre DMS is developed and commercially supported by [Adlibre Pty Ltd](http://www.adlibre.com.au). 
+
+More information is available from [Adlibre DMS website](http://www.adlibre.com.au/adlibre-dms/).
