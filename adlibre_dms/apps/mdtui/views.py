@@ -329,7 +329,9 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
             if upload_form.is_valid():
                 upload_file = upload_form.files['file']
             else:
-                upload_file = None
+                # HACK: upload a stub document as our first revision
+                import os
+                upload_file = open(os.path.join(os.path.split(__file__)[0], 'stub_document.pdf'), 'rb')
 
             manager = DocumentManager()
             manager.store(request, upload_file, index_info=index_info, barcode=barcode)
