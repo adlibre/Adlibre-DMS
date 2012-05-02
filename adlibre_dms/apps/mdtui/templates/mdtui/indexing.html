@@ -269,7 +269,7 @@
 <script type="text/javascript">
 
     function printBarcode() {
-        url = '{% url bcp-print "Code128" "1234" %}' // FIXME http://localhost:8000/bcp/Standard39/' + code;
+        url = '{% url bcp-print "Code128" barcode %}'
         $('#printer').attr("src", url);
         return false;
     }
