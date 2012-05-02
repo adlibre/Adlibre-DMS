@@ -158,11 +158,11 @@ class DocumentTypeRule(models.Model):
         self.save()
         return self
 
-    def add_new_document(self):
+    def allocate_barcode(self):
         """
         Function increments last document number for this Document Type Model by int(1)
         """
-        log.debug('doc_codes.models add_new_document. sequence_last: %s', self.sequence_last)
+        log.debug('doc_codes.models allocate_barcode. sequence_last: %s', self.sequence_last)
         self.sequence_last += 1
         self.save()
         return self._generate_document_barcode(self.sequence_last)
