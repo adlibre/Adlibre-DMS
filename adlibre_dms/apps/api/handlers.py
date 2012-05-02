@@ -74,7 +74,7 @@ class FileHandler(BaseFileHandler):
                 return rc.BAD_REQUEST
         if manager.errors:
             log.error('FileHandler.read manager errors: %s' % manager.errors)
-            return rc.BAD_REQUEST # FIXME: file non existent, returns rc.BAD_REQUEST. should be reading RC code from plugin exception.
+            return rc.NOT_FOUND # FIXME: should be reading RC code from plugin exception.
         response = HttpResponse(content, mimetype=mimetype)
         response["Content-Length"] = len(content)
         response['Content-Disposition'] = 'filename=%s' % filename
