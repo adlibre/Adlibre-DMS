@@ -62,6 +62,8 @@ class DocumentIndexForm(forms.Form):
             try:
                 # Validate only if those keys exist e.g in search usage there is no description field
                 try:
+                    # Trimming whitespaces on all fields
+                    self.data[unicode(field)] = self.data[unicode(field)].strip(' \t\n\r')
                     cur_field.validate(self.data[unicode(field)])
                 except ValidationError, e:
                     # appending error to form errors
