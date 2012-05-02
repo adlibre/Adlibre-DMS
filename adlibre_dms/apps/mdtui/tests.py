@@ -6,7 +6,7 @@ License: See LICENSE for license information
 Author: Iurii Garmash
 """
 
-import json, os, urllib, datetime
+import json, os, urllib, datetime, pdb
 from couchdbkit import Server
 from django.test import TestCase
 from django.core.urlresolvers import reverse
@@ -88,7 +88,7 @@ mdt3 = {
             "type": "string",
             "length": 60,
             "field_name": "Report Type",
-            "description": "Report Type (e.g. Reconciliation, Pay run etc)"
+            "description": "Report type (e.g. Reconciliation, Pay run etc)"
         },
         "3": {
             "type": "date",
@@ -199,6 +199,12 @@ typehead_call4 = {
 typehead_call5 = {
     'key_name': "Reporting Entity",
     "autocomplete_search": "11"
+}
+
+# Search dates ranges creation from single date testing
+range_gen1 = {
+    'end_date':'2012-04-02',
+    'Report Date From': '2012-03-30'
 }
 
 # Proper date range calls
@@ -1426,6 +1432,54 @@ class MDTUI(TestCase):
         # Keys added to indexes
         self.assertNotContains(response, 'Reporting Entity: '+ind_doc1['Reporting Entity'])
         self.assertContains(response, 'Reporting Entity: '+ind_doc1['Reporting Entity'].strip(' \t\n\r'))
+
+    def test_42_date_keys_converted_to_date_ranges_on_search(self):
+        """
+        Date keys provided converted to date ranges with start/end date period
+        for both document indexing date/secondary dates key types.
+        """
+        # setting docrule
+        url = reverse('mdtui-search-type')
+        data = {'docrule': test_mdt_docrule_id2}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        url = reverse('mdtui-search-options')
+        # Getting required indexes id's
+        response = self.client.get(url)
+        #print response
+        ids = self._read_indexes_form(response)
+        print ids
+        # Dict without date range and only 1 date measures
+        data = {}
+        for key, value in range_gen1.iteritems():
+            if not key == 'date' and not key == 'end_date':
+                data[ids[key]] = value
+            else:
+                data[key] = value
+        print data
+        # Searching date range with unique doc1 keys
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        #pdb.set_trace()
+        print response
+        self.assertEqual(response.status_code, 200)
+        # No errors appeared
+        self.assertNotContains(response, "You have not defined Document Searching Options")
+        # None of doc2 and doc3 present in response
+        self.assertNotContains(response, doc2)
+        self.assertNotContains(response, doc3)
+        self.assertNotContains(response, doc2_dict['description'])
+        self.assertNotContains(response, doc3_dict['description'])
+        # Things that should be here
+        self.assertContains(response, '1960-01-01') # Max date range
+        self.assertContains(response, '1960-01-01') # Min date range
+        self.assertContains(response, '2012-04-02')
+        self.assertContains(response, 'Report Date: (from: 2012-03-30 to: 2100-01-01)') # Range recognised properly
+
+        self.assertContains(response, 'BBB-0001')
+        self.assertContains(response, 'BBB-0002')
 
     def test_z_cleanup(self):
         """

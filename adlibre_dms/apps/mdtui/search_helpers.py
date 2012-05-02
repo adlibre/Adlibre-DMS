@@ -10,52 +10,12 @@ from dmscouch.models import CouchDocument
 import logging
 from forms_representator import SEARCH_STRING_REPR
 
+DATE_RANGE_CONSTANTS = {
+    'min': u'1960-01-01',
+    'max': u'2100-01-01'
+}
+
 log = logging.getLogger('dms.mdtui.views')
-
-def search_by_single_date(cleaned_document_keys, docrule_id):
-    log.debug("Single exact date search")
-    # Getting all documents withing for this date
-    all_docs = CouchDocument.view(
-                                'dmscouch/search_date',
-                                key=[str_date_to_couch(cleaned_document_keys["date"]),
-                                     docrule_id]
-                                )
-    # Filtering by docrule_id and getting docs
-    resp_list = filter_couch_docs_by_docrule_id(all_docs, docrule_id)
-    documents = CouchDocument.view('_all_docs', keys=resp_list, include_docs=True )
-    if documents:
-        log.debug(
-            'Search results by single date without keys: "%s", docrule: "%s", documents: "%s"' %
-            (str_date_to_couch(cleaned_document_keys["date"]), docrule_id, map(lambda doc: doc["id"], documents) or None)
-        )
-    else:
-        log.debug(
-            'Search results by single date without keys: "%s", docrule: "%s", documents: None' %
-            (str_date_to_couch(cleaned_document_keys["date"]), docrule_id)
-        )
-    return documents
-
-def exact_date_with_keys_search(cleaned_document_keys, docrule_id):
-    log.debug('Multiple keys with exact date search')
-    documents = None
-    couch_req_params = convert_to_search_keys_for_single_date(cleaned_document_keys, docrule_id)
-    if couch_req_params:
-        search_res = CouchDocument.view('dmscouch/search', keys=couch_req_params )
-        # documents now returns ANY search type results.
-        # we need to convert it to ALL
-        docs_list = convert_search_res(search_res, couch_req_params.__len__())
-        documents = CouchDocument.view('_all_docs', keys=docs_list, include_docs=True )
-    if documents:
-        log.debug(
-            'Search results only by single date with keys set: "%s", docrule: "%s", documents: "%s"' %
-            (couch_req_params, docrule_id, map(lambda doc: doc["id"], documents))
-        )
-    else:
-        log.debug(
-            'Search results only by single date with keys set: "%s", docrule: "%s", documents: None' %
-            (couch_req_params, docrule_id)
-        )
-    return documents
 
 def document_date_range_only_search(cleaned_document_keys, docrule_id):
     log.debug('Date range search only')
@@ -110,12 +70,6 @@ def document_date_range_with_keys_search(cleaned_document_keys, docrule_id):
         )
     return documents
 
-def filer_couch_documents_by_keys(documents, keys_list):
-    """
-    Filters all documents in provided range with keys
-    """
-
-
 def filter_couch_docs_by_docrule_id(documents, docrule_id):
     """
     Helper for date range search primary to filter documents by given docrule
@@ -137,6 +91,34 @@ def cleanup_document_keys(document_keys):
     for key in del_list:
         del document_keys[key]
     return document_keys
+
+def ranges_validator(cleaned_document_keys):
+    """
+    Validates search keys for ranges.
+    Andds range measures to single date keys
+    """
+    keys_list = [key for key in cleaned_document_keys.iterkeys()]
+    for key in keys_list:
+        # Secondary key START date provided. Checking if end period exists
+        if key.endswith(SEARCH_STRING_REPR['field_label_from']):
+            pure_key = key.rstrip(SEARCH_STRING_REPR['field_label_from'])
+            desired_key = pure_key + SEARCH_STRING_REPR['field_label_to']
+            if not desired_key in keys_list:
+                cleaned_document_keys[desired_key] = DATE_RANGE_CONSTANTS['max']
+        # Secondary key END date provided. Checking if start period exists
+        if key.endswith(SEARCH_STRING_REPR['field_label_to']):
+            pure_key = key.rstrip(SEARCH_STRING_REPR['field_label_to'])
+            desired_key = pure_key + SEARCH_STRING_REPR['field_label_from']
+            if not desired_key in keys_list:
+                cleaned_document_keys[desired_key] = DATE_RANGE_CONSTANTS['min']
+        # Indexing date MIN/MAX provided
+        if u'date' in keys_list:
+            if not u'end_date' in keys_list:
+                cleaned_document_keys[u'end_date'] = DATE_RANGE_CONSTANTS['max']
+        if u'end_date' in keys_list:
+            if not u'date' in keys_list:
+                cleaned_document_keys[u'date'] = DATE_RANGE_CONSTANTS['min']
+    return cleaned_document_keys
 
 def recognise_dates_in_search(cleaned_document_keys):
     """
@@ -203,12 +185,12 @@ def convert_search_res_for_range(resp_set, cleaned_document_keys):
             docs_ids_mentions.append(docname)
             all_docs[docname] = 0
         set_list.append(docs_ids_mentions)
-        # Counting docs mentioned in all sets
+    # Counting docs mentioned in all sets
     for doc in all_docs:
         for set in set_list:
             if doc in set:
                 all_docs[doc] += 1
-        # Comparing search mentions and adding to response if all keys match
+    # Comparing search mentions and adding to response if all keys match
     docs_ids_list = []
     for key, value in all_docs.iteritems():
         if value >= resp_set.__len__():
@@ -284,7 +266,7 @@ def document_date_range_present_in_keys(keys):
             start = True
         elif key == 'end_date':
             end = True
-    if start and end:
+    if start or end:
         dd_range_present = True
     return dd_range_present
 
