@@ -138,38 +138,34 @@ def extract_secondary_keys_from_form(form):
             pass
     return keys_list
 
+def _cleanup_session_var(request, var):
+    """
+    Cleanup Session var helper
+    """
+    try:
+        request.session[var] = None
+        del request.session[var]
+    except KeyError:
+        pass
+
 def cleanup_search_session(request):
     """
     Makes MDTUI forget abut searching keys entered before.
     """
-    try:
-        # search done. Cleaning up session for indexing to avoid collisions in functions
-        request.session["document_search_dict"] = None
-        request.session['docrule'] = None
-        del request.session["document_search_dict"]
-        del request.session['docrule']
-    except KeyError:
-        pass
+    vars = ('document_search_dict', 'docrule',)
+    for var in vars:
+        _cleanup_session_var(request, var)
 
 def cleanup_indexing_session(request):
     """
     Makes MDTUI forget abut indexing keys entered before.
     """
-    try:
-        # Index done. Cleaning up session for future indexing to avoid collisions
-        request.session["document_keys_dict"] = None
-        request.session['docrule_id'] = None
-        del request.session["document_keys_dict"]
-        del request.session['docrule_id']
-    except KeyError:
-        pass
+    vars = ('document_keys_dict', 'docrule_id', 'barcode',)
+    for var in vars:
+        _cleanup_session_var(request, var)
 
 def cleanup_mdts(request):
     """
     Cleanup MDT's in improvised cache.
     """
-    try:
-        request.session['mdts'] = None
-        del request.session['mdts']
-    except KeyError:
-        pass
+    _cleanup_session_var(request, 'mdts')

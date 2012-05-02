@@ -147,75 +147,69 @@
 
     <div class="row">
         <div class="span3" style="text-align: center;">
-            <a href="#upload-file-tab" data-toggle="tab"><img src="{{ STATIC_URL }}upload.png" /></a>
-            <p><a href="#upload-file-tab" data-toggle="tab" class="btn"><i class="icon-upload"></i> {% trans 'Upload File' %}</a></p>
+            <a href="#fileModal" data-toggle="modal"><img src="{{ STATIC_URL }}upload.png" /></a>
+            <p><a href="#fileModal" data-toggle="modal" class="btn"><i class="icon-upload"></i> {% trans 'Upload File' %}</a></p>
         </div>
         <div class="span3" style="text-align: center;">
-            <a href="#print-barcode-tab" data-toggle="tab"><img src="{{ STATIC_URL }}printer.png" /></a>
-            <p><a href="#print-barcode-tab" data-toggle="tab" class="btn"><i class="icon-print"></i> {% trans 'Print Barcode' %}</a></p>
+            <a href="#printModal" data-toggle="modal"><img src="{{ STATIC_URL }}printer.png" /></a>
+            <p><a href="#printModal" data-toggle="modal" class="btn"><i class="icon-print"></i> {% trans 'Print Barcode' %}</a></p>
+        </div>
+    </div>
+
+    <div class="modal hide" id="printModal">
+        <div class="modal-header">
+            <button class="close" data-dismiss="modal">×</button>
+            <h3>Print Barcode</h3>
+        </div>
+        <div class="modal-body">
+            <p>Please wait for the barcode to print.</p>
+            <p>After printing you may continue.</p>
+            <p>Click <a href="#" onclick="printBarcode();">here</a> if you need to reprint.</p>
+        </div>
+        <iframe src="" id="printer" style="visibility: hidden;" width="0" height="0"></iframe>
+        <div class="modal-footer">
+            <a href="#" class="btn btn-primary">Continue <i class="icon-chevron-right icon-white"></i></a>
+            <a href="#" class="btn btn-primary" onclick="printBarcode();">Reprint</a>
+            <a href="#myModal" class="btn btn-danger" data-dismiss="modal"><i class="icon-trash icon-white"></i> Cancel</a>
         </div>
     </div>
 
 
-    <form class="form-horizontal" enctype="multipart/form-data" action="{{ request.path }}" method="post">
-        {% csrf_token %}
-        <div class="tab-content">
-
-            <div class="tab-pane" id="upload-file-tab">
+    <div class="modal hide" id="fileModal">
+        <div class="modal-header">
+            <button class="close" data-dismiss="modal">×</button>
+            <h3>Upload File</h3>
+        </div>
+        <div class="modal-body">
+            <form id="file-upload-form" class="form-horizontal well" enctype="multipart/form-data" action="{{ request.path }}" method="post">
+                {% csrf_token %}
                 <fieldset>
-                    <legend>Upload File</legend>
-                    {% comment %}
+                    {% for field in form %}
                     <div class="control-group">
-                        <label class="control-label" for="fileInput">File input</label>
+                        {% if field.errors %}
+                        {% for error in field.errors %}
+                        <div class="alert alert-error">
+                            <a class="close">×</a>
+                            <strong>{{ error }}</strong>
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+                        <label class="control-label">{{ field.label }}</label>
                         <div class="controls">
-                            <input class="input-file" id="fileInput" type="file">
+                            {{ field|attr:'class:input-xxlarge' }}
+                            <p class="help-block">{{ field.help_text }}</p>
                         </div>
                     </div>
-                    {% endcomment %}
-                {% for field in form %}
-                <div class="control-group well">
-                    {% if field.errors %}
-                    {% for error in field.errors %}
-                    <div class="alert alert-error">
-                        <a class="close">×</a>
-                        <strong>{{ error }}</strong>
-                    </div>
                     {% endfor %}
-                    {% endif %}
-                    <label class="control-label">{{ field.label }}</label>
-                    <div class="controls">
-                        {{ field|attr:'class:input-xxlarge' }}
-                        <p class="help-block">{{ field.help_text }}</p>
-                    </div>
-                </div>
-                {% endfor %}
                 </fieldset>
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-danger"><i class="icon-trash icon-white"></i> Cancel</button>
-                    <button type="submit" class="btn btn-primary" value="upload">Continue <i class="icon-chevron-right icon-white"></i></button>
-                </div>
-            </div>
-
-            <div class="tab-pane" id="print-barcode-tab">
-                <fieldset>
-                    <legend>Print Barcode</legend>
-
-                    <div class="control-group">
-
-                        <label class="checkbox">
-                            <input type="checkbox" checked="checked">Print Barcode
-                        </label>
-                    </div>
-                </fieldset>
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-danger"><i class="icon-trash icon-white"></i> Cancel</button>
-                    <button type="submit" class="btn btn-primary" value="barcode">Continue <i class="icon-chevron-right icon-white"></i></button>
-                </div>
-            </div>
-
+            </form>
         </div>
-    </form>
 
+        <div class="modal-footer">
+            <a href="#" class="btn btn-primary" id="file-upload-submit">Continue <i class="icon-chevron-right icon-white"></i></a>
+            <a href="#myModal" class="btn btn-danger" data-dismiss="modal"><i class="icon-trash icon-white"></i> Cancel</a>
+        </div>
+    </div>
 
     {% endif %} {# end step 3 #}
 
@@ -272,4 +266,30 @@
 
 {% block js_extra %}
 {% if step == "2" %}{% include "mdtui/_typeaheadjs.html" %}{% endif %}
+<script type="text/javascript">
+
+    function printBarcode() {
+        url = '{% url bcp-print "Code128" "1234" %}' // FIXME http://localhost:8000/bcp/Standard39/' + code;
+        $('#printer').attr("src", url);
+        return false;
+    }
+
+    $(document).ready(function(){
+        $('#printModal').on('show',function(){
+            printBarcode();
+        });
+    });
+
+</script>
+
+<script type="text/javascript">
+
+    $('#file-upload-submit').on('click', function(e){
+        // We don't want this to act as a link so cancel the link action
+        e.preventDefault();
+        // Find form and submit it
+        $('#file-upload-form').submit();
+    });
+
+</script>
 {% endblock %}
