@@ -77,16 +77,16 @@ def processDocumentIndexForm(request):
             try:
                 # For dynamic form fields
                 if not upper:
-                    secondary_indexes[field.field_name] = form.data[unicode(key)]
+                    secondary_indexes[field.field_name] = form.data[unicode(key)].strip(' \t\n\r')
                 else:
-                    secondary_indexes[field.field_name] = form.data[unicode(key)].upper()
+                    secondary_indexes[field.field_name] = form.data[unicode(key)].upper().strip(' \t\n\r')
             except (AttributeError, KeyError):
                 try:
                     # For native form fields
                     if not upper:
-                        secondary_indexes[key] = form.data[unicode(key)]
+                        secondary_indexes[key] = form.data[unicode(key)].strip(' \t\n\r')
                     else:
-                        secondary_indexes[key] = form.data[unicode(key)].upper()
+                        secondary_indexes[key] = form.data[unicode(key)].upper().strip(' \t\n\r')
                 except KeyError:
                     pass
 
