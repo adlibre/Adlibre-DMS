@@ -250,11 +250,17 @@ def indexing_details(request, step=None, template='mdtui/indexing.html'):
     document_keys = None
     warnings = []
     cleanup_search_session(request)
+    docrule_id = None
 
     try:
-        docrule_id = request.session['docrule_id'] or None
+        docrule_id = request.session['docrule_id']
     except KeyError:
         warnings.append(MDTUI_ERROR_STRINGS[1])
+
+    try:
+        document_keys = request.session["document_keys_dict"]
+    except KeyError:
+        pass
 
     if request.POST:
         secondary_indexes = processDocumentIndexForm(request)
@@ -271,10 +277,7 @@ def indexing_details(request, step=None, template='mdtui/indexing.html'):
         form = initIndexesForm(request)
 
     autocomplete_list = extract_secondary_keys_from_form(form)
-    try:
-        document_keys = request.session["document_keys_dict"]
-    except KeyError:
-        pass
+
     context.update( { 'step': step,
                       'form': form,
                       'document_keys': document_keys,
@@ -321,19 +324,21 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
     upload_form = DocumentUploadForm(request.POST or None, request.FILES or None)
     barcode_form = BarcodePrintedForm(request.POST or None)
 
-    if request.POST:
+    if upload_form.is_valid() or barcode_form.is_valid():
+        if not warnings:
+            if upload_form.is_valid():
+                upload_file = upload_form.files['file']
+            else:
+                upload_file = None
 
-        if upload_form.is_valid() or barcode_form.is_valid():
+            manager = DocumentManager()
+            manager.store(request, upload_file, index_info=index_info, barcode=barcode)
 
-            if not warnings:
-                manager = DocumentManager()
-                manager.store(request, upload_form.files['file'] or None, index_info=index_info, barcode=barcode)
-
-                if not manager.errors:
-                    return HttpResponseRedirect(reverse('mdtui-index-finished'))
-                else:
-                    # FIXME: dodgy error handling
-                    return HttpResponse(str(manager.errors))
+            if not manager.errors:
+                return HttpResponseRedirect(reverse('mdtui-index-finished'))
+            else:
+                # FIXME: dodgy error handling
+                return HttpResponse(str(manager.errors))
 
     context.update( { 'step': step,
                       'upload_form': upload_form,
