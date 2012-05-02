@@ -266,6 +266,7 @@
 
 {% block js_extra_inline %}
 {% if step == "2" %}{% include "mdtui/_typeaheadjs.html" %}{% endif %}
+{% if step == "3" %}
 <script type="text/javascript">
 
     /* Print Barcode with the url */
@@ -290,4 +291,5 @@
     });
 
 </script>
+{% endif %}
 {% endblock %}
