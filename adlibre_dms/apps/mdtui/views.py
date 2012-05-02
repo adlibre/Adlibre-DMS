@@ -293,6 +293,7 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
     warnings = []
     index_info = None
     docrule = None
+    barcode = None
 
     try:
         document_keys = request.session["document_keys_dict"]
