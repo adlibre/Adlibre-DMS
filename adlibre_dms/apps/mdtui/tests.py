@@ -1448,7 +1448,7 @@ class MDTUI(TestCase):
         response = self.client.get(url)
         #print response
         ids = self._read_indexes_form(response)
-        print ids
+        #print ids
         # Dict without date range and only 1 date measures
         data = {}
         for key, value in range_gen1.iteritems():
@@ -1456,14 +1456,14 @@ class MDTUI(TestCase):
                 data[ids[key]] = value
             else:
                 data[key] = value
-        print data
+        #print data
         # Searching date range with unique doc1 keys
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 302)
         new_url = self._retrieve_redirect_response_url(response)
         response = self.client.get(new_url)
         #pdb.set_trace()
-        print response
+        #print response
         self.assertEqual(response.status_code, 200)
         # No errors appeared
         self.assertNotContains(response, "You have not defined Document Searching Options")
