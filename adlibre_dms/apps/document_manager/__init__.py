@@ -110,11 +110,10 @@ class DocumentManager(object):
             doc.set_mimetype(uploaded_file.content_type)
         if index_info:
             doc.set_db_info(index_info)
-        if uploaded_file is not None:
-            # Process before storage plugins
-            doc = self.process_pluginpoint(pluginpoints.BeforeStoragePluginPoint, request, document=doc)
-            # Process storage plugins
-            self.process_pluginpoint(pluginpoints.StoragePluginPoint, request, document=doc)
+        # FIXME: if uploaded_file is not None, then some plugins should not run because we don't have a file
+        doc = self.process_pluginpoint(pluginpoints.BeforeStoragePluginPoint, request, document=doc)
+        # Process storage plugins
+        self.process_pluginpoint(pluginpoints.StoragePluginPoint, request, document=doc)
         # Process DatabaseStorage plugins
         doc = self.process_pluginpoint(pluginpoints.DatabaseStoragePluginPoint, request, document=doc)
         #mapping = self.get_plugin_mapping(doc)
