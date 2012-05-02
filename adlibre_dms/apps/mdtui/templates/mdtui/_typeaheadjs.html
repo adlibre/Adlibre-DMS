@@ -38,7 +38,13 @@
         var fields_data = JSON.parse(array);
         for (var item in fields_data) {
             // update corresponding form element
-            $('label.control-label:contains('+item+')').parent().find(':input').val(fields_data[item]);
+            var labels = $('label.control-label');
+            labels.each(function() {
+                var ltext = $(this).text();
+                if (ltext == item) {
+                        $(this).parent().find(':input').val(fields_data[item]);
+                } // if
+            }) // each
         };// for
     } // function
 </script>
