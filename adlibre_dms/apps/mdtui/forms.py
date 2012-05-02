@@ -25,10 +25,13 @@ CUSTOM_ERRORS = {
 }
 
 class DocumentTypeSelectForm(forms.Form):
-    docrule = forms.ChoiceField(choices = DOCRULE_CHOICES, label="Document Type")
+    docrule = forms.ChoiceField(choices=DOCRULE_CHOICES, label="Document Type")
 
 class DocumentUploadForm(forms.Form):
     file = forms.FileField()
+
+class BarcodePrintedForm(forms.Form):
+    printed = forms.HiddenInput()
 
 class DocumentIndexForm(forms.Form):
     """

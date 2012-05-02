@@ -24,7 +24,6 @@ urlpatterns = patterns('mdtui.views',
     url(r'^indexing/details$', 'indexing_details', {'step':'2',}, name='mdtui-index-details'),
     url(r'^indexing/source$', 'indexing_source', {'step':'3',}, name='mdtui-index-source'),
     url(r'^indexing/finished$', 'indexing_finished', {'step':'4',}, name='mdtui-index-finished'),
-    url(r'^indexing/barcode$', 'indexing_barcode', {'step':'5',}, name='mdtui-index-barcode'),
     # Common
     url(r'^download/(?P<code>[\w_-]+)$', 'download_pdf', name='mdtui-download-pdf'),
     # AJAX
