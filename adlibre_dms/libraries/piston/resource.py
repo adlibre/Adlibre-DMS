@@ -41,6 +41,9 @@ class Resource(object):
         self.display_errors = getattr(settings, 'PISTON_DISPLAY_ERRORS', True)
         self.stream = getattr(settings, 'PISTON_STREAM_OUTPUT', False)
 
+        # Disable CSRF for piston
+        self.csrf_exempt = getattr(self.handler, 'csrf_exempt', True)
+
     def determine_emitter(self, request, *args, **kwargs):
         """
         Function for determening which emitter to use
