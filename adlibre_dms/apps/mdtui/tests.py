@@ -1377,7 +1377,7 @@ class MDTUI(TestCase):
         self.assertNotContains(response, 'BBB-0001')
         self.assertNotContains(response, 'BBB-0002')
 
-    def test_39_autoomplete_single_key(self):
+    def test_39_autocomplete_single_key(self):
         """
         Testing Parallel keys lookup for recently uploaded document
         Single key must be returned.
@@ -1393,7 +1393,7 @@ class MDTUI(TestCase):
         self.assertContains(response, 'Reporting Entity')
         self.assertContains(response, 'JTG')
 
-    def test_40_autoomplete_single_key_wrong(self):
+    def test_40_autocomplete_single_key_wrong(self):
         """
         Testing Parallel keys lookup for recently uploaded document
         Single key must be returned.
@@ -1409,7 +1409,7 @@ class MDTUI(TestCase):
         self.assertNotContains(response, 'Reporting Entity')
         self.assertNotContains(response, 'JTG')
 
-    def test_41_trim_whitespases_works_on_all_fields(self):
+    def test_41_trim_whitespaces_works_on_all_fields(self):
         """
         All fields should trim whitespaces upon submitting indexes form
         """
