@@ -106,7 +106,7 @@ class DocumentManager(object):
             # get barcode from our dtr object
             dtr = DocumentTypeRule.objects.get(doccode_id=allocate_barcode)
             # FIXME: Barcode is allocated, but there is no transaction around this :(
-            barcode = dtr.add_new_document()
+            barcode = dtr.allocate_barcode()
             #print barcode
             doc.set_filename(barcode)
             log.debug('Allocated Barcode %s.' % barcode)
