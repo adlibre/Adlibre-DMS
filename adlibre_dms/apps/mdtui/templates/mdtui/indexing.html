@@ -264,10 +264,11 @@
 </style>
 {% endblock %}
 
-{% block js_extra %}
+{% block js_extra_inline %}
 {% if step == "2" %}{% include "mdtui/_typeaheadjs.html" %}{% endif %}
 <script type="text/javascript">
 
+    /* Print Barcode with the url */
     function printBarcode() {
         url = '{% url bcp-print "Code128" barcode %}'
         $('#printer').attr("src", url);
@@ -280,10 +281,7 @@
         });
     });
 
-</script>
-
-<script type="text/javascript">
-
+    /* Make the link act as a submit button on upload form */
     $('#file-upload-submit').on('click', function(e){
         // We don't want this to act as a link so cancel the link action
         e.preventDefault();
