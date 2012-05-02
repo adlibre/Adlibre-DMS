@@ -15,7 +15,7 @@ from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 
 from dmscouch.models import CouchDocument
-from forms import DocumentTypeSelectForm, DocumentUploadForm, DocumentSearchOptionsForm
+from forms import DocumentTypeSelectForm, DocumentUploadForm, BarcodePrintedForm, DocumentSearchOptionsForm
 from document_manager import DocumentManager
 from doc_codes.models import DocumentTypeRule
 from view_helpers import initIndexesForm
@@ -251,22 +251,23 @@ def indexing_details(request, step=None, template='mdtui/indexing.html'):
     warnings = []
     cleanup_search_session(request)
 
+    try:
+        docrule_id = request.session['docrule_id'] or None
+    except KeyError:
+        warnings.append(MDTUI_ERROR_STRINGS[1])
+
     if request.POST:
         secondary_indexes = processDocumentIndexForm(request)
         if secondary_indexes:
                 request.session["document_keys_dict"] = secondary_indexes
                 # Success, allocate barcode
-                dtr = DocumentTypeRule.objects.get(doccode_id=request.session['docrule_id'])
+                dtr = DocumentTypeRule.objects.get(doccode_id=docrule_id)
                 request.session["barcode"] = dtr.allocate_barcode()
                 return HttpResponseRedirect(reverse('mdtui-index-source'))
         else:
-            # Return validation with errrors...
+            # Return validation with errors...
             form = initIndexesForm(request)
     else:
-        try:
-            request.session['docrule_id']
-        except KeyError:
-            warnings.append(MDTUI_ERROR_STRINGS[1])
         form = initIndexesForm(request)
 
     autocomplete_list = extract_secondary_keys_from_form(form)
@@ -293,37 +294,40 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
     warnings = []
     index_info = None
     docrule = None
+    barcode = None
 
+    # Check session variables
     try:
         document_keys = request.session["document_keys_dict"]
     except KeyError:
         warnings.append(MDTUI_ERROR_STRINGS[2])
 
     try:
-        barcode = request.session['barcode'] or None
+        barcode = request.session['barcode']
     except KeyError:
         warnings.append(MDTUI_ERROR_STRINGS[2])
 
-    form = DocumentUploadForm(request.POST or None, request.FILES or None)
+    try:
+        index_info = request.session["document_keys_dict"]
+    except KeyError:
+        warnings.append(MDTUI_ERROR_STRINGS[3])
 
-    if request.POST: # or Something else eg barcode printer
+    try:
+        docrule = request.session['docrule_id']
+    except KeyError:
+        warnings.append(MDTUI_ERROR_STRINGS[1])
 
-        try:
-            index_info = request.session["document_keys_dict"]
-        except KeyError:
-            warnings.append(MDTUI_ERROR_STRINGS[3])
+    # Init Forms
+    upload_form = DocumentUploadForm(request.POST or None, request.FILES or None)
+    barcode_form = BarcodePrintedForm(request.POST or None)
 
-        try:
-            docrule = request.session['docrule_id']
-        except KeyError:
-            warnings.append(MDTUI_ERROR_STRINGS[1])
+    if request.POST:
 
-
-        if form.is_valid(): # Uploaded a file or printed a barcode
+        if upload_form.is_valid() or barcode_form.is_valid():
 
             if not warnings:
                 manager = DocumentManager()
-                manager.store(request, form.files['file'] or None, index_info=index_info, barcode=barcode)
+                manager.store(request, upload_form.files['file'] or None, index_info=index_info, barcode=barcode)
 
                 if not manager.errors:
                     return HttpResponseRedirect(reverse('mdtui-index-finished'))
@@ -331,15 +335,9 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
                     # FIXME: dodgy error handling
                     return HttpResponse(str(manager.errors))
 
-        #elif: # Something else, eg barcode printer
-            # Allocate Empty Barcode
-            # manager = DocumentManager()
-            # manager.store(request, index_info=index_info or None, barcode=barcode or None)
-            # NB need to modify DocumentManager to set_db_info and not require a file
-            # Print barcode
-
     context.update( { 'step': step,
-                      'form': form,
+                      'upload_form': upload_form,
+                      'barcode_form': barcode_form,
                       'document_keys': document_keys,
                       'warnings': warnings,
                       'barcode': barcode,
@@ -369,13 +367,6 @@ def indexing_finished(request, step=None, template='mdtui/indexing.html'):
     cleanup_indexing_session(request)
     cleanup_mdts(request)
     return render(request, template, context)
-
-
-def indexing_barcode(request):
-    """
-    Indexing: Step X: Print Barcode
-    """
-    return HttpResponse('Barcode Printing')
 
 
 @login_required

@@ -162,13 +162,19 @@
             <h3>Print Barcode</h3>
         </div>
         <div class="modal-body">
+            <form id="barcode-print-form" class="" enctype="multipart/form-data" action="{{ request.path }}" method="post">
+                {% csrf_token %}
+                {% for field in barcode_form %}
+                    {{ field }}
+                {% endfor %}
+            </form>
             <p>Please wait for the barcode to print.</p>
             <p>After printing you may continue.</p>
             <p>Click <a href="#" onclick="printBarcode();">here</a> if you need to reprint.</p>
         </div>
         <iframe src="" id="printer" style="visibility: hidden;" width="0" height="0"></iframe>
         <div class="modal-footer">
-            <a href="#" class="btn btn-primary">Continue <i class="icon-chevron-right icon-white"></i></a>
+            <a href="#" class="btn btn-primary" id="barcode-print-submit">Continue <i class="icon-chevron-right icon-white"></i></a>
             <a href="#" class="btn btn-primary" onclick="printBarcode();">Reprint</a>
             <a href="#myModal" class="btn btn-danger" data-dismiss="modal"><i class="icon-trash icon-white"></i> Cancel</a>
         </div>
@@ -184,7 +190,7 @@
             <form id="file-upload-form" class="form-horizontal well" enctype="multipart/form-data" action="{{ request.path }}" method="post">
                 {% csrf_token %}
                 <fieldset>
-                    {% for field in form %}
+                    {% for field in upload_form %}
                     <div class="control-group">
                         {% if field.errors %}
                         {% for error in field.errors %}
@@ -284,10 +290,14 @@
 
     /* Make the link act as a submit button on upload form */
     $('#file-upload-submit').on('click', function(e){
-        // We don't want this to act as a link so cancel the link action
         e.preventDefault();
-        // Find form and submit it
         $('#file-upload-form').submit();
+    });
+
+    /* Make the link act as a submit button on barcode form */
+    $('#barcode-print-submit').on('click', function(e){
+        e.preventDefault();
+        $('#barcode-print-form').submit();
     });
 
 </script>
