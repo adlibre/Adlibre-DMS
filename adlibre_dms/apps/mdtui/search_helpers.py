@@ -57,7 +57,12 @@ def document_date_range_with_keys_search(cleaned_document_keys, docrule_id):
                 search_res = CouchDocument.view('dmscouch/search', startkey=startkey, endkey=endkey)
                 resp_set.append(search_res)
     docs_list = convert_search_res_for_range(resp_set, cleaned_document_keys)
-    documents = CouchDocument.view('_all_docs', keys=docs_list, include_docs=True)
+    raw_docs = CouchDocument.view('_all_docs', keys=docs_list, include_docs=True)
+    docs_by_docrule_filter = filter_couch_docs_by_docrule_id(raw_docs, docrule_id)
+    if docs_list == docs_by_docrule_filter:
+        documents = raw_docs
+    else:
+        documents = CouchDocument.view('_all_docs', keys=docs_by_docrule_filter, include_docs=True)
     if documents:
         log.debug(
             'Search results by date range with additional keys: "%s", docrule: "%s", documents: "%s"' %
@@ -76,7 +81,7 @@ def filter_couch_docs_by_docrule_id(documents, docrule_id):
     """
     doc_ids_list = []
     for document in documents:
-        if document['metadata_doc_type_rule_id']==docrule_id:
+        if document['metadata_doc_type_rule_id'] == docrule_id:
             doc_ids_list.append(document.get_id)
     return doc_ids_list
 
