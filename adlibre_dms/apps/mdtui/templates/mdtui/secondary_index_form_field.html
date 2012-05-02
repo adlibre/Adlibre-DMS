@@ -20,7 +20,7 @@
     </div>
 {% else %}
     {# Dynamic Date type fields rendering #}
-    {% if not field.name = "date"%} {% if not field.name = "end_date" %}
+    {% if not field.name = "date" %} {% if not field.name = "end_date" %}
         <div class="control-group">
             {%  if field.errors %}
                 {%  for error in field.errors %}
@@ -30,12 +30,12 @@
                     </div>
                 {% endfor %}
             {% endif %}
-            <label class="control-label" for="id_date">{{ field.label }}</label>
+            <label class="control-label" for="id_date_{{ field.name }}">{{ field.label }}</label>
             <div class="input">
                 <div class="controls">
                     <div class="input-prepend">
                         <span class="add-on"><i class="icon-calendar"></i></span>
-                        <input id="id_date" type="text" value="{{ field.value|date:'Y-m-d' }}" name="{{ field.name }}" data-datepicker="datepicker" />
+                        <input id="id_date_{{ field.name }}" type="text" value="{{ field.value|date:'Y-m-d' }}" name="{{ field.name }}" data-datepicker="datepicker" />
                         {% if field.name = "date" %}
                             {# Additional date range field #}
                         {% endif %}
