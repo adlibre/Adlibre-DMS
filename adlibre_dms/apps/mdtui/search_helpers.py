@@ -100,7 +100,7 @@ def cleanup_document_keys(document_keys):
 def ranges_validator(cleaned_document_keys):
     """
     Validates search keys for ranges.
-    Andds range measures to single date keys
+    Adds range measures to single date keys
     """
     keys_list = [key for key in cleaned_document_keys.iterkeys()]
     for key in keys_list:
