@@ -65,7 +65,7 @@ def search_type(request, step, template='mdtui/search.html'):
             if form.is_valid():
                 mdts = None
                 docrule = form.data["docrule"]
-                request.session['docrule'] = docrule
+                request.session['search_docrule_id'] = docrule
                 # CouchDB connection Felt down warn user
                 try:
                     mdts = get_mdts_for_docrule(docrule)
@@ -80,7 +80,7 @@ def search_type(request, step, template='mdtui/search.html'):
         form = DocumentTypeSelectForm()
         # Trying to set docrule if previously selected
         try:
-            docrule = request.session['docrule']
+            docrule = request.session['search_docrule_id']
         except KeyError:
             pass
         if docrule:
@@ -102,13 +102,13 @@ def search_options(request, step, template='mdtui/search.html'):
     warnings = []
     autocomplete_list = None
     try:
-        request.session["docrule"]
+        request.session['search_docrule_id']
     except KeyError:
         warnings.append(MDTUI_ERROR_STRINGS[4])
 
     # CouchDB connection Felt down warn user
     try:
-        form = initIndexesForm(request)
+        form = initIndexesForm(request, search=True)
         autocomplete_list = extract_secondary_keys_from_form(form)
     except (RequestError,AttributeError) :
         form = DocumentSearchOptionsForm
@@ -122,7 +122,7 @@ def search_options(request, step, template='mdtui/search.html'):
             warnings.append(MDTUI_ERROR_STRINGS[5])
 
         if secondary_indexes:
-            request.session["document_search_dict"] = secondary_indexes
+            request.session['document_search_dict'] = secondary_indexes
             return HttpResponseRedirect(reverse('mdtui-search-results'))
 
     context = {
@@ -145,8 +145,8 @@ def search_results(request, step=None, template='mdtui/search.html'):
     warnings = []
     mdts_list = None
     try:
-        document_keys = request.session["document_search_dict"]
-        docrule_id = request.session['docrule']
+        document_keys = request.session['document_search_dict']
+        docrule_id = request.session['search_docrule_id']
     except KeyError:
         warnings.append(MDTUI_ERROR_STRINGS[3])
     log.debug('search_results call: docrule_id: "%s", document_search_dict: "%s"' % (docrule_id, document_keys))
@@ -211,7 +211,7 @@ def indexing_select_type(request, step=None, template='mdtui/indexing.html'):
     if request.POST:
         if form.is_valid():
             docrule = form.data["docrule"]
-            request.session['docrule_id'] = docrule
+            request.session['indexing_docrule_id'] = docrule
             mdts = get_mdts_for_docrule(docrule)
             if mdts:
                 request.session['mdts'] = mdts
@@ -219,7 +219,7 @@ def indexing_select_type(request, step=None, template='mdtui/indexing.html'):
     else:
         # form initing with docrule set if it was done previous
         try:
-            docrule = request.session["docrule_id"]
+            docrule = request.session['indexing_docrule_id']
         except KeyError:
             pass
         form = DocumentTypeSelectForm()
@@ -253,7 +253,7 @@ def indexing_details(request, step=None, template='mdtui/indexing.html'):
     docrule_id = None
 
     try:
-        docrule_id = request.session['docrule_id']
+        docrule_id = request.session['indexing_docrule_id']
     except KeyError:
         warnings.append(MDTUI_ERROR_STRINGS[1])
 
@@ -272,9 +272,9 @@ def indexing_details(request, step=None, template='mdtui/indexing.html'):
                 return HttpResponseRedirect(reverse('mdtui-index-source'))
         else:
             # Return validation with errors...
-            form = initIndexesForm(request)
+            form = initIndexesForm(request, search=False)
     else:
-        form = initIndexesForm(request)
+        form = initIndexesForm(request, search=False)
 
     autocomplete_list = extract_secondary_keys_from_form(form)
 
@@ -316,7 +316,7 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
         warnings.append(MDTUI_ERROR_STRINGS[3])
 
     try:
-        docrule = request.session['docrule_id']
+        docrule = request.session['indexing_docrule_id']
     except KeyError:
         warnings.append(MDTUI_ERROR_STRINGS[1])
 
@@ -367,9 +367,10 @@ def indexing_finished(request, step=None, template='mdtui/indexing.html'):
         pass
 
     try:
-        context.update({'docrule_id':request.session["docrule_id"],})
+        context.update({'docrule_id':request.session['indexing_docrule_id'],})
     except KeyError:
         pass
+
     # document uploaded forget everything
     cleanup_indexing_session(request)
     cleanup_mdts(request)
@@ -390,13 +391,14 @@ def mdt_parallel_keys(request):
     resp = []
     # Trying to get docrule for indexing calls
     try:
-        docrule_id = request.session['docrule_id']
+        docrule_id = request.session['indexing_docrule_id']
     except KeyError:
         pass
+
     # Trying to get docrule for searching calls
     try:
         if not docrule_id:
-            docrule_id = request.session['docrule']
+            docrule_id = request.session['search_docrule_id']
     except KeyError:
         pass
 
