@@ -95,7 +95,7 @@ class CouchDocument(Document):
         """
         Unifies DB storage of date object received from document.
         """
-        # TODO: Standartize DATE parsing here!!!
+        # TODO: Standardize DATE parsing here!!!
         doc_date = None
         # trying to get date from db_info dict first
         try:

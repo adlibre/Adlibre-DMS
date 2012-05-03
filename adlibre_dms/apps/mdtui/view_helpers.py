@@ -11,7 +11,7 @@ from forms import DocumentSearchOptionsForm
 from forms_representator import render_fields_from_docrules
 from forms_representator import get_mdts_for_docrule
 
-def initIndexesForm(request):
+def initIndexesForm(request, search=False):
     """
     DocumentIndexForm/DocumentSearchForm initialization
     in case of GET returns an empty base form,
@@ -21,22 +21,23 @@ def initIndexesForm(request):
     details = None
     search = determine_search_req(request)
     try:
-        # Trying to use cached MDT's and instantiating if none exist.
+        # Try to use cached MDT's
         details = request.session['mdts']
     except KeyError:
-        # Getting MDT's from CouchDB
+        if search:
+            session_var = 'search_docrule_id'
+        else:
+            session_var = 'indexing_docrule_id'
+
+        # Get MDT's from CouchDB
         try:
-            try:
-                details = get_mdts_for_docrule(request.session['docrule_id'])
-            except KeyError:
-                details = get_mdts_for_docrule(request.session['docrule'])
-                search = True
-            # Storing MDT's into improvised cashe
+            details = get_mdts_for_docrule(request.session[session_var])
+            # Store MDT's into improvised cache
             request.session['mdts'] = details
         except KeyError:
             pass
 
-    # Selecting proper form depending on request type
+    # Selecting form depending on request type
     if search:
         form = DocumentSearchOptionsForm()
     else:
@@ -61,7 +62,7 @@ def processDocumentIndexForm(request):
     Handles document index form validation/population/data handling
     Works for search/indexing calls
     """
-    form = initIndexesForm(request)
+    form = initIndexesForm(request, search=False)
     secondary_indexes = {}
     search = determine_search_req(request)
     if form.validation_ok() or search:
@@ -152,7 +153,7 @@ def cleanup_search_session(request):
     """
     Makes MDTUI forget abut searching keys entered before.
     """
-    vars = ('document_search_dict', 'docrule',)
+    vars = ('document_search_dict', 'search_docrule_id',)
     for var in vars:
         _cleanup_session_var(request, var)
 
@@ -160,7 +161,7 @@ def cleanup_indexing_session(request):
     """
     Makes MDTUI forget abut indexing keys entered before.
     """
-    vars = ('document_keys_dict', 'docrule_id', 'barcode',)
+    vars = ('document_keys_dict', 'indexing_docrule_id', 'barcode',)
     for var in vars:
         _cleanup_session_var(request, var)
 
