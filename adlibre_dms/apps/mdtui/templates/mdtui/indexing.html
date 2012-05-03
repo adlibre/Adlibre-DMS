@@ -53,19 +53,19 @@
                 <legend>Step {{ step }}: {% if request.session.indexing_docrule_id %}{% get_docrule_name_by_id request.session.indexing_docrule_id %}{% endif %} Index Details</legend>
                 <br />
                 {# INDEX DETAILS FORM RENDERING #}
-                {#  Form non field errors dummy #}
-                {%  if form.non_field_errors %}
-                    {%  for error in form.non_field_errors %}
+                {# Form non field errors dummy #}
+                {% if form.non_field_errors %}
+                    {% for error in form.non_field_errors %}
                     <div class="alert alert-error">
                         <a class="close">×</a>
                         <strong>{{ error.message }}</strong>
                     </div>
-                    {%  endfor %}
-                {%  endif %}
+                    {% endfor %}
+                {% endif %}
                 {% for field in form %}
                 {# Form fields #}
                 {% if not field|field_type = "DateField" %}
-                <div class="control-group{%  if field.errors %} error{%  endif %}">
+                <div class="control-group{% if field.errors %} error{% endif %}">
                     <label class="control-label">{{ field.label }}</label>
                     <div class="controls">
                         {% if not field.value and field.field.initial %}
@@ -109,7 +109,6 @@
                 {% endif %}
                 {% endfor %}
 
-
             </fieldset>
 
             <div class="form-actions">
@@ -119,9 +118,7 @@
         </form>
     {% endif %} {# end step 2 #}
 
-
     {% if step == "3" %}
-
         <fieldset>
             <legend>Step {{ step }}: Select Source{% if request.session.indexing_docrule_id %} for {% get_docrule_name_by_id request.session.indexing_docrule_id %}{% endif %}</legend>
         </fieldset>
@@ -131,7 +128,7 @@
 
             <ul class="metainfo">
                 {% for item in document_keys %}
-                    <li>{%  get_key_li_item document_keys item %}</li>
+                    <li>{% get_key_li_item document_keys item %}</li>
                 {% endfor %}
             </ul>
         {% endif %}
@@ -173,7 +170,6 @@
         </div>
     </div>
 
-
     <div class="modal hide bigmodal" id="fileModal">
         <div class="modal-header">
             <button class="close" data-dismiss="modal">×</button>
@@ -186,6 +182,9 @@
                     {% for field in upload_form %}
                     <div class="control-group">
                         {% if field.errors %}
+                        <script type="text/javascript">
+                            $('#fileModal').modal('show');
+                        </script>
                         {% for error in field.errors %}
                         <div class="alert alert-error">
                             <a class="close">×</a>
@@ -218,7 +217,7 @@
         </fieldset>
 
         {% if document_keys %}
-        <p>Your document's indexing keys:</p>
+        <p>Your document has been indexed with the following keys:</p>
 
         <ul class="metainfo">
             {% for item in document_keys %}
@@ -227,7 +226,6 @@
         </ul>
         {% endif %}
 
-        <p>Your document has been indexed successfully!</p>
         <a class="btn btn-primary" href="{% url mdtui-index %}">Start Again <i class="icon-chevron-right icon-white"></i></a>
     {% endif %} {# end step 4 #}
 
@@ -265,40 +263,40 @@
     }
 
     $(document).ready(function(){
+        /* Autoprint barcode */
         $('#printModal').on('show',function(){
             printBarcode();
         });
-    });
 
-    /* Make the link act as a submit button on upload form */
-    $('#file-upload-submit').on('click', function(e){
-        e.preventDefault();
-        $('#file-upload-form').submit();
-    });
-
-    /* Make the link act as a submit button on barcode form */
-    $('#barcode-print-submit').on('click', function(e){
-        e.preventDefault();
-        $('#barcode-print-form').submit();
-    });
-
-    /* IE, make the file upload modal larger and the file input bigger */
-    if ($.browser.msie) {
-        /* Show the name of the file to be uploaded under the file upload box */
-        $('#id_file').change(function(e){
-            var filename = $(this).val().replace(/C:\\fakepath\\/i, '')
-            $in=$(this);
-            $in.next().html(filename);
+        /* Make the link act as a submit button on upload form */
+        $('#file-upload-submit').on('click', function(e){
+            e.preventDefault();
+            $('#file-upload-form').submit();
         });
-        $('#id_file').attr('class', 'input-xxlarge');
-    }
 
-    /* Prevent file upload double submit */
-    $('#file-upload-form').on('submit', function(e){
-        $('#file-upload-submit').attr('disabled', true);
-        $('#file-upload-cancel').attr('disabled', true);
+        /* Make the link act as a submit button on barcode form */
+        $('#barcode-print-submit').on('click', function(e){
+            e.preventDefault();
+            $('#barcode-print-form').submit();
+        });
+
+        /* IE, make the file upload modal larger and the file input bigger */
+        if ($.browser.msie) {
+            /* Show the name of the file to be uploaded under the file upload box */
+            $('#id_file').change(function(e){
+                var filename = $(this).val().replace(/C:\\fakepath\\/i, '')
+                $in=$(this);
+                $in.next().html(filename);
+            });
+            $('#id_file').attr('class', 'input-xxlarge');
+        }
+
+        /* Prevent file upload double submit */
+        $('#file-upload-form').on('submit', function(e){
+            $('#file-upload-submit').attr('disabled', true);
+            $('#file-upload-cancel').attr('disabled', true);
+        });
     });
-
 </script>
 {% endif %}
 {% endblock %}

@@ -6,12 +6,21 @@
     <meta charset="UTF-8">
     <title>{% block page_title %}{% endblock %}</title>
 
-    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    {% block javascript %}
+    <!-- HTML5 shim, for IE6-8 support of HTML elements -->
     <!--[if lt IE 9]>
     <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
+    <script src="{{ STATIC_URL }}js/jquery-1.7.1.min.js "></script>
+    <script src="{{ STATIC_URL }}js/bootstrap-collapse.js"></script>
+    <script src="{{ STATIC_URL }}js/bootstrap-tab.js"></script>
+    <script src="{{ STATIC_URL }}js/bootstrap-datepicker.js"></script>
+    <script src="{{ STATIC_URL }}js/bootstrap-modal.js"></script>
+    {% compress js %}
+    <script src="{{ STATIC_URL }}js/bootstrap-typeahead.js"></script>
+    {% endcompress %}
+    {% endblock %}
 
-    <!-- Le styles -->
     {% compress css %}
     {% block css %}
     <link href="{{ STATIC_URL }}css/bootstrap.css" rel="stylesheet">
@@ -75,7 +84,6 @@
             top: 488px;
         }
     </style>
-
     {% endblock %}
     {% endcompress %}
 
@@ -148,19 +156,7 @@
         <p><a href="http://www.adlibre.com.au/">{% trans 'Adlibre DMS' %}</a> - &copy; Adlibre {% now "Y" %} </p>
     </footer>
 
-{% block js_footer %}
-    <!-- Le javascript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script src="{{ STATIC_URL }}js/jquery-1.7.1.min.js "></script>
-    <script src="{{ STATIC_URL }}js/bootstrap-collapse.js"></script>
-    <script src="{{ STATIC_URL }}js/bootstrap-tab.js"></script>
-    <script src="{{ STATIC_URL }}js/bootstrap-datepicker.js"></script>
-    <script src="{{ STATIC_URL }}js/bootstrap-modal.js"></script>
-    {% compress js %}
-    <script src="{{ STATIC_URL }}js/bootstrap-typeahead.js"></script>
-    {% endcompress %}
-{% endblock %}
+{% block js_footer %}{% endblock %}
 
 {% compress js %}
 {% block js_extra %}{% endblock %}
