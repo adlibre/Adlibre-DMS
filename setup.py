@@ -89,7 +89,7 @@ setup(name='adlibre_dms',
         ('deployment', find_files('deployment', '*')),
         ('log', ['log/.gitignore']), # create empty dir
         ('www', ['www/.gitignore']), # create empty dir
-        ('www/status-files', ['www/status-files/500.html', 'www/status-files/503.html']),
+        ('www/status-pages', ['www/status-pages/500.html', 'www/status-pages/503.html']),
     ],
     install_requires=[
             # Core requirements
