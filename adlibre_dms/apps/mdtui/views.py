@@ -320,9 +320,16 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
     except KeyError:
         warnings.append(MDTUI_ERROR_STRINGS[1])
 
-    # Init Forms
-    upload_form = DocumentUploadForm(request.POST or None, request.FILES or None)
-    barcode_form = BarcodePrintedForm(request.POST or None)
+    # Init Forms correctly depending on url posted
+    if request.GET.get('uploaded') is None:
+        upload_form = DocumentUploadForm()
+    else:
+        upload_form = DocumentUploadForm(request.POST or None, request.FILES or None)
+
+    if request.GET.get('barcoded') is None:
+        barcode_form = BarcodePrintedForm()
+    else:
+        barcode_form = BarcodePrintedForm(request.POST or None)
 
     if upload_form.is_valid() or barcode_form.is_valid():
         if not warnings:

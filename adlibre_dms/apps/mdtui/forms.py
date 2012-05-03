@@ -31,7 +31,17 @@ class DocumentUploadForm(forms.Form):
     file = forms.FileField()
 
 class BarcodePrintedForm(forms.Form):
-    printed = forms.HiddenInput()
+    printed = forms.CharField(required=True,widget=forms.HiddenInput)
+
+    def __init__(self, *args, **kwargs):
+        super(BarcodePrintedForm, self).__init__(*args, **kwargs)
+        self.fields['printed'].initial = 'printed'
+
+    def clean_printed(self):
+        printed = self.cleaned_data.get('printed')
+        if not printed == 'printed':
+            raise forms.ValidationError("Form not validated")
+        return printed
 
 class DocumentIndexForm(forms.Form):
     """
