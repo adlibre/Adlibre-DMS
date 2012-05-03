@@ -127,6 +127,7 @@
             <p>Your document's indexing keys:</p>
 
             <ul class="metainfo">
+                <li>Barcode: {{ barcode }}</li>
                 {% for item in document_keys %}
                     <li>{% get_key_li_item document_keys item %}</li>
                 {% endfor %}
@@ -220,8 +221,9 @@
         <p>Your document has been indexed with the following keys:</p>
 
         <ul class="metainfo">
+            <li>Barcode: {{ barcode }}</li>
             {% for item in document_keys %}
-            <li>{%  get_key_li_item document_keys item %}</li>
+            <li>{% get_key_li_item document_keys item %}</li>
             {% endfor %}
         </ul>
         {% endif %}

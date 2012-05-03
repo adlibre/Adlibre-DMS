@@ -187,7 +187,6 @@ def view_pdf(request, code, step, template='mdtui/view.html'):
     """
     View PDF Document
     """
-
     pdf_url = reverse('mdtui-download-pdf', kwargs = { 'code': code, })
     context = { 'pdf_url': pdf_url, 'code': code, 'step':step }
     return render(request, template, context)
@@ -367,14 +366,19 @@ def indexing_finished(request, step=None, template='mdtui/indexing.html'):
     """
     context = { 'step': step,  }
     try:
-        context.update({'document_keys':request.session["document_keys_dict"],})
+        context.update({'document_keys': request.session['document_keys_dict'],})
         log.debug('indexing_finished called with: step: "%s", document_keys_dict: "%s",' %
                   (step, context['document_keys']))
     except KeyError:
         pass
 
     try:
-        context.update({'docrule_id':request.session['indexing_docrule_id'],})
+        context.update({'barcode': request.session['barcode'],})
+    except KeyError:
+        pass
+
+    try:
+        context.update({'docrule_id': request.session['indexing_docrule_id'],})
     except KeyError:
         pass
 
