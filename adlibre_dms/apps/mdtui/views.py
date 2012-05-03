@@ -30,7 +30,7 @@ from search_helpers import document_date_range_only_search
 from search_helpers import document_date_range_with_keys_search
 from search_helpers import recognise_dates_in_search
 from search_helpers import document_date_range_present_in_keys
-from search_helpers import dates_ranges_exist
+from search_helpers import get_docrules_used_in_mdts
 from search_helpers import ranges_validator
 from forms_representator import get_mdts_for_docrule
 from parallel_keys import ParallelKeysManager
@@ -156,7 +156,6 @@ def search_results(request, step=None, template='mdtui/search.html'):
         ck = ranges_validator(clean_keys)
         cleaned_document_keys = recognise_dates_in_search(ck)
         keys = [key for key in cleaned_document_keys.iterkeys()]
-        dr_exist = dates_ranges_exist(cleaned_document_keys)
         dd_range_keys = document_date_range_present_in_keys(keys)
         keys_cnt = cleaned_document_keys.__len__()
         # Selecting appropriate search method
@@ -417,6 +416,7 @@ def mdt_parallel_keys(request):
     )
     if valid_call:
         manager = ParallelKeysManager()
+        allowed_docrules = get_docrules_used_in_mdts(mdts)
         mdts = manager.get_keys_for_docrule(docrule_id, mdts)
         pkeys = manager.get_parallel_keys_for_key(mdts, key_name)
         # db call to search in docs
@@ -437,7 +437,7 @@ def mdt_parallel_keys(request):
                         resp_array[pkey['field_name']] = doc.mdt_indexes[pkey['field_name']]
                 suggestion = json.dumps(resp_array)
                 # filtering from existing results
-                if not suggestion in resp:
+                if not suggestion in resp and doc.metadata_doc_type_rule_id in allowed_docrules:
                     resp.append(suggestion)
         else:
             # Simple 'single' key suggestion
@@ -451,7 +451,7 @@ def mdt_parallel_keys(request):
             for doc in documents:
                 resp_array = {key_name: doc.mdt_indexes[key_name]}
                 suggestion = json.dumps(resp_array)
-                if not suggestion in resp:
+                if not suggestion in resp and doc.metadata_doc_type_rule_id in allowed_docrules:
                     resp.append(suggestion)
     log.debug('mdt_parallel_keys response: %s' % resp)
     return HttpResponse(json.dumps(resp))
