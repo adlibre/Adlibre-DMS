@@ -229,27 +229,8 @@
 
         <p>Your document has been indexed successfully!</p>
         <a class="btn btn-primary" href="{% url mdtui-index %}">Start Again <i class="icon-chevron-right icon-white"></i></a>
-        {%  comment %}
-        <form class="form-horizontal" action="{{ request.path }}" method="post">
-            {% csrf_token %}
-        <div class="form-actions">
-            <button type="submit" class="btn btn-success"><i class="icon-ok icon-white"></i> OK</button>
-            <button type="submit" class="btn btn-success"><i class="icon-ok icon-white"></i> Print Barcode</button>
-        </div>
-        </form>
-        {%  endcomment %}
     {% endif %} {# end step 4 #}
 
-    {%  comment %}
-    {% if step == "5" %}
-        <fieldset>
-            <legend>Step {{ step }}: Thank you{# or print barcode if barcode required #}</legend>
-        </fieldset>
-        <br />
-
-
-    {% endif %} {# end step 5 #}
-    {%  endcomment %}
 {% endblock %}
 
 {% block css_extra %}
@@ -317,9 +298,6 @@
         $('#file-upload-submit').attr('disabled', true);
         $('#file-upload-cancel').attr('disabled', true);
     });
-
-
-
 
 </script>
 {% endif %}
