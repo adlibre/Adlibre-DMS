@@ -174,7 +174,7 @@
     </div>
 
 
-    <div class="modal hide" id="fileModal">
+    <div class="modal hide bigmodal" id="fileModal">
         <div class="modal-header">
             <button class="close" data-dismiss="modal">×</button>
             <h3>Upload File</h3>
@@ -261,6 +261,14 @@
         background-position: 100px 201px;
     }
 </style>
+<!--[if IE]>
+<style type="text/css">
+    .bigmodal {
+        width:940px;
+        margin-left:-470px;
+    }
+</style>
+<![endif]-->
 {% endblock %}
 
 {% block js_extra_inline %}
@@ -293,14 +301,17 @@
         $('#barcode-print-form').submit();
     });
 
-    /* Add the path of the file upload under the file upload box. IE only */
-    $('#id_file').change(function(e){
-        if ($.browser.msie) {
+    /* IE, make the file upload modal larger and the file input bigger */
+    if ($.browser.msie) {
+        /* Show the name of the file to be uploaded under the file upload box */
+        $('#id_file').change(function(e){
             var filename = $(this).val().replace(/C:\\fakepath\\/i, '')
             $in=$(this);
             $in.next().html(filename);
-        }
-    });
+        });
+        $('#id_file').attr('class', 'input-xxlarge');
+    }
+
 
 </script>
 {% endif %}
