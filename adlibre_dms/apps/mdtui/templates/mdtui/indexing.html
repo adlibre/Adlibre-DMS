@@ -57,7 +57,7 @@
         <form class="form-horizontal" action="{{ request.path }}" method="post">
             {% csrf_token %}
             <fieldset>
-                <legend>Step {{ step }}: {% if request.session.docrule_id %}{% get_docrule_name_by_id request.session.docrule_id %}{% endif %} Index Details</legend>
+                <legend>Step {{ step }}: {% if request.session.indexing_docrule_id %}{% get_docrule_name_by_id request.session.indexing_docrule_id %}{% endif %} Index Details</legend>
                 <br />
                 {# INDEX DETAILS FORM RENDERING #}
                 {#  Form non field errors dummy #}
@@ -130,7 +130,7 @@
     {% if step == "3" %}
 
         <fieldset>
-            <legend>Step {{ step }}: Select Source{% if request.session.docrule_id %} for {% get_docrule_name_by_id request.session.docrule_id %}{% endif %}</legend>
+            <legend>Step {{ step }}: Select Source{% if request.session.indexing_docrule_id %} for {% get_docrule_name_by_id request.session.indexing_docrule_id %}{% endif %}</legend>
         </fieldset>
 
         {% if document_keys %}
