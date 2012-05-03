@@ -31,13 +31,7 @@
     </div>
     {% endfor %}
 
-    {% if step == None %} {# This step will no long be visible #}
-    <p>This is where it begins...</p>
-    <a class="btn btn-primary btn-large" href="{% url mdtui-index-type %}">Start <i class="icon-chevron-right icon-white"></i></a>
-    {% endif %}
-
     {% if step == "1" %}
-
         <form class="form-horizontal" action="{{ request.path }}" method="post">
             {% csrf_token %}
             <fieldset>
@@ -53,7 +47,6 @@
     {% endif %} {# end step 1 #}
 
     {% if step == "2" %}
-
         <form class="form-horizontal" action="{{ request.path }}" method="post">
             {% csrf_token %}
             <fieldset>
