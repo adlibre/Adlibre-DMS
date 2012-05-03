@@ -296,8 +296,9 @@
     /* Add the path of the file upload under the file upload box. IE only */
     $('#id_file').change(function(e){
         if ($.browser.msie) {
+            var filename = $(this).val().replace(/C:\\fakepath\\/i, '')
             $in=$(this);
-            $in.next().html($in.val());
+            $in.next().html(filename);
         }
     });
 
