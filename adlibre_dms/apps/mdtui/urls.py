@@ -16,7 +16,6 @@ urlpatterns = patterns('mdtui.views',
     url(r'^search/type', 'search_type', {'step':'type',}, name='mdtui-search-type'),
     url(r'^search/options$', 'search_options', {'step':'options',}, name='mdtui-search-options'),
     url(r'^search/results$', 'search_results', {'step':'results',}, name='mdtui-search-results'),
-    url(r'^search/view/(?P<code>[\w_-]+)$', 'search_viewer', {'step':'view',}, name='mdtui-search-view'),
     url(r'^search/export/$', 'search_results', {'step':'export'}, name='mdtui-search-export'),
     # Indexing
     url(r'^indexing/type$$', 'indexing_select_type', {'step':'1',}, name='mdtui-index'),
@@ -26,6 +25,7 @@ urlpatterns = patterns('mdtui.views',
     url(r'^indexing/finished$', 'indexing_finished', {'step':'4',}, name='mdtui-index-finished'),
     # Common
     url(r'^download/(?P<code>[\w_-]+)$', 'download_pdf', name='mdtui-download-pdf'),
+    url(r'^view/(?P<code>[\w_-]+)$', 'view_pdf', {'step':'view',}, name='mdtui-view-pdf'),
     # AJAX
     url(r'^parallel/$', 'mdt_parallel_keys', name='mdtui-parallel-keys'),
 )

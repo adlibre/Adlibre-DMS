@@ -183,9 +183,9 @@ def search_results(request, step=None, template='mdtui/search.html'):
 
 
 @login_required
-def search_viewer(request, code, step, template='mdtui/view.html'):
+def view_pdf(request, code, step, template='mdtui/view.html'):
     """
-    Search Step 4: View Document
+    View PDF Document
     """
 
     pdf_url = reverse('mdtui-download-pdf', kwargs = { 'code': code, })
