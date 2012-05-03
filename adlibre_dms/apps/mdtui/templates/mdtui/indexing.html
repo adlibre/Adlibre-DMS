@@ -293,6 +293,14 @@
         $('#barcode-print-form').submit();
     });
 
+    /* Add the path of the file upload under the file upload box. IE only */
+    $('#id_file').change(function(e){
+        if ($.browser.msie) {
+            $in=$(this);
+            $in.next().html($in.val());
+        }
+    });
+
 </script>
 {% endif %}
 {% endblock %}
