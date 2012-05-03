@@ -1,0 +1,3 @@
+These are where the custom service status pages go for our http server.
+
+Eg when the FCGI processes are down, the 503 page is rendered
