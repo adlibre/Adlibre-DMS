@@ -48,8 +48,10 @@ def render_fields_from_docrules(mdts_dict, init_dict=None, search=False):
     for mdt_key, mdt_value in mdts_dict.iteritems():
         #print mdt_value['fields']
         if mdt_value["fields"]:
-            for field_key, field_value in mdt_value['fields'].iteritems():
-                #print field_value
+            # Sort fields
+            sorted_fields = mdt_value['fields'].items()
+            sorted_fields.sort()
+            for field_key, field_value in sorted_fields:
                 form_field = None
                 if field_value["type"]==u'integer':
                     if unicode(counter) in init_dict and init_dict[unicode(counter)]:
