@@ -162,7 +162,7 @@
             <h3>Print Barcode</h3>
         </div>
         <div class="modal-body">
-            <form id="barcode-print-form" class="" enctype="multipart/form-data" action="{{ request.path }}" method="post">
+            <form id="barcode-print-form" class="" enctype="multipart/form-data" action="{{ request.path }}?barcoded" method="post">
                 {% csrf_token %}
                 {% for field in barcode_form %}
                     {{ field }}
@@ -187,7 +187,7 @@
             <h3>Upload File</h3>
         </div>
         <div class="modal-body">
-            <form id="file-upload-form" class="form-horizontal well" enctype="multipart/form-data" action="{{ request.path }}" method="post">
+            <form id="file-upload-form" class="form-horizontal well" enctype="multipart/form-data" action="{{ request.path }}?uploaded" method="post">
                 {% csrf_token %}
                 <fieldset>
                     {% for field in upload_form %}
