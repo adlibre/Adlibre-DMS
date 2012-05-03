@@ -17,7 +17,7 @@ def do_key_li_item(parser, token):
     Useful for rendering search/indexing form request.
     """
     try:
-        # splitings args provided
+        # splitting args provided
         tag_name, keys_dict, key_item = token.split_contents()
     except ValueError:
         raise template.TemplateSyntaxError("%r tag requires exactly two arguments" % token.contents.split()[0])
@@ -59,7 +59,7 @@ def do_docrule_name_by_id(parser, token):
     Uses standard DocruleManager method without making any db requests.
     """
     try:
-        # splitings args provided
+        # splitting args provided
         tag_name, key_item = token.split_contents()
     except ValueError:
         raise template.TemplateSyntaxError("%r tag requires exactly one argument" % token.contents.split()[0])
@@ -87,7 +87,7 @@ def do_sec_key_for_doc_mdtkey(parser, token):
     Returns Secondary Key for this document to populate Search metadata Key's results.
     """
     try:
-        # splitings args provided
+        # splitting args provided
         tag_name, doc_keys_dict, key_item = token.split_contents()
     except ValueError:
         raise template.TemplateSyntaxError("%r tag requires exactly 2 arguments" % token.contents.split()[0])
@@ -116,7 +116,7 @@ def get_field_id_from_form_by_name(parser, token):
     Returns Form #id for Secondary Key field provided. Uses Indexes form to retrieve dependency.
     """
     try:
-        # splitings args provided
+        # splitting args provided
         tag_name, form, key_item = token.split_contents()
     except ValueError:
         raise template.TemplateSyntaxError("%r tag requires exactly 2 arguments" % token.contents.split()[0])

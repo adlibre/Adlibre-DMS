@@ -59,7 +59,7 @@
         <form class="form-horizontal" action="{{ request.path }}" method="post">
             {% csrf_token %}
             <fieldset>
-                <legend>{% if request.session.docrule %}{% get_docrule_name_by_id request.session.docrule %} {% endif %}Search Options</legend>
+                <legend>{% if request.session.search_docrule_id %}{% get_docrule_name_by_id request.session.search_docrule_id %} {% endif %}Search Options</legend>
 
                 <br />
                 {% comment %}
@@ -84,7 +84,7 @@
 
     {% if step == "results" %}
         <fieldset>
-            <legend>{% if request.session.docrule %}{% get_docrule_name_by_id request.session.docrule %} {% endif %} Results</legend>
+            <legend>{% if request.session.search_docrule_id %}{% get_docrule_name_by_id request.session.search_docrule_id %} {% endif %} Results</legend>
         </fieldset>
 
         <table class="table table-striped" id="results-table">
@@ -110,7 +110,7 @@
             <tbody>
             {% for doc in documents %}
                 <tr>
-                    <td style="white-space: nowrap;"><a href="{% url mdtui-search-view doc.id %}" title="View Document" target="_blank"><i class="icon-download"></i> {{ doc.id }}</a></td>
+                    <td style="white-space: nowrap;"><a href="{% url mdtui-view-pdf doc.id %}" title="View Document" target="_blank"><i class="icon-download"></i> {{ doc.id }}</a></td>
                     <td style="white-space: nowrap;">{{ doc.metadata_created_date|date:"Y-m-d" }}</td>
                     
                     {% for key in mdts %}
