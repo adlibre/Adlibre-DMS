@@ -5,7 +5,7 @@
 #
 # Uses UNIX sockets for FCGI
 #
-# Version 2.2
+# Version 2.3
 
 # Project Specific Config
 PROJNAME='adlibre_dms'
@@ -54,11 +54,13 @@ function stopit {
         RC=$?
         echo "Process(s) Terminated."
         rm -f -- ${WPIDFILE}
+        rm -f -- ${SOCKET}
     else
         echo "PIDFILE not found. Killing likely processes."
         kill `pgrep -f "python ${SRCDIR}/manage.py runfcgi method=threaded minspare=${MINSPARE} maxspare=${MAXSPARE} maxchildren=${MAXCHILDREN} socket=$SOCKET pidfile=${WPIDFILE} --settings=${SETTINGS}"`
         RC=$?
         echo "Process(s) Terminated."
+        rm -f -- ${SOCKET}
     fi
 }
 
