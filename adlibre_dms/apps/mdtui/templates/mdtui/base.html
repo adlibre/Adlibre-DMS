@@ -156,7 +156,17 @@
         <p><a href="http://www.adlibre.com.au/">{% trans 'Adlibre DMS' %}</a> - &copy; Adlibre {% now "Y" %} </p>
     </footer>
 
-{% block js_footer %}{% endblock %}
+{% block js_footer %}
+<script type="text/javascript">
+    $(document).ready(function(){
+        /* Bind hide button on alert messages */
+        $('.alert a.close').on('click', function(e){
+            $(this).parent().hide();
+            alert($(this).hidden());
+        });
+    });
+</script>
+{% endblock %}
 
 {% compress js %}
 {% block js_extra %}{% endblock %}
