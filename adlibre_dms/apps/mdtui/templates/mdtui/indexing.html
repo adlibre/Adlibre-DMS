@@ -26,7 +26,7 @@
     {# WARNINGS HANDLER #}
     {% for warning in warnings %}
     <div class="alert">
-        <a class="close">×</a> {# TODO: Bind close event #}
+        <a class="close">×</a>
         <strong>{{ warning }}</strong>
     </div>
     {% endfor %}
@@ -161,12 +161,12 @@
             </form>
             <p>Please wait for the barcode to print.</p>
             <p>After printing you may continue.</p>
-            <p>Click <a href="#" onclick="printBarcode();">here</a> if you need to reprint.</p>
+            <p>Click <a href="#" class="btn-print-barcode">here</a> if you need to reprint.</p>
         </div>
         <iframe src="" id="printer" style="visibility: hidden;" width="0" height="0"></iframe>
         <div class="modal-footer">
             <a href="#" class="btn btn-primary" id="barcode-print-submit">Continue <i class="icon-chevron-right icon-white"></i></a>
-            <a href="#" class="btn btn-primary" onclick="printBarcode();">Reprint</a>
+            <a href="#" class="btn btn-primary btn-print-barcode">Reprint</a>
             <a href="#myModal" class="btn btn-danger" data-dismiss="modal"><i class="icon-trash icon-white"></i> Cancel</a>
         </div>
     </div>
@@ -183,9 +183,6 @@
                     {% for field in upload_form %}
                     <div class="control-group">
                         {% if field.errors %}
-                        <script type="text/javascript">
-                            $('#fileModal').modal('show');
-                        </script>
                         {% for error in field.errors %}
                         <div class="alert alert-error">
                             <a class="close">×</a>
@@ -270,6 +267,12 @@
             printBarcode();
         });
 
+        /* bind print barcode to appropriate buttons */
+        $('.btn-print-barcode').on('click', function(e){
+            e.preventDefault();
+            printBarcode();
+        });
+
         /* Make the link act as a submit button on upload form */
         $('#file-upload-submit').on('click', function(e){
             e.preventDefault();
@@ -298,6 +301,12 @@
             $('#file-upload-submit').attr('disabled', true);
             $('#file-upload-cancel').attr('disabled', true);
         });
+
+        /* show filemodal if there are alerts */
+        if ($('#fileModal .alert').length) {
+            $('#fileModal').modal('show');
+        }
+
     });
 </script>
 {% endif %}
