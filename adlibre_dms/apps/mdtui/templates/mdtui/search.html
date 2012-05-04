@@ -4,17 +4,17 @@
 {% load widget_tweaks %}
 
 {% block body_content %}
-    <h1 id="page-heading">{% block body_title %}Document Search{% endblock %}</h1>
+    <h1 id="page-heading">{% block body_title %}{% trans 'Document Search' %}{% endblock %}</h1>
 
     {% if step != None %}
     {# Use this for a progress / step indicator / navigation #}
     <ul class="pager x-progress-tracker">
         {% url mdtui-search-type as url %}
-        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 1: Select Type &rarr;</a></li>
+        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">{% trans 'Step 1: Select Type' %} &rarr;</a></li>
         {% url mdtui-search-options as url %}
-        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 2: Options &rarr;</a></li>
+        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">{% trans 'Step 2: Options' %} &rarr;</a></li>
         {% url mdtui-search-results as url %}
-        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">Step 3: Results &rarr;</a></li>
+        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">{% trans 'Step 3: Results' %} &rarr;</a></li>
     </ul>
     {% endif %}
 
@@ -35,11 +35,6 @@
     </div>
     {% endif %}
 
-    {% if step == None %} {# This step will no long be visible #}
-        <p>This is where it begins...</p>
-        <a class="btn btn-primary btn-large" href="{% url mdtui-search-type %}">Start <i class="icon-chevron-right icon-white"></i></a>
-    {% endif %}
-
     {% if step == "type" %}
         <form class="form-horizontal" action="{{ request.path }}" method="post">
             {% csrf_token %}
@@ -49,8 +44,8 @@
             </fieldset>
 
             <div class="form-actions">
-                <button type="submit" class="btn btn-danger"><i class="icon-trash icon-white"></i> Cancel</button>
-                <button type="submit" class="btn btn-primary">Continue <i class="icon-chevron-right icon-white"></i></button>
+                <button type="submit" class="btn btn-danger"><i class="icon-trash icon-white"></i> {% trans 'Cancel' %}</button>
+                <button type="submit" class="btn btn-primary">{% trans 'Continue' %} <i class="icon-chevron-right icon-white"></i></button>
             </div>
         </form>
     {% endif %} {# end step 1 #}
@@ -60,8 +55,8 @@
             {% csrf_token %}
             <fieldset>
                 <legend>{% if request.session.search_docrule_id %}{% get_docrule_name_by_id request.session.search_docrule_id %} {% endif %}Search Options</legend>
-
                 <br />
+
                 {% comment %}
                 <div class="alert alert-error">
                     <a class="close">×</a>
@@ -76,8 +71,8 @@
             </fieldset>
 
             <div class="form-actions">
-                <button type="submit" class="btn btn-danger"><i class="icon-repeat icon-white"></i> Reset</button>
-                <button type="submit" class="btn btn-primary">Search <i class="icon-search icon-white"></i></button>
+                <button type="submit" class="btn btn-danger"><i class="icon-repeat icon-white"></i> {% trans 'Reset' %}</button>
+                <button type="submit" class="btn btn-primary">{% trans 'Search' %} <i class="icon-search icon-white"></i></button>
             </div>
         </form>
     {% endif %}
@@ -91,32 +86,30 @@
             <caption>Search with keys:
                 <ul class="metainfo">
                 {% for item in document_keys %}
-                        <li>{% get_key_li_item document_keys item %}</li>
+                    <li>{% get_key_li_item document_keys item %}</li>
                 {% endfor %}
                 </ul>
             </caption>
             <thead>
                 <tr>
-                    <th>View</th>
-                    <th><a href="{# sort on this#}">Date</a></th>
+                    <th>{% trans 'View' %}</th>
+                    <th><a href="{# TODO: sort on this#}">{% trans 'Date' %}</a></th>
                     {% for key in mdts %}
-                    <th><a href="{# sort on this#}">{{ key }}</a></th>
+                    <th><a href="{# TODO: sort on this#}">{{ key }}</a></th>
                     {% endfor %}
-                    <th><a href="{# sort on this#}">Description</a></th>
-                    <th><a href="{# sort on this#}">Type</a></th>
-                    <th>Actions</th>
+                    <th><a href="{# TODO: sort on this#}">{% trans 'Description' %}</a></th>
+                    <th><a href="{# TODO: sort on this#}">{% trans 'Type' %}</a></th>
+                    <th>{% trans 'Actions' %}</th>
                 </tr>
             </thead>
             <tbody>
             {% for doc in documents %}
                 <tr>
-                    <td style="white-space: nowrap;"><a href="{% url mdtui-view-pdf doc.id %}" title="View Document" target="_blank"><i class="icon-download"></i> {{ doc.id }}</a></td>
-                    <td style="white-space: nowrap;">{{ doc.metadata_created_date|date:"Y-m-d" }}</td>
-                    
+                    <td class="nw"><a href="{% url mdtui-view-pdf doc.id %}" title="{% trans 'View Document' %}" target="_blank"><i class="icon-download"></i> {{ doc.id }}</a></td>
+                    <td class="nw">{{ doc.metadata_created_date|date:"Y-m-d" }}</td>
                     {% for key in mdts %}
                     <td>{% get_sec_key_for_doc doc.mdt_indexes key %}</td>
                     {% endfor %}
-
                     <td>{{ doc.metadata_description }}</td>
                     <td>{% get_docrule_name_by_id doc.metadata_doc_type_rule_id %}</td>
                     <td><a href="{% url bcp-print 'Code128' doc.id %}" title="{% trans 'Reprint Barcode' %}"><i class="icon-barcode"></i></a> | {# TODO: Admin only #}<a href="" title="{% trans 'Edit Metadata' %}"><i class="icon-edit"></i></a></td>
@@ -132,19 +125,19 @@
         {# Let's use pagination like this #}
         <div class="pagination">
             <ul>
-                <li><a href="#">Prev</a></li>
+                <li><a href="#">{% trans 'Prev' %}</a></li>
                 <li class="active">
                     <a href="#">1</a>
                 </li>
                 <li><a href="#">2</a></li>
                 <li><a href="#">3</a></li>
                 <li><a href="#">4</a></li>
-                <li><a href="#">Next</a></li>
+                <li><a href="#">{% trans 'Next' %}</a></li>
             </ul>
         </div>
 {% endcomment %}
 
-        <a href="{% url mdtui-search-export %}" title="Download Results to CSV" class="btn"><i class="icon-download-alt"></i> Export Results</a>
+        <p><a href="{% url mdtui-search-export %}" title="{% trans 'Download Results to CSV' %}" class="btn"><i class="icon-download-alt"></i> {% trans 'Export Results' %}</a></p>
 
     {% endif %}
 
@@ -153,6 +146,7 @@
 {% block css_extra %}
     <style type="text/css">
         #results-table tbody tr.highlight { text-decoration: underline; cursor: pointer; }
+        #results-table td.nw { white-space: nowrap; }
         #body-content {
             background-image: url("{{ STATIC_URL }}search-background.png");
             background-repeat: no-repeat;
@@ -166,18 +160,15 @@
     {% if step == "results" %}
     <script type="text/javascript">
         $(document).ready(function(){
-            // Hide the first cell for JavaScript enabled browsers.
-            //$('#link-table td:first-child').hide();
-
             // Apply a class on mouse over and remove it on mouse out.
             $('#results-table tbody tr').hover(function() {
                 $(this).toggleClass('highlight');
             });
 
-            // Assign a click handler that grabs the URL
-            // from the first cell and redirects the user.
-            $('#results-table tbody tr').click(function() {
-                location.href = $(this).find('td a').attr('href');
+            // Assign a click handler that grabs the URL from the first cell
+            $('#results-table tbody tr').on('click', function(e){
+                e.preventDefault();
+                window.open($(this).find('td a').attr('href'), "_blank");
             });
         });
 
