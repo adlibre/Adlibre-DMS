@@ -25,6 +25,8 @@ test_mdt_docrule_id3 = 7 # should be properly assigned to fixtures docrule that 
 
 indexes_form_match_pattern = '(Employee ID|Employee Name|Friends ID|Friends Name|Required Date|Reporting Entity|Report Date|Report Type).+?name=\"(\d+|\d+_from|\d+_to)\"'
 
+indexing_done_string = 'Your document has been indexed'
+indexes_added_string = 'Your documents indexes'
 mdt1 = {
     "_id": 'mdt1',
     "docrule_id": [str(test_mdt_docrule_id),],
@@ -113,6 +115,20 @@ mdt4 = {
         },
     "parallel": {}
 }
+
+#mdt5 = {
+#    "_id": "mdt5",
+#    "description": "Test MDT Number 5",
+#    "docrule_id": [str(test_mdt_docrule_id3), str(test_mdt_docrule_id2)],
+#    "fields": {
+#        "1": {
+#            "field_name": "Employee",
+#            "description": "testing 1 mdt to 2 docrules",
+#            "type": "string"
+#        }
+#    },
+#    "parallel": {}
+#}
 
 # Static dictionary of documents to be indexed for mdt1 and mdt2
 doc1_dict = {
@@ -297,7 +313,7 @@ class MDTUI(TestCase):
         self.assertContains(response, '<legend>Step 1: Select Document Type</legend>')
         self.assertContains(response, 'Adlibre Invoices')
         self.assertEqual(response.status_code, 200)
-    
+
     def test_03_step1_post_redirect(self):
         """
         MDTUI Displays Step 2 Properly (after proper call)
@@ -405,13 +421,13 @@ class MDTUI(TestCase):
         self.assertEqual(response.status_code, 200)
         # Make the file upload
         file = os.path.join(settings.FIXTURE_DIRS[0], 'testdata', doc1+'.pdf')
-        data = { 'file': open(file, 'rb'), 'post_data':'to make request post type'}
-        response = self.client.post(url, data)
+        data = { 'file': open(file, 'rb'), 'uploaded':u''}
+        response = self.client.post(url+'?uploaded', data)
         # Follow Redirect
         self.assertEqual(response.status_code, 302)
         new_url = self._retrieve_redirect_response_url(response)
         response = self.client.get(new_url)
-        self.assertContains(response, 'Your document has been indexed successfully')
+        self.assertContains(response, indexing_done_string)
         self.assertContains(response, 'Friends Name: Andrew')
         self.assertContains(response, 'Start Again')
 
@@ -759,13 +775,13 @@ class MDTUI(TestCase):
         self.assertEqual(response.status_code, 200)
         # Make the file upload
         file = os.path.join(settings.FIXTURE_DIRS[0], 'testdata', doc1+'.pdf')
-        data = { 'file': open(file, 'rb') , 'post_data':'to make this request post type'}
-        response = self.client.post(uurl, data)
+        data = { 'file': open(file, 'rb') , 'uploaded':u''}
+        response = self.client.post(uurl+'?uploaded', data)
         # Follow Redirect
         self.assertEqual(response.status_code, 302)
         new_url = self._retrieve_redirect_response_url(response)
         response = self.client.get(new_url)
-        self.assertContains(response, 'Your document has been indexed successfully')
+        self.assertContains(response, indexing_done_string)
         self.assertContains(response, 'Friends Name: Andrew')
         self.assertContains(response, 'Start Again')
 
@@ -788,13 +804,13 @@ class MDTUI(TestCase):
         self.assertEqual(response.status_code, 200)
         # Make the file upload
         file = os.path.join(settings.FIXTURE_DIRS[0], 'testdata', doc2+'.pdf')
-        data = { 'file': open(file, 'rb') , 'post_data':'to make this request post type'}
-        response = self.client.post(uurl, data)
+        data = { 'file': open(file, 'rb') , 'uploaded':u''}
+        response = self.client.post(uurl+'?uploaded', data)
         # Follow Redirect
         self.assertEqual(response.status_code, 302)
         new_url = self._retrieve_redirect_response_url(response)
         response = self.client.get(new_url)
-        self.assertContains(response, 'Your document has been indexed successfully')
+        self.assertContains(response, indexing_done_string)
         self.assertContains(response, 'Friends Name: Yuri')
         self.assertContains(response, 'Start Again')
 
@@ -817,13 +833,13 @@ class MDTUI(TestCase):
         self.assertEqual(response.status_code, 200)
         # Make the file upload
         file = os.path.join(settings.FIXTURE_DIRS[0], 'testdata', doc3+'.pdf')
-        data = { 'file': open(file, 'rb') , 'post_data':'to make this request post type'}
-        response = self.client.post(uurl, data)
+        data = { 'file': open(file, 'rb') , 'uploaded':u''}
+        response = self.client.post(uurl+'?uploaded', data)
         # Follow Redirect
         self.assertEqual(response.status_code, 302)
         new_url = self._retrieve_redirect_response_url(response)
         response = self.client.get(new_url)
-        self.assertContains(response, 'Your document has been indexed successfully')
+        self.assertContains(response, indexing_done_string)
         self.assertContains(response, 'Friends Name: Someone')
         self.assertContains(response, 'Start Again')
 
@@ -1142,13 +1158,13 @@ class MDTUI(TestCase):
             self.assertEqual(response.status_code, 200)
             # Make the file upload
             file = os.path.join(settings.FIXTURE_DIRS[0], 'testdata', doc1+'.pdf')
-            data = { 'file': open(file, 'rb') , 'post_data':'to make this request post type'}
-            response = self.client.post(uurl, data)
+            data = { 'file': open(file, 'rb'), 'uploaded': u''}
+            response = self.client.post(uurl+'?uploaded', data)
             # Follow Redirect
             self.assertEqual(response.status_code, 302)
             new_url = self._retrieve_redirect_response_url(response)
             response = self.client.get(new_url)
-            self.assertContains(response, 'Your document has been indexed successfully')
+            self.assertContains(response, indexing_done_string)
             self.assertContains(response, 'Report Date: '+doc_dict['Report Date'])
             self.assertContains(response, 'Start Again')
 
@@ -1296,7 +1312,7 @@ class MDTUI(TestCase):
         self.assertContains(response, 'Creation Date: 2012-04-17')
         self.assertContains(response, 'Description: something usefull')
         self.assertContains(response, 'Tests Uppercase Field: LOWERCASE DATA')
-        self.assertContains(response, "Your document's indexing keys:")
+        self.assertContains(response,indexes_added_string)
 
     def test_37_uppercase_fields_UPPERCASE_DATA(self):
         # Normal uppercase field rendering and using
@@ -1314,7 +1330,7 @@ class MDTUI(TestCase):
         self.assertContains(response, 'Creation Date: 2012-04-17')
         self.assertContains(response, 'Description: something usefull')
         self.assertContains(response, 'Tests Uppercase Field: UPPERCASE DATA')
-        self.assertContains(response, "Your document's indexing keys:")
+        self.assertContains(response, indexes_added_string)
 
     def test_38_search_by_keys_only_contains_secondary_date_range(self):
         """
