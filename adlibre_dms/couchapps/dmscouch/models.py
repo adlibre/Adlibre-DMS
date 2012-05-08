@@ -14,7 +14,7 @@ class CouchDocument(Document):
     metadata_doc_type_rule_id = StringProperty(default="")
     metadata_user_id = StringProperty(default="")
     metadata_user_name = StringProperty(default="")
-    metadata_created_date = DateTimeProperty(default=datetime.utcnow)
+    metadata_created_date = DateTimeProperty(default=datetime.utcnow()) # Should fix #731 Andrew check!
     metadata_description = StringProperty(default="")
     tags = ListProperty(default=[])
     mdt_indexes = DictProperty(default={})
