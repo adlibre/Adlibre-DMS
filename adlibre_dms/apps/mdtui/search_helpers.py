@@ -283,13 +283,13 @@ def str_date_to_couch(from_date):
     couch_date = from_date + 'T00:00:00Z'
     return couch_date
 
-def get_docrules_used_in_mdts(mdts):
-    """
-    Extracts DocumentTypeRules used in MDTS
-    """
-    docrules_all = {}
-    for key, mdt in mdts.iteritems():
-        for docrule in mdt['docrule_id']:
-            docrules_all[docrule] = ''
-    docrules = [key for key in docrules_all.iterkeys()]
-    return docrules
+#def get_docrules_used_in_mdts(mdts):
+#    """
+#    Extracts DocumentTypeRules used in MDTS
+#    """
+#    docrules_all = {}
+#    for key, mdt in mdts.iteritems():
+#        for docrule in mdt['docrule_id']:
+#            docrules_all[docrule] = ''
+#    docrules = [key for key in docrules_all.iterkeys()]
+#    return docrules

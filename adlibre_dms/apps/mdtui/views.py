@@ -30,7 +30,6 @@ from search_helpers import document_date_range_only_search
 from search_helpers import document_date_range_with_keys_search
 from search_helpers import recognise_dates_in_search
 from search_helpers import document_date_range_present_in_keys
-from search_helpers import get_docrules_used_in_mdts
 from search_helpers import ranges_validator
 from forms_representator import get_mdts_for_docrule
 from parallel_keys import ParallelKeysManager
@@ -397,7 +396,7 @@ def mdt_parallel_keys(request):
     autocomplete_req = None
     docrule_id = None
     key_name = None
-    mdts={}
+    doc_mdts={}
     resp = []
     # Trying to get docrule for indexing calls
     try:
@@ -419,53 +418,58 @@ def mdt_parallel_keys(request):
         valid_call = False
 
     try:
-        mdts = request.session["mdts"]
+        doc_mdts = request.session["mdts"]
     except KeyError:
         pass
 
     log.debug(
         'mdt_parallel_keys call: docrule_id: "%s", key_name: "%s", autocomplete: "%s" Call is valid: "%s", MDTS: %s' %
-        (docrule_id, key_name, autocomplete_req, valid_call, mdts)
+        (docrule_id, key_name, autocomplete_req, valid_call, doc_mdts)
     )
     if valid_call:
         manager = ParallelKeysManager()
-        allowed_docrules = get_docrules_used_in_mdts(mdts)
-        mdts = manager.get_keys_for_docrule(docrule_id, mdts)
-        pkeys = manager.get_parallel_keys_for_key(mdts, key_name)
-        # db call to search in docs
-        if pkeys:
-            # Suggestion for several parallel keys
-            documents = CouchDocument.view(
-                'dmscouch/search_autocomplete', # Name of couch view "couchapps/dmscouch/_design/views/search_autocomplete"
-                startkey=[key_name, autocomplete_req],
-                endkey=[key_name, unicode(autocomplete_req)+u'\ufff0' ], # http://wiki.apache.org/couchdb/HTTP_view_API
-                include_docs=True # TODO: think about optimising this call (E.G. response with 10000 docs = 1MB request)
-                                  # Maybe!!! add 1 more db view call to get docs with unique those secondary keys pairs...
-            )
-            # Adding each selected value to suggestions list
-            for doc in documents:
-                resp_array = {}
-                if pkeys:
-                    for pkey in pkeys:
-                        resp_array[pkey['field_name']] = doc.mdt_indexes[pkey['field_name']]
-                suggestion = json.dumps(resp_array)
-                # filtering from existing results
-                if not suggestion in resp and doc.metadata_doc_type_rule_id in allowed_docrules:
-                    resp.append(suggestion)
-        else:
-            # Simple 'single' key suggestion
-            documents = CouchDocument.view(
-                'dmscouch/search_autocomplete',
-                startkey=[key_name, autocomplete_req],
-                endkey=[key_name, unicode(autocomplete_req)+u'\ufff0' ],
-                include_docs=True # TODO: change indexes not to load the full document but required fields (MAYBE)
-            )
-            # Fetching unique responses to suggestion set
-            for doc in documents:
-                resp_array = {key_name: doc.mdt_indexes[key_name]}
-                suggestion = json.dumps(resp_array)
-                if not suggestion in resp and doc.metadata_doc_type_rule_id in allowed_docrules:
-                    resp.append(suggestion)
+        for mdt in doc_mdts.itervalues():
+            mdt_keys =[mdt[u'fields'][mdt_key][u'field_name'] for mdt_key in mdt[u'fields']]
+            log.debug('mdt_parallel_keys selected for suggestion MDT-s keys: %s' % mdt_keys)
+            if key_name in mdt_keys:
+                # Autocomplete key belongs to this MDT
+                mdt_docrules = mdt[u'docrule_id']
+                mdt_fields = manager.get_keys_for_docrule(docrule_id, doc_mdts)
+                pkeys = manager.get_parallel_keys_for_key(mdt_fields, key_name)
+                for docrule in mdt_docrules:
+                    # db call to search in docs
+                    if pkeys:
+                        # Suggestion for several parallel keys
+                        documents = CouchDocument.view(
+                            'dmscouch/search_autocomplete',
+                            startkey=[docrule, key_name, autocomplete_req],
+                            endkey=[docrule, key_name, unicode(autocomplete_req)+u'\ufff0'],
+                            include_docs=True,
+                        )
+                        # Adding each selected value to suggestions list
+                        for doc in documents:
+                            resp_array = {}
+                            if pkeys:
+                                for pkey in pkeys:
+                                    resp_array[pkey['field_name']] = doc.mdt_indexes[pkey['field_name']]
+                            suggestion = json.dumps(resp_array)
+                            # filtering from existing results
+                            if not suggestion in resp:
+                                resp.append(suggestion)
+                    else:
+                        # Simple 'single' key suggestion
+                        documents = CouchDocument.view(
+                            'dmscouch/search_autocomplete',
+                            startkey=[docrule, key_name, autocomplete_req],
+                            endkey=[docrule, key_name, unicode(autocomplete_req)+u'\ufff0' ],
+                            include_docs=True
+                        )
+                        # Fetching unique responses to suggestion set
+                        for doc in documents:
+                            resp_array = {key_name: doc.mdt_indexes[key_name]}
+                            suggestion = json.dumps(resp_array)
+                            if not suggestion in resp:
+                                resp.append(suggestion)
     log.debug('mdt_parallel_keys response: %s' % resp)
     return HttpResponse(json.dumps(resp))
 
