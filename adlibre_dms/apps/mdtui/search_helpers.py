@@ -158,23 +158,6 @@ def recognise_dates_in_search(cleaned_document_keys):
                     cleaned_document_keys[pure_key]=(from_value, to_value)
     return cleaned_document_keys
 
-#def convert_search_res(search_res, match_len):
-#    """
-#    Converts search results for multiple keys with single date request
-#    from type ANY to type ALL (keys exist in document)
-#    """
-#    docs_list = {}
-#    matched_docs = []
-#    for row in search_res:
-#        if row.get_id in docs_list.keys():
-#            docs_list[row.get_id] += 1
-#        else:
-#            docs_list[row.get_id] = 1
-#    for doc_id, mention_count in docs_list.iteritems():
-#        if mention_count >= match_len:
-#            matched_docs.append(doc_id)
-#    return matched_docs
-
 def convert_search_res_for_range(resp_set, cleaned_document_keys):
     """
     Converts search results for set of keys CouchDB responses with optional date range
@@ -201,19 +184,6 @@ def convert_search_res_for_range(resp_set, cleaned_document_keys):
         if value >= resp_set.__len__():
             docs_ids_list.append(key)
     return docs_ids_list
-
-#def convert_to_search_keys_for_single_date(document_keys, docrule_id):
-#    """
-#    Makes proper keys request set for 'dmscouch/search' CouchDB view.
-#    """
-#    req_params = []
-#    for key, value in document_keys.iteritems():
-#        if key != "date":
-#            if not "date" in document_keys.keys():
-#                req_params.append([key, value, docrule_id],)
-#            else:
-#                req_params.append([key, value, docrule_id, str_date_to_couch(document_keys["date"])],)
-#    return req_params
 
 def convert_to_search_keys_for_date_range(document_keys, pkey, docrule_id, end=False, date_range=False):
     """
@@ -248,17 +218,6 @@ def convert_to_search_keys_for_date_range(document_keys, pkey, docrule_id, end=F
                         req_params = [key, value[1], docrule_id]
     return req_params
 
-#def dates_ranges_exist(cleaned_keys):
-#    """
-#    Helper to detect date ranges present in cleaned search keys dict
-#    Date range should be type: Tuple
-#    """
-#    dr_present = False
-#    for key, value in cleaned_keys.iteritems():
-#        if value.__class__.__name__ == 'tuple':
-#            dr_present = True
-#    return dr_present
-
 def document_date_range_present_in_keys(keys):
     """
     Helper to recognise document date range in search keys
@@ -283,13 +242,3 @@ def str_date_to_couch(from_date):
     couch_date = from_date + 'T00:00:00Z'
     return couch_date
 
-#def get_docrules_used_in_mdts(mdts):
-#    """
-#    Extracts DocumentTypeRules used in MDTS
-#    """
-#    docrules_all = {}
-#    for key, mdt in mdts.iteritems():
-#        for docrule in mdt['docrule_id']:
-#            docrules_all[docrule] = ''
-#    docrules = [key for key in docrules_all.iterkeys()]
-#    return docrules
