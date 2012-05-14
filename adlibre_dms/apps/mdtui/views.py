@@ -41,11 +41,11 @@ from restkit.client import RequestError
 log = logging.getLogger('dms.mdtui.views')
 
 MDTUI_ERROR_STRINGS = {
-    1:'You have not selected the Document Type.',
-    2:'You have not entered Document Indexing Data. Document will not be searchable by indexes.',
-    3:'You have not defined Document Searching Options.',
-    4:'You have not defined Document Type. Can only search by "Creation Date".',
-    5:'Database Connection absent. Check CouchDB server connection.',
+    'NO_DOCRULE':'You have not selected the Document Type.',
+    'NO_INDEX':'You have not entered Document Indexing Data. Document will not be searchable by indexes.',
+    'NO_S_KEYS':'You have not defined Document Searching Options.',
+    'NO_TYPE':'You have not defined Document Type. Can only search by "Creation Date".',
+    'NO_DB':'Database Connection absent. Check CouchDB server connection.',
     'NO_DOCUMENTS_FOUND': 'Nothing to export because of empty documents results.'
 }
 
@@ -69,12 +69,12 @@ def search_type(request, step, template='mdtui/search.html'):
                 try:
                     mdts = get_mdts_for_docrule(docrule)
                 except RequestError:
-                    warnings.append(MDTUI_ERROR_STRINGS[5])
+                    warnings.append(MDTUI_ERROR_STRINGS['NO_DB'])
                 if mdts:
                     request.session['mdts'] = mdts
                     return HttpResponseRedirect(reverse('mdtui-search-options'))
             else:
-                warnings.append(MDTUI_ERROR_STRINGS[1])
+                warnings.append(MDTUI_ERROR_STRINGS['NO_DOCRULE'])
     else:
         form = DocumentTypeSelectForm()
         # Trying to set docrule if previously selected
@@ -103,7 +103,7 @@ def search_options(request, step, template='mdtui/search.html'):
     try:
         request.session['search_docrule_id']
     except KeyError:
-        warnings.append(MDTUI_ERROR_STRINGS[4])
+        warnings.append(MDTUI_ERROR_STRINGS['NO_TYPE'])
 
     # CouchDB connection Felt down warn user
     try:
@@ -111,14 +111,14 @@ def search_options(request, step, template='mdtui/search.html'):
         autocomplete_list = extract_secondary_keys_from_form(form)
     except (RequestError,AttributeError) :
         form = DocumentSearchOptionsForm
-        warnings.append(MDTUI_ERROR_STRINGS[5])
+        warnings.append(MDTUI_ERROR_STRINGS['NO_DB'])
 
     if request.POST:
         try:
             secondary_indexes = processDocumentIndexForm(request)
         except RequestError:
             secondary_indexes = None
-            warnings.append(MDTUI_ERROR_STRINGS[5])
+            warnings.append(MDTUI_ERROR_STRINGS['NO_DB'])
 
         if secondary_indexes:
             request.session['document_search_dict'] = secondary_indexes
@@ -147,7 +147,7 @@ def search_results(request, step=None, template='mdtui/search.html'):
         document_keys = request.session['document_search_dict']
         docrule_id = request.session['search_docrule_id']
     except KeyError:
-        warnings.append(MDTUI_ERROR_STRINGS[3])
+        warnings.append(MDTUI_ERROR_STRINGS['NO_S_KEYS'])
     log.debug('search_results call: docrule_id: "%s", document_search_dict: "%s"' % (docrule_id, document_keys))
     if document_keys:
         # turning document_search dict into something useful for the couch request
@@ -252,7 +252,7 @@ def indexing_details(request, step=None, template='mdtui/indexing.html'):
     try:
         docrule_id = request.session['indexing_docrule_id']
     except KeyError:
-        warnings.append(MDTUI_ERROR_STRINGS[1])
+        warnings.append(MDTUI_ERROR_STRINGS['NO_DOCRULE'])
 
     try:
         document_keys = request.session["document_keys_dict"]
@@ -300,22 +300,22 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
     try:
         document_keys = request.session["document_keys_dict"]
     except KeyError:
-        warnings.append(MDTUI_ERROR_STRINGS[2])
+        warnings.append(MDTUI_ERROR_STRINGS['NO_INDEX'])
 
     try:
         barcode = request.session['barcode']
     except KeyError:
-        warnings.append(MDTUI_ERROR_STRINGS[2])
+        warnings.append(MDTUI_ERROR_STRINGS['NO_INDEX'])
 
     try:
         index_info = request.session["document_keys_dict"]
     except KeyError:
-        warnings.append(MDTUI_ERROR_STRINGS[3])
+        warnings.append(MDTUI_ERROR_STRINGS['NO_S_KEYS'])
 
     try:
         docrule = request.session['indexing_docrule_id']
     except KeyError:
-        warnings.append(MDTUI_ERROR_STRINGS[1])
+        warnings.append(MDTUI_ERROR_STRINGS['NO_DOCRULE'])
 
     # Init Forms correctly depending on url posted
     if request.GET.get('uploaded') is None:
@@ -426,6 +426,21 @@ def mdt_parallel_keys(request):
         'mdt_parallel_keys call: docrule_id: "%s", key_name: "%s", autocomplete: "%s" Call is valid: "%s", MDTS: %s' %
         (docrule_id, key_name, autocomplete_req, valid_call, doc_mdts)
     )
+    # TODO: Can be optimised for huge document's amounts in future (Step: Scalability testing)
+    """
+    # We can collect all the documents keys for each docrule in MDT related to requested field and load them into queue.
+    # Then check them for duplicated values and/or make a big index with all the document's keys in it
+    # to fetch only document indexes we need on first request. (Instead of 'include_docs=True')
+    # E.g. Make autocomplete Couch View to output index with all Document's mdt_indexes ONLY.
+    #
+    # Total amount of requests will be 3 instead of 2 (for 2 docrules <> 1 MDT) but they will be smaller.
+    # And that will be good for say 1 000 000 documents. However, DB size will rise too.
+    # (Because we will copy all the doc's indexes into separate specific response for Typehead in fact)
+    # Final step is to load all unique suggestion documents that are passed through our filters.
+    # (Or if we will build this special index it won't be necessary)
+    # (Only if we require parallel keys to be parsed)
+    # It can be done by specifying multiple keys that we need to load here. ('key' ws 'keys' *args in CouchDB request)
+    """
     if valid_call:
         manager = ParallelKeysManager()
         for mdt in doc_mdts.itervalues():
