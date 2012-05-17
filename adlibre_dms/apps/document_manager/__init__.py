@@ -99,25 +99,29 @@ class DocumentManager(object):
         or file object
         """
         log.debug('Storing Document %s, index_info: %s, barcode: %s' % (uploaded_file, index_info, barcode))
-        doc = Document()
-        doc.set_file_obj(uploaded_file)
-        if barcode is not None:
-            doc.set_filename(barcode)
-            log.debug('Allocated Barcode %s.' % barcode)
+        # Check if file already exists
+        if not self.file_exists(request, uploaded_file.name):
+            doc = Document()
+            doc.set_file_obj(uploaded_file)
+            if barcode is not None:
+                doc.set_filename(barcode)
+                log.debug('Allocated Barcode %s.' % barcode)
+            else:
+                doc.set_filename(os.path.basename(uploaded_file.name))
+            if hasattr(uploaded_file, 'content_type'):
+                doc.set_mimetype(uploaded_file.content_type)
+            if index_info:
+                doc.set_db_info(index_info)
+            # FIXME: if uploaded_file is not None, then some plugins should not run because we don't have a file
+            doc = self.process_pluginpoint(pluginpoints.BeforeStoragePluginPoint, request, document=doc)
+            # Process storage plugins
+            self.process_pluginpoint(pluginpoints.StoragePluginPoint, request, document=doc)
+            # Process DatabaseStorage plugins
+            doc = self.process_pluginpoint(pluginpoints.DatabaseStoragePluginPoint, request, document=doc)
+            #mapping = self.get_plugin_mapping(doc)
+            #for plugin in mapping.get_database_storage_plugins(): print 'Mapping has plugin: ', plugin
         else:
-            doc.set_filename(os.path.basename(uploaded_file.name))
-        if hasattr(uploaded_file, 'content_type'):
-            doc.set_mimetype(uploaded_file.content_type)
-        if index_info:
-            doc.set_db_info(index_info)
-        # FIXME: if uploaded_file is not None, then some plugins should not run because we don't have a file
-        doc = self.process_pluginpoint(pluginpoints.BeforeStoragePluginPoint, request, document=doc)
-        # Process storage plugins
-        self.process_pluginpoint(pluginpoints.StoragePluginPoint, request, document=doc)
-        # Process DatabaseStorage plugins
-        doc = self.process_pluginpoint(pluginpoints.DatabaseStoragePluginPoint, request, document=doc)
-        #mapping = self.get_plugin_mapping(doc)
-        #for plugin in mapping.get_database_storage_plugins(): print 'Mapping has plugin: ', plugin
+            doc = self.update(request, uploaded_file.name)
         return doc
 
     def rename(self, request, document_name, new_name, extension):
@@ -140,6 +144,7 @@ class DocumentManager(object):
         """
         doc = Document()
         doc.set_filename(document_name)
+        #doc = self.retrieve(request, document_name)
         if extension:
             doc.set_requested_extension(extension)
         doc.set_tag_string(tag_string)
@@ -233,3 +238,14 @@ class DocumentManager(object):
 
     def get_all_tags(self, doccode=None):
         return TagsPlugin().get_all_tags(doccode = doccode)
+
+    def file_exists(self, request, filename):
+        """
+        Main condition of file present in DMS is here
+        """
+        exists = False
+        # TODO: implement this to really check if we need ot update document
+#        file_obj = self.retrieve(request, filename, only_metadata=True)
+#        if file_obj.metadata:
+#            exists = True
+        return exists
