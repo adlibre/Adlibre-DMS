@@ -8,10 +8,9 @@ Author: Iurii Garmash
 
 from dms_plugins.pluginpoints import BeforeRetrievalPluginPoint, BeforeRemovalPluginPoint, DatabaseStoragePluginPoint
 from dms_plugins.models import Document as DocTags #TODO: needs refactoring of name
-from dms_plugins.workers import Plugin, PluginError, BreakPluginChain
+from dms_plugins.workers import Plugin
 from document_manager import DocumentManager
 from dmscouch.models import CouchDocument
-import os
 
 class CouchDBMetadata(object):
     """
@@ -36,14 +35,23 @@ class CouchDBMetadata(object):
                     # HACK: Preserving db_info here... (May be Solution!!!)
                     db_info = document.get_db_info()
                     document = manager.retrieve(request, document.file_name, only_metadata=True)
-                    document.set_db_info(db_info)
+
+                    # HACK: saving NEW metadata ONLY if they exist in new uploaded doc (Preserving old indexes)
+                    if db_info:
+                        document.set_db_info(db_info)
+                    else:
+                        # Asking couchdb about if old metadata exists
+                        temp_doc = self.retrieve(request, document)
+                        old_metadata = temp_doc.get_db_info()
+                        if old_metadata['mdt_indexes']:
+                            document.set_db_info(old_metadata['mdt_indexes'])
+
                 # updating tags to sync with Django DB
                 self.sync_document_tags(document)
-                # assuming no document with this _id exists. SAVING
+                # assuming no document with this _id exists. SAVING. HACK: or overwriting existing
                 couchdoc=CouchDocument()
                 couchdoc.populate_from_dms(request, document)
                 couchdoc.save(force_update=True)
-                #print "Storing Document into DB", document
                 return document
 
     def update_metadata_after_removal(self, request, document):
@@ -56,14 +64,13 @@ class CouchDBMetadata(object):
             couchdoc = CouchDocument.get(docid=stripped_filename)
             couchdoc.delete()
         return document
-        #print "Deleted Document in DB", document
 
     def retrieve(self, request, document):
 
         manager = DocumentManager()
         mapping = manager.get_plugin_mapping(document)
-        # doing nothing for no doccode documents
-        # doing nothing for documents without mapping has DB plugins
+        # No actions for no doccode documents
+        # No actions for documents without 'mapping has DB plugins'
         if document.get_docrule().no_doccode:
             return document
         else:
@@ -73,7 +80,6 @@ class CouchDBMetadata(object):
                 doc_name = document.get_stripped_filename()
                 couchdoc = CouchDocument.get(docid=doc_name)
                 document = couchdoc.populate_into_dms(request, document)
-                #print "Populating Document from DB", document
                 return document
 
     """
