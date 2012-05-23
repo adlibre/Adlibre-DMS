@@ -36,7 +36,8 @@ class CouchDBMetadata(object):
                     db_info = document.get_db_info()
                     document = manager.retrieve(request, document.file_name, only_metadata=True)
 
-                    # HACK: saving NEW metadata ONLY if they exist in new uploaded doc (Preserving old indexes)
+                    # HACK: saving NEW metadata ONLY if they exist in new uploaded doc (Preserving old indexes)'
+                    current_revisions = document.metadata
                     if db_info:
                         document.set_db_info(db_info)
                     else:
@@ -44,12 +45,15 @@ class CouchDBMetadata(object):
                         temp_doc = self.retrieve(request, document)
                         old_metadata = temp_doc.get_db_info()
                         if old_metadata['mdt_indexes']:
+                            # Updating document revisions
+#                            old_metadata['revisions'] = current_revisions
                             document.set_db_info(old_metadata['mdt_indexes'])
-
+                            document.set_metadata(current_revisions)
                 # updating tags to sync with Django DB
                 self.sync_document_tags(document)
                 # assuming no document with this _id exists. SAVING. HACK: or overwriting existing
                 couchdoc=CouchDocument()
+
                 couchdoc.populate_from_dms(request, document)
                 couchdoc.save(force_update=True)
                 return document
@@ -64,6 +68,9 @@ class CouchDBMetadata(object):
             couchdoc = CouchDocument.get(docid=stripped_filename)
             couchdoc.delete()
         return document
+
+    def update_documents_metadata(self, request, document):
+        pass
 
     def retrieve(self, request, document):
 
