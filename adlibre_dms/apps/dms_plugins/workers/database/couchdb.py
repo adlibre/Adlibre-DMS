@@ -37,16 +37,18 @@ class CouchDBMetadata(object):
                     document = manager.retrieve(request, document.file_name, only_metadata=True)
 
                     # HACK: saving NEW metadata ONLY if they exist in new uploaded doc (Preserving old indexes)'
-                    current_revisions = document.metadata
                     if db_info:
+                        # Storing new indexes
                         document.set_db_info(db_info)
                     else:
-                        # Asking couchdb about if old metadata exists
+                        # TODO: move this code into a proper place (UPDATE method)
+                        # Asking couchdb about if old metadata exists and updating them properly
+                        current_revisions = document.metadata
                         temp_doc = self.retrieve(request, document)
                         old_metadata = temp_doc.get_db_info()
                         if old_metadata['mdt_indexes']:
-                            # Updating document revisions
-#                            old_metadata['revisions'] = current_revisions
+                            # Preserving Description
+                            old_metadata['mdt_indexes']['description'] = old_metadata['description']
                             document.set_db_info(old_metadata['mdt_indexes'])
                             document.set_metadata(current_revisions)
                 # updating tags to sync with Django DB
@@ -58,6 +60,12 @@ class CouchDBMetadata(object):
                 couchdoc.save(force_update=True)
                 return document
 
+    def update_documents_metadata(self, request, document):
+        # TODO: implement this (Decouple from store method)
+        # TODO: handle dates properly. e.g. Creation date left as is.
+        # TODO: add updated date and handle it in DMS in another manner.
+        pass
+
     def update_metadata_after_removal(self, request, document):
         """
         Updates document CouchDB metadata on removal. (Removes CouchDB document)
@@ -68,9 +76,6 @@ class CouchDBMetadata(object):
             couchdoc = CouchDocument.get(docid=stripped_filename)
             couchdoc.delete()
         return document
-
-    def update_documents_metadata(self, request, document):
-        pass
 
     def retrieve(self, request, document):
 
