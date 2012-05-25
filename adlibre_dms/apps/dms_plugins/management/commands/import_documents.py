@@ -11,7 +11,7 @@ import traceback
 from django.core.management.base import BaseCommand#, CommandError
 from django.contrib.auth.models import User
 
-from core.models import DocumentManager
+from core.document_manager import DocumentManager
 
 class FakeRequest(object):
     def __init__(self):

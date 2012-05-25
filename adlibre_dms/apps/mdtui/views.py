@@ -16,7 +16,7 @@ from django.contrib.auth.decorators import login_required
 
 from dmscouch.models import CouchDocument
 from forms import DocumentTypeSelectForm, DocumentUploadForm, BarcodePrintedForm, DocumentSearchOptionsForm
-from core.models import DocumentManager
+from core.document_manager import DocumentManager
 from doc_codes.models import DocumentTypeRule
 from view_helpers import initIndexesForm
 from view_helpers import processDocumentIndexForm
