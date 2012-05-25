@@ -20,7 +20,7 @@ from django.shortcuts import get_object_or_404
 from django.template import RequestContext, loader
 
 from dms_plugins import models, forms, representator
-from core.models import DocumentManager
+from core.document_manager import DocumentManager
 from browser.forms import UploadForm
 
 

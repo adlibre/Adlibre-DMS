@@ -20,7 +20,7 @@ from django.utils.decorators import method_decorator
 from api.decorators.auth import logged_in_or_basicauth
 from api.decorators.group_required import group_required
 
-from core.models import DocumentManager
+from core.document_manager import DocumentManager
 from dms_plugins import models
 from doc_codes.models import DocumentTypeRuleManagerInstance
 from mdt_manager import MetaDataTemplateManager
