@@ -44,7 +44,7 @@ class CouchDocument(Document):
         # adding description if exists
         try:
             self.metadata_description = document.db_info["description"]
-        except:
+        except KeyError:
             self.metadata_description = ""
             pass
         self.tags = document.tags

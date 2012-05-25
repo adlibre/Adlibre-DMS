@@ -140,6 +140,7 @@ class DocumentManager(object):
     def update(self, request, document_name, tag_string=None, remove_tag_string=None, extension=None):
         """
         Process update plugins.
+
         This is needed to update document properties like tags without re-storing document itself.
         """
         doc = Document()
@@ -190,9 +191,6 @@ class DocumentManager(object):
         metadatas = self.get_plugins_by_type(doccode_plugin_mapping, 'metadata', pluginpoint)
         if metadatas: metadata = metadatas[0]
         return metadata
-
-    def get_tags_plugin(self):
-        return
 
     def get_file_list(self, doccode_plugin_mapping, start=0, finish=None, order=None, searchword=None,
                             tags=[], filter_date=None):
