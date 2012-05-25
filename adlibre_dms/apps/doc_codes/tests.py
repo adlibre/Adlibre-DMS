@@ -1,5 +1,6 @@
 """
 Module: Document Type Rules Model Unit Tests
+
 Project: Adlibre DMS
 Copyright: Adlibre Pty Ltd 2012
 License: See LICENSE for license information
@@ -13,7 +14,7 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 
 from doc_codes.models import DocumentTypeRule
-from document import Document
+from core.models import Document
 
 
 # DocCodeModelTest Test Data
