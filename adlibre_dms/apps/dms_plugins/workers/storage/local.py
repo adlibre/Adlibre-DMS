@@ -36,7 +36,15 @@ def naturalsort(L, reverse=False):
 class LocalFilesystemManager(object):
     def get_document_directory(self, document):
         root = settings.DOCUMENT_ROOT
-        directory = document.splitdir()
+        # Refactoring for v2 (splitdir() method from Document() object used only here.)
+        directory = None
+        doccode = document.get_docrule()
+        if doccode:
+            splitdir = ''
+            for d in doccode.split(document.get_stripped_filename()):
+                splitdir = os.path.join(splitdir, d)
+            directory = os.path.join(str(doccode.get_id()), splitdir)
+
         if not directory:
             raise PluginError("The document type is not supported.", 500) # no doccode for document
         directory = os.path.join(root, directory)

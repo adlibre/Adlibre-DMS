@@ -218,26 +218,6 @@ class Document(object):
     def set_option(self, key, value):
         self.options[key] = value
 
-    def splitdir(self):
-        directory = None
-        doccode = self.get_docrule()
-        if doccode:
-        #            saved_dir = self.get_option('parent_directory') or ''
-        #            if saved_dir or doccode.no_doccode:
-        #                doccode_dirs = doccode.split()
-        #                doccode_dirs = map(lambda x: x.replace('{{DATE}}', datetime.datetime.now().strftime(settings.DATE_FORMAT)),
-        #                                    doccode_dirs)
-        #                if saved_dir:
-        #                    doccode_dirs[-1] = saved_dir
-        #                args = [str(doccode.get_id())] + doccode_dirs
-        #                directory = os.path.join(*args)
-        #            else:
-            splitdir = ''
-            for d in doccode.split(self.get_stripped_filename()):
-                splitdir = os.path.join(splitdir, d)
-            directory = os.path.join(str(doccode.get_id()), splitdir)
-        return directory
-
     def get_creation_time(self):
         metadata = self.get_current_metadata()
         if metadata:
