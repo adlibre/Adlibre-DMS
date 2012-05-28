@@ -12,6 +12,8 @@ from dms_plugins.workers import Plugin
 from core.document_manager import DocumentManager
 from dmscouch.models import CouchDocument
 
+from couchdbkit.resource import ResourceNotFound
+
 class CouchDBMetadata(object):
     """
         Stores metadata in CouchDB DatabaseManager.
@@ -44,13 +46,17 @@ class CouchDBMetadata(object):
                         # TODO: move this code into a proper place (UPDATE method)
                         # Asking couchdb about if old metadata exists and updating them properly
                         current_revisions = document.metadata
-                        temp_doc = self.retrieve(request, document)
-                        old_metadata = temp_doc.get_db_info()
-                        if old_metadata['mdt_indexes']:
-                            # Preserving Description
-                            old_metadata['mdt_indexes']['description'] = old_metadata['description']
-                            document.set_db_info(old_metadata['mdt_indexes'])
-                            document.set_metadata(current_revisions)
+                        try:
+                            # Only if document exists in DB. Falling gracefully if not.
+                            temp_doc = self.retrieve(request, document)
+                            old_metadata = temp_doc.get_db_info()
+                            if old_metadata['mdt_indexes']:
+                                # Preserving Description
+                                old_metadata['mdt_indexes']['description'] = old_metadata['description']
+                                document.set_db_info(old_metadata['mdt_indexes'])
+                                document.set_metadata(current_revisions)
+                        except ResourceNotFound:
+                            pass
                 # updating tags to sync with Django DB
                 self.sync_document_tags(document)
                 # assuming no document with this _id exists. SAVING. HACK: or overwriting existing
