@@ -23,7 +23,8 @@ from dms_plugins.workers import DmsException
 
 from core.models import Document
 
-log = logging.getLogger('dms.document_manager')
+log = logging.getLogger('core.document_manager')
+
 # TODO: Delint this file
 # TODO: AC: I think this should be refactored so that 'request' is not used here. Plugin points should be executed elsewhere.
 class ConfigurationError(Exception):
@@ -31,14 +32,11 @@ class ConfigurationError(Exception):
 
 class DocumentManager(object):
     """
-
+    Document() object operations handler
     """
     def __init__(self):
         self.errors = []
         self.warnings = []
-
-    def get_plugin_mappings(self):
-        return models.DoccodePluginMapping.objects.all()
 
     def get_plugin_mapping_by_kwargs(self, **kwargs):
         try:
