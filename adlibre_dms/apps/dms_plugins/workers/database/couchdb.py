@@ -7,7 +7,7 @@ Author: Iurii Garmash
 """
 
 from dms_plugins.pluginpoints import BeforeRetrievalPluginPoint, BeforeRemovalPluginPoint, DatabaseStoragePluginPoint
-from dms_plugins.models import Document as DocTags #TODO: needs refactoring of name
+from dms_plugins.models import DocTags
 from dms_plugins.workers import Plugin
 from core.document_manager import DocumentManager
 from dmscouch.models import CouchDocument

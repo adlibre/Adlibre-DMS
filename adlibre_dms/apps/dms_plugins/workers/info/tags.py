@@ -1,7 +1,7 @@
 from taggit.models import Tag
 from taggit.utils import parse_tags
 
-from dms_plugins.models import Document
+from dms_plugins.models import DocTags
 from dms_plugins.pluginpoints import BeforeRetrievalPluginPoint, BeforeUpdatePluginPoint
 from dms_plugins.workers import Plugin, PluginError
 
@@ -13,9 +13,9 @@ class TagsPlugin(Plugin, BeforeRetrievalPluginPoint):
     def work(self, request, document, **kwargs):
         tags = []
         try:
-            doc_model = Document.objects.get(name = document.get_filename())
+            doc_model = DocTags.objects.get(name = document.get_filename())
             tags = doc_model.get_tag_list()
-        except Document.DoesNotExist:
+        except DocTags.DoesNotExist:
             pass
         document.set_tags(tags)
         return document
@@ -23,11 +23,11 @@ class TagsPlugin(Plugin, BeforeRetrievalPluginPoint):
     def get_all_tags(self, doccode = None):
         tags = Tag.objects.all()
         if doccode:
-            tags = tags.filter(taggit_taggeditem_items__document__doccode = doccode.get_id()).distinct()
+            tags = tags.filter(taggit_taggeditem_items__doctags__doccode = doccode.get_id()).distinct()
         return tags
 
     def get_doc_models(self, doccode = None, tags = []):
-        doc_models = Document.objects.all()
+        doc_models = DocTags.objects.all()
         if doccode:
             doc_models = doc_models.filter(doccode = doccode.get_id())
         if tags:
@@ -44,7 +44,7 @@ class TagsUpdatePlugin(Plugin, BeforeUpdatePluginPoint):
         tag_string = tag_string.strip()
         remove_tag_string = document.get_remove_tag_string()
         remove_tag_string = remove_tag_string.strip()
-        doc_model, created = Document.objects.get_or_create(name = document.get_filename(),
+        doc_model, created = DocTags.objects.get_or_create(name = document.get_filename(),
                                                                 doccode = document.get_docrule().get_id())
         if tag_string or remove_tag_string:
             if tag_string:
@@ -52,7 +52,7 @@ class TagsUpdatePlugin(Plugin, BeforeUpdatePluginPoint):
                 doc_model.tags.add(*tags)
             else:
                 doc_model.tags.remove(remove_tag_string)
-            doc_model = Document.objects.get(pk = doc_model.pk)
+            doc_model = DocTags.objects.get(pk = doc_model.pk)
         document.set_tags(doc_model.get_tag_list())
         return document
 

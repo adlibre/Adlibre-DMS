@@ -120,7 +120,7 @@ class PluginOption(models.Model):
         return "%s: %s" % (self.name, self.value)
 
 # TODO: Refactor this to more suitable name (without using verbose_name)
-class Document(models.Model):
+class DocTags(models.Model):
     """
         A model that represents Document for maintainig Tag relations.
     """
