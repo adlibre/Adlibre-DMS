@@ -20,6 +20,7 @@ from dms_plugins.workers import PluginError, PluginWarning, BreakPluginChain
 from dms_plugins.workers.info.tags import TagsPlugin
 from dms_plugins import pluginpoints
 from dms_plugins.workers import DmsException
+from dms_plugins.operator import PluginsOperator
 
 from core.models import Document
 
@@ -57,18 +58,11 @@ class DocumentManager(object):
             raise DmsException('Rule not found', 404)
         return mapping
 
-    def get_plugins_from_mapping(self, mapping, pluginpoint, plugin_type):
-        plugins = []
-        plugin_objects = getattr(mapping, 'get_' + pluginpoint.settings_field_name)()
-        plugins = map(lambda plugin_obj: plugin_obj.get_plugin(), plugin_objects)
-        if plugin_type:
-            plugins = filter(lambda plugin: hasattr(plugin, 'plugin_type') and plugin.plugin_type == plugin_type, plugins)
-        return plugins
-
     def get_plugins(self, pluginpoint, document, plugin_type=None):
+        operator = PluginsOperator()
         mapping = self.get_plugin_mapping(document)
         if mapping:
-            plugins = self.get_plugins_from_mapping(mapping, pluginpoint, plugin_type)
+            plugins = operator.get_plugins_from_mapping(mapping, pluginpoint, plugin_type)
         else:
             plugins = []
         return plugins
@@ -174,7 +168,8 @@ class DocumentManager(object):
         return self.process_pluginpoint(pluginpoints.BeforeRemovalPluginPoint, request, document=doc)
 
     def get_plugins_by_type(self, doccode_plugin_mapping, plugin_type, pluginpoint=pluginpoints.BeforeStoragePluginPoint):
-        plugins = self.get_plugins_from_mapping(doccode_plugin_mapping, pluginpoint, plugin_type=plugin_type)
+        operator = PluginsOperator()
+        plugins = operator.get_plugins_from_mapping(doccode_plugin_mapping, pluginpoint, plugin_type=plugin_type)
         return plugins
 
     def get_storage(self, doccode_plugin_mapping, pluginpoint=pluginpoints.StoragePluginPoint):
