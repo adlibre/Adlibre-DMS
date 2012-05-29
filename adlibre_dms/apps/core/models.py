@@ -19,9 +19,8 @@ from django.conf import settings
 from dms_plugins.workers import DmsException
 from doc_codes.models import DocumentTypeRuleManagerInstance
 
+log = logging.getLogger('core.document')
 
-
-log = logging.getLogger('dms.document')
 class Document(object):
     """
     DMS core Document Object
