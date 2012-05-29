@@ -23,6 +23,7 @@ from api.decorators.group_required import group_required
 from core.document_manager import DocumentManager
 from dms_plugins import models
 from doc_codes.models import DocumentTypeRuleManagerInstance
+from dms_plugins.models import DoccodePluginMapping
 from mdt_manager import MetaDataTemplateManager
 
 
@@ -286,8 +287,7 @@ class RulesHandler(BaseHandler):
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
     @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def read(self, request):
-        manager = DocumentManager()
-        mappings = manager.get_plugin_mappings()
+        mappings = DoccodePluginMapping.objects.all()
         rules = list(map(lambda x: {
                             'doccode': x.get_docrule().get_title(),
                             'id': x.pk,
