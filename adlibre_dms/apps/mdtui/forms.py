@@ -122,7 +122,7 @@ class DocumentSearchOptionsForm(forms.Form):
     Has dynamic initialization abilities.
     """
     date = forms.DateField(label="Creation Date From", help_text="Date of the document added")
-    end_date = forms.DateField(required=False, label="To", help_text="Final possible document date")
+    end_date = forms.DateField(required=False, label="Creation Date To", help_text="Final possible document date")
 
     def __init__(self, *args, **kwargs):
         super(DocumentSearchOptionsForm, self).__init__(*args, **kwargs)
