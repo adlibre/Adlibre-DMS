@@ -35,7 +35,7 @@ class DoccodePluginMapping(models.Model):
     database_storage_plugins = ManyPluginField(   pluginpoints.DatabaseStoragePluginPoint,
                                                 related_name = 'settings_database_storage',
                                                 blank = True,
-                                                verbose_name = "Storage Workflow")
+                                                verbose_name = "Database Storage Workflow")
     storage_plugins = ManyPluginField(   pluginpoints.StoragePluginPoint, 
                                                 related_name = 'settings_storage',
                                                 blank = True,
