@@ -110,17 +110,6 @@ class DoccodePluginMapping(models.Model):
         """
         return self.database_storage_plugins.all().order_by('index')
 
-    def get_docrule_mapping(self):
-        log.info('get_docrule_mapping for DocumentTypeRule : %s.' % self)
-        mapping = dms_plugins.models.DoccodePluginMapping.objects.filter(
-            doccode = str(self.doccode_id),
-            active=True)
-        if mapping.count():
-            mapping = mapping[0]
-        else:
-            raise dms_plugins.workers.DmsException('Rule not found', 404)
-        return mapping
-
 class PluginOption(models.Model):
     pluginmapping = models.ForeignKey(DoccodePluginMapping)
     plugin = models.ForeignKey(Plugin)

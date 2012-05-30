@@ -79,6 +79,7 @@ class DocumentManager(object):
     def store(self, request, uploaded_file, index_info=None, barcode=None):
         """
         Process all storage plugins
+
         uploaded file is http://docs.djangoproject.com/en/1.3/topics/http/file-uploads/#django.core.files.uploadedfile.UploadedFile
         or file object
         """
