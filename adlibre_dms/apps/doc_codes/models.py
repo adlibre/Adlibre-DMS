@@ -9,6 +9,7 @@ Author: Iurii Garmash
 from django.db import models
 import re
 import logging
+import dms_plugins
 
 log = logging.getLogger('dms')
 
@@ -23,6 +24,7 @@ DOCCODE_TYPES = [
 class DocumentTypeRule(models.Model):
     """
     Main Model for Document Type Rules (Old Doccode).
+
     In order for an app to function Properly must contain:
     Basic model for storing "No doccode" Documents.
         - doccode_id = 1000 (or any no_doccode Id set)
@@ -185,6 +187,19 @@ class DocumentTypeRule(models.Model):
             log.debug("False barcode")
             return False
 
+    # TODO: method should not rise anything by himself
+    # TODO: should get more than one mappings. (Need to change entire logic)
+    def get_docrule_plugin_mappings(self):
+        log.info('get_docrule_mapping for DocumentTypeRule : %s.' % self)
+        mapping = dms_plugins.models.DoccodePluginMapping.objects.filter(
+            doccode = str(self.doccode_id),
+            active=True)
+        if mapping.count():
+            mapping = mapping[0]
+        else:
+            raise dms_plugins.workers.DmsException('Rule not found', 404)
+        return mapping
+
 
 class DocumentTypeRuleManager(object):
     def __init__(self):
@@ -215,7 +230,9 @@ class DocumentTypeRuleManager(object):
 
     def get_docrule_by_id(self, id):
         """
-        Works without making requests to DB. (when used with instance variable)
+        Works without making additional requests to DB.
+
+        (when used with instance variable)
         """
         docrules = self.doccodes
         docrule_instance = docrules.get(doccode_id=id)

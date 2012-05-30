@@ -21,13 +21,19 @@ class CouchDBMetadata(object):
     """
 
     def store(self, request, document):
+        """
+        Stores CouchDB object into DB.
+
+        (Updates or overwrites CouchDB document)
+        """
         docrule = document.get_docrule()
         # doing nothing for no doccode documents
         if docrule.no_doccode:
             return document
         else:
             manager = DocumentManager()
-            mapping = manager.get_plugin_mapping(document)
+            # FIXME: there might be more than one mapping
+            mapping = docrule.get_docrule_plugin_mappings()
             # doing nothing for documents without mapping has DB plugins
             if not mapping.get_database_storage_plugins():
                 return document
@@ -74,7 +80,9 @@ class CouchDBMetadata(object):
 
     def update_metadata_after_removal(self, request, document):
         """
-        Updates document CouchDB metadata on removal. (Removes CouchDB document)
+        Updates document CouchDB metadata on removal.
+
+        (Removes CouchDB document)
         """
         if not document.get_file_obj():
             #doc is fully deleted from fs
@@ -86,7 +94,8 @@ class CouchDBMetadata(object):
     def retrieve(self, request, document):
 
         manager = DocumentManager()
-        mapping = manager.get_plugin_mapping(document)
+        docrule = document.get_docrule()
+        mapping = docrule.get_docrule_plugin_mappings()
         # No actions for no doccode documents
         # No actions for documents without 'mapping has DB plugins'
         if document.get_docrule().no_doccode:

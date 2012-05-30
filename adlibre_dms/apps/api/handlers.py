@@ -151,7 +151,9 @@ class FileInfoHandler(BaseFileHandler):
         manager = DocumentManager()
         document = manager.retrieve(request, code, hashcode=hashcode, revision=revision, only_metadata=True,
             extension=suggested_format)
-        mapping = manager.get_plugin_mapping(document)
+        docrule = document.get_docrule()
+        # FIXME: there might be more than one docrules!
+        mapping = docrule.get_docrule_plugin_mappings()
         if manager.errors:
             log.error('FileInfoHandler.read errors: %s' % manager.errors)
             if settings.DEBUG:
@@ -162,7 +164,7 @@ class FileInfoHandler(BaseFileHandler):
         info = document.get_dict()
         info['document_list_url'] = reverse('ui_document_list', kwargs={'id_rule': mapping.pk})
         info['tags'] = document.get_tags()
-        info['no_doccode'] = document.get_docrule().no_doccode
+        info['no_doccode'] = docrule.no_doccode
         log.info('FileInfoHandler.read request fulfilled for %s, ext %s, rev %s, hash %s' % (code, suggested_format, revision, hashcode))
         return HttpResponse(json.dumps(info))
 
