@@ -137,7 +137,7 @@ class DocumentTypeRule(models.Model):
 
     def get_id(self):
         #print 'Doccode model "get_id" called.'
-        return self.doccode_id
+        return self.pk
 
     def get_title(self):
         title = getattr(self, 'title', '')
@@ -192,7 +192,7 @@ class DocumentTypeRule(models.Model):
     def get_docrule_plugin_mappings(self):
         log.info('get_docrule_mapping for DocumentTypeRule : %s.' % self)
         mapping = dms_plugins.models.DoccodePluginMapping.objects.filter(
-            doccode = str(self.doccode_id),
+            doccode = str(self.pk),
             active=True)
         if mapping.count():
             mapping = mapping[0]
@@ -235,7 +235,7 @@ class DocumentTypeRuleManager(object):
         (when used with instance variable)
         """
         docrules = self.doccodes
-        docrule_instance = docrules.get(doccode_id=id)
+        docrule_instance = docrules.get(pk=id)
         return docrule_instance
 
 # TODO: FIXME: We need to reinitialize this on saving new Document Type Rule. (Internal list of them is not updated)

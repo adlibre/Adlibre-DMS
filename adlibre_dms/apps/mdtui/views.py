@@ -264,7 +264,7 @@ def indexing_details(request, step=None, template='mdtui/indexing.html'):
         if secondary_indexes:
                 request.session["document_keys_dict"] = secondary_indexes
                 # Success, allocate barcode
-                dtr = DocumentTypeRule.objects.get(doccode_id=docrule_id)
+                dtr = DocumentTypeRule.objects.get(pk=docrule_id)
                 request.session["barcode"] = dtr.allocate_barcode()
                 return HttpResponseRedirect(reverse('mdtui-index-source'))
         else:

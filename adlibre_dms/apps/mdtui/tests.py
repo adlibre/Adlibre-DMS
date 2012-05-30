@@ -20,8 +20,8 @@ password = 'admin'
 couchdb_url = 'http://127.0.0.1:5984'
 
 test_mdt_docrule_id = 2 # should be properly assigned to fixtures docrule that uses CouchDB plugins
-test_mdt_docrule_id2 = 6 # should be properly assigned to fixtures docrule that uses CouchDB plugins
-test_mdt_docrule_id3 = 7 # should be properly assigned to fixtures docrule that uses CouchDB plugins
+test_mdt_docrule_id2 = 7 # should be properly assigned to fixtures docrule that uses CouchDB plugins
+test_mdt_docrule_id3 = 8 # should be properly assigned to fixtures docrule that uses CouchDB plugins
 
 indexes_form_match_pattern = '(Employee ID|Employee Name|Friends ID|Friends Name|Required Date|Reporting Entity|Report Date|Report Type).+?name=\"(\d+|\d+_from|\d+_to)\"'
 

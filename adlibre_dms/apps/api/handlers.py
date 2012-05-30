@@ -230,7 +230,8 @@ class TagsHandler(BaseHandler):
         try:
             manager = DocumentManager()
             mapping = manager.get_plugin_mapping_by_kwargs(pk=id_rule)
-            tags = manager.get_all_tags(doccode=mapping.get_docrule())
+            docrule = mapping.get_docrule()
+            tags = manager.get_all_tags(doccode=docrule)
             log.info('TagsHandler.read request fulfilled for rule %s' % (id_rule))
             return map(lambda x: x.name, tags)
         except Exception, e: # FIXME
