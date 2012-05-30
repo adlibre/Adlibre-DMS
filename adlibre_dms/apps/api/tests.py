@@ -16,6 +16,7 @@ from dms_plugins.models import DoccodePluginMapping
 
 from adlibre.dms.base_test import DMSTestCase
 
+
 """
 Test data
 """
@@ -26,7 +27,7 @@ Test data
 # TODO: Run all of these tests for different auth. Plain, Django, and none!
 # TODO: Test with and without correct permissions.
 
-adlibre_invoices_rule_id = 1 # FIXME, we should have a dict of rules and ids provided by DMSTestCase
+adlibre_invoices_rule_id = 2 # FIXME, we should have a dict of rules and ids provided by DMSTestCase
 
 #no_doccode_name = "test_no_doccode"
 adl_invoice_name = "ADL-1985"
@@ -47,7 +48,7 @@ class APITest(DMSTestCase):
         doccode = DocumentTypeRuleManagerInstance.get_docrule_by_name('Test PDFs')
         mapping = DoccodePluginMapping.objects.get(doccode = doccode.get_id())
         #we don't really care if it crashes above, cause that means our database is imperfect
-        url = reverse('api_rules_detail', kwargs={'id_rule': 2, 'emitter_format': 'json'})
+        url = reverse('api_rules_detail', kwargs={'id_rule': 3, 'emitter_format': 'json'})
         response = self.client.get(url)
         self.assertContains(response, 'Test PDFs')
 

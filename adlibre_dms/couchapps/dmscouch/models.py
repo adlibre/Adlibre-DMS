@@ -33,7 +33,7 @@ class CouchDocument(Document):
         if document.get_stripped_filename():
             self.id = document.get_stripped_filename()
             self._doc['_id']=self.id
-        self.metadata_doc_type_rule_id = str(document.doccode.doccode_id)
+        self.metadata_doc_type_rule_id = str(document.doccode.pk)
         # user name/id from Django user
         self.metadata_user_id = str(request.user.pk)
         if request.user.first_name:

@@ -19,7 +19,7 @@ from doc_codes.models import DocumentTypeRule
 log = logging.getLogger('dms_plugins.models')
 
 try:
-    DOCRULE_CHOICES = map(lambda doccode: (str(doccode.doccode_id), doccode.title), DocumentTypeRule.objects.all())
+    DOCRULE_CHOICES = map(lambda doccode: (str(doccode.pk), doccode.title), DocumentTypeRule.objects.all())
 except:
     # HACK: syncdb or no initial DocumentTypeRule exists...
     DOCRULE_CHOICES = [('1000', 'No Doccode'),]
@@ -60,7 +60,7 @@ class DoccodePluginMapping(models.Model):
     def get_name(self):
         doccode_name = "No name given"
         try:
-            doccode_name = DocumentTypeRule.objects.get(doccode_id=self.doccode).title
+            doccode_name = DocumentTypeRule.objects.get(pk=self.doccode).title
         except (KeyError, AttributeError):
             pass
         return unicode(doccode_name)
@@ -68,10 +68,7 @@ class DoccodePluginMapping(models.Model):
 
     def get_docrule(self):
         docrules = DocumentTypeRuleManagerInstance.get_docrules()
-        try:
-            docrule = docrules[int(self.doccode)]
-        except:
-            docrule = docrules.filter(doccode_id=self.doccode)[0]
+        docrule = docrules.filter(pk=self.doccode)[0]
         return docrule
 
     def get_before_storage_plugins(self):
