@@ -7,6 +7,10 @@ License: See LICENSE for license information
 Author: Iurii Garmash
 """
 
+import logging
+
+log = logging.getLogger('dms_plugins.operator')
+
 class PluginsOperator(object):
     def __init__(self):
         # FIXME: Dummy init (unused fro now)

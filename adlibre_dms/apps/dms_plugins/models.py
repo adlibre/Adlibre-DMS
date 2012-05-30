@@ -6,10 +6,8 @@ License: See LICENSE for license information
 """
 
 from django.db import models
+import logging
 
-"""
-New models
-"""
 from djangoplugins.fields import PluginField, ManyPluginField
 from djangoplugins.models import Plugin
 from taggit.managers import TaggableManager
@@ -17,6 +15,8 @@ from taggit.managers import TaggableManager
 from dms_plugins import pluginpoints
 from doc_codes.models import DocumentTypeRuleManagerInstance
 from doc_codes.models import DocumentTypeRule
+
+log = logging.getLogger('dms_plugins.models')
 
 try:
     DOCRULE_CHOICES = map(lambda doccode: (str(doccode.doccode_id), doccode.title), DocumentTypeRule.objects.all())
@@ -109,6 +109,17 @@ class DoccodePluginMapping(models.Model):
         Method to get active 'database_storage_plugins' plugins for Doccode Plugin Mapping instance
         """
         return self.database_storage_plugins.all().order_by('index')
+
+    def get_docrule_mapping(self):
+        log.info('get_docrule_mapping for DocumentTypeRule : %s.' % self)
+        mapping = dms_plugins.models.DoccodePluginMapping.objects.filter(
+            doccode = str(self.doccode_id),
+            active=True)
+        if mapping.count():
+            mapping = mapping[0]
+        else:
+            raise dms_plugins.workers.DmsException('Rule not found', 404)
+        return mapping
 
 class PluginOption(models.Model):
     pluginmapping = models.ForeignKey(DoccodePluginMapping)

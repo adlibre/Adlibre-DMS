@@ -46,21 +46,11 @@ class DocumentManager(object):
             raise DmsException('Rule not found', 404)
         return mapping
 
-    def get_plugin_mapping(self, document):
-        doccode = document.get_docrule()
-        log.info('get_plugin_mapping for: %s.' % doccode)
-        mapping = models.DoccodePluginMapping.objects.filter(
-            doccode = str(doccode.doccode_id),
-            active=True)
-        if mapping.count():
-            mapping = mapping[0]
-        else:
-            raise DmsException('Rule not found', 404)
-        return mapping
-
     def get_plugins(self, pluginpoint, document, plugin_type=None):
         operator = PluginsOperator()
-        mapping = self.get_plugin_mapping(document)
+        docrule = document.get_docrule()
+        # FIXME: there might be more than one docrule mappings.
+        mapping = docrule.get_docrule_plugin_mappings()
         if mapping:
             plugins = operator.get_plugins_from_mapping(mapping, pluginpoint, plugin_type)
         else:
