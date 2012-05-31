@@ -887,7 +887,7 @@
             "active": true, 
             "barcode_format": "", 
             "doccode_type": "1", 
-            "doccode_id": 5,
+            "doccode_id": 4,
             "no_doccode": false
         }
     }, 
@@ -904,7 +904,7 @@
             "active": true, 
             "barcode_format": "", 
             "doccode_type": "3", 
-            "doccode_id": 4,
+            "doccode_id": 5,
             "no_doccode": false
         }
     }, 
