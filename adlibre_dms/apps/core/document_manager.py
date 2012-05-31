@@ -33,7 +33,9 @@ class ConfigurationError(Exception):
 
 class DocumentManager(object):
     """
-    Document() object operations handler
+    Main CRUD logic operations handler.
+
+    Will be refactored out to DocumentProcessor()
     """
     def __init__(self):
         self.errors = []
@@ -226,6 +228,7 @@ class DocumentManager(object):
     def file_exists(self, request, filename):
         """
         Main condition of file present in DMS is here
+
         """
         exists = False
         # TODO: implement this to really check if we need ot update document
