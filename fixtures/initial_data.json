@@ -835,8 +835,7 @@
             "split_string": "", 
             "active": true, 
             "barcode_format": "", 
-            "doccode_type": "1", 
-            "doccode_id": 1,
+            "doccode_type": "1",
             "no_doccode": true
         }
     }, 
@@ -852,8 +851,7 @@
             "split_string": "0:5,5:8", 
             "active": true, 
             "barcode_format": "", 
-            "doccode_type": "1", 
-            "doccode_id": 3,
+            "doccode_type": "1",
             "no_doccode": false
         }
     }, 
@@ -869,8 +867,7 @@
             "split_string": "0:3,4:8", 
             "active": true, 
             "barcode_format": "ADL-%s", 
-            "doccode_type": "1", 
-            "doccode_id": 2, 
+            "doccode_type": "1",
             "no_doccode": false
         }
     }, 
@@ -886,8 +883,7 @@
             "split_string": "0:4,5:7,8:10,11:20", 
             "active": true, 
             "barcode_format": "", 
-            "doccode_type": "1", 
-            "doccode_id": 4,
+            "doccode_type": "1",
             "no_doccode": false
         }
     }, 
@@ -903,8 +899,7 @@
             "split_string": "", 
             "active": true, 
             "barcode_format": "", 
-            "doccode_type": "3", 
-            "doccode_id": 5,
+            "doccode_type": "3",
             "no_doccode": false
         }
     }, 
@@ -920,8 +915,7 @@
             "split_string": "", 
             "active": true, 
             "barcode_format": "", 
-            "doccode_type": "2", 
-            "doccode_id": 6,
+            "doccode_type": "2",
             "no_doccode": false
         }
     },
@@ -938,7 +932,6 @@
             "active": true,
             "barcode_format": "BBB-%s",
             "doccode_type": "1",
-            "doccode_id": 7,
             "no_doccode": false
         }
     },
@@ -955,7 +948,6 @@
             "active": true,
             "barcode_format": "CCC-%s",
             "doccode_type": "1",
-            "doccode_id": 8,
             "no_doccode": false
         }
     },
