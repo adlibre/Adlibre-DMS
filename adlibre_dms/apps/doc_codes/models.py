@@ -36,7 +36,6 @@ class DocumentTypeRule(models.Model):
     For now DMS requires it to be like so.
     """
     doccode_type = models.CharField(choices=DOCCODE_TYPES, max_length=64, default='1')
-    doccode_id = models.IntegerField('Document Type Rule ID')
     sequence_last = models.IntegerField("Number of Documents", default=0, help_text="Last document stored. (Don't change unless you understand the consequences.)")
     no_doccode = models.BooleanField(default=False)
     title = models.CharField("Document Type Rule Name", max_length=60)
