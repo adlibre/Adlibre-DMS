@@ -70,7 +70,7 @@ class DocumentTypeRule(models.Model):
     active = models.BooleanField(default=True)
 
     def __unicode__(self):
-        return u'DocumentTypeRule:' + unicode(self.get_title())
+        return unicode(self.get_title())
 
     def validate(self, document_name):
         """

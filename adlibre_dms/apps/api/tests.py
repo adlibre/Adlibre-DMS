@@ -1,5 +1,6 @@
 """
 Module: API Unit Tests
+
 Project: Adlibre DMS
 Copyright: Adlibre Pty Ltd 2011
 License: See LICENSE for license information
@@ -15,11 +16,6 @@ from doc_codes.models import DocumentTypeRuleManagerInstance
 from dms_plugins.models import DoccodePluginMapping
 
 from adlibre.dms.base_test import DMSTestCase
-
-
-"""
-Test data
-"""
 
 # TODO: Create a test document code, and a set of test documents at the start of test
 # TODO: Test self.rules, self.rules_missing, self.documents_missing
