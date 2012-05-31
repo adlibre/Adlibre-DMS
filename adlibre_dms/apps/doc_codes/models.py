@@ -1,5 +1,6 @@
 """
 Module: Document Type Rules Model for Adlibre DMS
+
 Project: Adlibre DMS
 Copyright: Adlibre Pty Ltd 2012
 License: See LICENSE for license information
