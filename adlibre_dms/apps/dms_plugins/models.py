@@ -114,13 +114,13 @@ class PluginOption(models.Model):
     def __unicode__(self):
         return "%s: %s" % (self.name, self.value)
 
-# TODO: make it part of the  DoccodePluginMapping() model instance.
+# TODO: MAYBE make it part of the  DoccodePluginMapping() model instance.
 class DocTags(models.Model):
     """
         A model that represents Document for maintainig Tag relations.
     """
     name = models.CharField(max_length = 128)
-    doccode = models.CharField(max_length = 63, choices = DOCRULE_CHOICES)
+    doccode = models.ForeignKey(DocumentTypeRule)
     tags = TaggableManager()
 
     class Meta:
