@@ -1,5 +1,6 @@
 """
 Module: DMS Plugins DB connections module
+
 Project: Adlibre DMS
 Copyright: Adlibre Pty Ltd 2012
 License: See LICENSE for license information
@@ -13,7 +14,6 @@ from djangoplugins.models import Plugin
 from taggit.managers import TaggableManager
 
 from dms_plugins import pluginpoints
-from doc_codes.models import DocumentTypeRuleManagerInstance
 from doc_codes.models import DocumentTypeRule
 
 log = logging.getLogger('dms_plugins.models')
@@ -26,7 +26,7 @@ except:
     pass
 
 class DoccodePluginMapping(models.Model):
-    doccode = models.CharField(choices = DOCRULE_CHOICES, max_length = 64)
+    doccode = models.ForeignKey(DocumentTypeRule)
     #if changing *_plugins names please change dms_plugins.pluginpoints correspondingly
     before_storage_plugins = ManyPluginField(   pluginpoints.BeforeStoragePluginPoint, 
                                                 related_name = 'settings_before_storage',
@@ -55,21 +55,19 @@ class DoccodePluginMapping(models.Model):
     active = models.BooleanField(default = False)
 
     def __unicode__(self):
-        return self.get_name()
+        return unicode(self.get_name())
 
     def get_name(self):
-        doccode_name = "No name given"
         try:
-            doccode_name = DocumentTypeRule.objects.get(pk=self.doccode).title
+            doccode_name = self.doccode.get_title()
         except (KeyError, AttributeError):
+            doccode_name = 'No name given'
             pass
         return unicode(doccode_name)
     name = property(get_name)
 
     def get_docrule(self):
-        docrules = DocumentTypeRuleManagerInstance.get_docrules()
-        docrule = docrules.filter(pk=self.doccode)[0]
-        return docrule
+        return self.doccode
 
     def get_before_storage_plugins(self):
         """
