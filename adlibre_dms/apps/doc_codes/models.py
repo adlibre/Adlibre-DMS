@@ -12,7 +12,7 @@ import re
 import logging
 import dms_plugins
 
-log = logging.getLogger('dms')
+log = logging.getLogger('dms.doc_codes')
 
 # HACK: For allowing for extended validation / splitting.
 # TODO: Refactor this requirement out.

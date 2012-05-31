@@ -18,13 +18,6 @@ from doc_codes.models import DocumentTypeRule
 
 log = logging.getLogger('dms_plugins.models')
 
-try:
-    DOCRULE_CHOICES = map(lambda doccode: (str(doccode.pk), doccode.title), DocumentTypeRule.objects.all())
-except:
-    # HACK: syncdb or no initial DocumentTypeRule exists...
-    DOCRULE_CHOICES = [('1000', 'No Doccode'),]
-    pass
-
 class DoccodePluginMapping(models.Model):
     doccode = models.ForeignKey(DocumentTypeRule)
     #if changing *_plugins names please change dms_plugins.pluginpoints correspondingly
