@@ -12,14 +12,14 @@ import os
 import logging
 import djangoplugins
 
-from django.conf import settings
+#from django.conf import settings
 from django.core.files.uploadedfile import UploadedFile
 
-from dms_plugins import models
-from dms_plugins.workers import PluginError, PluginWarning, BreakPluginChain
+#from dms_plugins import models
+#from dms_plugins.workers import PluginError, PluginWarning, BreakPluginChain
 from dms_plugins.workers.info.tags import TagsPlugin
 from dms_plugins import pluginpoints
-from dms_plugins.workers import DmsException
+#from dms_plugins.workers import DmsException
 from dms_plugins.operator import PluginsOperator
 
 from core.models import Document
@@ -41,26 +41,6 @@ class DocumentManager(object):
         self.errors = []
         self.warnings = []
 
-    def process_pluginpoint(self, pluginpoint, request, document=None):
-        operator = PluginsOperator()
-        plugins = operator.get_plugins_for_point(pluginpoint, document)
-        log.debug('process_pluginpoint: %s with %s plugins.' % (pluginpoint, plugins))
-        for plugin in plugins:
-            try:
-                log.debug('process_pluginpoint begin processing: %s.' % plugin)
-                document = plugin.work(request, document)
-                log.debug('process_pluginpoint begin processed: %s.' % plugin)
-            except PluginError, e: # if some plugin throws an exception, stop processing and store the error message
-                self.errors.append(e)
-                if settings.DEBUG:
-                    log.error('process_pluginpoint: %s.' % e) # e.parameter, e.code
-                break
-            except PluginWarning, e:
-                self.warnings.append(str(e))
-            except BreakPluginChain:
-                break
-        return document
-
     def store(self, request, uploaded_file, index_info=None, barcode=None):
         """
         Process all storage plugins
@@ -70,6 +50,7 @@ class DocumentManager(object):
         """
         log.debug('Storing Document %s, index_info: %s, barcode: %s' % (uploaded_file, index_info, barcode))
         # Check if file already exists
+        operator = PluginsOperator()
         if not self.file_exists(request, uploaded_file.name):
             doc = Document()
             doc.set_file_obj(uploaded_file)
@@ -83,13 +64,12 @@ class DocumentManager(object):
             if index_info:
                 doc.set_db_info(index_info)
                 # FIXME: if uploaded_file is not None, then some plugins should not run because we don't have a file
-            doc = self.process_pluginpoint(pluginpoints.BeforeStoragePluginPoint, request, document=doc)
+            doc = operator.process_pluginpoint(pluginpoints.BeforeStoragePluginPoint, request, document=doc)
             # Process storage plugins
-            self.process_pluginpoint(pluginpoints.StoragePluginPoint, request, document=doc)
+            operator.process_pluginpoint(pluginpoints.StoragePluginPoint, request, document=doc)
             # Process DatabaseStorage plugins
-            doc = self.process_pluginpoint(pluginpoints.DatabaseStoragePluginPoint, request, document=doc)
-            #mapping = self.get_plugin_mapping(doc)
-            #for plugin in mapping.get_database_storage_plugins(): print 'Mapping has plugin: ', plugin
+            doc = operator.process_pluginpoint(pluginpoints.DatabaseStoragePluginPoint, request, document=doc)
+            self.check_errors_in_operator(operator)
         else:
             doc = self.update(request, uploaded_file.name)
         return doc
@@ -114,16 +94,20 @@ class DocumentManager(object):
         This is needed to update document properties like tags without re-storing document itself.
         """
         doc = Document()
+        operator = PluginsOperator()
         doc.set_filename(document_name)
         #doc = self.retrieve(request, document_name)
         if extension:
             doc.set_requested_extension(extension)
         doc.set_tag_string(tag_string)
         doc.set_remove_tag_string(remove_tag_string)
-        return self.process_pluginpoint(pluginpoints.BeforeUpdatePluginPoint, request, document=doc)
+        doc = operator.process_pluginpoint(pluginpoints.BeforeUpdatePluginPoint, request, document=doc)
+        self.check_errors_in_operator(operator)
+        return doc
 
     def retrieve(self, request, document_name, hashcode=None, revision=None, only_metadata=False, extension=None):
         doc = Document()
+        operator = PluginsOperator()
         doc.set_filename(document_name)
         doc.set_hashcode(hashcode)
         doc.set_revision(revision)
@@ -131,17 +115,21 @@ class DocumentManager(object):
         if extension:
             doc.set_requested_extension(extension)
         doc.update_options(options)
-        doc = self.process_pluginpoint(pluginpoints.BeforeRetrievalPluginPoint, request, document=doc)
+        doc = operator.process_pluginpoint(pluginpoints.BeforeRetrievalPluginPoint, request, document=doc)
+        self.check_errors_in_operator(operator)
         return doc
 
     def remove(self, request, document_name, revision=None, extension=None):
         doc = Document()
+        operator = PluginsOperator()
         doc.set_filename(document_name)
         if extension:
             doc.set_requested_extension(extension)
         if revision:
             doc.set_revision(revision)
-        return self.process_pluginpoint(pluginpoints.BeforeRemovalPluginPoint, request, document=doc)
+        doc = operator.process_pluginpoint(pluginpoints.BeforeRemovalPluginPoint, request, document=doc)
+        self.check_errors_in_operator(operator)
+        return doc
 
     def get_plugins_by_type(self, doccode_plugin_mapping, plugin_type, pluginpoint=pluginpoints.BeforeStoragePluginPoint):
         operator = PluginsOperator()
@@ -216,3 +204,18 @@ class DocumentManager(object):
         #        if file_obj.metadata:
         #            exists = True
         return exists
+
+    def check_errors_in_operator(self, operator):
+        """
+        Method checks for errors and warnings PluginOperator() has and makes them own errors/warnings.
+
+        Returns Boolean depending if exist.
+        """
+        for error in operator.plugin_errors:
+            self.errors.append(error)
+        for warning in operator.plugin_warnings:
+            self.warnings.append(warning)
+        if operator.plugin_errors or operator.plugin_warnings:
+            return True
+        else:
+            return False
