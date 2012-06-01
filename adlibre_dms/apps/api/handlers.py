@@ -1,5 +1,6 @@
 """
 Module: Piston API Handlers
+
 Project: Adlibre DMS
 Copyright: Adlibre Pty Ltd 2011, 2012
 License: See LICENSE for license information
@@ -22,6 +23,7 @@ from api.decorators.group_required import group_required
 
 from core.document_manager import DocumentManager
 from dms_plugins import models
+from dms_plugins.operator import PluginsOperator
 from doc_codes.models import DocumentTypeRuleManagerInstance
 from dms_plugins.models import DoccodePluginMapping
 from mdt_manager import MetaDataTemplateManager
@@ -180,7 +182,8 @@ class FileListHandler(BaseHandler):
     def read(self, request, id_rule):
         try:
             manager = DocumentManager()
-            mapping = manager.get_plugin_mapping_by_kwargs(pk = id_rule)
+            operator = PluginsOperator()
+            mapping = operator.get_plugin_mapping_by_id(id_rule)
             start = 0
             finish = None
             try:
@@ -228,10 +231,10 @@ class TagsHandler(BaseHandler):
     @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def read(self, request, id_rule):
         try:
-            manager = DocumentManager()
-            mapping = manager.get_plugin_mapping_by_kwargs(pk=id_rule)
+            operator = PluginsOperator()
+            mapping = operator.get_plugin_mapping_by_id(id_rule)
             docrule = mapping.get_docrule()
-            tags = manager.get_all_tags(doccode=docrule)
+            tags = operator.get_all_tags(doccode=docrule)
             log.info('TagsHandler.read request fulfilled for rule %s' % (id_rule))
             return map(lambda x: x.name, tags)
         except Exception, e: # FIXME
@@ -318,9 +321,9 @@ class RulesDetailHandler(BaseHandler):
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
     @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def read(self, request, id_rule):
-        manager = DocumentManager()
+        operator = PluginsOperator()
         try:
-            mapping = manager.get_plugin_mapping_by_kwargs(pk=id_rule)
+            mapping = operator.get_plugin_mapping_by_id(id_rule)
         except Exception, e: # FIXME
             log.error('RulesDetailHandler.read Exception %s' % e)
             if settings.DEBUG:

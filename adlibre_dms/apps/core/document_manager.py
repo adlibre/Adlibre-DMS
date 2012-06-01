@@ -41,13 +41,6 @@ class DocumentManager(object):
         self.errors = []
         self.warnings = []
 
-    def get_plugin_mapping_by_kwargs(self, **kwargs):
-        try:
-            mapping = models.DoccodePluginMapping.objects.get(**kwargs)
-        except models.DoccodePluginMapping.DoesNotExist:
-            raise DmsException('Rule not found', 404)
-        return mapping
-
     def get_plugins(self, pluginpoint, document, plugin_type=None):
         operator = PluginsOperator()
         docrule = document.get_docrule()
@@ -221,9 +214,6 @@ class DocumentManager(object):
     def get_plugin_list(self):
         all_plugins = djangoplugins.models.Plugin.objects.all().order_by('point__name', 'index')
         return all_plugins
-
-    def get_all_tags(self, doccode=None):
-        return TagsPlugin().get_all_tags(doccode = doccode)
 
     def file_exists(self, request, filename):
         """
