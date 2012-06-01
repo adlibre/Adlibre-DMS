@@ -41,19 +41,9 @@ class DocumentManager(object):
         self.errors = []
         self.warnings = []
 
-    def get_plugins(self, pluginpoint, document, plugin_type=None):
-        operator = PluginsOperator()
-        docrule = document.get_docrule()
-        # FIXME: there might be more than one docrule mappings.
-        mapping = docrule.get_docrule_plugin_mappings()
-        if mapping:
-            plugins = operator.get_plugins_from_mapping(mapping, pluginpoint, plugin_type)
-        else:
-            plugins = []
-        return plugins
-
     def process_pluginpoint(self, pluginpoint, request, document=None):
-        plugins = self.get_plugins(pluginpoint, document)
+        operator = PluginsOperator()
+        plugins = operator.get_plugins_for_point(pluginpoint, document)
         log.debug('process_pluginpoint: %s with %s plugins.' % (pluginpoint, plugins))
         for plugin in plugins:
             try:

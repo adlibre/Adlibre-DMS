@@ -16,8 +16,8 @@ log = logging.getLogger('dms_plugins.operator')
 
 class PluginsOperator(object):
     def __init__(self):
-        # FIXME: Dummy init (unused for now)
-        self.plugins = None
+        self.plugin_errors = []
+        self.plugin_warnings = []
 
     def get_plugins_from_mapping(self, mapping, pluginpoint, plugin_type):
         """
@@ -30,7 +30,20 @@ class PluginsOperator(object):
             plugins = filter(lambda plugin: hasattr(plugin, 'plugin_type') and plugin.plugin_type == plugin_type, plugins)
         return plugins
 
-    # Maybe it should be some kind of DoccodePluginMapping manager or similar.
+    def get_plugins_for_point(self, pluginpoint, document, plugin_type=None):
+        """
+        Retrieves Plugins for given Pluginpoint.
+        """
+        docrule = document.get_docrule()
+        # FIXME: with current architecture there might be more than one docrule mappings.
+        mapping = docrule.get_docrule_plugin_mappings()
+        if mapping:
+            plugins = self.get_plugins_from_mapping(mapping, pluginpoint, plugin_type)
+        else:
+            plugins = []
+        return plugins
+
+    # FIXME: Maybe it should be some kind of DoccodePluginMapping manager or similar.
     def get_plugin_mapping_by_id(self, pk):
         try:
             mapping = DoccodePluginMapping.objects.get(pk=int(pk))
