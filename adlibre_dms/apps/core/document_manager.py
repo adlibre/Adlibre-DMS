@@ -12,14 +12,10 @@ import os
 import logging
 import djangoplugins
 
-#from django.conf import settings
 from django.core.files.uploadedfile import UploadedFile
 
-#from dms_plugins import models
-#from dms_plugins.workers import PluginError, PluginWarning, BreakPluginChain
 from dms_plugins.workers.info.tags import TagsPlugin
 from dms_plugins import pluginpoints
-#from dms_plugins.workers import DmsException
 from dms_plugins.operator import PluginsOperator
 
 from core.models import Document
