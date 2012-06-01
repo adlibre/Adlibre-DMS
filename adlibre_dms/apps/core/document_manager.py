@@ -70,18 +70,19 @@ class DocumentManager(object):
             doc = self.update(request, uploaded_file.name)
         return doc
 
-    def rename(self, request, document_name, new_name, extension):
-        doc = self.retrieve(request, document_name, extension=extension)
-        if new_name and new_name != doc.get_filename():
-            name = new_name
-            ufile = UploadedFile(doc.get_file_obj(), name, content_type=doc.get_mimetype())
-            new_doc = self.create(request, ufile)
-            if not self.errors:
-                self.remove(request, doc.get_filename(), extension=extension)
-                #            else:
-            #                if settings.DEBUG:
-            #                    print "ERRORS: %s" % self.errors
-            return new_doc
+    def read(self, request, document_name, hashcode=None, revision=None, only_metadata=False, extension=None):
+        doc = Document()
+        operator = PluginsOperator()
+        doc.set_filename(document_name)
+        doc.set_hashcode(hashcode)
+        doc.set_revision(revision)
+        options = {'only_metadata': only_metadata,}
+        if extension:
+            doc.set_requested_extension(extension)
+        doc.update_options(options)
+        doc = operator.process_pluginpoint(pluginpoints.BeforeRetrievalPluginPoint, request, document=doc)
+        self.check_errors_in_operator(operator)
+        return doc
 
     def update(self, request, document_name, tag_string=None, remove_tag_string=None, extension=None):
         """
@@ -101,21 +102,7 @@ class DocumentManager(object):
         self.check_errors_in_operator(operator)
         return doc
 
-    def retrieve(self, request, document_name, hashcode=None, revision=None, only_metadata=False, extension=None):
-        doc = Document()
-        operator = PluginsOperator()
-        doc.set_filename(document_name)
-        doc.set_hashcode(hashcode)
-        doc.set_revision(revision)
-        options = {'only_metadata': only_metadata,}
-        if extension:
-            doc.set_requested_extension(extension)
-        doc.update_options(options)
-        doc = operator.process_pluginpoint(pluginpoints.BeforeRetrievalPluginPoint, request, document=doc)
-        self.check_errors_in_operator(operator)
-        return doc
-
-    def remove(self, request, document_name, revision=None, extension=None):
+    def delete(self, request, document_name, revision=None, extension=None):
         doc = Document()
         operator = PluginsOperator()
         doc.set_filename(document_name)
@@ -126,6 +113,22 @@ class DocumentManager(object):
         doc = operator.process_pluginpoint(pluginpoints.BeforeRemovalPluginPoint, request, document=doc)
         self.check_errors_in_operator(operator)
         return doc
+
+
+
+
+    def rename(self, request, document_name, new_name, extension):
+        doc = self.read(request, document_name, extension=extension)
+        if new_name and new_name != doc.get_filename():
+            name = new_name
+            ufile = UploadedFile(doc.get_file_obj(), name, content_type=doc.get_mimetype())
+            new_doc = self.create(request, ufile)
+            if not self.errors:
+                self.delete(request, doc.get_filename(), extension=extension)
+                #            else:
+            #                if settings.DEBUG:
+            #                    print "ERRORS: %s" % self.errors
+            return new_doc
 
     def get_plugins_by_type(self, doccode_plugin_mapping, plugin_type, pluginpoint=pluginpoints.BeforeStoragePluginPoint):
         operator = PluginsOperator()
@@ -162,7 +165,7 @@ class DocumentManager(object):
             limit_to=doc_names)
 
     def get_file(self, request, document_name, hashcode, extension, revision=None):
-        document = self.retrieve(request, document_name, hashcode=hashcode, revision=revision, extension=extension,)
+        document = self.read(request, document_name, hashcode=hashcode, revision=revision, extension=extension,)
         mimetype, filename, content = (None, None, None)
         if not self.errors:
             document.get_file_obj().seek(0)
