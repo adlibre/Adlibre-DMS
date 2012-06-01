@@ -43,7 +43,7 @@ class Command(BaseCommand):
                     file_obj = open(os.path.join(root, fil))
                     file_obj.seek(0)
                     try:
-                        manager.store(FakeRequest(), file_obj)
+                        manager.create(FakeRequest(), file_obj)
                     except Exception:
                         self.stderr.write(traceback.format_exc() + "\n")
                     else:

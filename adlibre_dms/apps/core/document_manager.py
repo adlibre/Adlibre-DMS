@@ -37,7 +37,7 @@ class DocumentManager(object):
         self.errors = []
         self.warnings = []
 
-    def store(self, request, uploaded_file, index_info=None, barcode=None):
+    def create(self, request, uploaded_file, index_info=None, barcode=None):
         """
         Process all storage plugins
 
@@ -75,7 +75,7 @@ class DocumentManager(object):
         if new_name and new_name != doc.get_filename():
             name = new_name
             ufile = UploadedFile(doc.get_file_obj(), name, content_type=doc.get_mimetype())
-            new_doc = self.store(request, ufile)
+            new_doc = self.create(request, ufile)
             if not self.errors:
                 self.remove(request, doc.get_filename(), extension=extension)
                 #            else:
