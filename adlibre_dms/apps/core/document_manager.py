@@ -115,8 +115,10 @@ class DocumentManager(object):
         return doc
 
 
-
-
+    """
+    Other methods
+    """
+    # TODO: find proper place for them.
     def rename(self, request, document_name, new_name, extension):
         doc = self.read(request, document_name, extension=extension)
         if new_name and new_name != doc.get_filename():
