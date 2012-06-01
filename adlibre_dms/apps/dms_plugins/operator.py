@@ -21,7 +21,7 @@ class PluginsOperator(object):
 
     def get_plugins_from_mapping(self, mapping, pluginpoint, plugin_type):
         """
-        Extracts and instantiates plugins from given plugin mapping.
+        Extracts and instantiates Plugin() objects from given plugin mapping.
         """
         plugins = []
         plugin_objects = getattr(mapping, 'get_' + pluginpoint.settings_field_name)()
