@@ -116,7 +116,7 @@ class DocumentManager(object):
 
 
     """
-    Other methods
+    Other methods (main method helpers)
     """
     # TODO: find proper place for them.
     def rename(self, request, document_name, new_name, extension):
