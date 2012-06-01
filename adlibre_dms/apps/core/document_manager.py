@@ -132,14 +132,10 @@ class DocumentManager(object):
             #                    print "ERRORS: %s" % self.errors
             return new_doc
 
-    def get_plugins_by_type(self, doccode_plugin_mapping, plugin_type, pluginpoint=pluginpoints.BeforeStoragePluginPoint):
-        operator = PluginsOperator()
-        plugins = operator.get_plugins_from_mapping(doccode_plugin_mapping, pluginpoint, plugin_type=plugin_type)
-        return plugins
-
     def get_storage(self, doccode_plugin_mapping, pluginpoint=pluginpoints.StoragePluginPoint):
+        operator = PluginsOperator()
         #Plugin point does not matter here as mapping must have a storage plugin both at storage and retrieval stages
-        storage = self.get_plugins_by_type(doccode_plugin_mapping, 'storage', pluginpoint)
+        storage = operator.get_plugins_from_mapping(doccode_plugin_mapping, pluginpoint, plugin_type='storage')
         #Document MUST have a storage plugin
         if not storage:
             raise ConfigurationError("No storage plugin for %s" % doccode_plugin_mapping)
@@ -148,7 +144,8 @@ class DocumentManager(object):
 
     def get_metadata(self, doccode_plugin_mapping, pluginpoint=pluginpoints.StoragePluginPoint):
         metadata = None
-        metadatas = self.get_plugins_by_type(doccode_plugin_mapping, 'metadata', pluginpoint)
+        operator = PluginsOperator()
+        metadatas = operator.get_plugins_from_mapping(doccode_plugin_mapping, pluginpoint, plugin_type='metadata')
         if metadatas: metadata = metadatas[0]
         return metadata
 
