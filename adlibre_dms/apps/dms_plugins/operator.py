@@ -8,8 +8,12 @@ Author: Iurii Garmash
 """
 
 import logging
+
+from django.conf import settings
+
 from models import DoccodePluginMapping
 from workers import DmsException
+from workers import PluginError, PluginWarning, BreakPluginChain
 from workers.info.tags import TagsPlugin
 
 log = logging.getLogger('dms_plugins.operator')
@@ -18,6 +22,25 @@ class PluginsOperator(object):
     def __init__(self):
         self.plugin_errors = []
         self.plugin_warnings = []
+
+    def process_pluginpoint(self, pluginpoint, request, document=None):
+        plugins = self.get_plugins_for_point(pluginpoint, document)
+        log.debug('process_pluginpoint: %s with %s plugins.' % (pluginpoint, plugins))
+        for plugin in plugins:
+            try:
+                log.debug('process_pluginpoint begin processing: %s.' % plugin)
+                document = plugin.work(request, document)
+                log.debug('process_pluginpoint begin processed: %s.' % plugin)
+            except PluginError, e: # if some plugin throws an exception, stop processing and store the error message
+                self.plugin_errors.append(e)
+                if settings.DEBUG:
+                    log.error('process_pluginpoint: %s.' % e) # e.parameter, e.code
+                break
+            except PluginWarning, e:
+                self.plugin_warnings.append(str(e))
+            except BreakPluginChain:
+                break
+        return document
 
     def get_plugins_from_mapping(self, mapping, pluginpoint, plugin_type):
         """
