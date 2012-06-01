@@ -83,7 +83,7 @@ def get_file(request, code, suggested_format=None):
 def revision_document(request, document):
     document_name = document
     manager = DocumentManager()
-    document = manager.retrieve(request, document_name, only_metadata=True)
+    document = manager.read(request, document_name, only_metadata=True)
     extra_context = {}
     metadata = document.get_metadata()
     def get_args(fileinfo):

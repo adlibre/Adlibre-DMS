@@ -125,7 +125,7 @@ class FileHandler(BaseFileHandler):
         manager = DocumentManager()
         try:
             log.debug('FileHandler.delete attempt with %s %s' % (code, revision))
-            manager.remove(request, code, revision=revision, extension=suggested_format)
+            manager.delete(request, code, revision=revision, extension=suggested_format)
         except Exception, e:
             log.error('FileHandler.delete exception %s' % e)
             if settings.DEBUG:
@@ -151,7 +151,7 @@ class FileInfoHandler(BaseFileHandler):
     def read(self, request, code, suggested_format=None):
         revision, hashcode, extra = self._get_info(request)
         manager = DocumentManager()
-        document = manager.retrieve(request, code, hashcode=hashcode, revision=revision, only_metadata=True,
+        document = manager.read(request, code, hashcode=hashcode, revision=revision, only_metadata=True,
             extension=suggested_format)
         docrule = document.get_docrule()
         # FIXME: there might be more than one docrules!

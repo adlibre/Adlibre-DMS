@@ -42,7 +42,7 @@ class CouchDBMetadata(object):
                 if not document.metadata:
                     # HACK: Preserving db_info here... (May be Solution!!!)
                     db_info = document.get_db_info()
-                    document = manager.retrieve(request, document.file_name, only_metadata=True)
+                    document = manager.read(request, document.file_name, only_metadata=True)
 
                     # HACK: saving NEW metadata ONLY if they exist in new uploaded doc (Preserving old indexes)'
                     if db_info:
