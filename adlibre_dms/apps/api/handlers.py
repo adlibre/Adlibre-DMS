@@ -125,7 +125,7 @@ class FileHandler(BaseFileHandler):
         manager = DocumentManager()
         try:
             log.debug('FileHandler.delete attempt with %s %s' % (code, revision))
-            manager.delete_file(request, code, revision=revision, extension=suggested_format)
+            manager.remove(request, code, revision=revision, extension=suggested_format)
         except Exception, e:
             log.error('FileHandler.delete exception %s' % e)
             if settings.DEBUG:

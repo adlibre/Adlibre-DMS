@@ -19,6 +19,12 @@ from workers.info.tags import TagsPlugin
 log = logging.getLogger('dms_plugins.operator')
 
 class PluginsOperator(object):
+    """
+    Handles Plugin() Processing logic.
+
+    Must execute plugins for certain tasks.
+    """
+    # TODO: All plugin executions must be decoupled and optional, so you can remove any plugin and it will not affect entire system.
     def __init__(self):
         self.plugin_errors = []
         self.plugin_warnings = []

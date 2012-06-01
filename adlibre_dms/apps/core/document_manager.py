@@ -175,10 +175,6 @@ class DocumentManager(object):
                 filename = document.get_full_filename()
         return mimetype, filename, content
 
-    def delete_file(self, request, document_name, revision=None, extension=None):
-        document = self.remove(request, document_name, revision=revision, extension=extension)
-        return document
-
     def get_revision_count(self, document_name, doccode_plugin_mapping):
         storage = self.get_storage(doccode_plugin_mapping)
         doc = Document()
