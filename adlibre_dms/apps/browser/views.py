@@ -51,7 +51,7 @@ def upload(request, template_name='browser/upload.html', extra_context={}):
     if request.method == 'POST':
         if form.is_valid():
             manager = DocumentManager()
-            manager.store(request, form.files['file'])
+            manager.create(request, form.files['file'])
             if not manager.errors:
                 messages.success(request, 'File has been uploaded.')
             else:

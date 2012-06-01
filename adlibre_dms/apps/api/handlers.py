@@ -54,7 +54,7 @@ class FileHandler(BaseFileHandler):
     def create(self, request, code, suggested_format=None):
         # FIXME... code and file stream should be passed in separately!
         manager = DocumentManager()
-        document = manager.store(request, request.FILES['file'])
+        document = manager.create(request, request.FILES['file'])
         if len(manager.errors) > 0:
             log.error('FileHandler.create manager errors: %s' % manager.errors)
             return rc.BAD_REQUEST
