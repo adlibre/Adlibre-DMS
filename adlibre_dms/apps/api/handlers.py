@@ -272,8 +272,8 @@ class RevisionCountHandler(BaseHandler):
                 except models.DoccodePluginMapping.DoesNotExist:
                     log.error('RevisionCountHandler.read DoccodePluginMapping.DoesNotExist exception raised')
                     raise
-                manager = DocumentManager()
-                rev_count = manager.get_revision_count(document, mapping)
+                operator = PluginsOperator()
+                rev_count = operator.get_revision_count(document, mapping)
                 if rev_count <= 0: # document without revisions is broken FIXME: In future this is ok!
                     log.info('RevisionCountHandler.read rev_count %s.' % str(rev_count))
                     raise Exception('No document revisions')
