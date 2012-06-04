@@ -18,6 +18,7 @@ from django.shortcuts import get_object_or_404
 from django.template import RequestContext, loader
 
 from dms_plugins import models, forms, representator
+from dms_plugins.operator import PluginsOperator
 from core.document_manager import DocumentManager
 from browser.forms import UploadForm
 
@@ -153,8 +154,8 @@ def plugins(request, template_name='browser/plugins.html',
     """
     List of available plugins
     """
-    manager = DocumentManager()
-    plugins = manager.get_plugin_list()
+    operator = PluginsOperator()
+    plugins = operator.get_plugin_list()
     extra_context['plugin_list'] = plugins
 
     return direct_to_template(request, template_name, extra_context=extra_context)

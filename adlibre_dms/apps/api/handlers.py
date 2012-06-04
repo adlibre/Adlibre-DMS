@@ -355,9 +355,9 @@ class PluginsHandler(BaseHandler):
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
     @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def read(self, request):
-        manager = DocumentManager()
+        operator = PluginsOperator()
         try:
-            plugin_list = manager.get_plugin_list()
+            plugin_list = operator.get_plugin_list()
         except Exception, e: # FIXME
             log.error('PluginsHandler.read Exception %s' % e)
             if settings.DEBUG:
