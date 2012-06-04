@@ -8,6 +8,7 @@ Author: Iurii Garmash
 """
 
 import logging
+import djangoplugins
 
 from django.conf import settings
 
@@ -58,6 +59,10 @@ class PluginsOperator(object):
         if plugin_type:
             plugins = filter(lambda plugin: hasattr(plugin, 'plugin_type') and plugin.plugin_type == plugin_type, plugins)
         return plugins
+
+    def get_plugin_list(self):
+        all_plugins = djangoplugins.models.Plugin.objects.all().order_by('point__name', 'index')
+        return all_plugins
 
     def get_plugins_for_point(self, pluginpoint, document, plugin_type=None):
         """
