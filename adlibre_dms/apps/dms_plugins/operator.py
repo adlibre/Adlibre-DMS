@@ -30,7 +30,8 @@ class PluginsOperator(object):
     """
     Handles Plugin() Processing logic.
 
-    Must execute plugins for certain tasks.
+    Must execute plugins for certain minor tasks. (That are not CRUD)
+    e.g. PluginsOperator().rename_file(old_filename, new_filename)
     """
     # TODO: All plugin executions must be decoupled and optional, so you can remove any plugin and it will not affect entire system.
     def __init__(self):
@@ -38,6 +39,11 @@ class PluginsOperator(object):
         self.plugin_warnings = []
 
     def process_pluginpoint(self, pluginpoint, request, document=None):
+        """
+        PluginsOperator() main gear.
+
+        Iterates over plugins and executes them according to config and workflow specified (PluginPoint)
+        """
         plugins = self.get_plugins_for_point(pluginpoint, document)
         log.debug('process_pluginpoint: %s with %s plugins.' % (pluginpoint, plugins))
         for plugin in plugins:
@@ -57,9 +63,7 @@ class PluginsOperator(object):
         return document
 
     def get_plugins_from_mapping(self, mapping, pluginpoint, plugin_type):
-        """
-        Extracts and instantiates Plugin() objects from given plugin mapping.
-        """
+        """Extracts and instantiates Plugin() objects from given plugin mapping."""
         plugins = []
         plugin_objects = getattr(mapping, 'get_' + pluginpoint.settings_field_name)()
         plugins = map(lambda plugin_obj: plugin_obj.get_plugin(), plugin_objects)
@@ -68,13 +72,12 @@ class PluginsOperator(object):
         return plugins
 
     def get_plugin_list(self):
+        """Gets a list of all installed into DMS plugins."""
         all_plugins = djangoplugins.models.Plugin.objects.all().order_by('point__name', 'index')
         return all_plugins
 
     def get_plugins_for_point(self, pluginpoint, document, plugin_type=None):
-        """
-        Retrieves Plugins for given Pluginpoint.
-        """
+        """Retrieves Plugins for given Pluginpoint."""
         docrule = document.get_docrule()
         # FIXME: with current architecture there might be more than one docrule mappings.
         mapping = docrule.get_docrule_plugin_mappings()
@@ -91,11 +94,6 @@ class PluginsOperator(object):
         except mapping.DoesNotExist:
             raise DmsException('Rule not found', 404)
         return mapping
-
-    # TODO: Convert it into workflow. Do not use Plugin() directly. WRONG!
-    # Maybe MAKE some Tags() Manager to handle it's logic with own pluginpoints etc...
-    def get_all_tags(self, doccode=None):
-        return TagsPlugin().get_all_tags(doccode = doccode)
 
     def get_revisions_metadata(self, doccode_plugin_mapping):
         metadata = None
@@ -135,3 +133,25 @@ class PluginsOperator(object):
         # Should we validate more than one storage plugin?
         # FIXME: document should be able to work with several storage plugins.
         return storage[0]
+
+    def get_file_list(self, doccode_plugin_mapping, start=0, finish=None, order=None, searchword=None,
+                      tags=None, filter_date=None):
+        # Proper tags init according to PEP
+        if not tags:
+            tags = []
+        storage = self.get_storage(doccode_plugin_mapping)
+        metadata = self.get_revisions_metadata(doccode_plugin_mapping)
+        doccode = doccode_plugin_mapping.get_docrule()
+        doc_models = TagsPlugin().get_doc_models(doccode=doccode_plugin_mapping.get_docrule(), tags=tags)
+        doc_names = map(lambda x: x.name, doc_models)
+        if metadata:
+            document_directories = metadata.worker.get_directories(doccode, filter_date=filter_date)
+        else:
+            document_directories = []
+        return storage.worker.get_list(doccode, document_directories, start, finish, order, searchword,
+            limit_to=doc_names)
+
+    # TODO: Convert it into workflow. Do not use Plugin() directly. WRONG!
+    # Maybe MAKE some Tags() Manager to handle it's logic with own pluginpoints etc...
+    def get_all_tags(self, doccode=None):
+        return TagsPlugin().get_all_tags(doccode = doccode)
