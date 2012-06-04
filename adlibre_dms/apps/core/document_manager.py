@@ -39,7 +39,7 @@ class DocumentManager(object):
 
     def create(self, request, uploaded_file, index_info=None, barcode=None):
         """
-        Process all storage plugins
+        Creates a new Document() object and populates it with provided parameters.
 
         uploaded file is http://docs.djangoproject.com/en/1.3/topics/http/file-uploads/#django.core.files.uploadedfile.UploadedFile
         or file object
@@ -71,6 +71,14 @@ class DocumentManager(object):
         return doc
 
     def read(self, request, document_name, hashcode=None, revision=None, only_metadata=False, extension=None):
+        """
+        Reads document data from DMS
+
+        Method creates, instantiates and populates new Document() object.
+        Using name and/or search filter criteria provided.
+
+        Currently can read Document() with file object attached or either read only metadata.
+        """
         doc = Document()
         operator = PluginsOperator()
         doc.set_filename(document_name)
@@ -103,6 +111,9 @@ class DocumentManager(object):
         return doc
 
     def delete(self, request, document_name, revision=None, extension=None):
+        """
+        Deletes Document() or it's parts from DMS.
+        """
         doc = Document()
         operator = PluginsOperator()
         doc.set_filename(document_name)
@@ -116,21 +127,8 @@ class DocumentManager(object):
 
 
     """
-    Other methods (main method helpers)
+    Other methods (usually main method helpers)
     """
-    # TODO: find proper place for them.
-    def rename(self, request, document_name, new_name, extension):
-        doc = self.read(request, document_name, extension=extension)
-        if new_name and new_name != doc.get_filename():
-            name = new_name
-            ufile = UploadedFile(doc.get_file_obj(), name, content_type=doc.get_mimetype())
-            new_doc = self.create(request, ufile)
-            if not self.errors:
-                self.delete(request, doc.get_filename(), extension=extension)
-                #            else:
-            #                if settings.DEBUG:
-            #                    print "ERRORS: %s" % self.errors
-            return new_doc
 
     def get_storage(self, doccode_plugin_mapping, pluginpoint=pluginpoints.StoragePluginPoint):
         operator = PluginsOperator()
@@ -199,6 +197,12 @@ class DocumentManager(object):
         #            exists = True
         return exists
 
+    """
+    Helper methods
+
+    (should stay here)
+    They define logic of manager minor tasks.
+    """
     def check_errors_in_operator(self, operator):
         """
         Method checks for errors and warnings PluginOperator() has and makes them own errors/warnings.
