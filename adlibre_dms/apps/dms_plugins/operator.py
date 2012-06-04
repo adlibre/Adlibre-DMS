@@ -12,13 +12,19 @@ import djangoplugins
 
 from django.conf import settings
 
+from core.errors import ConfigurationError
 from models import DoccodePluginMapping
 from workers import DmsException
 from workers import PluginError, PluginWarning, BreakPluginChain
 from workers.info.tags import TagsPlugin
 from dms_plugins import pluginpoints
 
+from core.models import Document
+
 log = logging.getLogger('dms_plugins.operator')
+
+# PEP method to fix out redundant imports.
+__all__ = ['PluginsOperator']
 
 class PluginsOperator(object):
     """
@@ -98,3 +104,34 @@ class PluginsOperator(object):
         if metadatas:
             metadata = metadatas[0]
         return metadata
+
+    """
+    Some unusual magic with processing plugins...
+
+    I think they must be part of the retrieve workflow with some options set.
+    We should not touch those methods directly. IT creates a mess.
+    e.g. DocumentProcessor().read(document, option='revision_count')
+    """
+    # TODO: make this part of retrieve workflow (like 'only_metadata' option)
+    def get_revision_count(self, document_name, doccode_plugin_mapping):
+        """
+        Refactor ME to make part of read workflow...
+        """
+        storage = self.get_storage(doccode_plugin_mapping)
+        doc = Document()
+        doc.set_filename(document_name)
+        return storage.worker.get_revision_count(doc)
+
+    def get_storage(self, doccode_plugin_mapping):
+        """
+        Maybe it is a part of read workflow to???
+        """
+        pluginpoint = pluginpoints.StoragePluginPoint
+        # Plugin point does not matter here as mapping must have a storage plugin both at storage and retrieval stages
+        storage = self.get_plugins_from_mapping(doccode_plugin_mapping, pluginpoint, plugin_type='storage')
+        # Document MUST have a storage plugin
+        if not storage:
+            raise ConfigurationError("No storage plugin for %s" % doccode_plugin_mapping)
+        # Should we validate more than one storage plugin?
+        # FIXME: document should be able to work with several storage plugins.
+        return storage[0]
