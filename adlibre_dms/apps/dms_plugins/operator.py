@@ -16,6 +16,7 @@ from models import DoccodePluginMapping
 from workers import DmsException
 from workers import PluginError, PluginWarning, BreakPluginChain
 from workers.info.tags import TagsPlugin
+from dms_plugins import pluginpoints
 
 log = logging.getLogger('dms_plugins.operator')
 
@@ -89,3 +90,11 @@ class PluginsOperator(object):
     # Maybe MAKE some Tags() Manager to handle it's logic with own pluginpoints etc...
     def get_all_tags(self, doccode=None):
         return TagsPlugin().get_all_tags(doccode = doccode)
+
+    def get_revisions_metadata(self, doccode_plugin_mapping):
+        metadata = None
+        pluginpoint=pluginpoints.StoragePluginPoint
+        metadatas = self.get_plugins_from_mapping(doccode_plugin_mapping, pluginpoint, plugin_type='metadata')
+        if metadatas:
+            metadata = metadatas[0]
+        return metadata
