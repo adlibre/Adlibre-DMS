@@ -18,6 +18,7 @@ from piston.handler import BaseHandler
 from piston.utils import rc
 
 from django.utils.decorators import method_decorator
+from django.core.files.uploadedfile import UploadedFile
 from api.decorators.auth import logged_in_or_basicauth
 from api.decorators.group_required import group_required
 
@@ -96,7 +97,15 @@ class FileHandler(BaseFileHandler):
         try:
             manager = DocumentManager()
             if new_name:
-                document = manager.rename(request, code, new_name, suggested_format) #FIXME hashcode?
+                # TODO: consider if we need some new place for this...
+                # MAYBE we need to make it part of the update sequence here...
+                # Renames current document name here.
+                renaming_doc = manager.read(request, code, extension=suggested_format)
+                if new_name != renaming_doc.get_filename():
+                    ufile = UploadedFile(renaming_doc.get_file_obj(), new_name, content_type=renaming_doc.get_mimetype())
+                    document = manager.create(request, ufile)
+                    if not manager.errors:
+                        manager.delete(request, renaming_doc.get_filename(), extension=suggested_format)
             else:
                 document = manager.update(request, code, tag_string=tag_string, remove_tag_string=remove_tag_string,
                         extension=suggested_format) #FIXME hashcode missing?
