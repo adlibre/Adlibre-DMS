@@ -47,27 +47,24 @@ class DocumentManager(object):
         log.debug('Storing Document %s, index_info: %s, barcode: %s' % (uploaded_file, index_info, barcode))
         # Check if file already exists
         operator = PluginsOperator()
-        if not self.file_exists(request, uploaded_file.name):
-            doc = Document()
-            doc.set_file_obj(uploaded_file)
-            if barcode is not None:
-                doc.set_filename(barcode)
-                log.debug('Allocated Barcode %s.' % barcode)
-            else:
-                doc.set_filename(os.path.basename(uploaded_file.name))
-            if hasattr(uploaded_file, 'content_type'):
-                doc.set_mimetype(uploaded_file.content_type)
-            if index_info:
-                doc.set_db_info(index_info)
-                # FIXME: if uploaded_file is not None, then some plugins should not run because we don't have a file
-            doc = operator.process_pluginpoint(pluginpoints.BeforeStoragePluginPoint, request, document=doc)
-            # Process storage plugins
-            operator.process_pluginpoint(pluginpoints.StoragePluginPoint, request, document=doc)
-            # Process DatabaseStorage plugins
-            doc = operator.process_pluginpoint(pluginpoints.DatabaseStoragePluginPoint, request, document=doc)
-            self.check_errors_in_operator(operator)
+        doc = Document()
+        doc.set_file_obj(uploaded_file)
+        if barcode is not None:
+            doc.set_filename(barcode)
+            log.debug('Allocated Barcode %s.' % barcode)
         else:
-            doc = self.update(request, uploaded_file.name)
+            doc.set_filename(os.path.basename(uploaded_file.name))
+        if hasattr(uploaded_file, 'content_type'):
+            doc.set_mimetype(uploaded_file.content_type)
+        if index_info:
+            doc.set_db_info(index_info)
+            # FIXME: if uploaded_file is not None, then some plugins should not run because we don't have a file
+        doc = operator.process_pluginpoint(pluginpoints.BeforeStoragePluginPoint, request, document=doc)
+        # Process storage plugins
+        operator.process_pluginpoint(pluginpoints.StoragePluginPoint, request, document=doc)
+        # Process DatabaseStorage plugins
+        doc = operator.process_pluginpoint(pluginpoints.DatabaseStoragePluginPoint, request, document=doc)
+        self.check_errors_in_operator(operator)
         return doc
 
     def read(self, request, document_name, hashcode=None, revision=None, only_metadata=False, extension=None):
@@ -184,18 +181,6 @@ class DocumentManager(object):
     def get_plugin_list(self):
         all_plugins = djangoplugins.models.Plugin.objects.all().order_by('point__name', 'index')
         return all_plugins
-
-    def file_exists(self, request, filename):
-        """
-        Main condition of file present in DMS is here
-
-        """
-        exists = False
-        # TODO: implement this to really check if we need ot update document
-        #        file_obj = self.retrieve(request, filename, only_metadata=True)
-        #        if file_obj.metadata:
-        #            exists = True
-        return exists
 
     """
     Helper methods
