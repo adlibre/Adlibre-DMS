@@ -10,9 +10,6 @@ Author: Iurii Garmash
 
 import os
 import logging
-import djangoplugins
-
-from django.core.files.uploadedfile import UploadedFile
 
 from dms_plugins.workers.info.tags import TagsPlugin
 from dms_plugins import pluginpoints
@@ -137,17 +134,11 @@ class DocumentManager(object):
             #Should we validate more than one storage plugin?
         return storage[0]
 
-    def get_metadata(self, doccode_plugin_mapping, pluginpoint=pluginpoints.StoragePluginPoint):
-        metadata = None
-        operator = PluginsOperator()
-        metadatas = operator.get_plugins_from_mapping(doccode_plugin_mapping, pluginpoint, plugin_type='metadata')
-        if metadatas: metadata = metadatas[0]
-        return metadata
-
     def get_file_list(self, doccode_plugin_mapping, start=0, finish=None, order=None, searchword=None,
                       tags=[], filter_date=None):
+        operator = PluginsOperator()
         storage = self.get_storage(doccode_plugin_mapping)
-        metadata = self.get_metadata(doccode_plugin_mapping)
+        metadata = operator.get_revisions_metadata(doccode_plugin_mapping)
         doccode = doccode_plugin_mapping.get_docrule()
         doc_models = TagsPlugin().get_doc_models(doccode=doccode_plugin_mapping.get_docrule(), tags=tags)
         doc_names = map(lambda x: x.name, doc_models)
