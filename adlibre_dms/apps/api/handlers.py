@@ -190,7 +190,6 @@ class FileListHandler(BaseHandler):
     @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def read(self, request, id_rule):
         try:
-            manager = DocumentManager()
             operator = PluginsOperator()
             mapping = operator.get_plugin_mapping_by_id(id_rule)
             start = 0
@@ -210,7 +209,7 @@ class FileListHandler(BaseHandler):
                     raise
                 else:
                     pass
-            file_list = manager.get_file_list(mapping, start, finish, order, searchword, tags=[tag],
+            file_list = operator.get_file_list(mapping, start, finish, order, searchword, tags=[tag],
                                                 filter_date = filter_date)
             for item in file_list:
                 ui_url = reverse('ui_document', kwargs = {'document_name': item['name']})

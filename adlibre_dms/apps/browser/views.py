@@ -71,7 +71,7 @@ def error_response(errors):
 
 def get_file(request, code, suggested_format=None):
     hashcode = request.GET.get('hashcode', None) # Refactor me out
-    manager = DocumentManager()
+    operator = PluginsOperator()
     mimetype, filename, content = manager.get_file(request, code, hashcode, suggested_format)
     if manager.errors:
         return error_response(manager.errors)
@@ -138,8 +138,8 @@ def files_index(request):
 @staff_member_required
 def files_document(request, id_rule):
     mapping = get_object_or_404(models.DoccodePluginMapping, pk = id_rule)
-    manager = DocumentManager()
-    file_list = manager.get_file_list(mapping)
+    operator = PluginsOperator()
+    file_list = operator.get_file_list(mapping)
     extra_context = {
         'mapping': mapping,
         'document_list': file_list,

@@ -11,7 +11,6 @@ Author: Iurii Garmash
 import os
 import logging
 
-from dms_plugins.workers.info.tags import TagsPlugin
 from dms_plugins import pluginpoints
 from dms_plugins.operator import PluginsOperator
 
@@ -117,26 +116,9 @@ class DocumentManager(object):
         self.check_errors_in_operator(operator)
         return doc
 
-
-    """
-    Other methods (usually main method helpers)
-    """
-
-    def get_file_list(self, doccode_plugin_mapping, start=0, finish=None, order=None, searchword=None,
-                      tags=[], filter_date=None):
-        operator = PluginsOperator()
-        storage = operator.get_storage(doccode_plugin_mapping)
-        metadata = operator.get_revisions_metadata(doccode_plugin_mapping)
-        doccode = doccode_plugin_mapping.get_docrule()
-        doc_models = TagsPlugin().get_doc_models(doccode=doccode_plugin_mapping.get_docrule(), tags=tags)
-        doc_names = map(lambda x: x.name, doc_models)
-        if metadata:
-            document_directories = metadata.worker.get_directories(doccode, filter_date=filter_date)
-        else:
-            document_directories = []
-        return storage.worker.get_list(doccode, document_directories, start, finish, order, searchword,
-            limit_to=doc_names)
-
+    # TODO: invent a way to move/refactor/simplify this method...
+    # It may be the root of all evil here...
+    # Main user of Document() object's methods...
     def get_file(self, request, document_name, hashcode, extension, revision=None):
         document = self.read(request, document_name, hashcode=hashcode, revision=revision, extension=extension,)
         mimetype, filename, content = (None, None, None)
@@ -154,7 +136,7 @@ class DocumentManager(object):
     """
     Helper methods
 
-    (should stay here)
+    General for all CRUD operations.
     They define logic of manager minor tasks.
     """
     def check_errors_in_operator(self, operator):
