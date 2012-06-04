@@ -96,7 +96,7 @@ class Local(object):
             raise PluginError("No such document: %s" % fullpath, 404)
         document.set_fullpath(fullpath)
         #file will be read on first access lazily
-        if document.get_option('only_metadata') == True:
+        if document.get_option('only_metadata'):
             raise BreakPluginChain()
         return document
 
