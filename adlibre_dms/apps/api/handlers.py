@@ -22,7 +22,7 @@ from django.core.files.uploadedfile import UploadedFile
 from api.decorators.auth import logged_in_or_basicauth
 from api.decorators.group_required import group_required
 
-from core.document_manager import DocumentManager
+from core.document_processor import DocumentProcessor
 from core.http import DocumentResponse
 from dms_plugins import models
 from dms_plugins.operator import PluginsOperator
@@ -52,10 +52,10 @@ class FileHandler(BaseFileHandler):
     @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def create(self, request, code, suggested_format=None):
         # FIXME... code and file stream should be passed in separately!
-        manager = DocumentManager()
-        document = manager.create(request, request.FILES['file'])
-        if len(manager.errors) > 0:
-            log.error('FileHandler.create manager errors: %s' % manager.errors)
+        processor = DocumentProcessor()
+        document = processor.create(request, request.FILES['file'])
+        if len(processor.errors) > 0:
+            log.error('FileHandler.create manager errors: %s' % processor.errors)
             return rc.BAD_REQUEST
         log.info('FileHandler.create request fulfilled for %s' % document.get_filename())
         return document.get_filename() # FIXME, should be rc.CREATED
@@ -64,13 +64,13 @@ class FileHandler(BaseFileHandler):
     @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def read(self, request, code, suggested_format=None):
         revision, hashcode, extra = self._get_info(request)
-        manager = DocumentManager()
-        document = manager.read(request, code, hashcode, revision, extension=suggested_format)
-        if manager.errors:
+        processor = DocumentProcessor()
+        document = processor.read(request, code, hashcode, revision, extension=suggested_format)
+        if processor.errors:
             if settings.DEBUG:
                 raise
             else:
-                log.error('FileHandler.read manager errors: %s' % manager.errors)
+                log.error('FileHandler.read manager errors: %s' % processor.errors)
                 return rc.NOT_FOUND # FIXME: should be reading RC code from plugin exception.
                                     # @yuri 2 @andrew: I do not think we should expose internal DMS exception to API user.
         else:
@@ -89,22 +89,22 @@ class FileHandler(BaseFileHandler):
         new_name = request.PUT.get('new_name', None)
 
         try:
-            manager = DocumentManager()
+            processor = DocumentProcessor()
             if new_name:
                 # TODO: consider if we need some new place for this...
                 # MAYBE we need to make it part of the update sequence here...
                 # Renames current document name here.
-                renaming_doc = manager.read(request, code, extension=suggested_format)
+                renaming_doc = processor.read(request, code, extension=suggested_format)
                 if new_name != renaming_doc.get_filename():
                     ufile = UploadedFile(renaming_doc.get_file_obj(), new_name, content_type=renaming_doc.get_mimetype())
-                    document = manager.create(request, ufile)
-                    if not manager.errors:
-                        manager.delete(request, renaming_doc.get_filename(), extension=suggested_format)
+                    document = processor.create(request, ufile)
+                    if not processor.errors:
+                        processor.delete(request, renaming_doc.get_filename(), extension=suggested_format)
             else:
-                document = manager.update(request, code, tag_string=tag_string, remove_tag_string=remove_tag_string,
+                document = processor.update(request, code, tag_string=tag_string, remove_tag_string=remove_tag_string,
                         extension=suggested_format) #FIXME hashcode missing?
-            if len(manager.errors) > 0:
-                log.error('FileHandler.update manager errors %s' % manager.errors)
+            if len(processor.errors) > 0:
+                log.error('FileHandler.update manager errors %s' % processor.errors)
                 if settings.DEBUG:
                     raise Exception('FileHandler.update manager errors')
                 else:
@@ -125,19 +125,19 @@ class FileHandler(BaseFileHandler):
     #        full_filename = request.REQUEST.get('full_filename', None) # what is this?
     #        parent_directory = request.REQUEST.get('parent_directory', None) # FIXME! Used by no doccode!
         revision, hashcode, extra = self._get_info(request)
-        manager = DocumentManager()
+        processor = DocumentProcessor()
         try:
             log.debug('FileHandler.delete attempt with %s %s' % (code, revision))
-            manager.delete(request, code, revision=revision, extension=suggested_format)
+            processor.delete(request, code, revision=revision, extension=suggested_format)
         except Exception, e:
             log.error('FileHandler.delete exception %s' % e)
             if settings.DEBUG:
                 raise
             else:
                 return rc.BAD_REQUEST
-        if len(manager.errors) > 0:
+        if len(processor.errors) > 0:
             if settings.DEBUG:
-                log.error('Manager Errors encountered %s' % manager.errors)
+                log.error('Manager Errors encountered %s' % processor.errors)
             return rc.BAD_REQUEST
         log.info('FileHandler.delete request fulfilled for code: %s, format: %s, rev: %s, hash: %s.' % (code, suggested_format, revision, hashcode))
         return rc.DELETED
@@ -153,19 +153,20 @@ class FileInfoHandler(BaseFileHandler):
     @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def read(self, request, code, suggested_format=None):
         revision, hashcode, extra = self._get_info(request)
-        manager = DocumentManager()
-        document = manager.read(request, code, hashcode=hashcode, revision=revision, only_metadata=True,
+        processor = DocumentProcessor()
+        document = processor.read(request, code, hashcode=hashcode, revision=revision, only_metadata=True,
             extension=suggested_format)
         docrule = document.get_docrule()
         # FIXME: there might be more than one docrules!
         mapping = docrule.get_docrule_plugin_mappings()
-        if manager.errors:
-            log.error('FileInfoHandler.read errors: %s' % manager.errors)
+        if processor.errors:
+            log.error('FileInfoHandler.read errors: %s' % processor.errors)
             if settings.DEBUG:
                 raise Exception('FileInfoHandler.read manager.errors')
             else:
                 return rc.BAD_REQUEST
-            # FIXME This is ugly
+        # FIXME This is ugly
+        # TODO: should go into core.http
         info = document.get_dict()
         info['document_list_url'] = reverse('ui_document_list', kwargs={'id_rule': mapping.pk})
         info['tags'] = document.get_tags()
