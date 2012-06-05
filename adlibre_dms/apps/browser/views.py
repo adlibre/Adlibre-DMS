@@ -21,7 +21,7 @@ from django.template import RequestContext, loader
 
 from dms_plugins import models, forms, representator
 from dms_plugins.operator import PluginsOperator
-from core.document_manager import DocumentManager
+from core.document_processor import DocumentProcessor
 from browser.forms import UploadForm
 from core.http import DocumentResponse
 
@@ -59,13 +59,13 @@ def upload(request, template_name='browser/upload.html', extra_context={}):
     form = UploadForm(request.POST or None, request.FILES or None)
     if request.method == 'POST':
         if form.is_valid():
-            manager = DocumentManager()
-            manager.create(request, form.files['file'])
-            if not manager.errors:
+            processor = DocumentProcessor()
+            processor.create(request, form.files['file'])
+            if not processor.errors:
                 messages.success(request, 'File has been uploaded.')
                 log.info('browser.upload file: %s sucess' % form.files['file'].name)
             else:
-                error_string = "; ".join([unicode(x) for x in manager.errors])
+                error_string = "; ".join([unicode(x) for x in processor.errors])
                 messages.error(request, error_string)
                 log.error('browser.upload errror: %s' % error_string)
 
@@ -82,11 +82,11 @@ def error_response(errors):
 
 def get_file(request, code, suggested_format=None):
     hashcode = request.GET.get('hashcode', None) # Refactor me out
-    manager = DocumentManager()
-    document = manager.read(request, code, hashcode=hashcode, extension=suggested_format,)
+    processor = DocumentProcessor()
+    document = processor.read(request, code, hashcode=hashcode, extension=suggested_format,)
     #mimetype, filename, content = manager.get_file(request, code, hashcode, suggested_format)
-    if manager.errors:
-        response = error_response(manager.errors)
+    if processor.errors:
+        response = error_response(processor.errors)
     else:
         response = DocumentResponse(document)
     return response
@@ -94,8 +94,8 @@ def get_file(request, code, suggested_format=None):
 @staff_member_required
 def revision_document(request, document):
     document_name = document
-    manager = DocumentManager()
-    document = manager.read(request, document_name, only_metadata=True)
+    processor = DocumentProcessor()
+    document = processor.read(request, document_name, only_metadata=True)
     extra_context = {}
     metadata = document.get_metadata()
     def get_args(fileinfo):
@@ -107,7 +107,7 @@ def revision_document(request, document):
         if args:
             arg_string = "?" + "&".join(args)
         return arg_string
-    if not manager.errors:
+    if not processor.errors:
         if metadata:
             revisions = map(lambda x: int(x), metadata.keys())
             revisions.sort()
@@ -132,10 +132,10 @@ def revision_document(request, document):
                 'document_name': document.get_filename(),
             }
     else:
-        t = manager.errors
-        messages.error(request, "; ".join(map(lambda x: x.parameter, manager.errors)))
-    if manager.warnings:
-        messages.warning(request, "; ".join(manager.warnings))
+        t = processor.errors
+        messages.error(request, "; ".join(map(lambda x: x.parameter, processor.errors)))
+    if processor.warnings:
+        messages.warning(request, "; ".join(processor.warnings))
     return direct_to_template(request, 'browser/revision.html',
             extra_context=extra_context)
 

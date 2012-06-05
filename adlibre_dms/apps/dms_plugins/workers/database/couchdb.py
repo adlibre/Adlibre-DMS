@@ -9,7 +9,7 @@ Author: Iurii Garmash
 from dms_plugins.pluginpoints import BeforeRetrievalPluginPoint, BeforeRemovalPluginPoint, DatabaseStoragePluginPoint
 from dms_plugins.models import DocTags
 from dms_plugins.workers import Plugin
-from core.document_manager import DocumentManager
+from core.document_processor import DocumentProcessor
 from dmscouch.models import CouchDocument
 
 from couchdbkit.resource import ResourceNotFound
@@ -31,7 +31,7 @@ class CouchDBMetadata(object):
         if docrule.no_doccode:
             return document
         else:
-            manager = DocumentManager()
+            processor = DocumentProcessor()
             # FIXME: there might be more than one mapping
             mapping = docrule.get_docrule_plugin_mappings()
             # doing nothing for documents without mapping has DB plugins
@@ -42,7 +42,7 @@ class CouchDBMetadata(object):
                 if not document.metadata:
                     # HACK: Preserving db_info here... (May be Solution!!!)
                     db_info = document.get_db_info()
-                    document = manager.read(request, document.file_name, only_metadata=True)
+                    document = processor.read(request, document.file_name, only_metadata=True)
 
                     # HACK: saving NEW metadata ONLY if they exist in new uploaded doc (Preserving old indexes)'
                     if db_info:
@@ -92,8 +92,6 @@ class CouchDBMetadata(object):
         return document
 
     def retrieve(self, request, document):
-
-        manager = DocumentManager()
         docrule = document.get_docrule()
         mapping = docrule.get_docrule_plugin_mappings()
         # No actions for no doccode documents

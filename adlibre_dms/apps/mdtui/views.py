@@ -16,7 +16,7 @@ from django.contrib.auth.decorators import login_required
 
 from dmscouch.models import CouchDocument
 from forms import DocumentTypeSelectForm, DocumentUploadForm, BarcodePrintedForm, DocumentSearchOptionsForm
-from core.document_manager import DocumentManager
+from core.document_processor import DocumentProcessor
 from doc_codes.models import DocumentTypeRule
 from view_helpers import initIndexesForm
 from view_helpers import processDocumentIndexForm
@@ -337,14 +337,14 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
                 import os
                 upload_file = open(os.path.join(os.path.split(__file__)[0], 'stub_document.pdf'), 'rb')
 
-            manager = DocumentManager()
-            manager.create(request, upload_file, index_info=index_info, barcode=barcode)
+            processor = DocumentProcessor()
+            processor.create(request, upload_file, index_info=index_info, barcode=barcode)
 
-            if not manager.errors:
+            if not processor.errors:
                 return HttpResponseRedirect(reverse('mdtui-index-finished'))
             else:
                 # FIXME: dodgy error handling
-                return HttpResponse(str(manager.errors))
+                return HttpResponse(str(processor.errors))
 
     context.update( { 'step': step,
                       'upload_form': upload_form,
