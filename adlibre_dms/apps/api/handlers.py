@@ -23,6 +23,7 @@ from api.decorators.auth import logged_in_or_basicauth
 from api.decorators.group_required import group_required
 
 from core.document_manager import DocumentManager
+from core.http import DocumentResponse
 from dms_plugins import models
 from dms_plugins.operator import PluginsOperator
 from doc_codes.models import DocumentTypeRuleManagerInstance
@@ -43,11 +44,8 @@ class BaseFileHandler(BaseHandler):
         log.debug('BaseFileHandler._get_info returned: %s : %s : %s.' % (revision, hashcode, extra))
         return revision, hashcode, extra
 
-
 class FileHandler(BaseFileHandler):
-    """
-    CRUD Methods for documents
-    """
+    """CRUD Methods for documents"""
     allowed_methods = ('GET', 'POST', 'DELETE', 'PUT')
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
@@ -67,22 +65,18 @@ class FileHandler(BaseFileHandler):
     def read(self, request, code, suggested_format=None):
         revision, hashcode, extra = self._get_info(request)
         manager = DocumentManager()
-        try:
-            mimetype, filename, content = manager.get_file(request, code, hashcode,
-                    suggested_format, revision=revision)
-        except Exception, e:
-            log.error('FileHandler.read exception %s' % e)
+        document = manager.read(request, code, hashcode, revision, extension=suggested_format)
+        if manager.errors:
             if settings.DEBUG:
                 raise
             else:
-                return rc.BAD_REQUEST
-        if manager.errors:
-            log.error('FileHandler.read manager errors: %s' % manager.errors)
-            return rc.NOT_FOUND # FIXME: should be reading RC code from plugin exception.
-        response = HttpResponse(content, mimetype=mimetype)
-        response["Content-Length"] = len(content)
-        response['Content-Disposition'] = 'filename=%s' % filename
-        log.info('FileHandler.read request fulfilled for code: %s, format: %s, rev %s, hash: %s.' % (code, suggested_format, revision, hashcode))
+                log.error('FileHandler.read manager errors: %s' % manager.errors)
+                return rc.NOT_FOUND # FIXME: should be reading RC code from plugin exception.
+                                    # @yuri 2 @andrew: I do not think we should expose internal DMS exception to API user.
+        else:
+            response = DocumentResponse(document)
+            log.info('FileHandler.read request fulfilled for code: %s, format: %s, rev %s, hash: %s.'
+                     % (code, suggested_format, revision, hashcode))
         return response
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))

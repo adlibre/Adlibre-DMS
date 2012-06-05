@@ -118,23 +118,6 @@ class DocumentManager(object):
         self.check_errors_in_operator(operator)
         return doc
 
-    # TODO: invent a way to move/refactor/simplify this method...
-    # It may be the root of all evil here...
-    # Main user of Document() object's methods...
-    def get_file(self, request, document_name, hashcode, extension, revision=None):
-        document = self.read(request, document_name, hashcode=hashcode, revision=revision, extension=extension,)
-        mimetype, filename, content = (None, None, None)
-        if not self.errors:
-            document.get_file_obj().seek(0)
-            content = document.get_file_obj().read()
-            mimetype = document.get_mimetype()
-
-            if revision:
-                filename = document.get_filename_with_revision()
-            else:
-                filename = document.get_full_filename()
-        return mimetype, filename, content
-
     """
     Helper methods
 

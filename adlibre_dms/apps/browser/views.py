@@ -23,6 +23,7 @@ from dms_plugins import models, forms, representator
 from dms_plugins.operator import PluginsOperator
 from core.document_manager import DocumentManager
 from browser.forms import UploadForm
+from core.http import DocumentResponse
 
 # FIXME: temporary logger
 #log = logging.getLogger('browser')
@@ -79,17 +80,6 @@ def error_response(errors):
     response.status_code = error.code
     return response
 
-def file_response(document):
-    document.get_file_obj().seek(0)
-    content = document.get_file_obj().read()
-    mimetype = document.get_mimetype()
-    filename = document.get_full_filename()
-    response = HttpResponse(content, mimetype = mimetype)
-    response["Content-Length"] = len(content)
-    response['Content-Disposition'] = 'filename=%s' % filename
-    return response
-
-
 def get_file(request, code, suggested_format=None):
     hashcode = request.GET.get('hashcode', None) # Refactor me out
     manager = DocumentManager()
@@ -98,7 +88,7 @@ def get_file(request, code, suggested_format=None):
     if manager.errors:
         response = error_response(manager.errors)
     else:
-        response = file_response(document)
+        response = DocumentResponse(document)
     return response
 
 @staff_member_required
