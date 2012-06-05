@@ -17,28 +17,25 @@ from core.models import Document
 
 # FIXME: temporary logger
 log = logging.getLogger('')
-#log = logging.getLogger('core.document_manager')
+#log = logging.getLogger('core.document_processor')
 
 # TODO: AC: I think this should be refactored so that 'request' is not used here. Plugin points should be executed elsewhere.
 class DocumentProcessor(object):
-    """
-    Main CRUD logic operations handler.
-
-    Will be refactored out to DocumentProcessor()
-    """
+    """Main DMS CRUD logic operations handler."""
     def __init__(self):
         self.errors = []
         self.warnings = []
 
     def create(self, request, uploaded_file, index_info=None, barcode=None):
         """
-        Creates a new Document() object and populates it with provided parameters.
+        Creates a new Document() object.
+
+        Responsible for adding new Document() objects into DMS.
 
         uploaded file is http://docs.djangoproject.com/en/1.3/topics/http/file-uploads/#django.core.files.uploadedfile.UploadedFile
         or file object
         """
-        log.debug('Storing Document %s, index_info: %s, barcode: %s' % (uploaded_file, index_info, barcode))
-        # Check if file already exists
+        log.debug('CREATE Document %s, index_info: %s, barcode: %s' % (uploaded_file, index_info, barcode))
         operator = PluginsOperator()
         doc = Document()
         doc.set_file_obj(uploaded_file)
@@ -51,7 +48,7 @@ class DocumentProcessor(object):
             doc.set_mimetype(uploaded_file.content_type)
         if index_info:
             doc.set_db_info(index_info)
-            # FIXME: if uploaded_file is not None, then some plugins should not run because we don't have a file
+        # FIXME: if uploaded_file is not None, then some plugins should not run because we don't have a file
         doc = operator.process_pluginpoint(pluginpoints.BeforeStoragePluginPoint, request, document=doc)
         # Process storage plugins
         operator.process_pluginpoint(pluginpoints.StoragePluginPoint, request, document=doc)
@@ -69,6 +66,8 @@ class DocumentProcessor(object):
 
         Currently can read Document() with file object attached or either read only metadata.
         """
+        log.debug('READ Document %s, hashcode: %s, revision: %s, only_metadata: %s, extension: %s'
+                  % (document_name, hashcode, revision, only_metadata, extension) )
         doc = Document()
         operator = PluginsOperator()
         doc.set_filename(document_name)
@@ -88,10 +87,11 @@ class DocumentProcessor(object):
 
         This is needed to update document properties like tags without re-storing document itself.
         """
+        log.debug('UPDATE Document %s, tag_string: %s, remove_tag_string: %s, extension: %s'
+                  % (document_name, tag_string, remove_tag_string, extension) )
         doc = Document()
         operator = PluginsOperator()
         doc.set_filename(document_name)
-        #doc = self.retrieve(request, document_name)
         if extension:
             doc.set_requested_extension(extension)
         doc.set_tag_string(tag_string)
@@ -101,9 +101,9 @@ class DocumentProcessor(object):
         return doc
 
     def delete(self, request, document_name, revision=None, extension=None):
-        """
-        Deletes Document() or it's parts from DMS.
-        """
+        """Deletes Document() or it's parts from DMS."""
+        log.debug('DELETEE Document %s, revision: %s, extension: %s'
+                  % (document_name, revision, extension) )
         doc = Document()
         operator = PluginsOperator()
         doc.set_filename(document_name)
@@ -115,22 +115,19 @@ class DocumentProcessor(object):
         self.check_errors_in_operator(operator)
         return doc
 
-    """
-    Helper methods
-
-    General for all CRUD operations.
-    They define logic of manager minor tasks.
-    """
     def check_errors_in_operator(self, operator):
         """
         Method checks for errors and warnings PluginOperator() has and makes them own errors/warnings.
 
-        Returns Boolean depending if exist.
+        Helper method to be used in all CRUD logic for proper PluginOperator() interactions.
+        Returns Boolean depending if errors/warnings exist.
         """
         for error in operator.plugin_errors:
             self.errors.append(error)
+            log.error('DocumentManager error: %s' % error)
         for warning in operator.plugin_warnings:
             self.warnings.append(warning)
+            log.debug('DocumentManager warning: %s' % warning)
         if operator.plugin_errors or operator.plugin_warnings:
             return True
         else:
