@@ -29,16 +29,6 @@ from core.http import DocumentResponse
 #log = logging.getLogger('browser')
 log = logging.getLogger('')
 
-def handlerError(request, httpcode, message):
-    t = loader.get_template(str(httpcode)+'_custom.html')
-    context = RequestContext(
-        request, {'request_path': request.path,
-                  'message': message, }
-        )
-    response = HttpResponse(t.render(context))
-    response.status_code = httpcode
-    return response
-
 def index(request):
     return direct_to_template(request, 'browser/index.html')
 
