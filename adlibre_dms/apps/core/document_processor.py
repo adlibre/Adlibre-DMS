@@ -15,11 +15,9 @@ from dms_plugins.operator import PluginsOperator
 
 from core.models import Document
 
-# FIXME: temporary logger
-log = logging.getLogger('')
-#log = logging.getLogger('core.document_processor')
+log = logging.getLogger('core.document_processor')
 
-# TODO: AC: I think this should be refactored so that 'request' is not used here. Plugin points should be executed elsewhere.
+# TODO: AC: I think this should be refactored so that 'request' is not used here.
 class DocumentProcessor(object):
     """Main DMS CRUD logic operations handler."""
     def __init__(self):
@@ -39,6 +37,8 @@ class DocumentProcessor(object):
         operator = PluginsOperator()
         doc = Document()
         doc.set_file_obj(uploaded_file)
+
+        # Setting new file name and type.
         if barcode is not None:
             doc.set_filename(barcode)
             log.debug('Allocated Barcode %s.' % barcode)
@@ -48,11 +48,10 @@ class DocumentProcessor(object):
             doc.set_mimetype(uploaded_file.content_type)
         if index_info:
             doc.set_db_info(index_info)
+        # Processing plugins
         # FIXME: if uploaded_file is not None, then some plugins should not run because we don't have a file
         doc = operator.process_pluginpoint(pluginpoints.BeforeStoragePluginPoint, request, document=doc)
-        # Process storage plugins
         operator.process_pluginpoint(pluginpoints.StoragePluginPoint, request, document=doc)
-        # Process DatabaseStorage plugins
         doc = operator.process_pluginpoint(pluginpoints.DatabaseStoragePluginPoint, request, document=doc)
         self.check_errors_in_operator(operator)
         return doc
