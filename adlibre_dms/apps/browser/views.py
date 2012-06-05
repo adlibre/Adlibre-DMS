@@ -6,6 +6,8 @@ Copyright: Adlibre Pty Ltd 2011
 License: See LICENSE for license information
 """
 
+import logging
+
 from djangoplugins import models as plugin_models
 from djangoplugins.models import Plugin
 
@@ -22,6 +24,9 @@ from dms_plugins.operator import PluginsOperator
 from core.document_manager import DocumentManager
 from browser.forms import UploadForm
 
+# FIXME: temporary logger
+#log = logging.getLogger('browser')
+log = logging.getLogger('')
 
 def handlerError(request, httpcode, message):
     t = loader.get_template(str(httpcode)+'_custom.html')
@@ -44,7 +49,9 @@ def index(request):
 # I don't think we want to necessarily use the django admin login.
 def upload(request, template_name='browser/upload.html', extra_context={}):
     """
-    Upload file processing. Uploaded file will be check against available rules to
+    Upload file processing.
+
+    Uploaded file will be check against available rules to
     determine storage, validator, and security plugins.
     """
 
@@ -55,8 +62,11 @@ def upload(request, template_name='browser/upload.html', extra_context={}):
             manager.create(request, form.files['file'])
             if not manager.errors:
                 messages.success(request, 'File has been uploaded.')
+                log.info('browser.upload file: %s sucess' % form.files['file'].name)
             else:
-                messages.error(request, "; ".join(map(lambda x: x[0], manager.errors)))
+                error_string = "; ".join([unicode(x) for x in manager.errors])
+                messages.error(request, error_string)
+                log.error('browser.upload errror: %s' % error_string)
 
     extra_context['form'] = form
     return direct_to_template(request,
@@ -69,15 +79,26 @@ def error_response(errors):
     response.status_code = error.code
     return response
 
-def get_file(request, code, suggested_format=None):
-    hashcode = request.GET.get('hashcode', None) # Refactor me out
-    operator = PluginsOperator()
-    mimetype, filename, content = manager.get_file(request, code, hashcode, suggested_format)
-    if manager.errors:
-        return error_response(manager.errors)
+def file_response(document):
+    document.get_file_obj().seek(0)
+    content = document.get_file_obj().read()
+    mimetype = document.get_mimetype()
+    filename = document.get_full_filename()
     response = HttpResponse(content, mimetype = mimetype)
     response["Content-Length"] = len(content)
     response['Content-Disposition'] = 'filename=%s' % filename
+    return response
+
+
+def get_file(request, code, suggested_format=None):
+    hashcode = request.GET.get('hashcode', None) # Refactor me out
+    manager = DocumentManager()
+    document = manager.read(request, code, hashcode=hashcode, extension=suggested_format,)
+    #mimetype, filename, content = manager.get_file(request, code, hashcode, suggested_format)
+    if manager.errors:
+        response = error_response(manager.errors)
+    else:
+        response = file_response(document)
     return response
 
 @staff_member_required
