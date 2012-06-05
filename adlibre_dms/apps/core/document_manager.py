@@ -16,7 +16,9 @@ from dms_plugins.operator import PluginsOperator
 
 from core.models import Document
 
-log = logging.getLogger('core.document_manager')
+# FIXME: temporary logger
+log = logging.getLogger('')
+#log = logging.getLogger('core.document_manager')
 
 # TODO: Delint this file
 # TODO: AC: I think this should be refactored so that 'request' is not used here. Plugin points should be executed elsewhere.

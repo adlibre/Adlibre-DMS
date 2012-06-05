@@ -21,7 +21,9 @@ from dms_plugins import pluginpoints
 
 from core.models import Document
 
-log = logging.getLogger('dms_plugins.operator')
+# FIXME: Temporary logger
+#log = logging.getLogger('dms_plugins.operator')
+log = logging.getLogger('dms')
 
 # PEP method to fix out redundant imports.
 __all__ = ['PluginsOperator']
