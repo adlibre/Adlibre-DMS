@@ -87,13 +87,12 @@ class FileHandler(BaseFileHandler):
         tag_string = request.PUT.get('tag_string', None)
         remove_tag_string = request.PUT.get('remove_tag_string', None)
         new_name = request.PUT.get('new_name', None)
-
+        # TODO: consider if we need some new place for this...
+        # MAYBE we need to make it part of the update sequence here...
+        # Renames current document name here.
         try:
             processor = DocumentProcessor()
             if new_name:
-                # TODO: consider if we need some new place for this...
-                # MAYBE we need to make it part of the update sequence here...
-                # Renames current document name here.
                 renaming_doc = processor.read(request, code, extension=suggested_format)
                 if new_name != renaming_doc.get_filename():
                     ufile = UploadedFile(renaming_doc.get_file_obj(), new_name, content_type=renaming_doc.get_mimetype())
@@ -110,13 +109,14 @@ class FileHandler(BaseFileHandler):
                 else:
                     return rc.BAD_REQUEST
             log.info('FileHandler.update request fulfilled for code: %s, format: %s, rev: %s, hash: %s.' % (code, suggested_format, revision, hashcode))
-            return HttpResponse(json.dumps( document.get_dict() )) # FIXME should be rc.ALL_OK
+            response_string = json.dumps( document.get_dict() )
+            return HttpResponse(response_string) # FIXME should be rc.ALL_OK
         except Exception, e: # FIXME
             log.error('FileHandler.update exception %s' % e)
             if settings.DEBUG:
                 raise
             else:
-                return rc.BAD_REQUEST
+                return rc.ALL_OK
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
     @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
