@@ -8,7 +8,7 @@ Author: Iurii Garmash
 """
 
 """
-Main http generation methods storage.
+Main http objects manipulation methods here.
 """
 import logging
 
