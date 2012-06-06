@@ -1479,6 +1479,7 @@ class MDTUI(TestCase):
     def test_z_cleanup(self):
         """
         Cleaning up after all tests finished.
+
         Must be ran after all tests in this test suite.
         """
         # Deleting all test MDT's

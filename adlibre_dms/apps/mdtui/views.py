@@ -413,8 +413,12 @@ def mdt_parallel_keys(request):
 
     try:
         key_name = request.POST[u'key_name']
-        autocomplete_req = request.POST[u'autocomplete_search']
+        # .strip() Fixes bug with space symbol returns ANY results. issue #749
+        autocomplete_req = request.POST[u'autocomplete_search'].strip(' \t\n\r')
     except KeyError:
+        valid_call = False
+
+    if not autocomplete_req:
         valid_call = False
 
     try:
