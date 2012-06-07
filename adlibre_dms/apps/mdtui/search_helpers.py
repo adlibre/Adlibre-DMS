@@ -1,21 +1,25 @@
 """
 Module: SEARCH TYPE VARIATIONS GENERAL SEARCH HELPERS
+
 Project: Adlibre DMS
 Copyright: Adlibre Pty Ltd 2012
 License: See LICENSE for license information
 Author: Iurii Garmash
 """
 
-from dmscouch.models import CouchDocument
 import logging
+
+from operator import itemgetter
+
+from dmscouch.models import CouchDocument
 from forms_representator import SEARCH_STRING_REPR
+
+log = logging.getLogger('dms.mdtui.views')
 
 DATE_RANGE_CONSTANTS = {
     'min': u'1960-01-01',
     'max': u'2100-01-01'
 }
-
-log = logging.getLogger('dms.mdtui.views')
 
 def document_date_range_only_search(cleaned_document_keys, docrule_id):
     log.debug('Date range search only')
@@ -76,9 +80,7 @@ def document_date_range_with_keys_search(cleaned_document_keys, docrule_id):
     return documents
 
 def filter_couch_docs_by_docrule_id(documents, docrule_id):
-    """
-    Helper for date range search primary to filter documents by given docrule
-    """
+    """Helper for date range search primary to filter documents by given docrule"""
     doc_ids_list = []
     for document in documents:
         if document['metadata_doc_type_rule_id'] == docrule_id:
@@ -126,9 +128,7 @@ def ranges_validator(cleaned_document_keys):
     return cleaned_document_keys
 
 def recognise_dates_in_search(cleaned_document_keys):
-    """
-    Finding ranges in cleaned keys and converting them to tuple pairs
-    """
+    """Finding ranges in cleaned keys and converting them to tuple pairs"""
     proceed = False
     keys_list = [key for key in cleaned_document_keys.iterkeys()]
     # TODO: implement this
@@ -160,8 +160,10 @@ def recognise_dates_in_search(cleaned_document_keys):
 
 def convert_search_res_for_range(resp_set, cleaned_document_keys):
     """
-    Converts search results for set of keys CouchDB responses with optional date range
-    from type ANY to type ALL (evey key exist in document)
+    Converts search results from type ANY to type ALL
+
+    (evey key exist in document)
+    For CouchDB documents list provided by search.
     """
     set_list = []
     all_docs = {}
@@ -188,6 +190,7 @@ def convert_search_res_for_range(resp_set, cleaned_document_keys):
 def convert_to_search_keys_for_date_range(document_keys, pkey, docrule_id, end=False, date_range=False):
     """
     Makes proper keys request set for 'dmscouch/search' CouchDB view.
+
     Takes date range into account.
     """
     req_params = []
@@ -219,9 +222,7 @@ def convert_to_search_keys_for_date_range(document_keys, pkey, docrule_id, end=F
     return req_params
 
 def document_date_range_present_in_keys(keys):
-    """
-    Helper to recognise document date range in search keys
-    """
+    """Helper to recognise document date range in search keys"""
     dd_range_present = False
     start = False
     end = False
@@ -236,9 +237,15 @@ def document_date_range_present_in_keys(keys):
 
 def str_date_to_couch(from_date):
     """
-    Converts date from form date widget generated format, like '2012-03-02'
-    To CouchDocument stored date. E.g.: '2012-03-02T00:00:00Z'
+    Converts date from form date widget generated format
+
+    e.g.: '2012-03-02' to CouchDocument stored date. E.g.: '2012-03-02T00:00:00Z'
     """
     couch_date = from_date + 'T00:00:00Z'
     return couch_date
+
+def search_results_by_date(documents):
+    """Sorts search results into list by CouchDB document's 'created date'."""
+    newlist = sorted(documents, key=itemgetter('metadata_created_date'))
+    return newlist
 
