@@ -31,6 +31,7 @@ from search_helpers import document_date_range_with_keys_search
 from search_helpers import recognise_dates_in_search
 from search_helpers import document_date_range_present_in_keys
 from search_helpers import ranges_validator
+from search_helpers import search_results_by_date
 from forms_representator import get_mdts_for_docrule
 from parallel_keys import ParallelKeysManager
 from data_exporter import export_to_csv
@@ -164,7 +165,8 @@ def search_results(request, step=None, template='mdtui/search.html'):
             documents = document_date_range_with_keys_search(cleaned_document_keys, docrule_id)
 
         mdts_list = get_mdts_for_documents(documents)
-
+    if documents:
+        documents = search_results_by_date(documents)
     # Produces a CSV file from search results
     if documents and step == 'export':
         log.debug('search_results exporting found documents to CSV')
