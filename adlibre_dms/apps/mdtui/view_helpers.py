@@ -12,7 +12,7 @@ from forms import DocumentSearchOptionsForm
 from forms_representator import render_fields_from_docrules
 from forms_representator import get_mdts_for_docrule
 
-def initIndexesForm(request, search=False):
+def initIndexesForm(request):
     """
     DocumentIndexForm/DocumentSearchForm initialization
 
@@ -66,7 +66,7 @@ def processDocumentIndexForm(request):
 
     Works for search/indexing calls
     """
-    form = initIndexesForm(request, search=False)
+    form = initIndexesForm(request)
     secondary_indexes = {}
     search = determine_search_req(request)
     if form.validation_ok() or search:
