@@ -53,9 +53,7 @@ MDTUI_ERROR_STRINGS = {
 
 @login_required
 def search_type(request, step, template='mdtui/search.html'):
-    """
-    Search Step 1: Select Search Type
-    """
+    """Search Step 1: Select Search Type"""
     docrule = None
     warnings = []
     cleanup_indexing_session(request)
@@ -96,9 +94,7 @@ def search_type(request, step, template='mdtui/search.html'):
 
 @login_required
 def search_options(request, step, template='mdtui/search.html'):
-    """
-    Search Step 2: Search Options
-    """
+    """Search Step 2: Search Options"""
     warnings = []
     autocomplete_list = None
     try:
@@ -136,9 +132,7 @@ def search_options(request, step, template='mdtui/search.html'):
 
 @login_required
 def search_results(request, step=None, template='mdtui/search.html'):
-    """
-    Search Step 3: Search Results
-    """
+    """Search Step 3: Search Results"""
     document_keys = None
     docrule_id = None
     documents = None
@@ -184,9 +178,7 @@ def search_results(request, step=None, template='mdtui/search.html'):
 
 @login_required
 def view_pdf(request, code, step, template='mdtui/view.html'):
-    """
-    View PDF Document
-    """
+    """View PDF Document"""
     pdf_url = reverse('mdtui-download-pdf', kwargs = { 'code': code, })
     context = { 'pdf_url': pdf_url, 'code': code, 'step':step }
     return render(request, template, context)
@@ -194,9 +186,7 @@ def view_pdf(request, code, step, template='mdtui/view.html'):
 
 @login_required
 def indexing_select_type(request, step=None, template='mdtui/indexing.html'):
-    """
-    Indexing: Step 1 : Select Document Type
-    """
+    """Indexing: Step 1 : Select Document Type"""
     # Context init
     context = {}
     docrule = None
@@ -241,9 +231,7 @@ def indexing_select_type(request, step=None, template='mdtui/indexing.html'):
 
 @login_required
 def indexing_details(request, step=None, template='mdtui/indexing.html'):
-    """
-    Indexing: Step 2 : Index Details
-    """
+    """Indexing: Step 2 : Index Details"""
     # Context init
     context = {}
     document_keys = None
@@ -288,9 +276,7 @@ def indexing_details(request, step=None, template='mdtui/indexing.html'):
 
 @login_required
 def indexing_source(request, step=None, template='mdtui/indexing.html'):
-    """
-    Indexing: Step 3: Upload File / Associate File / Print Barcode
-    """
+    """Indexing: Step 3: Upload File / Associate File / Print Barcode"""
     document_keys = None
     context = {}
     warnings = []
@@ -361,9 +347,7 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
 
 @login_required
 def indexing_finished(request, step=None, template='mdtui/indexing.html'):
-    """
-    Indexing: Step 4: Finished
-    """
+    """Indexing: Step 4: Finished"""
     context = { 'step': step,  }
     try:
         context.update({'document_keys': request.session['document_keys_dict'],})
@@ -392,6 +376,7 @@ def indexing_finished(request, step=None, template='mdtui/indexing.html'):
 def mdt_parallel_keys(request):
     """
     Returns parallel keys suggestions for autocomplete.
+
     NB, Don't rename this to parallel_keys. It conflicts with imported lib of same name.
     """
     valid_call = True
@@ -496,9 +481,7 @@ def mdt_parallel_keys(request):
 
 @login_required
 def download_pdf(request, code):
-    """
-    Returns Document For Download
-    """
+    """Returns Document For Download"""
     # right now we just redirect to API, but in future we might want to decouple from API app.
     url = reverse('api_file', kwargs={'code': code, 'suggested_format': 'pdf'},)
     return redirect(url)
