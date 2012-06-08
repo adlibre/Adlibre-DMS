@@ -108,7 +108,7 @@ def search_options(request, step, template='mdtui/search.html'):
 
     # CouchDB connection Felt down warn user
     try:
-        form = initIndexesForm(request, search=True)
+        form = initIndexesForm(request)
         autocomplete_list = extract_secondary_keys_from_form(form)
     except (RequestError,AttributeError) :
         form = DocumentSearchOptionsForm
@@ -271,9 +271,9 @@ def indexing_details(request, step=None, template='mdtui/indexing.html'):
                 return HttpResponseRedirect(reverse('mdtui-index-source'))
         else:
             # Return validation with errors...
-            form = initIndexesForm(request, search=False)
+            form = initIndexesForm(request)
     else:
-        form = initIndexesForm(request, search=False)
+        form = initIndexesForm(request)
 
     autocomplete_list = extract_secondary_keys_from_form(form)
 
