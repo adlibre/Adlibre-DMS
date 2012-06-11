@@ -51,3 +51,16 @@ class ParallelKeysManager(object):
                 if db_field[u'field_name'] == unicode(key_name):
                     return pkeys
         return None
+
+    def get_parallel_keys_for_pkeys(self, pkeys, secondary_keys):
+        """
+        Extracts only parallel keys/values pairs for parallel keys in keys/values list provided.
+
+        returns list of tuples of parallel keys. E.g.:
+        [('name': 'mike'), ('surname': 'kernel')]
+        """
+        pkeys_list = []
+        if pkeys:
+            for pkey in pkeys:
+                pkeys_list.append((pkey[u'field_name'], secondary_keys[pkey[u'field_name']]))
+        return pkeys_list
