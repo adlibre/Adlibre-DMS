@@ -32,6 +32,7 @@ from search_helpers import recognise_dates_in_search
 from search_helpers import document_date_range_present_in_keys
 from search_helpers import ranges_validator
 from search_helpers import search_results_by_date
+from search_helpers import check_for_secondary_keys_pairs
 from forms_representator import get_mdts_for_docrule
 from parallel_keys import ParallelKeysManager
 from data_exporter import export_to_csv
@@ -47,15 +48,14 @@ MDTUI_ERROR_STRINGS = {
     'NO_S_KEYS':'You have not defined Document Searching Options.',
     'NO_TYPE':'You have not defined Document Type. Can only search by "Creation Date".',
     'NO_DB':'Database Connection absent. Check CouchDB server connection.',
-    'NO_DOCUMENTS_FOUND': 'Nothing to export because of empty documents results.'
+    'NO_DOCUMENTS_FOUND': 'Nothing to export because of empty documents results.',
+    'NEW_KEY_VALUE_PAIR': 'Adding new indexing key: '
 }
 
 
 @login_required
 def search_type(request, step, template='mdtui/search.html'):
-    """
-    Search Step 1: Select Search Type
-    """
+    """Search Step 1: Select Search Type"""
     docrule = None
     warnings = []
     cleanup_indexing_session(request)
@@ -96,9 +96,7 @@ def search_type(request, step, template='mdtui/search.html'):
 
 @login_required
 def search_options(request, step, template='mdtui/search.html'):
-    """
-    Search Step 2: Search Options
-    """
+    """Search Step 2: Search Options"""
     warnings = []
     autocomplete_list = None
     try:
@@ -108,7 +106,7 @@ def search_options(request, step, template='mdtui/search.html'):
 
     # CouchDB connection Felt down warn user
     try:
-        form = initIndexesForm(request, search=True)
+        form = initIndexesForm(request)
         autocomplete_list = extract_secondary_keys_from_form(form)
     except (RequestError,AttributeError) :
         form = DocumentSearchOptionsForm
@@ -136,9 +134,7 @@ def search_options(request, step, template='mdtui/search.html'):
 
 @login_required
 def search_results(request, step=None, template='mdtui/search.html'):
-    """
-    Search Step 3: Search Results
-    """
+    """Search Step 3: Search Results"""
     document_keys = None
     docrule_id = None
     documents = None
@@ -184,9 +180,7 @@ def search_results(request, step=None, template='mdtui/search.html'):
 
 @login_required
 def view_pdf(request, code, step, template='mdtui/view.html'):
-    """
-    View PDF Document
-    """
+    """View PDF Document"""
     pdf_url = reverse('mdtui-download-pdf', kwargs = { 'code': code, })
     context = { 'pdf_url': pdf_url, 'code': code, 'step':step }
     return render(request, template, context)
@@ -194,9 +188,7 @@ def view_pdf(request, code, step, template='mdtui/view.html'):
 
 @login_required
 def indexing_select_type(request, step=None, template='mdtui/indexing.html'):
-    """
-    Indexing: Step 1 : Select Document Type
-    """
+    """Indexing: Step 1 : Select Document Type"""
     # Context init
     context = {}
     docrule = None
@@ -241,9 +233,7 @@ def indexing_select_type(request, step=None, template='mdtui/indexing.html'):
 
 @login_required
 def indexing_details(request, step=None, template='mdtui/indexing.html'):
-    """
-    Indexing: Step 2 : Index Details
-    """
+    """Indexing: Step 2 : Index Details"""
     # Context init
     context = {}
     document_keys = None
@@ -271,9 +261,9 @@ def indexing_details(request, step=None, template='mdtui/indexing.html'):
                 return HttpResponseRedirect(reverse('mdtui-index-source'))
         else:
             # Return validation with errors...
-            form = initIndexesForm(request, search=False)
+            form = initIndexesForm(request)
     else:
-        form = initIndexesForm(request, search=False)
+        form = initIndexesForm(request)
 
     autocomplete_list = extract_secondary_keys_from_form(form)
 
@@ -285,12 +275,9 @@ def indexing_details(request, step=None, template='mdtui/indexing.html'):
                     })
     return render_to_response(template, context, context_instance=RequestContext(request))
 
-
 @login_required
 def indexing_source(request, step=None, template='mdtui/indexing.html'):
-    """
-    Indexing: Step 3: Upload File / Associate File / Print Barcode
-    """
+    """Indexing: Step 3: Upload File / Associate File / Print Barcode"""
     document_keys = None
     context = {}
     warnings = []
@@ -330,6 +317,12 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
     else:
         barcode_form = BarcodePrintedForm(request.POST or None)
 
+    # Appending warnings for creating a new parrallel key/value pair.
+    new_sec_key_pairs = check_for_secondary_keys_pairs(index_info, docrule)
+    if new_sec_key_pairs:
+        for new_key, new_value in new_sec_key_pairs.iteritems():
+            warnings.append(MDTUI_ERROR_STRINGS['NEW_KEY_VALUE_PAIR'] + new_key + ': ' + new_value)
+
     if upload_form.is_valid() or barcode_form.is_valid():
         if not warnings:
             if upload_form.is_valid():
@@ -361,9 +354,7 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
 
 @login_required
 def indexing_finished(request, step=None, template='mdtui/indexing.html'):
-    """
-    Indexing: Step 4: Finished
-    """
+    """Indexing: Step 4: Finished"""
     context = { 'step': step,  }
     try:
         context.update({'document_keys': request.session['document_keys_dict'],})
@@ -382,7 +373,7 @@ def indexing_finished(request, step=None, template='mdtui/indexing.html'):
     except KeyError:
         pass
 
-    # document uploaded forget everything
+    # Document uploaded forget everything
     cleanup_indexing_session(request)
     cleanup_mdts(request)
     return render(request, template, context)
@@ -392,6 +383,7 @@ def indexing_finished(request, step=None, template='mdtui/indexing.html'):
 def mdt_parallel_keys(request):
     """
     Returns parallel keys suggestions for autocomplete.
+
     NB, Don't rename this to parallel_keys. It conflicts with imported lib of same name.
     """
     valid_call = True
@@ -496,9 +488,7 @@ def mdt_parallel_keys(request):
 
 @login_required
 def download_pdf(request, code):
-    """
-    Returns Document For Download
-    """
+    """Returns Document For Download"""
     # right now we just redirect to API, but in future we might want to decouple from API app.
     url = reverse('api_file', kwargs={'code': code, 'suggested_format': 'pdf'},)
     return redirect(url)

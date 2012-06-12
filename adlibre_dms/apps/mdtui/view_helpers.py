@@ -1,5 +1,6 @@
 """
 Module: Metadata Template UI views helpers
+
 Project: Adlibre DMS
 Copyright: Adlibre Pty Ltd 2012
 License: See LICENSE for license information
@@ -11,9 +12,10 @@ from forms import DocumentSearchOptionsForm
 from forms_representator import render_fields_from_docrules
 from forms_representator import get_mdts_for_docrule
 
-def initIndexesForm(request, search=False):
+def initIndexesForm(request):
     """
     DocumentIndexForm/DocumentSearchForm initialization
+
     in case of GET returns an empty base form,
     in case of POST returns populated (from request) form instance.
     in both cases form is rendered with MDT index fields
@@ -61,9 +63,10 @@ def initIndexesForm(request, search=False):
 def processDocumentIndexForm(request):
     """
     Handles document index form validation/population/data handling
+
     Works for search/indexing calls
     """
-    form = initIndexesForm(request, search=False)
+    form = initIndexesForm(request)
     secondary_indexes = {}
     search = determine_search_req(request)
     if form.validation_ok() or search:
@@ -99,8 +102,9 @@ def processDocumentIndexForm(request):
 
 def determine_search_req(request):
     """
-    Helper to finds out if provided request is search or indexing (not search) one
-    Returns Boolean search request
+    Helper to find out if provided request is search or indexing
+
+    Returns Boolean value
     Currently determining if search by the url
     Warning! (MUST BE CHANGED IF RENAMING SEARCH URL)
     """
@@ -111,9 +115,7 @@ def determine_search_req(request):
     return search
 
 def get_mdts_for_documents(documents):
-    """
-    Returns list of mdts for provided documents list
-    """
+    """Returns list of mdts for provided documents list"""
     indexes = {}
     resp = None
     if documents:
@@ -125,9 +127,7 @@ def get_mdts_for_documents(documents):
     return resp
 
 def extract_secondary_keys_from_form(form):
-    """
-    Extracts secondary keys list from Indexes form.
-    """
+    """Extracts secondary keys list from Indexes form."""
     keys_list = []
     for field_id, field in form.fields.iteritems():
         try:
@@ -141,9 +141,7 @@ def extract_secondary_keys_from_form(form):
     return keys_list
 
 def _cleanup_session_var(request, var):
-    """
-    Cleanup Session var helper
-    """
+    """Cleanup Session var helper"""
     try:
         request.session[var] = None
         del request.session[var]
@@ -151,23 +149,17 @@ def _cleanup_session_var(request, var):
         pass
 
 def cleanup_search_session(request):
-    """
-    Makes MDTUI forget abut searching keys entered before.
-    """
+    """Makes MDTUI forget abut searching keys entered before."""
     vars = ('document_search_dict', 'search_docrule_id',)
     for var in vars:
         _cleanup_session_var(request, var)
 
 def cleanup_indexing_session(request):
-    """
-    Makes MDTUI forget abut indexing keys entered before.
-    """
+    """Makes MDTUI forget abut indexing keys entered before."""
     vars = ('document_keys_dict', 'indexing_docrule_id', 'barcode',)
     for var in vars:
         _cleanup_session_var(request, var)
 
 def cleanup_mdts(request):
-    """
-    Cleanup MDT's in improvised cache.
-    """
+    """Cleanup MDT's in improvised cache."""
     _cleanup_session_var(request, 'mdts')
