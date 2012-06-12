@@ -1,5 +1,6 @@
 """
 Module: DMS Browser Django Unit Tests
+
 Project: Adlibre DMS
 Copyright: Adlibre Pty Ltd 2011
 License: See LICENSE for license information
@@ -12,6 +13,8 @@ from django.core.urlresolvers import reverse
 
 from adlibre.dms.base_test import DMSTestCase
 
+# Used in determining if current file is PDF file by 'string' inside a file content.
+pdf_file_string_part = '%PDF-1.4'
 
 class ViewTest(DMSTestCase):
     """
@@ -85,17 +88,17 @@ class ViewTest(DMSTestCase):
         for d in self.documents_hash:
             url = '/get/%s?hashcode=%s' % (d[0], d[1])
             response = self.client.get(url)
-            self.assertContains(response, '', status_code=200)
+            self.assertContains(response, pdf_file_string_part, status_code=200)
         
         for d in self.documents_hash:
             url = '/get/%s.pdf?hashcode=%s' % (d[0], d[1])
             response = self.client.get(url)
-            self.assertContains(response, '', status_code=200)
+            self.assertContains(response, pdf_file_string_part, status_code=200)
 
         for d in self.documents_hash:
             url = '/get/%s.pdf?hashcode=%s&extension=txt' % (d[0], d[1])
             response = self.client.get(url)
-            self.assertContains(response, '', status_code=200)
+            self.assertContains(response, pdf_file_string_part, status_code=200)
 
         # TODO: fix this it will break...
         for d in self.documents_missing_hash:

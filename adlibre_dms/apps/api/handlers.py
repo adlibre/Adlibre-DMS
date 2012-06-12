@@ -1,5 +1,6 @@
 """
 Module: Piston API Handlers
+
 Project: Adlibre DMS
 Copyright: Adlibre Pty Ltd 2011, 2012
 License: See LICENSE for license information
@@ -17,12 +18,16 @@ from piston.handler import BaseHandler
 from piston.utils import rc
 
 from django.utils.decorators import method_decorator
+from django.core.files.uploadedfile import UploadedFile
 from api.decorators.auth import logged_in_or_basicauth
 from api.decorators.group_required import group_required
 
-from document_manager import DocumentManager
+from core.document_processor import DocumentProcessor
+from core.http import DocumentResponse
 from dms_plugins import models
+from dms_plugins.operator import PluginsOperator
 from doc_codes.models import DocumentTypeRuleManagerInstance
+from dms_plugins.models import DoccodePluginMapping
 from mdt_manager import MetaDataTemplateManager
 
 
@@ -39,21 +44,18 @@ class BaseFileHandler(BaseHandler):
         log.debug('BaseFileHandler._get_info returned: %s : %s : %s.' % (revision, hashcode, extra))
         return revision, hashcode, extra
 
-
 class FileHandler(BaseFileHandler):
-    """
-    CRUD Methods for documents
-    """
+    """CRUD Methods for documents"""
     allowed_methods = ('GET', 'POST', 'DELETE', 'PUT')
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
     @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def create(self, request, code, suggested_format=None):
         # FIXME... code and file stream should be passed in separately!
-        manager = DocumentManager()
-        document = manager.store(request, request.FILES['file'])
-        if len(manager.errors) > 0:
-            log.error('FileHandler.create manager errors: %s' % manager.errors)
+        processor = DocumentProcessor()
+        document = processor.create(request, request.FILES['file'])
+        if len(processor.errors) > 0:
+            log.error('FileHandler.create manager errors: %s' % processor.errors)
             return rc.BAD_REQUEST
         log.info('FileHandler.create request fulfilled for %s' % document.get_filename())
         return document.get_filename() # FIXME, should be rc.CREATED
@@ -62,23 +64,19 @@ class FileHandler(BaseFileHandler):
     @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def read(self, request, code, suggested_format=None):
         revision, hashcode, extra = self._get_info(request)
-        manager = DocumentManager()
-        try:
-            mimetype, filename, content = manager.get_file(request, code, hashcode,
-                    suggested_format, revision=revision)
-        except Exception, e:
-            log.error('FileHandler.read exception %s' % e)
+        processor = DocumentProcessor()
+        document = processor.read(request, code, hashcode, revision, extension=suggested_format)
+        if processor.errors:
             if settings.DEBUG:
                 raise
             else:
-                return rc.BAD_REQUEST
-        if manager.errors:
-            log.error('FileHandler.read manager errors: %s' % manager.errors)
-            return rc.NOT_FOUND # FIXME: should be reading RC code from plugin exception.
-        response = HttpResponse(content, mimetype=mimetype)
-        response["Content-Length"] = len(content)
-        response['Content-Disposition'] = 'filename=%s' % filename
-        log.info('FileHandler.read request fulfilled for code: %s, format: %s, rev %s, hash: %s.' % (code, suggested_format, revision, hashcode))
+                log.error('FileHandler.read manager errors: %s' % processor.errors)
+                return rc.NOT_FOUND # FIXME: should be reading RC code from plugin exception.
+                                    # @yuri 2 @andrew: I do not think we should expose internal DMS exception to API user.
+        else:
+            response = DocumentResponse(document)
+            log.info('FileHandler.read request fulfilled for code: %s, format: %s, rev %s, hash: %s.'
+                     % (code, suggested_format, revision, hashcode))
         return response
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
@@ -89,28 +87,36 @@ class FileHandler(BaseFileHandler):
         tag_string = request.PUT.get('tag_string', None)
         remove_tag_string = request.PUT.get('remove_tag_string', None)
         new_name = request.PUT.get('new_name', None)
-
+        # TODO: consider if we need some new place for this...
+        # MAYBE we need to make it part of the update sequence here...
+        # Renames current document name here.
         try:
-            manager = DocumentManager()
+            processor = DocumentProcessor()
             if new_name:
-                document = manager.rename(request, code, new_name, suggested_format) #FIXME hashcode?
+                renaming_doc = processor.read(request, code, extension=suggested_format)
+                if new_name != renaming_doc.get_filename():
+                    ufile = UploadedFile(renaming_doc.get_file_obj(), new_name, content_type=renaming_doc.get_mimetype())
+                    document = processor.create(request, ufile)
+                    if not processor.errors:
+                        processor.delete(request, renaming_doc.get_filename(), extension=suggested_format)
             else:
-                document = manager.update(request, code, tag_string=tag_string, remove_tag_string=remove_tag_string,
+                document = processor.update(request, code, tag_string=tag_string, remove_tag_string=remove_tag_string,
                         extension=suggested_format) #FIXME hashcode missing?
-            if len(manager.errors) > 0:
-                log.error('FileHandler.update manager errors %s' % manager.errors)
+            if len(processor.errors) > 0:
+                log.error('FileHandler.update manager errors %s' % processor.errors)
                 if settings.DEBUG:
                     raise Exception('FileHandler.update manager errors')
                 else:
                     return rc.BAD_REQUEST
             log.info('FileHandler.update request fulfilled for code: %s, format: %s, rev: %s, hash: %s.' % (code, suggested_format, revision, hashcode))
-            return HttpResponse(json.dumps( document.get_dict() )) # FIXME should be rc.ALL_OK
+            response_string = json.dumps( document.get_dict() )
+            return HttpResponse(response_string) # FIXME should be rc.ALL_OK
         except Exception, e: # FIXME
             log.error('FileHandler.update exception %s' % e)
             if settings.DEBUG:
                 raise
             else:
-                return rc.BAD_REQUEST
+                return rc.ALL_OK
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
     @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
@@ -119,19 +125,19 @@ class FileHandler(BaseFileHandler):
     #        full_filename = request.REQUEST.get('full_filename', None) # what is this?
     #        parent_directory = request.REQUEST.get('parent_directory', None) # FIXME! Used by no doccode!
         revision, hashcode, extra = self._get_info(request)
-        manager = DocumentManager()
+        processor = DocumentProcessor()
         try:
             log.debug('FileHandler.delete attempt with %s %s' % (code, revision))
-            manager.delete_file(request, code, revision=revision, extension=suggested_format)
+            processor.delete(request, code, revision=revision, extension=suggested_format)
         except Exception, e:
             log.error('FileHandler.delete exception %s' % e)
             if settings.DEBUG:
                 raise
             else:
                 return rc.BAD_REQUEST
-        if len(manager.errors) > 0:
+        if len(processor.errors) > 0:
             if settings.DEBUG:
-                log.error('Manager Errors encountered %s' % manager.errors)
+                log.error('Manager Errors encountered %s' % processor.errors)
             return rc.BAD_REQUEST
         log.info('FileHandler.delete request fulfilled for code: %s, format: %s, rev: %s, hash: %s.' % (code, suggested_format, revision, hashcode))
         return rc.DELETED
@@ -147,21 +153,24 @@ class FileInfoHandler(BaseFileHandler):
     @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def read(self, request, code, suggested_format=None):
         revision, hashcode, extra = self._get_info(request)
-        manager = DocumentManager()
-        document = manager.retrieve(request, code, hashcode=hashcode, revision=revision, only_metadata=True,
+        processor = DocumentProcessor()
+        document = processor.read(request, code, hashcode=hashcode, revision=revision, only_metadata=True,
             extension=suggested_format)
-        mapping = manager.get_plugin_mapping(document)
-        if manager.errors:
-            log.error('FileInfoHandler.read errors: %s' % manager.errors)
+        docrule = document.get_docrule()
+        # FIXME: there might be more than one docrules!
+        mapping = docrule.get_docrule_plugin_mappings()
+        if processor.errors:
+            log.error('FileInfoHandler.read errors: %s' % processor.errors)
             if settings.DEBUG:
                 raise Exception('FileInfoHandler.read manager.errors')
             else:
                 return rc.BAD_REQUEST
-            # FIXME This is ugly
+        # FIXME This is ugly
+        # TODO: should go into core.http
         info = document.get_dict()
         info['document_list_url'] = reverse('ui_document_list', kwargs={'id_rule': mapping.pk})
         info['tags'] = document.get_tags()
-        info['no_doccode'] = document.get_docrule().no_doccode
+        info['no_doccode'] = docrule.no_doccode
         log.info('FileInfoHandler.read request fulfilled for %s, ext %s, rev %s, hash %s' % (code, suggested_format, revision, hashcode))
         return HttpResponse(json.dumps(info))
 
@@ -176,8 +185,8 @@ class FileListHandler(BaseHandler):
     @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def read(self, request, id_rule):
         try:
-            manager = DocumentManager()
-            mapping = manager.get_plugin_mapping_by_kwargs(pk = id_rule)
+            operator = PluginsOperator()
+            mapping = operator.get_plugin_mapping_by_id(id_rule)
             start = 0
             finish = None
             try:
@@ -195,7 +204,7 @@ class FileListHandler(BaseHandler):
                     raise
                 else:
                     pass
-            file_list = manager.get_file_list(mapping, start, finish, order, searchword, tags=[tag],
+            file_list = operator.get_file_list(mapping, start, finish, order, searchword, tags=[tag],
                                                 filter_date = filter_date)
             for item in file_list:
                 ui_url = reverse('ui_document', kwargs = {'document_name': item['name']})
@@ -225,9 +234,10 @@ class TagsHandler(BaseHandler):
     @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def read(self, request, id_rule):
         try:
-            manager = DocumentManager()
-            mapping = manager.get_plugin_mapping_by_kwargs(pk=id_rule)
-            tags = manager.get_all_tags(doccode=mapping.get_docrule())
+            operator = PluginsOperator()
+            mapping = operator.get_plugin_mapping_by_id(id_rule)
+            docrule = mapping.get_docrule()
+            tags = operator.get_all_tags(doccode=docrule)
             log.info('TagsHandler.read request fulfilled for rule %s' % (id_rule))
             return map(lambda x: x.name, tags)
         except Exception, e: # FIXME
@@ -256,8 +266,8 @@ class RevisionCountHandler(BaseHandler):
                 except models.DoccodePluginMapping.DoesNotExist:
                     log.error('RevisionCountHandler.read DoccodePluginMapping.DoesNotExist exception raised')
                     raise
-                manager = DocumentManager()
-                rev_count = manager.get_revision_count(document, mapping)
+                operator = PluginsOperator()
+                rev_count = operator.get_revision_count(document, mapping)
                 if rev_count <= 0: # document without revisions is broken FIXME: In future this is ok!
                     log.info('RevisionCountHandler.read rev_count %s.' % str(rev_count))
                     raise Exception('No document revisions')
@@ -286,8 +296,7 @@ class RulesHandler(BaseHandler):
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
     @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def read(self, request):
-        manager = DocumentManager()
-        mappings = manager.get_plugin_mappings()
+        mappings = DoccodePluginMapping.objects.all()
         rules = list(map(lambda x: {
                             'doccode': x.get_docrule().get_title(),
                             'id': x.pk,
@@ -315,9 +324,9 @@ class RulesDetailHandler(BaseHandler):
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
     @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def read(self, request, id_rule):
-        manager = DocumentManager()
+        operator = PluginsOperator()
         try:
-            mapping = manager.get_plugin_mapping_by_kwargs(pk=id_rule)
+            mapping = operator.get_plugin_mapping_by_id(id_rule)
         except Exception, e: # FIXME
             log.error('RulesDetailHandler.read Exception %s' % e)
             if settings.DEBUG:
@@ -340,9 +349,9 @@ class PluginsHandler(BaseHandler):
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
     @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def read(self, request):
-        manager = DocumentManager()
+        operator = PluginsOperator()
         try:
-            plugin_list = manager.get_plugin_list()
+            plugin_list = operator.get_plugin_list()
         except Exception, e: # FIXME
             log.error('PluginsHandler.read Exception %s' % e)
             if settings.DEBUG:

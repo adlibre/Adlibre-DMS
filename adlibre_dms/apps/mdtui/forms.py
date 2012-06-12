@@ -13,7 +13,7 @@ http://djangosnippets.org/snippets/714/
 from django import forms
 import datetime
 
-from dms_plugins.models import DOCRULE_CHOICES
+from doc_codes.models import DocumentTypeRule
 from django.core.exceptions import ValidationError
 from forms_representator import setFormFields
 from forms_representator import setFormData
@@ -25,7 +25,7 @@ CUSTOM_ERRORS = {
 }
 
 class DocumentTypeSelectForm(forms.Form):
-    docrule = forms.ChoiceField(choices=DOCRULE_CHOICES, label="Document Type")
+    docrule = forms.ModelChoiceField(queryset=DocumentTypeRule.objects.all(), label="Document Type")
 
 class DocumentUploadForm(forms.Form):
     file = forms.FileField()

@@ -1,31 +1,34 @@
 """
-Module: DMS core Document Object
+Module: DMS Core system object.
+
 Project: Adlibre DMS
-Copyright: Adlibre Pty Ltd 2012
+Copyright: Adlibre Pty Ltd 2011
 License: See LICENSE for license information
+Author: Iurii Garmash
 """
 
-import datetime
+
 import os
 import magic
 import mimetypes
 import time
 import logging
 
-from django.conf import settings
 
+from django.conf import settings
 from dms_plugins.workers import DmsException
 from doc_codes.models import DocumentTypeRuleManagerInstance
 
-
-log = logging.getLogger('dms.document')
-
+log = logging.getLogger('core.document')
 
 class Document(object):
     """
     DMS core Document Object
 
-    A "Document Object" represents an instance of document-version within a doc type.
+    Basic internal building block.
+    Represents an instance of unique NAME.
+    All other DMS processing use it as a main building block.
+    However main interaction method of this document is DocumentManager()
 
     """
     def __init__(self):
@@ -65,6 +68,9 @@ class Document(object):
 
     def get_docrule(self):
         log.debug('get_docrule for %s.' % self.doccode)
+        # TODO: add checking doccode from Couch_DB or similar (when self.db_info data present). It usually contains it.
+        # we can economise 1-2 SQL Db calls this way.
+        # Better to implemnt through proxy for e.g.: self.get_docrule_from_db_info()
         if self.doccode is None and self.get_filename():
             self.doccode = DocumentTypeRuleManagerInstance.find_for_string(self.get_stripped_filename())
             if self.doccode is None:
@@ -211,26 +217,6 @@ class Document(object):
     def set_option(self, key, value):
         self.options[key] = value
 
-    def splitdir(self):
-        directory = None
-        doccode = self.get_docrule()
-        if doccode:
-#            saved_dir = self.get_option('parent_directory') or ''
-#            if saved_dir or doccode.no_doccode:
-#                doccode_dirs = doccode.split()
-#                doccode_dirs = map(lambda x: x.replace('{{DATE}}', datetime.datetime.now().strftime(settings.DATE_FORMAT)),
-#                                    doccode_dirs)
-#                if saved_dir:
-#                    doccode_dirs[-1] = saved_dir
-#                args = [str(doccode.get_id())] + doccode_dirs
-#                directory = os.path.join(*args)
-#            else:
-            splitdir = ''
-            for d in doccode.split(self.get_stripped_filename()):
-                splitdir = os.path.join(splitdir, d)
-            directory = os.path.join(str(doccode.get_id()), splitdir)
-        return directory
-
     def get_creation_time(self):
         metadata = self.get_current_metadata()
         if metadata:
@@ -274,3 +260,5 @@ class Document(object):
 
     def set_db_info(self, db_info):
         self.db_info = db_info
+
+

@@ -14,7 +14,7 @@ class CouchDocument(Document):
     metadata_doc_type_rule_id = StringProperty(default="")
     metadata_user_id = StringProperty(default="")
     metadata_user_name = StringProperty(default="")
-    metadata_created_date = DateTimeProperty(default=datetime.utcnow)
+    metadata_created_date = DateTimeProperty(default=datetime.utcnow()) # Should fix #731 Andrew check!
     metadata_description = StringProperty(default="")
     tags = ListProperty(default=[])
     mdt_indexes = DictProperty(default={})
@@ -33,7 +33,7 @@ class CouchDocument(Document):
         if document.get_stripped_filename():
             self.id = document.get_stripped_filename()
             self._doc['_id']=self.id
-        self.metadata_doc_type_rule_id = str(document.doccode.doccode_id)
+        self.metadata_doc_type_rule_id = str(document.doccode.pk)
         # user name/id from Django user
         self.metadata_user_id = str(request.user.pk)
         if request.user.first_name:
@@ -44,7 +44,7 @@ class CouchDocument(Document):
         # adding description if exists
         try:
             self.metadata_description = document.db_info["description"]
-        except:
+        except KeyError:
             self.metadata_description = ""
             pass
         self.tags = document.tags
