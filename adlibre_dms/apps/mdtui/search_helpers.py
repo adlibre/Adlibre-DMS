@@ -277,6 +277,7 @@ def check_for_secondary_keys_pairs(sec_keys_list, docrule_id):
     mdts = mdt_manager.get_mdts_for_docrule(docrule_id)
     pkeys = p_keys_manager.get_parallel_keys_for_mdts(mdts)
     # Getting Pkeys lists.
+    # TODO: query only parallel keys...
     for key in sec_keys_list.iterkeys():
         key_pkeys = p_keys_manager.get_parallel_keys_for_key(pkeys, key)
         pkeys_with_values = p_keys_manager.get_parallel_keys_for_pkeys(key_pkeys, sec_keys_list)
@@ -287,9 +288,6 @@ def check_for_secondary_keys_pairs(sec_keys_list, docrule_id):
             # Appending non existing keys into list to be checked.
             if not documents:
                 suspicious_keys_list[pkey] = pvalue
-
-    # TODO: continue this... to check for parallel keys of those pairs and not only new added new keys, like it is now...
-
     if suspicious_keys_list:
         log.debug('Found new unique key/values in secondary keys: ', suspicious_keys_list)
     else:
