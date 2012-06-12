@@ -14,6 +14,10 @@ from operator import itemgetter
 from dmscouch.models import CouchDocument
 from forms_representator import SEARCH_STRING_REPR
 
+from parallel_keys import ParallelKeysManager
+from mdt_manager import MetaDataTemplateManager
+from dmscouch.models import CouchDocument
+
 log = logging.getLogger('dms.mdtui.views')
 
 DATE_RANGE_CONSTANTS = {
@@ -249,3 +253,43 @@ def search_results_by_date(documents):
     newlist = sorted(documents, key=itemgetter('metadata_created_date'))
     return newlist
 
+def check_for_secondary_keys_pairs(sec_keys_list, docrule_id):
+    """Checks for parallel keys pairs if they already exist in Secondary Keys.
+
+    Scenario:
+    Existing Parallell key:
+        JOHN 1234
+    user enters
+        MIKE 1234
+    where MIKE already exists in combination with another numeric id we should still issue a warning.
+    EG. The combination of key values is new! (even though no new keys have been created)
+    """
+    # Init
+    suspicious_keys_list = {}
+    p_keys_manager = ParallelKeysManager()
+    mdt_manager = MetaDataTemplateManager()
+    keys_list = [key for key in sec_keys_list.iterkeys()]
+    # Cleaning from not secondary keys
+    for key in keys_list:
+        if key == 'date' or key == 'description':
+            del sec_keys_list[key]
+    # Getting list of parallel keys for this docrule.
+    mdts = mdt_manager.get_mdts_for_docrule(docrule_id)
+    pkeys = p_keys_manager.get_parallel_keys_for_mdts(mdts)
+    # Getting Pkeys lists.
+    # TODO: query only parallel keys...
+    for key in sec_keys_list.iterkeys():
+        key_pkeys = p_keys_manager.get_parallel_keys_for_key(pkeys, key)
+        pkeys_with_values = p_keys_manager.get_parallel_keys_for_pkeys(key_pkeys, sec_keys_list)
+        # Getting all keys for parallel key to check if it exists in any document metadata already.
+        for pkey, pvalue in pkeys_with_values:
+            documents = CouchDocument.view('dmscouch/search_autocomplete',
+                                            key=[docrule_id, pkey, pvalue])
+            # Appending non existing keys into list to be checked.
+            if not documents:
+                suspicious_keys_list[pkey] = pvalue
+    if suspicious_keys_list:
+        log.debug('Found new unique key/values in secondary keys: ', suspicious_keys_list)
+    else:
+        log.debug('Found NO new unique key/values in secondary keys')
+    return suspicious_keys_list
