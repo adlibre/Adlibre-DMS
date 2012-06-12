@@ -1,5 +1,6 @@
 """
 Module: Document import management script for Adlibre DMS
+
 Project: Adlibre DMS
 Copyright: Adlibre Pty Ltd 2011
 License: See LICENSE for license information
@@ -8,10 +9,10 @@ License: See LICENSE for license information
 import os
 import traceback
 
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand#, CommandError
 from django.contrib.auth.models import User
 
-from document_manager import DocumentManager
+from core.document_processor import DocumentProcessor
 
 class FakeRequest(object):
     def __init__(self):
@@ -33,7 +34,7 @@ class Command(BaseCommand):
                 self.stderr.write('Could not import %s: no such directory\n' % directory)
                 continue
             cnt = 0
-            manager = DocumentManager()
+            processor = DocumentProcessor()
             for root, dirs, files in os.walk(directory):
                 if '.svn' in dirs:
                     dirs.remove('.svn')  # don't visit svn directories
@@ -43,12 +44,12 @@ class Command(BaseCommand):
                     file_obj = open(os.path.join(root, fil))
                     file_obj.seek(0)
                     try:
-                        manager.store(FakeRequest(), file_obj)
+                        processor.create(FakeRequest(), file_obj)
                     except Exception:
                         self.stderr.write(traceback.format_exc() + "\n")
                     else:
-                        if manager.errors:
-                            self.stderr.write("\n".join(map(lambda x: x[0], manager.errors)) + "\n")
+                        if processor.errors:
+                            self.stderr.write("\n".join(map(lambda x: x[0], processor.errors)) + "\n")
                         else:
                             cnt += 1
                     file_obj.close()

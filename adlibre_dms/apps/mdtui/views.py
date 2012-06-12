@@ -16,7 +16,7 @@ from django.contrib.auth.decorators import login_required
 
 from dmscouch.models import CouchDocument
 from forms import DocumentTypeSelectForm, DocumentUploadForm, BarcodePrintedForm, DocumentSearchOptionsForm
-from document_manager import DocumentManager
+from core.document_processor import DocumentProcessor
 from doc_codes.models import DocumentTypeRule
 from view_helpers import initIndexesForm
 from view_helpers import processDocumentIndexForm
@@ -30,8 +30,8 @@ from search_helpers import document_date_range_only_search
 from search_helpers import document_date_range_with_keys_search
 from search_helpers import recognise_dates_in_search
 from search_helpers import document_date_range_present_in_keys
-from search_helpers import get_docrules_used_in_mdts
 from search_helpers import ranges_validator
+from search_helpers import search_results_by_date
 from forms_representator import get_mdts_for_docrule
 from parallel_keys import ParallelKeysManager
 from data_exporter import export_to_csv
@@ -42,11 +42,11 @@ from restkit.client import RequestError
 log = logging.getLogger('dms.mdtui.views')
 
 MDTUI_ERROR_STRINGS = {
-    1:'You have not selected the Document Type.',
-    2:'You have not entered Document Indexing Data. Document will not be searchable by indexes.',
-    3:'You have not defined Document Searching Options.',
-    4:'You have not defined Document Type. Can only search by "Creation Date".',
-    5:'Database Connection absent. Check CouchDB server connection.',
+    'NO_DOCRULE':'You have not selected the Document Type.',
+    'NO_INDEX':'You have not entered Document Indexing Data. Document will not be searchable by indexes.',
+    'NO_S_KEYS':'You have not defined Document Searching Options.',
+    'NO_TYPE':'You have not defined Document Type. Can only search by "Creation Date".',
+    'NO_DB':'Database Connection absent. Check CouchDB server connection.',
     'NO_DOCUMENTS_FOUND': 'Nothing to export because of empty documents results.'
 }
 
@@ -70,12 +70,12 @@ def search_type(request, step, template='mdtui/search.html'):
                 try:
                     mdts = get_mdts_for_docrule(docrule)
                 except RequestError:
-                    warnings.append(MDTUI_ERROR_STRINGS[5])
+                    warnings.append(MDTUI_ERROR_STRINGS['NO_DB'])
                 if mdts:
                     request.session['mdts'] = mdts
                     return HttpResponseRedirect(reverse('mdtui-search-options'))
             else:
-                warnings.append(MDTUI_ERROR_STRINGS[1])
+                warnings.append(MDTUI_ERROR_STRINGS['NO_DOCRULE'])
     else:
         form = DocumentTypeSelectForm()
         # Trying to set docrule if previously selected
@@ -104,7 +104,7 @@ def search_options(request, step, template='mdtui/search.html'):
     try:
         request.session['search_docrule_id']
     except KeyError:
-        warnings.append(MDTUI_ERROR_STRINGS[4])
+        warnings.append(MDTUI_ERROR_STRINGS['NO_TYPE'])
 
     # CouchDB connection Felt down warn user
     try:
@@ -112,14 +112,14 @@ def search_options(request, step, template='mdtui/search.html'):
         autocomplete_list = extract_secondary_keys_from_form(form)
     except (RequestError,AttributeError) :
         form = DocumentSearchOptionsForm
-        warnings.append(MDTUI_ERROR_STRINGS[5])
+        warnings.append(MDTUI_ERROR_STRINGS['NO_DB'])
 
     if request.POST:
         try:
             secondary_indexes = processDocumentIndexForm(request)
         except RequestError:
             secondary_indexes = None
-            warnings.append(MDTUI_ERROR_STRINGS[5])
+            warnings.append(MDTUI_ERROR_STRINGS['NO_DB'])
 
         if secondary_indexes:
             request.session['document_search_dict'] = secondary_indexes
@@ -148,7 +148,7 @@ def search_results(request, step=None, template='mdtui/search.html'):
         document_keys = request.session['document_search_dict']
         docrule_id = request.session['search_docrule_id']
     except KeyError:
-        warnings.append(MDTUI_ERROR_STRINGS[3])
+        warnings.append(MDTUI_ERROR_STRINGS['NO_S_KEYS'])
     log.debug('search_results call: docrule_id: "%s", document_search_dict: "%s"' % (docrule_id, document_keys))
     if document_keys:
         # turning document_search dict into something useful for the couch request
@@ -165,7 +165,8 @@ def search_results(request, step=None, template='mdtui/search.html'):
             documents = document_date_range_with_keys_search(cleaned_document_keys, docrule_id)
 
         mdts_list = get_mdts_for_documents(documents)
-
+    if documents:
+        documents = search_results_by_date(documents)
     # Produces a CSV file from search results
     if documents and step == 'export':
         log.debug('search_results exporting found documents to CSV')
@@ -253,7 +254,7 @@ def indexing_details(request, step=None, template='mdtui/indexing.html'):
     try:
         docrule_id = request.session['indexing_docrule_id']
     except KeyError:
-        warnings.append(MDTUI_ERROR_STRINGS[1])
+        warnings.append(MDTUI_ERROR_STRINGS['NO_DOCRULE'])
 
     try:
         document_keys = request.session["document_keys_dict"]
@@ -265,7 +266,7 @@ def indexing_details(request, step=None, template='mdtui/indexing.html'):
         if secondary_indexes:
                 request.session["document_keys_dict"] = secondary_indexes
                 # Success, allocate barcode
-                dtr = DocumentTypeRule.objects.get(doccode_id=docrule_id)
+                dtr = DocumentTypeRule.objects.get(pk=docrule_id)
                 request.session["barcode"] = dtr.allocate_barcode()
                 return HttpResponseRedirect(reverse('mdtui-index-source'))
         else:
@@ -301,22 +302,22 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
     try:
         document_keys = request.session["document_keys_dict"]
     except KeyError:
-        warnings.append(MDTUI_ERROR_STRINGS[2])
+        warnings.append(MDTUI_ERROR_STRINGS['NO_INDEX'])
 
     try:
         barcode = request.session['barcode']
     except KeyError:
-        warnings.append(MDTUI_ERROR_STRINGS[2])
+        warnings.append(MDTUI_ERROR_STRINGS['NO_INDEX'])
 
     try:
         index_info = request.session["document_keys_dict"]
     except KeyError:
-        warnings.append(MDTUI_ERROR_STRINGS[3])
+        warnings.append(MDTUI_ERROR_STRINGS['NO_S_KEYS'])
 
     try:
         docrule = request.session['indexing_docrule_id']
     except KeyError:
-        warnings.append(MDTUI_ERROR_STRINGS[1])
+        warnings.append(MDTUI_ERROR_STRINGS['NO_DOCRULE'])
 
     # Init Forms correctly depending on url posted
     if request.GET.get('uploaded') is None:
@@ -338,14 +339,14 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
                 import os
                 upload_file = open(os.path.join(os.path.split(__file__)[0], 'stub_document.pdf'), 'rb')
 
-            manager = DocumentManager()
-            manager.store(request, upload_file, index_info=index_info, barcode=barcode)
+            processor = DocumentProcessor()
+            processor.create(request, upload_file, index_info=index_info, barcode=barcode)
 
-            if not manager.errors:
+            if not processor.errors:
                 return HttpResponseRedirect(reverse('mdtui-index-finished'))
             else:
                 # FIXME: dodgy error handling
-                return HttpResponse(str(manager.errors))
+                return HttpResponse(str(processor.errors))
 
     context.update( { 'step': step,
                       'upload_form': upload_form,
@@ -397,7 +398,7 @@ def mdt_parallel_keys(request):
     autocomplete_req = None
     docrule_id = None
     key_name = None
-    mdts={}
+    doc_mdts={}
     resp = []
     # Trying to get docrule for indexing calls
     try:
@@ -414,58 +415,82 @@ def mdt_parallel_keys(request):
 
     try:
         key_name = request.POST[u'key_name']
-        autocomplete_req = request.POST[u'autocomplete_search']
+        # .strip() Fixes bug with space symbol returns ANY results. issue #749
+        autocomplete_req = request.POST[u'autocomplete_search'].strip(' \t\n\r')
     except KeyError:
         valid_call = False
 
+    if not autocomplete_req:
+        valid_call = False
+
     try:
-        mdts = request.session["mdts"]
+        doc_mdts = request.session["mdts"]
     except KeyError:
         pass
 
     log.debug(
         'mdt_parallel_keys call: docrule_id: "%s", key_name: "%s", autocomplete: "%s" Call is valid: "%s", MDTS: %s' %
-        (docrule_id, key_name, autocomplete_req, valid_call, mdts)
+        (docrule_id, key_name, autocomplete_req, valid_call, doc_mdts)
     )
+    # TODO: Can be optimised for huge document's amounts in future (Step: Scalability testing)
+    """
+    # We can collect all the documents keys for each docrule in MDT related to requested field and load them into queue.
+    # Then check them for duplicated values and/or make a big index with all the document's keys in it
+    # to fetch only document indexes we need on first request. (Instead of 'include_docs=True')
+    # E.g. Make autocomplete Couch View to output index with all Document's mdt_indexes ONLY.
+    #
+    # Total amount of requests will be 3 instead of 2 (for 2 docrules <> 1 MDT) but they will be smaller.
+    # And that will be good for say 1 000 000 documents. However, DB size will rise too.
+    # (Because we will copy all the doc's indexes into separate specific response for Typehead in fact)
+    # Final step is to load all unique suggestion documents that are passed through our filters.
+    # (Or if we will build this special index it won't be necessary)
+    # (Only if we require parallel keys to be parsed)
+    # It can be done by specifying multiple keys that we need to load here. ('key' ws 'keys' *args in CouchDB request)
+    """
     if valid_call:
         manager = ParallelKeysManager()
-        allowed_docrules = get_docrules_used_in_mdts(mdts)
-        mdts = manager.get_keys_for_docrule(docrule_id, mdts)
-        pkeys = manager.get_parallel_keys_for_key(mdts, key_name)
-        # db call to search in docs
-        if pkeys:
-            # Suggestion for several parallel keys
-            documents = CouchDocument.view(
-                'dmscouch/search_autocomplete', # Name of couch view "couchapps/dmscouch/_design/views/search_autocomplete"
-                startkey=[key_name, autocomplete_req],
-                endkey=[key_name, unicode(autocomplete_req)+u'\ufff0' ], # http://wiki.apache.org/couchdb/HTTP_view_API
-                include_docs=True # TODO: think about optimising this call (E.G. response with 10000 docs = 1MB request)
-                                  # Maybe!!! add 1 more db view call to get docs with unique those secondary keys pairs...
-            )
-            # Adding each selected value to suggestions list
-            for doc in documents:
-                resp_array = {}
-                if pkeys:
-                    for pkey in pkeys:
-                        resp_array[pkey['field_name']] = doc.mdt_indexes[pkey['field_name']]
-                suggestion = json.dumps(resp_array)
-                # filtering from existing results
-                if not suggestion in resp and doc.metadata_doc_type_rule_id in allowed_docrules:
-                    resp.append(suggestion)
-        else:
-            # Simple 'single' key suggestion
-            documents = CouchDocument.view(
-                'dmscouch/search_autocomplete',
-                startkey=[key_name, autocomplete_req],
-                endkey=[key_name, unicode(autocomplete_req)+u'\ufff0' ],
-                include_docs=True # TODO: change indexes not to load the full document but required fields (MAYBE)
-            )
-            # Fetching unique responses to suggestion set
-            for doc in documents:
-                resp_array = {key_name: doc.mdt_indexes[key_name]}
-                suggestion = json.dumps(resp_array)
-                if not suggestion in resp and doc.metadata_doc_type_rule_id in allowed_docrules:
-                    resp.append(suggestion)
+        for mdt in doc_mdts.itervalues():
+            mdt_keys =[mdt[u'fields'][mdt_key][u'field_name'] for mdt_key in mdt[u'fields']]
+            log.debug('mdt_parallel_keys selected for suggestion MDT-s keys: %s' % mdt_keys)
+            if key_name in mdt_keys:
+                # Autocomplete key belongs to this MDT
+                mdt_docrules = mdt[u'docrule_id']
+                mdt_fields = manager.get_keys_for_docrule(docrule_id, doc_mdts)
+                pkeys = manager.get_parallel_keys_for_key(mdt_fields, key_name)
+                for docrule in mdt_docrules:
+                    # db call to search in docs
+                    if pkeys:
+                        # Suggestion for several parallel keys
+                        documents = CouchDocument.view(
+                            'dmscouch/search_autocomplete',
+                            startkey=[docrule, key_name, autocomplete_req],
+                            endkey=[docrule, key_name, unicode(autocomplete_req)+u'\ufff0'],
+                            include_docs=True,
+                        )
+                        # Adding each selected value to suggestions list
+                        for doc in documents:
+                            resp_array = {}
+                            if pkeys:
+                                for pkey in pkeys:
+                                    resp_array[pkey['field_name']] = doc.mdt_indexes[pkey['field_name']]
+                            suggestion = json.dumps(resp_array)
+                            # filtering from existing results
+                            if not suggestion in resp:
+                                resp.append(suggestion)
+                    else:
+                        # Simple 'single' key suggestion
+                        documents = CouchDocument.view(
+                            'dmscouch/search_autocomplete',
+                            startkey=[docrule, key_name, autocomplete_req],
+                            endkey=[docrule, key_name, unicode(autocomplete_req)+u'\ufff0' ],
+                            include_docs=True
+                        )
+                        # Fetching unique responses to suggestion set
+                        for doc in documents:
+                            resp_array = {key_name: doc.mdt_indexes[key_name]}
+                            suggestion = json.dumps(resp_array)
+                            if not suggestion in resp:
+                                resp.append(suggestion)
     log.debug('mdt_parallel_keys response: %s' % resp)
     return HttpResponse(json.dumps(resp))
 

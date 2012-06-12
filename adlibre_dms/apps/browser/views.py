@@ -1,38 +1,33 @@
 """
 Module: DMS Browser Django Views
+
 Project: Adlibre DMS
 Copyright: Adlibre Pty Ltd 2011
 License: See LICENSE for license information
 """
 
-import os
+import logging
 
 from djangoplugins import models as plugin_models
 from djangoplugins.models import Plugin
 
-from django.http import HttpResponse, HttpResponseRedirect, Http404
+from django.http import HttpResponse, HttpResponseRedirect
 from django.views.generic.simple import direct_to_template
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
 from django.template import RequestContext, loader
 
 from dms_plugins import models, forms, representator
-from document_manager import DocumentManager
+from dms_plugins.operator import PluginsOperator
+from core.document_processor import DocumentProcessor
 from browser.forms import UploadForm
+from core.http import DocumentResponse
 
-
-def handlerError(request, httpcode, message):
-    t = loader.get_template(str(httpcode)+'_custom.html')
-    context = RequestContext(
-        request, {'request_path': request.path,
-                  'message': message, }
-        )
-    response = HttpResponse(t.render(context))
-    response.status_code = httpcode
-    return response
+# FIXME: temporary logger
+#log = logging.getLogger('browser')
+log = logging.getLogger('')
 
 def index(request):
     return direct_to_template(request, 'browser/index.html')
@@ -45,19 +40,24 @@ def index(request):
 # I don't think we want to necessarily use the django admin login.
 def upload(request, template_name='browser/upload.html', extra_context={}):
     """
-    Upload file processing. Uploaded file will be check against available rules to
+    Upload file processing.
+
+    Uploaded file will be check against available rules to
     determine storage, validator, and security plugins.
     """
 
     form = UploadForm(request.POST or None, request.FILES or None)
     if request.method == 'POST':
         if form.is_valid():
-            manager = DocumentManager()
-            manager.store(request, form.files['file'])
-            if not manager.errors:
+            processor = DocumentProcessor()
+            processor.create(request, form.files['file'])
+            if not processor.errors:
                 messages.success(request, 'File has been uploaded.')
+                log.info('browser.upload file: %s sucess' % form.files['file'].name)
             else:
-                messages.error(request, "; ".join(map(lambda x: x[0], manager.errors)))
+                error_string = "; ".join([unicode(x) for x in processor.errors])
+                messages.error(request, error_string)
+                log.error('browser.upload errror: %s' % error_string)
 
     extra_context['form'] = form
     return direct_to_template(request,
@@ -72,20 +72,20 @@ def error_response(errors):
 
 def get_file(request, code, suggested_format=None):
     hashcode = request.GET.get('hashcode', None) # Refactor me out
-    manager = DocumentManager()
-    mimetype, filename, content = manager.get_file(request, code, hashcode, suggested_format)
-    if manager.errors:
-        return error_response(manager.errors)
-    response = HttpResponse(content, mimetype = mimetype)
-    response["Content-Length"] = len(content)
-    response['Content-Disposition'] = 'filename=%s' % filename
+    processor = DocumentProcessor()
+    document = processor.read(request, code, hashcode=hashcode, extension=suggested_format,)
+    #mimetype, filename, content = manager.get_file(request, code, hashcode, suggested_format)
+    if processor.errors:
+        response = error_response(processor.errors)
+    else:
+        response = DocumentResponse(document)
     return response
 
 @staff_member_required
 def revision_document(request, document):
     document_name = document
-    manager = DocumentManager()
-    document = manager.retrieve(request, document_name, only_metadata=True)
+    processor = DocumentProcessor()
+    document = processor.read(request, document_name, only_metadata=True)
     extra_context = {}
     metadata = document.get_metadata()
     def get_args(fileinfo):
@@ -97,7 +97,7 @@ def revision_document(request, document):
         if args:
             arg_string = "?" + "&".join(args)
         return arg_string
-    if not manager.errors:
+    if not processor.errors:
         if metadata:
             revisions = map(lambda x: int(x), metadata.keys())
             revisions.sort()
@@ -122,10 +122,10 @@ def revision_document(request, document):
                 'document_name': document.get_filename(),
             }
     else:
-        t = manager.errors
-        messages.error(request, "; ".join(map(lambda x: x.parameter, manager.errors)))
-    if manager.warnings:
-        messages.warning(request, "; ".join(manager.warnings))
+        t = processor.errors
+        messages.error(request, "; ".join(map(lambda x: x.parameter, processor.errors)))
+    if processor.warnings:
+        messages.warning(request, "; ".join(processor.warnings))
     return direct_to_template(request, 'browser/revision.html',
             extra_context=extra_context)
 
@@ -139,8 +139,8 @@ def files_index(request):
 @staff_member_required
 def files_document(request, id_rule):
     mapping = get_object_or_404(models.DoccodePluginMapping, pk = id_rule)
-    manager = DocumentManager()
-    file_list = manager.get_file_list(mapping)
+    operator = PluginsOperator()
+    file_list = operator.get_file_list(mapping)
     extra_context = {
         'mapping': mapping,
         'document_list': file_list,
@@ -155,8 +155,8 @@ def plugins(request, template_name='browser/plugins.html',
     """
     List of available plugins
     """
-    manager = DocumentManager()
-    plugins = manager.get_plugin_list()
+    operator = PluginsOperator()
+    plugins = operator.get_plugin_list()
     extra_context['plugin_list'] = plugins
 
     return direct_to_template(request, template_name, extra_context=extra_context)

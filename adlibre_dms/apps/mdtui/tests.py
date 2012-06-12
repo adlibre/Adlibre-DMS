@@ -20,8 +20,8 @@ password = 'admin'
 couchdb_url = 'http://127.0.0.1:5984'
 
 test_mdt_docrule_id = 2 # should be properly assigned to fixtures docrule that uses CouchDB plugins
-test_mdt_docrule_id2 = 6 # should be properly assigned to fixtures docrule that uses CouchDB plugins
-test_mdt_docrule_id3 = 7 # should be properly assigned to fixtures docrule that uses CouchDB plugins
+test_mdt_docrule_id2 = 7 # should be properly assigned to fixtures docrule that uses CouchDB plugins
+test_mdt_docrule_id3 = 8 # should be properly assigned to fixtures docrule that uses CouchDB plugins
 
 indexes_form_match_pattern = '(Employee ID|Employee Name|Friends ID|Friends Name|Required Date|Reporting Entity|Report Date|Report Type).+?name=\"(\d+|\d+_from|\d+_to)\"'
 
@@ -116,19 +116,19 @@ mdt4 = {
     "parallel": {}
 }
 
-#mdt5 = {
-#    "_id": "mdt5",
-#    "description": "Test MDT Number 5",
-#    "docrule_id": [str(test_mdt_docrule_id3), str(test_mdt_docrule_id2)],
-#    "fields": {
-#        "1": {
-#            "field_name": "Employee",
-#            "description": "testing 1 mdt to 2 docrules",
-#            "type": "string"
-#        }
-#    },
-#    "parallel": {}
-#}
+mdt5 = {
+    "_id": "mdt5",
+    "description": "Test MDT Number 5",
+    "docrule_id": [str(test_mdt_docrule_id3), str(test_mdt_docrule_id2)],
+    "fields": {
+        "1": {
+            "field_name": "Employee",
+            "description": "testing 1 mdt to 2 docrules",
+            "type": "string"
+        }
+    },
+    "parallel": {}
+}
 
 # Static dictionary of documents to be indexed for mdt1 and mdt2
 doc1_dict = {
@@ -255,45 +255,24 @@ class MDTUI(TestCase):
         # We are using only logged in client in this test
         self.client.login(username=username, password=password)
 
-    def test_00_setup_mdt1(self):
+    def test_00_setup_mdts(self):
         """
-        Setup MDT 1 for the test suite. Made like standalone test because we need it to be run only once
-        """
-        # adding our MDT's required through API. (MDT API should be working)
-        mdt = json.dumps(mdt1)
-        url = reverse('api_mdt')
-        response = self.client.post(url, {"mdt": mdt})
-        self.assertEqual(response.status_code, 200)
-
-    def test_00_setup_mdt2(self):
-        """
-        Setup MDT 2 for the test suite. Made like standalone test because we need it to be run only once
+        Setup all MDTs for the test suite.
+        Made it standalone test because we need it to be run only once
         """
         # adding our MDT's required through API. (MDT API should be working)
-        mdt = json.dumps(mdt2)
         url = reverse('api_mdt')
-        response = self.client.post(url, {"mdt": mdt})
-        self.assertEqual(response.status_code, 200)
-
-    def test_00_setup_mdt3(self):
-        """
-        Setup MDT 3 for the test suite. Made like standalone test because we need it to be run only once
-        """
-        # adding our MDT's required through API. (MDT API should be working)
-        mdt = json.dumps(mdt3)
-        url = reverse('api_mdt')
-        response = self.client.post(url, {"mdt": mdt})
-        self.assertEqual(response.status_code, 200)
-
-    def test_00_setup_mdt4(self):
-        """
-        Setup MDT 4 for the test suite. Made like standalone test because we need it to be run only once
-        """
-        # adding our MDT's required through API. (MDT API should be working)
-        mdt = json.dumps(mdt4)
-        url = reverse('api_mdt')
-        response = self.client.post(url, {"mdt": mdt})
-        self.assertEqual(response.status_code, 200)
+        # List formatted so to comment out any MDT easily
+        for m in [
+                    mdt1,
+                    mdt2,
+                    mdt3,
+                    mdt4,
+                    mdt5
+                 ]:
+            mdt = json.dumps(m)
+            response = self.client.post(url, {"mdt": mdt})
+            self.assertEqual(response.status_code, 200)
 
     def test_01_opens_app(self):
         """
@@ -1500,6 +1479,7 @@ class MDTUI(TestCase):
     def test_z_cleanup(self):
         """
         Cleaning up after all tests finished.
+
         Must be ran after all tests in this test suite.
         """
         # Deleting all test MDT's

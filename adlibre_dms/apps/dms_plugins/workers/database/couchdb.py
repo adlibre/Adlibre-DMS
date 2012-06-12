@@ -7,11 +7,12 @@ Author: Iurii Garmash
 """
 
 from dms_plugins.pluginpoints import BeforeRetrievalPluginPoint, BeforeRemovalPluginPoint, DatabaseStoragePluginPoint
-from dms_plugins.models import Document as DocTags #TODO: needs refactoring of name
-from dms_plugins.workers import Plugin, PluginError, BreakPluginChain
-from document_manager import DocumentManager
+from dms_plugins.models import DocTags
+from dms_plugins.workers import Plugin
+from core.document_processor import DocumentProcessor
 from dmscouch.models import CouchDocument
-import os
+
+from couchdbkit.resource import ResourceNotFound
 
 class CouchDBMetadata(object):
     """
@@ -20,13 +21,19 @@ class CouchDBMetadata(object):
     """
 
     def store(self, request, document):
+        """
+        Stores CouchDB object into DB.
+
+        (Updates or overwrites CouchDB document)
+        """
         docrule = document.get_docrule()
         # doing nothing for no doccode documents
         if docrule.no_doccode:
             return document
         else:
-            manager = DocumentManager()
-            mapping = manager.get_plugin_mapping(document)
+            processor = DocumentProcessor()
+            # FIXME: there might be more than one mapping
+            mapping = docrule.get_docrule_plugin_mappings()
             # doing nothing for documents without mapping has DB plugins
             if not mapping.get_database_storage_plugins():
                 return document
@@ -35,20 +42,47 @@ class CouchDBMetadata(object):
                 if not document.metadata:
                     # HACK: Preserving db_info here... (May be Solution!!!)
                     db_info = document.get_db_info()
-                    document = manager.retrieve(request, document.file_name, only_metadata=True)
-                    document.set_db_info(db_info)
+                    document = processor.read(request, document.file_name, only_metadata=True)
+
+                    # HACK: saving NEW metadata ONLY if they exist in new uploaded doc (Preserving old indexes)'
+                    if db_info:
+                        # Storing new indexes
+                        document.set_db_info(db_info)
+                    else:
+                        # TODO: move this code into a proper place (UPDATE method)
+                        # Asking couchdb about if old metadata exists and updating them properly
+                        current_revisions = document.metadata
+                        try:
+                            # Only if document exists in DB. Falling gracefully if not.
+                            temp_doc = self.retrieve(request, document)
+                            old_metadata = temp_doc.get_db_info()
+                            if old_metadata['mdt_indexes']:
+                                # Preserving Description
+                                old_metadata['mdt_indexes']['description'] = old_metadata['description']
+                                document.set_db_info(old_metadata['mdt_indexes'])
+                                document.set_metadata(current_revisions)
+                        except ResourceNotFound:
+                            pass
                 # updating tags to sync with Django DB
                 self.sync_document_tags(document)
-                # assuming no document with this _id exists. SAVING
+                # assuming no document with this _id exists. SAVING. HACK: or overwriting existing
                 couchdoc=CouchDocument()
+
                 couchdoc.populate_from_dms(request, document)
                 couchdoc.save(force_update=True)
-                #print "Storing Document into DB", document
                 return document
+
+    def update_documents_metadata(self, request, document):
+        # TODO: implement this (Decouple from store method)
+        # TODO: handle dates properly. e.g. Creation date left as is.
+        # TODO: add updated date and handle it in DMS in another manner.
+        pass
 
     def update_metadata_after_removal(self, request, document):
         """
-        Updates document CouchDB metadata on removal. (Removes CouchDB document)
+        Updates document CouchDB metadata on removal.
+
+        (Removes CouchDB document)
         """
         if not document.get_file_obj():
             #doc is fully deleted from fs
@@ -56,14 +90,12 @@ class CouchDBMetadata(object):
             couchdoc = CouchDocument.get(docid=stripped_filename)
             couchdoc.delete()
         return document
-        #print "Deleted Document in DB", document
 
     def retrieve(self, request, document):
-
-        manager = DocumentManager()
-        mapping = manager.get_plugin_mapping(document)
-        # doing nothing for no doccode documents
-        # doing nothing for documents without mapping has DB plugins
+        docrule = document.get_docrule()
+        mapping = docrule.get_docrule_plugin_mappings()
+        # No actions for no doccode documents
+        # No actions for documents without 'mapping has DB plugins'
         if document.get_docrule().no_doccode:
             return document
         else:
@@ -73,7 +105,6 @@ class CouchDBMetadata(object):
                 doc_name = document.get_stripped_filename()
                 couchdoc = CouchDocument.get(docid=doc_name)
                 document = couchdoc.populate_into_dms(request, document)
-                #print "Populating Document from DB", document
                 return document
 
     """

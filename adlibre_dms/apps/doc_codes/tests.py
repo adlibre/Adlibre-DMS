@@ -1,5 +1,6 @@
 """
 Module: Document Type Rules Model Unit Tests
+
 Project: Adlibre DMS
 Copyright: Adlibre Pty Ltd 2012
 License: See LICENSE for license information
@@ -13,7 +14,7 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 
 from doc_codes.models import DocumentTypeRule
-from document import Document
+from core.models import Document
 
 
 # DocCodeModelTest Test Data
@@ -26,7 +27,9 @@ generated_barcodes = (
     (3, False),
     (4, False),
     (5, False),
-    (1000, False),
+    (6, False),
+    (7, 'BBB-1001'),
+    (8, 'CCC-1001'),
 )
 
 
@@ -46,8 +49,8 @@ class DocCodeModelTest(TestCase):
     def test_generate_document_barcode(self):
         "This is a test for barcode generation."
 
-        for doccode_id, result in generated_barcodes:
-            obj = DocumentTypeRule.objects.get(doccode_id=doccode_id)
+        for docrule_id, result in generated_barcodes:
+            obj = DocumentTypeRule.objects.get(pk=docrule_id)
             obj.set_last_document_number(1000)
             self.assertEquals(obj.allocate_barcode(), result)
             self.assertEquals(obj.get_last_document_number(), 1001)
