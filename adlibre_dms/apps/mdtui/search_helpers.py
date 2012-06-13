@@ -277,17 +277,20 @@ def check_for_secondary_keys_pairs(sec_keys_list, docrule_id):
     mdts = mdt_manager.get_mdts_for_docrule(docrule_id)
     pkeys = p_keys_manager.get_parallel_keys_for_mdts(mdts)
     # Getting Pkeys lists.
-    # TODO: query only parallel keys...
+    checked_keys = []
     for key in sec_keys_list.iterkeys():
         key_pkeys = p_keys_manager.get_parallel_keys_for_key(pkeys, key)
         pkeys_with_values = p_keys_manager.get_parallel_keys_for_pkeys(key_pkeys, sec_keys_list)
-        # Getting all keys for parallel key to check if it exists in any document metadata already.
-        for pkey, pvalue in pkeys_with_values:
-            documents = CouchDocument.view('dmscouch/search_autocomplete',
-                                            key=[docrule_id, pkey, pvalue])
-            # Appending non existing keys into list to be checked.
-            if not documents:
-                suspicious_keys_list[pkey] = pvalue
+        # Checking if this parallel keys group already was checked.
+        if not pkeys_with_values in checked_keys:
+            checked_keys.append(pkeys_with_values)
+            # Getting all keys for parallel key to check if it exists in any document metadata already.
+            for pkey, pvalue in pkeys_with_values:
+                documents = CouchDocument.view('dmscouch/search_autocomplete',
+                                                key=[docrule_id, pkey, pvalue])
+                # Appending non existing keys into list to be checked.
+                if not documents:
+                    suspicious_keys_list[pkey] = pvalue
     if suspicious_keys_list:
         log.debug('Found new unique key/values in secondary keys: ', suspicious_keys_list)
     else:
