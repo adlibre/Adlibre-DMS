@@ -253,7 +253,7 @@ def search_results_by_date(documents):
     newlist = sorted(documents, key=itemgetter('metadata_created_date'))
     return newlist
 
-def check_for_secondary_keys_pairs(sec_keys_list, docrule_id):
+def check_for_secondary_keys_pairs(input_keys_list, docrule_id):
     """Checks for parallel keys pairs if they already exist in Secondary Keys.
 
     Scenario:
@@ -264,7 +264,10 @@ def check_for_secondary_keys_pairs(sec_keys_list, docrule_id):
     where MIKE already exists in combination with another numeric id we should still issue a warning.
     EG. The combination of key values is new! (even though no new keys have been created)
     """
-    # Init
+    # Copying dictionary data and operating with them in function
+    sec_keys_list = {}
+    for key in input_keys_list.iterkeys():
+        sec_keys_list[key] = input_keys_list[key]
     suspicious_keys_list = {}
     p_keys_manager = ParallelKeysManager()
     mdt_manager = MetaDataTemplateManager()
