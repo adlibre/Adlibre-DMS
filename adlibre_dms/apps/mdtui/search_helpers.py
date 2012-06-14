@@ -266,9 +266,11 @@ def check_for_secondary_keys_pairs(input_keys_list, docrule_id):
     """
     # Copying dictionary data and operating with them in function
     sec_keys_list = {}
-    for key in input_keys_list.iterkeys():
-        sec_keys_list[key] = input_keys_list[key]
     suspicious_keys_list = {}
+    if input_keys_list:
+        for key in input_keys_list.iterkeys():
+            sec_keys_list[key] = input_keys_list[key]
+        suspicious_keys_list = {}
     p_keys_manager = ParallelKeysManager()
     mdt_manager = MetaDataTemplateManager()
     keys_list = [key for key in sec_keys_list.iterkeys()]

@@ -324,22 +324,21 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
             warnings.append(MDTUI_ERROR_STRINGS['NEW_KEY_VALUE_PAIR'] + new_key + ': ' + new_value)
 
     if upload_form.is_valid() or barcode_form.is_valid():
-        if not warnings:
-            if upload_form.is_valid():
-                upload_file = upload_form.files['file']
-            else:
-                # HACK: upload a stub document as our first revision
-                import os
-                upload_file = open(os.path.join(os.path.split(__file__)[0], 'stub_document.pdf'), 'rb')
+        if upload_form.is_valid():
+            upload_file = upload_form.files['file']
+        else:
+            # HACK: upload a stub document as our first revision
+            import os
+            upload_file = open(os.path.join(os.path.split(__file__)[0], 'stub_document.pdf'), 'rb')
 
-            processor = DocumentProcessor()
-            processor.create(request, upload_file, index_info=index_info, barcode=barcode)
+        processor = DocumentProcessor()
+        processor.create(request, upload_file, index_info=index_info, barcode=barcode)
 
-            if not processor.errors:
-                return HttpResponseRedirect(reverse('mdtui-index-finished'))
-            else:
-                # FIXME: dodgy error handling
-                return HttpResponse(str(processor.errors))
+        if not processor.errors:
+            return HttpResponseRedirect(reverse('mdtui-index-finished'))
+        else:
+            # FIXME: dodgy error handling
+            return HttpResponse(str(processor.errors))
 
     context.update( { 'step': step,
                       'upload_form': upload_form,
