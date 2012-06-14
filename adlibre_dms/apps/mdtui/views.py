@@ -377,7 +377,6 @@ def indexing_finished(request, step=None, template='mdtui/indexing.html'):
     cleanup_mdts(request)
     return render(request, template, context)
 
-
 @login_required
 def mdt_parallel_keys(request):
     """
@@ -401,6 +400,9 @@ def mdt_parallel_keys(request):
     try:
         if not docrule_id:
             docrule_id = request.session['search_docrule_id']
+        # No docrule present in session. Invalidating view call.
+        if not docrule_id:
+            valid_call = False
     except KeyError:
         pass
 
@@ -411,13 +413,14 @@ def mdt_parallel_keys(request):
     except KeyError:
         valid_call = False
 
-    if not autocomplete_req:
-        valid_call = False
-
     try:
         doc_mdts = request.session["mdts"]
     except KeyError:
         pass
+
+    # Nothing queried for autocomplete and no MDTS found. Invalidating call
+    if not autocomplete_req or not doc_mdts:
+        valid_call = False
 
     log.debug(
         'mdt_parallel_keys call: docrule_id: "%s", key_name: "%s", autocomplete: "%s" Call is valid: "%s", MDTS: %s' %
