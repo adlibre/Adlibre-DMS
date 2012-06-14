@@ -161,6 +161,19 @@ doc3_dict = {
     'Friends Name': 'Someone',
 }
 
+# Static dictionary of document #1 to test WARNING of creating new index fields
+doc1_creates_warnigs_dict = {
+    'date': '2012-03-06',
+    'description': 'Test Document Number N',
+    'Employee ID': '1234567',
+    'Required Date': '2012-03-07',
+    'Employee Name': 'Iurii Garmash',
+    'Friends ID': '123',
+    'Friends Name': 'Andrew',
+}
+
+doc1_creates_warnigs_string = 'Adding new indexing key: Employee ID: 1234567'
+
 # Static dictionary of documents to be indexed for mdt3
 m2_doc1_dict = {
     'date': '2012-04-01',
@@ -1475,6 +1488,28 @@ class MDTUI(TestCase):
 
         self.assertContains(response, 'BBB-0001')
         self.assertContains(response, 'BBB-0002')
+
+    def test_43_warns_about_new_parallel_key(self):
+        """
+        Warns about new parallel keys created
+        """
+        # Selecting Document Type Rule
+        url = reverse('mdtui-index-type')
+        response = self.client.post(url, {'docrule': test_mdt_docrule_id})
+        self.assertEqual(response.status_code, 302)
+        # Getting indexes form and matching form Indexing Form fields names
+        url = reverse('mdtui-index-details')
+        response = self.client.get(url)
+        rows_dict = self._read_indexes_form(response)
+        post_dict = self._convert_doc_to_post_dict(rows_dict, doc1_creates_warnigs_dict)
+        # Adding Document Indexes
+        response = self.client.post(url, post_dict)
+        self.assertEqual(response.status_code, 302)
+        url = reverse('mdtui-index-source')
+        response = self.client.get(url)
+        self.assertContains(response, 'Friends ID: 123')
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, doc1_creates_warnigs_string)
 
     def test_z_cleanup(self):
         """
