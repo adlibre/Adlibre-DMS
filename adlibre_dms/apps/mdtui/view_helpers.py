@@ -7,6 +7,9 @@ License: See LICENSE for license information
 Author: Iurii Garmash
 """
 
+import datetime
+from django.conf import settings
+
 from forms import DocumentIndexForm
 from forms import DocumentSearchOptionsForm
 from forms_representator import render_fields_from_docrules

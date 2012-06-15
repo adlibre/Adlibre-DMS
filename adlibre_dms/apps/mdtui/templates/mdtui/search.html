@@ -106,7 +106,7 @@
             {% for doc in documents %}
                 <tr>
                     <td class="nw"><a href="{% url mdtui-view-pdf doc.id %}" title="{% trans 'View Document' %}" target="_blank"><i class="icon-download"></i> {{ doc.id }}</a></td>
-                    <td class="nw">{{ doc.metadata_created_date|date:"Y-m-d" }}</td>
+                    <td class="nw">{{ doc.metadata_created_date|date:DATE_FORMAT }}</td>
                     {% for key in mdts %}
                     <td>{% get_sec_key_for_doc doc.mdt_indexes key %}</td>
                     {% endfor %}

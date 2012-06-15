@@ -9,6 +9,8 @@ Author: Iurii Garmash
 from datetime import datetime
 from couchdbkit.ext.django.schema import *
 
+from django.conf import settings
+
 class CouchDocument(Document):
     id = StringProperty()
     metadata_doc_type_rule_id = StringProperty(default="")
@@ -99,7 +101,7 @@ class CouchDocument(Document):
         doc_date = None
         # trying to get date from db_info dict first
         try:
-            doc_date = datetime.strptime(str(document.db_info["date"]), "%Y-%m-%d")
+            doc_date = datetime.strptime(str(document.db_info["date"]), settings.DATE_FORMAT)
         except Exception:
             pass
         if doc_date:
