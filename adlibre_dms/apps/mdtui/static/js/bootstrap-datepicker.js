@@ -268,6 +268,7 @@
         if (dom.length === 1) {
           dom = '0' + dom;
         }
+        // Modified by yuri according to Feature #750 Humanize dates (eg DD/MM/YYYY)
         return dom + '/' + month + "/" + date.getFullYear();
       }
 
