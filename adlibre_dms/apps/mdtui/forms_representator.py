@@ -1,14 +1,17 @@
 """
 Module: Document Index form fields producer
+
 Project: Adlibre DMS
 Copyright: Adlibre Pty Ltd 2012
 License: See LICENSE for license information
 Author: Iurii Garmash
 """
+
 import logging
 import datetime
 from django import forms
 from mdt_manager import MetaDataTemplateManager
+from django.conf import settings
 
 SEARCH_STRING_REPR = {
     'field_label_from': u' From',
@@ -37,7 +40,9 @@ def get_mdts_for_docrule(docrule_id):
 
 def render_fields_from_docrules(mdts_dict, init_dict=None, search=False):
     """
-    Create dictionary of additional fields for form, according to MDT's provided.
+    Create dictionary of additional fields for form,
+
+    according to MDT's provided.
     Takes optional values dict to init prepopulated fields.
     """
     log.debug('Rendering fields for docrules: "%s", init_dict: "%s", search: "%s"'% (mdts_dict, init_dict, search))
@@ -138,7 +143,7 @@ def setFormData(fm, kwds):
             fm.initial[k] = int(kwds[k])
         except ValueError:
             try:
-                dt = datetime.datetime.strptime(kwds[k], "%Y-%m-%d")
+                dt = datetime.datetime.strptime(kwds[k], settings.DATE_FORMAT)
                 fm.initial[k] = dt
             except ValueError:
                 try:

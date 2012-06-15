@@ -8,6 +8,9 @@ Author: Iurii Garmash
 """
 
 import logging
+import datetime
+
+from django.conf import settings
 
 from operator import itemgetter
 
@@ -17,12 +20,13 @@ from forms_representator import SEARCH_STRING_REPR
 from parallel_keys import ParallelKeysManager
 from mdt_manager import MetaDataTemplateManager
 from dmscouch.models import CouchDocument
+from adlibre.date_converter import date_standardized
 
 log = logging.getLogger('dms.mdtui.views')
 
 DATE_RANGE_CONSTANTS = {
-    'min': u'1960-01-01',
-    'max': u'2100-01-01'
+    'min': unicode(date_standardized('1960-01-01')),
+    'max': unicode(date_standardized('2100-01-01')),
 }
 
 def document_date_range_only_search(cleaned_document_keys, docrule_id):
@@ -243,10 +247,13 @@ def str_date_to_couch(from_date):
     """
     Converts date from form date widget generated format
 
-    e.g.: '2012-03-02' to CouchDocument stored date. E.g.: '2012-03-02T00:00:00Z'
+    e.g.:
+    date '2012-03-02' or whatever format specified in settings.py
+    to CouchDocument stored date. E.g.: '2012-03-02T00:00:00Z'
     """
-    couch_date = from_date + 'T00:00:00Z'
-    return couch_date
+    couch_date = datetime.datetime.strptime(from_date, settings.DATE_FORMAT)
+    converted_date = str(couch_date.strftime("%Y-%m-%d")) + 'T00:00:00Z'
+    return converted_date
 
 def search_results_by_date(documents):
     """Sorts search results into list by CouchDB document's 'created date'."""

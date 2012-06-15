@@ -1,5 +1,6 @@
 """
 Module: MDTUI forms
+
 Project: Adlibre DMS
 Copyright: Adlibre Pty Ltd 2012
 License: See LICENSE for license information
@@ -11,16 +12,18 @@ http://djangosnippets.org/snippets/714/
 """
 
 from django import forms
+from django.core.exceptions import ValidationError
+from django.conf import settings
 import datetime
 
 from doc_codes.models import DocumentTypeRule
-from django.core.exceptions import ValidationError
 from forms_representator import setFormFields
 from forms_representator import setFormData
+from adlibre.date_converter import date_standardized
 
 CUSTOM_ERRORS = {
     'NUMBER': 'Must be Number. (example "123456")',
-    'DATE': 'Must be in valid Date format. (example "2012-12-31")',
+    'DATE': 'Must be in valid Date format. (example "%s")' % date_standardized('2012-12-30'),
     'UPPER': 'This field should be uppercase.'
 }
 
@@ -101,7 +104,7 @@ class DocumentIndexForm(forms.Form):
                         pass
                 if cur_field.__class__.__name__ == "DateField":
                     try:
-                        datetime.datetime.strptime(self.data[unicode(field)], "%Y-%m-%d")
+                        datetime.datetime.strptime(self.data[unicode(field)], settings.DATE_FORMAT)
                     except ValueError:
                         # appending error to form errors
                         if self.data[unicode(field)]:
@@ -152,7 +155,7 @@ class DocumentSearchOptionsForm(forms.Form):
                         pass
                 if cur_field.__class__.__name__ == "DateField":
                     try:
-                        datetime.datetime.strptime(self.data[unicode(field)], "%Y-%m-%d")
+                        datetime.datetime.strptime(self.data[unicode(field)], settings.DATE_FORMAT)
                     except ValueError:
                         # appending error to form errors
                         if self.data[unicode(field)]:

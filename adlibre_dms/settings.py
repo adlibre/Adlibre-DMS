@@ -132,6 +132,8 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'adlibre_dms.context_processors.theme_name',
     'adlibre_dms.context_processors.theme_template_base',
     'adlibre_dms.context_processors.product_version',
+    'adlibre_dms.context_processors.date_format',
+    'adlibre_dms.context_processors.datetime_format',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -296,8 +298,9 @@ PRODUCT_VERSION = '1.0'
 # name of template theme, used by context_processors.py.
 THEME_NAME = 'solid' # 'adlibre' or 'basic' or 'solid'
 
+# Date/time formats used throughout MUI app and (in future DMS forms)
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S" # format that is used in document metadata
-DATE_FORMAT = "%Y-%m-%d"
+DATE_FORMAT = "%d/%m/%Y"
 
 DEMO = True
 NEW_SYSTEM = False

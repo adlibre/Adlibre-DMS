@@ -9,11 +9,10 @@ Author: Iurii Garmash
 import csv
 from django.http import HttpResponse
 from doc_codes.models import DocumentTypeRuleManagerInstance
+from adlibre.date_converter import date_standardized
 
 def export_to_csv(search_keys, sec_keys_names, documents):
-    """
-    Helper to produce proper CSV file for search results export
-    """
+    """Helper to produce proper CSV file for search results export"""
     # Cleaning Up documents
     docs = {}
     for document in documents:
@@ -36,7 +35,7 @@ def export_to_csv(search_keys, sec_keys_names, documents):
                 # No value exists
                 doc_sec_keys.append('Not given',)
         # Converting date to Y-m-d format
-        cr_date = doc['metadata_created_date'].rstrip('T00:00:00Z')
+        cr_date = date_standardized(doc['metadata_created_date'].rstrip('T00:00:00Z'))
         # Catching Document's type rule to name it in export
         # This way should not produce SQL DB requests (Uses DocumentTypeRuleManagerInstance for this)
         docrule = DocumentTypeRuleManagerInstance.get_docrule_by_id(doc['metadata_doc_type_rule_id'])
