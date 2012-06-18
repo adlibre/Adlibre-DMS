@@ -47,6 +47,9 @@ def initIndexesForm(request):
         form = DocumentSearchOptionsForm()
     else:
         form = DocumentIndexForm()
+        # Form initial document creation date set on each request (Issue #731)
+        form.fields['date'].initial = datetime.datetime.now()
+        form.base_fields['date'].initial = datetime.datetime.now()
 
     if details and not details == 'error':
         # MDT's exist for ths docrule adding fields to form
