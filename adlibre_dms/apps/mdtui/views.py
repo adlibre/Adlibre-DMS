@@ -275,6 +275,7 @@ def indexing_details(request, step=None, template='mdtui/indexing.html'):
                     })
     return render_to_response(template, context, context_instance=RequestContext(request))
 
+
 @login_required
 def indexing_source(request, step=None, template='mdtui/indexing.html'):
     """Indexing: Step 3: Upload File / Associate File / Print Barcode"""
@@ -376,6 +377,7 @@ def indexing_finished(request, step=None, template='mdtui/indexing.html'):
     cleanup_indexing_session(request)
     cleanup_mdts(request)
     return render(request, template, context)
+
 
 @login_required
 def mdt_parallel_keys(request):
@@ -486,6 +488,7 @@ def mdt_parallel_keys(request):
                                 resp.append(suggestion)
     log.debug('mdt_parallel_keys response: %s' % resp)
     return HttpResponse(json.dumps(resp))
+
 
 @login_required
 def download_pdf(request, code):
