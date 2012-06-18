@@ -251,8 +251,14 @@ def str_date_to_couch(from_date):
     date '2012-03-02' or whatever format specified in settings.py
     to CouchDocument stored date. E.g.: '2012-03-02T00:00:00Z'
     """
-    couch_date = datetime.datetime.strptime(from_date, settings.DATE_FORMAT)
-    converted_date = str(couch_date.strftime("%Y-%m-%d")) + 'T00:00:00Z'
+    # HACK: left here to debug improper date calls
+    converted_date = ''
+    try:
+        couch_date = datetime.datetime.strptime(from_date, settings.DATE_FORMAT)
+        converted_date = str(couch_date.strftime("%Y-%m-%d")) + 'T00:00:00Z'
+    except ValueError:
+        log.error('Server time conversion error. String received: %s' % from_date)
+        pass
     return converted_date
 
 def search_results_by_date(documents):
