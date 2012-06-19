@@ -25,6 +25,7 @@ from view_helpers import extract_secondary_keys_from_form
 from view_helpers import cleanup_search_session
 from view_helpers import cleanup_indexing_session
 from view_helpers import cleanup_mdts
+from view_helpers import unify_index_info_couch_dates_fmt
 from search_helpers import cleanup_document_keys
 from search_helpers import document_date_range_only_search
 from search_helpers import document_date_range_with_keys_search
@@ -332,8 +333,13 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
             import os
             upload_file = open(os.path.join(os.path.split(__file__)[0], 'stub_document.pdf'), 'rb')
 
+        # Unifying dates to CouchDB storage formats.
+        # TODO: maybe make it a part of the CouchDB storing manager.
+        clean_index = unify_index_info_couch_dates_fmt(index_info)
+
+        # Storing into DMS with main Document Processor and current indexes
         processor = DocumentProcessor()
-        processor.create(request, upload_file, index_info=index_info, barcode=barcode)
+        processor.create(request, upload_file, index_info=clean_index, barcode=barcode)
 
         if not processor.errors:
             return HttpResponseRedirect(reverse('mdtui-index-finished'))
