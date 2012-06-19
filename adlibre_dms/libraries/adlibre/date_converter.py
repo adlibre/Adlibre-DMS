@@ -8,9 +8,11 @@ Author: Iurii Garmash
 """
 
 import datetime
+import logging
 
 from django.conf import settings
 
+log = logging.getLogger('dms')
 
 def date_standardized(date_string):
     """Converts date from format %Y-%m-%d into proper DMS global date format"""
@@ -31,8 +33,6 @@ def str_date_to_couch(from_date):
         couch_date = datetime.datetime.strptime(from_date, settings.DATE_FORMAT)
         converted_date = str(couch_date.strftime("%Y-%m-%d")) + 'T00:00:00Z'
     except ValueError:
-        print 'error date to couch conversion'
-        print from_date
-        #log.error('Server time conversion error. String received: %s' % from_date)
+        log.error('adlibre.date_convertor time conversion error. String received: %s' % from_date)
         pass
     return converted_date
