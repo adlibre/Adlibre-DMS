@@ -14,6 +14,7 @@ from forms import DocumentIndexForm
 from forms import DocumentSearchOptionsForm
 from forms_representator import render_fields_from_docrules
 from forms_representator import get_mdts_for_docrule
+from adlibre.date_converter import str_date_to_couch
 
 def initIndexesForm(request):
     """
@@ -145,6 +146,25 @@ def extract_secondary_keys_from_form(form):
             # standard field
             pass
     return keys_list
+
+def unify_index_info_couch_dates_fmt(index_info):
+    """
+    Applies standardization to secondary keys 'date' type keys.
+    """
+    clean_info = {}
+    index_keys = [key for key in index_info.iterkeys()]
+    for index_key in index_keys:
+        if not index_key=='date':
+            try:
+                value = index_info[index_key]
+                index_date = datetime.datetime.strptime(value, settings.DATE_FORMAT)
+                clean_info[index_key] = str_date_to_couch(value)
+            except ValueError:
+                clean_info[index_key] = index_info[index_key]
+                pass
+        else:
+            clean_info[index_key] = index_info[index_key]
+    return clean_info
 
 def _cleanup_session_var(request, var):
     """Cleanup Session var helper"""

@@ -14,13 +14,13 @@ from django.conf import settings
 
 from operator import itemgetter
 
-from dmscouch.models import CouchDocument
 from forms_representator import SEARCH_STRING_REPR
 
 from parallel_keys import ParallelKeysManager
 from mdt_manager import MetaDataTemplateManager
 from dmscouch.models import CouchDocument
 from adlibre.date_converter import date_standardized
+from adlibre.date_converter import str_date_to_couch
 
 log = logging.getLogger('dms.mdtui.views')
 
@@ -219,14 +219,14 @@ def convert_to_search_keys_for_date_range(document_keys, pkey, docrule_id, end=F
                 # Creating DB request for document dates (or without document dates) range
                 if not end:
                     if dd_range:
-                        req_params = [key, value[0], docrule_id, str_date_to_couch(document_keys["date"])]
+                        req_params = [key, str_date_to_couch(value[0]), docrule_id, str_date_to_couch(document_keys["date"])]
                     else:
-                        req_params = [key, value[0], docrule_id]
+                        req_params = [key, str_date_to_couch(value[0]), docrule_id]
                 else:
                     if dd_range:
-                        req_params = [key, value[1], docrule_id, str_date_to_couch(document_keys["end_date"])]
+                        req_params = [key, str_date_to_couch(value[1]), docrule_id, str_date_to_couch(document_keys["end_date"])]
                     else:
-                        req_params = [key, value[1], docrule_id]
+                        req_params = [key, str_date_to_couch(value[1]), docrule_id]
     return req_params
 
 def document_date_range_present_in_keys(keys):
@@ -242,24 +242,6 @@ def document_date_range_present_in_keys(keys):
     if start or end:
         dd_range_present = True
     return dd_range_present
-
-def str_date_to_couch(from_date):
-    """
-    Converts date from form date widget generated format
-
-    e.g.:
-    date '2012-03-02' or whatever format specified in settings.py
-    to CouchDocument stored date. E.g.: '2012-03-02T00:00:00Z'
-    """
-    # HACK: left here to debug improper date calls
-    converted_date = ''
-    try:
-        couch_date = datetime.datetime.strptime(from_date, settings.DATE_FORMAT)
-        converted_date = str(couch_date.strftime("%Y-%m-%d")) + 'T00:00:00Z'
-    except ValueError:
-        log.error('Server time conversion error. String received: %s' % from_date)
-        pass
-    return converted_date
 
 def search_results_by_date(documents):
     """Sorts search results into list by CouchDB document's 'created date'."""
