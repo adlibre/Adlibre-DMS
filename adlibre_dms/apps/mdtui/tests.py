@@ -285,6 +285,18 @@ date_range_none = {
     u'date':unicode(date_standardized('2012-03-30')),
 }
 
+# Requests search of BBB-0001 document only specifying date range for it
+date_range_withing_2_ranges_1 = {
+    u'2_to': [u'03/04/2012'],
+    u'end_date': [u'05/04/2012'],
+    u'2_from': [u'01/04/2012'],
+    u'1': [u''],
+    u'0': [u''],
+    u'3': [u''],
+    u'date': [u'01/04/2012'],
+}
+
+
 # Proper date range with keys search
 date_range_with_keys_3_docs = {
     u'date':unicode(date_standardized('2012-03-01')),
@@ -1566,7 +1578,42 @@ class MDTUI(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, doc1_creates_warnigs_string)
 
-    def test_z_cleanup(self):
+    def test_44_extended_date_ranges_test(self):
+        """
+        Testing search files in different date range combinations
+
+        this test tests:
+        2 docs for test docrule 2 (BBB-00X)
+        filtered by creation date range (creation date)
+        without other keys.
+        Specifying another date range combinations (secondary keys of "date" type)
+        does not break this indexing date filtering.
+        """
+        # setting docrule
+        url = reverse('mdtui-search-type')
+        data = {'docrule': test_mdt_docrule_id2}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        url = reverse('mdtui-search-options')
+        # Getting required indexes id's
+        response = self.client.get(url)
+        # Searching date range with unique doc1 keys
+        response = self.client.post(url, date_range_withing_2_ranges_1)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        # Response is ok and only one doc persists there
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'BBB-0001')
+        # No errors appeared
+        self.assertNotContains(response, "You have not defined Document Searching Options")
+        # None of doc2 of this docrule and docs from other docrules exist in response
+        self.assertNotContains(response, doc1)
+        self.assertNotContains(response, doc2)
+        self.assertNotContains(response, doc3)
+        self.assertNotContains(response, 'BBB-0002')
+
+    def _test_z_cleanup(self):
         """
         Cleaning up after all tests finished.
 
