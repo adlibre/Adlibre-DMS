@@ -6,7 +6,11 @@ License: See LICENSE for license information
 Author: Iurii Garmash
 """
 
+import datetime
+
 from django import template
+from django.conf import settings
+
 from doc_codes.models import DocumentTypeRuleManagerInstance
 register = template.Library()
 
@@ -106,6 +110,11 @@ class ProvideSecKey(template.Node):
                 value = doc_keys_dict[key_item]
             except:
                 value = ''
+            # Matching/converting from CouchDB time format
+            try:
+                value = datetime.datetime.strftime(value, settings.DATE_FORMAT)
+            except TypeError:
+                pass
             return value
         except template.VariableDoesNotExist:
             return ''
