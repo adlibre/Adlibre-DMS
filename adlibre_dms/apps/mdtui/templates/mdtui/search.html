@@ -105,14 +105,14 @@
             <tbody>
             {% for doc in documents %}
                 <tr>
-                    <td class="nw"><a href="{% url mdtui-view-pdf doc.id %}" title="{% trans 'View Document' %}" target="_blank"><i class="icon-download"></i> {{ doc.id }}</a></td>
+                    <td class="nw"><a href="{% url mdtui-view-pdf doc.id %}" title="{% trans 'View Document' %}" alt="{% trans 'View Document' %}" target="_blank"><i class="icon-download"></i> {{ doc.id }}</a></td>
                     <td class="nw">{{ doc.metadata_created_date|date:DATE_FORMAT }}</td>
                     {% for key in mdts %}
                     <td>{% get_sec_key_for_doc doc.mdt_indexes key %}</td>
                     {% endfor %}
                     <td>{{ doc.metadata_description }}</td>
                     <td>{% get_docrule_name_by_id doc.metadata_doc_type_rule_id %}</td>
-                    <td><a href="{% url bcp-print 'Code128' doc.id %}" title="{% trans 'Reprint Barcode' %}"><i class="icon-barcode"></i></a> | {# TODO: Admin only #}<a href="" title="{% trans 'Edit Metadata' %}"><i class="icon-edit"></i></a></td>
+                    <td><a href="{% url bcp-print 'Code128' doc.id %}" title="{% trans 'Reprint Barcode' %}" alt="{% trans 'Reprint Barcode' %}" target="_blank"><i class="icon-barcode"></i></a> {% comment %} | {# TODO: Admin only #}<a href="" title="{% trans 'Edit Metadata' %}"><i class="icon-edit"></i></a>{% endcomment %}</td>
                 </tr>
             {% endfor %}
             </tbody>
@@ -166,10 +166,14 @@
             });
 
             // Assign a click handler that grabs the URL from the first cell
-            $('#results-table tbody tr').on('click', function(e){
+            $('#results-table tbody tr td').on('click', function(e){
                 e.preventDefault();
-                window.open($(this).find('td a').attr('href'), "_blank");
+                //window.open($(this).parent('a').attr('href'), "_blank");
+                //alert($(this).parent().find('a').attr('href'));
+                window.open($(this).parent().find('a').attr('href'), "_blank");
             });
+            // Remove Assigned click handler from last col item
+            $('#results-table tbody tr td:last').unbind('click');
         });
 
     </script>
