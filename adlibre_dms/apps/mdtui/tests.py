@@ -1613,7 +1613,7 @@ class MDTUI(TestCase):
         self.assertNotContains(response, doc3)
         self.assertNotContains(response, 'BBB-0002')
 
-    def _test_z_cleanup(self):
+    def test_z_cleanup(self):
         """
         Cleaning up after all tests finished.
 
