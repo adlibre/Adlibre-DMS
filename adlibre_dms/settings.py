@@ -301,7 +301,7 @@ THEME_NAME = 'solid' # 'adlibre' or 'basic' or 'solid'
 # Date/time formats used throughout MUI app and (in future DMS forms)
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S" # format that is used in document metadata
 DATE_FORMAT = "%d/%m/%Y"
-# Note that changing this from any type of 'Ymd' format will make dates unsearchable.
+# Note that changing this into any other 'Ymd' sequence will make dates unsearchable.
 DATE_COUCHDB_FORMAT = "%Y-%m-%dT00:00:00Z"
 
 DEMO = True
