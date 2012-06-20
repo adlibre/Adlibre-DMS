@@ -168,12 +168,10 @@
             // Assign a click handler that grabs the URL from the first cell
             $('#results-table tbody tr td').on('click', function(e){
                 e.preventDefault();
-                //window.open($(this).parent('a').attr('href'), "_blank");
-                //alert($(this).parent().find('a').attr('href'));
                 window.open($(this).parent().find('a').attr('href'), "_blank");
             });
             // Remove Assigned click handler from last col item
-            $('#results-table tbody tr td:last').unbind('click');
+            $('#results-table tbody tr').find('td:last').unbind('click');
         });
 
     </script>
