@@ -272,4 +272,3 @@ def cleanup_docrules_permissions(**kwargs):
 # Attached this to recreate permission for each syncdb
 signals.post_syncdb.connect(update_docrules_permissions)
 
-# test comment (DEL ME)
