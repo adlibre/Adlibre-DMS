@@ -14,6 +14,7 @@ from django.shortcuts import render, redirect, render_to_response, HttpResponseR
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 
+from api.decorators.group_required import group_required
 from dmscouch.models import CouchDocument
 from forms import DocumentTypeSelectForm, DocumentUploadForm, BarcodePrintedForm, DocumentSearchOptionsForm
 from core.document_processor import DocumentProcessor
@@ -37,6 +38,7 @@ from search_helpers import check_for_secondary_keys_pairs
 from forms_representator import get_mdts_for_docrule
 from parallel_keys import ParallelKeysManager
 from data_exporter import export_to_csv
+from security import SEC_GROUP_NAMES
 
 from restkit.client import RequestError
 
@@ -55,6 +57,7 @@ MDTUI_ERROR_STRINGS = {
 
 
 @login_required
+@group_required(SEC_GROUP_NAMES['search'])
 def search_type(request, step, template='mdtui/search.html'):
     """Search Step 1: Select Search Type"""
     docrule = None
@@ -96,6 +99,7 @@ def search_type(request, step, template='mdtui/search.html'):
 
 
 @login_required
+@group_required(SEC_GROUP_NAMES['search'])
 def search_options(request, step, template='mdtui/search.html'):
     """Search Step 2: Search Options"""
     warnings = []
@@ -134,6 +138,7 @@ def search_options(request, step, template='mdtui/search.html'):
 
 
 @login_required
+@group_required(SEC_GROUP_NAMES['search'])
 def search_results(request, step=None, template='mdtui/search.html'):
     """Search Step 3: Search Results"""
     document_keys = None
@@ -180,6 +185,7 @@ def search_results(request, step=None, template='mdtui/search.html'):
 
 
 @login_required
+@group_required(SEC_GROUP_NAMES['search'])
 def view_pdf(request, code, step, template='mdtui/view.html'):
     """View PDF Document"""
     pdf_url = reverse('mdtui-download-pdf', kwargs = { 'code': code, })
@@ -188,6 +194,7 @@ def view_pdf(request, code, step, template='mdtui/view.html'):
 
 
 @login_required
+@group_required(SEC_GROUP_NAMES['index'])
 def indexing_select_type(request, step=None, template='mdtui/indexing.html'):
     """Indexing: Step 1 : Select Document Type"""
     # Context init
@@ -233,6 +240,7 @@ def indexing_select_type(request, step=None, template='mdtui/indexing.html'):
 
 
 @login_required
+@group_required(SEC_GROUP_NAMES['index'])
 def indexing_details(request, step=None, template='mdtui/indexing.html'):
     """Indexing: Step 2 : Index Details"""
     # Context init
@@ -278,6 +286,7 @@ def indexing_details(request, step=None, template='mdtui/indexing.html'):
 
 
 @login_required
+@group_required(SEC_GROUP_NAMES['index'])
 def indexing_source(request, step=None, template='mdtui/indexing.html'):
     """Indexing: Step 3: Upload File / Associate File / Print Barcode"""
     document_keys = None
@@ -359,6 +368,7 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
 
 
 @login_required
+@group_required(SEC_GROUP_NAMES['index'])
 def indexing_finished(request, step=None, template='mdtui/indexing.html'):
     """Indexing: Step 4: Finished"""
     context = { 'step': step,  }
@@ -497,6 +507,7 @@ def mdt_parallel_keys(request):
 
 
 @login_required
+@group_required(SEC_GROUP_NAMES['search'])
 def download_pdf(request, code):
     """Returns Document For Download"""
     # right now we just redirect to API, but in future we might want to decouple from API app.
