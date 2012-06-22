@@ -8,9 +8,8 @@ Author: Iurii Garmash
 """
 
 from django.db import models
-from django.contrib.auth.models import Group, Permission
+from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import signals
 
 import re
 import logging
@@ -78,9 +77,12 @@ class DocumentTypeRule(models.Model):
 
     def save(self, *args, **kwargs):
         """Overriding save method to add permissions into admin"""
-        content_type, created = ContentType.objects.get_or_create(app_label='doc_rule', model='')
+        content_type, created = ContentType.objects.get_or_create(
+                                                        app_label='rule',
+                                                        model='',
+                                                        name='document type')
         permission = Permission.objects.get_or_create(  codename=self.title,
-                                                        name=self.title,
+                                                        name='Can interact '+unicode(self.title),
                                                         content_type=content_type)
         super(DocumentTypeRule, self).save(*args, **kwargs)
 
@@ -254,21 +256,4 @@ class DocumentTypeRuleManager(object):
 # Bug #657
 DocumentTypeRuleManagerInstance = DocumentTypeRuleManager()
 
-def update_docrules_permissions(**kwargs):
-    """Triggering programmatic save() of each DocumentTypeRule on syncdb to generate permission for each DocumentTypeRule"""
-    docrules = DocumentTypeRule.objects.all()
-    for rule in docrules:
-        rule.save()
-    #print 'Created user role/permission for each DocumentTypeRule()'
-
-def cleanup_docrules_permissions(**kwargs):
-    """Cleans up all permissions for each DocumentTypeRule()"""
-    content_type, created = ContentType.objects.get_or_create(app_label='doc_rule', model='')
-    permissions = Permission.objects.filter(content_type=content_type)
-    for p in permissions:
-        p.delete()
-    #print 'Deleted all permissions for each DocumentTypeRule()'
-
-# Attached this to recreate permission for each syncdb
-signals.post_syncdb.connect(update_docrules_permissions)
 
