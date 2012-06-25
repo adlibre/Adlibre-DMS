@@ -80,7 +80,7 @@ class DocumentTypeRule(models.Model):
         content_type, created = ContentType.objects.get_or_create(
                                                         app_label='rule',
                                                         model='',
-                                                        name='document type')
+                                                        name='document type') # filtered upon usage with this 'name'!
         permission = Permission.objects.get_or_create(  codename=self.title,
                                                         name='Can interact '+unicode(self.title),
                                                         content_type=content_type)

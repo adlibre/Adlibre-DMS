@@ -21,6 +21,14 @@ from adlibre.date_converter import date_standardized
 username = 'admin'
 password = 'admin'
 
+# test user 1
+username_1 = 'test_perms_1'
+password_1 = 'test1'
+
+# test user 2
+username_2 = 'test_perms_2'
+password_2 = 'test2'
+
 couchdb_url = 'http://127.0.0.1:5984'
 
 test_mdt_docrule_id = 2 # should be properly assigned to fixtures docrule that uses CouchDB plugins
@@ -1612,6 +1620,73 @@ class MDTUI(TestCase):
         self.assertNotContains(response, doc2)
         self.assertNotContains(response, doc3)
         self.assertNotContains(response, 'BBB-0002')
+
+    def test_45_security_restricts_search_or_index(self):
+        # We need another logged in user for this test
+        self.client.logout()
+        self.client.login(username=username_1, password=password_1)
+        # Trying to access indexing
+        search_url = reverse('mdtui-search-type')
+        index_url = reverse('mdtui-index-type')
+        # User test1 have access to search
+        response = self.client.get(search_url)
+        self.assertEqual(response.status_code, 200)
+        # User test1 do not have access to index
+        response = self.client.get(index_url)
+        self.assertNotEqual(response.status_code, 200)
+        self.client.logout()
+        self.client.login(username=username_2, password=password_2)
+        # User test2 have access to index
+        response = self.client.get(index_url)
+        self.assertEqual(response.status_code, 200)
+        # User test2 do not have access to search
+        response = self.client.get(search_url)
+        self.assertNotEqual(response.status_code, 200)
+        self.client.logout()
+
+    def test_46_indexing_docrule_choices_limited_by_permission(self):
+        # We need another logged in user for this test
+        self.client.logout()
+        self.client.login(username=username_1, password=password_1)
+        # Checking if user sees his own permitted document type rules
+        url = reverse('mdtui-search-type')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Test Doc Type 2')
+        self.assertContains(response, 'Test Doc Type 3')
+        # And does not see hidden ones
+        self.assertNotContains(response, 'Adlibre Invoices')
+        self.client.logout()
+
+    def test_47_searching_docrule_choices_limited_by_permission(self):
+        # We need another logged in user for this test
+        self.client.logout()
+        self.client.login(username=username_2, password=password_2)
+        # Checking if user sees his own permitted document type rules
+        url = reverse('mdtui-index-type')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Adlibre Invoices')
+        self.assertContains(response, 'Test PDFs')
+        # And does not see hidden ones
+        self.assertNotContains(response, 'Test Doc Type 2')
+        self.client.logout()
+
+    def test_48_admin_sees_all_docrules_everywhere(self):
+        search_url = reverse('mdtui-search-type')
+        index_url = reverse('mdtui-index-type')
+        response = self.client.get(index_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Test Doc Type 2')
+        self.assertContains(response, 'Test Doc Type 3')
+        self.assertContains(response, 'Adlibre Invoices')
+        self.assertContains(response, 'Test PDFs')
+        response = self.client.get(search_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Test Doc Type 2')
+        self.assertContains(response, 'Test Doc Type 3')
+        self.assertContains(response, 'Adlibre Invoices')
+        self.assertContains(response, 'Test PDFs')
 
     def test_z_cleanup(self):
         """
