@@ -16,7 +16,7 @@ from django.contrib.auth.decorators import login_required
 
 from api.decorators.group_required import group_required
 from dmscouch.models import CouchDocument
-from forms import DocumentTypeSelectForm, DocumentUploadForm, BarcodePrintedForm, DocumentSearchOptionsForm
+from forms import DocumentUploadForm, BarcodePrintedForm, DocumentSearchOptionsForm, make_document_type_select_form
 from core.document_processor import DocumentProcessor
 from doc_codes.models import DocumentTypeRule
 from view_helpers import initIndexesForm
@@ -64,7 +64,8 @@ def search_type(request, step, template='mdtui/search.html'):
     warnings = []
     cleanup_indexing_session(request)
     cleanup_mdts(request)
-    form = DocumentTypeSelectForm(request.POST or None)
+    filtered_form = make_document_type_select_form(user=request.user)
+    form = filtered_form(request.POST or None)
     if request.POST:
             if form.is_valid():
                 mdts = None
@@ -81,14 +82,13 @@ def search_type(request, step, template='mdtui/search.html'):
             else:
                 warnings.append(MDTUI_ERROR_STRINGS['NO_DOCRULE'])
     else:
-        form = DocumentTypeSelectForm()
         # Trying to set docrule if previously selected
         try:
             docrule = request.session['search_docrule_id']
         except KeyError:
             pass
         if docrule:
-            form = DocumentTypeSelectForm({'docrule': docrule})
+            form = filtered_form({'docrule': docrule})
 
     context = {
                 'warnings': warnings,
@@ -203,7 +203,8 @@ def indexing_select_type(request, step=None, template='mdtui/indexing.html'):
     document_keys = None
     autocomplete_list = []
     warnings = []
-    form = DocumentTypeSelectForm(request.POST or None)
+    filtered_form = make_document_type_select_form(user=request.user)
+    form = filtered_form(request.POST or None)
     cleanup_search_session(request)
     cleanup_mdts(request)
     
@@ -216,14 +217,13 @@ def indexing_select_type(request, step=None, template='mdtui/indexing.html'):
                 request.session['mdts'] = mdts
             return HttpResponseRedirect(reverse('mdtui-index-details'))
     else:
-        # form initing with docrule set if it was done previous
+        # initializing form with previously selected docrule.
         try:
             docrule = request.session['indexing_docrule_id']
         except KeyError:
             pass
-        form = DocumentTypeSelectForm()
         if docrule:
-            form = DocumentTypeSelectForm({'docrule': docrule})
+            form = filtered_form({'docrule': docrule})
 
     try:
         document_keys = request.session["document_keys_dict"]
