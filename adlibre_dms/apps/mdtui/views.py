@@ -52,6 +52,7 @@ MDTUI_ERROR_STRINGS = {
     'NO_TYPE':'You have not defined Document Type. Can only search by "Creation Date".',
     'NO_DB':'Database Connection absent. Check CouchDB server connection.',
     'NO_DOCUMENTS_FOUND': 'Nothing to export because of empty documents results.',
+    'NO_MDTS': 'No Meta Data templates found for selected Document Type.',
     'NEW_KEY_VALUE_PAIR': 'Adding new indexing key: '
 }
 
@@ -59,7 +60,7 @@ MDTUI_ERROR_STRINGS = {
 @login_required
 @group_required(SEC_GROUP_NAMES['search'])
 def search_type(request, step, template='mdtui/search.html'):
-    """Search Step 1: Select Search Type"""
+    """Search Step 1: Select Search MDT"""
     docrule = None
     warnings = []
     cleanup_indexing_session(request)
@@ -79,6 +80,8 @@ def search_type(request, step, template='mdtui/search.html'):
                 if mdts:
                     request.session['mdts'] = mdts
                     return HttpResponseRedirect(reverse('mdtui-search-options'))
+                else:
+                    warnings.append(MDTUI_ERROR_STRINGS['NO_MDTS'])
             else:
                 warnings.append(MDTUI_ERROR_STRINGS['NO_DOCRULE'])
     else:
@@ -215,7 +218,9 @@ def indexing_select_type(request, step=None, template='mdtui/indexing.html'):
             mdts = get_mdts_for_docrule(docrule)
             if mdts:
                 request.session['mdts'] = mdts
-            return HttpResponseRedirect(reverse('mdtui-index-details'))
+                return HttpResponseRedirect(reverse('mdtui-index-details'))
+            else:
+                warnings.append(MDTUI_ERROR_STRINGS['NO_MDTS'])
     else:
         # initializing form with previously selected docrule.
         try:
