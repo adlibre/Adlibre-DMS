@@ -1,5 +1,6 @@
 """
 Module: Metadata Template UI Views
+
 Project: Adlibre DMS
 Copyright: Adlibre Pty Ltd 2012
 License: See LICENSE for license information
@@ -191,7 +192,6 @@ def search_results(request, step=None, template='mdtui/search.html'):
 
 
 @login_required
-@group_required(SEC_GROUP_NAMES['search'])
 def view_pdf(request, code, step, template='mdtui/view.html'):
     """View PDF Document"""
     pdf_url = reverse('mdtui-download-pdf', kwargs = { 'code': code, })
@@ -522,7 +522,6 @@ def mdt_parallel_keys(request):
 
 
 @login_required
-@group_required(SEC_GROUP_NAMES['search'])
 def download_pdf(request, code):
     """Returns Document For Download"""
     # right now we just redirect to API, but in future we might want to decouple from API app.
