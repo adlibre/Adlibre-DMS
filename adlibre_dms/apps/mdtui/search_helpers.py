@@ -29,71 +29,82 @@ DATE_RANGE_CONSTANTS = {
     'max': unicode(date_standardized('2100-01-01')),
 }
 
-def document_date_range_only_search(cleaned_document_keys, docrule_id):
+def document_date_range_only_search(cleaned_document_keys, docrule_ids):
     log.debug('Date range search only')
-    startkey = [str_date_to_couch(cleaned_document_keys["date"]), docrule_id]
-    endkey = [str_date_to_couch(cleaned_document_keys["end_date"]), docrule_id]
-    # Getting all documents withing this date range
-    all_docs = CouchDocument.view('dmscouch/search_date', startkey=startkey, endkey=endkey)
-    # Filtering by docrule_id and getting docs
-    resp_list = filter_couch_docs_by_docrule_id(all_docs, docrule_id)
+    resp_list = []
+    for docrule_id in docrule_ids:
+        startkey = [str_date_to_couch(cleaned_document_keys["date"]), docrule_id]
+        endkey = [str_date_to_couch(cleaned_document_keys["end_date"]), docrule_id]
+        # Getting all documents withing this date range
+        all_docs = CouchDocument.view('dmscouch/search_date', startkey=startkey, endkey=endkey)
+        # Filtering by docrule_ids and getting docs
+        doc_list = []
+        for document in all_docs:
+            if document['metadata_doc_type_rule_id'] in docrule_ids:
+                doc_list.append(document.get_id)
+        # Appending to fetch docs list if not already there
+        for doc_name in doc_list:
+            if not doc_name in resp_list:
+                resp_list.append(doc_name)
+
     documents = CouchDocument.view('_all_docs', keys=resp_list, include_docs=True )
     if documents:
         log.debug(
-            'Search results by date range: from: "%s", to: "%s", docrule: "%s", documents: "%s"' %
-            (startkey[0], endkey[0], docrule_id, map(lambda doc: doc["id"], documents))
+            'Search results by date range: from: "%s", to: "%s", docrules: "%s", documents: "%s"' %
+            (startkey[0], endkey[0], docrule_ids, map(lambda doc: doc["id"], documents))
         )
     else:
         log.debug(
-            'Search results by date range: from: "%s", to: "%s", docrule: "%s", documents: None' %
-            (startkey[0], endkey[0], docrule_id)
+            'Search results by date range: from: "%s", to: "%s", docrules: "%s", documents: None' %
+            (startkey[0], endkey[0], docrule_ids)
         )
     return documents
 
-def document_date_range_with_keys_search(cleaned_document_keys, docrule_id):
+def document_date_range_with_keys_search(cleaned_document_keys, docrule_ids):
     log.debug('Date range search with additional keys specified')
-    resp_set = []
-    # Getting list of date range filtered docs for each provided secondary key
-    # Except for internal keys
-    for key, value in cleaned_document_keys.iteritems():
-        if not (key == 'date') and not (key == 'end_date'):
-            if not value.__class__.__name__ == 'tuple':
-                # Normal search
-                startkey = convert_to_search_keys_for_date_range(cleaned_document_keys, key, docrule_id)
-                endkey = convert_to_search_keys_for_date_range(cleaned_document_keys, key, docrule_id, end=True)
-            else:
-                # Got date range key
-                startkey = convert_to_search_keys_for_date_range(cleaned_document_keys, key, docrule_id, date_range=True)
-                endkey = convert_to_search_keys_for_date_range(cleaned_document_keys, key, docrule_id, end=True, date_range=True)
-            if startkey and endkey:
-                search_res = CouchDocument.view('dmscouch/search', startkey=startkey, endkey=endkey)
-                resp_set.append(search_res)
-    docs_list = convert_search_res_for_range(resp_set, cleaned_document_keys)
-    raw_docs = CouchDocument.view('_all_docs', keys=docs_list, include_docs=True)
-    docs_by_docrule_filter = filter_couch_docs_by_docrule_id(raw_docs, docrule_id)
-    if docs_list == docs_by_docrule_filter:
-        documents = raw_docs
-    else:
-        documents = CouchDocument.view('_all_docs', keys=docs_by_docrule_filter, include_docs=True)
+    resp_set = {}
+    docs_list = {}
+    # For each docrule user search is requested
+    for docrule_id in docrule_ids:
+        # Getting list of date range filtered docs for each provided secondary key
+        # Except for internal keys
+        for key, value in cleaned_document_keys.iteritems():
+            if not (key == 'date') and not (key == 'end_date'):
+                if not value.__class__.__name__ == 'tuple':
+                    # Normal search
+                    startkey = convert_to_search_keys_for_date_range(cleaned_document_keys, key, docrule_id)
+                    endkey = convert_to_search_keys_for_date_range(cleaned_document_keys, key, docrule_id, end=True)
+                else:
+                    # Got date range key
+                    startkey = convert_to_search_keys_for_date_range(cleaned_document_keys, key, docrule_id, date_range=True)
+                    endkey = convert_to_search_keys_for_date_range(cleaned_document_keys, key, docrule_id, end=True, date_range=True)
+                if startkey and endkey:
+                    # Appending results list to mixed set of results.
+                    search_res = CouchDocument.view('dmscouch/search', startkey=startkey, endkey=endkey)
+                    if docrule_id in resp_set.iterkeys():
+                        resp_set[docrule_id].append(search_res)
+                    else:
+                        resp_set[docrule_id] = [search_res]
+        # Extracting documents for each CouchDB response set.
+        docs_list[docrule_id] = convert_search_res_for_range(resp_set, cleaned_document_keys, docrule_id)
+    # Listing all documents to retrieve and getting them
+    retrieve_docs = []
+    for d_list in docs_list.itervalues():
+        if d_list:
+            for item in d_list:
+                retrieve_docs.append(item)
+    documents = CouchDocument.view('_all_docs', keys=retrieve_docs, include_docs=True)
     if documents:
         log.debug(
             'Search results by date range with additional keys: "%s", docrule: "%s", documents: "%s"' %
-            (cleaned_document_keys, docrule_id, map(lambda doc: doc["id"], documents))
+            (cleaned_document_keys, docrule_ids, map(lambda doc: doc["id"], documents))
         )
     else:
         log.debug(
             'Search results by date range with additional keys: "%s", docrule: "%s", documents: None' %
-            (cleaned_document_keys, docrule_id)
+            (cleaned_document_keys, docrule_ids)
         )
     return documents
-
-def filter_couch_docs_by_docrule_id(documents, docrule_id):
-    """Helper for date range search primary to filter documents by given docrule"""
-    doc_ids_list = []
-    for document in documents:
-        if document['metadata_doc_type_rule_id'] == docrule_id:
-            doc_ids_list.append(document.get_id)
-    return doc_ids_list
 
 def cleanup_document_keys(document_keys):
     """
@@ -140,7 +151,7 @@ def recognise_dates_in_search(cleaned_document_keys):
     proceed = False
     keys_list = [key for key in cleaned_document_keys.iterkeys()]
     # TODO: implement this
-    # Converting document date range to tuple fro consistency
+    # Converting document date range to tuple for consistency
 #    if 'date' in keys_list and 'end_date' in keys_list:
 #        print 'Refactor! date range in search conversion'
 
@@ -166,7 +177,7 @@ def recognise_dates_in_search(cleaned_document_keys):
                     cleaned_document_keys[pure_key]=(from_value, to_value)
     return cleaned_document_keys
 
-def convert_search_res_for_range(resp_set, cleaned_document_keys):
+def convert_search_res_for_range(resp_set, cleaned_document_keys, docrule_id):
     """
     Converts search results from type ANY to type ALL
 
@@ -176,7 +187,7 @@ def convert_search_res_for_range(resp_set, cleaned_document_keys):
     set_list = []
     all_docs = {}
     # Extracting documents mentions ang grouping by set
-    for set in resp_set:
+    for set in resp_set[docrule_id]:
         docs_ids_mentions = []
         for doc in set:
             docname = doc.get_id
@@ -191,7 +202,7 @@ def convert_search_res_for_range(resp_set, cleaned_document_keys):
     # Comparing search mentions and adding to response if all keys match
     docs_ids_list = []
     for key, value in all_docs.iteritems():
-        if value >= resp_set.__len__():
+        if value >= resp_set[docrule_id].__len__():
             docs_ids_list.append(key)
     return docs_ids_list
 
@@ -296,3 +307,14 @@ def check_for_secondary_keys_pairs(input_keys_list, docrule_id):
     else:
         log.debug('Found NO new unique key/values in secondary keys')
     return suspicious_keys_list
+
+def get_mdts_by_names(names_list):
+    """
+    Proxy for clean implementation
+
+    Planned to be refactored out upon implementing something like search manager
+    or uniting main system core with search logic.
+    """
+    manager = MetaDataTemplateManager()
+    mdts = manager.get_mdts_by_name(names_list)
+    return mdts

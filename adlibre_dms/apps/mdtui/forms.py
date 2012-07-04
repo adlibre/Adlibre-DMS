@@ -32,7 +32,6 @@ def make_document_type_select_form(user=None):
     Special method to construct custom DocumentTypeSelectForm object
     with list of DocumentTypeRule() limited with user permissions
     """
-    docrules_queryset = DocumentTypeRule.objects.all()
     # Check for user permissions and build queryset for form based on that.
     if user:
         if not user.is_superuser:
@@ -42,6 +41,8 @@ def make_document_type_select_form(user=None):
                 if permission.content_type.name=='document type':
                     allowed_docrules_names.append(permission.codename)
             docrules_queryset = DocumentTypeRule.objects.filter(title__in=allowed_docrules_names)
+        else:
+            docrules_queryset = DocumentTypeRule.objects.all()
 
     # Build a form with provided queryset of DocumentTypeRules.
     class DocumentTypeSelectForm(forms.Form):
