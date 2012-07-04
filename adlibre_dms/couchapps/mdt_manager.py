@@ -47,6 +47,55 @@ class MetaDataTemplateManager(object):
             log.error('Got no mdts for docrule: %s' % docrule_id)
             return False
 
+    def get_mdts_by_name(self, names_list):
+        """
+
+        """
+        log.debug('Getting MDT-s named: %s' % names_list)
+        mdts_list = {}
+        # Getting MDT's from DB
+        if names_list:
+            mdts_view = MetaDataTemplate.view('mdtcouch/all', keys=names_list, include_docs=True)
+        else:
+            mdts_view = None
+        # Constructing MDT's response dict
+        if mdts_view:
+            id = 1
+            for row in mdts_view:
+                mdts_list[str(id)] = row._doc
+                # cleaning up _id and _rev from response to unify response
+                mdts_list[str(id)]["mdt_id"] = mdts_list[str(id)]['_id']
+                del mdts_list[str(id)]['_id']
+                del mdts_list[str(id)]['_rev']
+                id+=1
+            return mdts_list
+        else:
+            log.error('Got no MDT-s from CouchDB named: %s' % names_list)
+            return False
+
+    def get_all_mdts(self):
+        """
+
+        """
+        log.debug('Getting all MDT-s.')
+        mdts_list = {}
+        # Getting MDT's from DB
+        mdts_view = MetaDataTemplate.view('mdtcouch/docrules_list')
+        if mdts_view:
+            # Constructing MDT's response dict
+            id = 1
+            for row in mdts_view:
+                mdts_list[str(id)] = row._doc
+                # cleaning up _id and _rev from response to unify response
+                mdts_list[str(id)]["mdt_id"] = mdts_list[str(id)]['_id']
+                del mdts_list[str(id)]['_id']
+                del mdts_list[str(id)]['_rev']
+                id+=1
+            return mdts_list
+        else:
+            log.error('Got no MDT-s from CouchDB.')
+            return False
+
     def store(self, mdt_data):
         """
         Method to store MDT into DB. Uses JSON provided.

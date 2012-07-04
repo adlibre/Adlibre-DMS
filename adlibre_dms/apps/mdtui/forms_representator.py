@@ -9,9 +9,14 @@ Author: Iurii Garmash
 
 import logging
 import datetime
+
 from django import forms
-from mdt_manager import MetaDataTemplateManager
 from django.conf import settings
+
+from restkit.client import RequestError
+
+from mdt_manager import MetaDataTemplateManager
+from doc_codes.models import DocumentTypeRule
 
 SEARCH_STRING_REPR = {
     'field_label_from': u' From',
@@ -151,3 +156,66 @@ def setFormData(fm, kwds):
                 except ValueError:
                         pass
 
+def make_mdt_select_form(user=None):
+    """
+    Special method to construct custom MDTSearchSelectForm
+    suggests MDT's for search that only restricted by user Docrule permissions.
+    E.g.:
+    'MDT1' is shown in MDTSearchSelectForm only if:
+    'MDT1' has connected 'docrule1' AND 'user', that is provided to method,
+    has permission to interact with this DocumentTypeRule ('docrule1' in our case).
+    """
+    mdt_m = MetaDataTemplateManager()
+    try:
+        all_mdts = mdt_m.get_all_mdts()
+    except RequestError:
+        all_mdts = {}
+        pass
+    filtered_mdts = {}
+    # Filtering MDT's displaying only permitted ones for provided user
+    if not user.is_superuser:
+        # Filtering Document Type Rules for user
+        perms = user.user_permissions.all()
+        allowed_docrules_names = []
+        for permission in perms:
+            if permission.content_type.name=='document type':
+                allowed_docrules_names.append(permission.codename)
+        docrules_queryset = DocumentTypeRule.objects.filter(title__in=allowed_docrules_names)
+        # Getting list of PKs of allowed Document Type Rules.
+        allowed_docrules_pks = []
+        if docrules_queryset:
+            for rule in docrules_queryset:
+                allowed_docrules_pks.append(unicode(rule.pk))
+
+        # Filtering all_mdts by only allowed ones
+        for mdt in all_mdts:
+            mdt_docrules = all_mdts[mdt]['docrule_id']
+            for docrule_id in mdt_docrules:
+                if docrule_id in allowed_docrules_pks:
+                    filtered_mdts[mdt] = all_mdts[mdt]
+    # listing mdts to display in form by number, mdt_id
+    if filtered_mdts:
+        mdt_choices = [(mdt, all_mdts[mdt]['mdt_id']) for mdt in filtered_mdts.iterkeys()]
+    else:
+        mdts_list = [mdt for mdt in all_mdts.iterkeys()]
+        mdt_choices = [(mdt, all_mdts[mdt]['mdt_id']) for mdt in mdts_list]
+    mdt_choices.sort()
+
+    # Constructing form
+    class MDTSelectForm(forms.Form):
+        mdt = forms.ChoiceField(choices=mdt_choices, label="Meta Data Template")
+
+    return MDTSelectForm
+
+def get_mdt_from_search_mdt_select_form(mdt_ids, form):
+    """
+    Method extracts MDT name from form (that has mdt names already)
+
+    Economises 1 CouchDB + DB requests this way.
+    """
+    names_list = []
+    ids_list = form.base_fields['mdt'].choices
+    for choice in ids_list:
+        if choice[0] in mdt_ids:
+            names_list.append(choice[1])
+    return names_list

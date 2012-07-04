@@ -35,7 +35,10 @@ from search_helpers import document_date_range_present_in_keys
 from search_helpers import ranges_validator
 from search_helpers import search_results_by_date
 from search_helpers import check_for_secondary_keys_pairs
+from search_helpers import get_mdts_by_names
 from forms_representator import get_mdts_for_docrule
+from forms_representator import make_mdt_select_form
+from forms_representator import get_mdt_from_search_mdt_select_form
 from parallel_keys import ParallelKeysManager
 from data_exporter import export_to_csv
 from security import SEC_GROUP_NAMES
@@ -61,20 +64,22 @@ MDTUI_ERROR_STRINGS = {
 @group_required(SEC_GROUP_NAMES['search'])
 def search_type(request, step, template='mdtui/search.html'):
     """Search Step 1: Select Search MDT"""
-    docrule = None
+    mdt = None
     warnings = []
     cleanup_indexing_session(request)
     cleanup_mdts(request)
-    filtered_form = make_document_type_select_form(user=request.user)
+    filtered_form = make_mdt_select_form(request.user)
     form = filtered_form(request.POST or None)
     if request.POST:
             if form.is_valid():
                 mdts = None
-                docrule = form.data["docrule"]
-                request.session['search_docrule_id'] = docrule
+                mdt_form_id = form.data["mdt"]
                 # CouchDB connection Felt down warn user
                 try:
-                    mdts = get_mdts_for_docrule(docrule)
+                    mdt_names = get_mdt_from_search_mdt_select_form(mdt_form_id, filtered_form)
+                    request.session['search_mdt_id'] = mdt_form_id
+                    mdts = get_mdts_by_names(mdt_names)
+                    request.session['search_docrule_ids'] = mdts['1']['docrule_id']
                 except RequestError:
                     warnings.append(MDTUI_ERROR_STRINGS['NO_DB'])
                 if mdts:
@@ -82,16 +87,14 @@ def search_type(request, step, template='mdtui/search.html'):
                     return HttpResponseRedirect(reverse('mdtui-search-options'))
                 else:
                     warnings.append(MDTUI_ERROR_STRINGS['NO_MDTS'])
-            else:
-                warnings.append(MDTUI_ERROR_STRINGS['NO_DOCRULE'])
     else:
         # Trying to set docrule if previously selected
         try:
-            docrule = request.session['search_docrule_id']
+            mdt = request.session['search_mdt_id']
         except KeyError:
             pass
-        if docrule:
-            form = filtered_form({'docrule': docrule})
+        if mdt:
+            form = filtered_form({'mdt': mdt})
 
     context = {
                 'warnings': warnings,
@@ -108,9 +111,9 @@ def search_options(request, step, template='mdtui/search.html'):
     warnings = []
     autocomplete_list = None
     try:
-        request.session['search_docrule_id']
+        request.session['search_mdt_id']
     except KeyError:
-        warnings.append(MDTUI_ERROR_STRINGS['NO_TYPE'])
+        warnings.append(MDTUI_ERROR_STRINGS['NO_MDTS'])
 
     # CouchDB connection Felt down warn user
     try:
@@ -145,16 +148,16 @@ def search_options(request, step, template='mdtui/search.html'):
 def search_results(request, step=None, template='mdtui/search.html'):
     """Search Step 3: Search Results"""
     document_keys = None
-    docrule_id = None
+    docrule_ids = None
     documents = None
     warnings = []
     mdts_list = None
     try:
         document_keys = request.session['document_search_dict']
-        docrule_id = request.session['search_docrule_id']
+        docrule_ids = request.session['search_docrule_ids']
     except KeyError:
         warnings.append(MDTUI_ERROR_STRINGS['NO_S_KEYS'])
-    log.debug('search_results call: docrule_id: "%s", document_search_dict: "%s"' % (docrule_id, document_keys))
+    log.debug('search_results call: docrule_id: "%s", document_search_dict: "%s"' % (docrule_ids, document_keys))
     if document_keys:
         # turning document_search dict into something useful for the couch request
         clean_keys = cleanup_document_keys(document_keys)
@@ -165,9 +168,9 @@ def search_results(request, step=None, template='mdtui/search.html'):
         keys_cnt = cleaned_document_keys.__len__()
         # Selecting appropriate search method
         if dd_range_keys and keys_cnt == 2:
-            documents = document_date_range_only_search(cleaned_document_keys, docrule_id)
+            documents = document_date_range_only_search(cleaned_document_keys, docrule_ids)
         else:
-            documents = document_date_range_with_keys_search(cleaned_document_keys, docrule_id)
+            documents = document_date_range_with_keys_search(cleaned_document_keys, docrule_ids)
 
         mdts_list = get_mdts_for_documents(documents)
     if documents:
@@ -471,7 +474,12 @@ def mdt_parallel_keys(request):
             if key_name in mdt_keys:
                 # Autocomplete key belongs to this MDT
                 mdt_docrules = mdt[u'docrule_id']
-                mdt_fields = manager.get_keys_for_docrule(docrule_id, doc_mdts)
+                if docrule_id:
+                    # In case of index get Parallel keys from all MDT for docrule
+                    mdt_fields = manager.get_keys_for_docrule(docrule_id, doc_mdts)
+                else:
+                    # In case of search get only from selected MDT
+                    mdt_fields = manager.get_parallel_keys_for_mdts(doc_mdts)
                 pkeys = manager.get_parallel_keys_for_key(mdt_fields, key_name)
                 for docrule in mdt_docrules:
                     # db call to search in docs
