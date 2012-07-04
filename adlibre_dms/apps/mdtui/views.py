@@ -308,12 +308,14 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
     try:
         document_keys = request.session["document_keys_dict"]
     except KeyError:
-        warnings.append(MDTUI_ERROR_STRINGS['NO_INDEX'])
+        if not MDTUI_ERROR_STRINGS['NO_INDEX'] in warnings:
+            warnings.append(MDTUI_ERROR_STRINGS['NO_INDEX'])
 
     try:
         barcode = request.session['barcode']
     except KeyError:
-        warnings.append(MDTUI_ERROR_STRINGS['NO_INDEX'])
+        if not MDTUI_ERROR_STRINGS['NO_INDEX'] in warnings:
+            warnings.append(MDTUI_ERROR_STRINGS['NO_INDEX'])
 
     try:
         index_info = request.session["document_keys_dict"]
