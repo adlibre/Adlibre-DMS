@@ -177,6 +177,7 @@ def make_mdt_select_form(user=None):
         # Filtering Document Type Rules for user
         perms = user.user_permissions.all()
         allowed_docrules_names = []
+        # Checking for permitted docrules
         for permission in perms:
             if permission.content_type.name=='document type':
                 if not permission.codename in allowed_docrules_names:
