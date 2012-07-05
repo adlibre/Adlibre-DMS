@@ -8,9 +8,6 @@ Author: Iurii Garmash
 """
 
 import logging
-import datetime
-
-from django.conf import settings
 
 from operator import itemgetter
 
