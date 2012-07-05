@@ -179,7 +179,13 @@ def make_mdt_select_form(user=None):
         allowed_docrules_names = []
         for permission in perms:
             if permission.content_type.name=='document type':
-                allowed_docrules_names.append(permission.codename)
+                if not permission.codename in allowed_docrules_names:
+                    allowed_docrules_names.append(permission.codename)
+        for group in user.groups.all():
+            for permission in group.permissions.all():
+                if permission.content_type.name=='document type':
+                    if not permission.codename in allowed_docrules_names:
+                        allowed_docrules_names.append(permission.codename)
         docrules_queryset = DocumentTypeRule.objects.filter(title__in=allowed_docrules_names)
         # Getting list of PKs of allowed Document Type Rules.
         allowed_docrules_pks = []
