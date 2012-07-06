@@ -89,7 +89,7 @@ def search_type(request, step, template='mdtui/search.html'):
                 else:
                     warnings.append(MDTUI_ERROR_STRINGS['NO_MDTS'])
     else:
-        # Trying to set docrule if previously selected
+        # Trying to set mdt if previously selected
         try:
             mdt = request.session['search_mdt_id']
         except KeyError:
