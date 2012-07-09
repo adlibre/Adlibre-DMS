@@ -5,15 +5,17 @@
 #
 # Uses UNIX sockets for FCGI
 #
-# Version 2.3
+# Version 2.4
 
 # Project Specific Config
 PROJNAME='adlibre_dms'
 WEB_USER='wwwpub'
 
+METHOD=prefork #threaded
 MAXSPARE=2
 MINSPARE=2
 MAXCHILDREN=10
+MAXREQUESTS=128
 UMASK=007
 
 CWD=$(cd ${0%/*} && pwd -P)
@@ -29,7 +31,7 @@ SOCKET="$PROJDIR/"${3-$(echo "${PROJNAME}")}".sock"
 PIDBASE="$PROJDIR/"${3-$(echo "${PROJNAME}")}
 WPIDFILE="${PIDBASE}.wsgi.pid"
 CPIDFILE="${PIDBASE}.celeryd.pid"
-
+CMD="python ${SRCDIR}/manage.py runfcgi method=${METHOD} minspare=${MINSPARE} maxspare=${MAXSPARE} maxchildren=${MAXCHILDREN} maxrequests=${MAXREQUESTS} socket=$SOCKET pidfile=${WPIDFILE} umask=${UMASK} --settings=${SETTINGS}"
 
 # Functions
 function startit {
@@ -40,7 +42,7 @@ function startit {
         RC=128
     else
         . ${BINDIR}/activate
-        python ${SRCDIR}/manage.py runfcgi method=threaded minspare=${MINSPARE} maxspare=${MAXSPARE} maxchildren=${MAXCHILDREN} socket=$SOCKET pidfile=${WPIDFILE} umask=${UMASK} --settings=${SETTINGS}
+	exec ${CMD}
         RC=$?
         echo "Started."
     fi
@@ -57,7 +59,7 @@ function stopit {
         rm -f -- ${SOCKET}
     else
         echo "PIDFILE not found. Killing likely processes."
-        kill `pgrep -f "python ${SRCDIR}/manage.py runfcgi method=threaded minspare=${MINSPARE} maxspare=${MAXSPARE} maxchildren=${MAXCHILDREN} socket=$SOCKET pidfile=${WPIDFILE} --settings=${SETTINGS}"`
+        kill `pgrep -f "${CMD}"`
         RC=$?
         echo "Process(s) Terminated."
         rm -f -- ${SOCKET}
