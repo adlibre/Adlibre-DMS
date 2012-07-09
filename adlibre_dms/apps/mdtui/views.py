@@ -57,7 +57,8 @@ MDTUI_ERROR_STRINGS = {
     'NO_DB':'Database Connection absent. Check CouchDB server connection.',
     'NO_DOCUMENTS_FOUND': 'Nothing to export because of empty documents results.',
     'NO_MDTS': 'No Meta Data templates found for selected Document Type.',
-    'NEW_KEY_VALUE_PAIR': 'Adding new indexing key: '
+    'NEW_KEY_VALUE_PAIR': 'Adding new indexing key: ',
+    'NO_MDT_NO_DOCRULE': 'You must select Meta Data Template or Document Type.'
 }
 
 
@@ -66,28 +67,88 @@ MDTUI_ERROR_STRINGS = {
 def search_type(request, step, template='mdtui/search.html'):
     """Search Step 1: Select Search MDT"""
     mdt = None
+    docrule_form_id = None
     warnings = []
     cleanup_indexing_session(request)
     cleanup_mdts(request)
-    filtered_form = make_mdt_select_form(request.user)
-    form = filtered_form(request.POST or None)
-    if request.POST:
-            if form.is_valid():
-                mdts = None
-                mdt_form_id = form.data["mdt"]
-                # CouchDB connection Felt down warn user
+
+    # Initialising MDT or Docrule form according to data provided
+    valid_call = True
+    required_mdt = True
+    required_docrule = True
+    try:
+        if request.POST['docrule']:
+            required_mdt = False
+    except KeyError:
+        pass
+    try:
+        if request.POST['mdt']:
+            required_docrule = False
+    except KeyError:
+        pass
+    # Do not process in case docrule and MDT provided
+    try:
+        if request.POST['docrule'] and request.POST['mdt']:
+            valid_call = False
+    except KeyError:
+        pass
+
+    mdts_filtered_form = make_mdt_select_form(request.user, required_mdt)
+    mdts_form = mdts_filtered_form(request.POST or None)
+    docrules_filtered_form = make_document_type_select_form(request.user, required_docrule)
+    docrules_form = docrules_filtered_form(request.POST or None)
+    if request.POST and valid_call:
+            # Cleaning previous form data
+            for key_name in ['search_mdt_id', 'search_docrule_ids', 'mdts', 'searching_docrule_id']:
                 try:
-                    mdt_names = get_mdt_from_search_mdt_select_form(mdt_form_id, filtered_form)
-                    request.session['search_mdt_id'] = mdt_form_id
-                    mdts = get_mdts_by_names(mdt_names)
-                    request.session['search_docrule_ids'] = mdts['1']['docrule_id']
-                except RequestError:
-                    warnings.append(MDTUI_ERROR_STRINGS['NO_DB'])
-                if mdts:
-                    request.session['mdts'] = mdts
-                    return HttpResponseRedirect(reverse('mdtui-search-options'))
+                    del request.session[key_name]
+                except KeyError:
+                    pass
+
+            if mdts_form.is_valid():
+                mdts = None
+                mdt_form_id = None
+                try:
+                    mdt_form_id = mdts_form.data["mdt"]
+                except KeyError:
+                    pass
+                # CouchDB connection Felt down warn user
+                if mdt_form_id:
+                    try:
+                        mdt_names = get_mdt_from_search_mdt_select_form(mdt_form_id, mdts_filtered_form)
+                        request.session['search_mdt_id'] = mdt_form_id
+                        mdts = get_mdts_by_names(mdt_names)
+                        request.session['search_docrule_ids'] = mdts['1']['docrule_id']
+                    except RequestError:
+                        warnings.append(MDTUI_ERROR_STRINGS['NO_DB'])
+                    if mdts:
+                        request.session['mdts'] = mdts
+                        if valid_call:
+                            return HttpResponseRedirect(reverse('mdtui-search-options'))
                 else:
-                    warnings.append(MDTUI_ERROR_STRINGS['NO_MDTS'])
+                    if not MDTUI_ERROR_STRINGS['NO_MDTS'] in warnings:
+                        warnings.append(MDTUI_ERROR_STRINGS['NO_MDTS'])
+            if docrules_form.is_valid():
+                # If Docrule selected than MDT is not required and MDT's form is valid in fact
+                docrule_form_id = None
+                try:
+                    docrule_form_id = docrules_form.data["docrule"]
+                except KeyError:
+                    pass
+                if docrule_form_id:
+                    request.session['searching_docrule_id'] = docrule_form_id
+                    mdts = get_mdts_for_docrule(docrule_form_id)
+                    if mdts:
+                        request.session['mdts'] = mdts
+                        if valid_call:
+                            return HttpResponseRedirect(reverse('mdtui-search-options'))
+                else:
+                    if not MDTUI_ERROR_STRINGS['NO_MDTS'] in warnings:
+                        warnings.append(MDTUI_ERROR_STRINGS['NO_MDTS'])
+
+            if not docrules_form.is_valid() and not mdts_form.is_valid():
+                warnings.append(MDTUI_ERROR_STRINGS['NO_MDT_NO_DOCRULE'])
+
     else:
         # Trying to set mdt if previously selected
         try:
@@ -95,12 +156,21 @@ def search_type(request, step, template='mdtui/search.html'):
         except KeyError:
             pass
         if mdt:
-            form = filtered_form({'mdt': mdt})
+            mdts_form = mdts_filtered_form({'mdt': mdt})
+
+        # Trying to set docrule if previously selected
+        try:
+            mdt = request.session['search_docrule_id']
+        except KeyError:
+            pass
+        if mdt:
+            docrules_form = docrules_filtered_form({'docrule': docrule_form_id})
 
     context = {
                 'warnings': warnings,
                 'step': step,
-                'form': form,
+                'mdts_form': mdts_form,
+                'docrules_form': docrules_form,
                }
     return render_to_response(template, context, context_instance=RequestContext(request))
 
@@ -111,10 +181,17 @@ def search_options(request, step, template='mdtui/search.html'):
     """Search Step 2: Search Options"""
     warnings = []
     autocomplete_list = None
+    mdt_id = None
+    # Trying to get stuff we require OR warn user
     try:
-        request.session['search_mdt_id']
+        mdt_id = request.session['search_mdt_id']
     except KeyError:
-        warnings.append(MDTUI_ERROR_STRINGS['NO_MDTS'])
+        pass
+    if not mdt_id:
+        try:
+            request.session['searching_docrule_id']
+        except KeyError:
+            warnings.append(MDTUI_ERROR_STRINGS['NO_MDTS'])
 
     # CouchDB connection Felt down warn user
     try:
@@ -149,15 +226,27 @@ def search_options(request, step, template='mdtui/search.html'):
 def search_results(request, step=None, template='mdtui/search.html'):
     """Search Step 3: Search Results"""
     document_keys = None
-    docrule_ids = None
+    docrule_ids = []
     documents = None
     warnings = []
     mdts_list = None
     try:
         document_keys = request.session['document_search_dict']
-        docrule_ids = request.session['search_docrule_ids']
     except KeyError:
         warnings.append(MDTUI_ERROR_STRINGS['NO_S_KEYS'])
+    # Getting docrules list for both search methods (Only one allowed)
+    try:
+        # trying to get id's list (for MDT search)
+        docrule_ids = request.session['search_docrule_ids']
+    except KeyError:
+        pass
+    if not docrule_ids:
+        try:
+            # If not exists making list for docrules search
+            docrule_ids = [request.session['searching_docrule_id'],]
+        except KeyError:
+            pass
+
     log.debug('search_results call: docrule_id: "%s", document_search_dict: "%s"' % (docrule_ids, document_keys))
     if document_keys:
         # turning document_search dict into something useful for the couch request

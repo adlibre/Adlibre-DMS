@@ -156,7 +156,7 @@ def setFormData(fm, kwds):
                 except ValueError:
                         pass
 
-def make_mdt_select_form(user=None):
+def make_mdt_select_form(user=None, required=True):
     """
     Special method to construct custom MDTSearchSelectForm
     suggests MDT's for search that only restricted by user Docrule permissions.
@@ -168,12 +168,14 @@ def make_mdt_select_form(user=None):
     mdt_m = MetaDataTemplateManager()
     try:
         all_mdts = mdt_m.get_all_mdts()
+        if not all_mdts:
+            all_mdts = {}
     except RequestError:
         all_mdts = {}
         pass
     filtered_mdts = {}
     # Filtering MDT's displaying only permitted ones for provided user
-    if not user.is_superuser:
+    if not user.is_superuser and all_mdts:
         # Filtering Document Type Rules for user
         perms = user.user_permissions.all()
         allowed_docrules_names = []
@@ -210,7 +212,7 @@ def make_mdt_select_form(user=None):
 
     # Constructing form
     class MDTSelectForm(forms.Form):
-        mdt = forms.ChoiceField(choices=mdt_choices, label="Meta Data Template")
+        mdt = forms.ChoiceField(choices=mdt_choices, label="Meta Data Template", required=required)
 
     return MDTSelectForm
 

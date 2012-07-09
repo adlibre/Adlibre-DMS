@@ -27,7 +27,7 @@ CUSTOM_ERRORS = {
     'UPPER': 'This field should be uppercase.'
 }
 
-def make_document_type_select_form(user=None):
+def make_document_type_select_form(user=None, required=True):
     """
     Special method to construct custom DocumentTypeSelectForm object
     with list of DocumentTypeRule() limited with user permissions
@@ -53,7 +53,7 @@ def make_document_type_select_form(user=None):
 
     # Build a form with provided queryset of DocumentTypeRules.
     class DocumentTypeSelectForm(forms.Form):
-        docrule = forms.ModelChoiceField(queryset=docrules_queryset, label="Document Type")
+        docrule = forms.ModelChoiceField(queryset=docrules_queryset, label="Document Type", required=required)
 
     return DocumentTypeSelectForm
 
