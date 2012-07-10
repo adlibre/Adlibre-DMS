@@ -370,8 +370,51 @@ upper_right_dict = {
     u'description': [u'something usefull']
 }
 
+# Searches with Document Type preselected:
+select_mdt5 = {u'mdt': [u'5']}
+select_docrule_7 = {u'docrule': [u'7']}
+
+search_date_range_only_docrule_7_1 = {
+    u'2_to': [u''],
+    u'end_date': [u''],
+    u'2_from': [u''],
+    u'1': [u''],
+    u'0': [u''],
+    u'3': [u''],
+    u'date': [u'01/03/2012'],
+}
+
+search_date_range_only_docrule_7_2 = {
+    u'2_to': [u''],
+    u'end_date': [u''],
+    u'2_from': [u''],
+    u'1': [u''],
+    u'0': [u''],
+    u'3': [u''],
+    u'date': [u'30/04/2012'],
+}
+
+search_date_range_and_keys_docrule_7_1 = {
+    u'2_to': [u'10/07/2012'],
+    u'end_date': [u''],
+    u'2_from': [u'01/03/2012'],
+    u'1': [u''],
+    u'0': [u'JTG'],
+    u'3': [u'Vovan'],
+    u'date': [u'01/03/2012'],
+}
+
+search_date_range_and_keys_docrule_7_2 = {
+    u'2_to': [u'30/04/2012'],
+    u'end_date': [u''],
+    u'2_from': [u'01/03/2012'],
+    u'1': [u''],
+    u'0': [u''],
+    u'3': [u'Vovan'],
+    u'date': [u'01/03/2012'],
+}
+
 # TODO: test proper CSV export, even just simply, with date range and list of files present there
-# TODO: add tests fo date ranges searches.
 # TODO: add tests for Typehead suggests values between docrules
 
 # TODO: test posting docs to 2 different document type rules and mix out parallel keys and normal search here for proper behaviour:
@@ -1768,6 +1811,122 @@ class MDTUI(TestCase):
         self.assertContains(response, 'mdt3')
         self.assertContains(response, 'mdt4')
         self.assertContains(response, 'mdt5')
+
+    def test_50_search_works_docrule(self):
+        """
+        Testing Search part renders Docrules.
+        """
+        url = reverse('mdtui-search')
+        response = self.client.get(url)
+        self.assertContains(response, 'Test Doc Type 2')
+        self.assertContains(response, 'Test Doc Type 3')
+        self.assertContains(response, 'Adlibre Invoices')
+        self.assertContains(response, 'Test PDFs')
+        self.assertContains(response, 'Document Search')
+        self.assertContains(response, 'Document Type')
+        self.assertEqual(response.status_code, 200)
+
+    def test_51_search_selecting_type_forms(self):
+        """
+        Testing search selection (step type) rendered correctly
+        """
+        url = reverse('mdtui-search')
+        # Selecting MDT
+        response = self.client.post(url, select_mdt5)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        self.assertEqual(response.status_code, 200)
+        # Checking form rendered correctly
+        self.assertContains(response, 'Search Options')
+        self.assertContains(response, 'Employee')
+        self.assertNotContains(response, 'Tests Uppercase Field')
+        self.assertNotContains(response, 'Reporting Entity')
+        # Going back to step type renders proper selection of MDT
+        response = self.client.get(url)
+        self.assertContains(response, '<option value="5" selected="selected">mdt5')
+        # Selecting Document Type now
+        response = self.client.post(url, select_docrule_7)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Search Options')
+        self.assertContains(response, 'Reporting Entity')
+        self.assertContains(response, 'Employee')
+        self.assertContains(response, 'Report Date From')
+        self.assertContains(response, 'Report Type')
+        self.assertNotContains(response, 'Tests Uppercase Field')
+        # Checking step Type selection:
+        response = self.client.get(url)
+        self.assertContains(response, '<option value="7" selected="selected">Test Doc Type 2')
+        self.assertNotContains(response, '<option value="5" selected="selected">mdt5')
+
+    def test_52_search_by_docrule_using_date_range_only(self):
+        """
+        Search by Document Type with date range only.
+        """
+        url = reverse('mdtui-search')
+        # Selecting MDT
+        response = self.client.post(url, select_docrule_7)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Reporting Entity')
+        # Posting date range 1
+        response = self.client.post(new_url, search_date_range_only_docrule_7_1)
+        self.assertEqual(response.status_code, 302)
+        results_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(results_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'BBB-0001')
+        self.assertContains(response, 'BBB-0002')
+        self.assertContains(response, 'BBB-0003')
+        # Posting date range 2
+        response = self.client.post(new_url, search_date_range_only_docrule_7_2)
+        self.assertEqual(response.status_code, 302)
+        results_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(results_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, 'BBB-0001')
+        self.assertNotContains(response, 'BBB-0002')
+        self.assertContains(response, 'BBB-0003')
+
+    def test_53_search_by_docrule_using_date_range_and_keys(self):
+        """
+        Search complex queries that find documents by date ranges and/or combination of keys
+        Checks:
+        - 2 different date ranges,
+        - 2 keys,
+        - creation date range
+        """
+        url = reverse('mdtui-search')
+        # Selecting MDT
+        response = self.client.post(url, select_docrule_7)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Reporting Entity')
+        # Posting params 1
+        response = self.client.post(new_url, search_date_range_and_keys_docrule_7_1)
+        self.assertEqual(response.status_code, 302)
+        results_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(results_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'BBB-0001')
+        self.assertNotContains(response, 'BBB-0002')
+        self.assertNotContains(response, 'BBB-0003')
+        # Posting params 2
+        response = self.client.post(new_url, search_date_range_and_keys_docrule_7_2)
+        self.assertEqual(response.status_code, 302)
+        results_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(results_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'BBB-0001')
+        self.assertContains(response, 'BBB-0002')
+        self.assertNotContains(response, 'BBB-0003')
 
     def test_z_cleanup(self):
         """
