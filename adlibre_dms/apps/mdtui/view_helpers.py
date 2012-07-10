@@ -176,7 +176,7 @@ def _cleanup_session_var(request, var):
 
 def cleanup_search_session(request):
     """Makes MDTUI forget abut searching keys entered before."""
-    vars = ('document_search_dict', 'search_docrule_id',)
+    vars = ('document_search_dict', 'search_docrule_id', 'search_mdt_id', 'search_docrule_ids', 'searching_docrule_id')
     for var in vars:
         _cleanup_session_var(request, var)
 
