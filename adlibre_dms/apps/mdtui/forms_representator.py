@@ -212,7 +212,7 @@ def make_mdt_select_form(user=None, required=True):
 
     # Constructing form
     class MDTSelectForm(forms.Form):
-        mdt = forms.ChoiceField(choices=mdt_choices, label="Meta Data Template", required=required)
+        mdt = forms.ChoiceField(choices=mdt_choices, label="Custom Search", required=required)
 
     return MDTSelectForm
 
