@@ -1824,6 +1824,7 @@ class MDTUI(TestCase):
         self.assertContains(response, 'Test PDFs')
         self.assertContains(response, 'Document Search')
         self.assertContains(response, 'Document Type')
+        self.assertContains(response, 'Custom Search')
         self.assertEqual(response.status_code, 200)
 
     def test_51_search_selecting_type_forms(self):
