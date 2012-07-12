@@ -23,6 +23,7 @@ SEARCH_STRING_REPR = {
     'field_label_to': u' To',
     'id_from': u'_from',
     'id_to': u'_to',
+    'MDT_SEARCH': u"Custom Search",
     }
 
 log = logging.getLogger('dms.mdtui.views')
@@ -165,13 +166,19 @@ def make_mdt_select_form(user=None, required=True):
     'MDT1' has connected 'docrule1' AND 'user', that is provided to method,
     has permission to interact with this DocumentTypeRule ('docrule1' in our case).
     """
+    # Fetching all mdts that have more than 1 docrule
     mdt_m = MetaDataTemplateManager()
+    all_mdts = {}
     try:
-        all_mdts = mdt_m.get_all_mdts()
-        if not all_mdts:
-            all_mdts = {}
+        couch_mdts = mdt_m.get_all_mdts()
+        # Filtering with more than 1 docrule count
+        if couch_mdts:
+            for mdt_id, mdt in couch_mdts.iteritems():
+                mdt_docrules = mdt['docrule_id']
+                if mdt_docrules.__len__() > 1:
+                    all_mdts[mdt_id] = mdt
     except RequestError:
-        all_mdts = {}
+        # No CouchDB
         pass
     filtered_mdts = {}
     # Filtering MDT's displaying only permitted ones for provided user
@@ -212,7 +219,7 @@ def make_mdt_select_form(user=None, required=True):
 
     # Constructing form
     class MDTSelectForm(forms.Form):
-        mdt = forms.ChoiceField(choices=mdt_choices, label="Custom Search", required=required)
+        mdt = forms.ChoiceField(choices=mdt_choices, label=SEARCH_STRING_REPR['MDT_SEARCH'], required=required)
 
     return MDTSelectForm
 
