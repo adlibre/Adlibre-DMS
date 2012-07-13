@@ -6,6 +6,10 @@ License: See LICENSE for license information
 Author: Iurii Garmash
 """
 
+import datetime
+
+from django.conf import settings
+
 from dms_plugins.pluginpoints import BeforeRetrievalPluginPoint, BeforeRemovalPluginPoint, DatabaseStoragePluginPoint
 from dms_plugins.models import DocTags
 from dms_plugins.workers import Plugin
@@ -57,8 +61,12 @@ class CouchDBMetadata(object):
                             temp_doc = self.retrieve(request, document)
                             old_metadata = temp_doc.get_db_info()
                             if old_metadata['mdt_indexes']:
-                                # Preserving Description
+                                # Preserving Description, User, Created Date
                                 old_metadata['mdt_indexes']['description'] = old_metadata['description']
+                                old_metadata['mdt_indexes']['metadata_user_name'] = old_metadata['metadata_user_name']
+                                old_metadata['mdt_indexes']['metadata_user_id'] = old_metadata['metadata_user_id']
+                                old_cr_date = old_metadata['metadata_created_date']
+                                old_metadata['mdt_indexes']['date'] = datetime.datetime.strftime(old_cr_date, settings.DATE_FORMAT)
                                 document.set_db_info(old_metadata['mdt_indexes'])
                                 document.set_metadata(current_revisions)
                         except ResourceNotFound:
