@@ -65,8 +65,8 @@ class CouchDBMetadata(object):
                                 old_metadata['mdt_indexes']['description'] = old_metadata['description']
                                 old_metadata['mdt_indexes']['metadata_user_name'] = old_metadata['metadata_user_name']
                                 old_metadata['mdt_indexes']['metadata_user_id'] = old_metadata['metadata_user_id']
-                                old_cr_date = old_metadata['metadata_created_date']
-                                old_metadata['mdt_indexes']['date'] = datetime.datetime.strftime(old_cr_date, settings.DATE_FORMAT)
+                                old_cr_date = datetime.datetime.strftime(old_metadata['metadata_created_date'], settings.DATE_FORMAT)
+                                old_metadata['mdt_indexes']['date'] = old_cr_date
                                 document.set_db_info(old_metadata['mdt_indexes'])
                                 document.set_metadata(current_revisions)
                         except ResourceNotFound:
