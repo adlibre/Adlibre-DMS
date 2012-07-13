@@ -8,6 +8,7 @@ Author: Iurii Garmash
 
 from datetime import datetime
 from couchdbkit.ext.django.schema import *
+from couchdbkit.exceptions import BadValueError
 
 from django.conf import settings
 
@@ -114,7 +115,8 @@ class CouchDocument(Document):
             # setting document current revision metadata date, except not exists using now() instead.
             try:
                 revision = unicode(document.revision)
-                self.metadata_created_date = document.metadata[revision][u'created_date']
+                # TODO: FIXME: hardcoded revision date format
+                self.metadata_created_date = datetime.strptime(document.metadata[revision][u'created_date'], "%Y-%m-%d %H:%M:%S")
             except KeyError:
                 # if not provided model stores default "utcnow" date
                 pass
