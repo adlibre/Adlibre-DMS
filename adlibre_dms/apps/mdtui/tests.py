@@ -1955,6 +1955,39 @@ class MDTUI(TestCase):
         self.assertContains(response, 'BBB-0002')
         self.assertNotContains(response, 'BBB-0003')
 
+    def test_54_core_creation_indexes_left_the_smae_on_update(self):
+        """
+        Testing Doc update sequence.
+        e.g.:
+        You have indexed document through MUI and printed a barcode.
+        You now try to upload a document through API (e.g. from scanning house)
+        Your document's User, Description and created date are left the same.
+        """
+        # Changing user
+        self.client.logout()
+        self.client.login(username=username_1, password=password_1)
+        # Uploading file through browser app
+        filename = settings.FIXTURE_DIRS[0] + '/testdata/' + doc1 + '.pdf'
+        url = reverse('upload')
+        data = { 'file': open(filename, 'r'), }
+        response = self.client.post(url, data)
+        self.assertContains(response, 'File has been uploaded')
+        # Faking 'request' object to test with assertions
+        url = couchdb_url + '/dmscouch/'+doc1+'?revs_info=true'
+        r = self.client.get(url)
+        cou = urllib.urlopen(url)
+        resp = cou.read()
+        r.status_code = 200
+        r.content = resp
+        # Checking User/Description/Creation Date in new doc
+        self.assertContains(r, doc1) # Doc name present
+        self.assertContains(r, doc1+'_r2.pdf') # Revision updated
+        self.assertContains(r, 'Iurii Garmash') # Indexes present
+        self.assertContains(r, '"metadata_created_date":"2012-03-06T00:00:00Z"') # creation date left as it is
+        self.assertContains(r, '"metadata_user_name":"admin"') # User left as is
+        self.assertContains(r, '"metadata_user_id":"1"') # User PK stored properly
+        self.assertContains(r, doc1_dict['description']) # Description preserved
+
     def test_z_cleanup(self):
         """
         Cleaning up after all tests finished.

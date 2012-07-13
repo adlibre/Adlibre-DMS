@@ -36,12 +36,17 @@ class CouchDocument(Document):
             self.id = document.get_stripped_filename()
             self._doc['_id']=self.id
         self.metadata_doc_type_rule_id = str(document.doccode.pk)
-        # user name/id from Django user
-        self.metadata_user_id = str(request.user.pk)
-        if request.user.first_name:
-            self.metadata_user_name = request.user.first_name + u'' + request.user.last_name
-        else:
-            self.metadata_user_name = request.user.username
+        # Trying to set provided user name/id
+        try:
+            self.metadata_user_name = document.db_info["metadata_user_name"]
+            self.metadata_user_id = document.db_info["metadata_user_id"]
+        except KeyError:
+            # user name/id from Django user
+            self.metadata_user_id = str(request.user.pk)
+            if request.user.first_name:
+                self.metadata_user_name = request.user.first_name + u'' + request.user.last_name
+            else:
+                self.metadata_user_name = request.user.username
         self.set_doc_date(document)
         # adding description if exists
         try:
@@ -86,8 +91,7 @@ class CouchDocument(Document):
         db_info["description"] = self.metadata_description
         db_info["tags"] = self.tags
         db_info["metadata_doc_type_rule_id"] = self.metadata_doc_type_rule_id
-        # TODO: not implemented and needed for exposure till implementation of Permissions/Ldap plugin.
-        #db_info["metadata_user_id"] = self.metadata_user_id
+        db_info["metadata_user_id"] = self.metadata_user_id
         db_info["metadata_user_name"] = self.metadata_user_name
         db_info["metadata_created_date"] = self.metadata_created_date
         db_info["mdt_indexes"] = self.mdt_indexes
@@ -107,10 +111,10 @@ class CouchDocument(Document):
         if doc_date:
             self.metadata_created_date = doc_date
         else:
-            # setting document current revision metadata date, except not exist's using now() instead.
+            # setting document current revision metadata date, except not exists using now() instead.
             try:
                 revision = unicode(document.revision)
                 self.metadata_created_date = document.metadata[revision][u'created_date']
-            except Exception:
+            except KeyError:
                 # if not provided model stores default "utcnow" date
                 pass
