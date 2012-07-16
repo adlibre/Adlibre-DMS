@@ -1513,6 +1513,9 @@ class MDTUI(TestCase):
         self.assertNotContains(response, 'ADL-0003')
         self.assertNotContains(response, 'BBB-0001')
         self.assertNotContains(response, 'BBB-0002')
+        # Not contains 2 document dict fields
+        self.assertNotContains(response, 'metadata_user_name')
+        self.assertNotContains(response, 'metadata_user_id')
 
     def test_37_uppercase_fields_lowercase_data(self):
         """
