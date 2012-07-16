@@ -181,6 +181,14 @@ class APITest(DMSTestCase):
         response = self.client.get(url)
         self.assertContains(response, 'Bad Request', status_code=400)
 
+    def test_api_wrong_file_shows_not_exists(self):
+        # Fixed Bug #785
+        # MUI: View invalid filename causes exception
+        self.client.login(username=self.username, password=self.password)
+        url = reverse('api_file', args={"code": 'mas00000280.pdf'})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
+
     def test_zz_cleanup(self):
         """
         Test Cleanup

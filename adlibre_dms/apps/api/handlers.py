@@ -67,12 +67,8 @@ class FileHandler(BaseFileHandler):
         processor = DocumentProcessor()
         document = processor.read(request, code, hashcode, revision, extension=suggested_format)
         if processor.errors:
-            if settings.DEBUG:
-                raise
-            else:
-                log.error('FileHandler.read manager errors: %s' % processor.errors)
-                return rc.NOT_FOUND # FIXME: should be reading RC code from plugin exception.
-                                    # @yuri 2 @andrew: I do not think we should expose internal DMS exception to API user.
+            log.error('FileHandler.read manager errors: %s' % processor.errors)
+            return rc.NOT_FOUND
         else:
             response = DocumentResponse(document)
             log.info('FileHandler.read request fulfilled for code: %s, format: %s, rev %s, hash: %s.'

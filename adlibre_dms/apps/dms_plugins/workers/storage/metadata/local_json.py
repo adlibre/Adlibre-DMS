@@ -42,7 +42,7 @@ class LocalJSONMetadata(object):
             except:
                 raise PluginError("No such revision for this document", 404)
             document.set_metadata(fileinfo_db)
-        if document.get_option('only_metadata') == True:
+        if document.get_option('only_metadata'):
             raise BreakPluginChain()
         return document
 
@@ -110,9 +110,12 @@ class LocalJSONMetadata(object):
         json.dump(fileinfo_db, json_handler, indent = 4)
 
     def get_fake_metadata(self, root, fil):
-        return {   'created_date': datetime.datetime.strptime( 
-                    os.path.split(root)[-1], settings.DATE_FORMAT
-                    ).strftime(settings.DATETIME_FORMAT),
+        created_date = datetime.datetime.strptime(datetime.datetime.strftime(datetime.datetime.now(), settings.DATETIME_FORMAT), settings.DATETIME_FORMAT)
+        # TODO: Understand what the author ment by this...
+#        created_date = datetime.datetime.strptime(
+#                                                    os.path.split(root)[-1], settings.DATE_FORMAT
+#                                                    ).strftime(settings.DATETIME_FORMAT)
+        return {   'created_date': created_date,
                     'name': fil,
                     'revision': 'N/A'
                 }
