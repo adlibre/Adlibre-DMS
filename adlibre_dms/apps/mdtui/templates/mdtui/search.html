@@ -111,7 +111,9 @@
                     <th>{% trans 'View' %}</th>
                     <th><a href="{# TODO: sort on this#}">{% trans 'Creation Date' %}</a></th>
                     {% for key in mdts %}
+                    {% if not key == "metadata_user_name" and not key == "metadata_user_id" %}
                     <th><a href="{# TODO: sort on this#}">{{ key }}</a></th>
+                    {% endif %}
                     {% endfor %}
                     <th><a href="{# TODO: sort on this#}">{% trans 'Description' %}</a></th>
                     <th><a href="{# TODO: sort on this#}">{% trans 'Type' %}</a></th>
@@ -124,7 +126,9 @@
                     <td class="nw"><a href="{% url mdtui-view-pdf doc.id %}" title="{% trans 'View Document' %}" alt="{% trans 'View Document' %}" target="_blank"><i class="icon-download"></i> {{ doc.id }}</a></td>
                     <td class="nw">{{ doc.metadata_created_date|date:DATE_FORMAT }}</td>
                     {% for key in mdts %}
+                    {% if not key == "metadata_user_name" and not key == "metadata_user_id" %}
                     <td>{% get_sec_key_for_doc doc.mdt_indexes key %}</td>
+                    {% endif %}
                     {% endfor %}
                     <td>{{ doc.metadata_description }}</td>
                     <td>{% get_docrule_name_by_id doc.metadata_doc_type_rule_id %}</td>
