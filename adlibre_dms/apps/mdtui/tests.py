@@ -436,6 +436,12 @@ search_MDT_date_range_1 = {
     u'0': u'',
 }
 
+search_MDT_5_empty_options_form = {
+    u'date': u'',
+    u'end_date': u'',
+    u'0': u'',
+}
+
 search_MDT_date_range_2 = {}
 
 # TODO: test proper CSV export, even just simply, with date range and list of files present there
@@ -1990,6 +1996,33 @@ class MDTUI(TestCase):
         self.assertContains(r, '"metadata_user_name":"admin"') # User left as is
         self.assertContains(r, '"metadata_user_id":"1"') # User PK stored properly
         self.assertContains(r, doc1_dict['description']) # Description preserved
+
+    def test_55_mdt_empty_search(self):
+        """
+        Bug #791 MUI: Selecting MDT search results Exception.
+
+        After selection of MDT and submitting "Search Options" form with empty results
+        we have a bug that rises an exception in search results. Prevents from rendering.
+        """
+        url = reverse('mdtui-search-type')
+        data = {'mdt': test_mdt_id_5}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        url = reverse('mdtui-search-options')
+        # Getting required indexes id's
+        response = self.client.get(url)
+        # Searching date range with unique doc1 keys
+        response = self.client.post(url, search_MDT_5_empty_options_form)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        # Response is ok and only one doc persists there
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, MDTUI_ERROR_STRINGS['NO_S_KEYS'])
+        # No documents for any of docrules found in response
+        self.assertNotContains(response, 'BBB-')
+        self.assertNotContains(response, 'CCC-')
+        self.assertNotContains(response, 'ADL-')
 
     def test_z_cleanup(self):
         """

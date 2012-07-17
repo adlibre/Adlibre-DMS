@@ -252,16 +252,20 @@ def search_results(request, step=None, template='mdtui/search.html'):
         clean_keys = cleanup_document_keys(document_keys)
         ck = ranges_validator(clean_keys)
         cleaned_document_keys = recognise_dates_in_search(ck)
-        keys = [key for key in cleaned_document_keys.iterkeys()]
-        dd_range_keys = document_date_range_present_in_keys(keys)
-        keys_cnt = cleaned_document_keys.__len__()
-        # Selecting appropriate search method
-        if dd_range_keys and keys_cnt == 2:
-            documents = document_date_range_only_search(cleaned_document_keys, docrule_ids)
+        # Submitted form with all fields empty
+        if cleaned_document_keys:
+            keys = [key for key in cleaned_document_keys.iterkeys()]
+            dd_range_keys = document_date_range_present_in_keys(keys)
+            keys_cnt = cleaned_document_keys.__len__()
+            # Selecting appropriate search method
+            if dd_range_keys and keys_cnt == 2:
+                documents = document_date_range_only_search(cleaned_document_keys, docrule_ids)
+            else:
+                documents = document_date_range_with_keys_search(cleaned_document_keys, docrule_ids)
         else:
-            documents = document_date_range_with_keys_search(cleaned_document_keys, docrule_ids)
-
+            warnings.append(MDTUI_ERROR_STRINGS['NO_S_KEYS'])
         mdts_list = get_mdts_for_documents(documents)
+
     if documents:
         documents = search_results_by_date(documents)
     # Produces a CSV file from search results
