@@ -136,14 +136,15 @@
 
     <h4>{% trans 'Choose document source:' %}</h4>
 
+    {# Buttons work only if call is Valid (e.g. all indexes and doccode selected #}
     <div class="row">
         <div class="span3" style="text-align: center;">
-            <a href="#fileModal" data-toggle="modal"><img src="{{ STATIC_URL }}upload.png" /></a>
-            <p><a href="#fileModal" data-toggle="modal" class="btn"><i class="icon-upload"></i> {% trans 'Upload File' %}</a></p>
+            <a href="#{% if valid_call %}fileModal{% endif %}" data-toggle="modal"><img src="{{ STATIC_URL }}upload.png" /></a>
+            <p><a href="#{% if valid_call %}fileModal{% endif %}" data-toggle="modal" class="btn"><i class="icon-upload"></i> {% trans 'Upload File' %}</a></p>
         </div>
         <div class="span3" style="text-align: center;">
-            <a href="#printModal" data-toggle="modal"><img src="{{ STATIC_URL }}printer.png" /></a>
-            <p><a href="#printModal" data-toggle="modal" class="btn"><i class="icon-print"></i> {% trans 'Print Barcode' %}</a></p>
+            <a href="#{% if valid_call %}printModal{% endif %}" data-toggle="modal"><img src="{{ STATIC_URL }}printer.png" /></a>
+            <p><a href="#{% if valid_call %}printModal{% endif %}" data-toggle="modal" class="btn"><i class="icon-print"></i> {% trans 'Print Barcode' %}</a></p>
         </div>
     </div>
 
@@ -208,7 +209,6 @@
             <a href="#myModal" class="btn btn-danger" data-dismiss="modal" id="file-upload-cancel"><i class="icon-trash icon-white"></i> {% trans 'Cancel' %}</a>
         </div>
     </div>
-
     {% endif %} {# end step 3 #}
 
     {% if step == "4" %}

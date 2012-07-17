@@ -58,7 +58,8 @@ MDTUI_ERROR_STRINGS = {
     'NO_DOCUMENTS_FOUND': 'Nothing to export because of empty documents results.',
     'NO_MDTS': 'No Meta Data templates found for selected Document Type.',
     'NEW_KEY_VALUE_PAIR': 'Adding new indexing key: ',
-    'NO_MDT_NO_DOCRULE': 'You must select Meta Data Template or Document Type.'
+    'NO_MDT_NO_DOCRULE': 'You must select Meta Data Template or Document Type.',
+    'NOT_VALID_INDEXING': 'You can not barcode or upload document without any indexes',
 }
 
 
@@ -395,28 +396,34 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
     index_info = None
     docrule = None
     barcode = None
+    valid_call = True
+
 
     # Check session variables
     try:
         document_keys = request.session["document_keys_dict"]
     except KeyError:
+        valid_call = False
         if not MDTUI_ERROR_STRINGS['NO_INDEX'] in warnings:
             warnings.append(MDTUI_ERROR_STRINGS['NO_INDEX'])
 
     try:
         barcode = request.session['barcode']
     except KeyError:
+        valid_call = False
         if not MDTUI_ERROR_STRINGS['NO_INDEX'] in warnings:
             warnings.append(MDTUI_ERROR_STRINGS['NO_INDEX'])
 
     try:
         index_info = request.session["document_keys_dict"]
     except KeyError:
+        valid_call = False
         warnings.append(MDTUI_ERROR_STRINGS['NO_S_KEYS'])
 
     try:
         docrule = request.session['indexing_docrule_id']
     except KeyError:
+        valid_call = False
         warnings.append(MDTUI_ERROR_STRINGS['NO_DOCRULE'])
 
     # Init Forms correctly depending on url posted
@@ -444,21 +451,25 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
             import os
             upload_file = open(os.path.join(os.path.split(__file__)[0], 'stub_document.pdf'), 'rb')
 
-        # Unifying dates to CouchDB storage formats.
-        # TODO: maybe make it a part of the CouchDB storing manager.
-        clean_index = unify_index_info_couch_dates_fmt(index_info)
+        if valid_call:
+            # Unifying dates to CouchDB storage formats.
+            # TODO: maybe make it a part of the CouchDB storing manager.
+            clean_index = unify_index_info_couch_dates_fmt(index_info)
 
-        # Storing into DMS with main Document Processor and current indexes
-        processor = DocumentProcessor()
-        processor.create(request, upload_file, index_info=clean_index, barcode=barcode)
+            # Storing into DMS with main Document Processor and current indexes
+            processor = DocumentProcessor()
+            processor.create(request, upload_file, index_info=clean_index, barcode=barcode)
 
-        if not processor.errors:
-            return HttpResponseRedirect(reverse('mdtui-index-finished'))
+            if not processor.errors:
+                return HttpResponseRedirect(reverse('mdtui-index-finished'))
+            else:
+                # FIXME: dodgy error handling
+                return HttpResponse(str(processor.errors))
         else:
-            # FIXME: dodgy error handling
-            return HttpResponse(str(processor.errors))
+            warnings.append(MDTUI_ERROR_STRINGS['NOT_VALID_INDEXING'])
 
     context.update( { 'step': step,
+                      'valid_call': valid_call,
                       'upload_form': upload_form,
                       'barcode_form': barcode_form,
                       'document_keys': document_keys,

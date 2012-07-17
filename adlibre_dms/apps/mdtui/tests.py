@@ -777,6 +777,10 @@ class MDTUI(TestCase):
         self.assertContains(response, 'Upload File')
         self.assertContains(response, 'id_file')
         self.assertEqual(response.status_code, 200)
+        # Contains ability to print barcode or upload file
+        # Bug #792 MUI: Barcode/Upload document without indexes bug.
+        self.assertContains(response, '<a href="#fileModal')
+        self.assertContains(response, '<a href="#printModal')
 
     def test_11_rendering_form_without_first_step(self):
         """
@@ -2023,6 +2027,26 @@ class MDTUI(TestCase):
         self.assertNotContains(response, 'BBB-')
         self.assertNotContains(response, 'CCC-')
         self.assertNotContains(response, 'ADL-')
+
+    def test_56_indexing_uploading_or_barcoding_without_indexes(self):
+        """
+        Bug #792 MUI: Barcode/Upload document without indexes bug.
+
+        Bug that appears when user tries to upload or barcode document without:
+        Submitting any indexes.
+        Entering Document Type.
+        (E.g. going into MDTUI and entering STEP 3 from scratch without filling any previous forms.)
+        """
+        url = reverse('mdtui-index-source')
+        response = self.client.get(url)
+        # Checking if response is ok to test this case
+        self.assertContains(response, MDTUI_ERROR_STRINGS['NO_INDEX'])
+        self.assertContains(response, MDTUI_ERROR_STRINGS['NO_S_KEYS'])
+        self.assertContains(response, MDTUI_ERROR_STRINGS['NO_DOCRULE'])
+        print response
+        # Printing Barcode or uploading modal showing disabled
+        self.assertNotContains(response, '<a href="#fileModal')
+        self.assertNotContains(response, '<a href="#printModal')
 
     def test_z_cleanup(self):
         """
