@@ -16,7 +16,6 @@ from django.core.exceptions import ValidationError
 from django.conf import settings
 import datetime
 
-from doc_codes.models import DocumentTypeRule
 from forms_representator import setFormFields
 from forms_representator import setFormData
 from adlibre.date_converter import date_standardized
@@ -26,37 +25,6 @@ CUSTOM_ERRORS = {
     'DATE': 'Must be in valid Date format. (example "%s")' % date_standardized('2012-12-30'),
     'UPPER': 'This field should be uppercase.'
 }
-
-def make_document_type_select_form(user=None, required=True):
-    """
-    Special method to construct custom DocumentTypeSelectForm object
-    with list of DocumentTypeRule() limited with user permissions
-    """
-    # Check for user permissions and build queryset for form based on that.
-    if user:
-        if not user.is_superuser:
-            perms = user.user_permissions.all()
-            allowed_docrules_names = []
-            # Checking for permitted docrules
-            for permission in perms:
-                if permission.content_type.name=='document type':
-                    if not permission.codename in allowed_docrules_names:
-                        allowed_docrules_names.append(permission.codename)
-            for group in user.groups.all():
-                for permission in group.permissions.all():
-                    if permission.content_type.name=='document type':
-                        if not permission.codename in allowed_docrules_names:
-                            allowed_docrules_names.append(permission.codename)
-            docrules_queryset = DocumentTypeRule.objects.filter(title__in=allowed_docrules_names)
-        else:
-            docrules_queryset = DocumentTypeRule.objects.all()
-
-    # Build a form with provided queryset of DocumentTypeRules.
-    class DocumentTypeSelectForm(forms.Form):
-        docrule = forms.ModelChoiceField(queryset=docrules_queryset, label="Document Type", required=required)
-
-    return DocumentTypeSelectForm
-
 
 class DocumentUploadForm(forms.Form):
     file = forms.FileField()
