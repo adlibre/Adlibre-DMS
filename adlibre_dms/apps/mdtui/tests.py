@@ -12,6 +12,9 @@ import json, os, urllib, datetime, re
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from django.conf import settings
+from django.contrib.auth.models import User
+from django.contrib.auth.models import Group
+from django.contrib.auth.models import Permission
 
 from couchdbkit import Server
 
@@ -30,6 +33,10 @@ password_1 = 'test1'
 username_2 = 'test_perms_2'
 password_2 = 'test2'
 
+# test user 3
+username_3 = 'tests_user_3'
+password_3 = 'test3'
+
 couchdb_url = 'http://127.0.0.1:5984'
 
 test_mdt_docrule_id = 2 # should be properly assigned to fixtures docrule that uses CouchDB plugins
@@ -41,7 +48,7 @@ test_mdt_id_2 = 2 # Second MDT used in testing search part of MUI
 test_mdt_id_3 = 3 # Third MDT used in testing search part of MUI
 test_mdt_id_5 = 5 # Last MDT used in testing search part of MUI
 
-indexes_form_match_pattern = '(Employee ID|Employee Name|Friends ID|Friends Name|Required Date|Reporting Entity|Report Date|Report Type|Employee|Tests Uppercase Field).+?name=\"(\d+|\d+_from|\d+_to)\"'
+indexes_form_match_pattern = '(Employee ID|Employee Name|Friends ID|Friends Name|Required Date|Reporting Entity|Report Date|Report Type|Employee|Tests Uppercase Field|Additional).+?name=\"(\d+|\d+_from|\d+_to)\"'
 
 indexing_done_string = 'Your document has been indexed'
 indexes_added_string = 'Your documents indexes'
@@ -172,6 +179,7 @@ doc1_dict = {
     'Employee Name': 'Iurii Garmash',
     'Friends ID': '123',
     'Friends Name': 'Andrew',
+    'Additional': 'Something for 1',
 }
 
 doc2_dict = {
@@ -182,6 +190,7 @@ doc2_dict = {
     'Employee Name': 'Andrew Cutler',
     'Friends ID': '321',
     'Friends Name': 'Yuri',
+    'Additional': 'Something for 2',
 }
 
 doc3_dict = {
@@ -192,6 +201,7 @@ doc3_dict = {
     'Employee Name': 'Andrew Cutler',
     'Friends ID': '222',
     'Friends Name': 'Someone',
+    'Additional': 'Something for 3',
 }
 
 # Static dictionary of document #1 to test WARNING of creating new index fields
@@ -215,6 +225,7 @@ m2_doc1_dict = {
     'Report Date': date_standardized('2012-04-01'),
     'Report Type': 'Reconciliation',
     'Employee': 'Vovan',
+    'Additional': 'Something mdt2 1',
 }
 
 m2_doc2_dict = {
@@ -224,6 +235,7 @@ m2_doc2_dict = {
     'Report Date': date_standardized('2012-04-04'),
     'Report Type': 'Pay run',
     'Employee': 'Vovan',
+    'Additional': 'Something mdt2 2',
 }
 
 m2_doc3_dict = {
@@ -233,6 +245,7 @@ m2_doc3_dict = {
     'Report Date': date_standardized('2012-05-01'),
     'Report Type': 'Pay run',
     'Employee': 'Andrew',
+    'Additional': 'Something mdt2 3',
 }
 
 ind_doc1 = {
@@ -443,6 +456,15 @@ search_MDT_5_empty_options_form = {
 }
 
 search_MDT_date_range_2 = {}
+
+# Permissions search testing
+search_select_mdt_6 = {u'mdt': u'6'}
+
+search_seleect_mdt_6_date_range = {
+    u'date': date_standardized('2012-01-01'),
+    u'end_date': u'',
+    u'0': u'',
+}
 
 # TODO: test proper CSV export, even just simply, with date range and list of files present there
 # TODO: add tests for Typehead suggests values between docrules
@@ -1436,7 +1458,7 @@ class MDTUI(TestCase):
             self.assertNotContains(response, doc_dict['Employee Name'])
         # Keys from MDT-s 1 and 2 not rendered vin search response
         for key in doc1_dict.iterkeys():
-            if not key=='date' and not key=='description':
+            if not key=='date' and not key=='description' and not key=='Additional':
                 self.assertNotContains(response, key)
 
     def test_35_search_date_range_withing_2_different_docrules_2(self):
@@ -2043,10 +2065,79 @@ class MDTUI(TestCase):
         self.assertContains(response, MDTUI_ERROR_STRINGS['NO_INDEX'])
         self.assertContains(response, MDTUI_ERROR_STRINGS['NO_S_KEYS'])
         self.assertContains(response, MDTUI_ERROR_STRINGS['NO_DOCRULE'])
-        print response
         # Printing Barcode or uploading modal showing disabled
         self.assertNotContains(response, '<a href="#fileModal')
         self.assertNotContains(response, '<a href="#printModal')
+
+    def test_57_searching_by_MDT_filters_permitted_results(self):
+        """
+        Feature #716 Search by metadata template
+
+        Need to make sure that searching using MDT
+        will not go displaying protected documents in search results.
+
+        Generally first test of restricted MDT's search results.
+        """
+        # Creating special user
+        user = User.objects.create_user(username_3, 'a@b.com', password_3)
+        user.save()
+        # Adding permission to interact Adlibre invoices only
+        perm = Permission.objects.filter(name=u'Can interact Adlibre Invoices')
+        user.user_permissions.add(perm[0])
+        # Registering that user in required security groups and removing their permissions...
+        for groupname in ['security', 'api', 'MUI Index interaction', 'MUI Search interaction']:
+            g = Group.objects.get(name=groupname)
+            g.user_set.add(user)
+            for perm in g.permissions.all():
+                g.permissions.remove(perm)
+        # Logging in with this new user
+        self.client.logout()
+        self.client.login(username=username_3, password=password_3)
+        url = reverse('mdtui-search-type')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        response = self.client.post(url, search_select_mdt_6)
+        opt_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(opt_url)
+        self.assertEqual(response.status_code, 200)
+        response = self.client.post(opt_url, search_seleect_mdt_6_date_range)
+        res_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(res_url)
+        # Checking if search result is filtered properly (Only 'Adlibre Invoices' Docuemnt Type's docs present)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, doc1)
+        self.assertContains(response, doc2)
+        self.assertContains(response, 'ADL-0003')
+        self.assertNotContains(response, 'BBB-0001')
+        self.assertNotContains(response, 'BBB-0002')
+        self.assertNotContains(response, 'BBB-0003')
+        self.assertNotContains(response, 'CCC-0001')
+
+        # Doing the same with adding second permission (for Test docrule 2)
+        perm2 = Permission.objects.filter(name=u'Can interact Test Doc Type 2')
+        user.user_permissions.add(perm2[0])
+        # Reinitialising search:
+        url = reverse('mdtui-search-type')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        response = self.client.post(url, search_select_mdt_6)
+        opt_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(opt_url)
+        self.assertEqual(response.status_code, 200)
+        response = self.client.post(opt_url, search_seleect_mdt_6_date_range)
+        res_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(res_url)
+        response = self.client.get(res_url)
+        # Checking if search result is filtered properly
+        # ('Adlibre Invoices' and 'Test Doc Type 2' Docuemnt Type's docs present)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, doc1)
+        self.assertContains(response, doc2)
+        self.assertContains(response, 'ADL-0003')
+        self.assertContains(response, 'BBB-0001')
+        self.assertContains(response, 'BBB-0002')
+        self.assertContains(response, 'BBB-0003')
+        self.assertNotContains(response, 'CCC-0001')
 
     def test_z_cleanup(self):
         """
