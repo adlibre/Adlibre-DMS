@@ -17,7 +17,7 @@ from django.contrib.auth.decorators import login_required
 
 from api.decorators.group_required import group_required
 from dmscouch.models import CouchDocument
-from forms import DocumentUploadForm, BarcodePrintedForm, DocumentSearchOptionsForm, make_document_type_select_form
+from forms import DocumentUploadForm, BarcodePrintedForm, DocumentSearchOptionsForm
 from core.document_processor import DocumentProcessor
 from doc_codes.models import DocumentTypeRule
 from view_helpers import initIndexesForm
@@ -40,9 +40,11 @@ from search_helpers import get_mdts_by_names
 from forms_representator import get_mdts_for_docrule
 from forms_representator import make_mdt_select_form
 from forms_representator import get_mdt_from_search_mdt_select_form
+from forms_representator import make_document_type_select_form
 from parallel_keys import ParallelKeysManager
 from data_exporter import export_to_csv
 from security import SEC_GROUP_NAMES
+from security import filter_permitted_docrules
 
 from restkit.client import RequestError
 
@@ -118,7 +120,11 @@ def search_type(request, step, template='mdtui/search.html'):
                     mdt_names = get_mdt_from_search_mdt_select_form(mdt_form_id, mdts_filtered_form)
                     request.session['search_mdt_id'] = mdt_form_id
                     mdts = get_mdts_by_names(mdt_names)
-                    request.session['search_docrule_ids'] = mdts['1']['docrule_id']
+                    docrules_list = mdts['1']['docrule_id']
+                    if not request.user.is_superuser:
+                        request.session['search_docrule_ids'] = filter_permitted_docrules(docrules_list, request.user)
+                    else:
+                        request.session['search_docrule_ids'] = docrules_list
                 except RequestError:
                     warnings.append(MDTUI_ERROR_STRINGS['NO_DB'])
                 if mdts:

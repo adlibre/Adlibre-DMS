@@ -15,8 +15,10 @@ from django.conf import settings
 
 from restkit.client import RequestError
 
-from mdt_manager import MetaDataTemplateManager
 from doc_codes.models import DocumentTypeRule
+from mdt_manager import MetaDataTemplateManager
+from security import list_permitted_docrules_pks
+from security import list_permitted_docrules_qs
 
 SEARCH_STRING_REPR = {
     'field_label_from': u' From',
@@ -157,6 +159,25 @@ def setFormData(fm, kwds):
                 except ValueError:
                         pass
 
+def make_document_type_select_form(user=None, required=True):
+    """
+    Special method to construct custom DocumentTypeSelectForm object
+
+    with list of DocumentTypeRule() limited with user permissions
+    """
+    # Check for user permissions and build queryset for form based on that.
+    if user:
+        if not user.is_superuser:
+            docrules_queryset = list_permitted_docrules_qs(user)
+        else:
+            docrules_queryset = DocumentTypeRule.objects.all()
+
+    # Build a form with provided queryset of DocumentTypeRules.
+    class DocumentTypeSelectForm(forms.Form):
+        docrule = forms.ModelChoiceField(queryset=docrules_queryset, label="Document Type", required=required)
+
+    return DocumentTypeSelectForm
+
 def make_mdt_select_form(user=None, required=True):
     """
     Special method to construct custom MDTSearchSelectForm
@@ -183,26 +204,7 @@ def make_mdt_select_form(user=None, required=True):
     filtered_mdts = {}
     # Filtering MDT's displaying only permitted ones for provided user
     if not user.is_superuser and all_mdts:
-        # Filtering Document Type Rules for user
-        perms = user.user_permissions.all()
-        allowed_docrules_names = []
-        # Checking for permitted docrules
-        for permission in perms:
-            if permission.content_type.name=='document type':
-                if not permission.codename in allowed_docrules_names:
-                    allowed_docrules_names.append(permission.codename)
-        for group in user.groups.all():
-            for permission in group.permissions.all():
-                if permission.content_type.name=='document type':
-                    if not permission.codename in allowed_docrules_names:
-                        allowed_docrules_names.append(permission.codename)
-        docrules_queryset = DocumentTypeRule.objects.filter(title__in=allowed_docrules_names)
-        # Getting list of PKs of allowed Document Type Rules.
-        allowed_docrules_pks = []
-        if docrules_queryset:
-            for rule in docrules_queryset:
-                allowed_docrules_pks.append(unicode(rule.pk))
-
+        allowed_docrules_pks = list_permitted_docrules_pks(user)
         # Filtering all_mdts by only allowed ones
         for mdt in all_mdts:
             mdt_docrules = all_mdts[mdt]['docrule_id']
