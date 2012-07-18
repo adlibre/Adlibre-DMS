@@ -153,7 +153,7 @@
     </div>
 
     <footer class="container">
-        <p><a href="http://www.adlibre.com.au/">{% trans 'Adlibre DMS' %}</a> - &copy; Adlibre {% now "Y" %} </p>
+        <p><a href="http://www.adlibre.com.au/">{% trans 'Adlibre DMS' %}</a> - &copy; Adlibre {% now "Y" %} | {% trans 'Version' %}: {{ PRODUCT_VERSION }}. {% if user.is_authenticated %}Logged in as {{ user }}{% else %}Logged out{% endif %}</p>
     </footer>
 
 {% block js_footer %}

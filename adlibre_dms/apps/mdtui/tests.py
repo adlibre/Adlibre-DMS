@@ -710,8 +710,11 @@ class MDTUI(TestCase):
         """
         url = reverse('mdtui-home')
         response = self.client.get(url)
-        self.assertContains(response, 'To continue, choose from the options below')
         self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'To continue, choose from the options below')
+        # Version rendered (#757)v
+        self.assertContains(response, 'Version:')
+        self.assertContains(response, 'Logged in as')
 
     def test_07_step1(self):
         """
