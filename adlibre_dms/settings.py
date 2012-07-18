@@ -186,6 +186,7 @@ INSTALLED_APPS = (
     # DMS Core
     'api',
     'docs',
+    'core',
     'browser',
     'dms_plugins',
     'doc_codes',
@@ -293,8 +294,6 @@ COMPRESS_ENABLED = False
 # Adlibre DMS Specific Settings
 #
 
-PRODUCT_VERSION = '1.0'
-
 # name of template theme, used by context_processors.py.
 THEME_NAME = 'solid' # 'adlibre' or 'basic' or 'solid'
 
@@ -311,4 +310,15 @@ NEW_SYSTEM = False
 try:
     from local_settings import *
 except ImportError:
+    pass
+
+# Trying to read DMS version from version file stored
+PRODUCT_VERSION = '1.0'
+try:
+    version_file = os.path.join(PROJECT_PATH, 'version.txt')
+    ver_file = open(version_file, 'r')
+    version = ver_file.read()
+    PRODUCT_VERSION = version
+except Exception, e:
+    print e
     pass
