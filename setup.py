@@ -48,6 +48,7 @@ setup(name='adlibre_dms',
     scripts=[],
     package_data={
             'adlibre_dms': [
+		'version.txt',
                 'apps/browser/static/favicon.ico',
                 'apps/browser/static/browser/*',
                 'apps/browser/templates/browser/*.html',
