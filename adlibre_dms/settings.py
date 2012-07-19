@@ -319,6 +319,7 @@ try:
     ver_file = open(version_file, 'r')
     version = ver_file.read()
     PRODUCT_VERSION = version
+    print 'DMS Version: ' + PRODUCT_VERSION
 except Exception, e:
     print e
     pass
