@@ -106,10 +106,6 @@ class Couch:
 
 
 def show_doc_revisions(extended):
-    """
-    This will increment the doc_type_rule_id by 1.
-    Used for JTG migration 20120613
-    """
     db = Couch('localhost', '5984')
     dbName = 'dmscouch'
 
