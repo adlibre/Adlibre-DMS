@@ -39,6 +39,16 @@ COUCHDB_DATABASES = (
          ('mdtcouch', 'http://127.0.0.1:5984/mdtcouch'),
 )
 
+# Required for using password (adlibre.auth) app
+# We must override with real email server at Production
+if DEBUG:
+    EMAIL_HOST = 'localhost'
+    EMAIL_PORT = 1025
+    EMAIL_HOST_USER = ''
+    EMAIL_HOST_PASSWORD = ''
+    EMAIL_USE_TLS = False
+    DEFAULT_FROM_EMAIL = 'testing@example.com'
+
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
@@ -183,6 +193,7 @@ INSTALLED_APPS = (
     'couchdbkit.ext.django', # needed for CouchDB usage
     'widget_tweaks', # used by MUI templates
     'compressor', # MUI js / css compression
+    'registration',
     # DMS Core
     'api',
     'docs',

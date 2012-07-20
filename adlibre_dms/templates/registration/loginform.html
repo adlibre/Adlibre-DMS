@@ -5,7 +5,6 @@
 
     {% csrf_token %}
     <p>{{ form.non_field_errors }}</p>
-
 {% if not DEMO %}
     <dl class="line">
         <dt><label for="id_username">{% trans 'Username' %}</label></dt>
@@ -19,6 +18,7 @@
     <div class="buttons">
         <input name="" type="submit" value="{% trans 'Log in' %}" class="submit" />
     </div>
+
 
     <script type="text/javascript">
     document.getElementById('id_username').focus();
@@ -38,6 +38,7 @@
         <input name="" type="submit" value="Try Demo Now" class="submit" />
     </div>
 {% endif %}
+    <a href="{% url pwd_reset %}">Reset Password</a>
     <input type="hidden" name="next" value="{{ next }}" />
 </form>
 </div>
