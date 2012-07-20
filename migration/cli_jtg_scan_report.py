@@ -109,7 +109,7 @@ def show_doc_report(parsable=False):
     """
     This is a custom report to facilitate scanning / indexing reconciliation for JTG
     """
-    db = Couch('localhost', '5986')
+    db = Couch('localhost', '5984')
     dbName = 'dmscouch'
 
     print "Special report of all document's in database '%s'. Excepts arguments ;) (-p or --parsable)" % dbName
@@ -124,7 +124,11 @@ def show_doc_report(parsable=False):
         d = json.loads(d_js)
         revisions = d['revisions']
         mdt_indexes = d['mdt_indexes']
-        employee = str(mdt_indexes['Employee Name'])
+
+        try:
+            employee = str(mdt_indexes['Employee Name'])
+        except KeyError:
+            employee = ""
 
         if revisions:
             revision_names = [rev_name for rev_name in revisions.iterkeys()]
