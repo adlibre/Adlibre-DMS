@@ -41,6 +41,8 @@ COUCHDB_DATABASES = (
 
 # Required for using password (adlibre.auth) app
 # We must override with real email server at Production
+# Test it with server (e.g.):
+# python -m smtpd -n -c DebuggingServer localhost:1025
 if DEBUG:
     EMAIL_HOST = 'localhost'
     EMAIL_PORT = 1025
