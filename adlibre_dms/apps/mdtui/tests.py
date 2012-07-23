@@ -475,7 +475,6 @@ search_seleect_mdt_6_date_range = {
 }
 
 # TODO: test password reset forms/stuff
-# TODO: test mui pages hide/show according to permission restrictions
 
 # TODO: test proper CSV export, even just simply, with date range and list of files present there
 # TODO: add tests for Typehead suggests values between docrules
