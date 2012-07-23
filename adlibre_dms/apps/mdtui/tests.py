@@ -37,6 +37,14 @@ password_2 = 'test2'
 username_3 = 'tests_user_3'
 password_3 = 'test3'
 
+# test user 4
+username_4 = 'tests_user_4'
+password_4 = 'test4'
+
+# test user 5
+username_5 = 'tests_user_5'
+password_5 = 'test5'
+
 couchdb_url = 'http://127.0.0.1:5984'
 
 test_mdt_docrule_id = 2 # should be properly assigned to fixtures docrule that uses CouchDB plugins
@@ -465,6 +473,9 @@ search_seleect_mdt_6_date_range = {
     u'end_date': u'',
     u'0': u'',
 }
+
+# TODO: test password reset forms/stuff
+# TODO: test mui pages hide/show according to permission restrictions
 
 # TODO: test proper CSV export, even just simply, with date range and list of files present there
 # TODO: add tests for Typehead suggests values between docrules
@@ -2141,6 +2152,78 @@ class MDTUI(TestCase):
         self.assertContains(response, 'BBB-0002')
         self.assertContains(response, 'BBB-0003')
         self.assertNotContains(response, 'CCC-0001')
+
+    def test_58_user_sees_only_permitted_choices_MUI(self):
+        """
+        Feature  #755 MUI: Hide features user doesn't have access to
+
+        Test #1 tests proper search rendering
+
+        If a user doesn't have access to index or to search then those features (eg links / menu options) should be hidden.
+        This will require some template modification, and some sort of context var to expose the permissions.
+        """
+        # Creating special user
+        user = User.objects.create_user(username_4, 'b@c.com', password_4)
+        user.save()
+        # Adding permission to interact Adlibre invoices only
+        perm = Permission.objects.filter(name=u'Can interact Adlibre Invoices')
+        user.user_permissions.add(perm[0])
+        # Registering that user in required security groups and removing their permissions...
+        for groupname in ['security', 'MUI Search interaction']:
+            g = Group.objects.get(name=groupname)
+            g.user_set.add(user)
+            for perm in g.permissions.all():
+                g.permissions.remove(perm)
+
+        # Using user 4 to check for search permissions and proper templates rendering
+        self.client.logout()
+        self.client.login(username=username_4, password=password_4)
+        response = self.client.get(reverse('mdtui-home'))
+        self.assertEqual(response.status_code, 200)
+        # MUI search button rendered anywhere on the page
+        self.assertContains(response, 'i class="icon-search icon-white">')
+        # MUI NO index button icon rendered
+        self.assertNotContains(response, 'i class="icon-barcode icon-white">')
+        # MUI indexing big logo NOT rendered
+        self.assertNotContains(response, 'barcode.png')
+        # MUI Searching big logo rendered
+        self.assertContains(response, 'search.png')
+
+    def test_59_user_sees_only_permitted_choices_MUI(self):
+        """
+        Feature  #755 MUI: Hide features user doesn't have access to
+
+        Test #2 Tests proper indexing rendering
+
+        If a user doesn't have access to index or to search then those features (eg links / menu options) should be hidden.
+        This will require some template modification, and some sort of context var to expose the permissions.
+        """
+        # Creating special user
+        user = User.objects.create_user(username_5, 'c@d.com', password_5)
+        user.save()
+        # Adding permission to interact Adlibre invoices only
+        perm = Permission.objects.filter(name=u'Can interact Adlibre Invoices')
+        user.user_permissions.add(perm[0])
+        # Registering that user in required security groups and removing their permissions...
+        for groupname in ['security', 'MUI Index interaction']:
+            g = Group.objects.get(name=groupname)
+            g.user_set.add(user)
+            for perm in g.permissions.all():
+                g.permissions.remove(perm)
+
+        # Using user 5 to check for search permissions and proper templates rendering
+        self.client.logout()
+        self.client.login(username=username_5, password=password_5)
+        response = self.client.get(reverse('mdtui-home'))
+        self.assertEqual(response.status_code, 200)
+        # MUI search button NOT rendered anywhere on the page
+        self.assertNotContains(response, 'i class="icon-search icon-white">')
+        # MUI index button icon rendered
+        self.assertContains(response, 'i class="icon-barcode icon-white">')
+        # MUI Searching big logo NOT rendered
+        self.assertNotContains(response, 'search.png')
+        # MUI Indexing big logo rendered
+        self.assertContains(response, 'barcode.png')
 
     def test_z_cleanup(self):
         """

@@ -23,7 +23,6 @@ def check_search_permit(context):
     """
     # Do nothing if context variable has already been set
     if 'search_permitted' in context:
-        print 'already has search variable'
         return ''
     user = context['request'].user
     permission = False
@@ -48,7 +47,6 @@ def check_index_permit(context):
     """
     # Do nothing if context variable has already been set
     if 'index_permitted' in context:
-        print 'already has index variable'
         return ''
     user = context['request'].user
     permission = False
