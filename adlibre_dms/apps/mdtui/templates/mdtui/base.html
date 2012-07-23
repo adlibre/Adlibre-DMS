@@ -1,5 +1,6 @@
 {% load i18n %}
 {% load compress %}
+{% load mui_permissions %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -126,13 +127,21 @@
                 <a class="brand" href="{% url home %}">{% trans 'Adlibre DMS' %}</a>
                 <div class="nav-collapse">
                     <ul class="nav">
+                        {% check_index_permit %}
+                        {% check_search_permit %}
                         {% url mdtui-home as url %}
                         <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}"><i class="icon-home icon-white"></i> {% trans 'Home' %}</a></li>
+                    {% if search_permitted %}
                         {% url mdtui-search as url %}
                         <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}"><i class="icon-search icon-white"></i> {% trans 'Search' %}</a></li>
+                    {% endif %}
+                    {% if index_permitted %}
                         {% url mdtui-index as url %}
                         <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}"><i class="icon-barcode icon-white"></i> {% trans 'Index' %}</a></li>
-                        {# <li><a href="{{ url }}"><i class="icon-list icon-white"></i> {% trans 'Admin' %}</a></li>  #}
+                    {% endif %}
+                    {% if request.user.is_superuser %}
+                        <li><a href="{% url admin:index %}"><i class="icon-list icon-white"></i> {% trans 'DMS Admin' %}</a></li>
+                    {% endif %}
                         {% if user.is_authenticated %}
                         <li class="logout"><a href="{% url logout %}?next={{ request.path }}"><i class="icon-user icon-white"></i> {% trans 'Log out' %}</a></li>
                         {% else %}

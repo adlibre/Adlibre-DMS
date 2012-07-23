@@ -1,5 +1,6 @@
 {% extends "mdtui/base.html" %}
 {% load i18n %}
+{% load mui_permissions %}
 
 {% block body_content %}
     <header class="hero-unit">
@@ -9,14 +10,20 @@
     </header>
 
     <div class="row">
+        {% check_index_permit %}
+        {% check_search_permit %}
+        {% if search_permitted %}
         <div class="span6" style="text-align: center;">
             <p><a href="{% url mdtui-search %}"><img src="{{ STATIC_URL }}search.png" /></a></p>
             <p><a href="{% url mdtui-search %}" class="btn btn-primary btn-large"><i class="icon-search icon-white"></i> {% trans 'Search' %}</a></p>
         </div>
+        {% endif %}
+        {% if index_permitted %}
         <div class="span6" style="text-align: center;">
             <p><a href="{% url mdtui-index %}"><img src="{{ STATIC_URL }}barcode.png" /></a></p>
             <p><a href="{% url mdtui-index %}" class="btn btn-primary btn-large"><i class="icon-barcode icon-white"></i> {% trans 'Index' %}</a></p>
         </div>
+        {% endif %}
     </div>
 {% endblock %}
 

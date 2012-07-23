@@ -1,5 +1,6 @@
 """
 Module: Template rendering helpers for MDTUI
+
 Project: Adlibre DMS
 Copyright: Adlibre Pty Ltd 2012
 License: See LICENSE for license information
@@ -18,6 +19,7 @@ register = template.Library()
 def do_key_li_item(parser, token):
     """
     converts search/index form results dict into more readable format.
+
     Useful for rendering search/indexing form request.
     """
     try:
@@ -60,6 +62,7 @@ class ProvideLiElement(template.Node):
 def do_docrule_name_by_id(parser, token):
     """
     Provides Document Rule Name instead of Document Rule ID, provided
+
     Uses standard DocruleManager method without making any db requests.
     """
     try:
@@ -88,7 +91,9 @@ class ConvertDocrule(template.Node):
 @register.tag(name="get_sec_key_for_doc")
 def do_sec_key_for_doc_mdtkey(parser, token):
     """
-    Returns Secondary Key for this document to populate Search metadata Key's results.
+    Returns Secondary Key for this document
+
+    to populate Search metadata Key's results.
     """
     try:
         # splitting args provided
@@ -122,7 +127,9 @@ class ProvideSecKey(template.Node):
 @register.tag(name="get_form_id_for_key")
 def get_field_id_from_form_by_name(parser, token):
     """
-    Returns Form #id for Secondary Key field provided. Uses Indexes form to retrieve dependency.
+    Returns Form #id for Secondary Key field provided.
+
+    Uses Indexes form to retrieve dependency.
     """
     try:
         # splitting args provided
