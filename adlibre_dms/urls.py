@@ -33,8 +33,6 @@ urlpatterns += patterns('',
     url(r'^ui/', include('ui.urls')),
     url(r'^mdtui/', include('mdtui.urls')),
     url(r'^bcp/', include('bcp.urls')),
-
-    # Adlibre apps
     url(r'^user/', include('adlibre.auth.urls')),
 
     # This needs to be last

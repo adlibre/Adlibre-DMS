@@ -195,7 +195,6 @@ INSTALLED_APPS = (
     'couchdbkit.ext.django', # needed for CouchDB usage
     'widget_tweaks', # used by MUI templates
     'compressor', # MUI js / css compression
-    'registration',
     # DMS Core
     'api',
     'docs',
