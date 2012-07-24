@@ -98,6 +98,14 @@ LOGGING = {
         }
 }
 
+# Email settings
+EMAIL_HOST = 'localhost'
+EMAIL_PORT = 25
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
+EMAIL_USE_TLS = False
+DEFAULT_FROM_EMAIL = 'testing@example.com' # Override in your local_settings
+
 # This will import the local_settings in our virtual_env subdir next to manage.py.
 try:
     from local_settings import *
