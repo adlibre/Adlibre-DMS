@@ -41,19 +41,19 @@ def findall(dir, pattern='*'):
 
 
 setup(name='adlibre_dms',
-    version='0.1.0',
+    version=open('version.txt').read(),
     long_description=open('README.md').read(),
     url='https://github.com/adlibre/Adlibre-DMS',
     packages=find_packages('.'),
     scripts=[],
     package_data={
             'adlibre_dms': [
-		'version.txt',
+		        'version.txt',
                 'apps/browser/static/favicon.ico',
                 'apps/browser/static/browser/*',
                 'apps/browser/templates/browser/*.html',
                 'apps/browser/templates/browser/include/*.html',
-                'apps/docs/templates/docs/browser/*',
+                'apps/docs/templates/docs/*',
                 'apps/mdtui/*.pdf',
                 'apps/mdtui/static/*.ico',
                 'apps/mdtui/static/*.png',
