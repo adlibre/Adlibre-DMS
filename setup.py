@@ -41,7 +41,7 @@ def findall(dir, pattern='*'):
 
 
 setup(name='adlibre_dms',
-    version=open('version.txt').read(),
+    version=open('adlibre_dms/version.txt').read(),
     long_description=open('README.md').read(),
     url='https://github.com/adlibre/Adlibre-DMS',
     packages=find_packages('.'),
