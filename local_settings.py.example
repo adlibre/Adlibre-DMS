@@ -21,3 +21,6 @@ TIME_ZONE = None
 
 # remove fcgi script name from url (lighttpd)
 FORCE_SCRIPT_NAME = ''
+
+# Email Settings Overrides
+DEFAULT_FROM_EMAIL = 'dms@example.com'
