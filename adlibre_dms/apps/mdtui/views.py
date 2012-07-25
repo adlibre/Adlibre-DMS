@@ -521,6 +521,9 @@ def mdt_parallel_keys(request):
 
     NB, Don't rename this to parallel_keys. It conflicts with imported lib of same name.
     """
+    # HACK: limiting autocomplete to start searching from 3 keys
+    letters_limit = 3
+
     valid_call = True
     autocomplete_req = None
     docrule_id = None
@@ -556,6 +559,9 @@ def mdt_parallel_keys(request):
 
     # Nothing queried for autocomplete and no MDTS found. Invalidating call
     if not autocomplete_req or not doc_mdts:
+        valid_call = False
+
+    if not autocomplete_req.__len__() > letters_limit:
         valid_call = False
 
     log.debug(
