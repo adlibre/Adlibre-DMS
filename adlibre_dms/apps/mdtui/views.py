@@ -613,7 +613,7 @@ def mdt_parallel_keys(request):
                         )
                         # Adding each selected value to suggestions list
                         for doc in documents:
-                            # Only iterate untill we've got 8 results
+                            # Only append values until we've got 'suggestions_limit' results
                             if suggestion_count > suggestions_limit:
                                 break
                             resp_array = {}
@@ -623,6 +623,7 @@ def mdt_parallel_keys(request):
                             suggestion = json.dumps(resp_array)
                             # filtering from existing results
                             if not suggestion in resp:
+                                # Increasing counter of suggestions
                                 suggestion_count += 1
                                 resp.append(suggestion)
                     else:
@@ -631,15 +632,21 @@ def mdt_parallel_keys(request):
                             'dmscouch/search_autocomplete',
                             startkey=[docrule, key_name, autocomplete_req],
                             endkey=[docrule, key_name, unicode(autocomplete_req)+u'\ufff0' ],
-                            include_docs=True
+                            reduce = True
                         )
                         # Fetching unique responses to suggestion set
                         for doc in documents:
-                            resp_array = {key_name: doc.mdt_indexes[key_name]}
-                            suggestion = json.dumps(resp_array)
-                            if not suggestion in resp:
-                                suggestion_count += 1
-                                resp.append(suggestion)
+                            # Only append values until we've got 'suggestions_limit' results
+                            if suggestion_count > suggestions_limit:
+                                break
+                            doc_docrule =  doc['value'][0][0]['metadata_doc_type_rule_id']
+                            if doc_docrule == docrule:
+                                resp_array = {key_name: doc['value'][0][0]['single_suggestion']}
+                                suggestion = json.dumps(resp_array)
+                                if not resp_array in resp:
+                                    # Limiting results search to
+                                    suggestion_count += 1
+                                    resp.append(suggestion)
     log.debug('mdt_parallel_keys response: %s' % resp)
     return HttpResponse(json.dumps(resp))
 
