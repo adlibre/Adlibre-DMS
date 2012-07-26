@@ -522,7 +522,9 @@ def mdt_parallel_keys(request):
     NB, Don't rename this to parallel_keys. It conflicts with imported lib of same name.
     """
     # HACK: limiting autocomplete to start searching from 3 keys
-    letters_limit = 3
+    letters_limit = 0
+    # HACK #2 Represents number of results to suggest to user
+    suggestions_limit = 8
 
     valid_call = True
     autocomplete_req = None
@@ -598,6 +600,7 @@ def mdt_parallel_keys(request):
                     # In case of search get only from selected MDT
                     mdt_fields = manager.get_parallel_keys_for_mdts(doc_mdts)
                 pkeys = manager.get_parallel_keys_for_key(mdt_fields, key_name)
+                suggestion_count = 0
                 for docrule in mdt_docrules:
                     # db call to search in docs
                     if pkeys:
@@ -610,6 +613,9 @@ def mdt_parallel_keys(request):
                         )
                         # Adding each selected value to suggestions list
                         for doc in documents:
+                            # Only iterate untill we've got 8 results
+                            if suggestion_count > suggestions_limit:
+                                break
                             resp_array = {}
                             if pkeys:
                                 for pkey in pkeys:
@@ -617,6 +623,7 @@ def mdt_parallel_keys(request):
                             suggestion = json.dumps(resp_array)
                             # filtering from existing results
                             if not suggestion in resp:
+                                suggestion_count += 1
                                 resp.append(suggestion)
                     else:
                         # Simple 'single' key suggestion
@@ -631,6 +638,7 @@ def mdt_parallel_keys(request):
                             resp_array = {key_name: doc.mdt_indexes[key_name]}
                             suggestion = json.dumps(resp_array)
                             if not suggestion in resp:
+                                suggestion_count += 1
                                 resp.append(suggestion)
     log.debug('mdt_parallel_keys response: %s' % resp)
     return HttpResponse(json.dumps(resp))
