@@ -286,11 +286,11 @@ doc3 = 'ADL-1111'
 # Proper for doc1
 typehead_call1 = {
                 'key_name': "Friends ID",
-                "autocomplete_search": "1"
+                "autocomplete_search": "123"
                 }
 typehead_call2 = {
                 'key_name': "Employee ID",
-                "autocomplete_search": "12"
+                "autocomplete_search": "123"
                 }
 
 # Improper for doc1
@@ -302,12 +302,18 @@ typehead_call3 = {
 # Proper for single key
 typehead_call4 = {
     'key_name': "Reporting Entity",
-    "autocomplete_search": "JT"
+    "autocomplete_search": "JTG"
 }
-# Inproper for single key
+# Not proper for single key
 typehead_call5 = {
     'key_name': "Reporting Entity",
-    "autocomplete_search": "11"
+    "autocomplete_search": "111"
+}
+
+# No duplicates check
+typehead_call6 = {
+    'key_name': "Employee",
+    "autocomplete_search": "And"
 }
 
 # Search dates ranges creation from single date testing
@@ -2223,6 +2229,28 @@ class MDTUI(TestCase):
         self.assertNotContains(response, 'search.png')
         # MUI Indexing big logo rendered
         self.assertContains(response, 'barcode.png')
+
+    def test_60_autocomplete_single_key_no_duplicates(self):
+        """
+        Testing key lookup for single key
+
+        Must render ONE suggestion for this key only.
+        No duplicates in text should occur.
+        """
+        # Selecting Document Type Rule
+        url = reverse('mdtui-index-type')
+        response = self.client.post(url, {'docrule': test_mdt_docrule_id2})
+        self.assertEqual(response.status_code, 302)
+        url = reverse("mdtui-parallel-keys")
+        response = self.client.post(url, typehead_call6)
+        self.assertEqual(response.status_code, 200)
+        # Checking response for duplicates
+        self.assertContains(response, 'Employee')
+        self.assertContains(response, 'Andrew')
+        emp_count = re.findall('Employee', response.content)
+        and_count = re.findall('Andrew', response.content)
+        self.assertEqual(emp_count.__len__(), 1)
+        self.assertEqual(and_count.__len__(), 1)
 
     def test_z_cleanup(self):
         """
