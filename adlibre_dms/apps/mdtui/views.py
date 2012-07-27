@@ -517,13 +517,15 @@ def indexing_finished(request, step=None, template='mdtui/indexing.html'):
 @login_required
 def mdt_parallel_keys(request):
     """
-    Returns parallel keys suggestions for autocomplete.
+    Returns suggestions for typeahead.
 
+    Renders parallel keys and simple "one key" requests.
     NB, Don't rename this to parallel_keys. It conflicts with imported lib of same name.
     """
-    # HACK: limiting autocomplete to start searching from 3 keys
-    letters_limit = 0
-    # HACK #2 Represents number of results to suggest to user
+    # Limiting autocomplete to start searching from NUMBER of keys
+    # Change it to 0 to search all, starting from empty value
+    letters_limit = 2
+    # Limit of response results
     suggestions_limit = 8
 
     valid_call = True
@@ -600,8 +602,10 @@ def mdt_parallel_keys(request):
                     # In case of search get only from selected MDT
                     mdt_fields = manager.get_parallel_keys_for_mdts(doc_mdts)
                 pkeys = manager.get_parallel_keys_for_key(mdt_fields, key_name)
-                suggestion_count = 0
                 for docrule in mdt_docrules:
+                    # Only search through another docrules if response is not full
+                    if resp.__len__() > suggestions_limit:
+                        break
                     # db call to search in docs
                     if pkeys:
                         # Suggestion for several parallel keys
@@ -610,11 +614,12 @@ def mdt_parallel_keys(request):
                             startkey=[docrule, key_name, autocomplete_req],
                             endkey=[docrule, key_name, unicode(autocomplete_req)+u'\ufff0'],
                             include_docs=True,
+                            reduce=False
                         )
                         # Adding each selected value to suggestions list
                         for doc in documents:
                             # Only append values until we've got 'suggestions_limit' results
-                            if suggestion_count > suggestions_limit:
+                            if resp.__len__() > suggestions_limit:
                                 break
                             resp_array = {}
                             if pkeys:
@@ -623,8 +628,6 @@ def mdt_parallel_keys(request):
                             suggestion = json.dumps(resp_array)
                             # filtering from existing results
                             if not suggestion in resp:
-                                # Increasing counter of suggestions
-                                suggestion_count += 1
                                 resp.append(suggestion)
                     else:
                         # Simple 'single' key suggestion
@@ -637,15 +640,13 @@ def mdt_parallel_keys(request):
                         # Fetching unique responses to suggestion set
                         for doc in documents:
                             # Only append values until we've got 'suggestions_limit' results
-                            if suggestion_count > suggestions_limit:
+                            if resp.__len__() > suggestions_limit:
                                 break
-                            doc_docrule =  doc['value'][0][0]['metadata_doc_type_rule_id']
+                            doc_docrule =  doc['value'][0]['metadata_doc_type_rule_id']
                             if doc_docrule == docrule:
-                                resp_array = {key_name: doc['value'][0][0]['single_suggestion']}
+                                resp_array = {key_name: doc['value'][0]['single_suggestion']}
                                 suggestion = json.dumps(resp_array)
-                                if not resp_array in resp:
-                                    # Limiting results search to
-                                    suggestion_count += 1
+                                if not suggestion in resp:
                                     resp.append(suggestion)
     log.debug('mdt_parallel_keys response: %s' % resp)
     return HttpResponse(json.dumps(resp))
