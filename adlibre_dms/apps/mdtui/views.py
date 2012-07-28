@@ -642,9 +642,9 @@ def mdt_parallel_keys(request):
                             # Only append values until we've got 'suggestions_limit' results
                             if resp.__len__() > suggestions_limit:
                                 break
-                            doc_docrule =  doc['value'][0]['metadata_doc_type_rule_id']
+                            doc_docrule =  doc['value'][0][0]['metadata_doc_type_rule_id']
                             if doc_docrule == docrule:
-                                resp_array = {key_name: doc['value'][0]['single_suggestion']}
+                                resp_array = {key_name: doc['value'][0][0]['single_suggestion']}
                                 suggestion = json.dumps(resp_array)
                                 if not suggestion in resp:
                                     resp.append(suggestion)
