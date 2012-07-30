@@ -643,7 +643,6 @@ def mdt_parallel_keys(request):
                             if resp.__len__() > suggestions_limit:
                                 break
                             resp_array = {key_name: doc['value'][0][0]['single_suggestion']}
-                            print resp_array
                             suggestion = json.dumps(resp_array)
                             if not suggestion in resp:
                                 resp.append(suggestion)
