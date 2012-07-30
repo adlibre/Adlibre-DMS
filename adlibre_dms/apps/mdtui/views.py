@@ -517,10 +517,17 @@ def indexing_finished(request, step=None, template='mdtui/indexing.html'):
 @login_required
 def mdt_parallel_keys(request):
     """
-    Returns parallel keys suggestions for autocomplete.
+    Returns suggestions for typeahead.
 
+    Renders parallel keys and simple "one key" requests.
     NB, Don't rename this to parallel_keys. It conflicts with imported lib of same name.
     """
+    # Limiting autocomplete to start searching from NUMBER of keys
+    # Change it to 0 to search all, starting from empty value
+    letters_limit = 0
+    # Limit of response results
+    suggestions_limit = 8
+
     valid_call = True
     autocomplete_req = None
     docrule_id = None
@@ -558,6 +565,9 @@ def mdt_parallel_keys(request):
     if not autocomplete_req or not doc_mdts:
         valid_call = False
 
+    if not autocomplete_req.__len__() > letters_limit:
+        valid_call = False
+
     log.debug(
         'mdt_parallel_keys call: docrule_id: "%s", key_name: "%s", autocomplete: "%s" Call is valid: "%s", MDTS: %s' %
         (docrule_id, key_name, autocomplete_req, valid_call, doc_mdts)
@@ -593,6 +603,9 @@ def mdt_parallel_keys(request):
                     mdt_fields = manager.get_parallel_keys_for_mdts(doc_mdts)
                 pkeys = manager.get_parallel_keys_for_key(mdt_fields, key_name)
                 for docrule in mdt_docrules:
+                    # Only search through another docrules if response is not full
+                    if resp.__len__() > suggestions_limit:
+                        break
                     # db call to search in docs
                     if pkeys:
                         # Suggestion for several parallel keys
@@ -601,9 +614,13 @@ def mdt_parallel_keys(request):
                             startkey=[docrule, key_name, autocomplete_req],
                             endkey=[docrule, key_name, unicode(autocomplete_req)+u'\ufff0'],
                             include_docs=True,
+                            reduce=False
                         )
                         # Adding each selected value to suggestions list
                         for doc in documents:
+                            # Only append values until we've got 'suggestions_limit' results
+                            if resp.__len__() > suggestions_limit:
+                                break
                             resp_array = {}
                             if pkeys:
                                 for pkey in pkeys:
@@ -617,12 +634,15 @@ def mdt_parallel_keys(request):
                         documents = CouchDocument.view(
                             'dmscouch/search_autocomplete',
                             startkey=[docrule, key_name, autocomplete_req],
-                            endkey=[docrule, key_name, unicode(autocomplete_req)+u'\ufff0' ],
-                            include_docs=True
+                            endkey=[docrule, key_name, unicode(autocomplete_req)+u'\ufff0'],
+                            reduce = True,
                         )
                         # Fetching unique responses to suggestion set
                         for doc in documents:
-                            resp_array = {key_name: doc.mdt_indexes[key_name]}
+                            # Only append values until we've got 'suggestions_limit' results
+                            if resp.__len__() > suggestions_limit:
+                                break
+                            resp_array = {key_name: doc['value'][0][0]['single_suggestion']}
                             suggestion = json.dumps(resp_array)
                             if not suggestion in resp:
                                 resp.append(suggestion)

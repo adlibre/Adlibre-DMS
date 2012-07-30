@@ -295,7 +295,8 @@ def check_for_secondary_keys_pairs(input_keys_list, docrule_id):
             # Getting all keys for parallel key to check if it exists in any document metadata already.
             for pkey, pvalue in pkeys_with_values:
                 documents = CouchDocument.view('dmscouch/search_autocomplete',
-                                                key=[docrule_id, pkey, pvalue])
+                                                key=[docrule_id, pkey, pvalue],
+                                                reduce=False)
                 # Appending non existing keys into list to be checked.
                 if not documents:
                     suspicious_keys_list[pkey] = pvalue
