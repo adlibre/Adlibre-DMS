@@ -524,7 +524,7 @@ def mdt_parallel_keys(request):
     """
     # Limiting autocomplete to start searching from NUMBER of keys
     # Change it to 0 to search all, starting from empty value
-    letters_limit = 2
+    letters_limit = 0
     # Limit of response results
     suggestions_limit = 8
 
@@ -634,20 +634,19 @@ def mdt_parallel_keys(request):
                         documents = CouchDocument.view(
                             'dmscouch/search_autocomplete',
                             startkey=[docrule, key_name, autocomplete_req],
-                            endkey=[docrule, key_name, unicode(autocomplete_req)+u'\ufff0' ],
-                            reduce = True
+                            endkey=[docrule, key_name, unicode(autocomplete_req)+u'\ufff0'],
+                            reduce = True,
                         )
                         # Fetching unique responses to suggestion set
                         for doc in documents:
                             # Only append values until we've got 'suggestions_limit' results
                             if resp.__len__() > suggestions_limit:
                                 break
-                            doc_docrule =  doc['value'][0][0]['metadata_doc_type_rule_id']
-                            if doc_docrule == docrule:
-                                resp_array = {key_name: doc['value'][0][0]['single_suggestion']}
-                                suggestion = json.dumps(resp_array)
-                                if not suggestion in resp:
-                                    resp.append(suggestion)
+                            resp_array = {key_name: doc['value'][0][0]['single_suggestion']}
+                            print resp_array
+                            suggestion = json.dumps(resp_array)
+                            if not suggestion in resp:
+                                resp.append(suggestion)
     log.debug('mdt_parallel_keys response: %s' % resp)
     return HttpResponse(json.dumps(resp))
 
