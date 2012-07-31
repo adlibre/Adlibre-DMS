@@ -524,7 +524,7 @@ def mdt_parallel_keys(request):
     """
     # Limiting autocomplete to start searching from NUMBER of keys
     # Change it to 0 to search all, starting from empty value
-    letters_limit = 0
+    letters_limit = 2
     # Limit of response results
     suggestions_limit = 8
 
@@ -563,9 +563,6 @@ def mdt_parallel_keys(request):
 
     # Nothing queried for autocomplete and no MDTS found. Invalidating call
     if not autocomplete_req or not doc_mdts:
-        valid_call = False
-
-    if not autocomplete_req.__len__() > letters_limit:
         valid_call = False
 
     log.debug(
@@ -608,41 +605,43 @@ def mdt_parallel_keys(request):
                         break
                     # db call to search in docs
                     if pkeys:
-                        # Suggestion for several parallel keys
-                        documents = CouchDocument.view(
-                            'dmscouch/search_autocomplete',
-                            startkey=[docrule, key_name, autocomplete_req],
-                            endkey=[docrule, key_name, unicode(autocomplete_req)+u'\ufff0'],
-                            include_docs=True,
-                            reduce=False
-                        )
-                        # Adding each selected value to suggestions list
-                        for doc in documents:
-                            # Only append values until we've got 'suggestions_limit' results
-                            if resp.__len__() > suggestions_limit:
-                                break
-                            resp_array = {}
-                            if pkeys:
-                                for pkey in pkeys:
-                                    resp_array[pkey['field_name']] = doc.mdt_indexes[pkey['field_name']]
-                            suggestion = json.dumps(resp_array)
-                            # filtering from existing results
-                            if not suggestion in resp:
-                                resp.append(suggestion)
+                        # Making no action if not enough letters
+                        if autocomplete_req.__len__() > letters_limit:
+                            # Suggestion for several parallel keys
+                            documents = CouchDocument.view(
+                                'dmscouch/search_autocomplete',
+                                startkey=[docrule, key_name, autocomplete_req],
+                                endkey=[docrule, key_name, unicode(autocomplete_req)+u'\ufff0'],
+                                include_docs=True,
+                                reduce=False
+                            )
+                            # Adding each selected value to suggestions list
+                            for doc in documents:
+                                # Only append values until we've got 'suggestions_limit' results
+                                if resp.__len__() > suggestions_limit:
+                                    break
+                                resp_array = {}
+                                if pkeys:
+                                    for pkey in pkeys:
+                                        resp_array[pkey['field_name']] = doc.mdt_indexes[pkey['field_name']]
+                                suggestion = json.dumps(resp_array)
+                                # filtering from existing results
+                                if not suggestion in resp:
+                                    resp.append(suggestion)
                     else:
                         # Simple 'single' key suggestion
                         documents = CouchDocument.view(
                             'dmscouch/search_autocomplete',
                             startkey=[docrule, key_name, autocomplete_req],
                             endkey=[docrule, key_name, unicode(autocomplete_req)+u'\ufff0'],
-                            reduce = True,
+                            group = True,
                         )
                         # Fetching unique responses to suggestion set
                         for doc in documents:
                             # Only append values until we've got 'suggestions_limit' results
                             if resp.__len__() > suggestions_limit:
                                 break
-                            resp_array = {key_name: doc['value'][0][0]['single_suggestion']}
+                            resp_array = {key_name: doc['key'][2]}
                             suggestion = json.dumps(resp_array)
                             if not suggestion in resp:
                                 resp.append(suggestion)
