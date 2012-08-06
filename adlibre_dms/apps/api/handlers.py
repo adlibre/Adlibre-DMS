@@ -52,8 +52,12 @@ class FileHandler(BaseFileHandler):
     @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def create(self, request, code, suggested_format=None):
         # FIXME... code and file stream should be passed in separately!
+        if 'file' in request.FILES:
+            work_file = request.FILES['file']
+        else:
+            return rc.BAD_REQUEST
         processor = DocumentProcessor()
-        document = processor.create(request, request.FILES['file'])
+        document = processor.create(request, work_file)
         if len(processor.errors) > 0:
             log.error('FileHandler.create manager errors: %s' % processor.errors)
             return rc.BAD_REQUEST
