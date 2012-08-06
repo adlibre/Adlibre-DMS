@@ -1,5 +1,10 @@
 #! /usr/bin/python2.6
 
+"""
+A simple report to show all the documents in our DMS
+- Number of revisions
+"""
+
 import json, sys
 
 from lib_couch import prettyPrint, Couch
