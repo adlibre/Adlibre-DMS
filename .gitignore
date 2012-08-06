@@ -3,3 +3,6 @@ build
 dist
 *.egg-info
 .DS_Store
+extra/cli-3.py
+extra/dms_sender.cfg
+extra/win-client2.py
