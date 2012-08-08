@@ -8,17 +8,16 @@
 {% if not DEMO %}
     <dl class="line">
         <dt><label for="id_username">{% trans 'Username' %}</label></dt>
-        <dd><input id="id_username" name="username" type="text" value="" class="input" /></dd>
+        <dd><input id="id_username" name="username" type="text" value="{{ form.username.value}}" class="input" autocomplete="off" /></dd>
     </dl>
     <dl class="line">
         <dt><label for="id_password">{% trans 'Password' %}</label></dt>
-        <dd><input id="id_password" name="password" type="password" value="" class="input" />
+        <dd><input id="id_password" name="password" type="password" value="" class="input" autocomplete="off" />
             <input type="hidden" name="this_is_the_login_form" value="1" /></dd>
     </dl>
     <div class="buttons">
         <input name="" type="submit" value="{% trans 'Log in' %}" class="submit" />
     </div>
-
 
     <script type="text/javascript">
     document.getElementById('id_username').focus();
