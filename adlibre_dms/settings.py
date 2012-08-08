@@ -18,7 +18,7 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-    # ('Your Name', 'admin@adlibre.net'),
+    # ('Your Name', 'your_email@example.com'),
 )
 
 MANAGERS = ADMINS
