@@ -45,6 +45,10 @@ password_4 = 'test4'
 username_5 = 'tests_user_5'
 password_5 = 'test5'
 
+# test user 6
+username_6 = 'tests_user_6'
+password_6 = 'test6'
+
 couchdb_url = 'http://127.0.0.1:5984'
 
 test_mdt_docrule_id = 2 # should be properly assigned to fixtures docrule that uses CouchDB plugins
@@ -2251,6 +2255,46 @@ class MDTUI(TestCase):
         and_count = re.findall('Andrew', response.content)
         self.assertEqual(emp_count.__len__(), 1)
         self.assertEqual(and_count.__len__(), 1)
+
+    def test_61_user_can_view_documents_from_permitted_docrules(self):
+        """
+        Testing user can view only documents that are allowed to him with user permissions.
+
+        Testing MDTUI 'view document' view to redirect with permission limitations.
+        In fact it's a test of API response through view and download pdf view proxies.
+        """
+        code1 = "ADL-0001"
+        code2 = 'CCC-0001'
+        # Creating special user
+        user = User.objects.create_user(username_6, 'd@d.com', password_6)
+        user.save()
+        # Adding permission to interact Adlibre invoices only
+        perm = Permission.objects.filter(name=u'Can interact Adlibre Invoices')
+        user.user_permissions.add(perm[0])
+        # Registering that user in required security groups and removing their permissions...
+        for groupname in ['api', 'security', 'MUI Index interaction', 'MUI Search interaction']:
+            g = Group.objects.get(name=groupname)
+            g.user_set.add(user)
+            for perm in g.permissions.all():
+                g.permissions.remove(perm)
+        # Logging in with this new user
+        self.client.logout()
+        self.client.login(username=username_6, password=password_6)
+        # Checking accessibility
+        url = reverse('mdtui-view-pdf', kwargs = { 'code': code1, })
+        response = self.client.get(url)
+        self.assertNotEqual(response.status_code, 302)
+        self.assertContains(response, code1)
+        # Checking API directly
+        url = reverse('api_file', kwargs={'code': code1, 'suggested_format': 'pdf'},)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '%PDF-1.4') # PDF is there
+        # Checking API directly (must not be there)
+        url = reverse('api_file', kwargs={'code': code2, 'suggested_format': 'pdf'},)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 401) # Forbidden code returned
+        self.assertNotContains(response, '%PDF-1.4') # PDF is not there
 
     def test_z_cleanup(self):
         """
