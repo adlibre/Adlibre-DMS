@@ -30,6 +30,8 @@ from doc_codes.models import DocumentTypeRuleManagerInstance
 from dms_plugins.models import DoccodePluginMapping
 from mdt_manager import MetaDataTemplateManager
 
+from mdtui.security import list_permitted_docrules_qs
+
 
 log = logging.getLogger('dms.api.handlers')
 
@@ -70,6 +72,11 @@ class FileHandler(BaseFileHandler):
         revision, hashcode, extra = self._get_info(request)
         processor = DocumentProcessor()
         document = processor.read(request, code, hashcode, revision, extension=suggested_format)
+        if not request.user.is_superuser:
+            # Hack: Used part of the code from MDTUI Wrong!
+            user_permissions = list_permitted_docrules_qs(request.user)
+            if not document.doccode in user_permissions:
+                return rc.FORBIDDEN
         if processor.errors:
             log.error('FileHandler.read manager errors: %s' % processor.errors)
             return rc.NOT_FOUND
