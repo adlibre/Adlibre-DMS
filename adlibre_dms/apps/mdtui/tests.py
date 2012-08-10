@@ -59,6 +59,7 @@ test_mdt_id_1 = 1 # First MDT used in testing search part of MUI
 test_mdt_id_2 = 2 # Second MDT used in testing search part of MUI
 test_mdt_id_3 = 3 # Third MDT used in testing search part of MUI
 test_mdt_id_5 = 5 # Last MDT used in testing search part of MUI
+test_mdt_id_6 = 6 # Last MDT used in testing search part of MUI
 
 indexes_form_match_pattern = '(Employee ID|Employee Name|Friends ID|Friends Name|Required Date|Reporting Entity|Report Date|Report Type|Employee|Tests Uppercase Field|Additional).+?name=\"(\d+|\d+_from|\d+_to)\"'
 
@@ -482,6 +483,14 @@ search_seleect_mdt_6_date_range = {
     u'date': date_standardized('2012-01-01'),
     u'end_date': u'',
     u'0': u'',
+}
+
+# Export testing on page 2
+search_MDT_5_export_results_test = {
+    u'0': u'Andrew',
+    u'date': u'',
+    u'end_date': u'',
+    u'export_results': u'export',
 }
 
 # TODO: test password reset forms/stuff
@@ -2262,6 +2271,7 @@ class MDTUI(TestCase):
 
         Testing MDTUI 'view document' view to redirect with permission limitations.
         In fact it's a test of API response through view and download pdf view proxies.
+        Reflects issue #802
         """
         code1 = "ADL-0001"
         code2 = 'CCC-0001'
@@ -2294,6 +2304,37 @@ class MDTUI(TestCase):
         url = reverse('api_file', kwargs={'code': code2, 'suggested_format': 'pdf'},)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 401) # Forbidden code returned
+
+    def test_62_mdt_empty_search(self):
+        """
+        Feature #801: MUI: Search Result Export moved from step 3 to step 2.
+
+        Added additional button that returns export results rather than.
+        Testing if it returns results in proper form. E.g. CSV file with all the data should be there.
+        """
+        url = reverse('mdtui-search-type')
+        data = {'mdt': test_mdt_id_5}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        url = reverse('mdtui-search-options')
+        # Getting required indexes id's
+        response = self.client.get(url)
+        # Searching date range with unique doc1 keys
+        response = self.client.post(url, search_MDT_5_export_results_test)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+
+        # Response is ok and no warning exists there
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, MDTUI_ERROR_STRINGS['NO_S_KEYS'])
+        # Response is type CSV and contains proper docs
+        self.assertEqual(response._headers['content-type'][1], 'text/csv')
+        self.assertContains(response, 'CCC-0002')
+        self.assertContains(response, 'CCC-0001')
+        self.assertContains(response, 'BBB-0003')
+        self.assertNotContains(response, 'ADL-')
+        self.assertContains(response, 'Employee,Andrew')
 
     def test_z_cleanup(self):
         """
