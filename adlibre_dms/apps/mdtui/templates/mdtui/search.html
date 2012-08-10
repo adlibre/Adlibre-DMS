@@ -84,11 +84,15 @@
                 {% for field in form %}
                 {% include 'mdtui/secondary_index_form_field.html' %}
                 {% endfor %}
+                {# Must return hidden value 'on' in case of user submits with export results #}
+                {# <input type="checkbox" name="export_results" id="id_export_results" value="" /><br />  #}
+                <input id="id_export_results" type="hidden" name="export_results">
             </fieldset>
 
             <div class="form-actions">
                 <button type="reset" class="btn btn-danger"><i class="icon-repeat icon-white"></i> {% trans 'Reset' %}</button>
                 <button type="submit" class="btn btn-primary">{% trans 'Search' %} <i class="icon-search icon-white"></i></button>
+                <button type="submit" class="btn btn-primary" id="btn_export_results">{% trans 'Export results' %} <i class="icon-list-alt icon-white"></i></button>
             </div>
         </form>
     {% endif %}
@@ -196,7 +200,18 @@
 
     </script>
     {% endif %}
-    {% if step == "options" %}{% include "mdtui/_typeaheadjs.html" %}{% endif %}
+    {% if step == "options" %}{% include "mdtui/_typeaheadjs.html" %}
+    <script type='text/javascript'>
+        function bind_export_results(){
+            $('#btn_export_results').click(
+                    function() {
+                        $('#id_export_results').attr("value", "export");
+                    }
+            );
+        }
+        $(document).ready(bind_export_results);
+    </script>
+    {% endif %}
     {% if step == "view" %}
     <script type="text/javascript" language="javascript" charset="utf-8" src="{{ STATIC_URL }}js/pdfobject.min.js"></script>
     <script type='text/javascript'>
