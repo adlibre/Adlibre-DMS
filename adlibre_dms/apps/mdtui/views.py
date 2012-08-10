@@ -241,6 +241,15 @@ def search_results(request, step=None, template='mdtui/search.html'):
         document_keys = request.session['document_search_dict']
     except KeyError:
         warnings.append(MDTUI_ERROR_STRINGS['NO_S_KEYS'])
+    # Determining if we call export in fact instead of normal search and converting into internal variable
+    if document_keys:
+        if document_keys.__len__() == 1 and 'export_results' in document_keys:
+            warnings.append(MDTUI_ERROR_STRINGS['NO_S_KEYS'])
+        if 'export_results' in document_keys.iterkeys():
+            if document_keys['export_results'] == 'export':
+                export = True
+            # Cleaning search dict afterwards
+            del document_keys['export_results']
     # Getting docrules list for both search methods (Only one allowed)
     try:
         # trying to get id's list (for MDT search)
@@ -253,13 +262,6 @@ def search_results(request, step=None, template='mdtui/search.html'):
             docrule_ids = [request.session['searching_docrule_id'],]
         except KeyError:
             pass
-    # Determining if we call export in fact instead of normal search and converting into internal variable
-    if 'export_results' in document_keys.iterkeys():
-        if document_keys['export_results'] == 'export':
-            export = True
-        # Cleaning search dict afterwards
-        del document_keys['export_results']
-
 
     log.debug('search_results call: docrule_id: "%s", document_search_dict: "%s"' % (docrule_ids, document_keys))
     if document_keys:
