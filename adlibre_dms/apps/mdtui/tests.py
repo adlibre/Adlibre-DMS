@@ -2294,7 +2294,6 @@ class MDTUI(TestCase):
         url = reverse('api_file', kwargs={'code': code2, 'suggested_format': 'pdf'},)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 401) # Forbidden code returned
-        self.assertNotContains(response, '%PDF-1.4') # PDF is not there
 
     def test_z_cleanup(self):
         """
