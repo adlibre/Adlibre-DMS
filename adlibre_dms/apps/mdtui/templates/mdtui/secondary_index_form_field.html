@@ -1,6 +1,8 @@
 {% load index_keys %}
 {% load widget_tweaks %}
 
+{% if field.name = "export_results" %}
+{% else %}
 {% if not field|field_type = "DateField" %}
     {# String/Integer form field type #}
     <div class="control-group">
@@ -102,3 +104,4 @@
         </div>
     {% endif %} {# field = end_date #}
 {% endif %} {# field_type #}
+{% endif %} {# not export results #}

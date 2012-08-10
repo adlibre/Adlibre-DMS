@@ -236,6 +236,7 @@ def search_results(request, step=None, template='mdtui/search.html'):
     documents = None
     warnings = []
     mdts_list = None
+    export = False
     try:
         document_keys = request.session['document_search_dict']
     except KeyError:
@@ -252,6 +253,13 @@ def search_results(request, step=None, template='mdtui/search.html'):
             docrule_ids = [request.session['searching_docrule_id'],]
         except KeyError:
             pass
+    # Determining if we call export in fact instead of normal search and converting into internal variable
+    if 'export_results' in document_keys.iterkeys():
+        if document_keys['export_results'] == 'export':
+            export = True
+        # Cleaning search dict afterwards
+        del document_keys['export_results']
+
 
     log.debug('search_results call: docrule_id: "%s", document_search_dict: "%s"' % (docrule_ids, document_keys))
     if document_keys:
@@ -276,7 +284,7 @@ def search_results(request, step=None, template='mdtui/search.html'):
     if documents:
         documents = search_results_by_date(documents)
     # Produces a CSV file from search results
-    if documents and step == 'export':
+    if (documents and step == 'export') or (documents and export):
         log.debug('search_results exporting found documents to CSV')
         csv_response = export_to_csv(document_keys, mdts_list, documents)
         return csv_response
