@@ -91,8 +91,8 @@
 
             <div class="form-actions">
                 <button type="reset" class="btn btn-danger"><i class="icon-repeat icon-white"></i> {% trans 'Reset' %}</button>
-                <button type="submit" class="btn btn-primary" id="btn_search">{% trans 'Search' %} <i class="icon-search icon-white"></i></button>
-                <button type="submit" class="btn btn-primary" id="btn_export_results">{% trans 'Export results' %} <i class="icon-download-alt icon-white"></i></button>
+                <button type="submit" class="btn btn-primary">{% trans 'Search' %} <i class="icon-search icon-white"></i></button>
+                <button type="submit" class="btn btn-primary" id="btn_export_results">{% trans 'Export results' %} <i class="icon-list-alt icon-white"></i></button>
             </div>
         </form>
     {% endif %}
@@ -161,7 +161,7 @@
         </div>
 {% endcomment %}
 
-        <p><a href="{% url mdtui-search-export %}" title="{% trans 'Download Results to CSV' %}" class="btn">{% trans 'Export Results' %} <i class="icon-download-alt"></i></a></p>
+        <p><a href="{% url mdtui-search-export %}" title="{% trans 'Download Results to CSV' %}" class="btn"><i class="icon-download-alt"></i> {% trans 'Export Results' %}</a></p>
 
     {% endif %}
 
@@ -206,11 +206,6 @@
             $('#btn_export_results').click(
                     function() {
                         $('#id_export_results').attr("value", "export");
-                    }
-            );
-            $('#btn_search').click(
-                    function() {
-                        $('#id_export_results').attr("value", "");
                     }
             );
         }
