@@ -91,7 +91,7 @@
 
             <div class="form-actions">
                 <button type="reset" class="btn btn-danger"><i class="icon-repeat icon-white"></i> {% trans 'Reset' %}</button>
-                <button type="submit" class="btn btn-primary">{% trans 'Search' %} <i class="icon-search icon-white"></i></button>
+                <button type="submit" class="btn btn-primary" id="btn_search">{% trans 'Search' %} <i class="icon-search icon-white"></i></button>
                 <button type="submit" class="btn btn-primary" id="btn_export_results">{% trans 'Export results' %} <i class="icon-list-alt icon-white"></i></button>
             </div>
         </form>
@@ -203,11 +203,20 @@
     {% if step == "options" %}{% include "mdtui/_typeaheadjs.html" %}
     <script type='text/javascript'>
         function bind_export_results(){
+            // Button export results must change hidden form field
             $('#btn_export_results').click(
                     function() {
                         $('#id_export_results').attr("value", "export");
                     }
             );
+            // Button Search must revert those changes
+            // If you would press back or search it won't do export again.
+            $('#btn_search').click(
+                    function() {
+                        $('#id_export_results').attr("value", " ");
+                    }
+            );
+            //
         }
         $(document).ready(bind_export_results);
     </script>
