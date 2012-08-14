@@ -59,6 +59,7 @@ test_mdt_id_1 = 1 # First MDT used in testing search part of MUI
 test_mdt_id_2 = 2 # Second MDT used in testing search part of MUI
 test_mdt_id_3 = 3 # Third MDT used in testing search part of MUI
 test_mdt_id_5 = 5 # Last MDT used in testing search part of MUI
+test_mdt_id_5_name = 'mdt5'
 test_mdt_id_6 = 6 # Last MDT used in testing search part of MUI
 
 indexes_form_match_pattern = '(Employee ID|Employee Name|Friends ID|Friends Name|Required Date|Reporting Entity|Report Date|Report Type|Employee|Tests Uppercase Field|Additional).+?name=\"(\d+|\d+_from|\d+_to)\"'
@@ -493,6 +494,11 @@ search_MDT_5_export_results_test = {
     u'export_results': u'export',
 }
 
+search_MDT_5 = {
+    u'0': u'Andrew',
+    u'date': u'',
+    u'end_date': u'',
+}
 # TODO: test password reset forms/stuff
 
 # TODO: test proper CSV export, even just simply, with date range and list of files present there
@@ -1174,7 +1180,7 @@ class MDTUI(TestCase):
         Names autogenarated for docs. e.g. ADL-0001, ADL-0002, ADL-0003
         (Not ADL-0001, ADL-0002, ADL-1111 like files uploaded)
         """
-        # setting MDT
+        # setting DocTypeRule
         url = reverse('mdtui-search-type')
         data = {'docrule': test_mdt_docrule_id}
         response = self.client.post(url, data)
@@ -1223,7 +1229,7 @@ class MDTUI(TestCase):
         And does not contain doc3 values.
         All docs render their indexes correctly.
         """
-        # setting MDT
+        # setting DocTypeRule
         url = reverse('mdtui-search-type')
         data = {'docrule': test_mdt_docrule_id}
         response = self.client.post(url, data)
@@ -1276,7 +1282,7 @@ class MDTUI(TestCase):
         And does not contain doc1 and2 unique values.
         All docs render their indexes correctly.
         """
-        # setting MDT
+        # setting DocTypeRule
         url = reverse('mdtui-search-type')
         data = {'docrule': test_mdt_docrule_id}
         response = self.client.post(url, data)
@@ -1326,7 +1332,7 @@ class MDTUI(TestCase):
         And does not contain doc1 and2 unique values.
         All docs render their indexes correctly.
         """
-        # Setting MDT
+        # Setting DocTypeRule
         url = reverse('mdtui-search-type')
         data = {'docrule': test_mdt_docrule_id}
         response = self.client.post(url, data)
@@ -1364,7 +1370,7 @@ class MDTUI(TestCase):
         And does not contain doc2 and3 unique values.
         All docs render their indexes correctly.
         """
-        # Setting MDT
+        # Setting DocTypeRule
         url = reverse('mdtui-search-type')
         data = {'docrule': test_mdt_docrule_id}
         response = self.client.post(url, data)
@@ -1411,7 +1417,7 @@ class MDTUI(TestCase):
         And does not contain doc1 unique values.
         All docs render their indexes correctly.
         """
-        # setting docrule
+        # Setting DocTypeRule
         url = reverse('mdtui-search-type')
         data = {'docrule': test_mdt_docrule_id}
         response = self.client.post(url, data)
@@ -1460,7 +1466,7 @@ class MDTUI(TestCase):
         (MDT3) keys are displayed and MDT's 1 and 2 does not displaying.
         2 test docs for MDT3 rendered.
         """
-        # setting docrule
+        # Setting DocTypeRule
         url = reverse('mdtui-search-type')
         data = {'docrule': test_mdt_docrule_id2}
         response = self.client.post(url, data)
@@ -1501,7 +1507,7 @@ class MDTUI(TestCase):
         (MDT1 and MDT2) keys are displayed and MDT3 keys does not displaying.
         3 test docs for MDT1 and MDT2 rendered.
         """
-        # setting docrule
+        # Setting MDT
         url = reverse('mdtui-search-type')
         data = {'mdt': test_mdt_id_5}
         response = self.client.post(url, data)
@@ -1543,7 +1549,7 @@ class MDTUI(TestCase):
         (MDT3) keys are displayed and MDT's 1 and 2 does not displaying.
         2 test docs for MDT3 rendered.
         """
-        # setting docrule
+        # setting MDT
         url = reverse('mdtui-search-type')
         data = {'mdt': test_mdt_id_5}
         response = self.client.post(url, data)
@@ -1629,7 +1635,7 @@ class MDTUI(TestCase):
         And does not contain doc2 and doc3 unique values.
         All docs render their indexes correctly.
         """
-        # setting docrule
+        # Setting DocTypeRule
         url = reverse('mdtui-search-type')
         data = {'docrule': test_mdt_docrule_id}
         response = self.client.post(url, data)
@@ -1784,7 +1790,7 @@ class MDTUI(TestCase):
         """
         Warns about new parallel keys created
         """
-        # Selecting Document Type Rule
+        # Selecting DocumentTypeRule
         url = reverse('mdtui-index-type')
         response = self.client.post(url, {'docrule': test_mdt_docrule_id})
         self.assertEqual(response.status_code, 302)
@@ -2336,7 +2342,61 @@ class MDTUI(TestCase):
         self.assertNotContains(response, 'ADL-')
         self.assertContains(response, 'Employee,Andrew')
 
-    def test_z_cleanup(self):
+    def test_63_mdt_search_contains_mdt_name_in_header(self):
+        """
+        Feature #800: MUI: Show document type in search options
+
+        Testing here if MDT search contains MDT name in header.
+        """
+        url = reverse('mdtui-search-type')
+        data = {'mdt': test_mdt_id_5}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        url = reverse('mdtui-search-options')
+        # Getting required indexes id's
+        response = self.client.get(url)
+        # MDT5 name present in response (step name header)
+        self.assertContains(response, test_mdt_id_5_name+' Search Options')
+        # Searching date range with unique doc1 keys
+        response = self.client.post(url, search_MDT_5)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        # Response is ok and no warning exists there
+        self.assertEqual(response.status_code, 200)
+        # MDT5 name present in response (step name header)
+        self.assertContains(response, test_mdt_id_5_name+' Results')
+
+    def test_64_docrule_search_contains_docrule_name_in_header(self):
+        """
+        Feature #800: MUI: Show document type in search options
+
+        Testing here if DocumentType based search contains Document Type name in header.
+        """
+        # Setting DocumentTypeRule
+        url = reverse('mdtui-search-type')
+        data = {'docrule': test_mdt_docrule_id}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        # Response is ok and no warning exists there
+        self.assertEqual(response.status_code, 200)
+        # Response contains proper step header
+        self.assertContains(response, 'Adlibre Invoices Search Options')
+        url = reverse('mdtui-search-options')
+        # Searching by Document 1,2,3 date range
+        # Feel free to replace it with any other search
+        data = date_range_1and2_not3
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        # Response contains proper step header
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Adlibre Invoices Results")
+
+    def _test_z_cleanup(self):
         """
         Cleaning up after all tests finished.
 
