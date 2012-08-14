@@ -3,3 +3,11 @@ build
 dist
 *.egg-info
 .DS_Store
+
+adlibre_dms/apps/mdtui/management/commands/populate_dms.py
+
+adlibre_dms/apps/mdtui/management/commands/cleanup_dms.py
+
+adlibre_dms/apps/mdtui/management/commands/__init__.py
+
+documents/*.*
