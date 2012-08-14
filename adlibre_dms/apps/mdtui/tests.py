@@ -2396,7 +2396,7 @@ class MDTUI(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Adlibre Invoices Results")
 
-    def _test_z_cleanup(self):
+    def test_z_cleanup(self):
         """
         Cleaning up after all tests finished.
 
