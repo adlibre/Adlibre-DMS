@@ -166,3 +166,24 @@ def field_type(field):
     Returns field type in 'str'
     """
     return field.field.__class__.__name__
+
+@register.simple_tag(takes_context=True)
+def get_used_in_search_mdt(context):
+    """Used to display Search MDT names relation in heading.
+
+    E.g. Search Adlibre Invoices
+    Retrieves MDT name from request sessio contest.
+
+    """
+    try:
+        session = context['request'].session
+        result = u''
+        if session:
+            for mdt in session['mdts']:
+                result += unicode(session['mdts'][mdt]['mdt_id'])
+        return result
+    except Exception, e:
+        print e
+        return ''
+        pass
+
