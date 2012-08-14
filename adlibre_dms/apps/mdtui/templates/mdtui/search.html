@@ -70,7 +70,7 @@
         <form class="form-horizontal" action="{{ request.path }}" method="post">
             {% csrf_token %}
             <fieldset>
-                <legend>{% if request.session.search_docrule_id %}{% get_docrule_name_by_id request.session.search_docrule_id %} {% endif %}Search Options</legend>
+                <legend>{% if request.session.searching_docrule_id %}{% get_docrule_name_by_id request.session.searching_docrule_id %}{% endif %}{% if request.session.search_mdt_id %}{% get_used_in_search_mdt %}{% endif %} Search Options</legend>
                 <br />
 
                 {% comment %}
@@ -99,7 +99,7 @@
 
     {% if step == "results" %}
         <fieldset>
-            <legend>{% if request.session.search_docrule_id %}{% get_docrule_name_by_id request.session.search_docrule_id %} {% endif %} Results</legend>
+            <legend>{% if request.session.searching_docrule_id %}{% get_docrule_name_by_id request.session.searching_docrule_id %}{% endif %}{% if request.session.search_mdt_id %}{% get_used_in_search_mdt %}{% endif %} Results</legend>
         </fieldset>
 
         <table class="table table-striped" id="results-table">
