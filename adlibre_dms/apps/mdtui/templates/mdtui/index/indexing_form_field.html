@@ -1,0 +1,46 @@
+{% load index_keys %}
+
+{# Form fields #}
+{% if not field|field_type = "DateField" %}
+    <div class="control-group{% if field.errors %} error{% endif %}">
+        <label class="control-label">{{ field.label }}</label>
+        <div class="controls">
+            {% if not field.value and field.field.initial %}
+                {# Taking field initial data for dynamic fields #}
+                <input id="{{ field.id_for_label }}" class="input-xxlarge" type="text" maxlength="{{ field.field.max_length }}" value="{{ field.field.initial }}" name="{{ field.name }}">
+            {% else %}
+                {# Normal field rendering #}
+                {{ field|attr:'class:input-xxlarge' }}
+            {% endif %}
+            {%  if field.errors %}
+                {%  for message in field.errors.messages %}
+                    <span class="help-inline">
+                            <strong>{{ message }}</strong>
+                        </span>
+                {%  endfor %}
+            {%  endif %}
+            <p class="help-block">{{ field.help_text }}</p>
+        </div>
+    </div>
+{% else %}
+    <div class="control-group{%  if field.errors %} error{%  endif %}">
+        <label class="control-label" for="dateselect">{{ field.label }}</label>
+        <div class="input">
+            <div class="controls">
+                <div class="input-prepend">
+                    <span class="add-on"><i class="icon-calendar"></i></span>
+                    <input id="id_date" type="text" value="{% if field.value|date:DATE_FORMAT %}{{ field.value|date:DATE_FORMAT }}{% else %}{% if field.value %}{{ field.value }}{% endif %}{% endif %}" name="{{ field.name }}" class="input-medium" data-datepicker="datepicker">
+                    {%  if field.errors %}
+                        {%  for message in field.errors.messages %}
+                            <span class="help-inline">
+                                    <strong>{{ message }}</strong>
+                                </span>
+                        {% endfor %}
+                    {% endif %}
+                    <p class="help-block">{{ field.help_text }}</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+{% endif %}
