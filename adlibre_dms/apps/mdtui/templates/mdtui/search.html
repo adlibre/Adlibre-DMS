@@ -1,7 +1,6 @@
 {% extends "mdtui/base.html" %}
 {% load i18n %}
 {% load index_keys %}
-{% load widget_tweaks %}
 
 {% block body_content %}
     <h1 id="page-heading">{% block body_title %}{% trans 'Document Search' %}{% endblock %}</h1>
@@ -35,134 +34,17 @@
     </div>
     {% endif %}
 
+    {# STEPS RENDERING #}
     {% if step == "type" %}
-        {# MDTS FORM #}
-        <fieldset>
-            <legend>Step Select {{ step }}:</legend>
-        </fieldset>
-        <form class="form-horizontal" action="{{ request.path }}" method="post">
-            {% csrf_token %}
-            <fieldset>
-                {{ mdts_form }}
-            </fieldset>
-
-            <div class="form-actions">
-                <button type="reset" class="btn btn-danger"><i class="icon-trash icon-white"></i> {% trans 'Cancel' %}</button>
-                <button type="submit" class="btn btn-primary">{% trans 'Continue' %} <i class="icon-chevron-right icon-white"></i></button>
-            </div>
-        </form>
-        {# DOCRULES FORM #}
-        <legend>OR:</legend>
-        <form class="form-horizontal" action="{{ request.path }}" method="post">
-            {% csrf_token %}
-            <fieldset>
-                {{ docrules_form }}
-            </fieldset>
-
-            <div class="form-actions">
-                <button type="reset" class="btn btn-danger"><i class="icon-trash icon-white"></i> {% trans 'Cancel' %}</button>
-                <button type="submit" class="btn btn-primary">{% trans 'Continue' %} <i class="icon-chevron-right icon-white"></i></button>
-            </div>
-        </form>
-    {% endif %} {# end step 1 #}
+    {% include "mdtui/search/type.html" %}
+    {% endif %}
 
     {% if step == "options" %}
-        <form class="form-horizontal" action="{{ request.path }}" method="post">
-            {% csrf_token %}
-            <fieldset>
-                <legend>{% if request.session.searching_docrule_id %}{% get_docrule_name_by_id request.session.searching_docrule_id %}{% endif %}{% if request.session.search_mdt_id %}{% get_used_in_search_mdt %}{% endif %} Search Options</legend>
-                <br />
-
-                {% comment %}
-                <div class="alert alert-error">
-                    <a class="close">×</a>
-                    <strong>Error!</strong> Form validation errors go here! (field validation errors go along each field below)
-                </div>
-                {% endcomment %}
-
-                {# SEARCH INDEX DETAILS FORM RENDERING #}
-                {% for field in form %}
-                {% include 'mdtui/secondary_index_form_field.html' %}
-                {% endfor %}
-                {# Must return hidden value 'on' in case of user submits with export results #}
-                {# <input type="checkbox" name="export_results" id="id_export_results" value="" /><br />  #}
-                <input id="id_export_results" type="hidden" name="export_results">
-            </fieldset>
-
-            <div class="form-actions">
-                <button type="reset" class="btn btn-danger"><i class="icon-repeat icon-white"></i> {% trans 'Reset' %}</button>
-                <button type="submit" class="btn btn-primary" id="btn_search">{% trans 'Search' %} <i class="icon-search icon-white"></i></button>
-                <button type="submit" class="btn btn-primary" id="btn_export_results">{% trans 'Export results' %} <i class="icon-list-alt icon-white"></i></button>
-            </div>
-        </form>
+    {% include "mdtui/search/options.html" %}
     {% endif %}
 
     {% if step == "results" %}
-        <fieldset>
-            <legend>{% if request.session.searching_docrule_id %}{% get_docrule_name_by_id request.session.searching_docrule_id %}{% endif %}{% if request.session.search_mdt_id %}{% get_used_in_search_mdt %}{% endif %} Results</legend>
-        </fieldset>
-
-        <table class="table table-striped" id="results-table">
-            <caption>Search with keys:
-                <ul class="metainfo">
-                {% for item in document_keys %}
-                    <li>{% get_key_li_item document_keys item %}</li>
-                {% endfor %}
-                </ul>
-            </caption>
-            <thead>
-                <tr>
-                    <th>{% trans 'View' %}</th>
-                    <th><a href="{# TODO: sort on this#}">{% trans 'Creation Date' %}</a></th>
-                    {% for key in mdts %}
-                    {% if not key == "metadata_user_name" and not key == "metadata_user_id" %}
-                    <th><a href="{# TODO: sort on this#}">{{ key }}</a></th>
-                    {% endif %}
-                    {% endfor %}
-                    <th><a href="{# TODO: sort on this#}">{% trans 'Description' %}</a></th>
-                    <th><a href="{# TODO: sort on this#}">{% trans 'Type' %}</a></th>
-                    <th>{% trans 'Actions' %}</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for doc in documents %}
-                <tr>
-                    <td class="nw"><a href="{% url mdtui-view-pdf doc.id %}" title="{% trans 'View Document' %}" alt="{% trans 'View Document' %}" target="_blank"><i class="icon-download"></i> {{ doc.id }}</a></td>
-                    <td class="nw">{{ doc.metadata_created_date|date:DATE_FORMAT }}</td>
-                    {% for key in mdts %}
-                    {% if not key == "metadata_user_name" and not key == "metadata_user_id" %}
-                    <td>{% get_sec_key_for_doc doc.mdt_indexes key %}</td>
-                    {% endif %}
-                    {% endfor %}
-                    <td>{{ doc.metadata_description }}</td>
-                    <td>{% get_docrule_name_by_id doc.metadata_doc_type_rule_id %}</td>
-                    <td><a href="{% url bcp-print 'Code128' doc.id %}" title="{% trans 'Reprint Barcode' %}" alt="{% trans 'Reprint Barcode' %}" target="_blank"><i class="icon-barcode"></i></a> {% comment %} | {# TODO: Admin only #}<a href="" title="{% trans 'Edit Metadata' %}"><i class="icon-edit"></i></a>{% endcomment %}</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-
-{% comment %}
-        TODO FINISH THIS
-        <hr />
-        <p>{# TODO: show number of results found #} Showing 50 of 1,232,300 results matching query.</p>
-        {# Let's use pagination like this #}
-        <div class="pagination">
-            <ul>
-                <li><a href="#">{% trans 'Prev' %}</a></li>
-                <li class="active">
-                    <a href="#">1</a>
-                </li>
-                <li><a href="#">2</a></li>
-                <li><a href="#">3</a></li>
-                <li><a href="#">4</a></li>
-                <li><a href="#">{% trans 'Next' %}</a></li>
-            </ul>
-        </div>
-{% endcomment %}
-
-        <p><a href="{% url mdtui-search-export %}" title="{% trans 'Download Results to CSV' %}" class="btn"><i class="icon-download-alt"></i> {% trans 'Export Results' %}</a></p>
-
+    {% include "mdtui/search/results.html" %}
     {% endif %}
 
 {% endblock %}
@@ -180,56 +62,16 @@
     </style>
 {% endblock %}
 
+{# ADDITIONAL SCRIPTS REQUIRED BY STEPS #}
 {% block js_extra_inline %}
     {% if step == "results" %}
-    <script type="text/javascript">
-        $(document).ready(function(){
-            // Apply a class on mouse over and remove it on mouse out.
-            $('#results-table tbody tr').hover(function() {
-                $(this).toggleClass('highlight');
-            });
-
-            // Assign a click handler that grabs the URL from the first cell
-            $('#results-table tbody tr td').on('click', function(e){
-                e.preventDefault();
-                window.open($(this).parent().find('a').attr('href'), "_blank");
-            });
-            // Remove Assigned click handler from last col item
-            $('#results-table tbody tr').find('td:last').unbind('click');
-        });
-
-    </script>
+        {% include "mdtui/search/results_scripts.html" %}
     {% endif %}
-    {% if step == "options" %}{% include "mdtui/_typeaheadjs.html" %}
-    <script type='text/javascript'>
-        function bind_export_results(){
-            // Button export results must change hidden form field
-            $('#btn_export_results').click(
-                    function() {
-                        $('#id_export_results').attr("value", "export");
-                    }
-            );
-            // Button Search must revert those changes
-            // If you would press back or search it won't do export again.
-            $('#btn_search').click(
-                    function() {
-                        $('#id_export_results').attr("value", " ");
-                    }
-            );
-        }
-        $(document).ready(bind_export_results);
-    </script>
+    {% if step == "options" %}
+        {% include "mdtui/_typeaheadjs.html" %}
+        {% include "mdtui/search/options_scripts.html" %}
     {% endif %}
     {% if step == "view" %}
-    <script type="text/javascript" language="javascript" charset="utf-8" src="{{ STATIC_URL }}js/pdfobject.min.js"></script>
-    <script type='text/javascript'>
-        function embedPDF(){
-            var myPDF = new PDFObject({
-                url: '{% url mdtui-download-pdf code %}', //This assumes source is convertible to a PDF
-                pdfOpenParams: { view: 'Fit', scrollbars: '0', toolbar: '0', statusbar: '0', messages: '0', navpanes: '0' }
-            }).embed('pdfobj');
-        }
-        window.onload = embedPDF; //Feel free to replace window.onload if needed.
-    </script>
+        {% include "mdtui/search/view_scripts.html" %}
     {% endif %}
 {% endblock %}

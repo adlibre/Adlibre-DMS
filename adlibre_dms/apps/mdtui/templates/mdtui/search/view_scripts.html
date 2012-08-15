@@ -1,0 +1,10 @@
+<script type="text/javascript" language="javascript" charset="utf-8" src="{{ STATIC_URL }}js/pdfobject.min.js"></script>
+<script type='text/javascript'>
+    function embedPDF(){
+        var myPDF = new PDFObject({
+            url: '{% url mdtui-download-pdf code %}', //This assumes source is convertible to a PDF
+            pdfOpenParams: { view: 'Fit', scrollbars: '0', toolbar: '0', statusbar: '0', messages: '0', navpanes: '0' }
+        }).embed('pdfobj');
+    }
+    window.onload = embedPDF; //Feel free to replace window.onload if needed.
+</script>

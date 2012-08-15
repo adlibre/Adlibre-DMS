@@ -1,0 +1,66 @@
+{% load i18n %}
+{% load index_keys %}
+<fieldset>
+    <legend>{% if request.session.searching_docrule_id %}{% get_docrule_name_by_id request.session.searching_docrule_id %}{% endif %}{% if request.session.search_mdt_id %}{% get_used_in_search_mdt %}{% endif %} Results</legend>
+</fieldset>
+
+<table class="table table-striped" id="results-table">
+    <caption>Search with keys:
+        <ul class="metainfo">
+            {% for item in document_keys %}
+                <li>{% get_key_li_item document_keys item %}</li>
+            {% endfor %}
+        </ul>
+    </caption>
+    <thead>
+    <tr>
+        <th>{% trans 'View' %}</th>
+        <th><a href="{# TODO: sort on this#}">{% trans 'Creation Date' %}</a></th>
+        {% for key in mdts %}
+            {% if not key == "metadata_user_name" and not key == "metadata_user_id" %}
+                <th><a href="{# TODO: sort on this#}">{{ key }}</a></th>
+            {% endif %}
+        {% endfor %}
+        <th><a href="{# TODO: sort on this#}">{% trans 'Description' %}</a></th>
+        <th><a href="{# TODO: sort on this#}">{% trans 'Type' %}</a></th>
+        <th>{% trans 'Actions' %}</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for doc in documents %}
+        <tr>
+            <td class="nw"><a href="{% url mdtui-view-pdf doc.id %}" title="{% trans 'View Document' %}" alt="{% trans 'View Document' %}" target="_blank"><i class="icon-download"></i> {{ doc.id }}</a></td>
+            <td class="nw">{{ doc.metadata_created_date|date:DATE_FORMAT }}</td>
+            {% for key in mdts %}
+                {% if not key == "metadata_user_name" and not key == "metadata_user_id" %}
+                    <td>{% get_sec_key_for_doc doc.mdt_indexes key %}</td>
+                {% endif %}
+            {% endfor %}
+            <td>{{ doc.metadata_description }}</td>
+            <td>{% get_docrule_name_by_id doc.metadata_doc_type_rule_id %}</td>
+            <td><a href="{% url bcp-print 'Code128' doc.id %}" title="{% trans 'Reprint Barcode' %}" alt="{% trans 'Reprint Barcode' %}" target="_blank"><i class="icon-barcode"></i></a> {% comment %} | {# TODO: Admin only #}<a href="" title="{% trans 'Edit Metadata' %}"><i class="icon-edit"></i></a>{% endcomment %}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% comment %}
+        TODO: FINISH THIS
+        <hr />
+        <p>{# TODO: show number of results found #} Showing 50 of 1,232,300 results matching query.</p>
+        {# Let's use pagination like this #}
+        <div class="pagination">
+            <ul>
+                <li><a href="#">{% trans 'Prev' %}</a></li>
+                <li class="active">
+                    <a href="#">1</a>
+                </li>
+                <li><a href="#">2</a></li>
+                <li><a href="#">3</a></li>
+                <li><a href="#">4</a></li>
+                <li><a href="#">{% trans 'Next' %}</a></li>
+            </ul>
+        </div>
+{% endcomment %}
+
+<p><a href="{% url mdtui-search-export %}" title="{% trans 'Download Results to CSV' %}" class="btn"><i class="icon-download-alt"></i> {% trans 'Export Results' %}</a></p>
