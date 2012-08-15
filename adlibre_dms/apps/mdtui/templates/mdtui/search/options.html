@@ -1,0 +1,20 @@
+{% load i18n %}
+{% load index_keys %}
+<form class="form-horizontal" action="{{ request.path }}" method="post">
+    {% csrf_token %}
+    <fieldset>
+        <legend>{% if request.session.searching_docrule_id %}{% get_docrule_name_by_id request.session.searching_docrule_id %}{% endif %}{% if request.session.search_mdt_id %}{% get_used_in_search_mdt %}{% endif %} Search Options</legend>
+        <br />
+        {# SEARCH INDEX DETAILS FORM RENDERING #}
+        {% for field in form %}
+            {% include 'mdtui/secondary_index_form_field.html' %}
+        {% endfor %}
+        <input id="id_export_results" type="hidden" name="export_results">
+    </fieldset>
+
+    <div class="form-actions">
+        <button type="reset" class="btn btn-danger"><i class="icon-repeat icon-white"></i> {% trans 'Reset' %}</button>
+        <button type="submit" class="btn btn-primary" id="btn_search">{% trans 'Search' %} <i class="icon-search icon-white"></i></button>
+        <button type="submit" class="btn btn-primary" id="btn_export_results">{% trans 'Export results' %} <i class="icon-list-alt icon-white"></i></button>
+    </div>
+</form>

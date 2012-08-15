@@ -1,0 +1,18 @@
+<script type='text/javascript'>
+    function bind_export_results(){
+        // Button export results must change hidden form field
+        $('#btn_export_results').click(
+                function() {
+                    $('#id_export_results').attr("value", "export");
+                }
+        );
+        // Button Search must revert those changes
+        // If you would press back or search it won't do export again.
+        $('#btn_search').click(
+                function() {
+                    $('#id_export_results').attr("value", " ");
+                }
+        );
+    }
+    $(document).ready(bind_export_results);
+</script>

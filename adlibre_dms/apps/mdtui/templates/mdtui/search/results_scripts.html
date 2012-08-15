@@ -1,0 +1,17 @@
+<script type="text/javascript">
+    $(document).ready(function(){
+        // Apply a class on mouse over and remove it on mouse out.
+        $('#results-table tbody tr').hover(function() {
+            $(this).toggleClass('highlight');
+        });
+
+        // Assign a click handler that grabs the URL from the first cell
+        $('#results-table tbody tr td').on('click', function(e){
+            e.preventDefault();
+            window.open($(this).parent().find('a').attr('href'), "_blank");
+        });
+        // Remove Assigned click handler from last col item
+        $('#results-table tbody tr').find('td:last').unbind('click');
+    });
+
+</script>
