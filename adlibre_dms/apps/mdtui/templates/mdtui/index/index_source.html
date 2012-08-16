@@ -1,0 +1,93 @@
+{% load i18n %}
+{% load index_keys %}
+
+<fieldset>
+    <legend>Step {{ step }}: Select Source{% if request.session.indexing_docrule_id %} for {% get_docrule_name_by_id request.session.indexing_docrule_id %}{% endif %}</legend>
+</fieldset>
+
+{% if document_keys %}
+    <p>{% trans 'Your documents indexes:' %}</p>
+
+    <ul class="metainfo">
+        <li>Barcode: {{ barcode }}</li>
+        {% for item in document_keys %}
+            <li>{% get_key_li_item document_keys item %}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+<h4>{% trans 'Choose document source:' %}</h4>
+
+{# Buttons work only if call is Valid (e.g. all indexes and doccode selected #}
+<div class="row">
+    <div class="span3" style="text-align: center;">
+        <a href="#{% if valid_call %}fileModal{% endif %}" data-toggle="modal"><img src="{{ STATIC_URL }}upload.png" /></a>
+        <p><a href="#{% if valid_call %}fileModal{% endif %}" data-toggle="modal" class="btn"><i class="icon-upload"></i> {% trans 'Upload File' %}</a></p>
+    </div>
+    <div class="span3" style="text-align: center;">
+        <a href="#{% if valid_call %}printModal{% endif %}" data-toggle="modal"><img src="{{ STATIC_URL }}printer.png" /></a>
+        <p><a href="#{% if valid_call %}printModal{% endif %}" data-toggle="modal" class="btn"><i class="icon-print"></i> {% trans 'Print Barcode' %}</a></p>
+    </div>
+</div>
+
+<div class="modal hide" id="printModal">
+    <div class="modal-header">
+        <button class="close" data-dismiss="modal">×</button>
+        <h3>{% trans 'Print Barcode' %}</h3>
+    </div>
+    <div class="modal-body">
+        <form id="barcode-print-form" class="" enctype="multipart/form-data" action="{{ request.path }}?barcoded" method="post">
+            {% csrf_token %}
+            {% for field in barcode_form %}
+                {{ field }}
+            {% endfor %}
+        </form>
+        {% blocktrans %}
+            <p>Please wait for the barcode to print.</p>
+            <p>After printing you may continue.</p>
+            <p>Click <a href="#" class="btn-print-barcode">here</a> if you need to reprint.</p>
+        {% endblocktrans %}
+    </div>
+    <iframe src="" id="printer" style="visibility: hidden;" width="0" height="0"></iframe>
+    <div class="modal-footer">
+        <a href="#" class="btn btn-primary" id="barcode-print-submit">{% trans 'Continue' %} <i class="icon-chevron-right icon-white"></i></a>
+        <a href="#" class="btn btn-primary btn-print-barcode">{% trans 'Reprint' %}</a>
+        <a href="#myModal" class="btn btn-danger" data-dismiss="modal"><i class="icon-trash icon-white"></i> {% trans 'Cancel' %}</a>
+    </div>
+</div>
+
+<div class="modal hide bigmodal" id="fileModal">
+    <div class="modal-header">
+        <button class="close" data-dismiss="modal">×</button>
+        <h3>{% trans 'Upload File' %}</h3>
+    </div>
+    <div class="modal-body">
+        <form id="file-upload-form" class="form-horizontal well" enctype="multipart/form-data" action="{{ request.path }}?uploaded" method="post">
+            {% csrf_token %}
+            <fieldset>
+                {% for field in upload_form %}
+                    <div class="control-group">
+                        {% if field.errors %}
+                            {% for error in field.errors %}
+                                <div class="alert alert-error">
+                                    <a class="close">×</a>
+                                    <strong>{{ error }}</strong>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                        <label class="control-label">{{ field.label }}</label>
+                        <div class="controls">
+                            {{ field }}
+                            <p class="help-block">{{ field.help_text }}</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </fieldset>
+        </form>
+    </div>
+
+    <div class="modal-footer">
+        <a href="#" class="btn btn-primary" id="file-upload-submit">{% trans 'Continue' %} <i class="icon-chevron-right icon-white"></i></a>
+        <a href="#myModal" class="btn btn-danger" data-dismiss="modal" id="file-upload-cancel"><i class="icon-trash icon-white"></i> {% trans 'Cancel' %}</a>
+    </div>
+</div>
