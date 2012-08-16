@@ -1,6 +1,5 @@
 {% extends "mdtui/base.html" %}
 {% load i18n %}
-{% load index_keys %}
 
 {% block body_content %}
     <h1 id="page-heading">{% block body_title %}{% trans 'Document Search' %}{% endblock %}</h1>
@@ -36,15 +35,15 @@
 
     {# STEPS RENDERING #}
     {% if step == "type" %}
-    {% include "mdtui/search/type.html" %}
+    {% include "mdtui/search/search_type.html" %}
     {% endif %}
 
     {% if step == "options" %}
-    {% include "mdtui/search/options.html" %}
+    {% include "mdtui/search/search_options.html" %}
     {% endif %}
 
     {% if step == "results" %}
-    {% include "mdtui/search/results.html" %}
+    {% include "mdtui/search/search_results.html" %}
     {% endif %}
 
 {% endblock %}
@@ -65,13 +64,13 @@
 {# ADDITIONAL SCRIPTS REQUIRED BY STEPS #}
 {% block js_extra_inline %}
     {% if step == "results" %}
-        {% include "mdtui/search/results_scripts.html" %}
+        {% include "mdtui/search/search_results_scripts.html" %}
     {% endif %}
     {% if step == "options" %}
         {% include "mdtui/_typeaheadjs.html" %}
-        {% include "mdtui/search/options_scripts.html" %}
+        {% include "mdtui/search/search_options_scripts.html" %}
     {% endif %}
     {% if step == "view" %}
-        {% include "mdtui/search/view_scripts.html" %}
+        {% include "mdtui/search/search_view_scripts.html" %}
     {% endif %}
 {% endblock %}
