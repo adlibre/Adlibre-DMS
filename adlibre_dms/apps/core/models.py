@@ -49,6 +49,7 @@ class Document(object):
         self.remove_tag_string = ''
         self.requested_extension = None
         self.db_info = {}
+        self.new_indexes = {}
 
     def get_name(self):
         name = self.get_filename()
@@ -261,4 +262,29 @@ class Document(object):
     def set_db_info(self, db_info):
         self.db_info = db_info
 
+    def update_db_info(self, new_indexes):
+        self.new_indexes = new_indexes
+
+    # TODO: SHould not be here... (Maybe forms_representator is a proper place)
+    def construct_edit_indexes_data(self, mdts):
+        """ Method to indexes dictionary with new indexes according to existing MDTS.
+        """
+        indexes_dict = {}
+        if self.db_info:
+            db_info = self.get_db_info()
+            indexes_dict = {'description': db_info['description']}
+            # Finding key in MDT's and appending it to the form.
+            counter = 0
+            if 'mdt_indexes' in db_info:
+                for mdt in mdts.itervalues():
+                    for field in mdt['fields'].itervalues():
+                        # Fail gracefully if no index for this MDT exists in DB
+                        # Thus enabling us to add new MDTs for documents
+                        # without creating serious bugs in editing document
+                        try:
+                            indexes_dict[str(counter)] = db_info['mdt_indexes'][field['field_name']]
+                        except:
+                            pass
+                        counter += 1
+        return indexes_dict
 

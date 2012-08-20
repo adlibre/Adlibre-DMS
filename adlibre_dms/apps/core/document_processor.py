@@ -80,7 +80,7 @@ class DocumentProcessor(object):
         self.check_errors_in_operator(operator)
         return doc
 
-    def update(self, request, document_name, tag_string=None, remove_tag_string=None, extension=None):
+    def update(self, request, document_name, tag_string=None, remove_tag_string=None, extension=None, new_indexes=None):
         """
         Process update plugins.
 
@@ -95,6 +95,9 @@ class DocumentProcessor(object):
             doc.set_requested_extension(extension)
         doc.set_tag_string(tag_string)
         doc.set_remove_tag_string(remove_tag_string)
+        # TODO: Implement this (garmoncheg @ #794 Edit metadata)
+        if new_indexes:
+            doc.update_db_info(new_indexes)
         doc = operator.process_pluginpoint(pluginpoints.BeforeUpdatePluginPoint, request, document=doc)
         self.check_errors_in_operator(operator)
         return doc

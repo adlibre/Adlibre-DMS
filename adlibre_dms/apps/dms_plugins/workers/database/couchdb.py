@@ -10,7 +10,7 @@ import datetime
 
 from django.conf import settings
 
-from dms_plugins.pluginpoints import BeforeRetrievalPluginPoint, BeforeRemovalPluginPoint, DatabaseStoragePluginPoint
+from dms_plugins.pluginpoints import BeforeRetrievalPluginPoint, BeforeRemovalPluginPoint, BeforeUpdatePluginPoint, DatabaseStoragePluginPoint
 from dms_plugins.models import DocTags
 from dms_plugins.workers import Plugin
 from core.document_processor import DocumentProcessor
@@ -80,11 +80,14 @@ class CouchDBMetadata(object):
                 couchdoc.save(force_update=True)
                 return document
 
-    def update_documents_metadata(self, request, document):
-        # TODO: implement this (Decouple from store method)
-        # TODO: handle dates properly. e.g. Creation date left as is.
-        # TODO: add updated date and handle it in DMS in another manner.
-        pass
+    def update_document_metadata(self, request, document):
+        """
+        Updates document with new indexes and stores old one into another revision.
+        """
+        # TODO: implement this !!!!
+        if document.new_indexes:
+            print document.new_indexes
+        return document
 
     def update_metadata_after_removal(self, request, document):
         """
@@ -148,6 +151,16 @@ class CouchDBMetadataStoragePlugin(Plugin, DatabaseStoragePluginPoint):
 
     def work(self, request, document, **kwargs):
         return self.worker.store(request, document)
+
+class CouchDBMetadataUpdatePlugin(Plugin, BeforeUpdatePluginPoint):
+    title = "CouchDB Metadata Update Indexes"
+    description = "Updates document after new indexes added with preserving old revision of document indexes"
+
+    plugin_type = 'database'
+    worker = CouchDBMetadata()
+
+    def work(self, request, document, **kwargs):
+        return self.worker.update_document_metadata(request, document)
 
 class CouchDBMetadataRemovalPlugin(Plugin, BeforeRemovalPluginPoint):
     title = "CouchDB Metadata Removal"

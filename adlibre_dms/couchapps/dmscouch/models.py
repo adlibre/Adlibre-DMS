@@ -120,3 +120,8 @@ class CouchDocument(Document):
             except KeyError:
                 # if not provided model stores default "utcnow" date
                 pass
+
+    # TODO: Implement this (garmoncheg @ #794 Edit metadata)
+    def update_from_dms(self, document):
+
+        return document

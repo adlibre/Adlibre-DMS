@@ -1,0 +1,27 @@
+{% load index_keys %}
+<form class="form-horizontal" action="{{ request.path }}" method="post">
+    {% csrf_token %}
+    <fieldset>
+        <legend>Edit index data for document: {{ doc_name }}</legend>
+        <br />
+        {# EDIT INDEX DATA FORM RENDERING #}
+        {# Form non field errors dummy #}
+        {% if form.non_field_errors %}
+            {% for error in form.non_field_errors %}
+                <div class="alert alert-error">
+                    <a class="close">×</a>
+                    <strong>{{ error.message }}</strong>
+                </div>
+            {% endfor %}
+        {% endif %}
+        {% for field in form %}
+            {% include "mdtui/index/index_form_field.html" %}
+        {% endfor %}
+
+    </fieldset>
+
+    <div class="form-actions">
+        <button type="reset" class="btn btn-danger"><i class="icon-trash icon-white"></i> Cancel</button>
+        <button type="submit" class="btn btn-primary">Continue <i class="icon-chevron-right icon-white"></i></button>
+    </div>
+</form>
