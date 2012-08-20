@@ -115,6 +115,78 @@ class DocumentIndexForm(forms.Form):
             return False
         return True
 
+class EditDocumentIndexForm(forms.Form):
+    """
+    Form for editing document indexes.
+    Has dynamic initialization abilities.
+    """
+    description = forms.CharField(max_length=100, label="Description", help_text="Brief Document Description")
+
+    def __init__(self, *args, **kwargs):
+        super(EditDocumentIndexForm, self).__init__(*args, **kwargs)
+
+    def setFields(self, kwds):
+        setFormFields(self, kwds)
+
+    def setData(self, kwds):
+        setFormData(self, kwds)
+
+    def validation_ok(self):
+        """
+        Form validation sequence overridden here.
+        Does check if field is entered (basic fields validation)
+        Does Type validation for the proper data entry.
+        E.g. if user enters ABC instead of 123 or date in wrong format.
+        Char fields are only checked if entered at all.
+        """
+        # TODO: test validation if it is working or not... (garmoncheg @ #794 Edit metadata)
+        for field in self.fields:
+            cur_field = self.fields[field]
+            # Simple if field entered validation
+            try:
+                # Validate only if those keys exist e.g in search usage there is no description field
+                try:
+                    # Trimming whitespaces on all fields
+                    self.data[unicode(field)] = self.data[unicode(field)].strip(' \t\n\r')
+                    cur_field.validate(self.data[unicode(field)])
+                except ValidationError, e:
+                    # appending error to form errors
+                    self.errors[field] = e
+                    self._errors[field] = e
+            except KeyError:
+                pass
+
+            # Wrong type validation
+            try:
+                # Validate only if those keys exist
+                if cur_field.__class__.__name__ == "IntegerField":
+                    try:
+                        int(self.data[unicode(field)])
+                    except ValueError:
+                        # appending error to form errors
+                        if self.data[unicode(field)]:
+                            # Wrong data entered adding type error
+                            e = ValidationError(CUSTOM_ERRORS['NUMBER'])
+                            self.errors[field] = e
+                            self._errors[field] = e
+                        pass
+                if cur_field.__class__.__name__ == "DateField":
+                    try:
+                        datetime.datetime.strptime(self.data[unicode(field)], settings.DATE_FORMAT)
+                    except ValueError:
+                        # appending error to form errors
+                        if self.data[unicode(field)]:
+                            # Wrong data entered adding type error
+                            e = ValidationError(CUSTOM_ERRORS['DATE'])
+                            self.errors[field] = e
+                            self._errors[field] = e
+                        pass
+            except KeyError:
+                pass
+        if self.errors:
+            return False
+        return True
+
 class DocumentSearchOptionsForm(forms.Form):
     """
     Form for searching documents by indexes.

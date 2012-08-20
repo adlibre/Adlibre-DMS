@@ -5,7 +5,7 @@
 
     <h1 id="page-heading">{% block body_title %}{% trans 'Document Indexing' %}{% endblock %}</h1>
 
-    {% if step != None %}
+    {% if step != 'edit' %}
     {# Use this for a progress / step indicator / navigation #}
     <ul class="pager x-progress-tracker">
         {% url mdtui-index-type as url %}
@@ -27,6 +27,13 @@
         <a class="close">×</a>
         <strong>{{ warning }}</strong>
     </div>
+    {% endfor %}
+
+    {% for warning in error_warnings %}
+        <div class="alert alert-error">
+            <a class="close">×</a>
+            <strong>{{ warning }}</strong>
+        </div>
     {% endfor %}
 
     {% if step == "1" %}

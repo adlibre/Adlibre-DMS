@@ -12,6 +12,7 @@ from django.conf import settings
 
 from forms import DocumentIndexForm
 from forms import DocumentSearchOptionsForm
+from forms import EditDocumentIndexForm
 from forms_representator import render_fields_from_docrules
 from forms_representator import get_mdts_for_docrule
 from adlibre.date_converter import str_date_to_couch
@@ -106,6 +107,32 @@ def processDocumentIndexForm(request):
             return secondary_indexes
         else:
             return None
+
+def initEditIndexesForm(doc, request):
+    """
+    Edit form creating with population from existing document
+
+    Inherits initIndexesForm with faking it's data to be rendered properly
+    """
+    docrule_id = str(doc.get_docrule().id)
+    mdts = get_mdts_for_docrule(docrule_id)
+    initial_indexes = doc.construct_edit_indexes_data(mdts)
+    # Faking POST request to populate from with initial indexes properly
+    if not request.POST:
+        request.POST = initial_indexes
+    else:
+        if 'description' in request.POST:
+            initial_indexes['description'] = request.POST['description']
+    form = EditDocumentIndexForm()
+    if mdts and not mdts == 'error':
+        # MDT's exist for this docrule adding fields to form
+        fields = render_fields_from_docrules(mdts, request.POST or None)
+        if fields:
+            form.setFields(fields)
+    form.setData(initial_indexes)
+    # TODO: test validation working here (if relevant)
+    #form.validation_ok()
+    return form
 
 def determine_search_req(request):
     """

@@ -22,6 +22,7 @@ from core.document_processor import DocumentProcessor
 from doc_codes.models import DocumentTypeRule
 from view_helpers import initIndexesForm
 from view_helpers import processDocumentIndexForm
+from view_helpers import initEditIndexesForm
 from view_helpers import get_mdts_for_documents
 from view_helpers import extract_secondary_keys_from_form
 from view_helpers import cleanup_search_session
@@ -307,6 +308,52 @@ def view_pdf(request, code, step, template='mdtui/view.html'):
     context = { 'pdf_url': pdf_url, 'code': code, 'step':step }
     return render(request, template, context)
 
+@login_required
+@group_required(SEC_GROUP_NAMES['edit_index'])
+def indexing_edit(request, code, step='edit', template='mdtui/indexing.html'):
+    """Indexing step: Edit. Made for editing indexes of document that is indexed already."""
+    context = {}
+    warnings = []
+    error_warnings = []
+    form = False
+    processor = DocumentProcessor()
+
+    doc = processor.read(request, code)
+    if not processor.errors:
+        if not request.POST:
+            form = initEditIndexesForm(doc, request)
+        else:
+            # HACK: TODO: Validating through another form because it works. Need to make another sequence or update existing.
+            secondary_indexes = processDocumentIndexForm(request)
+
+            # TODO: IMPLEMENT THIS!!!
+            #doc = processor.update(code, new_indexes=secondary_indexes)
+
+            if secondary_indexes:
+                # TODO: Create a separate template here and proper actions for it.
+                # Faking Indexing data added to render indexing finished step
+                request.session['document_keys_dict'] = secondary_indexes
+                request.session['barcode'] = code
+                docrule = str(doc.get_docrule().id)
+                request.session['indexing_docrule_id'] = docrule
+
+                if not processor.errors:
+                    return HttpResponseRedirect(reverse('mdtui-index-finished'))
+                else:
+                    form = initEditIndexesForm(doc, request)
+    else:
+        for error in processor.errors:
+            error_warnings.append(error.parameter)
+    if form:
+        # No form is possible when document does not exist
+        context.update( {'form': form,} )
+    context.update( { 'step': step,
+                      'doc_name': code,
+                      'warnings': warnings,
+                      'error_warnings': error_warnings,
+                      })
+    cleanup_indexing_session(request)
+    return render_to_response(template, context, context_instance=RequestContext(request))
 
 @login_required
 @group_required(SEC_GROUP_NAMES['index'])
