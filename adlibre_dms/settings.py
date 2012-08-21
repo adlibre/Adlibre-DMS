@@ -34,10 +34,17 @@ DATABASES = {
     }
 }
 
-COUCHDB_DATABASES = (
-         ('dmscouch', 'http://127.0.0.1:5984/dmscouch'),
-         ('mdtcouch', 'http://127.0.0.1:5984/mdtcouch'),
-)
+if DEBUG:
+    COUCHDB_DATABASES = (
+        ('dmscouch', 'http://127.0.0.1:5984/dmscouch_test'),
+        ('mdtcouch', 'http://127.0.0.1:5984/mdtcouch_test'),
+    )
+else:
+    COUCHDB_DATABASES = (
+        ('dmscouch', 'http://127.0.0.1:5984/dmscouch'),
+        ('mdtcouch', 'http://127.0.0.1:5984/mdtcouch'),
+    )
+
 
 # Required for using password (adlibre.auth) app
 # We must override with real email server at Production

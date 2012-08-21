@@ -50,6 +50,7 @@ username_6 = 'tests_user_6'
 password_6 = 'test6'
 
 couchdb_url = 'http://127.0.0.1:5984'
+couchdb_name = 'dmscouch_test'
 
 test_mdt_docrule_id = 2 # should be properly assigned to fixtures docrule that uses CouchDB plugins
 test_mdt_docrule_id2 = 7 # should be properly assigned to fixtures docrule that uses CouchDB plugins
@@ -855,7 +856,7 @@ class MDTUI(TestCase):
         Document now exists in couchDB
         Querying CouchDB itself to test docs exist.
         """
-        url = couchdb_url + '/dmscouch/'+doc1+'?revs_info=true'
+        url = couchdb_url + '/' + couchdb_name + '/' + doc1 + '?revs_info=true'
         # HACK: faking 'request' object here
         r = self.client.get(url)
         cou = urllib.urlopen(url)
@@ -2046,7 +2047,7 @@ class MDTUI(TestCase):
         response = self.client.post(url, data)
         self.assertContains(response, 'File has been uploaded')
         # Faking 'request' object to test with assertions
-        url = couchdb_url + '/dmscouch/'+doc1+'?revs_info=true'
+        url = couchdb_url + '/' + couchdb_name + '/' + doc1 + '?revs_info=true'
         r = self.client.get(url)
         cou = urllib.urlopen(url)
         resp = cou.read()
