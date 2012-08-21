@@ -1,5 +1,6 @@
 """
 Module: MDTUI data exporting Moodule
+
 Project: Adlibre DMS
 Copyright: Adlibre Pty Ltd 2012
 License: See LICENSE for license information
@@ -10,6 +11,10 @@ import csv
 from django.http import HttpResponse
 from doc_codes.models import DocumentTypeRuleManagerInstance
 from adlibre.date_converter import date_standardized
+
+import logging
+
+log = logging.getLogger('dms.mdtui.data_exporter')
 
 def export_to_csv(search_keys, sec_keys_names, documents):
     """Helper to produce proper CSV file for search results export"""
@@ -35,7 +40,13 @@ def export_to_csv(search_keys, sec_keys_names, documents):
                 # No value exists
                 doc_sec_keys.append('Not given',)
         # Converting date to Y-m-d format
-        cr_date = date_standardized(doc['metadata_created_date'].rstrip('T00:00:00Z'))
+        # TODO: fix this and find a cause of it. What adds time to indexes? ( Refs #807 )
+        try:
+            cr_date = date_standardized(doc['metadata_created_date'].rstrip('T00:00:00Z'))
+        except ValueError:
+            cr_date = doc['metadata_created_date']
+            log.error('Wrong date index in database!: doc._id: %s' % doc['_id'])
+            pass
         # Catching Document's type rule to name it in export
         # This way should not produce SQL DB requests (Uses DocumentTypeRuleManagerInstance for this)
         docrule = DocumentTypeRuleManagerInstance.get_docrule_by_id(doc['metadata_doc_type_rule_id'])
