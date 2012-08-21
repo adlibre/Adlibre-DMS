@@ -79,59 +79,79 @@ def processDocumentIndexForm(request):
     search = determine_search_req(request)
     if form.validation_ok() or search:
         for key, field in form.fields.iteritems():
-            # UPPERCASE Init if set attribute
-            upper = False
-            try:
-                if field.is_uppercase:
-                    upper = True
-            except AttributeError:
-                pass
-            # FIXME: Nested exceptions.. bad
-            try:
-                # For dynamic form fields
-                if not upper:
-                    secondary_indexes[field.field_name] = form.data[unicode(key)].strip(' \t\n\r')
-                else:
-                    secondary_indexes[field.field_name] = form.data[unicode(key)].upper().strip(' \t\n\r')
-            except (AttributeError, KeyError):
-                try:
-                    # For native form fields
-                    if not upper:
-                        secondary_indexes[key] = form.data[unicode(key)].strip(' \t\n\r')
-                    else:
-                        secondary_indexes[key] = form.data[unicode(key)].upper().strip(' \t\n\r')
-                except KeyError:
-                    pass
-
+            index_tuple = process_indexes_field(key, field, form.data)
+            if index_tuple:
+                secondary_indexes[index_tuple[0]] = index_tuple[1]
         if secondary_indexes:
             return secondary_indexes
         else:
             return None
 
-def initEditIndexesForm(doc, request):
+def processEditDocumentIndexForm(request, doc):
+    form = initEditIndexesForm(request, doc)
+    secondary_indexes = {}
+    if form.validation_ok():
+        for key, field in form.fields.iteritems():
+            index_tuple = process_indexes_field(key, field, form.data)
+            if index_tuple:
+                secondary_indexes[index_tuple[0]] = index_tuple[1]
+    if secondary_indexes:
+        return secondary_indexes
+    else:
+        return None
+
+def process_indexes_field(key, field, data):
+    index_tuple = ()
+    # UPPERCASE Init if set attribute
+    upper = False
+    try:
+        if field.is_uppercase:
+            upper = True
+    except AttributeError:
+        pass
+        # FIXME: Nested exceptions.. bad
+    try:
+        # For dynamic form fields
+        if not upper:
+            index_tuple = (field.field_name, data[unicode(key)].strip(' \t\n\r'))
+        else:
+            index_tuple = (field.field_name, data[unicode(key)].upper().strip(' \t\n\r'))
+    except (AttributeError, KeyError):
+        try:
+            # For native form fields
+            if not upper:
+                index_tuple = (key, data[unicode(key)].strip(' \t\n\r'))
+            else:
+                index_tuple = (key, data[unicode(key)].upper().strip(' \t\n\r'))
+        except KeyError:
+            pass
+    return index_tuple
+
+def initEditIndexesForm(request, doc):
     """
     Edit form creating with population from existing document
 
     Inherits initIndexesForm with faking it's data to be rendered properly
     """
+    mdts = None
+    initial_indexes = None
     docrule_id = str(doc.get_docrule().id)
-    mdts = get_mdts_for_docrule(docrule_id)
-    initial_indexes = doc.construct_edit_indexes_data(mdts)
     # Faking POST request to populate from with initial indexes properly
     if not request.POST:
+        # TODO: cashe MDTS
+        mdts = get_mdts_for_docrule(docrule_id)
+        initial_indexes = doc.construct_edit_indexes_data(mdts)
         request.POST = initial_indexes
-    else:
-        if 'description' in request.POST:
-            initial_indexes['description'] = request.POST['description']
     form = EditDocumentIndexForm()
     if mdts and not mdts == 'error':
         # MDT's exist for this docrule adding fields to form
         fields = render_fields_from_docrules(mdts, request.POST or None)
         if fields:
             form.setFields(fields)
-    form.setData(initial_indexes)
-    # TODO: test validation working here (if relevant)
-    #form.validation_ok()
+    if not request.POST:
+        form.setData(initial_indexes)
+        # TODO: test validation working here, if relevant
+        #form.validation_ok()
     return form
 
 def determine_search_req(request):
