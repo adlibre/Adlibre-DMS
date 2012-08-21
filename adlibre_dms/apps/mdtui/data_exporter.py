@@ -7,7 +7,7 @@ License: See LICENSE for license information
 Author: Iurii Garmash
 """
 
-import csv
+import csv, re
 from django.http import HttpResponse
 from doc_codes.models import DocumentTypeRuleManagerInstance
 from adlibre.date_converter import date_standardized
@@ -40,13 +40,7 @@ def export_to_csv(search_keys, sec_keys_names, documents):
                 # No value exists
                 doc_sec_keys.append('Not given',)
         # Converting date to Y-m-d format
-        # TODO: fix this and find a cause of it. What adds time to indexes? ( Refs #807 )
-        try:
-            cr_date = date_standardized(doc['metadata_created_date'].rstrip('T00:00:00Z'))
-        except ValueError:
-            cr_date = doc['metadata_created_date']
-            log.error('Wrong date index in database!: doc._id: %s' % doc['_id'])
-            pass
+        cr_date = date_standardized(re.sub("T\d{2}:\d{2}:\d{2}Z", "", doc['metadata_created_date']))
         # Catching Document's type rule to name it in export
         # This way should not produce SQL DB requests (Uses DocumentTypeRuleManagerInstance for this)
         docrule = DocumentTypeRuleManagerInstance.get_docrule_by_id(doc['metadata_doc_type_rule_id'])
