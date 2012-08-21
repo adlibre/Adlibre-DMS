@@ -23,6 +23,7 @@ from doc_codes.models import DocumentTypeRule
 from view_helpers import initIndexesForm
 from view_helpers import processDocumentIndexForm
 from view_helpers import initEditIndexesForm
+from view_helpers import processEditDocumentIndexForm
 from view_helpers import get_mdts_for_documents
 from view_helpers import extract_secondary_keys_from_form
 from view_helpers import cleanup_search_session
@@ -321,16 +322,15 @@ def indexing_edit(request, code, step='edit', template='mdtui/indexing.html'):
     doc = processor.read(request, code)
     if not processor.errors:
         if not request.POST:
-            form = initEditIndexesForm(doc, request)
+            form = initEditIndexesForm(request, doc)
         else:
-            # HACK: TODO: Validating through another form because it works. Need to make another sequence or update existing.
-            secondary_indexes = processDocumentIndexForm(request)
+            secondary_indexes = processEditDocumentIndexForm(request, doc)
 
             # TODO: IMPLEMENT THIS!!!
             #doc = processor.update(code, new_indexes=secondary_indexes)
 
             if secondary_indexes:
-                # TODO: Create a separate template here and proper actions for it.
+                # TODO: Create a separate template here and proper behaviour and constants for it.
                 # Faking Indexing data added to render indexing finished step
                 request.session['document_keys_dict'] = secondary_indexes
                 request.session['barcode'] = code
