@@ -61,6 +61,8 @@ setup(name='adlibre_dms',
                 'apps/mdtui/static/img/*.png',
                 'apps/mdtui/static/js/*.js',
                 'apps/mdtui/templates/mdtui/*.html',
+                'apps/mdtui/templates/mdtui/index/*.html',
+                'apps/mdtui/templates/mdtui/search/*.html',
                 # Themes
                 'apps/theme/*/static/theme/*/*.png',
                 'apps/theme/*/static/theme/*/*.css',
