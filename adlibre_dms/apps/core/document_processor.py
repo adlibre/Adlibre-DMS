@@ -19,7 +19,35 @@ log = logging.getLogger('core.document_processor')
 
 # TODO: AC: I think this should be refactored so that 'request' is not used here.
 class DocumentProcessor(object):
-    """Main DMS CRUD logic operations handler."""
+    """Main DMS CRUD logic operations handler.
+
+    TODO: refactor methods to accept only 1 additional variable 'options'
+    so instead of adding local vars:
+
+        Manager().create(request, uploaded_file, index_info, barcode)
+
+    it should list all the options required there. e.g. in this case:
+
+        options = {
+                'barcode' = 'ADL-0001' ,
+                'index_info' = {
+                           # ...
+                    },
+            }
+        class Manager()
+
+            def create(request, uploaded_file, options=None)
+                # Context init
+                barcode = None
+                index_info = None
+                # ...
+                if options:
+                    if 'barcode' in options:
+                        barcode = options['barcode']
+                    # ...
+
+    Manager should have similar behaviour at all the CRUD methods.
+    """
     def __init__(self):
         self.errors = []
         self.warnings = []
@@ -80,14 +108,24 @@ class DocumentProcessor(object):
         self.check_errors_in_operator(operator)
         return doc
 
-    def update(self, request, document_name, tag_string=None, remove_tag_string=None, extension=None, new_indexes=None):
+    def update(self, request, document_name, tag_string=None, remove_tag_string=None, extension=None, options=None):
         """
         Process update plugins.
 
         This is needed to update document properties like tags without re-storing document itself.
+
+        Has ability to:
+            - update document indexes
+            TODO: continue this...
         """
-        log.debug('UPDATE Document %s, tag_string: %s, remove_tag_string: %s, extension: %s'
-                  % (document_name, tag_string, remove_tag_string, extension) )
+        log.debug('UPDATE Document %s, tag_string: %s, remove_tag_string: %s, extension: %s, options: %s'
+                  % (document_name, tag_string, remove_tag_string, extension, options) )
+        # Context init
+        new_indexes = None
+        if options:
+            if 'new_indexes' in options:
+                new_indexes = options['new_indexes']
+
         doc = Document()
         operator = PluginsOperator()
         doc.set_filename(document_name)
@@ -95,7 +133,6 @@ class DocumentProcessor(object):
             doc.set_requested_extension(extension)
         doc.set_tag_string(tag_string)
         doc.set_remove_tag_string(remove_tag_string)
-        # TODO: Implement this (garmoncheg @ #794 Edit metadata)
         if new_indexes:
             doc.update_db_info(new_indexes)
         doc = operator.process_pluginpoint(pluginpoints.BeforeUpdatePluginPoint, request, document=doc)

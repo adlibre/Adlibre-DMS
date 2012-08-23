@@ -84,9 +84,11 @@ class CouchDBMetadata(object):
         """
         Updates document with new indexes and stores old one into another revision.
         """
-        # TODO: implement this !!!!
-        if document.new_indexes:
-            print document.new_indexes
+        if document.new_indexes and document.file_name:
+            couchdoc = CouchDocument.get(docid=document.file_name)
+            couchdoc.update_indexes_revision(document)
+            couchdoc.save()
+            document = couchdoc.populate_into_dms(request, document)
         return document
 
     def update_metadata_after_removal(self, request, document):
