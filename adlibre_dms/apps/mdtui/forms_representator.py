@@ -237,3 +237,21 @@ def get_mdt_from_search_mdt_select_form(mdt_ids, form):
         if choice[0] in mdt_ids:
             names_list.append(choice[1])
     return names_list
+
+def construct_edit_indexes_data(mdts, db_info):
+    """ Method to indexes dictionary with new indexes according to existing MDTS."""
+    indexes_dict = {'description': db_info['description']}
+    # Finding key in MDT's and appending it to the form.
+    counter = 0
+    if 'mdt_indexes' in db_info:
+        for mdt in mdts.itervalues():
+            for field in mdt['fields'].itervalues():
+                # Fail gracefully if no index for this MDT exists in DB
+                # Thus enabling us to add new MDTs for documents
+                # without creating serious bugs in editing document
+                try:
+                    indexes_dict[str(counter)] = db_info['mdt_indexes'][field['field_name']]
+                except:
+                    pass
+                counter += 1
+    return indexes_dict

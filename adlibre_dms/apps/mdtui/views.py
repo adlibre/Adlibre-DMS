@@ -320,15 +320,14 @@ def indexing_edit(request, code, step='edit', template='mdtui/indexing.html'):
     processor = DocumentProcessor()
 
     doc = processor.read(request, code)
+    # TODO: check for misconfiguration here (plugin edit indexes exists in doc's docrule)
     if not processor.errors:
         if not request.POST:
             form = initEditIndexesForm(request, doc)
         else:
             secondary_indexes = processEditDocumentIndexForm(request, doc)
-
-            # TODO: IMPLEMENT THIS!!!
-            #doc = processor.update(code, new_indexes=secondary_indexes)
-
+            options = { 'new_indexes': secondary_indexes }
+            doc = processor.update(request, code, options=options)
             if secondary_indexes:
                 # TODO: Create a separate template here and proper behaviour and constants for it.
                 # Faking Indexing data added to render indexing finished step
@@ -352,6 +351,7 @@ def indexing_edit(request, code, step='edit', template='mdtui/indexing.html'):
                       'warnings': warnings,
                       'error_warnings': error_warnings,
                       })
+    # TODO: cleanup after custom view.
     cleanup_indexing_session(request)
     return render_to_response(template, context, context_instance=RequestContext(request))
 

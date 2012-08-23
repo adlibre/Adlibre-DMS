@@ -130,6 +130,8 @@ class EditDocumentIndexForm(forms.Form):
 
     def setData(self, kwds):
         setFormData(self, kwds)
+        if 'description' in kwds:
+            self.base_fields['description'].initial = kwds['description']
 
     def validation_ok(self):
         """

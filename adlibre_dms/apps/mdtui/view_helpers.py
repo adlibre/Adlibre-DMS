@@ -15,6 +15,7 @@ from forms import DocumentSearchOptionsForm
 from forms import EditDocumentIndexForm
 from forms_representator import render_fields_from_docrules
 from forms_representator import get_mdts_for_docrule
+from forms_representator import construct_edit_indexes_data
 from adlibre.date_converter import str_date_to_couch
 
 def initIndexesForm(request):
@@ -96,6 +97,8 @@ def processEditDocumentIndexForm(request, doc):
             if index_tuple:
                 secondary_indexes[index_tuple[0]] = index_tuple[1]
     if secondary_indexes:
+        secondary_indexes['metadata_user_name'] = request.user.username
+        secondary_indexes['metadata_user_id'] = str(request.user.pk)
         return secondary_indexes
     else:
         return None
@@ -133,25 +136,28 @@ def initEditIndexesForm(request, doc):
 
     Inherits initIndexesForm with faking it's data to be rendered properly
     """
-    mdts = None
     initial_indexes = None
     docrule_id = str(doc.get_docrule().id)
+    POST = request.POST
+    # TODO: cashe MDTS
+    mdts = get_mdts_for_docrule(docrule_id)
     # Faking POST request to populate from with initial indexes properly
-    if not request.POST:
-        # TODO: cashe MDTS
-        mdts = get_mdts_for_docrule(docrule_id)
-        initial_indexes = doc.construct_edit_indexes_data(mdts)
-        request.POST = initial_indexes
+    if not POST:
+        if doc.db_info:
+            initial_indexes = construct_edit_indexes_data(mdts, doc.db_info)
+            request.POST = initial_indexes
     form = EditDocumentIndexForm()
     if mdts and not mdts == 'error':
         # MDT's exist for this docrule adding fields to form
         fields = render_fields_from_docrules(mdts, request.POST or None)
         if fields:
             form.setFields(fields)
-    if not request.POST:
+    if not POST:
         form.setData(initial_indexes)
-        # TODO: test validation working here, if relevant
-        #form.validation_ok()
+    # TODO: test validation working here, if relevant
+    else:
+        form.setData(POST)
+        form.validation_ok()
     return form
 
 def determine_search_req(request):
