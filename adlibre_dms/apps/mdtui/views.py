@@ -29,6 +29,7 @@ from view_helpers import extract_secondary_keys_from_form
 from view_helpers import cleanup_search_session
 from view_helpers import cleanup_indexing_session
 from view_helpers import cleanup_mdts
+from view_helpers import _cleanup_session_var
 from view_helpers import unify_index_info_couch_dates_fmt
 from search_helpers import cleanup_document_keys
 from search_helpers import document_date_range_only_search
@@ -320,24 +321,26 @@ def indexing_edit(request, code, step='edit', template='mdtui/indexing.html'):
     processor = DocumentProcessor()
 
     doc = processor.read(request, code)
-    # TODO: check for misconfiguration here (plugin edit indexes exists in doc's docrule)
+    # TODO: check for misconfiguration here (plugin or permission to edit indexes exists in document's DorulePluginMapping)
     if not processor.errors:
         if not request.POST:
             form = initEditIndexesForm(request, doc)
         else:
+            old_db_info = doc.get_db_info()
             secondary_indexes = processEditDocumentIndexForm(request, doc)
             options = { 'new_indexes': secondary_indexes }
             doc = processor.update(request, code, options=options)
             if secondary_indexes:
-                # TODO: Create a separate template here and proper behaviour and constants for it.
-                # Faking Indexing data added to render indexing finished step
-                request.session['document_keys_dict'] = secondary_indexes
-                request.session['barcode'] = code
-                docrule = str(doc.get_docrule().id)
-                request.session['indexing_docrule_id'] = docrule
-
+                del secondary_indexes['metadata_user_name']
+                del secondary_indexes['metadata_user_id']
+                request.session['edit_index_keys_dict'] = secondary_indexes
+                request.session['edit_index_barcode'] = code
+                old_docs_indexes = {'description': old_db_info['description']}
+                for index_name, index_value in old_db_info['mdt_indexes'].iteritems():
+                    old_docs_indexes[index_name] = index_value
+                request.session['old_document_keys'] = old_docs_indexes
                 if not processor.errors:
-                    return HttpResponseRedirect(reverse('mdtui-index-finished'))
+                    return HttpResponseRedirect(reverse('mdtui-index-edit-finished'))
                 else:
                     form = initEditIndexesForm(doc, request)
     else:
@@ -351,9 +354,33 @@ def indexing_edit(request, code, step='edit', template='mdtui/indexing.html'):
                       'warnings': warnings,
                       'error_warnings': error_warnings,
                       })
-    # TODO: cleanup after custom view.
-    cleanup_indexing_session(request)
-    return render_to_response(template, context, context_instance=RequestContext(request))
+    return render(request, template, context)
+
+@login_required
+@group_required(SEC_GROUP_NAMES['edit_index'])
+def indexing_edit_result(request, step='edit_finish', template='mdtui/indexing.html'):
+    context = { 'step': step,  }
+    try:
+        context.update({'document_keys': request.session['edit_index_keys_dict'],})
+        log.debug('indexing_finished called with: step: "%s", document_keys_dict: "%s",' %
+                  (step, context['document_keys']))
+    except KeyError:
+        pass
+
+    try:
+        context.update({'barcode': request.session['edit_index_barcode'],})
+    except KeyError:
+        pass
+
+    try:
+        context.update({'old_document_keys': request.session['old_document_keys'],})
+    except KeyError:
+        pass
+
+#    for var in ['old_document_keys', 'edit_index_barcode', 'edit_index_keys_dict']:
+#        _cleanup_session_var(request, var)
+#    cleanup_mdts(request)
+    return render(request, template, context)
 
 @login_required
 @group_required(SEC_GROUP_NAMES['index'])

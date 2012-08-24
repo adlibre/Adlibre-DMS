@@ -1,0 +1,28 @@
+{% load index_keys %}
+<fieldset>
+    <legend>Finished editing index data for document: {{ barcode }}</legend>
+</fieldset>
+
+{% if document_keys %}
+    <p>Your NEW document keys are:</p>
+    <ul class="metainfo">
+        {% for item in document_keys %}
+            <li>{% get_key_li_item document_keys item %}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+{% if old_document_keys %}
+    <p>Your OLD document keys were:</p>
+    <ul class="metainfo">
+        {% for item in old_document_keys %}
+            <li>{% get_key_li_item old_document_keys item %}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+{% if barcode %}
+<p>You may now correct again or return to search results</p>
+<a class="btn btn-warning" href="{% url mdtui-index-edit code=barcode %}">Correct <i class="icon-chevron-left icon-white"></i></a>
+<a class="btn btn-success" href="{% url mdtui-search-results %}">Return <i class="icon-chevron-right icon-white"></i></a>
+{% endif %}
