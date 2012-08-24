@@ -245,7 +245,10 @@ def construct_edit_indexes_data(mdts, db_info):
     counter = 0
     if 'mdt_indexes' in db_info:
         for mdt in mdts.itervalues():
-            for field in mdt['fields'].itervalues():
+            # Sort fields, like render_fields_from_docrules method does
+            sorted_fields = mdt['fields'].items()
+            sorted_fields.sort()
+            for field_key, field in sorted_fields:
                 # Fail gracefully if no index for this MDT exists in DB
                 # Thus enabling us to add new MDTs for documents
                 # without creating serious bugs in editing document

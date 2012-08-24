@@ -127,7 +127,6 @@ class CouchDocument(Document):
                 # Model stores default "utcnow" date farther
                 pass
 
-    # TODO: Implement this (garmoncheg @ #794 Edit metadata)
     def update_indexes_revision(self, document):
         """Updates CouchDB document with new revision of indexing data.
 

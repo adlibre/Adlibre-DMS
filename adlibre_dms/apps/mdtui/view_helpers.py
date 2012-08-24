@@ -145,6 +145,11 @@ def initEditIndexesForm(request, doc):
     if not POST:
         if doc.db_info:
             initial_indexes = construct_edit_indexes_data(mdts, doc.db_info)
+            # Converting dates into strings if relevant.
+            for key, value in initial_indexes.iteritems():
+                # Metaclass based conversions to
+                if value.__class__.__name__ == 'datetime':
+                    initial_indexes[key] = value.strftime(settings.DATE_FORMAT)
             request.POST = initial_indexes
     form = EditDocumentIndexForm()
     if mdts and not mdts == 'error':

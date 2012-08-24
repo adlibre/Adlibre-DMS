@@ -38,23 +38,27 @@
 
     {% if step == "1" %}
         {% include "mdtui/index/index_type.html" %}
-    {% endif %} {# end step 1 #}
+    {% endif %}
 
     {% if step == "2" %}
         {% include "mdtui/index/index_details.html" %}
-    {% endif %} {# end step 2 #}
+    {% endif %}
 
     {% if step == "3" %}
         {% include "mdtui/index/index_source.html" %}
-    {% endif %} {# end step 3 #}
+    {% endif %}
 
     {% if step == "4" %}
         {% include "mdtui/index/index_review.html" %}
-    {% endif %} {# end step 4 #}
+    {% endif %}
 
     {% if step == "edit" %}
         {% include "mdtui/index/index_edit.html" %}
-    {% endif %} {# end edit #}
+    {% endif %}
+
+    {% if step == "edit_finish" %}
+        {% include "mdtui/index/index_edit_finished.html" %}
+    {% endif %}
 {% endblock %}
 
 {% block css_extra %}
