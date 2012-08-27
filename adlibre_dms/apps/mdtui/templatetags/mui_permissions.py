@@ -61,7 +61,7 @@ def check_index_permit(context):
     return ''
 
 @register.simple_tag(takes_context=True)
-def check_index_permit(context):
+def check_edit_index_permit(context):
     """
     Checks request.user for permission to EDIT DOCUMENT INDEX in MUI
 
