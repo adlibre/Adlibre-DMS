@@ -1,6 +1,7 @@
 {% load i18n %}
 {% load index_keys %}
 {% load mui_permissions %}
+{% check_edit_index_permit %}
 <fieldset>
     <legend>{% if request.session.searching_docrule_id %}{% get_docrule_name_by_id request.session.searching_docrule_id %}{% endif %}{% if request.session.search_mdt_id %}{% get_used_in_search_mdt %}{% endif %} Results</legend>
 </fieldset>
