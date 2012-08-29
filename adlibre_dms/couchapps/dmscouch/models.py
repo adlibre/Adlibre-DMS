@@ -154,7 +154,7 @@ class CouchDocument(Document):
             secondary_indexes = {}
             for secondary_index_name, secondary_index_value in document.new_indexes.iteritems():
                 if not secondary_index_name in ['description', 'metadata_user_name', 'metadata_user_id',]:
-                    # Converting datge format to couch if secondary index is DMS date type
+                    # Converting date format to couch if secondary index is DMS date type
                     try:
                         datetime.strptime(secondary_index_value, settings.DATE_FORMAT)
                         secondary_indexes[secondary_index_name] = str_date_to_couch(secondary_index_value)
