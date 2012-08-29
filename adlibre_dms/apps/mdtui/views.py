@@ -7,9 +7,11 @@ License: See LICENSE for license information
 """
 
 import json
+import datetime
 import logging
 
 from django.core.urlresolvers import reverse
+from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, render_to_response, HttpResponseRedirect
 from django.template import RequestContext
@@ -29,7 +31,6 @@ from view_helpers import extract_secondary_keys_from_form
 from view_helpers import cleanup_search_session
 from view_helpers import cleanup_indexing_session
 from view_helpers import cleanup_mdts
-from view_helpers import _cleanup_session_var
 from view_helpers import unify_index_info_couch_dates_fmt
 from search_helpers import cleanup_document_keys
 from search_helpers import document_date_range_only_search
@@ -337,7 +338,11 @@ def indexing_edit(request, code, step='edit', template='mdtui/indexing.html'):
                 request.session['edit_index_barcode'] = code
                 old_docs_indexes = {'description': old_db_info['description']}
                 for index_name, index_value in old_db_info['mdt_indexes'].iteritems():
-                    old_docs_indexes[index_name] = index_value
+                    # Converting Old index dates to render according to DMS date format
+                    if index_value.__class__.__name__ == 'datetime':
+                        old_docs_indexes[index_name] = datetime.datetime.strftime(index_value, settings.DATE_FORMAT)
+                    else:
+                        old_docs_indexes[index_name] = index_value
                 request.session['old_document_keys'] = old_docs_indexes
                 if not processor.errors:
                     return HttpResponseRedirect(reverse('mdtui-index-edit-finished'))
