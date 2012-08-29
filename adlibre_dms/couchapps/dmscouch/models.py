@@ -7,10 +7,13 @@ Author: Iurii Garmash
 """
 
 from datetime import datetime
-from couchdbkit.ext.django.schema import *
-from couchdbkit.exceptions import BadValueError
+import re
 
 from django.conf import settings
+
+from couchdbkit.ext.django.schema import *
+
+from adlibre.date_converter import str_date_to_couch
 
 class CouchDocument(Document):
     id = StringProperty()
@@ -155,7 +158,13 @@ class CouchDocument(Document):
             secondary_indexes = {}
             for secondary_index_name, secondary_index_value in document.new_indexes.iteritems():
                 if not secondary_index_name in ['description', 'metadata_user_name', 'metadata_user_id',]:
-                    secondary_indexes[secondary_index_name] = secondary_index_value
+                    # Converting datge format to couch if secondary index is DMS date type
+                    try:
+                        datetime.strptime(secondary_index_value, settings.DATE_FORMAT)
+                        secondary_indexes[secondary_index_name] = str_date_to_couch(secondary_index_value)
+                    except ValueError:
+                        secondary_indexes[secondary_index_name] = secondary_index_value
+                        pass
             # Storing current index data into new revision
             if not 'index_revisions' in self:
                 # Creating index_revisions initial data dictionary.
