@@ -735,7 +735,8 @@
             ], 
             "before_update_plugins": [
                 19, 
-                21
+                21,
+                25
             ], 
             "active": true, 
             "before_storage_plugins": [
@@ -931,7 +932,8 @@
             ],
             "before_update_plugins": [
                 19,
-                21
+                21,
+                25
             ],
             "active": true,
             "before_storage_plugins": [
@@ -970,7 +972,8 @@
             ],
             "before_update_plugins": [
                 19,
-                21
+                21,
+                25
             ],
             "active": true,
             "before_storage_plugins": [
@@ -1385,6 +1388,17 @@
             "_order": 7, 
             "name": "dms_plugins.workers.database.couchdb.CouchDBMetadataRetrievalPlugin", 
             "point": 2
+        }
+    },
+    {
+        "pk": 25,
+        "model": "djangoplugins.plugin",
+        "fields": {
+            "status": 0,
+            "index": 0,
+            "_order": 2,
+            "name": "dms_plugins.workers.database.couchdb.CouchDBMetadataUpdatePlugin",
+            "point": 4
         }
     }
 ]
