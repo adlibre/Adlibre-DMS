@@ -63,7 +63,28 @@ test_mdt_id_5 = 5 # Last MDT used in testing search part of MUI
 test_mdt_id_5_name = 'mdt5'
 test_mdt_id_6 = 6 # Last MDT used in testing search part of MUI
 
-indexes_form_match_pattern = '(Employee ID|Employee Name|Friends ID|Friends Name|Required Date|Reporting Entity|Report Date|Report Type|Employee|Tests Uppercase Field|Additional).+?name=\"(\d+|\d+_from|\d+_to)\"'
+############################ GENERATING REGEXP ##############################
+# to match page form and view it's fields.
+indexes_match_strings = [
+    'Employee ID',
+    'Employee Name',
+    'Friends ID',
+    'Friends Name',
+    'Required Date',
+    'Reporting Entity',
+    'Report Date',
+    'Report Type',
+    'Employee',
+    'Tests Uppercase Field',
+    'Additional',
+]
+main_form_match_regexp = ').+?name=\"(\d+|\d+_from|\d+_to)\"'
+indexes_form_match_pattern = ''
+for index in indexes_match_strings:
+    indexes_form_match_pattern += index + '|'
+indexes_form_match_pattern = indexes_form_match_pattern[:-1]
+indexes_form_match_pattern = '(%s%s' % (indexes_form_match_pattern, main_form_match_regexp)
+################################# END #######################################
 
 indexing_done_string = 'Your document has been indexed'
 indexes_added_string = 'Your documents indexes'
@@ -500,6 +521,26 @@ search_MDT_5 = {
     u'date': u'',
     u'end_date': u'',
 }
+
+# Edit document indexes specific settings
+edit_document_name_1 = "CCC-0001"
+edit_document_name_2 = "BBB-0001"
+
+new_m5_doc1_dict = {
+    'description': 'Editing of builtin field test',
+    'Employee': 'Andrew and his friend',
+    'Tests Uppercase Field': 'some data',
+}
+
+new_m2_doc1_dict = {
+    'description': 'Test Document MDT 3 Number 1 and other',
+    'Employee': 'Vovan Patsan',
+    'Reporting Entity': 'JTG',
+    'Report Type': 'Reconciliation',
+    'Report Date': '02/04/2012',
+    'Additional': 'Something mdt2 1'
+}
+
 # TODO: test password reset forms/stuff
 
 # TODO: test proper CSV export, even just simply, with date range and list of files present there
@@ -515,6 +556,7 @@ class MDTUI(TestCase):
     def setUp(self):
         # We are using only logged in client in this test
         self.client.login(username=username, password=password)
+        self.response = None
 
     def test_01_setup_mdts(self):
         """
@@ -2397,7 +2439,199 @@ class MDTUI(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Adlibre Invoices Results")
 
-    def test_z_cleanup(self):
+    def test_65_edit_document_indexes_access(self):
+        """
+        Refs #764 - Feature: MUI Edit Metadata
+
+        Check for button "Edit document Indexes" rendering depending on user permission to edit.
+        Checks:
+        - permitted user
+        - superuser
+        - not permitted user
+        """
+        edit_btn_string = """href="/mdtui/indexing/edit/CCC-0001"""
+        data = {'mdt': test_mdt_id_5}
+        # Adding apecial permission to test user 1
+        user = User.objects.get(username=username_1)
+        # Registering that user in required security groups and removing their permissions...
+        for groupname in ['MUI can Edit Document Indexes']:
+            g = Group.objects.get(name=groupname)
+            g.user_set.add(user)
+            for perm in g.permissions.all():
+                g.permissions.remove(perm)
+        # Logging in with this user
+        self.client.logout()
+        self.client.login(username=username_1, password=password_1)
+        # Selecting MDT
+        url = reverse('mdtui-search-type')
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        # User can see Desired Field
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Employee")
+        url = reverse('mdtui-search-options')
+        # Searching docs for MDT5
+        response = self.client.post(url, search_MDT_5)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        self.assertEqual(response.status_code, 200)
+        # Response contains documents and edit button for them
+        self.assertContains(response, edit_document_name_1)
+        self.assertContains(response, edit_btn_string)
+
+        # Checking Superuser perms now
+        self.client.logout()
+        self.client.login(username=username, password=password)
+        # Simplified search sequence, assuming all checked working before.
+        url = reverse('mdtui-search-type')
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        url = reverse('mdtui-search-options')
+        response = self.client.post(url, search_MDT_5)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        self.assertEqual(response.status_code, 200)
+        # Response contains documents and edit button for them
+        self.assertContains(response, edit_document_name_1)
+        self.assertContains(response, edit_btn_string)
+
+        # Checking user without permissions now (Creating one first)
+        user = User.objects.create_user(username_4, 'b@c.com', password_4)
+        user.save()
+        # Adding permission to interact Test Doc Type 3 only
+        perm = Permission.objects.filter(name=u'Can interact Test Doc Type 3')
+        user.user_permissions.add(perm[0])
+        # Registering that user in required security groups and removing their permissions...
+        for groupname in ['security', 'MUI Search interaction']:
+            g = Group.objects.get(name=groupname)
+            g.user_set.add(user)
+            for perm in g.permissions.all():
+                g.permissions.remove(perm)
+        # Relogin with this user
+        self.client.logout()
+        self.client.login(username=username_4, password=password_4)
+        # Simplified search sequence, assuming all checked working before.
+        url = reverse('mdtui-search-type')
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        url = reverse('mdtui-search-options')
+        response = self.client.post(url, search_MDT_5)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        self.assertEqual(response.status_code, 200)
+        # Response contains documents and edit button for them
+        self.assertContains(response, edit_document_name_1)
+        self.assertNotContains(response, edit_btn_string)
+        self.assertNotContains(response, "BBB-0003") # We're not under admin now
+
+    def test_66_edit_document_indexes_step_rendered_properly(self):
+        """
+        Refs #764 - Feature: MUI Edit Metadata
+
+        Uses documents 'CCC-0001' and 'BBB-0002' to check:
+        - Edit step head rendered properly
+        - Contains all the form fields it should
+        - Form is filled with proper data
+        """
+        self._check_edit_step_with_document(edit_document_name_1,  m5_doc1_dict)
+        self._check_edit_step_with_document(edit_document_name_2, m2_doc1_dict)
+
+    def test_67_edit_document_indexes_updating_index(self):
+        """
+        Refs #764 - Feature: MUI Edit Metadata
+
+        - Uppercase field still forces uppercase
+        - secondary keys stored OK
+        - Main fields (description) keys stored ok
+        - Form changes data in the couchdb document itself
+        """
+        self._check_edit_step_with_document(edit_document_name_1,  m5_doc1_dict)
+        ids = self._read_indexes_form(self.response)
+        data = self._create_edit_indexes_post_dict(new_m5_doc1_dict, ids)
+        url = reverse('mdtui-index-edit', kwargs={'code': edit_document_name_1})
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, edit_document_name_1)
+        # EDIT Results page contains all OLD indexes
+        for key, value in m5_doc1_dict.iteritems():
+            if not key == 'date':
+                if not value == 'some data':
+                    self.assertContains(response, value)
+        # EDIT Results page contains all NEW indexes
+        for value in new_m5_doc1_dict.itervalues():
+            if not value == 'some data':
+                self.assertContains(response, value)
+            else:
+                self.assertContains(response, 'SOME DATA')
+        # Quering CouchDB directly for existence and proper document indexes rendering
+        couch_doc = self._open_couchdoc(couchdb_name, edit_document_name_1)
+        if not 'index_revisions' in couch_doc:
+            raise AssertionError('CouchDB Document has not been updated')
+        if not '1' in couch_doc['index_revisions']:
+            raise AssertionError('CouchDB Document index_revisions has no revisions')
+
+    def test_68_edit_document_indexes_updating_index(self):
+        """
+        Refs #764 - Feature: MUI Edit Metadata
+
+        Refs #824 - Bug: Editing document indexes displays wrong dates in old doc indexes
+        Refs #822 - Bug: Edit indexes new revision writes down wrong date to secindary indexes
+
+        - Uppercase field still forces uppercase
+        - secondary keys stored OK
+        - Main fields (description) keys stored ok
+        - field type DATE in CouchDB document stored properly after update indexes
+        - document indexes revision updates to v2 after second update
+        """
+        self._check_edit_step_with_document(edit_document_name_2, m2_doc1_dict)
+        ids = self._read_indexes_form(self.response)
+        data = self._create_edit_indexes_post_dict(new_m2_doc1_dict, ids)
+        url = reverse('mdtui-index-edit', kwargs={'code': edit_document_name_2})
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, edit_document_name_2)
+        # EDIT Results page contains all OLD indexes
+        for key, value in m2_doc1_dict.iteritems():
+            if not key == 'date':
+                self.assertContains(response, value)
+        # EDIT Results page contains all NEW indexes
+        for value in new_m2_doc1_dict.itervalues():
+            self.assertContains(response, value)
+        # Quering CouchDB directly for existence and proper document indexes rendering
+        couch_doc = self._open_couchdoc(couchdb_name, edit_document_name_2)
+        if not 'index_revisions' in couch_doc:
+            raise AssertionError('CouchDB Document has not been updated')
+        if not '1' in couch_doc['index_revisions']:
+            raise AssertionError('CouchDB Document index_revisions has no revisions')
+        if '2' in couch_doc['index_revisions']:
+            raise AssertionError('CouchDB Document Should have only one revision at this step')
+        if not couch_doc['mdt_indexes']['Report Date'] == u'2012-04-02T00:00:00Z':
+            raise AssertionError('CouchDB Document has bug storing new indexes DATE format')
+        # Adding revision 2 of document indexes
+        data = self._create_edit_indexes_post_dict(new_m2_doc1_dict, ids)
+        url = reverse('mdtui-index-edit', kwargs={'code': edit_document_name_2})
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        # Checking if revision 2 of CouchDB document indexes created
+        if not '2' in couch_doc['index_revisions']:
+            raise AssertionError('CouchDB Document does not update indexes revisions after more than 1 edit')
+
+
+
+    # TODO: tests admin access menu item only visible to superusers...
+
+    def _test_z_cleanup(self):
         """
         Cleaning up after all tests finished.
 
@@ -2544,3 +2778,60 @@ class MDTUI(TestCase):
         for key, value in temp_keys.iteritems():
             request_dict[key] = value
         return request_dict
+
+    def _create_edit_indexes_post_dict(self, keys_dict, form_ids_dict):
+        """
+        Creates a dict for custom keys to edit document indexes.
+        Takes into account:
+          - form dynamic id's
+          - description provided
+        """
+        request_dict = {}
+        for key, value in keys_dict.iteritems():
+            if key == 'description':
+                request_dict[key] = value
+            else:
+                request_dict[form_ids_dict[key]] = value
+        return request_dict
+
+    def _check_edit_indexes_data_form(self, response, doc_dict):
+        """Scans Document edit indexes form for proper data and fields rendering."""
+        for field_name, field_value in doc_dict.iteritems():
+            if not field_name in ['date', 'description']:
+                self.assertContains(response, field_name)
+                # Omitting Uppercase field value exception
+                if not field_value == 'some data':
+                    self.assertContains(response, field_value)
+                else:
+                    self.assertContains(response, field_value.upper())
+            elif field_name == 'description':
+                self.assertContains(response, "Description")
+                self.assertContains(response, field_value)
+
+    def _check_edit_step_with_document(self, doc_name, doc_dict):
+        """
+        Subtest...
+
+        Checks for document dict and name rendered properly in indexing - Edit indexes step.
+        It creates self.response with form data rendered.
+        """
+        url = reverse('mdtui-index-edit', kwargs={'code': doc_name})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, doc_name)
+        self._check_edit_indexes_data_form(response, doc_dict)
+        self.response = response
+
+    def _open_couchdoc(self, db_name, barcode):
+        """Open given document in a given CouchDB database"""
+        firstdoc = {}
+        server = Server()
+        db = server.get_or_create_db(db_name)
+        r = db.view(
+            '_all_docs',
+            key=barcode,
+            include_docs=True,
+        )
+        for row in r:
+            firstdoc = row['doc']
+        return firstdoc
