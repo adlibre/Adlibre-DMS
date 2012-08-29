@@ -7,12 +7,8 @@ Author: Iurii Garmash
 """
 
 from datetime import datetime
-import re
-
 from django.conf import settings
-
 from couchdbkit.ext.django.schema import *
-
 from adlibre.date_converter import str_date_to_couch
 
 class CouchDocument(Document):
