@@ -60,14 +60,18 @@ class CouchDBMetadata(object):
                             # Only if document exists in DB. Falling gracefully if not.
                             temp_doc = self.retrieve(request, document)
                             old_metadata = temp_doc.get_db_info()
+                            old_index_revisions = None
                             if old_metadata['mdt_indexes']:
-                                # Preserving Description, User, Created Date
+                                # Preserving Description, User, Created Date, indexes revisions
+                                if temp_doc.index_revisions:
+                                    old_index_revisions = temp_doc.index_revisions
                                 old_metadata['mdt_indexes']['description'] = old_metadata['description']
                                 old_metadata['mdt_indexes']['metadata_user_name'] = old_metadata['metadata_user_name']
                                 old_metadata['mdt_indexes']['metadata_user_id'] = old_metadata['metadata_user_id']
                                 old_cr_date = datetime.datetime.strftime(old_metadata['metadata_created_date'], settings.DATE_FORMAT)
                                 old_metadata['mdt_indexes']['date'] = old_cr_date
                                 document.set_db_info(old_metadata['mdt_indexes'])
+                                document.set_index_revisions(old_index_revisions)
                                 document.set_metadata(current_revisions)
                         except ResourceNotFound:
                             pass
