@@ -22,6 +22,7 @@ class CouchDocument(Document):
     mdt_indexes = DictProperty(default={})
     search_keywords = ListProperty(default=[])
     revisions = DictProperty(default={})
+    index_revisions = DictProperty(default={})
 
     class Meta:
         app_label = "dmscouch"
@@ -69,6 +70,8 @@ class CouchDocument(Document):
             except: pass
         self.search_keywords = [] # TODO: not implemented yet
         self.revisions = document.metadata
+        if document.index_revisions:
+            self.index_revisions = document.index_revisions
 
     def populate_into_dms(self, request, document):
         """

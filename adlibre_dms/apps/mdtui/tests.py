@@ -2584,6 +2584,7 @@ class MDTUI(TestCase):
 
         Refs #824 - Bug: Editing document indexes displays wrong dates in old doc indexes
         Refs #822 - Bug: Edit indexes new revision writes down wrong date to secindary indexes
+        Refs #823 - Bug: Adding new document revision (file, e.g. by API) removes indexes revision
 
         - Uppercase field still forces uppercase
         - secondary keys stored OK
@@ -2624,14 +2625,40 @@ class MDTUI(TestCase):
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 302)
         # Checking if revision 2 of CouchDB document indexes created
+        couch_doc = self._open_couchdoc(couchdb_name, edit_document_name_2)
         if not '2' in couch_doc['index_revisions']:
             raise AssertionError('CouchDB Document does not update indexes revisions after more than 1 edit')
+        if '2' in couch_doc['revisions']:
+            raise AssertionError('Document has revision 2 already. can not test farther')
+        # Checking upload file by API to ensure revision indexes out there after document revision update
+        self.test_document_files_dir = os.path.join(settings.FIXTURE_DIRS[0], 'testdata')
+        file_path = os.path.join(self.test_document_files_dir, edit_document_name_2 + '.pdf')
+        data = { 'file': open(file_path, 'r'), }
+        url = reverse('api_file', kwargs={'code': edit_document_name_2, 'suggested_format': 'pdf',})
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 200)
+        # Checking if revision 2 of CouchDB document indexes preserved
+        couch_doc = self._open_couchdoc(couchdb_name, edit_document_name_2)
+        if not '2' in couch_doc['index_revisions']:
+            raise AssertionError('CouchDB Document fails to preserve index_revisions upon document revision update.')
+        if not '2' in couch_doc['revisions']:
+            raise AssertionError('Document has not been updated by API. Something went wrong there.')
 
+    def test_68_only_DMS_superuser_sees_admin_entry_menu_title(self):
+        """ Superuser only has shortcut in me to acces django admin"""
+        url = reverse('mdtui-home')
+        django_admin_btn_name = 'DMS Admin'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, django_admin_btn_name)
+        # Relogin with simple user (not superuser)
+        self.client.logout()
+        self.client.login(username=username_1, password=password_1)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, django_admin_btn_name)
 
-
-    # TODO: tests admin access menu item only visible to superusers...
-
-    def _test_z_cleanup(self):
+    def test_z_cleanup(self):
         """
         Cleaning up after all tests finished.
 

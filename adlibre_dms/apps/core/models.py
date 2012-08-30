@@ -266,3 +266,8 @@ class Document(object):
 
     def update_db_info(self, new_indexes):
         self.new_indexes = new_indexes
+
+    def set_index_revisions(self, revisions_dict):
+        """Forces document to have specified index revisions"""
+        if revisions_dict:
+            self.index_revisions = revisions_dict
