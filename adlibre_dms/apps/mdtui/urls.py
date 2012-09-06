@@ -31,3 +31,7 @@ urlpatterns = patterns('mdtui.views',
     # AJAX
     url(r'^parallel/$', 'mdt_parallel_keys', name='mdtui-parallel-keys'),
 )
+
+urlpatterns += patterns('mdtui.upload_handler_views',
+    url(r'^upload_progress/$', 'upload_progress', name='mdtui-upload-progress'),
+)
