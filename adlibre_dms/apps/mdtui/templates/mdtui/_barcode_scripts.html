@@ -81,13 +81,11 @@
             var freq = 1000; // freqency of update in ms
             var uuid = gen_uuid(); // id for this upload so we can fetch progress info.
             var progress_url = '{% url mdtui-upload-progress %}'; // ajax view serving progress info
-            var percentage_place = $('#upload-percent')
 
             // Append X-Progress-ID uuid form action
             this.action += (this.action.indexOf('?') == -1 ? '?' : '&') + 'X-Progress-ID=' + uuid;
 
-            var $progress = $('<div id="upload-progress" class="upload-progress"></div>').
-                    appendTo(percentage_place).append('<div class="progress-container"><span class="progress-info">uploading 0%</span><div class="progress-bar"></div></div>');
+            var $progress = $('<div id="upload-progress" class="upload-progress"></div>').appendTo(document.body).html('<div class="progress-container"><span class="progress-info">uploading 0%</span><div class="progress-bar"></div></div>');
 
             // progress bar position
             $progress.css({
