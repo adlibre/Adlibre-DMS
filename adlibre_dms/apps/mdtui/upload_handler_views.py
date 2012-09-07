@@ -1,8 +1,5 @@
 from django.core.cache import cache
 from django.http import HttpResponseServerError, HttpResponse
-from django.conf import global_settings
-
-FILE_UPLOAD_HANDLERS = ('libraries.adlibre.upload_handler.UploadProgressCachedHandler', ) + global_settings.FILE_UPLOAD_HANDLERS
 
 def upload_progress(request):
     """

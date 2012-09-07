@@ -2,6 +2,7 @@
 
 import os
 import sys
+from django.conf import global_settings
 
 
 PROJECT_PATH = os.path.abspath(os.path.split(__file__)[0])
@@ -221,19 +222,27 @@ INSTALLED_APPS = (
     'theme.solid',
 )
 
+if DEBUG:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+            'LOCATION': '127.0.0.1:11211',
+            }
+    }
+
+# FILE_UPLOAD_HANDLERS is only necessary if you want to track upload
+# progress in your Django app -- if you have a front-end proxy like
+# nginx or lighttpd, Django doesn't need to be involved in the upload
+# tracking.
+if DEBUG:
+    FILE_UPLOAD_HANDLERS = ('libraries.adlibre.upload_handler.UploadProgressCachedHandler', ) + global_settings.FILE_UPLOAD_HANDLERS
+
+
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
 # the site admins on every HTTP 500 error.
 # See http://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.
-
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': '/var/tmp/django_cache',
-        }
-}
-
 import logging
 class NoMessageFailuresFilter(logging.Filter):
     """
