@@ -320,6 +320,7 @@ def indexing_edit(request, code, step='edit', template='mdtui/indexing.html'):
     error_warnings = []
     form = False
     processor = DocumentProcessor()
+    autocomplete_list = None
 
     doc = processor.read(request, code)
     # TODO: check for misconfiguration here (plugin or permission to edit indexes exists in document's DorulePluginMapping)
@@ -352,11 +353,13 @@ def indexing_edit(request, code, step='edit', template='mdtui/indexing.html'):
         for error in processor.errors:
             error_warnings.append(error.parameter)
     if form:
+        autocomplete_list = extract_secondary_keys_from_form(form)
         # No form is possible when document does not exist
         context.update( {'form': form,} )
     context.update( { 'step': step,
                       'doc_name': code,
                       'warnings': warnings,
+                      'autocomplete_fields': autocomplete_list,
                       'error_warnings': error_warnings,
                       })
     return render(request, template, context)
@@ -632,7 +635,7 @@ def mdt_parallel_keys(request):
     # Trying to get docrule for searching calls
     try:
         if not docrule_id:
-            docrule_id = request.session['search_docrule_id']
+            docrule_id = request.session['searching_docrule_id']
         # No docrule present in session. Invalidating view call.
         if not docrule_id:
             valid_call = False
