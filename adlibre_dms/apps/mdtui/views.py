@@ -496,8 +496,6 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
     docrule = None
     barcode = None
     valid_call = True
-
-    request.upload_handlers.insert(0, UploadProgressSessionHandler(request))
     log.debug('request.upload_handlers: %s' % [h for h in request.upload_handlers] )
     # Check session variables
     try:
