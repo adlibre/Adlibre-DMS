@@ -226,8 +226,8 @@ INSTALLED_APPS = (
 # progress in your Django app -- if you have a front-end proxy like
 # nginx or lighttpd, Django doesn't need to be involved in the upload
 # tracking.
-if not DEBUG:
-    FILE_UPLOAD_HANDLERS = ('libraries.adlibre.upload_handler.UploadProgressCachedHandler', ) + global_settings.FILE_UPLOAD_HANDLERS
+
+FILE_UPLOAD_HANDLERS = ('libraries.adlibre.upload_handler.UploadProgressSessionHandler', ) + global_settings.FILE_UPLOAD_HANDLERS
 
 
 # A sample logging configuration. The only tangible logging
