@@ -45,9 +45,7 @@ class UploadProgressSessionHandler(MemoryFileUploadHandler):
                 'length': self.content_length,
                 'uploaded' : 0
             }
-            # self.request.session
-            print self.request.method
-            print self.cache_key
+            log.debug('upload handler X-Progress-ID: %s session: %s' % (self.progress_id, self.request.session))
 
     def new_file(self, field_name, file_name, content_type, content_length, charset=None):
         log.debug('adlibre.upload_handler.UploadProgressSessionHandler.new_file')
