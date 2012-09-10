@@ -16,7 +16,7 @@ Here's some javascript example code to make the ajax requests and display the pr
 
 from django.core.files.uploadhandler import MemoryFileUploadHandler
 
-class UploadProgressCachedHandler(MemoryFileUploadHandler):
+class UploadProgressSessionHandler(MemoryFileUploadHandler):
     """
     Tracks progress for file uploads.
     The http post request must contain a header or query parameter, 'X-Progress-ID'
@@ -26,7 +26,7 @@ class UploadProgressCachedHandler(MemoryFileUploadHandler):
     """
 
     def __init__(self, request=None):
-        super(UploadProgressCachedHandler, self).__init__(request)
+        super(UploadProgressSessionHandler, self).__init__(request)
         self.progress_id = None
         self.cache_key = None
 
@@ -42,6 +42,8 @@ class UploadProgressCachedHandler(MemoryFileUploadHandler):
                 'length': self.content_length,
                 'uploaded' : 0
             }
+            print self.request.method
+            print self.cache_key
 
     def new_file(self, field_name, file_name, content_type, content_length, charset=None):
         pass
