@@ -222,19 +222,11 @@ INSTALLED_APPS = (
     'theme.solid',
 )
 
-if DEBUG:
-    CACHES = {
-        'default': {
-            'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-            'LOCATION': '127.0.0.1:11211',
-            }
-    }
-
 # FILE_UPLOAD_HANDLERS is only necessary if you want to track upload
 # progress in your Django app -- if you have a front-end proxy like
 # nginx or lighttpd, Django doesn't need to be involved in the upload
 # tracking.
-if DEBUG:
+if not DEBUG:
     FILE_UPLOAD_HANDLERS = ('libraries.adlibre.upload_handler.UploadProgressCachedHandler', ) + global_settings.FILE_UPLOAD_HANDLERS
 
 
