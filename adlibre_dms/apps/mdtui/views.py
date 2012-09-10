@@ -49,7 +49,7 @@ from parallel_keys import ParallelKeysManager
 from data_exporter import export_to_csv
 from security import SEC_GROUP_NAMES
 from security import filter_permitted_docrules
-from libraries.adlibre.upload_handler import UploadProgressSessionHandler
+from adlibre.upload_handler import UploadProgressSessionHandler
 
 from restkit.client import RequestError
 
