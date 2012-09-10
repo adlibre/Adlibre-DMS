@@ -13,8 +13,10 @@ Set up the upload_progress view in any of your apps along with a corresponding e
 Here's some javascript example code to make the ajax requests and display the progress meter: http://www.djangosnippets.org/snippets/679/
 """
 
-
+import logging
 from django.core.files.uploadhandler import MemoryFileUploadHandler
+
+log = logging.getLogger('adlibre.upload_handler')
 
 class UploadProgressSessionHandler(MemoryFileUploadHandler):
     """
@@ -31,24 +33,28 @@ class UploadProgressSessionHandler(MemoryFileUploadHandler):
         self.cache_key = None
 
     def handle_raw_input(self, input_data, META, content_length, boundary, encoding=None):
+        log.debug('adlibre.upload_handler.UploadProgressSessionHandler.handle_raw_input')
         self.content_length = content_length
         if 'X-Progress-ID' in self.request.GET :
             self.progress_id = self.request.GET['X-Progress-ID']
         elif 'X-Progress-ID' in self.request.META:
             self.progress_id = self.request.META['X-Progress-ID']
         if self.progress_id:
-            self.cache_key = "%s_%s" % (self.request.META['REMOTE_ADDR'], self.progress_id )
+            self.cache_key = "%s_%s" % ("upload_progress", self.progress_id )
             self.request.session[self.cache_key] = {
                 'length': self.content_length,
                 'uploaded' : 0
             }
+            # self.request.session
             print self.request.method
             print self.cache_key
 
     def new_file(self, field_name, file_name, content_type, content_length, charset=None):
+        log.debug('adlibre.upload_handler.UploadProgressSessionHandler.new_file')
         pass
 
     def receive_data_chunk(self, raw_data, start):
+        log.debug('adlibre.upload_handler.UploadProgressSessionHandler.receive_data_chunk')
         if self.cache_key:
             data = self.request.session[self.cache_key]
             data['uploaded'] += self.chunk_size
@@ -56,9 +62,11 @@ class UploadProgressSessionHandler(MemoryFileUploadHandler):
         return raw_data
 
     def file_complete(self, file_size):
+        log.debug('adlibre.upload_handler.UploadProgressSessionHandler.file_complete')
         pass
 
     def upload_complete(self):
+        log.debug('adlibre.upload_handler.UploadProgressSessionHandler.upload_complete')
         if self.cache_key:
             del self.request.session[self.cache_key]
 
