@@ -496,7 +496,7 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
     docrule = None
     barcode = None
     valid_call = True
-    log.debug('request.upload_handlers: %s' % [h for h in request.upload_handlers] )
+
     # Check session variables
     try:
         document_keys = request.session["document_keys_dict"]
