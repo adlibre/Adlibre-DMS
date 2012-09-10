@@ -497,8 +497,7 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
     barcode = None
     valid_call = True
 
-    if request.method == 'POST':
-        request.upload_handlers.insert(0, UploadProgressSessionHandler(request))
+    request.upload_handlers.insert(0, UploadProgressSessionHandler(request))
 
     # Check session variables
     try:
