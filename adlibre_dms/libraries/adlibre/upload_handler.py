@@ -14,11 +14,11 @@ Here's some javascript example code to make the ajax requests and display the pr
 """
 
 import logging
-from django.core.files.uploadhandler import MemoryFileUploadHandler
+from django.core.files.uploadhandler import FileUploadHandler
 
 log = logging.getLogger('adlibre.upload_handler')
 
-class UploadProgressSessionHandler(MemoryFileUploadHandler):
+class UploadProgressSessionHandler(FileUploadHandler):
     """
     Tracks progress for file uploads.
     The http post request must contain a header or query parameter, 'X-Progress-ID'
@@ -29,6 +29,7 @@ class UploadProgressSessionHandler(MemoryFileUploadHandler):
 
     def __init__(self, request=None):
         super(UploadProgressSessionHandler, self).__init__(request)
+        log.debug('initialised UploadProgressSessionHandler')
         self.progress_id = None
         self.cache_key = None
 
