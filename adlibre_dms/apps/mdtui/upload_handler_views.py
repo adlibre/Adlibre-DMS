@@ -15,7 +15,7 @@ def upload_progress(request):
     elif 'X-Progress-ID' in request.META:
         progress_id = request.META['X-Progress-ID']
     if progress_id:
-        cache_key = "%s_%s" % (request.META['REMOTE_ADDR'], progress_id)
+        cache_key = "%s_%s" % ("upload_progress", progress_id)
         log.debug("request.session: %s" % [(key, value) for key,value  in request.session.iteritems()])
         try:
             data = request.session[cache_key]

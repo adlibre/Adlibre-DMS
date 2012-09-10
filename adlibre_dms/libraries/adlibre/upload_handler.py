@@ -32,6 +32,7 @@ class UploadProgressSessionHandler(FileUploadHandler):
         log.debug('initialised UploadProgressSessionHandler')
         self.progress_id = None
         self.cache_key = None
+        self.request = request
 
     def handle_raw_input(self, input_data, META, content_length, boundary, encoding=None):
         log.debug('adlibre.upload_handler.UploadProgressSessionHandler.handle_raw_input')
@@ -42,10 +43,11 @@ class UploadProgressSessionHandler(FileUploadHandler):
             self.progress_id = self.request.META['X-Progress-ID']
         if self.progress_id:
             self.cache_key = "%s_%s" % ("upload_progress", self.progress_id )
-            self.request.session[self.cache_key] = {
+            data =  {
                 'length': self.content_length,
                 'uploaded' : 0
             }
+            self.request.session[self.cache_key] = data
             log.debug('upload handler X-Progress-ID: %s session: %s' % (self.progress_id, self.request.session))
 
     def new_file(self, field_name, file_name, content_type, content_length, charset=None):
