@@ -79,7 +79,7 @@
             if ($.data(this, 'submitted')) return false;
             $('#uploading-image').show();
             // TODO: Implement this
-            /*
+
             var freq = 1000; // freqency of update in ms
             var uuid = gen_uuid(); // id for this upload so we can fetch progress info.
             var progress_url = '{% url mdtui-upload-progress %}'; // ajax view serving progress info
@@ -110,7 +110,7 @@
                 });
             };
             window.setTimeout(update_progress_info, freq);
-            */
+            
             $.data(this, 'submitted', true); // mark form as submitted.
         });
     });

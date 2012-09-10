@@ -15,13 +15,14 @@ Here's some javascript example code to make the ajax requests and display the pr
 
 
 from django.core.files.uploadhandler import MemoryFileUploadHandler
-from django.core.cache import cache
 
 class UploadProgressCachedHandler(MemoryFileUploadHandler):
     """
     Tracks progress for file uploads.
     The http post request must contain a header or query parameter, 'X-Progress-ID'
     which should contain a unique string to identify the upload to be tracked.
+
+    Uses django.sessions framework instead of memcache or similar cache based decisions @garmoncheg
     """
 
     def __init__(self, request=None):
@@ -37,19 +38,19 @@ class UploadProgressCachedHandler(MemoryFileUploadHandler):
             self.progress_id = self.request.META['X-Progress-ID']
         if self.progress_id:
             self.cache_key = "%s_%s" % (self.request.META['REMOTE_ADDR'], self.progress_id )
-            cache.set(self.cache_key, {
+            self.request.session[self.cache_key] = {
                 'length': self.content_length,
                 'uploaded' : 0
-            })
+            }
 
     def new_file(self, field_name, file_name, content_type, content_length, charset=None):
         pass
 
     def receive_data_chunk(self, raw_data, start):
         if self.cache_key:
-            data = cache.get(self.cache_key)
+            data = self.request.session[self.cache_key]
             data['uploaded'] += self.chunk_size
-            cache.set(self.cache_key, data)
+            self.request.session[self.cache_key] = data
         return raw_data
 
     def file_complete(self, file_size):
@@ -57,5 +58,5 @@ class UploadProgressCachedHandler(MemoryFileUploadHandler):
 
     def upload_complete(self):
         if self.cache_key:
-            cache.delete(self.cache_key)
+            del self.request.session[self.cache_key]
 
