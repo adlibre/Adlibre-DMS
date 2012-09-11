@@ -2644,7 +2644,7 @@ class MDTUI(TestCase):
         if not '2' in couch_doc['revisions']:
             raise AssertionError('Document has not been updated by API. Something went wrong there.')
 
-    def test_68_only_DMS_superuser_sees_admin_entry_menu_title(self):
+    def test_69_only_DMS_superuser_sees_admin_entry_menu_title(self):
         """ Superuser only has shortcut in me to acces django admin"""
         url = reverse('mdtui-home')
         django_admin_btn_name = 'DMS Admin'
@@ -2657,6 +2657,21 @@ class MDTUI(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, django_admin_btn_name)
+
+    def test_70_edit_document_indexes_updating_index(self):
+        """
+        Refs #829 Bug: Files Secondary indexes contain username and user PK
+
+        - Tests only proper indexes exist in secondary indexes of document that has more than 1 file revision
+        """
+        # Using document that has more than 1 revision for this test.
+        couch_doc = self._open_couchdoc(couchdb_name, 'ADL-0001')
+        if not '2' in couch_doc['revisions'].iterkeys():
+            raise AssertionError('CouchDB Document Has insufficient amount of revisions for test (required > 1 )')
+        if 'metadata_user_id' in couch_doc['mdt_indexes']:
+            raise AssertionError("""CouchDB Document's secondary indexes Contains wrong indexes: "metadata_user_id" """)
+        if 'metadata_user_name' in couch_doc['mdt_indexes']:
+            raise AssertionError("""CouchDB Document's secondary indexes Contains wrong indexes: "metadata_user_name" """)
 
     def test_z_cleanup(self):
         """
