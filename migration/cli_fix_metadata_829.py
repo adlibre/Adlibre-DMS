@@ -72,7 +72,6 @@ def show_doc_report(parsable=False):
         # Load document
         d_js = db.openDoc(dbName, bar_code)
         d = json.loads(d_js)
-        revisions = d['revisions']
         mdt_indexes = d['mdt_indexes']
         d_keys = [key for key in mdt_indexes.iterkeys()]
         if ('metadata_user_id' in d_keys) or ('metadata_user_name' in d_keys):
@@ -88,6 +87,9 @@ def show_doc_report(parsable=False):
                 print '%s, %s, %s' % (bar_code, mdt_u_id, mdt_u_name)
             else:
                 print "document: %s, metadata_user_id: %s, metadata_user_name: %s" % (bar_code, mdt_u_id, mdt_u_name)
+            if mdt_u_name=="Y" or mdt_u_id=="Y":
+                d_enc = json.dumps(d)
+                db.saveDoc(dbName, d_enc, docId=bar_code)
 
 if __name__ == "__main__":
     """
