@@ -1,16 +1,17 @@
 #! /usr/bin/python2.6
 
 """
-A simple report to show all the documents in our DMS
-- Number of revisions
-- MD5 sum of the latest revision (find duplicates / holding images)
+Fixing BUG #829 Script.
+Should cleanup keys:
+- metadata_user_name
+- metadata_user_id
+from all the DMS documents "mdt_indexes" dictionary.
 """
 
 import json, sys, urllib2
-import hashlib
 import datetime
 
-from lib_couch import prettyPrint, Couch
+from lib_couch import  Couch
 
 # DMS API parameters
 host = 'http://127.0.0.1:8000/'
@@ -65,57 +66,42 @@ def show_doc_report(parsable=False):
 
     for doc in docs_decoded['rows']:
         bar_code = doc['id']
+        mdt_u_id = 'N'
+        mdt_u_name = 'N'
 
         # Load document
         d_js = db.openDoc(dbName, bar_code)
         d = json.loads(d_js)
         revisions = d['revisions']
         mdt_indexes = d['mdt_indexes']
-
-        # Get employee Name (JTG Specific index)
-        try:
-            employee = str(mdt_indexes['Employee Name'])
-        except KeyError:
-            employee = ""
-
-        # Get revisions
-        if revisions:
-            revision_names = [rev_name for rev_name in revisions.iterkeys()]
-            revision_names.sort()
-        else:
-            revision_names = []
-
-        latest_revision = ''
-        if revision_names:
-            latest_revision = revision_names[revision_names.__len__() - 1]
-
-        # Get MD5 sum of the latest document revision
-        h_code=''
-        if latest_revision:
-            api_file = get_api_file(bar_code, parsable, latest_revision)
-
-            h = hashlib.new('md5')
-            h.update(api_file)
-            h_code = h.hexdigest()
-
-        # Format the output
-        if parsable:
-            print '"%s", "%s", "%s", "%s"' % (bar_code, revisions.__len__(), employee, h_code)
-        else:
-            print '%s, revision count: %s, names: %s, employee: %s, hashcode: %s' % (bar_code, revisions.__len__(), str(revision_names), employee, h_code)
+        d_keys = [key for key in mdt_indexes.iterkeys()]
+        if ('metadata_user_id' in d_keys) or ('metadata_user_name' in d_keys):
+            try:
+                del d['mdt_indexes']['metadata_user_id']
+                mdt_u_id = 'Y'
+            except: pass
+            try:
+                del d['mdt_indexes']['metadata_user_name']
+                mdt_u_name = 'Y'
+            except: pass
+            if parsable:
+                print '%s, %s, %s' % (bar_code, mdt_u_id, mdt_u_name)
+            else:
+                print "document: %s, metadata_user_id: %s, metadata_user_name: %s" % (bar_code, mdt_u_id, mdt_u_name)
 
 if __name__ == "__main__":
     """
     To run this you can do:
     >> python script_name.py
     output will be:
-    ADL-0001 revision count: 2 names: [u'1', u'2'], employee: JOHN DOE
+    document:ADL-0001, metadata_user_id: Y, metadata_user_name: N
 
     or to generate parsable output do:
     python script_name.py --parsable
     or
     python script_name.py --p
-    ADL-0001 1
+    output in this case:
+    ADL-0001, Y, N
     """
     parsable = False
     if sys.argv.__len__() > 1:
@@ -124,5 +110,4 @@ if __name__ == "__main__":
     t1 = datetime.datetime.now()
     show_doc_report(parsable)
     t2 = datetime.datetime.now()
-    if not parsable:
-        print 'Execution time: %s' % (t2-t1)
+    print 'Execution time: %s' % (t2-t1)
