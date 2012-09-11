@@ -35,7 +35,7 @@ def export_to_csv(search_keys, sec_keys_names, documents):
         for sec_key in sec_keys_names:
             try:
                 # Adding secondary key's value for doc
-                doc_sec_keys.append(doc['mdt_indexes'][sec_key])
+                doc_sec_keys.append(unicode(doc['mdt_indexes'][sec_key]).encode('utf8'))
             except KeyError:
                 # No value exists
                 doc_sec_keys.append('Not given',)
@@ -46,7 +46,7 @@ def export_to_csv(search_keys, sec_keys_names, documents):
         docrule = DocumentTypeRuleManagerInstance.get_docrule_by_id(doc['metadata_doc_type_rule_id'])
         docrule_name = docrule.get_title()
         # Final row adding
-        doc_row = [name,] + [cr_date,] + [doc['metadata_description']] + doc_sec_keys + [docrule_name,]
+        doc_row = [unicode(name).encode('utf8'),] + [cr_date,] + [unicode(doc['metadata_description']).encode('utf8')] + doc_sec_keys + [unicode(docrule_name).encode('utf8'),]
         writer.writerow(doc_row)
 
     # Appending search request parameters into CSV
@@ -66,7 +66,7 @@ def export_to_csv(search_keys, sec_keys_names, documents):
             docrule = DocumentTypeRuleManagerInstance.get_docrule_by_id(id)
             value = docrule.get_title()
         if not value.__class__.__name__ == 'tuple':
-            writer.writerow([unicode(item), unicode(value)])
+            writer.writerow([unicode(item).encode('utf8'), unicode(value).encode('utf8')])
         else:
-            writer.writerow(unicode(item) + u': (from: ' + unicode(value[0]) + u' to: ' + unicode(value[1]) + u')')
+            writer.writerow(unicode(item).encode('utf8') + u': (from: ' + unicode(value[0]).encode('utf8') + u' to: ' + unicode(value[1]).encode('utf8') + u')')
     return response
