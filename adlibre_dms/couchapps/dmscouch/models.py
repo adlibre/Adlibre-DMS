@@ -58,13 +58,12 @@ class CouchDocument(Document):
         if document.db_info:
             try:
                 db_info = document.db_info
-                # trying to cleanup date and description if exist...
-                try:
-                    del db_info["date"]
-                except: pass
-                try:
-                    del db_info["description"]
-                except: pass
+                # trying to cleanup irrelevant fields if exist...
+                # (Bug #829 Files Secondary indexes contain username and user PK)
+                for key in ["date", "description", "metadata_user_name", "metadata_user_id"]:
+                    try:
+                        del db_info[key]
+                    except: pass
                 self.mdt_indexes = db_info
                 # failing gracefully due to ability to save files with API (without metadata)
             except: pass
