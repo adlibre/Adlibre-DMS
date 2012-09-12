@@ -130,7 +130,7 @@ def process_indexes_field(key, field, data):
             pass
     return index_tuple
 
-def initEditIndexesForm(request, doc):
+def initEditIndexesForm(request, doc, given_indexes=None):
     """
     Edit form creating with population from existing document
 
@@ -143,8 +143,9 @@ def initEditIndexesForm(request, doc):
     mdts = get_mdts_for_docrule(docrule_id)
     # Faking POST request to populate from with initial indexes properly
     if not POST:
-        if doc.db_info:
-            initial_indexes = construct_edit_indexes_data(mdts, doc.db_info)
+        # Constructing form indexes from previous data or doc metadata
+        if given_indexes or doc.db_info:
+            initial_indexes = construct_edit_indexes_data(mdts, given_indexes or doc.db_info)
             # Converting dates into strings if relevant.
             for key, value in initial_indexes.iteritems():
                 # Metaclass based conversions to
