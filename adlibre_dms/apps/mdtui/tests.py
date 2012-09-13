@@ -532,6 +532,12 @@ new_m5_doc1_dict = {
     'Tests Uppercase Field': 'some data',
 }
 
+new_m5_doc2_dict = {
+    'description': 'Something new here',
+    'Employee': 'Yuri',
+    'Tests Uppercase Field': 'something more',
+}
+
 new_m2_doc1_dict = {
     'description': 'Test Document MDT 3 Number 1 and other',
     'Employee': 'Vovan Patsan',
@@ -2571,6 +2577,8 @@ class MDTUI(TestCase):
                 self.assertContains(response, value)
             else:
                 self.assertContains(response, 'SOME DATA')
+        # POST to save those indexes
+        response = self.client.post(reverse('mdtui-index-edit-finished'), {'something':' '})
         # Quering CouchDB directly for existence and proper document indexes rendering
         couch_doc = self._open_couchdoc(couchdb_name, edit_document_name_1)
         if not 'index_revisions' in couch_doc:
@@ -2609,6 +2617,8 @@ class MDTUI(TestCase):
         # EDIT Results page contains all NEW indexes
         for value in new_m2_doc1_dict.itervalues():
             self.assertContains(response, value)
+        # POST to save those indexes
+        response = self.client.post(new_url,  {'something':' '})
         # Quering CouchDB directly for existence and proper document indexes rendering
         couch_doc = self._open_couchdoc(couchdb_name, edit_document_name_2)
         if not 'index_revisions' in couch_doc:
@@ -2624,6 +2634,11 @@ class MDTUI(TestCase):
         url = reverse('mdtui-index-edit', kwargs={'code': edit_document_name_2})
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        self.assertEqual(response.status_code, 200)
+        # POST to save those indexes
+        response = self.client.post(new_url,  {'something':' '})
         # Checking if revision 2 of CouchDB document indexes created
         couch_doc = self._open_couchdoc(couchdb_name, edit_document_name_2)
         if not '2' in couch_doc['index_revisions']:
@@ -2672,6 +2687,57 @@ class MDTUI(TestCase):
             raise AssertionError("""CouchDB Document's secondary indexes Contains wrong indexes: "metadata_user_id" """)
         if 'metadata_user_name' in couch_doc['mdt_indexes']:
             raise AssertionError("""CouchDB Document's secondary indexes Contains wrong indexes: "metadata_user_name" """)
+
+    def test_71_redirect_after_succesfull_edit(self):
+        """
+        Refs #832 Edit indexes preserves META_HTTP_REFERER url through whole process
+        Refs #833: Edit document indexes new error handling	New	Iurii Garmash
+        Refs #834: Save happens in final step (after save pressed)
+        """
+        doc_name = 'CCC-0002'
+        # SEARCH for doc
+        url = reverse('mdtui-search-type')
+        data = {'mdt': test_mdt_id_5}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        url = reverse('mdtui-search-options')
+        # Getting required indexes id's
+        response = self.client.get(url)
+        # Searching date range with unique doc1 keys
+        response = self.client.post(url, search_MDT_5)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        # Response is ok and only one doc persists there
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, doc_name)
+
+        # EMULATE click to EDIT a document
+        search_url = new_url
+        url = reverse('mdtui-index-edit', kwargs={'code': doc_name})
+        response = self.client.get(url, {}, HTTP_REFERER=search_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, doc_name)
+        ids = self._read_indexes_form(response)
+        data = self._create_edit_indexes_post_dict(new_m5_doc2_dict, ids)
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'About to store index data for document')
+        # Trying to go back and forth to emulate user possibilities properly
+        response = self.client.get(url)
+        response = self.client.get(new_url)
+        # POST to save those indexes
+        response = self.client.post(new_url,  {'something':' '})
+        self.assertEqual(response.status_code, 302)
+        # Redirect follows referrer specified (where we came into edit indexes)
+        old_url = self._retrieve_redirect_response_url(response)
+        self.assertEqual(old_url, search_url)
+        # Returning to results render error
+        response = self.client.get(new_url)
+        self.assertContains(response, MDTUI_ERROR_STRINGS['ERROR_EDIT_INDEXES_FINISHED'])
 
     def test_z_cleanup(self):
         """
