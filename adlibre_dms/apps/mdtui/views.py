@@ -345,6 +345,7 @@ def indexing_edit(request, code, step='edit', template='mdtui/indexing.html'):
     if not processor.errors:
         if not request.POST:
             form = initEditIndexesForm(request, doc, changed_indexes)
+            request.session['indexing_docrule_id'] = doc.get_docrule().id
         else:
             old_db_info = doc.get_db_info()
             secondary_indexes = processEditDocumentIndexForm(request, doc)
