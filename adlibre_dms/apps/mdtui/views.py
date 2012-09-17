@@ -324,6 +324,7 @@ def indexing_edit(request, code, step='edit', template='mdtui/indexing.html'):
     form = False
     processor = DocumentProcessor()
     autocomplete_list = None
+    changed_indexes = None
     # Storing cancel (return back from edit) url
     try:
         return_url = request.session['edit_return']
@@ -336,10 +337,13 @@ def indexing_edit(request, code, step='edit', template='mdtui/indexing.html'):
             pass
         pass
 
-    try:
-        changed_indexes = request.session['edit_processor_indexes']
-    except KeyError:
-        changed_indexes = None
+    # Only preserve indexes if returning from edit indexes confirmation step
+    if 'HTTP_REFERER' in request.META and request.META['HTTP_REFERER'].endswith(reverse('mdtui-index-edit-finished')):
+        try:
+            changed_indexes = request.session['edit_processor_indexes']
+        except KeyError:
+            pass
+
     doc = processor.read(request, code)
     # TODO: check for misconfiguration here (plugin or permission to edit indexes exists in document's DorulePluginMapping)
     if not processor.errors:
