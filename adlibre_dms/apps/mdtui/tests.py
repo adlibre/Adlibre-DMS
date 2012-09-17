@@ -2688,7 +2688,7 @@ class MDTUI(TestCase):
         if 'metadata_user_name' in couch_doc['mdt_indexes']:
             raise AssertionError("""CouchDB Document's secondary indexes Contains wrong indexes: "metadata_user_name" """)
 
-    def test_71_redirect_after_succesfull_edit(self):
+    def test_71_redirect_after_successful_edit(self):
         """
         Refs #832 Edit indexes preserves META_HTTP_REFERER url through whole process
         Refs #833: Edit document indexes new error handling	New	Iurii Garmash
@@ -2738,6 +2738,52 @@ class MDTUI(TestCase):
         # Returning to results render error
         response = self.client.get(new_url)
         self.assertContains(response, MDTUI_ERROR_STRINGS['ERROR_EDIT_INDEXES_FINISHED'])
+
+    def test_71_preserving_editing_indexes_only_where_needed(self):
+        """
+        Refs #835 Edit metadata provides wrong file index
+
+        New indexes were not loading for second and each new doc.
+        Indexes should persist if returning from "edit indexes result" URL.
+        If referrer is other URL or absent... load only Document's indexes.
+        """
+        first_doc_name = 'CCC-0001'
+        second_doc_name = 'CCC-0002'
+        first_doc_new_indexes = {
+            '0': 'SOME DATA',
+            '1': 'Andrew and his friend',
+            'description': 'Editing of builtin field test',
+        }
+        second_doc_new_indexes = {
+            '0': 'SOME OTHER DATA',
+            '1': 'Andrew',
+            'description': 'Test Document Number 2 for MDT 5',
+        }
+        first_only_should_contain = 'Andrew and his friend'
+        # Checking first document for unique index
+        url = reverse('mdtui-index-edit', kwargs={'code': first_doc_name})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        response2 = self.client.post(url, first_doc_new_indexes)
+        self.assertEqual(response2.status_code, 302)
+        response = self.client.get(url)
+        self.assertContains(response, first_doc_name)
+        self.assertContains(response, first_only_should_contain)
+        # Checking second document should not contain this index
+        url = reverse('mdtui-index-edit', kwargs={'code': second_doc_name})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        response2 = self.client.post(url, second_doc_new_indexes)
+        self.assertEqual(response2.status_code, 302)
+        response = self.client.get(url)
+        self.assertContains(response, second_doc_name)
+        self.assertNotContains(response, first_only_should_contain)
+        # Checking first doc now contains those indexes
+        url = reverse('mdtui-index-edit', kwargs={'code': first_doc_name})
+        response = self.client.get(url, {}, HTTP_REFERER='http://127.0.0.1/'+reverse('mdtui-index-edit-finished'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, first_doc_name)
+        self.assertNotContains(response, first_only_should_contain)
 
     def test_z_cleanup(self):
         """
