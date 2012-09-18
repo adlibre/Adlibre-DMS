@@ -36,6 +36,8 @@ def get_mdts_for_docrule(docrule_id):
     Uses MDT's for docrule to list form fields.
     """
     log.debug("Getting MDT's from CouchDB")
+    if docrule_id.__class__.__name__ == 'int':
+        docrule_id = str(docrule_id)
     mdt_manager = MetaDataTemplateManager()
     mdt_manager.docrule_id = docrule_id
     mdts_dict = mdt_manager.get_mdts_for_docrule(docrule_id)
