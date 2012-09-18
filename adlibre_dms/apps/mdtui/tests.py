@@ -2785,6 +2785,46 @@ class MDTUI(TestCase):
         self.assertContains(response, first_doc_name)
         self.assertNotContains(response, first_only_should_contain)
 
+    def test_72_typeahead_working_in_edit_indexes(self):
+        """
+        Refs #836 Typeahead not working with single key (non parallel) field.
+
+        The issue was deeper and, in fact, is about providing sufficient initial data for autocomplete view.
+        """
+        doc_name = 'CCC-0001'
+        new_indexes = {
+            '0': 'SOME DATA',
+            '1': 'Andrew and his friend',
+            'description': 'Editing of builtin field test',
+            }
+        typ_call_1 = {
+            'key_name': 'Tests Uppercase Field',
+            'autocomplete_search': 'SOME DAT',
+            }
+        typ_call_2 = {
+            'key_name': 'Employee',
+            'autocomplete_search': 'Andre',
+            }
+        # Checking first document for unique index
+        url = reverse('mdtui-index-edit', kwargs={'code': doc_name})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        response2 = self.client.post(url, new_indexes)
+        self.assertEqual(response2.status_code, 302)
+        response = self.client.get(url)
+        self.assertContains(response, doc_name)
+        self.assertContains(response, new_indexes['description'])
+        # Checking typeahead now will provide proper results.
+        typ_url = reverse('mdtui-parallel-keys')
+        response = self.client.post(typ_url, typ_call_1)
+        for value in typ_call_1.itervalues():
+            self.assertContains(response, value)
+        typ_url = reverse('mdtui-parallel-keys')
+        response = self.client.post(typ_url, typ_call_2)
+        for value in typ_call_2.itervalues():
+            self.assertContains(response, value)
+
+
     def test_z_cleanup(self):
         """
         Cleaning up after all tests finished.
