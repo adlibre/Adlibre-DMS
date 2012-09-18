@@ -349,7 +349,10 @@ def indexing_edit(request, code, step='edit', template='mdtui/indexing.html'):
     if not processor.errors:
         if not request.POST:
             form = initEditIndexesForm(request, doc, changed_indexes)
-            request.session['indexing_docrule_id'] = doc.get_docrule().id
+            # Setting context variables required for autocomplete
+            docrule_id = str(doc.get_docrule().id)
+            request.session['indexing_docrule_id'] = docrule_id
+            request.session['mdts'] = get_mdts_for_docrule(docrule_id)
         else:
             old_db_info = doc.get_db_info()
             secondary_indexes = processEditDocumentIndexForm(request, doc)
@@ -385,7 +388,7 @@ def indexing_edit(request, code, step='edit', template='mdtui/indexing.html'):
 def indexing_edit_result(request, step='edit_finish', template='mdtui/indexing.html'):
     """Confirmation step for editing indexes"""
     # initialising context
-    required_vars = ('edit_processor_indexes', 'edit_index_barcode', 'old_document_keys', 'edit_return')
+    required_vars = ('edit_processor_indexes', 'edit_index_barcode', 'old_document_keys', 'edit_return', 'mdts')
     variables = {}
     warnings = []
     for var in required_vars:
