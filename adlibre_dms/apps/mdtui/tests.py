@@ -2824,7 +2824,6 @@ class MDTUI(TestCase):
         for value in typ_call_2.itervalues():
             self.assertContains(response, value)
 
-
     def test_z_cleanup(self):
         """
         Cleaning up after all tests finished.

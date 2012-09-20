@@ -5,11 +5,9 @@ Project: Adlibre DMS
 Copyright: Adlibre Pty Ltd 2011
 License: See LICENSE for license information
 Author: Iurii Garmash
+Desc: Main http objects manipulation methods here.
 """
 
-"""
-Main http objects manipulation methods here.
-"""
 import logging
 
 from django.http import HttpResponse
