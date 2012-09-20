@@ -13,7 +13,7 @@ import datetime
 from lib_couch import prettyPrint, Couch
 
 # DMS API parameters
-host = 'http://127.0.0.1:8000/'
+host = 'https://jtg.dms.adlibre.net/'
 api_url = 'api/file/'
 username = 'admin'
 password = 'admin'
@@ -89,6 +89,11 @@ def show_doc_report(parsable=False):
         if revision_names:
             latest_revision = revision_names[revision_names.__len__() - 1]
 
+	if revisions is not None:
+	    revisions_count = revisions.__len__()
+	else:
+	    revisions_count = 0
+
         # Get MD5 sum of the latest document revision
         h_code=''
         if latest_revision:
@@ -100,9 +105,9 @@ def show_doc_report(parsable=False):
 
         # Format the output
         if parsable:
-            print '"%s", "%s", "%s", "%s"' % (bar_code, revisions.__len__(), employee, h_code)
+            print '"%s", "%s", "%s", "%s"' % (bar_code, revisions_count, employee, h_code)
         else:
-            print '%s, revision count: %s, names: %s, employee: %s, hashcode: %s' % (bar_code, revisions.__len__(), str(revision_names), employee, h_code)
+            print '%s, revision count: %s, names: %s, employee: %s, hashcode: %s' % (bar_code, revisions_count, str(revision_names), employee, h_code)
 
 if __name__ == "__main__":
     """
