@@ -417,7 +417,7 @@ class MetaDataTemplateHandler(BaseHandler):
         result = manager.store(data)
         if result is False:
             log.error('MetaDataTemplateHandler.create error occurred on store.')
-            return rc.BAD_REQUEST
+            return rc.DUPLICATE_ENTRY
 
         log.info('MetaDataTemplateHandler.create request fulfilled.')
         return result

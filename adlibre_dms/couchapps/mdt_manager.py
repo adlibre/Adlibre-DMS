@@ -8,6 +8,7 @@ Author: Iurii Garmash
 
 import logging
 from mdtcouch.models import MetaDataTemplate
+from couchdbkit.exceptions import ResourceConflict
 
 log = logging.getLogger('dms.mdtcouch.mdt_manager')
 
@@ -126,12 +127,16 @@ class MetaDataTemplateManager(object):
         mdt = MetaDataTemplate()
         if self.validate_mdt(mdt_data):
             mdt.populate_from_DMS(mdt_data)
-            mdt.save()
-            log.debug('MetaDataTemplateManager.store added mdt with _id: %s' % mdt._id)
-            return {"status": "ok", "mdt_id": "%s" % mdt._id}
+            try:
+                mdt.save()
+                log.debug('MetaDataTemplateManager.store added mdt with _id: %s' % mdt._id)
+                return {"status": "ok", "mdt_id": "%s" % mdt._id}
+            except ResourceConflict, e:
+                log.error('MetaDataTemplateManager.store ResourceConflict error: %s' % e)
+                pass
         else:
             log.error('MetaDataTemplateManager.store MDT provided did not validate')
-            return False
+        return False
 
     def delete_mdt(self, mdt_id):
         log.info('delete_mdt %s' % mdt_id)

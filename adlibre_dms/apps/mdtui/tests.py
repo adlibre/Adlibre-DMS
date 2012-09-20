@@ -582,7 +582,10 @@ class MDTUI(TestCase):
                  ]:
             mdt = json.dumps(m)
             response = self.client.post(url, {"mdt": mdt})
-            self.assertEqual(response.status_code, 200)
+            if not response.status_code == 409:
+                self.assertEqual(response.status_code, 200)
+            else:
+                raise AssertionError('MDT %s exists!' % m['_id'])
 
     def test_02_posting_document_with_all_keys(self):
         """
