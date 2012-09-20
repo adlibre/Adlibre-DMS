@@ -31,6 +31,7 @@ from view_helpers import extract_secondary_keys_from_form
 from view_helpers import cleanup_search_session
 from view_helpers import cleanup_indexing_session
 from view_helpers import cleanup_mdts
+from view_helpers import _cleanup_session_var
 from view_helpers import unify_index_info_couch_dates_fmt
 from search_helpers import cleanup_document_keys
 from search_helpers import document_date_range_only_search
@@ -67,6 +68,7 @@ MDTUI_ERROR_STRINGS = {
     'NEW_KEY_VALUE_PAIR': 'Adding new indexing key: ',
     'NO_MDT_NO_DOCRULE': 'You must select Meta Data Template or Document Type.',
     'NOT_VALID_INDEXING': 'You can not barcode or upload document without any indexes',
+    'ERROR_EDIT_INDEXES_FINISHED': 'You can not visit this page directly',
 }
 
 
@@ -322,34 +324,49 @@ def indexing_edit(request, code, step='edit', template='mdtui/indexing.html'):
     form = False
     processor = DocumentProcessor()
     autocomplete_list = None
+    changed_indexes = None
+    # Storing cancel (return back from edit) url
+    try:
+        return_url = request.session['edit_return']
+    except KeyError:
+        try:
+            return_url = request.META['HTTP_REFERER']
+            request.session['edit_return'] = return_url
+        except KeyError:
+            return_url = '/'
+            pass
+        pass
+
+    # Only preserve indexes if returning from edit indexes confirmation step
+    if 'HTTP_REFERER' in request.META and request.META['HTTP_REFERER'].endswith(reverse('mdtui-index-edit-finished')):
+        try:
+            changed_indexes = request.session['edit_processor_indexes']
+        except KeyError:
+            pass
 
     doc = processor.read(request, code)
     # TODO: check for misconfiguration here (plugin or permission to edit indexes exists in document's DorulePluginMapping)
     if not processor.errors:
         if not request.POST:
-            form = initEditIndexesForm(request, doc)
+            form = initEditIndexesForm(request, doc, changed_indexes)
+            # Setting context variables required for autocomplete
+            docrule_id = str(doc.get_docrule().id)
+            request.session['indexing_docrule_id'] = docrule_id
+            request.session['mdts'] = get_mdts_for_docrule(docrule_id)
         else:
             old_db_info = doc.get_db_info()
             secondary_indexes = processEditDocumentIndexForm(request, doc)
-            options = { 'new_indexes': secondary_indexes }
-            doc = processor.update(request, code, options=options)
-            if secondary_indexes:
-                del secondary_indexes['metadata_user_name']
-                del secondary_indexes['metadata_user_id']
-                request.session['edit_index_keys_dict'] = secondary_indexes
-                request.session['edit_index_barcode'] = code
-                old_docs_indexes = {'description': old_db_info['description']}
-                for index_name, index_value in old_db_info['mdt_indexes'].iteritems():
-                    # Converting Old index dates to render according to DMS date format
-                    if index_value.__class__.__name__ == 'datetime':
-                        old_docs_indexes[index_name] = datetime.datetime.strftime(index_value, settings.DATE_FORMAT)
-                    else:
-                        old_docs_indexes[index_name] = index_value
-                request.session['old_document_keys'] = old_docs_indexes
-                if not processor.errors:
-                    return HttpResponseRedirect(reverse('mdtui-index-edit-finished'))
+            request.session['edit_processor_indexes'] = secondary_indexes
+            request.session['edit_index_barcode'] = code
+            old_docs_indexes = {'description': old_db_info['description']}
+            for index_name, index_value in old_db_info['mdt_indexes'].iteritems():
+                # Converting Old index dates to render according to DMS date format
+                if index_value.__class__.__name__ == 'datetime':
+                    old_docs_indexes[index_name] = datetime.datetime.strftime(index_value, settings.DATE_FORMAT)
                 else:
-                    form = initEditIndexesForm(doc, request)
+                    old_docs_indexes[index_name] = index_value
+            request.session['old_document_keys'] = old_docs_indexes
+            return HttpResponseRedirect(reverse('mdtui-index-edit-finished'))
     else:
         for error in processor.errors:
             error_warnings.append(error.parameter)
@@ -361,6 +378,7 @@ def indexing_edit(request, code, step='edit', template='mdtui/indexing.html'):
                       'doc_name': code,
                       'warnings': warnings,
                       'autocomplete_fields': autocomplete_list,
+                      'edit_return': return_url,
                       'error_warnings': error_warnings,
                       })
     return render(request, template, context)
@@ -368,27 +386,52 @@ def indexing_edit(request, code, step='edit', template='mdtui/indexing.html'):
 @login_required
 @group_required(SEC_GROUP_NAMES['edit_index'])
 def indexing_edit_result(request, step='edit_finish', template='mdtui/indexing.html'):
-    context = { 'step': step,  }
-    try:
-        context.update({'document_keys': request.session['edit_index_keys_dict'],})
-        log.debug('indexing_finished called with: step: "%s", document_keys_dict: "%s",' %
-                  (step, context['document_keys']))
-    except KeyError:
-        pass
+    """Confirmation step for editing indexes"""
+    # initialising context
+    required_vars = ('edit_processor_indexes', 'edit_index_barcode', 'old_document_keys', 'edit_return', 'mdts')
+    variables = {}
+    warnings = []
+    for var in required_vars:
+        try:
+            variables[var] = request.session[var]
+        except KeyError:
+            variables[var] = ''
+            # Error handling into warnings
+            if not var=='edit_return':
+                error_name = MDTUI_ERROR_STRINGS['ERROR_EDIT_INDEXES_FINISHED']
+                log.error('indexing_finished error: variable: %s,  %s' % (var, error_name))
+                if not error_name in warnings:
+                    warnings.append(error_name)
+            pass
+    log.debug('indexing_finished called with: step: "%s", variables: "%s",' % (step, variables))
 
-    try:
-        context.update({'barcode': request.session['edit_index_barcode'],})
-    except KeyError:
-        pass
-
-    try:
-        context.update({'old_document_keys': request.session['old_document_keys'],})
-    except KeyError:
-        pass
-
-#    for var in ['old_document_keys', 'edit_index_barcode', 'edit_index_keys_dict']:
-#        _cleanup_session_var(request, var)
-#    cleanup_mdts(request)
+    if request.POST:
+        code = variables['edit_index_barcode']
+        processor = DocumentProcessor()
+        options = { 'new_indexes': variables['edit_processor_indexes'] }
+        doc = processor.update(request, code, options=options)
+        if not processor.errors:
+            # cleanup session here because editing is finished
+            for var in required_vars:
+                _cleanup_session_var(request, var)
+            return HttpResponseRedirect(variables['edit_return'])
+        else:
+            for error in processor.errors:
+                warnings.append(error)
+    # Building new indexes for confirmation rendering
+    context_secondary_indexes = {}
+    if 'edit_processor_indexes' in variables.iterkeys() and variables['edit_processor_indexes']:
+        for index, value in variables['edit_processor_indexes'].iteritems():
+            if not index in ['metadata_user_name', 'metadata_user_id']:
+                context_secondary_indexes[index] = value
+    context = {
+        'step': step,
+        'document_keys': context_secondary_indexes,
+        'barcode': variables['edit_index_barcode'],
+        'old_document_keys': variables['old_document_keys'],
+        'edit_return': variables['edit_return'],
+        'warnings': warnings,
+    }
     return render(request, template, context)
 
 @login_required

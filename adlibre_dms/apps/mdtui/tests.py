@@ -532,6 +532,12 @@ new_m5_doc1_dict = {
     'Tests Uppercase Field': 'some data',
 }
 
+new_m5_doc2_dict = {
+    'description': 'Something new here',
+    'Employee': 'Yuri',
+    'Tests Uppercase Field': 'something more',
+}
+
 new_m2_doc1_dict = {
     'description': 'Test Document MDT 3 Number 1 and other',
     'Employee': 'Vovan Patsan',
@@ -2571,6 +2577,8 @@ class MDTUI(TestCase):
                 self.assertContains(response, value)
             else:
                 self.assertContains(response, 'SOME DATA')
+        # POST to save those indexes
+        response = self.client.post(reverse('mdtui-index-edit-finished'), {'something':' '})
         # Quering CouchDB directly for existence and proper document indexes rendering
         couch_doc = self._open_couchdoc(couchdb_name, edit_document_name_1)
         if not 'index_revisions' in couch_doc:
@@ -2609,6 +2617,8 @@ class MDTUI(TestCase):
         # EDIT Results page contains all NEW indexes
         for value in new_m2_doc1_dict.itervalues():
             self.assertContains(response, value)
+        # POST to save those indexes
+        response = self.client.post(new_url,  {'something':' '})
         # Quering CouchDB directly for existence and proper document indexes rendering
         couch_doc = self._open_couchdoc(couchdb_name, edit_document_name_2)
         if not 'index_revisions' in couch_doc:
@@ -2624,6 +2634,11 @@ class MDTUI(TestCase):
         url = reverse('mdtui-index-edit', kwargs={'code': edit_document_name_2})
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        self.assertEqual(response.status_code, 200)
+        # POST to save those indexes
+        response = self.client.post(new_url,  {'something':' '})
         # Checking if revision 2 of CouchDB document indexes created
         couch_doc = self._open_couchdoc(couchdb_name, edit_document_name_2)
         if not '2' in couch_doc['index_revisions']:
@@ -2672,6 +2687,143 @@ class MDTUI(TestCase):
             raise AssertionError("""CouchDB Document's secondary indexes Contains wrong indexes: "metadata_user_id" """)
         if 'metadata_user_name' in couch_doc['mdt_indexes']:
             raise AssertionError("""CouchDB Document's secondary indexes Contains wrong indexes: "metadata_user_name" """)
+
+    def test_71_redirect_after_successful_edit(self):
+        """
+        Refs #832 Edit indexes preserves META_HTTP_REFERER url through whole process
+        Refs #833: Edit document indexes new error handling	New	Iurii Garmash
+        Refs #834: Save happens in final step (after save pressed)
+        """
+        doc_name = 'CCC-0002'
+        # SEARCH for doc
+        url = reverse('mdtui-search-type')
+        data = {'mdt': test_mdt_id_5}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        url = reverse('mdtui-search-options')
+        # Getting required indexes id's
+        response = self.client.get(url)
+        # Searching date range with unique doc1 keys
+        response = self.client.post(url, search_MDT_5)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        # Response is ok and only one doc persists there
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, doc_name)
+
+        # EMULATE click to EDIT a document
+        search_url = new_url
+        url = reverse('mdtui-index-edit', kwargs={'code': doc_name})
+        response = self.client.get(url, {}, HTTP_REFERER=search_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, doc_name)
+        ids = self._read_indexes_form(response)
+        data = self._create_edit_indexes_post_dict(new_m5_doc2_dict, ids)
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'About to store index data for document')
+        # Trying to go back and forth to emulate user possibilities properly
+        response = self.client.get(url)
+        response = self.client.get(new_url)
+        # POST to save those indexes
+        response = self.client.post(new_url,  {'something':' '})
+        self.assertEqual(response.status_code, 302)
+        # Redirect follows referrer specified (where we came into edit indexes)
+        old_url = self._retrieve_redirect_response_url(response)
+        self.assertEqual(old_url, search_url)
+        # Returning to results render error
+        response = self.client.get(new_url)
+        self.assertContains(response, MDTUI_ERROR_STRINGS['ERROR_EDIT_INDEXES_FINISHED'])
+
+    def test_71_preserving_editing_indexes_only_where_needed(self):
+        """
+        Refs #835 Edit metadata provides wrong file index
+
+        New indexes were not loading for second and each new doc.
+        Indexes should persist if returning from "edit indexes result" URL.
+        If referrer is other URL or absent... load only Document's indexes.
+        """
+        first_doc_name = 'CCC-0001'
+        second_doc_name = 'CCC-0002'
+        first_doc_new_indexes = {
+            '0': 'SOME DATA',
+            '1': 'Andrew and his friend',
+            'description': 'Editing of builtin field test',
+        }
+        second_doc_new_indexes = {
+            '0': 'SOME OTHER DATA',
+            '1': 'Andrew',
+            'description': 'Test Document Number 2 for MDT 5',
+        }
+        first_only_should_contain = 'Andrew and his friend'
+        # Checking first document for unique index
+        url = reverse('mdtui-index-edit', kwargs={'code': first_doc_name})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        response2 = self.client.post(url, first_doc_new_indexes)
+        self.assertEqual(response2.status_code, 302)
+        response = self.client.get(url)
+        self.assertContains(response, first_doc_name)
+        self.assertContains(response, first_only_should_contain)
+        # Checking second document should not contain this index
+        url = reverse('mdtui-index-edit', kwargs={'code': second_doc_name})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        response2 = self.client.post(url, second_doc_new_indexes)
+        self.assertEqual(response2.status_code, 302)
+        response = self.client.get(url)
+        self.assertContains(response, second_doc_name)
+        self.assertNotContains(response, first_only_should_contain)
+        # Checking first doc now contains those indexes
+        url = reverse('mdtui-index-edit', kwargs={'code': first_doc_name})
+        response = self.client.get(url, {}, HTTP_REFERER='http://127.0.0.1/'+reverse('mdtui-index-edit-finished'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, first_doc_name)
+        self.assertNotContains(response, first_only_should_contain)
+
+    def test_72_typeahead_working_in_edit_indexes(self):
+        """
+        Refs #836 Typeahead not working with single key (non parallel) field.
+
+        The issue was deeper and, in fact, is about providing sufficient initial data for autocomplete view.
+        """
+        doc_name = 'CCC-0001'
+        new_indexes = {
+            '0': 'SOME DATA',
+            '1': 'Andrew and his friend',
+            'description': 'Editing of builtin field test',
+            }
+        typ_call_1 = {
+            'key_name': 'Tests Uppercase Field',
+            'autocomplete_search': 'SOME DAT',
+            }
+        typ_call_2 = {
+            'key_name': 'Employee',
+            'autocomplete_search': 'Andre',
+            }
+        # Checking first document for unique index
+        url = reverse('mdtui-index-edit', kwargs={'code': doc_name})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        response2 = self.client.post(url, new_indexes)
+        self.assertEqual(response2.status_code, 302)
+        response = self.client.get(url)
+        self.assertContains(response, doc_name)
+        self.assertContains(response, new_indexes['description'])
+        # Checking typeahead now will provide proper results.
+        typ_url = reverse('mdtui-parallel-keys')
+        response = self.client.post(typ_url, typ_call_1)
+        for value in typ_call_1.itervalues():
+            self.assertContains(response, value)
+        typ_url = reverse('mdtui-parallel-keys')
+        response = self.client.post(typ_url, typ_call_2)
+        for value in typ_call_2.itervalues():
+            self.assertContains(response, value)
+
 
     def test_z_cleanup(self):
         """

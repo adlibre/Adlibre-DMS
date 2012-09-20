@@ -36,6 +36,8 @@ def get_mdts_for_docrule(docrule_id):
     Uses MDT's for docrule to list form fields.
     """
     log.debug("Getting MDT's from CouchDB")
+    if docrule_id.__class__.__name__ == 'int':
+        docrule_id = str(docrule_id)
     mdt_manager = MetaDataTemplateManager()
     mdt_manager.docrule_id = docrule_id
     mdts_dict = mdt_manager.get_mdts_for_docrule(docrule_id)
@@ -243,18 +245,25 @@ def construct_edit_indexes_data(mdts, db_info):
     indexes_dict = {'description': db_info['description']}
     # Finding key in MDT's and appending it to the form.
     counter = 0
-    if 'mdt_indexes' in db_info:
-        for mdt in mdts.itervalues():
-            # Sort fields, like render_fields_from_docrules method does
-            sorted_fields = mdt['fields'].items()
-            sorted_fields.sort()
-            for field_key, field in sorted_fields:
-                # Fail gracefully if no index for this MDT exists in DB
-                # Thus enabling us to add new MDTs for documents
-                # without creating serious bugs in editing document
+    for mdt in mdts.itervalues():
+        # Sort fields, like render_fields_from_docrules method does
+        sorted_fields = mdt['fields'].items()
+        sorted_fields.sort()
+        for field_key, field in sorted_fields:
+            # Fail gracefully if no index for this MDT exists in DB
+            # Thus enabling us to add new MDTs for documents
+            # without creating serious bugs in editing document
+            if 'mdt_indexes' in db_info:
+                # We're initialising from document data
                 try:
                     indexes_dict[str(counter)] = db_info['mdt_indexes'][field['field_name']]
                 except:
                     pass
-                counter += 1
+            else:
+                # We're initialising from pre-stored data
+                try:
+                    indexes_dict[str(counter)] = db_info[field['field_name']]
+                except:
+                    pass
+            counter += 1
     return indexes_dict
