@@ -131,19 +131,33 @@ class ViewTest(DMSTestCase):
         Backend provides all proper data for browser 'view documents list for docrule' section.
         """
         self.client.login(username=self.username, password=self.password)
-        # Checking listing of all PDF documents
-        url = reverse('files_document', kwargs={'id_rule':'2'})
-        data = {"finish": "15",
-                "order": "created_date",
-                "start": "0"
-                }
-        response = self.client.post(url, data)
-        for doc_name in self.documents_pdf:
+        for rule_id in ['2', '7']:
+            url = reverse('files_document', kwargs={'id_rule':rule_id})
+            data = {"finish": "15",
+                    "order": "created_date",
+                    "start": "0"
+                    }
+            response = self.client.post(url, data)
+            if rule_id == '2':
+                self._check_docs_exist(
+                    response,
+                    self.documents_pdf,
+                    [self.documents_missing, self.documents_tif, self.documents_txt]
+                )
+            if rule_id == '7':
+                self._check_docs_exist(
+                    response,
+                    self.documents_pdf2,
+                    [self.documents_pdf, self.documents_missing, self.documents_tif, self.documents_txt]
+                )
+
+    def _check_docs_exist(self, response, exist, not_exist_list_of_lists):
+        """Helper to check for documents names present/absent in response"""
+        for doc_name in exist:
             self.assertContains(response, doc_name)
-        for not_exist_list in [self.documents_missing, self.documents_tif, self.documents_txt]:
+        for not_exist_list in not_exist_list_of_lists:
             for doc_name in not_exist_list:
                 self.assertNotContains(response, doc_name)
-
 
 class SettingsTest(DMSTestCase):
 
