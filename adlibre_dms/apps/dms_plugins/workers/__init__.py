@@ -1,5 +1,10 @@
+"""
+Module: DMS Plugins Base worker classes
 
-
+Project: Adlibre DMS
+Copyright: Adlibre Pty Ltd 2012
+License: See LICENSE for license information
+"""
 
 from djangoplugins.models import Plugin as DjangoPlugin, ENABLED
 from djangoplugins.utils import get_plugin_name
