@@ -1,6 +1,10 @@
+
+
+
 from djangoplugins.models import Plugin as DjangoPlugin, ENABLED
 from djangoplugins.utils import get_plugin_name
 
+from core.errors import DmsException
 from dms_plugins.models import PluginOption
 
 class Plugin(object):
@@ -63,20 +67,6 @@ class Plugin(object):
         except PluginOption.DoesNotExist:
             pass
         return value
-
-class DmsException(Exception):
-    def __init__(self, value, code):
-        self.parameter = value
-        self.code = code
-
-    def __str__(self):
-        return super(DmsException, self).__str__() + (" %s - %s" % (self.code, repr(self.parameter)))
-
-    def __repr__(self):
-        return super(DmsException, self).__repr__() + (" %s - %s" % (self.code, repr(self.parameter)))
-
-    def __unicode__(self):
-        return unicode(str(self))
 
 class PluginError(DmsException):
     pass
