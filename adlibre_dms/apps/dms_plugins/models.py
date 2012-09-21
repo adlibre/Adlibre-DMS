@@ -107,7 +107,6 @@ class PluginOption(models.Model):
     def __unicode__(self):
         return "%s: %s" % (self.name, self.value)
 
-# TODO: MAYBE make it part of the  DoccodePluginMapping() model instance.
 class DocTags(models.Model):
     """
         A model that represents Document for maintainig Tag relations.
