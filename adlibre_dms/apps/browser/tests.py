@@ -124,6 +124,27 @@ class ViewTest(DMSTestCase):
             response = self.client.get(url)
             self.assertContains(response, '', status_code=404)
 
+    def test_displays_all_required_documents(self):
+        """
+        Documents found by browser app and rendered properly by API.
+
+        Backend provides all proper data for browser 'view documents list for docrule' section.
+        """
+        self.client.login(username=self.username, password=self.password)
+        # Checking listing of all PDF documents
+        url = reverse('files_document', kwargs={'id_rule':'2'})
+        data = {"finish": "15",
+                "order": "created_date",
+                "start": "0"
+                }
+        response = self.client.post(url, data)
+        for doc_name in self.documents_pdf:
+            self.assertContains(response, doc_name)
+        for not_exist_list in [self.documents_missing, self.documents_tif, self.documents_txt]:
+            for doc_name in not_exist_list:
+                self.assertNotContains(response, doc_name)
+
+
 class SettingsTest(DMSTestCase):
 
     def test_settings_view(self):
@@ -190,7 +211,5 @@ class ConversionTest(DMSTestCase):
             self.assertContains(response, d, status_code=200)
 
     def test_zz_cleanup(self):
-        """
-        Test Cleanup
-        """
+        """Test Cleanup"""
         self.cleanAll(check_response=True)
