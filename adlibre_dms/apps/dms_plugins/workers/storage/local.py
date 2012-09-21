@@ -6,10 +6,8 @@ License: See LICENSE for license information
 """
 
 import datetime
-import json
 import os
 import shutil
-#import traceback
 
 from django.conf import settings
 
@@ -23,9 +21,7 @@ class NoRevisionError(Exception):
 
 
 def naturalsort(L, reverse=False):
-    """
-    Natural Language Sort
-    """
+    """Natural Language Sort"""
     import re
 
     convert = lambda text: ('', int(text)) if text.isdigit() else (text, 0)
@@ -57,15 +53,11 @@ class LocalFilesystemManager(object):
         return directory
 
 def file_present(file_name, directory):
-    """
-    Determine if file is present in directory
-    """
+    """Determine if file is present in directory"""
     return file_name in os.listdir(directory)
 
 def filecount(directory):
-    """
-    Count the number of files in a directory
-    """
+    """Count the number of files in a directory"""
     try:
         return len([f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))])
     except Exception, e:
@@ -226,7 +218,7 @@ class Local(object):
         return document
 
     def get_revision_count(self, document):
-        # Hacky way, but faster than reading the revs from the metadata
+        """Hacky way, but faster than reading the revs from the metadata"""
         directory = self.filesystem.get_document_directory(document)
         file_count = 0
         if document.get_docrule().no_doccode:
