@@ -87,6 +87,8 @@ class Local(object):
         if not os.path.exists(fullpath):
             raise PluginError("No such document: %s" % fullpath, 404)
         document.set_fullpath(fullpath)
+        # TODO: Plugin can break a plugins iteration. WRONG! Manager Task.
+        
         #file will be read on first access lazily
         if document.get_option('only_metadata'):
             raise BreakPluginChain()
