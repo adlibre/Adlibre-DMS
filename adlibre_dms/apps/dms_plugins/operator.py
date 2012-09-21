@@ -14,7 +14,7 @@ from django.conf import settings
 
 from core.errors import ConfigurationError
 from models import DoccodePluginMapping
-from workers import DmsException
+from core.errors import DmsException
 from workers import PluginError, PluginWarning, BreakPluginChain
 from workers.info.tags import TagsPlugin
 from dms_plugins import pluginpoints
