@@ -11,7 +11,7 @@ import shutil
 
 from django.conf import settings
 
-from dms_plugins.pluginpoints import BeforeStoragePluginPoint, BeforeRetrievalPluginPoint, BeforeRemovalPluginPoint,\
+from dms_plugins.pluginpoints import StoragePluginPoint, BeforeRetrievalPluginPoint, BeforeRemovalPluginPoint,\
 BeforeUpdatePluginPoint
 from dms_plugins.workers import Plugin, PluginError, BreakPluginChain
 
@@ -88,7 +88,7 @@ class Local(object):
             raise PluginError("No such document: %s" % fullpath, 404)
         document.set_fullpath(fullpath)
         # TODO: Plugin can break a plugins iteration. WRONG! Manager Task.
-        
+
         #file will be read on first access lazily
         if document.get_option('only_metadata'):
             raise BreakPluginChain()
@@ -232,7 +232,7 @@ class Local(object):
                 file_count -= 1
         return file_count
 
-class LocalStoragePlugin(Plugin, BeforeStoragePluginPoint):
+class LocalStoragePlugin(Plugin, StoragePluginPoint):
     title = "Local Storage"
     description = "Saves document as local file"
 
