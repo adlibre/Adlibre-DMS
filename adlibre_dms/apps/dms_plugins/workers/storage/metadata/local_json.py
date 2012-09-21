@@ -4,7 +4,7 @@ import os
 
 from django.conf import settings
 
-from dms_plugins.pluginpoints import BeforeStoragePluginPoint, BeforeRetrievalPluginPoint, BeforeRemovalPluginPoint
+from dms_plugins.pluginpoints import StoragePluginPoint, BeforeRetrievalPluginPoint, BeforeRemovalPluginPoint
 from dms_plugins.workers import Plugin, PluginError, BreakPluginChain
 from dms_plugins.workers.storage.local import LocalFilesystemManager
 
@@ -190,7 +190,7 @@ class LocalJSONMetadataRetrievalPlugin(Plugin, BeforeRetrievalPluginPoint):
     def work(self, request, document, **kwargs):
         return self.worker.retrieve(request, document)
 
-class LocalJSONMetadataStoragePlugin(Plugin, BeforeStoragePluginPoint):
+class LocalJSONMetadataStoragePlugin(Plugin, StoragePluginPoint):
     title = "Local Metadata Storage"
     description = "Saves document metadata as local file"
 

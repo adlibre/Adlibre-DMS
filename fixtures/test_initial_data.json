@@ -1142,7 +1142,7 @@
             "index": 50, 
             "_order": 3, 
             "name": "dms_plugins.workers.storage.local.LocalStoragePlugin", 
-            "point": 1
+            "point": 5
         }
     }, 
     {
@@ -1197,7 +1197,7 @@
             "index": 45, 
             "_order": 5, 
             "name": "dms_plugins.workers.storage.metadata.local_json.LocalJSONMetadataStoragePlugin", 
-            "point": 1
+            "point": 5
         }
     }, 
     {
