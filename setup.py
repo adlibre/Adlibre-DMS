@@ -71,6 +71,11 @@ setup(name='adlibre_dms',
                 # Admin UI
                 'apps/ui/static/css/ui/*.css',
                 'apps/ui/static/css/ui/datepick/*.css',
+                'apps/ui/static/js/ui/*.js',
+                'apps/ui/static/js/datepick/*.js',
+                'apps/ui/static/js/datepick/*.html',
+                'apps/ui/static/js/datepick/*.gif',
+
                 'apps/ui/templates/ui/*.html',
                 # CouchDB Components
                 'couchapps/*/_design/views/*/*.js',
