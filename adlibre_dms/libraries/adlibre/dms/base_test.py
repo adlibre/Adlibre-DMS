@@ -29,6 +29,7 @@ class DMSTestCase(TestCase):
 
         # Test Data
         self.documents_pdf = ('ADL-0001', 'ADL-0002', 'ADL-1111', 'ADL-1234', 'ADL-2222',)
+        self.documents_pdf2 = ('BBB-0001', )
         self.documents_txt = ('10001', '10006', '101',)
         self.documents_tif = ('2011-01-27-1', '2011-01-28-12',)
         self.documents_missing = ('ADL-8888', 'ADL-9999',)
@@ -115,6 +116,7 @@ class DMSTestCase(TestCase):
         self.cleanUp(self.documents_pdf, check_response=check_response)
         self.cleanUp(self.documents_tif, check_response=check_response)
         self.cleanUp(self.documents_txt, check_response=check_response)
+        self.cleanUp(self.documents_pdf2, check_response=check_response)
 
         cleanup_docs_list = []
 #        # no doc code documents require full filename in order to delete FIXME!
