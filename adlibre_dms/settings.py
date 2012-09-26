@@ -203,6 +203,7 @@ INSTALLED_APPS = (
     'couchdbkit.ext.django', # needed for CouchDB usage
     'widget_tweaks', # used by MUI templates
     'compressor', # MUI js / css compression
+    'django-log-file-viewer',
     # DMS Core
     'api',
     'docs',
@@ -378,6 +379,9 @@ if DEBUG:
 
 
 LOGIN_REDIRECT_URL = '/'
+
+LOG_FILES_DIR = os.path.join(PROJECT_PATH, '..', 'log/')
+LOG_FILES_RE = '(?P<date>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3})\s\[(?P<type>[A-Z]+)\]\s(?P<message>.+)'
 
 APPEND_SLASH = False # Stop Django from adding slashes to urls
 
