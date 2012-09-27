@@ -121,8 +121,9 @@ setup(name='adlibre_dms',
             'pyPdf==1.13',
             # Deployment
             'flup==1.0.3.dev-20110405',
-            'django-log-file-viewer==0.2'
-        ],
+            # Logging
+            'django-log-file-viewer'
+    ],
     dependency_links = [
         "https://github.com/adlibre/django-bcp/tarball/master#egg=django-bcp",
         "https://github.com/adlibre/adlibre-plugins/tarball/master#egg=adlibre-plugins"
