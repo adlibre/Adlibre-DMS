@@ -381,7 +381,7 @@ if DEBUG:
 LOGIN_REDIRECT_URL = '/'
 
 # django-log-file-viewer setttings
-LOG_FILES_DIR = os.path.join(PROJECT_PATH, '..', 'log/')
+LOG_FILES_DIR = os.path.join(PROJECT_PATH, '..', 'log')
 LOG_FILES_RE = '(?P<date>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3})\s\[(?P<type>[A-Z]+)\]\s(?P<message>.+)'
 LOG_FILES_PAGINATE_LINES = 20
 
