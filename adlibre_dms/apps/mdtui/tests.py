@@ -11,6 +11,7 @@ import json, os, urllib, datetime, re
 
 from django.test import TestCase
 from django.core.urlresolvers import reverse
+from django.core.paginator import Paginator
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
@@ -20,6 +21,7 @@ from couchdbkit import Server
 
 from adlibre.date_converter import date_standardized
 from mdtui.views import MDTUI_ERROR_STRINGS
+from mdtui.templatetags.paginator_tags import rebuild_sequence_digg
 
 # auth user
 username = 'admin'
@@ -522,6 +524,12 @@ search_MDT_5 = {
     u'end_date': u'',
 }
 
+search_MDT_5_wrong = {
+    u'0': u'Sergei',
+    u'date': u'',
+    u'end_date': u'',
+    }
+
 # Edit document indexes specific settings
 edit_document_name_1 = "CCC-0001"
 edit_document_name_2 = "BBB-0001"
@@ -556,6 +564,35 @@ new_m2_doc1_dict = {
 # THIS IS WRONG:
 # 1. search does not filter on MDT correctly. Getting results from multiple MDTs (and document types).
 # 2. parallel key lookups are not sharing parallel info across document types.
+
+# TODO: test paginator rendering in browser with more then 10 documents
+
+class PaginatorTestCase(TestCase):
+    def test_paginator_tag_logic(self):
+        """Refs #805: Testing Paginator tag logic
+
+        Testing proper rendering of Digg like paginator
+        """
+        sequence = [str(i) for i in range(200)]
+        paginated = Paginator(sequence, 10)
+        result_sequence = rebuild_sequence_digg(paginated.page(1))
+        self.assertEqual(result_sequence, [1, 2, '...', 19, 20])
+        result_sequence = rebuild_sequence_digg(paginated.page(2))
+        self.assertEqual(result_sequence, [1, 2, 3, '...', 19, 20])
+        result_sequence = rebuild_sequence_digg(paginated.page(3))
+        self.assertEqual(result_sequence, [1, 2, 3, 4,'...', 19, 20])
+        result_sequence = rebuild_sequence_digg(paginated.page(4))
+        self.assertEqual(result_sequence, [1, 2, 3, 4, 5, '...', 19, 20])
+        result_sequence = rebuild_sequence_digg(paginated.page(5))
+        self.assertEqual(result_sequence, [1, 2, '...', 4, 5, 6, '...', 19, 20])
+        result_sequence = rebuild_sequence_digg(paginated.page(17))
+        self.assertEqual(result_sequence, [1, 2, '...', 16, 17, 18, 19, 20])
+        result_sequence = rebuild_sequence_digg(paginated.page(18))
+        self.assertEqual(result_sequence, [1, 2, '...',  17, 18, 19, 20])
+        result_sequence = rebuild_sequence_digg(paginated.page(19))
+        self.assertEqual(result_sequence, [1, 2, '...', 18, 19, 20])
+        result_sequence = rebuild_sequence_digg(paginated.page(20))
+        self.assertEqual(result_sequence, [1, 2, '...', 19, 20])
 
 class MDTUI(TestCase):
 
@@ -2827,6 +2864,42 @@ class MDTUI(TestCase):
         for value in typ_call_2.itervalues():
             self.assertContains(response, value)
 
+    def test_73_paginator_exists(self):
+        """Refs #805: Simple paginator rendering test"""
+        url = reverse('mdtui-search-type')
+        data = {'mdt': test_mdt_id_5}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        url = reverse('mdtui-search-options')
+        response = self.client.get(url)
+        response = self.client.post(url, search_MDT_5)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'results matching query.')
+        self.assertContains(response, '<Page 1 of 1>')
+        self.assertContains(response, '/mdtui/search/results?page=1">1') # Paginator page one present
+        self.assertContains(response, '>Next<') # Paginator page next
+
+    def test_74_paginator_empty_search_results(self):
+        """Refs 805: Paginator rendering in empty search results conditions"""
+        url = reverse('mdtui-search-type')
+        data = {'mdt': test_mdt_id_5}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        url = reverse('mdtui-search-options')
+        response = self.client.get(url)
+        response = self.client.post(url, search_MDT_5_wrong)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, 'results matching query.')
+        self.assertNotContains(response, '<Page 1 of 1>')
+        self.assertNotContains(response, '/mdtui/search/results?page=1">1') # Paginator page one present
+        self.assertNotContains(response, '>Next<') # Paginator page next
+
     def test_z_cleanup(self):
         """
         Cleaning up after all tests finished.
@@ -3031,3 +3104,4 @@ class MDTUI(TestCase):
         for row in r:
             firstdoc = row['doc']
         return firstdoc
+

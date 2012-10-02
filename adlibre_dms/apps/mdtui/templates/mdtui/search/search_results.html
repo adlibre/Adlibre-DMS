@@ -29,7 +29,7 @@
     </tr>
     </thead>
     <tbody>
-    {% for doc in documents %}
+    {% for doc in paginated_documents.object_list %}
         <tr>
             <td class="nw"><a href="{% url mdtui-view-pdf doc.id %}" title="{% trans 'View Document' %}" alt="{% trans 'View Document' %}" target="_blank"><i class="icon-download"></i> {{ doc.id }}</a></td>
             <td class="nw">{{ doc.metadata_created_date|date:DATE_FORMAT }}</td>
@@ -45,24 +45,8 @@
     {% endfor %}
     </tbody>
 </table>
-
-{% comment %}
-        TODO: FINISH THIS
-        <hr />
-        <p>{# TODO: show number of results found #} Showing 50 of 1,232,300 results matching query.</p>
-        {# Let's use pagination like this #}
-        <div class="pagination">
-            <ul>
-                <li><a href="#">{% trans 'Prev' %}</a></li>
-                <li class="active">
-                    <a href="#">1</a>
-                </li>
-                <li><a href="#">2</a></li>
-                <li><a href="#">3</a></li>
-                <li><a href="#">4</a></li>
-                <li><a href="#">{% trans 'Next' %}</a></li>
-            </ul>
-        </div>
-{% endcomment %}
-
+{% if paginated_documents.paginator %}
+<hr />
+{% include "mdtui/search/search_results_paginator.html" %}
+{% endif %}
 <p><a href="{% url mdtui-search-export %}" title="{% trans 'Download Results to CSV' %}" class="btn"><i class="icon-download-alt"></i> {% trans 'Export Results' %}</a></p>

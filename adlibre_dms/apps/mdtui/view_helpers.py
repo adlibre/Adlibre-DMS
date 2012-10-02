@@ -234,14 +234,25 @@ def _cleanup_session_var(request, var):
         pass
 
 def cleanup_search_session(request):
-    """Makes MDTUI forget abut searching keys entered before."""
-    vars = ('document_search_dict', 'search_docrule_id', 'search_mdt_id', 'search_docrule_ids', 'searching_docrule_id')
+    """Makes MDTUI forget abut found search data."""
+    vars = (
+            'document_search_dict',
+            'search_docrule_id',
+            'search_mdt_id',
+            'search_docrule_ids',
+            'searching_docrule_id',
+            'search_results',
+    )
     for var in vars:
         _cleanup_session_var(request, var)
 
 def cleanup_indexing_session(request):
-    """Makes MDTUI forget abut indexing keys entered before."""
-    vars = ('document_keys_dict', 'indexing_docrule_id', 'barcode',)
+    """Makes MDTUI forget abut indexing data entered before."""
+    vars = (
+            'document_keys_dict',
+            'indexing_docrule_id',
+            'barcode',
+    )
     for var in vars:
         _cleanup_session_var(request, var)
 
