@@ -14,6 +14,14 @@ from django.contrib import admin
 
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
+from django.contrib.sessions.models import Session
+
+class SessionAdmin(admin.ModelAdmin):
+    def _session_data(self, obj):
+        return obj.get_decoded()
+    list_display = ['session_key', '_session_data', 'expire_date']
+admin.site.register(Session, SessionAdmin)
+
 
 UserAdmin.list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff', 'is_active',)
 
