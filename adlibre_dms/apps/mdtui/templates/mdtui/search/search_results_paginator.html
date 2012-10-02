@@ -1,0 +1,28 @@
+{% load i18n %}
+<p>Showing {{ paginated_documents.paginator.num_pages }} of {{ paginated_documents.paginator.count }} results matching query. {{ paginated_documents }}</p>
+<div class="pagination">
+    <ul>
+        {% if paginated_documents.has_previous %}
+        <li><a href="{% url mdtui-search-results %}?page={{ paginated_documents.previous_page_number }}">{% trans 'Prev' %}</a></li>
+        {%  endif %}
+        {% if paginated_documents.paginator.num_pages < 10 %}
+        {% for page_num in paginated_documents.paginator.page_range %}
+        <li{% if page_num == page %} class="active"{% endif %}><a href="{% url mdtui-search-results %}?page={{ page_num }}">{{ page_num }}</a></li>
+        {% endfor %}
+        {% else %}
+            {# Creating rebuild_paginated variable #}
+            {% load paginator_tags %}
+            {% pages_sequence paginated_documents %}
+            {% if rebuild_paginated %}
+                {% for page_num in rebuild_paginated %}
+                    <li{% if page_num == page %} class="active"{% endif %}>
+                        <a href="{% if page_num != '...' %}{% url mdtui-search-results %}?page={{ page_num }}{% else %}#{% endif %}">{{ page_num }}</a>
+                    </li>
+                {% endfor %}
+            {% endif %}
+        {% endif %}
+        {% if paginated_documents.has_next %}
+        <li><a href="{% url mdtui-search-results %}?page={{ paginated_documents.next_page_number }}">{% trans "Next" %}</a></li>
+        {% endif %}
+    </ul>
+</div>

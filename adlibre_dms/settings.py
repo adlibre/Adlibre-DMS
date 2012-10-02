@@ -380,8 +380,10 @@ if DEBUG:
 
 LOGIN_REDIRECT_URL = '/'
 
+# django-log-file-viewer setttings
 LOG_FILES_DIR = os.path.join(PROJECT_PATH, '..', 'log/')
 LOG_FILES_RE = '(?P<date>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3})\s\[(?P<type>[A-Z]+)\]\s(?P<message>.+)'
+LOG_FILES_PAGINATE_LINES = 20
 
 APPEND_SLASH = False # Stop Django from adding slashes to urls
 
@@ -404,7 +406,12 @@ THEME_NAME = 'solid' # 'adlibre' or 'basic' or 'solid'
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S" # format that is used in document metadata
 DATE_FORMAT = "%d/%m/%Y"
 # Note that changing this into any other 'Ymd' sequence will make dates unsearchable.
+# To change this you wold have to migrate CouchDB indexes.
 DATE_COUCHDB_FORMAT = "%Y-%m-%dT00:00:00Z"
+
+# Pagination of MUI search results to be overridden if needed.
+MUI_SEARCH_PAGINATE = 20
+MUI_SEARCH_PAGINATOR_PAGE_SEPARATOR = '...'
 
 DEMO = True
 NEW_SYSTEM = False

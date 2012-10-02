@@ -11,6 +11,7 @@ import datetime
 import logging
 
 from django.core.urlresolvers import reverse
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, render_to_response, HttpResponseRedirect
@@ -71,6 +72,7 @@ MDTUI_ERROR_STRINGS = {
     'ERROR_EDIT_INDEXES_FINISHED': 'You can not visit this page directly',
 }
 
+MUI_SEARCH_PAGINATE = getattr(settings, 'MUI_SEARCH_PAGINATE', 20)
 
 @login_required
 @group_required(SEC_GROUP_NAMES['search'])
@@ -242,8 +244,20 @@ def search_results(request, step=None, template='mdtui/search.html'):
     docrule_ids = []
     documents = None
     warnings = []
-    mdts_list = None
+    mdts_list = []
+    paginated_documents = []
     export = False
+    view = False
+    page = request.GET.get('page')
+    if not page:
+        page = 1
+    else:
+        try:
+            page = int(page)
+        except ValueError:
+            pass
+
+
     try:
         document_keys = request.session['document_search_dict']
     except KeyError:
@@ -270,8 +284,11 @@ def search_results(request, step=None, template='mdtui/search.html'):
         except KeyError:
             pass
 
-    log.debug('search_results call: docrule_id: "%s", document_search_dict: "%s"' % (docrule_ids, document_keys))
-    if document_keys:
+    log.debug(
+        'search_results call for : page: "%s", docrule_id: "%s", document_search_dict: "%s"'
+        % (page, docrule_ids, document_keys)
+    )
+    if document_keys and page==1:
         # turning document_search dict into something useful for the couch request
         clean_keys = cleanup_document_keys(document_keys)
         ck = ranges_validator(clean_keys)
@@ -289,17 +306,40 @@ def search_results(request, step=None, template='mdtui/search.html'):
         else:
             warnings.append(MDTUI_ERROR_STRINGS['NO_S_KEYS'])
         mdts_list = get_mdts_for_documents(documents)
+        if documents:
+            documents = search_results_by_date(documents)
+            # TODO: maybe! use cache here. Local memory cache may cover this
+            request.session['search_results'] = documents
+    else:
+        if document_keys:
+            # TODO: maybe! use cache here. Local memory cache may cover this
+            documents = request.session['search_results']
+            mdts_list = get_mdts_for_documents(documents)
+            log.debug('search_results: Getting results from cache. Num of results: %s' % documents.__len__)
 
-    if documents:
-        documents = search_results_by_date(documents)
     # Produces a CSV file from search results
     if (documents and step == 'export') or (documents and export):
         log.debug('search_results exporting found documents to CSV')
         csv_response = export_to_csv(document_keys, mdts_list, documents)
         return csv_response
 
+    if not documents:
+        documents = []
+    if document_keys:
+        # Paginator logic
+        paginator = Paginator(documents, MUI_SEARCH_PAGINATE)
+        try:
+            paginated_documents = paginator.page(page)
+        except PageNotAnInteger:
+            # If page is not an integer, deliver first page.
+            paginated_documents = paginator.page(1)
+        except EmptyPage:
+            # If page is out of range (e.g. 9999), deliver last page of results.
+            paginated_documents = paginator.page(paginator.num_pages)
+
     context = { 'step': step,
-                'documents': documents,
+                'paginated_documents': paginated_documents,
+                'page': page,
                 'document_keys': document_keys,
                 'mdts': mdts_list,
                 'warnings': warnings,
@@ -626,22 +666,14 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
 def indexing_finished(request, step=None, template='mdtui/indexing.html'):
     """Indexing: Step 4: Finished"""
     context = { 'step': step,  }
-    try:
-        context.update({'document_keys': request.session['document_keys_dict'],})
-        log.debug('indexing_finished called with: step: "%s", document_keys_dict: "%s",' %
-                  (step, context['document_keys']))
-    except KeyError:
-        pass
+    for name, item in ( ('document_keys', 'document_keys_dict'),
+                        ('barcode', 'barcode'),
+                        ('docrule_id', 'indexing_docrule_id') ):
+        if item in request.session:
+            context.update({name: request.session[item],})
 
-    try:
-        context.update({'barcode': request.session['barcode'],})
-    except KeyError:
-        pass
-
-    try:
-        context.update({'docrule_id': request.session['indexing_docrule_id'],})
-    except KeyError:
-        pass
+    log.debug('indexing_finished called with: step: "%s", document_keys_dict: "%s",' %
+              (step, context['document_keys']))
 
     # Document uploaded forget everything
     cleanup_indexing_session(request)
