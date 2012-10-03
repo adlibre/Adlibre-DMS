@@ -377,11 +377,37 @@ if DEBUG:
             }
     }
 
+# Caching settings
+if not DEBUG:
+    CACHES = {
+        'mui_search_results': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'memory_cache'
+        },
+        'default': {
+            'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+            'LOCATION': os.path.join(PROJECT_PATH, '..', '..', '..', '..', 'cache'),
+        },
+    }
+else:
+    CACHES = {
+        'mui_search_results': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'memory_cache'
+        },
+        'default': {
+            'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+            'LOCATION': os.path.join(PROJECT_PATH, '..', 'cache'),
+            },
+    }
 
 LOGIN_REDIRECT_URL = '/'
 
 # django-log-file-viewer setttings
-LOG_FILES_DIR = os.path.join(PROJECT_PATH, '..', '..', '..', '..', 'log')
+if not DEBUG:
+    LOG_FILES_DIR = os.path.join(PROJECT_PATH, '..', '..', '..', '..', 'log')
+else:
+    LOG_FILES_DIR = os.path.join(PROJECT_PATH, '..', 'log')
 LOG_FILES_RE = '(?P<date>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3})\s\[(?P<type>[A-Z]+)\]\s(?P<message>.+)'
 LOG_FILES_PAGINATE_LINES = 20
 
@@ -421,8 +447,6 @@ try:
     from local_settings import *
 except ImportError:
     pass
-
-print 'log files dir: %s' % LOG_FILES_DIR
 
 # Trying to read DMS version from version file stored
 PRODUCT_VERSION = '1.0'
