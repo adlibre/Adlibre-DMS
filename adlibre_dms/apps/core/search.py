@@ -15,12 +15,12 @@ from adlibre.date_converter import str_date_to_couch
 log = logging.getLogger('dms.core.search')
 
 # TODO: Standardize Search interaction (query/output) with those objects
-class SearchQuery(object):
+class DMSSearchQuery(object):
     """Defined data to be queried from DMS Search Manager class"""
     def __init__(self):
         self.document_keys = None
 
-class SearchResults(object):
+class DMSSearchResults(object):
     """Defines data to be ruturned by DMS Search Manager class"""
     def __init__(self):
         self.documents = None
