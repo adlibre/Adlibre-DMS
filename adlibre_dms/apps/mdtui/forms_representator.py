@@ -119,7 +119,7 @@ def render_fields_from_docrules(mdts_dict, init_dict=None, search=False):
                 if "uppercase" in field_value.iterkeys():
                     if field_value["uppercase"]=="yes":
                         form_field.is_uppercase = True
-                    # Setting additional field name (required to use for parsing in templates)
+                # Setting additional field name (required to use for parsing in templates)
                 if search and field_value["type"]==u'date':
                     form_field.field_name = field_value["field_name"] + SEARCH_STRING_REPR['field_label_to']
                     form_fields_list[unicode(counter) + SEARCH_STRING_REPR['id_to']] = form_field
