@@ -95,6 +95,7 @@ setup(name='adlibre_dms',
     data_files=[
         ('adlibre_dms', ['settings_prod.py', 'local_settings.py.example', 'adlibre_dms/manage.py']),
         ('db', ['db/.gitignore']), # create empty dir
+        ('cache', ['cache/.gitignore']), # create empty dir
         ('deployment', find_files('deployment', '*')),
         ('log', ['log/.gitignore']), # create empty dir
         ('www', ['www/.gitignore']), # create empty dir
