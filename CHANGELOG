@@ -1,0 +1,16 @@
+ADLIBRE DMS VERSIONS CHANGELOG
+
+DMS 1.0.5
+---------------------------------
++ added search results pagination
++ added caching usage
++ added sessions administration and one click cleanup admin action
++ added usage of django-log-file-viewer (version 0.3 for now)
+
+DMS 1.0.4
+---------------------------------
++ added document metadata editing feature in MUI
+
+DMS 1.0.3
+---------------------------------
++ added DMS versioning and minor core refactoring
