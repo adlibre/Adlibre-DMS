@@ -11,6 +11,7 @@ import datetime
 import logging
 
 from django.core.urlresolvers import reverse
+from django.core.cache import get_cache
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.conf import settings
 from django.http import HttpResponse
@@ -232,7 +233,6 @@ def search_options(request, step, template='mdtui/search.html'):
                }
     return render_to_response(template, context, context_instance=RequestContext(request))
 
-
 @login_required
 @group_required(SEC_GROUP_NAMES['search'])
 def search_results(request, step=None, template='mdtui/search.html'):
@@ -244,6 +244,7 @@ def search_results(request, step=None, template='mdtui/search.html'):
     mdts_list = []
     paginated_documents = []
     export = False
+    cache_documents_for = 3600 # Seconds
     page = request.GET.get('page')
     if not page:
         page = 1
@@ -284,7 +285,10 @@ def search_results(request, step=None, template='mdtui/search.html'):
         % (page, docrule_ids, document_keys)
     )
 
-    if document_keys and page==1:
+    cache = get_cache('mui_search_results')
+    cache_key = json.dumps(document_keys)
+    cached_documents = cache.get(cache_key, None)
+    if document_keys and not cached_documents:
         # turning document_search dict into something useful for the couch request
         clean_keys = cleanup_document_keys(document_keys)
         ck = ranges_validator(clean_keys)
@@ -293,15 +297,12 @@ def search_results(request, step=None, template='mdtui/search.html'):
             documents = search_documents(cleaned_document_keys, docrule_ids)
         else:
             warnings.append(MDTUI_ERROR_STRINGS['NO_S_KEYS'])
-        mdts_list = get_mdts_for_documents(documents)
-        # TODO: maybe! use cache here. Local memory cache may cover this
-        request.session['search_results'] = documents
+        cache.set(cache_key, documents, cache_documents_for)
+        log.debug('search_results: Got search results with amount of results: %s' % documents.__len__())
     else:
         if document_keys:
-            # TODO: maybe! use cache here. Local memory cache may cover this
-            documents = request.session['search_results']
-            mdts_list = get_mdts_for_documents(documents)
-            log.debug('search_results: Getting results from cache. Num of results: %s' % documents.__len__)
+            documents = cached_documents
+            log.debug('search_results: Getting results from cache. Num of results: %s' % documents.__len__())
 
     # Produces a CSV file from search results
     if (documents and step == 'export') or (documents and export):
@@ -309,7 +310,6 @@ def search_results(request, step=None, template='mdtui/search.html'):
         csv_response = export_to_csv(document_keys, mdts_list, documents)
         return csv_response
 
-    # Paginator logic
     if document_keys:
         paginator = Paginator(documents, MUI_SEARCH_PAGINATE)
         try:
