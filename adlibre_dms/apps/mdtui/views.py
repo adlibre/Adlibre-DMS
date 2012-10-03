@@ -297,6 +297,7 @@ def search_results(request, step=None, template='mdtui/search.html'):
             documents = search_documents(cleaned_document_keys, docrule_ids)
         else:
             warnings.append(MDTUI_ERROR_STRINGS['NO_S_KEYS'])
+        # TODO: advanced caching taking user and docrule into account
         cache.set(cache_key, documents, cache_documents_for)
         log.debug('search_results: Got search results with amount of results: %s' % documents.__len__())
     else:
@@ -311,6 +312,7 @@ def search_results(request, step=None, template='mdtui/search.html'):
         return csv_response
 
     if document_keys:
+        mdts_list = get_mdts_for_documents(documents)
         paginator = Paginator(documents, MUI_SEARCH_PAGINATE)
         try:
             paginated_documents = paginator.page(page)
