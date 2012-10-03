@@ -22,6 +22,7 @@ from api.decorators.group_required import group_required
 from dmscouch.models import CouchDocument
 from forms import DocumentUploadForm, BarcodePrintedForm, DocumentSearchOptionsForm
 from core.document_processor import DocumentProcessor
+from core.search import DMSSearchManager
 from doc_codes.models import DocumentTypeRule
 from view_helpers import initIndexesForm
 from view_helpers import processDocumentIndexForm
@@ -34,7 +35,8 @@ from view_helpers import cleanup_indexing_session
 from view_helpers import cleanup_mdts
 from view_helpers import _cleanup_session_var
 from view_helpers import unify_index_info_couch_dates_fmt
-from search_helpers import DMSSearchManager
+from search_helpers import ranges_validator
+from search_helpers import recognise_dates_in_search
 from search_helpers import search_results_by_date
 from search_helpers import check_for_secondary_keys_pairs
 from search_helpers import get_mdts_by_names
@@ -287,8 +289,8 @@ def search_results(request, step=None, template='mdtui/search.html'):
         manager = DMSSearchManager()
         # turning document_search dict into something useful for the couch request
         clean_keys = manager.cleanup_document_keys(document_keys)
-        ck = manager.ranges_validator(clean_keys)
-        cleaned_document_keys = manager.recognise_dates_in_search(ck)
+        ck = ranges_validator(clean_keys)
+        cleaned_document_keys = recognise_dates_in_search(ck)
         # Submitted form with all fields empty
         if cleaned_document_keys:
             keys = [key for key in cleaned_document_keys.iterkeys()]
