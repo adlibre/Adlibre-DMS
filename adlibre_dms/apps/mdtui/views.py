@@ -34,12 +34,7 @@ from view_helpers import cleanup_indexing_session
 from view_helpers import cleanup_mdts
 from view_helpers import _cleanup_session_var
 from view_helpers import unify_index_info_couch_dates_fmt
-from search_helpers import cleanup_document_keys
-from search_helpers import document_date_range_only_search
-from search_helpers import document_date_range_with_keys_search
-from search_helpers import recognise_dates_in_search
-from search_helpers import document_date_range_present_in_keys
-from search_helpers import ranges_validator
+from search_helpers import DMSSearchManager
 from search_helpers import search_results_by_date
 from search_helpers import check_for_secondary_keys_pairs
 from search_helpers import get_mdts_by_names
@@ -257,7 +252,6 @@ def search_results(request, step=None, template='mdtui/search.html'):
         except ValueError:
             pass
 
-
     try:
         document_keys = request.session['document_search_dict']
     except KeyError:
@@ -288,21 +282,23 @@ def search_results(request, step=None, template='mdtui/search.html'):
         'search_results call for : page: "%s", docrule_id: "%s", document_search_dict: "%s"'
         % (page, docrule_ids, document_keys)
     )
+
     if document_keys and page==1:
+        manager = DMSSearchManager()
         # turning document_search dict into something useful for the couch request
-        clean_keys = cleanup_document_keys(document_keys)
-        ck = ranges_validator(clean_keys)
-        cleaned_document_keys = recognise_dates_in_search(ck)
+        clean_keys = manager.cleanup_document_keys(document_keys)
+        ck = manager.ranges_validator(clean_keys)
+        cleaned_document_keys = manager.recognise_dates_in_search(ck)
         # Submitted form with all fields empty
         if cleaned_document_keys:
             keys = [key for key in cleaned_document_keys.iterkeys()]
-            dd_range_keys = document_date_range_present_in_keys(keys)
+            dd_range_keys = manager.document_date_range_present_in_keys(keys)
             keys_cnt = cleaned_document_keys.__len__()
             # Selecting appropriate search method
             if dd_range_keys and keys_cnt == 2:
-                documents = document_date_range_only_search(cleaned_document_keys, docrule_ids)
+                documents = manager.document_date_range_only_search(cleaned_document_keys, docrule_ids)
             else:
-                documents = document_date_range_with_keys_search(cleaned_document_keys, docrule_ids)
+                documents = manager.document_date_range_with_keys_search(cleaned_document_keys, docrule_ids)
         else:
             warnings.append(MDTUI_ERROR_STRINGS['NO_S_KEYS'])
         mdts_list = get_mdts_for_documents(documents)
