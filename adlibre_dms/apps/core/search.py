@@ -1,4 +1,11 @@
-"""test"""
+"""
+Module: DMS Core Search logic and base objects.
+
+Project: Adlibre DMS
+Copyright: Adlibre Pty Ltd 2011
+License: See LICENSE for license information
+Author: Iurii Garmash
+"""
 
 import logging
 
@@ -10,7 +17,6 @@ log = logging.getLogger('dms.core.search')
 # TODO: Standardize Search interaction (query/output) with those objects
 class SearchQuery(object):
     """Defined data to be queried from DMS Search Manager class"""
-
     def __init__(self):
         self.document_keys = None
 
