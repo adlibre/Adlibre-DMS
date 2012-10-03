@@ -422,6 +422,8 @@ try:
 except ImportError:
     pass
 
+print 'log files dir: %s' % LOG_FILES_DIR
+
 # Trying to read DMS version from version file stored
 PRODUCT_VERSION = '1.0'
 try:
