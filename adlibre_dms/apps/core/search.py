@@ -44,18 +44,6 @@ class DMSSearchManager(object):
             dd_range_present = True
         return dd_range_present
 
-    def cleanup_document_keys(self, document_keys):
-        """
-        Cleaning up key/value pairs that have empty values from CouchDB search request
-        """
-        del_list = []
-        for key, value in document_keys.iteritems():
-            if not value:
-                del_list.append(key)
-        for key in del_list:
-            del document_keys[key]
-        return document_keys
-
     def convert_search_res_for_range(self, resp_set, cleaned_document_keys, docrule_id):
         """
         Converts search results from type ANY to type ALL

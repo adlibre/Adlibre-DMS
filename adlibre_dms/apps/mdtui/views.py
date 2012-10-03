@@ -22,7 +22,6 @@ from api.decorators.group_required import group_required
 from dmscouch.models import CouchDocument
 from forms import DocumentUploadForm, BarcodePrintedForm, DocumentSearchOptionsForm
 from core.document_processor import DocumentProcessor
-from core.search import DMSSearchManager
 from doc_codes.models import DocumentTypeRule
 from view_helpers import initIndexesForm
 from view_helpers import processDocumentIndexForm
@@ -37,7 +36,8 @@ from view_helpers import _cleanup_session_var
 from view_helpers import unify_index_info_couch_dates_fmt
 from search_helpers import ranges_validator
 from search_helpers import recognise_dates_in_search
-from search_helpers import search_results_by_date
+from search_helpers import search_documents
+from search_helpers import cleanup_document_keys
 from search_helpers import check_for_secondary_keys_pairs
 from search_helpers import get_mdts_by_names
 from forms_representator import get_mdts_for_docrule
@@ -239,12 +239,11 @@ def search_results(request, step=None, template='mdtui/search.html'):
     """Search Step 3: Search Results"""
     document_keys = None
     docrule_ids = []
-    documents = None
+    documents = []
     warnings = []
     mdts_list = []
     paginated_documents = []
     export = False
-    view = False
     page = request.GET.get('page')
     if not page:
         page = 1
@@ -286,28 +285,17 @@ def search_results(request, step=None, template='mdtui/search.html'):
     )
 
     if document_keys and page==1:
-        manager = DMSSearchManager()
         # turning document_search dict into something useful for the couch request
-        clean_keys = manager.cleanup_document_keys(document_keys)
+        clean_keys = cleanup_document_keys(document_keys)
         ck = ranges_validator(clean_keys)
         cleaned_document_keys = recognise_dates_in_search(ck)
-        # Submitted form with all fields empty
         if cleaned_document_keys:
-            keys = [key for key in cleaned_document_keys.iterkeys()]
-            dd_range_keys = manager.document_date_range_present_in_keys(keys)
-            keys_cnt = cleaned_document_keys.__len__()
-            # Selecting appropriate search method
-            if dd_range_keys and keys_cnt == 2:
-                documents = manager.document_date_range_only_search(cleaned_document_keys, docrule_ids)
-            else:
-                documents = manager.document_date_range_with_keys_search(cleaned_document_keys, docrule_ids)
+            documents = search_documents(cleaned_document_keys, docrule_ids)
         else:
             warnings.append(MDTUI_ERROR_STRINGS['NO_S_KEYS'])
         mdts_list = get_mdts_for_documents(documents)
-        if documents:
-            documents = search_results_by_date(documents)
-            # TODO: maybe! use cache here. Local memory cache may cover this
-            request.session['search_results'] = documents
+        # TODO: maybe! use cache here. Local memory cache may cover this
+        request.session['search_results'] = documents
     else:
         if document_keys:
             # TODO: maybe! use cache here. Local memory cache may cover this
@@ -321,10 +309,8 @@ def search_results(request, step=None, template='mdtui/search.html'):
         csv_response = export_to_csv(document_keys, mdts_list, documents)
         return csv_response
 
-    if not documents:
-        documents = []
+    # Paginator logic
     if document_keys:
-        # Paginator logic
         paginator = Paginator(documents, MUI_SEARCH_PAGINATE)
         try:
             paginated_documents = paginator.page(page)
@@ -343,6 +329,7 @@ def search_results(request, step=None, template='mdtui/search.html'):
                 'warnings': warnings,
                 }
     return render_to_response(template, context, context_instance=RequestContext(request))
+
 
 
 @login_required

@@ -17,6 +17,7 @@ from parallel_keys import ParallelKeysManager
 from mdt_manager import MetaDataTemplateManager
 from dmscouch.models import CouchDocument
 from adlibre.date_converter import date_standardized
+from core.search import DMSSearchManager
 
 log = logging.getLogger('dms.mdtui.views')
 
@@ -24,6 +25,41 @@ DATE_RANGE_CONSTANTS = {
     'min': unicode(date_standardized('1960-01-01')),
     'max': unicode(date_standardized('2100-01-01')),
     }
+
+def search_documents(cleaned_document_keys, docrule_ids):
+    """Main DMS MUI search logic processing method"""
+    documents = []
+    manager = DMSSearchManager()
+
+    # Submitted form with all fields empty
+    if cleaned_document_keys:
+        keys = [key for key in cleaned_document_keys.iterkeys()]
+        dd_range_keys = manager.document_date_range_present_in_keys(keys)
+        keys_cnt = cleaned_document_keys.__len__()
+        # Selecting appropriate search method
+        if dd_range_keys and keys_cnt == 2:
+            documents = manager.document_date_range_only_search(cleaned_document_keys, docrule_ids)
+        else:
+            documents = manager.document_date_range_with_keys_search(cleaned_document_keys, docrule_ids)
+    if documents:
+        documents = search_results_by_date(documents)
+
+    # Not passing CouchDB search results object to template system to avoid bugs, in case it contains no documents
+    if not documents:
+        documents = []
+    return documents
+
+def cleanup_document_keys(document_keys):
+    """
+    Cleaning up key/value pairs that have empty values from CouchDB search request
+    """
+    del_list = []
+    for key, value in document_keys.iteritems():
+        if not value:
+            del_list.append(key)
+    for key in del_list:
+        del document_keys[key]
+    return document_keys
 
 def ranges_validator(cleaned_document_keys):
     """
