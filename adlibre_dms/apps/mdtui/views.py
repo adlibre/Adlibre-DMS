@@ -284,20 +284,20 @@ def search_results(request, step=None, template='mdtui/search.html'):
         'search_results call for : page: "%s", docrule_id: "%s", document_search_dict: "%s"'
         % (page, docrule_ids, document_keys)
     )
+    # turning document_search dict into something useful for the couch request
+    clean_keys = cleanup_document_keys(document_keys)
+    ck = ranges_validator(clean_keys)
+    cleaned_document_keys = recognise_dates_in_search(ck)
 
     cache = get_cache('mui_search_results')
     cache_key = json.dumps(document_keys)
     cached_documents = cache.get(cache_key, None)
     if document_keys and not cached_documents:
-        # turning document_search dict into something useful for the couch request
-        clean_keys = cleanup_document_keys(document_keys)
-        ck = ranges_validator(clean_keys)
-        cleaned_document_keys = recognise_dates_in_search(ck)
+
         if cleaned_document_keys:
             documents = search_documents(cleaned_document_keys, docrule_ids)
         else:
             warnings.append(MDTUI_ERROR_STRINGS['NO_S_KEYS'])
-        # TODO: advanced caching taking user and docrule into account
         cache.set(cache_key, documents, cache_documents_for)
         log.debug('search_results: Got search results with amount of results: %s' % documents.__len__())
     else:
