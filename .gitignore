@@ -11,3 +11,7 @@ adlibre_dms/apps/mdtui/management/commands/cleanup_dms.py
 adlibre_dms/apps/mdtui/management/commands/__init__.py
 
 documents/*.*
+
+documents_prod/*.*
+
+local_settings.py

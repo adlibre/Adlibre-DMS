@@ -23,6 +23,7 @@ from api.decorators.group_required import group_required
 from dmscouch.models import CouchDocument
 from forms import DocumentUploadForm, BarcodePrintedForm, DocumentSearchOptionsForm
 from core.document_processor import DocumentProcessor
+from core.search import DMSSearchManager, DMSSearchQuery
 from doc_codes.models import DocumentTypeRule
 from view_helpers import initIndexesForm
 from view_helpers import processDocumentIndexForm
@@ -37,7 +38,6 @@ from view_helpers import _cleanup_session_var
 from view_helpers import unify_index_info_couch_dates_fmt
 from search_helpers import ranges_validator
 from search_helpers import recognise_dates_in_search
-from search_helpers import search_documents
 from search_helpers import cleanup_document_keys
 from search_helpers import check_for_secondary_keys_pairs
 from search_helpers import get_mdts_by_names
@@ -288,20 +288,22 @@ def search_results(request, step=None, template='mdtui/search.html'):
     clean_keys = cleanup_document_keys(document_keys)
     ck = ranges_validator(clean_keys)
     cleaned_document_keys = recognise_dates_in_search(ck)
+    if not cleaned_document_keys:
+        warnings.append(MDTUI_ERROR_STRINGS['NO_S_KEYS'])
 
     cache = get_cache('mui_search_results')
-    cache_key = json.dumps(document_keys)
+    # Caching by document keys and docrules list, as a cache key
+    cache_key = json.dumps(document_keys)+json.dumps(docrule_ids)
     cached_documents = cache.get(cache_key, None)
-    if document_keys and not cached_documents:
-
+    if cleaned_document_keys and not cached_documents:
         if cleaned_document_keys:
-            documents = search_documents(cleaned_document_keys, docrule_ids)
-        else:
-            warnings.append(MDTUI_ERROR_STRINGS['NO_S_KEYS'])
+            # Using DMS actual search method for this
+            query = DMSSearchQuery({'document_keys':cleaned_document_keys, 'docrules':docrule_ids})
+            documents = DMSSearchManager().search_dms(query).get_documents()
         cache.set(cache_key, documents, cache_documents_for)
         log.debug('search_results: Got search results with amount of results: %s' % documents.__len__())
     else:
-        if document_keys:
+        if cleaned_document_keys:
             documents = cached_documents
             log.debug('search_results: Getting results from cache. Num of results: %s' % documents.__len__())
 
@@ -331,8 +333,6 @@ def search_results(request, step=None, template='mdtui/search.html'):
                 'warnings': warnings,
                 }
     return render_to_response(template, context, context_instance=RequestContext(request))
-
-
 
 @login_required
 def view_pdf(request, code, step, template='mdtui/view.html'):
