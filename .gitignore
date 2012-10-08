@@ -15,3 +15,5 @@ documents/*.*
 documents_prod/*.*
 
 local_settings.py
+
+local_settings.py
