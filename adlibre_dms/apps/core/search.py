@@ -9,26 +9,111 @@ Author: Iurii Garmash
 
 import logging
 
+from operator import itemgetter
+
+from errors import DmsException
 from dmscouch.models import CouchDocument
 from adlibre.date_converter import str_date_to_couch
 
 log = logging.getLogger('dms.core.search')
 
-# TODO: Standardize Search interaction (query/output) with those objects
 class DMSSearchQuery(object):
-    """Defined data to be queried from DMS Search Manager class"""
-    def __init__(self):
-        self.document_keys = None
+    """
+    Defined data to be queried from DMS Search Manager class
 
-class DMSSearchResults(object):
+    it axepts those paramethers:
+
+    - docrule_ids must be an iterable of docrule.pk numbers that range search query.
+        to search in several ids you must have e.g.:
+
+        'docrule_ids' == ['1', '2', '3', ...]
+
+    - document_keys must be a dictionary of secondary keys + optional fixed keys.
+        e.g. to search with document's creation date and some keys document_keys must be like:
+
+        'document_keys' == {
+            u'date': u'02/10/2012',
+            u'end_date': u'01/01/2100',
+            u'Reporting Entity': u'JTG'
+            u'Report Date': (u'08/10/2012', u'16/10/2012')
+        }
+
+    This example will result to 1 search query for documents with key JTG and 1 query for range of dates called
+    'Report Date' with using of 'Creation Date' Specified.
+    Each additional key will add 1 more search query.
+    Search results will be a mixed set of those documents matching query.
+    """
+    def __init__(self, *args):
+        """Dynamicaly initialising set of properties"""
+        kwargs_possible_params = ['document_keys', 'docrules']
+        for param in kwargs_possible_params:
+            if param in args[0]:
+                self.add_property(param, args[0][param])
+            else:
+                self.add_property(param, {})
+
+    def add_property(self, name, value):
+         self.__dict__[name] = value
+
+    def get_document_keys(self):
+        return self.document_keys
+
+    def set_document_keys(self, keys):
+        self.document_keys = keys
+
+    def get_docrules(self):
+        return self.docrules
+
+    def set_docrules(self, rule_ids_list):
+        self.docrules = rule_ids_list
+
+class DMSSearchResponse(object):
     """Defines data to be ruturned by DMS Search Manager class"""
-    def __init__(self):
-        self.documents = None
+    def __init__(self, documents=None):
+        self.documents = documents
+
+    def get_documents(self):
+        return self.documents
+
+    def set_documents(self, documents):
+        self.documents = documents
 
 class DMSSearchManager(object):
     """
     Manager to handle DMS Search Logic
     """
+    ############################## External interaction Methods ###############################
+    def search_dms(self, dms_search_query):
+        """
+        Main DMS search method.
+
+        Works with DMSSearchQuery and DMSSearchResponse
+        """
+        documents = []
+        try:
+            cleaned_document_keys = dms_search_query.get_document_keys()
+            docrule_ids = dms_search_query.get_docrules()
+        except Exception, e:
+            error_message = 'DMS Search error, Insufficient search query data: %s' % e
+            log.error(error_message)
+            raise DmsException(error_message, 400)
+        if cleaned_document_keys:
+            keys = [key for key in cleaned_document_keys.iterkeys()]
+            dd_range_keys = self.document_date_range_present_in_keys(keys)
+            keys_cnt = cleaned_document_keys.__len__()
+            # Selecting appropriate search method
+            if dd_range_keys and keys_cnt == 2:
+                documents = self.document_date_range_only_search(cleaned_document_keys, docrule_ids)
+            else:
+                documents = self.document_date_range_with_keys_search(cleaned_document_keys, docrule_ids)
+        # Not passing CouchDB search results object to template system to avoid bugs, in case it contains no documents
+        if not documents:
+            documents = []
+        # Default Sorting using date (In future we might use variable sort method here)
+        if documents:
+            documents = self.search_results_by_date(documents)
+        return DMSSearchResponse(documents)
+
     ########################################## Internal Methods ###############################
     def document_date_range_present_in_keys(self, keys):
         """Helper to recognise document date range in search keys"""
@@ -108,9 +193,10 @@ class DMSSearchManager(object):
                             req_params = [key, str_date_to_couch(value[1]), docrule_id]
         return req_params
 
-    ############################## External interaction Methods ###############################
-    def method1(self):
-        pass
+    def search_results_by_date(self, documents):
+        """Sorts search results into list by CouchDB document's 'created date'."""
+        newlist = sorted(documents, key=itemgetter('metadata_created_date'))
+        return newlist
 
     ##################################### Search Methods ######################################
     def document_date_range_with_keys_search(self, cleaned_document_keys, docrule_ids):
