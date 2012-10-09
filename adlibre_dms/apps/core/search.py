@@ -165,8 +165,7 @@ class DMSSearchManager(object):
         Takes date range into account.
         """
         req_params = []
-        manager = DMSSearchManager()
-        dd_range = manager.document_date_range_present_in_keys(document_keys)
+        dd_range = self.document_date_range_present_in_keys(document_keys)
         for key, value in document_keys.iteritems():
             if key == pkey:
                 if not date_range:
