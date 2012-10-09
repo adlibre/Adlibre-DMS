@@ -8,6 +8,7 @@ DMS 1.0.5
 + added usage of django-log-file-viewer (version 0.3 for now)
 + minor bugfixes in logging
 = refactoring of search methods
+= changed default search behaviour to match documents with end_date in a date range
 
 DMS 1.0.4
 ---------------------------------
