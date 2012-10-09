@@ -402,17 +402,6 @@ all_docs_range_and_key = {
     u'0': u'Andrew',
 }
 
-# Requests search of BBB-0001 document only specifying date range for it
-date_range_withing_2_ranges_1 = {
-    u'2_to': [u'03/04/2012'],
-    u'end_date': [u'05/04/2012'],
-    u'2_from': [u'01/04/2012'],
-    u'1': [u''],
-    u'0': [u''],
-    u'3': [u''],
-    u'date': [u'01/04/2012'],
-}
-
 
 # Proper date range with keys search
 date_range_with_keys_3_docs = {
@@ -1908,6 +1897,16 @@ class MDTUI(TestCase):
         Specifying another date range combinations (secondary keys of "date" type)
         does not break this indexing date filtering.
         """
+        # Requests search of BBB-0001 document only specifying date range for it
+        date_range_withing_2_ranges_1 = {
+            u'2_to': [u'02/04/2012'],
+            u'end_date': [u'05/04/2012'],
+            u'2_from': [u'01/04/2012'],
+            u'1': [u''],
+            u'0': [u''],
+            u'3': [u''],
+            u'date': [u'01/04/2012'],
+        }
         # setting docrule
         url = reverse('mdtui-search-type')
         data = {'docrule': test_mdt_docrule_id2}
@@ -2899,6 +2898,70 @@ class MDTUI(TestCase):
 #        self.assertNotContains(response, 'Page')
 #        self.assertNotContains(response, '/mdtui/search/results?page=1">1') # Paginator page one present
 #        self.assertNotContains(response, 'Next') # Paginator page next
+
+    def test_75_search_includes_ending_date_range_variable(self):
+        """
+        Refs bug #840 Search date range with one date bug
+
+        checks that search is including document with finish date range date.
+
+        only one record in a range and creation date is one date.. then records of this, finish range date, are found...
+        bug results example:
+        e.g. search for CON creation date 10/08/12 - 11/08/12 no records for date 11/08/12,
+        but if you select 10/08/12 - 12/08/12 you find it.
+        """
+        search_MDT_5_date_range_end_date =  {
+            u'date': u'01/03/2012',
+            u'end_date': u'10/03/2012',
+            u'0': u'Andrew',
+        }
+        search_MDT_5_date_range_end_date2 =  {
+            u'date': u'01/03/2012',
+            u'end_date': u'09/03/2012',
+            u'0': u'Andrew',
+        }
+        url = reverse('mdtui-search-type')
+        data = {'mdt': test_mdt_id_5}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        url = reverse('mdtui-search-options')
+        # Getting required indexes id's
+        response = self.client.get(url)
+        # Searching date range for this test
+        response = self.client.post(url, search_MDT_5_date_range_end_date)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        # Response is ok and only one doc persists there
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, MDTUI_ERROR_STRINGS['NO_S_KEYS'])
+        # No documents for any of docrules found in response
+        self.assertNotContains(response, 'BBB-')
+        self.assertNotContains(response, 'CCC-0001')
+        self.assertNotContains(response, 'ADL-')
+        self.assertNotContains(response, 'CCC-0002')
+
+        url = reverse('mdtui-search-type')
+        data = {'mdt': test_mdt_id_5}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        url = reverse('mdtui-search-options')
+        # Getting required indexes id's
+        response = self.client.get(url)
+        # Searching date range for this test
+        response = self.client.post(url, search_MDT_5_date_range_end_date2)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        # Response is ok and only one doc persists there
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, MDTUI_ERROR_STRINGS['NO_S_KEYS'])
+        # No documents for any of docrules found in response
+        self.assertNotContains(response, 'BBB-')
+        self.assertNotContains(response, 'CCC-0001')
+        self.assertNotContains(response, 'ADL-')
+        self.assertNotContains(response, 'CCC-0002')
+
 
     def test_z_cleanup(self):
         """

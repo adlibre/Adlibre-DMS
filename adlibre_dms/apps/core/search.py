@@ -8,8 +8,11 @@ Author: Iurii Garmash
 """
 
 import logging
+import datetime
 
 from operator import itemgetter
+
+from django.conf import settings
 
 from errors import DmsException
 from dmscouch.models import CouchDocument
@@ -176,21 +179,33 @@ class DMSSearchManager(object):
                         if not end:
                             req_params = [key, value, docrule_id, str_date_to_couch(document_keys["date"])]
                         else:
-                            req_params = [key, value, docrule_id, str_date_to_couch(document_keys["end_date"])]
+                            end_date = self.alter_end_date(document_keys["end_date"])
+                            req_params = [key, value, docrule_id, str_date_to_couch(end_date)]
                 else:
                     # Assuming date range is our date tuple
                     # Creating DB request for document dates (or without document dates) range
+                    # Adding 1 day to date range finish to complu CouchDB search conditions and include finish date results.
                     if not end:
                         if dd_range:
                             req_params = [key, str_date_to_couch(value[0]), docrule_id, str_date_to_couch(document_keys["date"])]
                         else:
                             req_params = [key, str_date_to_couch(value[0]), docrule_id]
                     else:
+                        end_key_date = self.alter_end_date(value[1])
                         if dd_range:
-                            req_params = [key, str_date_to_couch(value[1]), docrule_id, str_date_to_couch(document_keys["end_date"])]
+                            end_date = self.alter_end_date(document_keys["end_date"])
+                            req_params = [key, str_date_to_couch(end_key_date), docrule_id, str_date_to_couch(end_date)]
                         else:
-                            req_params = [key, str_date_to_couch(value[1]), docrule_id]
+                            req_params = [key, str_date_to_couch(end_key_date), docrule_id]
         return req_params
+
+    def alter_end_date(self, date_str):
+        """Method to override default Couchdb search capabilities about dates, not to include last range result"""
+        date = datetime.datetime.strptime(date_str, settings.DATE_FORMAT)
+        timedelta = datetime.timedelta(days=1)
+        new_date = date + timedelta
+        new_str_date = datetime.datetime.strftime(new_date, settings.DATE_FORMAT)
+        return new_str_date
 
     def search_results_by_date(self, documents):
         """Sorts search results into list by CouchDB document's 'created date'."""
