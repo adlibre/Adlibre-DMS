@@ -1,5 +1,5 @@
 """
-Module: MDT import management command for Adlibre DMS
+Module: MDT export management command for Adlibre DMS
 Project: Adlibre DMS
 Copyright: Adlibre Pty Ltd 2012
 License: See LICENSE for license information
