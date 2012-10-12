@@ -277,17 +277,18 @@ class DMSSearchManager(object):
         startkey = [None,]
         endkey = [None,]
         for docrule_id in docrule_ids:
-            startkey = [str_date_to_couch(cleaned_document_keys["date"]), docrule_id]
-            endkey = [str_date_to_couch(cleaned_document_keys["end_date"]), docrule_id]
+            startkey = [docrule_id, str_date_to_couch(cleaned_document_keys["date"])]
+            endkey = [docrule_id, str_date_to_couch(cleaned_document_keys["end_date"])]
             # Getting all documents withing this date range
             all_docs = CouchDocument.view('dmscouch/search_date', startkey=startkey, endkey=endkey)
-            # Filtering by docrule_ids and getting docs
-            doc_list = []
-            for document in all_docs:
-                if document['metadata_doc_type_rule_id'] in docrule_ids:
-                    doc_list.append(document.get_id)
+#            # Filtering by docrule_ids and getting docs
+#            doc_list = []
+#            for document in all_docs:
+#                if document['metadata_doc_type_rule_id'] in docrule_ids:
+#                    doc_list.append(document.get_id)
             # Appending to fetch docs list if not already there
-            for doc_name in doc_list:
+            for doc in all_docs:
+                doc_name = doc.get_id
                 if not doc_name in resp_list:
                     resp_list.append(doc_name)
         log.debug(
