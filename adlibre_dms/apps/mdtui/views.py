@@ -239,7 +239,7 @@ def search_results(request, step=None, template='mdtui/search.html'):
     """Search Step 3: Search Results"""
     document_keys = None
     docrule_ids = []
-    documents = []
+    document_names = []
     warnings = []
     mdts_list = []
     paginated_documents = []
@@ -298,24 +298,30 @@ def search_results(request, step=None, template='mdtui/search.html'):
     if cleaned_document_keys and not cached_documents:
         if cleaned_document_keys:
             # Using DMS actual search method for this
-            query = DMSSearchQuery({'document_keys':cleaned_document_keys, 'docrules':docrule_ids})
-            documents = DMSSearchManager().search_dms(query).get_documents()
-        cache.set(cache_key, documents, cache_documents_for)
-        log.debug('search_results: Got search results with amount of results: %s' % documents.__len__())
+            query = DMSSearchQuery({
+                'document_keys':cleaned_document_keys,
+                'docrules':docrule_ids,
+                'only_names': True,
+            })
+            document_names = DMSSearchManager().search_dms(query).get_document_names()
+        cache.set(cache_key, document_names, cache_documents_for)
+        log.debug('search_results: Got search results with amount of results: %s' % document_names)
     else:
         if cleaned_document_keys:
-            documents = cached_documents
-            log.debug('search_results: Getting results from cache. Num of results: %s' % documents.__len__())
+            document_names = cached_documents
+            log.debug('search_results: Getting results from cache. Num of results: %s' % document_names)
 
     # Produces a CSV file from search results
-    if (documents and step == 'export') or (documents and export):
+    if (document_names and step == 'export') or (document_names and export):
         log.debug('search_results exporting found documents to CSV')
+        # Getting all the documents from
+        documents = DMSSearchManager().get_found_documents(document_names)
         csv_response = export_to_csv(document_keys, mdts_list, documents)
         return csv_response
 
+    # Paginating list of documents and retrieving only required one's
     if document_keys:
-        mdts_list = get_mdts_for_documents(documents)
-        paginator = Paginator(documents, MUI_SEARCH_PAGINATE)
+        paginator = Paginator(document_names, MUI_SEARCH_PAGINATE)
         try:
             paginated_documents = paginator.page(page)
         except PageNotAnInteger:
@@ -324,6 +330,9 @@ def search_results(request, step=None, template='mdtui/search.html'):
         except EmptyPage:
             # If page is out of range (e.g. 9999), deliver last page of results.
             paginated_documents = paginator.page(paginator.num_pages)
+        paginated_documents_objects = DMSSearchManager().get_found_documents(paginated_documents.object_list)
+        paginated_documents.object_list = paginated_documents_objects
+        mdts_list = get_mdts_for_documents(paginated_documents_objects)
 
     context = { 'step': step,
                 'paginated_documents': paginated_documents,
