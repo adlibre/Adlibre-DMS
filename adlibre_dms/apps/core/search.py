@@ -20,6 +20,8 @@ from adlibre.date_converter import str_date_to_couch
 
 log = logging.getLogger('dms.core.search')
 
+MUI_SEARCH_PAGINATE = getattr(settings, 'MUI_SEARCH_PAGINATE', 20)
+
 class DMSSearchQuery(object):
     """
     Defined data to be queried from DMS Search Manager class
@@ -48,7 +50,7 @@ class DMSSearchQuery(object):
     """
     def __init__(self, *args):
         """Dynamicaly initialising set of properties"""
-        kwargs_possible_params = ['document_keys', 'docrules']
+        kwargs_possible_params = ['document_keys', 'docrules', 'only_names']
         for param in kwargs_possible_params:
             if param in args[0]:
                 self.add_property(param, args[0][param])
@@ -72,11 +74,23 @@ class DMSSearchQuery(object):
 
 class DMSSearchResponse(object):
     """Defines data to be ruturned by DMS Search Manager class"""
-    def __init__(self, documents=None):
-        self.documents = documents
+    def __init__(self, *args):
+        """Dynamicaly initialising set of properties"""
+        kwargs_possible_params = ['documents', 'document_names']
+        for param in kwargs_possible_params:
+            if param in args[0]:
+                self.add_property(param, args[0][param])
+            else:
+                self.add_property(param, None)
+
+    def add_property(self, name, value):
+        self.__dict__[name] = value
 
     def get_documents(self):
         return self.documents
+
+    def get_document_names(self):
+        return self.document_names
 
     def set_documents(self, documents):
         self.documents = documents
@@ -92,7 +106,7 @@ class DMSSearchManager(object):
 
         Works with DMSSearchQuery and DMSSearchResponse
         """
-        documents = []
+        document_names = []
         try:
             cleaned_document_keys = dms_search_query.get_document_keys()
             docrule_ids = dms_search_query.get_docrules()
@@ -106,16 +120,21 @@ class DMSSearchManager(object):
             keys_cnt = cleaned_document_keys.__len__()
             # Selecting appropriate search method
             if dd_range_keys and keys_cnt == 2:
-                documents = self.document_date_range_only_search(cleaned_document_keys, docrule_ids)
+                document_names = self.document_date_range_only_search(cleaned_document_keys, docrule_ids)
             else:
-                documents = self.document_date_range_with_keys_search(cleaned_document_keys, docrule_ids)
+                document_names = self.document_date_range_with_keys_search(cleaned_document_keys, docrule_ids)
+        # Search request finished if we need only names
+        if dms_search_query.only_names:
+            return DMSSearchResponse({'document_names': document_names})
+        # Actually retrieving documents
+        documents = self.get_found_documents(document_names)
         # Not passing CouchDB search results object to template system to avoid bugs, in case it contains no documents
         if not documents:
             documents = []
         # Default Sorting using date (In future we might use variable sort method here)
         if documents:
             documents = self.search_results_by_date(documents)
-        return DMSSearchResponse(documents)
+        return DMSSearchResponse({'documents':documents})
 
     ########################################## Internal Methods ###############################
     def document_date_range_present_in_keys(self, keys):
@@ -240,24 +259,17 @@ class DMSSearchManager(object):
                             resp_set[docrule_id] = [search_res]
                             # Extracting documents for each CouchDB response set.
             docs_list[docrule_id] = self.convert_search_res_for_range(resp_set, cleaned_document_keys, docrule_id)
-            # Listing all documents to retrieve and getting them
+        # Listing all documents to retrieve and getting them
         retrieve_docs = []
         for d_list in docs_list.itervalues():
             if d_list:
                 for item in d_list:
                     retrieve_docs.append(item)
-        documents = CouchDocument.view('_all_docs', keys=retrieve_docs, include_docs=True)
-        if documents:
-            log.debug(
-                'Search results by date range with additional keys: "%s", docrule: "%s", documents: "%s"' %
-                (cleaned_document_keys, docrule_ids, map(lambda doc: doc["id"], documents))
-            )
-        else:
-            log.debug(
-                'Search results by date range with additional keys: "%s", docrule: "%s", documents: None' %
-                (cleaned_document_keys, docrule_ids)
-            )
-        return documents
+        log.debug(
+            'Search results by date range with additional keys: "%s", docrule: "%s", documents: "%s"' %
+            (cleaned_document_keys, docrule_ids, map(lambda doc: doc, retrieve_docs))
+        )
+        return retrieve_docs
 
     def document_date_range_only_search(self, cleaned_document_keys, docrule_ids):
         log.debug('Date range search only')
@@ -274,20 +286,22 @@ class DMSSearchManager(object):
             for document in all_docs:
                 if document['metadata_doc_type_rule_id'] in docrule_ids:
                     doc_list.append(document.get_id)
-                    # Appending to fetch docs list if not already there
+            # Appending to fetch docs list if not already there
             for doc_name in doc_list:
                 if not doc_name in resp_list:
                     resp_list.append(doc_name)
+        log.debug(
+            'Search results by date range: from: "%s", to: "%s", docrules: "%s", documents: "%s"' %
+            (startkey[0], endkey[0], docrule_ids, resp_list)
+        )
+        return resp_list
 
-        documents = CouchDocument.view('_all_docs', keys=resp_list, include_docs=True )
-        if documents:
-            log.debug(
-                'Search results by date range: from: "%s", to: "%s", docrules: "%s", documents: "%s"' %
-                (startkey[0], endkey[0], docrule_ids, map(lambda doc: doc["id"], documents))
-            )
-        else:
-            log.debug(
-                'Search results by date range: from: "%s", to: "%s", docrules: "%s", documents: None' %
-                (startkey[0], endkey[0], docrule_ids)
-            )
+    def get_found_documents(self, document_names_list):
+        """
+        Method to retrieve documents index data by document names list.
+
+        @param document_names_list: list of document id's, e.g. ['DOC0001', 'MAS0001', '...' ]
+        @return: CouchDB documents list.
+        """
+        documents = CouchDocument.view('_all_docs', keys=document_names_list, include_docs=True )
         return documents
