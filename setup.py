@@ -123,7 +123,7 @@ setup(name='adlibre_dms',
             # Deployment
             'flup==1.0.3.dev-20110405',
             # Logging
-            'django-log-file-viewer'
+            'django-log-file-viewer==0.4'
     ],
     dependency_links = [
         "https://github.com/adlibre/django-bcp/tarball/master#egg=django-bcp",
