@@ -18,7 +18,6 @@ from piston.handler import BaseHandler
 from piston.utils import rc
 
 from django.utils.decorators import method_decorator
-from django.core.files.uploadedfile import UploadedFile
 from api.decorators.auth import logged_in_or_basicauth
 from api.decorators.group_required import group_required
 
@@ -94,21 +93,10 @@ class FileHandler(BaseFileHandler):
         tag_string = request.PUT.get('tag_string', None)
         remove_tag_string = request.PUT.get('remove_tag_string', None)
         new_name = request.PUT.get('new_name', None)
-        # TODO: consider if we need some new place for this...
-        # MAYBE we need to make it part of the update sequence here...
-        # Renames current document name here.
         try:
             processor = DocumentProcessor()
-            if new_name:
-                renaming_doc = processor.read(request, code, extension=suggested_format)
-                if new_name != renaming_doc.get_filename():
-                    ufile = UploadedFile(renaming_doc.get_file_obj(), new_name, content_type=renaming_doc.get_mimetype())
-                    document = processor.create(request, ufile)
-                    if not processor.errors:
-                        processor.delete(request, renaming_doc.get_filename(), extension=suggested_format)
-            else:
-                document = processor.update(request, code, tag_string=tag_string, remove_tag_string=remove_tag_string,
-                        extension=suggested_format) #FIXME hashcode missing?
+            document = processor.update(request, code, tag_string=tag_string, remove_tag_string=remove_tag_string,
+                    extension=suggested_format, options={'new_name': new_name}) #FIXME hashcode missing?
             if len(processor.errors) > 0:
                 log.error('FileHandler.update manager errors %s' % processor.errors)
                 if settings.DEBUG:
@@ -128,7 +116,7 @@ class FileHandler(BaseFileHandler):
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
     @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def delete(self, request, code, suggested_format=None):
-    # FIXME, should return 404 if file not found, 400 if no docrule exists.
+    # FIXME: should return 404 if file not found, 400 if no docrule exists.
     #        full_filename = request.REQUEST.get('full_filename', None) # what is this?
     #        parent_directory = request.REQUEST.get('parent_directory', None) # FIXME! Used by no doccode!
         revision, hashcode, extra = self._get_info(request)
