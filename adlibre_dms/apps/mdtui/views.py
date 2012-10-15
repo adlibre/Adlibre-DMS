@@ -568,40 +568,29 @@ def indexing_details(request, step=None, template='mdtui/indexing.html'):
 @group_required(SEC_GROUP_NAMES['index'])
 def indexing_source(request, step=None, template='mdtui/indexing.html'):
     """Indexing: Step 3: Upload File / Associate File / Print Barcode"""
-    document_keys = None
     context = {}
     warnings = []
-    index_info = None
-    docrule = None
-    barcode = None
     valid_call = True
-
-    # Check session variables
-    try:
-        document_keys = request.session["document_keys_dict"]
-    except KeyError:
-        valid_call = False
-        if not MDTUI_ERROR_STRINGS['NO_INDEX'] in warnings:
-            warnings.append(MDTUI_ERROR_STRINGS['NO_INDEX'])
-
-    try:
-        barcode = request.session['barcode']
-    except KeyError:
-        valid_call = False
-        if not MDTUI_ERROR_STRINGS['NO_INDEX'] in warnings:
-            warnings.append(MDTUI_ERROR_STRINGS['NO_INDEX'])
-
-    try:
-        index_info = request.session["document_keys_dict"]
-    except KeyError:
-        valid_call = False
-        warnings.append(MDTUI_ERROR_STRINGS['NO_S_KEYS'])
-
-    try:
-        docrule = request.session['indexing_docrule_id']
-    except KeyError:
-        valid_call = False
-        warnings.append(MDTUI_ERROR_STRINGS['NO_DOCRULE'])
+    temp_vars = {}
+    # Check session variables, init context and add proper user warnings
+    for var_name, context_var, action in [
+        ('document_keys', "document_keys_dict", 'NO_INDEX'),
+        ('barcode', 'barcode', 'NO_INDEX'),
+        ('index_info', 'document_keys_dict', 'NO_S_KEYS'),
+        ('docrule', 'indexing_docrule_id', 'NO_DOCRULE'),
+    ]:
+        try:
+            temp_vars[var_name] = None # Make sure it will definitely be there (Proper init)
+            temp_var = request.session[context_var]
+            temp_vars[var_name] = temp_var
+        except KeyError:
+            valid_call = False
+            if not MDTUI_ERROR_STRINGS[action] in warnings:
+                warnings.append(MDTUI_ERROR_STRINGS[action])
+    document_keys = temp_vars['document_keys']
+    barcode = temp_vars['barcode']
+    index_info = temp_vars['index_info']
+    docrule = temp_vars['docrule']
 
     # Init Forms correctly depending on url posted
     if request.GET.get('uploaded') is None:
