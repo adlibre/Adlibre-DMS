@@ -10,6 +10,8 @@ Author: Iurii Garmash
 import os
 import logging
 
+from django.core.files.uploadedfile import UploadedFile
+
 from dms_plugins import pluginpoints
 from dms_plugins.operator import PluginsOperator
 
@@ -121,11 +123,19 @@ class DocumentProcessor(object):
         log.debug('UPDATE Document %s, tag_string: %s, remove_tag_string: %s, extension: %s, options: %s'
                   % (document_name, tag_string, remove_tag_string, extension, options) )
         # Context init
-        new_indexes = None
-        if options:
-            if 'new_indexes' in options:
-                new_indexes = options['new_indexes']
+        new_indexes = self.check_options_for_option('new_indexes', options)
+        new_name = self.check_options_for_option('new_name', options)
 
+        # Sequence to make a new name for file.
+        # TODO: thui deletes all old revisions, instead of real rename...
+        if new_name:
+            renaming_doc = self.read(request, document_name, extension=extension)
+            if new_name != renaming_doc.get_filename():
+                ufile = UploadedFile(renaming_doc.get_file_obj(), new_name, content_type=renaming_doc.get_mimetype())
+                document = self.create(request, ufile)
+                if not self.errors:
+                    self.delete(request, renaming_doc.get_filename(), extension=extension)
+                return document
         doc = Document()
         operator = PluginsOperator()
         doc.set_filename(document_name)
@@ -171,3 +181,11 @@ class DocumentProcessor(object):
             return True
         else:
             return False
+
+    def check_options_for_option(self, option, options, default=None):
+        """Redundant checker if options for method has this value"""
+        response = default
+        if options:
+            if option in options:
+                response = options[option]
+        return response
