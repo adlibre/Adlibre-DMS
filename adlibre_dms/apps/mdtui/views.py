@@ -660,13 +660,10 @@ def indexing_finished(request, step=None, template='mdtui/indexing.html'):
                         ('barcode', 'barcode'),
                         ('docrule_id', 'indexing_docrule_id') ):
         if item in request.session:
-            try:
-                context.update({name: request.session[item],})
-            except KeyError:
-                pass
+            context.update({name: request.session[item],})
 
-    log.debug('indexing_finished called with: step: "%s", document_keys_dict: "%s",' %
-              (step, context['document_keys']))
+    log.debug('indexing_finished called with: step: "%s", context: "%s",' %
+              (step, context))
 
     # Document uploaded forget everything
     cleanup_indexing_session(request)
