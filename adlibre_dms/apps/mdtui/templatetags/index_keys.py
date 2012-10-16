@@ -84,7 +84,7 @@ class ConvertDocrule(template.Node):
             except: return 'None'
             docrule = DocumentTypeRuleManagerInstance.get_docrule_by_id(item)
             value = docrule.get_title()
-            value = unicode(value)[1].capitalize()
+            value = unicode(value).capitalize()
             return value
         except template.VariableDoesNotExist:
             return ''
@@ -181,7 +181,7 @@ def get_used_in_search_mdt(context):
         result = u''
         if session:
             for mdt in session['mdts']:
-                result += unicode(session['mdts'][mdt]['mdt_id'])[1].capitalize()
+                result += unicode(session['mdts'][mdt]['mdt_id']).capitalize()
         return result
     except Exception, e:
         print e
