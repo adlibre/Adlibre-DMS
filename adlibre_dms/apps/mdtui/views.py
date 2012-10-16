@@ -645,6 +645,11 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
 
     return render_to_response(template, context, context_instance=RequestContext(request))
 
+@login_required
+@group_required(SEC_GROUP_NAMES['index'])
+def indexing_edit_file_revisions(request, step=None, template='mdtui/indexing.html'):
+    context = {'step': step }
+    return render(request, template, context)
 
 @login_required
 @group_required(SEC_GROUP_NAMES['index'])
