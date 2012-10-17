@@ -87,10 +87,10 @@ class DMSSearchResponse(object):
         self.__dict__[name] = value
 
     def get_documents(self):
-        return self.documents
+        return self.__dict__['documents']
 
     def get_document_names(self):
-        return self.document_names
+        return self.__dict__['document_names']
 
     def set_documents(self, documents):
         self.documents = documents
@@ -281,11 +281,6 @@ class DMSSearchManager(object):
             endkey = [docrule_id, str_date_to_couch(cleaned_document_keys["end_date"])]
             # Getting all documents withing this date range
             all_docs = CouchDocument.view('dmscouch/search_date', startkey=startkey, endkey=endkey)
-#            # Filtering by docrule_ids and getting docs
-#            doc_list = []
-#            for document in all_docs:
-#                if document['metadata_doc_type_rule_id'] in docrule_ids:
-#                    doc_list.append(document.get_id)
             # Appending to fetch docs list if not already there
             for doc in all_docs:
                 doc_name = doc.get_id

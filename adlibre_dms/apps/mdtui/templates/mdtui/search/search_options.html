@@ -1,5 +1,6 @@
 {% load i18n %}
 {% load index_keys %}
+{% load search_options_tags %}
 <form class="form-horizontal" action="{{ request.path }}" method="post">
     {% csrf_token %}
     <fieldset>
@@ -7,8 +8,15 @@
         <br />
         {# SEARCH INDEX DETAILS FORM RENDERING #}
         {% for field in form %}
-            {% include 'mdtui/secondary_index_form_field.html' %}
+            {% if field.name != "date" %} {% if field.name != "end_date" %}
+                {% include 'mdtui/secondary_index_form_field.html' %}
+            {% endif %}{% endif %}
         {% endfor %}
+        {# Manually adding those 2 base fields #}
+        {% context_set_filed "date" %}
+            {% include 'mdtui/secondary_index_form_field.html' %}
+        {% context_set_filed "end_date" %}
+            {% include 'mdtui/secondary_index_form_field.html' %}
         <input id="id_export_results" type="hidden" name="export_results">
     </fieldset>
 

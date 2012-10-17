@@ -436,7 +436,7 @@ DATE_FORMAT = "%d/%m/%Y"
 DATE_COUCHDB_FORMAT = "%Y-%m-%dT00:00:00Z"
 
 # Pagination of MUI search results to be overridden if needed.
-MUI_SEARCH_PAGINATE = 2
+MUI_SEARCH_PAGINATE = 20
 MUI_SEARCH_PAGINATOR_PAGE_SEPARATOR = '...'
 
 DEMO = True
