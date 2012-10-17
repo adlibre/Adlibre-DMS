@@ -1026,10 +1026,10 @@ class MDTUI(TestCase):
         self.assertContains(response, 'CCC-0002')
         self.assertContains(response, m2_doc1_dict['description'])
         # context processors provide Document Type names
-        self.assertContains(response, "Test Doc Type 3")
-        self.assertContains(response, "Test Doc Type 2")
+        self.assertContains(response, "Test doc type 3")
+        self.assertContains(response, "Test doc type 3")
         # Contains only apropriate content types
-        self.assertNotContains(response, "Adlibre Invoices")
+        self.assertNotContains(response, "Adlibre invoices")
 
     def test_19_search_docrule_by_key_proper(self):
         """
@@ -1060,7 +1060,7 @@ class MDTUI(TestCase):
         # document found
         self.assertContains(response, doc1)
         # context processors provide docrule name
-        self.assertContains(response, "Adlibre Invoices")
+        self.assertContains(response, "Adlibre invoices")
 
     def test_20_search_by_date_improper(self):
         """
@@ -1281,7 +1281,7 @@ class MDTUI(TestCase):
         self.assertContains(response, 'ADL-0003')
         self.assertContains(response, doc3_dict['description'])
         # Context processors provide docrule name
-        self.assertContains(response, "Adlibre Invoices")
+        self.assertContains(response, "Adlibre invoices")
         # 3 documents secondary keys present
         for doc in [doc1_dict, doc2_dict, doc3_dict]:
             for key in doc.iterkeys():
@@ -1328,7 +1328,7 @@ class MDTUI(TestCase):
         self.assertContains(response, doc2)
         self.assertContains(response, doc2_dict['description'])
         # Context processors provide docrule name
-        self.assertContains(response, "Adlibre Invoices")
+        self.assertContains(response, "Adlibre invoices")
         # 2 documents secondary keys present
         for doc in [doc1_dict, doc2_dict]:
             for key in doc.iterkeys():
@@ -1379,7 +1379,7 @@ class MDTUI(TestCase):
         self.assertNotContains(response, doc1)
         self.assertNotContains(response, doc2)
         # Context processors provide docrule name
-        self.assertContains(response, "Adlibre Invoices")
+        self.assertContains(response, "Adlibre invoices")
         # 2 first documents secondary keys NOT present
         for doc in [doc1_dict, doc2_dict]:
             for key in doc.iterkeys():
@@ -2444,7 +2444,8 @@ class MDTUI(TestCase):
         # Getting required indexes id's
         response = self.client.get(url)
         # MDT5 name present in response (step name header)
-        self.assertContains(response, test_mdt_id_5_name+' Search Options')
+        mdt_name = test_mdt_id_5_name.capitalize()
+        self.assertContains(response, mdt_name+' Search Options')
         # Searching date range with unique doc1 keys
         response = self.client.post(url, search_MDT_5)
         self.assertEqual(response.status_code, 302)
@@ -2453,7 +2454,7 @@ class MDTUI(TestCase):
         # Response is ok and no warning exists there
         self.assertEqual(response.status_code, 200)
         # MDT5 name present in response (step name header)
-        self.assertContains(response, test_mdt_id_5_name+' Results')
+        self.assertContains(response, test_mdt_id_5_name.capitalize()+' Results')
 
     def test_64_docrule_search_contains_docrule_name_in_header(self):
         """
@@ -2471,7 +2472,7 @@ class MDTUI(TestCase):
         # Response is ok and no warning exists there
         self.assertEqual(response.status_code, 200)
         # Response contains proper step header
-        self.assertContains(response, 'Adlibre Invoices Search Options')
+        self.assertContains(response, 'Adlibre invoices Search Options')
         url = reverse('mdtui-search-options')
         # Searching by Document 1,2,3 date range
         # Feel free to replace it with any other search
@@ -2482,7 +2483,7 @@ class MDTUI(TestCase):
         response = self.client.get(new_url)
         # Response contains proper step header
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Adlibre Invoices Results")
+        self.assertContains(response, "Adlibre invoices Results")
 
     def test_65_edit_document_indexes_access(self):
         """

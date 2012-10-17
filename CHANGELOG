@@ -4,6 +4,7 @@ DMS 1.0.6
 ---------------------------------
 + Capitalization of MUI first letters in title name of docrule or mdt.
 = refactoring api methods to meet new core requirements.
+* Fixed field order to meet new search options form requirements.
 
 DMS 1.0.5
 ---------------------------------
