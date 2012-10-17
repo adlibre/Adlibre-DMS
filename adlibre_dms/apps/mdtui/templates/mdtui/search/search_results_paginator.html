@@ -1,5 +1,4 @@
 {% load i18n %}
-{% load paginator_tags %}
 <p>Showing {{ paginated_documents.paginator.num_pages }} of {{ paginated_documents.paginator.count }} results matching query. {{ paginated_documents }}</p>
 <div class="pagination">
     <ul>
@@ -12,6 +11,7 @@
         {% endfor %}
         {% else %}
             {# Creating rebuild_paginated variable #}
+            {% load paginator_tags %}
             {% pages_sequence paginated_documents %}
             {% if rebuild_paginated %}
                 {% for page_num in rebuild_paginated %}
