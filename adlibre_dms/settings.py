@@ -404,10 +404,10 @@ else:
 LOGIN_REDIRECT_URL = '/'
 
 # django-log-file-viewer setttings
-if not DEBUG:
-    LOG_FILES_DIR = os.path.join(PROJECT_PATH, '..', '..', '..', '..', 'log')
-else:
-    LOG_FILES_DIR = os.path.join(PROJECT_PATH, '..', 'log')
+#if not DEBUG:
+#    LOG_FILES_DIR = os.path.join(PROJECT_PATH, '..', '..', '..', '..', 'log')
+#else:
+LOG_FILES_DIR = os.path.join(PROJECT_PATH, '..', 'log')
 LOG_FILES_RE = '(?P<date>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3})\s\[(?P<type>[A-Z]+)\]\s(?P<message>.+)'
 LOG_FILES_PAGINATE_LINES = 20
 
@@ -436,7 +436,7 @@ DATE_FORMAT = "%d/%m/%Y"
 DATE_COUCHDB_FORMAT = "%Y-%m-%dT00:00:00Z"
 
 # Pagination of MUI search results to be overridden if needed.
-MUI_SEARCH_PAGINATE = 20
+MUI_SEARCH_PAGINATE = 2
 MUI_SEARCH_PAGINATOR_PAGE_SEPARATOR = '...'
 
 DEMO = True
