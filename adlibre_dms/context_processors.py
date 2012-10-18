@@ -33,3 +33,9 @@ def date_format(context):
 def datetime_format(context):
     """ Returns Context Variable Containing Datetime format currently used """
     return {'DATETIME_FORMAT': settings.DATETIME_FORMAT.replace('%','')}
+
+def stage_variable(context):
+    """ Determine if we currently running on stage production """
+    return {'STAGE': settings.STAGE_KEYWORD}
+
+

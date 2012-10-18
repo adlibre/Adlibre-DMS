@@ -89,6 +89,11 @@
         .input-xxlarge {
             width: 450px;
         }
+        {% if STAGE %}
+        body {
+            background-color: #fafad2;
+        }
+        {% endif %}
     </style>
     <link href="{{ STATIC_URL }}css/dms-icons.css" rel="stylesheet">
     {% endblock %}
