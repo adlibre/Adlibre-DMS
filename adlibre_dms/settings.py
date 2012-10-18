@@ -154,6 +154,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'adlibre_dms.context_processors.product_version',
     'adlibre_dms.context_processors.date_format',
     'adlibre_dms.context_processors.datetime_format',
+    'adlibre_dms.context_processors.stage_variable',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -441,6 +442,7 @@ MUI_SEARCH_PAGINATOR_PAGE_SEPARATOR = '...'
 
 DEMO = True
 NEW_SYSTEM = False
+STAGE_KEYWORD = False
 
 # This will import the local_settings in our virtual_env subdir next to manage.py.
 try:
