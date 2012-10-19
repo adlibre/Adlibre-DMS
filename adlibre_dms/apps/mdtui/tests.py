@@ -2963,6 +2963,27 @@ class MDTUI(TestCase):
         self.assertNotContains(response, 'ADL-')
         self.assertNotContains(response, 'CCC-0002')
 
+    def test_76_indexing_date_rendering(self):
+        """Refs #786 Checking if 'Creation date' Rendered properly in both index and search."""
+        # Testing search results for proper rendering
+        url = reverse('mdtui-search-type')
+        data = {'docrule': test_mdt_docrule_id}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        url = reverse('mdtui-search-options')
+        # Searching by Document 1,2,3 date range
+        data = date_range_none
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        self.assertEqual(response.status_code, 200)
+        # No errors appeared
+        self.assertNotContains(response, "You have not defined Document Searching Options")
+        # Real data check
+        self.assertContains(response, """Creation Date: (from: 30/03/2012 to: 31/03/2012)""")
+        self.assertNotContains(response, "end_date")
+        self.assertNotContains(response, "Undefined")
 
     def test_z_cleanup(self):
         """

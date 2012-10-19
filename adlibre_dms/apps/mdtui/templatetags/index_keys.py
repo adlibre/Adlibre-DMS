@@ -39,10 +39,16 @@ class ProvideLiElement(template.Node):
             item = self.key_item.resolve(context)
             dict = self.keys_dict.resolve(context)
             value = dict[item]
+            # Special rendering for 'date' variable in search
             if item == u'date':
-                item = u'Creation Date'
-            if item == u'end_date':
-                item = u'Creation Date to'
+                date = dict[u'date']
+                if u'end_date' in dict:
+                    end_date = dict[u'end_date']
+                    item = u'Creation Date: (from: ' + unicode(date) + u' to: ' + unicode(end_date) + u')'
+                    return item
+                else:
+                    # Normal rendering for indexes
+                    item = u'Creation Date'
             if item == u'description':
                 item = u'Description'
             if item == u'docrule_id':

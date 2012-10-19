@@ -50,7 +50,7 @@ def ranges_validator(cleaned_document_keys):
                 desired_key = pure_key + SEARCH_STRING_REPR['field_label_to']
                 if not desired_key in keys_list:
                     cleaned_document_keys[desired_key] = DATE_RANGE_CONSTANTS['max']
-                    # Secondary key END date provided. Checking if start period exists
+            # Secondary key END date provided. Checking if start period exists
             if key.endswith(SEARCH_STRING_REPR['field_label_to']):
                 pure_key = key.rstrip(SEARCH_STRING_REPR['field_label_to'])
                 desired_key = pure_key + SEARCH_STRING_REPR['field_label_from']
