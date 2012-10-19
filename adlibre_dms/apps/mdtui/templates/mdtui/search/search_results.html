@@ -10,7 +10,9 @@
     <caption>Search with keys:
         <ul class="metainfo">
             {% for item in document_keys %}
+                {% if not item == 'end_date' %} {# 'end_date' already included via get_key_li_item templatetag #}
                 <li>{% get_key_li_item document_keys item %}</li>
+                {% endif %}
             {% endfor %}
         </ul>
     </caption>
