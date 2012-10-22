@@ -603,6 +603,10 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
     else:
         barcode_form = BarcodePrintedForm(request.POST or None)
 
+    # Adding upload handlers to file
+    if request.POST:
+        request.upload_handlers.insert(0, UploadProgressSessionHandler(request))
+
     # Appending warnings for creating a new parrallel key/value pair.
     new_sec_key_pairs = check_for_secondary_keys_pairs(index_info, docrule)
     if new_sec_key_pairs:
