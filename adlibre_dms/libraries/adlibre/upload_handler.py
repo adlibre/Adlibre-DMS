@@ -18,6 +18,7 @@ from django.core.cache import get_cache
 from django.core.files.uploadhandler import FileUploadHandler
 
 log = logging.getLogger('adlibre.upload_handler')
+cache = get_cache('mui_search_results')
 
 class UploadProgressCachedHandler(FileUploadHandler):
     """
@@ -30,29 +31,35 @@ class UploadProgressCachedHandler(FileUploadHandler):
         super(UploadProgressCachedHandler, self).__init__(request)
         self.progress_id = None
         self.cache_key = None
-        self.cache = get_cache('mui_search_results')
 
     def handle_raw_input(self, input_data, META, content_length, boundary, encoding=None):
         self.content_length = content_length
+        log.debug('handle_raw_input called with: input_data: %s content_length: %s boundary: %s encoding: %s META: %s' %
+            (input_data, content_length, boundary, encoding, META))
         if 'X-Progress-ID' in self.request.GET :
             self.progress_id = self.request.GET['X-Progress-ID']
         elif 'X-Progress-ID' in self.request.META:
             self.progress_id = self.request.META['X-Progress-ID']
         if self.progress_id:
             self.cache_key = "%s" % self.progress_id
-            self.cache.set(self.cache_key, {
+            cache.set(self.cache_key, {
                 'length': self.content_length,
                 'uploaded' : 0
             })
+            # TODO Remove thid debug info
+            try:
+                data = cache.get(self.cache_key)
+                log.debug('handle_raw_input set up cache_variable: %s' % data)
+            except: pass
 
     def new_file(self, field_name, file_name, content_type, content_length, charset=None):
         pass
 
     def receive_data_chunk(self, raw_data, start):
         if self.cache_key:
-            data = self.cache.get(self.cache_key)
+            data = cache.get(self.cache_key)
             data['uploaded'] += self.chunk_size
-            self.cache.set(self.cache_key, data)
+            cache.set(self.cache_key, data)
         return raw_data
 
     def file_complete(self, file_size):
@@ -60,4 +67,4 @@ class UploadProgressCachedHandler(FileUploadHandler):
 
     def upload_complete(self):
         if self.cache_key:
-            self.cache.delete(self.cache_key)
+            cache.delete(self.cache_key)
