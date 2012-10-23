@@ -17,7 +17,7 @@ def upload_progress(request):
         progress_id = request.META['X-Progress-ID']
     if progress_id:
         from django.utils import simplejson
-        cache_key = "%s_%s" % (request.META['REMOTE_ADDR'], progress_id)
+        cache_key = "%s" % progress_id
         data = cache.get(cache_key)
         log.debug("responded with cache_key: %s, data: %s" % (cache_key, data))
         return HttpResponse(simplejson.dumps(data))
