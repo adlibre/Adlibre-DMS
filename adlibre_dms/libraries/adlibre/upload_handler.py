@@ -29,6 +29,7 @@ class UploadProgressCachedHandler(FileUploadHandler):
 
     def __init__(self, request=None):
         super(UploadProgressCachedHandler, self).__init__(request)
+        log.debug('UploadProgressCachedHandler init() called.')
         self.progress_id = None
         self.cache_key = None
 
@@ -56,10 +57,12 @@ class UploadProgressCachedHandler(FileUploadHandler):
         pass
 
     def receive_data_chunk(self, raw_data, start):
+        log.debug('receive_data_chunk called with: raw_data: %s, start: %s' % (raw_data, start) )
         if self.cache_key:
             data = cache.get(self.cache_key)
             data['uploaded'] += self.chunk_size
             cache.set(self.cache_key, data)
+            log.debug('receive_data_chunk updated data in cache: cache_key: %s, data: %s' % (self.cache_key, data) )
         return raw_data
 
     def file_complete(self, file_size):
