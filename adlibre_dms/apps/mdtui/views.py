@@ -10,6 +10,8 @@ import json
 import datetime
 import logging
 
+from restkit.client import RequestError
+
 from django.core.urlresolvers import reverse
 from django.core.cache import get_cache
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -49,9 +51,6 @@ from parallel_keys import ParallelKeysManager
 from data_exporter import export_to_csv
 from security import SEC_GROUP_NAMES
 from security import filter_permitted_docrules
-from adlibre.upload_handler import UploadProgressSessionHandler
-
-from restkit.client import RequestError
 
 
 log = logging.getLogger('dms.mdtui.views')
@@ -602,10 +601,6 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
         barcode_form = BarcodePrintedForm()
     else:
         barcode_form = BarcodePrintedForm(request.POST or None)
-
-    # Adding upload handlers to file
-    if request.POST:
-        request.upload_handlers.insert(0, UploadProgressSessionHandler(request))
 
     # Appending warnings for creating a new parrallel key/value pair.
     new_sec_key_pairs = check_for_secondary_keys_pairs(index_info, docrule)
