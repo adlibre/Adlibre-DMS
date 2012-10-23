@@ -19,7 +19,7 @@ def upload_progress(request):
         from django.utils import simplejson
         cache_key = "%s_%s" % (request.META['REMOTE_ADDR'], progress_id)
         data = cache.get(cache_key)
-        log.debug("responded with cache_key: %s" % cache_key)
+        log.debug("responded with cache_key: %s, data: %s" % (cache_key, data))
         return HttpResponse(simplejson.dumps(data))
     else:
         return HttpResponseServerError('Server Error: You must provide X-Progress-ID header' )
