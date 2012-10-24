@@ -1,4 +1,5 @@
 {% load index_keys %}
+{% load form_options_tags %}
 <form class="form-horizontal" action="{{ request.path }}" method="post">
     {% csrf_token %}
     <fieldset>
@@ -15,9 +16,13 @@
             {% endfor %}
         {% endif %}
         {% for field in form %}
-            {% include "mdtui/index/index_form_field.html" %}
+            {% if field.name != "date" %}
+                {% include 'mdtui/index/index_form_field.html' %}
+            {% endif %}
         {% endfor %}
-
+        {# Manually adding field Creation date to the end of the form #}
+        {% context_set_filed "date" %}
+        {% include 'mdtui/index/index_form_field.html' %}
     </fieldset>
 
     <div class="form-actions">
