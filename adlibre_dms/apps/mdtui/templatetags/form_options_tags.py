@@ -1,5 +1,5 @@
 """
-Module: Search specific Tags module.
+Module: Forms specific Tags module.
 
 Project: Adlibre DMS
 Copyright: Adlibre Pty Ltd 2012
