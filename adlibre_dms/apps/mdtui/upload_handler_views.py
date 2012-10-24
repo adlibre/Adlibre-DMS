@@ -9,7 +9,7 @@ def upload_progress(request):
     Return JSON object with information about the progress of an upload.
     """
     log.debug('Touch to upload_progress view.')
-    cache = get_cache('dafault')
+    cache = get_cache('default')
     progress_id = ''
     if 'X-Progress-ID' in request.GET:
         progress_id = request.GET['X-Progress-ID']
