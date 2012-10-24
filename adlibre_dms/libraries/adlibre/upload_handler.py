@@ -18,7 +18,8 @@ from django.core.cache import get_cache
 from django.core.files.uploadhandler import FileUploadHandler
 
 log = logging.getLogger('adlibre.upload_handler')
-cache = get_cache('mui_search_results')
+
+cache = get_cache('default')
 
 class UploadProgressCachedHandler(FileUploadHandler):
     """
