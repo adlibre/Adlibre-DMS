@@ -229,11 +229,10 @@ INSTALLED_APPS = (
 # nginx or lighttpd, Django doesn't need to be involved in the upload
 # tracking.
 
-FILE_UPLOAD_HANDLERS = ("adlibre.upload_handler.UploadProgressCachedHandler",
-                        "django.core.files.uploadhandler.MemoryFileUploadHandler",
-                        "django.core.files.uploadhandler.TemporaryFileUploadHandler",
-                        )
-
+# FILE_UPLOAD_HANDLERS = ("adlibre.upload_handler.UploadProgressCachedHandler",
+#                        "django.core.files.uploadhandler.MemoryFileUploadHandler",
+#                        "django.core.files.uploadhandler.TemporaryFileUploadHandler",
+#                        )
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
