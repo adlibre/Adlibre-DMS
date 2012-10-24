@@ -18,7 +18,7 @@ from django.core.cache import get_cache
 from django.core.files.uploadhandler import FileUploadHandler
 
 log = logging.getLogger('adlibre.upload_handler')
-
+cache_data_for = 320
 cache = get_cache('default')
 
 class UploadProgressCachedHandler(FileUploadHandler):
@@ -47,7 +47,7 @@ class UploadProgressCachedHandler(FileUploadHandler):
             cache.set(self.cache_key, {
                 'length': self.content_length,
                 'uploaded' : 0
-            })
+            }, cache_data_for)
             # TODO Remove thid debug info
             try:
                 data = cache.get(self.cache_key)
@@ -62,7 +62,7 @@ class UploadProgressCachedHandler(FileUploadHandler):
         if self.cache_key:
             data = cache.get(self.cache_key)
             data['uploaded'] += self.chunk_size
-            cache.set(self.cache_key, data)
+            cache.set(self.cache_key, data, cache_data_for)
             log.debug('receive_data_chunk updated data in cache: cache_key: %s, data: %s' % (self.cache_key, data) )
         return raw_data
 
