@@ -197,9 +197,8 @@ def get_used_in_search_mdt(context):
 @register.simple_tag(takes_context=True)
 def set_field_value(context, field_value):
     """populates variable into a context"""
-    try:
+    if field_value:
         context['field_value'] = field_value
-    except Exception, e:
-        print e
-        return ''
-        pass
+    else:
+        context['field_value'] = ''
+    return ''
