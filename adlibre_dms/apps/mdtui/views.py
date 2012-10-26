@@ -47,6 +47,7 @@ from forms_representator import get_mdts_for_docrule
 from forms_representator import make_mdt_select_form
 from forms_representator import get_mdt_from_search_mdt_select_form
 from forms_representator import make_document_type_select_form
+from forms_representator import make_document_type_select
 from parallel_keys import ParallelKeysManager
 from data_exporter import export_to_csv
 from security import SEC_GROUP_NAMES
@@ -474,26 +475,29 @@ def indexing_edit_result(request, step='edit_finish', template='mdtui/indexing.h
 def indexing_select_type(request, step=None, template='mdtui/indexing.html'):
     """Indexing: Step 1 : Select Document Type"""
     # Context init
-    context = {}
+    context = {'step': step,}
     docrule = None
-    document_keys = None
-    autocomplete_list = []
+    active_docrule = None
+#    autocomplete_list = []
     warnings = []
-    filtered_form = make_document_type_select_form(user=request.user)
-    form = filtered_form(request.POST or None)
+    docrules_list = make_document_type_select(user=request.user)
+#    form = filtered_form(request.POST or None)
     cleanup_search_session(request)
     cleanup_mdts(request)
-    
+#    if docrule_id:
+#        request.session['indexing_docrule_id'] = docrule_id
+#        return HttpResponseRedirect(reverse('mdtui-index-details'))
     if request.POST:
-        if form.is_valid():
-            docrule = form.data["docrule"]
-            request.session['indexing_docrule_id'] = docrule
-            mdts = get_mdts_for_docrule(docrule)
-            if mdts:
-                request.session['mdts'] = mdts
-                return HttpResponseRedirect(reverse('mdtui-index-details'))
-            else:
-                warnings.append(MDTUI_ERROR_STRINGS['NO_MDTS'])
+        for item, value in request.POST.iteritems():
+            if not item == u'csrfmiddlewaretoken':
+                docrule = int(item)
+        request.session['indexing_docrule_id'] = docrule
+        mdts = get_mdts_for_docrule(docrule)
+        if mdts:
+            request.session['mdts'] = mdts
+            return HttpResponseRedirect(reverse('mdtui-index-details'))
+        else:
+            warnings.append(MDTUI_ERROR_STRINGS['NO_MDTS'])
     else:
         # initializing form with previously selected docrule.
         try:
@@ -501,17 +505,11 @@ def indexing_select_type(request, step=None, template='mdtui/indexing.html'):
         except KeyError:
             pass
         if docrule:
-            form = filtered_form({'docrule': docrule})
+            active_docrule = docrule
 
-    try:
-        document_keys = request.session["document_keys_dict"]
-    except KeyError:
-        pass
-
-    context.update( { 'step': step,
-                      'form': form,
-                      'document_keys': document_keys,
-                      'autocomplete_fields': autocomplete_list,
+    context.update( {
+                      'active_docrule': active_docrule,
+                      'docrules_list': docrules_list,
                       'warnings': warnings,
                       })
     return render_to_response(template, context, context_instance=RequestContext(request))

@@ -836,7 +836,7 @@
             "title": "No doccode", 
             "barcode_zfill": 0, 
             "split_string": "", 
-            "active": true, 
+            "active": false,
             "barcode_format": "", 
             "doccode_type": "1",
             "no_doccode": true
