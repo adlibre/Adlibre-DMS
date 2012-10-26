@@ -161,6 +161,16 @@ def setFormData(fm, kwds):
                 except ValueError:
                         pass
 
+def make_document_type_select(user=None):
+    """Returns proper set of docrules for a given request.user"""
+    docrules_queryset = ()
+    if user:
+        if not user.is_superuser:
+            docrules_queryset = list_permitted_docrules_qs(user)
+        else:
+            docrules_queryset = DocumentTypeRule.objects.filter(active=True)
+    return docrules_queryset
+
 def make_document_type_select_form(user=None, required=True):
     """
     Special method to construct custom DocumentTypeSelectForm object

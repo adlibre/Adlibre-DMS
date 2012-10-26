@@ -69,6 +69,10 @@
         background-repeat: no-repeat;
         background-position: 100px 201px;
     }
+    button.step1 {
+        min-width: 300px;
+        max-width: 800px;
+    }
 </style>
 <!--[if IE]>
 <style type="text/css">
@@ -78,6 +82,10 @@
     }
 </style>
 <![endif]-->
+{% endblock %}
+
+{% block js_extra_head %}
+{% if step == "1" %}{% include "mdtui/index/index_type_scripts.html" %}{% endif %}
 {% endblock %}
 
 {% block js_extra_inline %}

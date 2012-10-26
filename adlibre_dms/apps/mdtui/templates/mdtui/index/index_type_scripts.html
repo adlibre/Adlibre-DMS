@@ -1,0 +1,48 @@
+<script type="text/javascript">
+
+    function trigger_hover(this_) {
+        // removing focus from all the selected buttons. e.g. by mouse
+        $("button.step1").removeClass('btn-info');
+        // actions on focus into the button
+        if ($(this_).hasClass('btn-primary')) {
+            $(this_).addClass('btn-success');
+        } else {
+            $(this_).addClass('btn-info');
+        }
+        return false;
+    }
+    function triger_hout(this_) {
+        // actions on focus out of the button
+        if ($(this_).hasClass('btn-primary')) {
+            $(this_).removeClass('btn-success');
+        } else {
+            $(this_).removeClass('btn-info');
+        }
+        return false;
+    }
+    function set_step1_events(all_step1_buttons) {
+
+        // Hover color events handler
+        all_step1_buttons.hover(function(){
+            trigger_hover(this);
+        }, function(){
+            triger_hout(this);
+        });
+        // keyboard focusing events handler
+        all_step1_buttons.focusin(function(){
+            trigger_hover(this);
+        });
+        all_step1_buttons.focusout(function(){
+            triger_hout(this);
+        });
+        // First button keyboard focus
+        all_step1_buttons.first().focus();
+
+        return false;
+    }
+    $(function(){
+        var all_step1_buttons = $('button.step1');
+        set_step1_events(all_step1_buttons);
+    });
+
+</script>

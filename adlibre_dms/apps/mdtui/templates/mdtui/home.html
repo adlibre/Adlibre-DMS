@@ -20,8 +20,8 @@
         {% endif %}
         {% if index_permitted %}
         <div class="span6" style="text-align: center;">
-            <p><a href="{% url mdtui-index %}"><img src="{{ STATIC_URL }}barcode.png" /></a></p>
-            <p><a href="{% url mdtui-index %}" class="btn btn-primary btn-large"><i class="icon-barcode icon-white"></i> {% trans 'Index' %}</a></p>
+            <p><a href="{% url mdtui-index-type %}"><img src="{{ STATIC_URL }}barcode.png" /></a></p>
+            <p><a href="{% url mdtui-index-type %}" class="btn btn-primary btn-large"><i class="icon-barcode icon-white"></i> {% trans 'Index' %}</a></p>
         </div>
         {% endif %}
     </div>

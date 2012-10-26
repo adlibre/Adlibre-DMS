@@ -2,11 +2,11 @@
     {% csrf_token %}
     <fieldset>
         <legend>Step {{ step }}: Select Document Type</legend>
-        {{ form }}
+        <div class="btn-group-vertical">
+            {% for docrule in docrules_list %}
+                <button type="submit" name="{{ docrule.pk }}" class="btn step1{% if active_docrule == docrule.pk %} btn-primary{% endif %}">{{ docrule }}</button>
+                <br />
+            {% endfor %}
+        </div>
     </fieldset>
-
-    <div class="form-actions">
-        <button type="reset" class="btn btn-danger"><i class="icon-trash icon-white"></i> Cancel</button>
-        <button type="submit" class="btn btn-primary">Continue <i class="icon-chevron-right icon-white"></i></button>
-    </div>
 </form>

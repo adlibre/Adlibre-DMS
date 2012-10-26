@@ -116,7 +116,9 @@
     <![endif]-->
 
     {% block css_extra %}{% endblock %}
-
+    {% compress js %}
+    {% block js_extra_head %}{% endblock %}
+    {% endcompress %}
     <!-- Le fav and touch icons -->
     <link rel="shortcut icon" href="{{ STATIC_URL }}favicon.ico">
     <link rel="apple-touch-icon" href="{{ STATIC_URL }}dms-57.png">
@@ -147,7 +149,7 @@
                         <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}"><i class="icon-search icon-white"></i> {% trans 'Search' %}</a></li>
                     {% endif %}
                     {% if index_permitted %}
-                        {% url mdtui-index as url %}
+                        {% url mdtui-index-type as url %}
                         <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}"><i class="icon-barcode icon-white"></i> {% trans 'Index' %}</a></li>
                     {% endif %}
                     {% if request.user.is_superuser %}
