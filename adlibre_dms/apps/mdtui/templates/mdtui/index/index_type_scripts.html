@@ -1,48 +1,112 @@
 <script type="text/javascript">
 
-    function trigger_hover(this_) {
-        // removing focus from all the selected buttons. e.g. by mouse
-        $("button.step1").removeClass('btn-info');
-        // actions on focus into the button
-        if ($(this_).hasClass('btn-primary')) {
-            $(this_).addClass('btn-success');
-        } else {
-            $(this_).addClass('btn-info');
-        }
-        return false;
-    }
-    function triger_hout(this_) {
-        // actions on focus out of the button
-        if ($(this_).hasClass('btn-primary')) {
-            $(this_).removeClass('btn-success');
-        } else {
-            $(this_).removeClass('btn-info');
-        }
-        return false;
-    }
-    function set_step1_events(all_step1_buttons) {
 
-        // Hover color events handler
-        all_step1_buttons.hover(function(){
-            trigger_hover(this);
-        }, function(){
-            triger_hout(this);
-        });
-        // keyboard focusing events handler
-        all_step1_buttons.focusin(function(){
-            trigger_hover(this);
-        });
-        all_step1_buttons.focusout(function(){
-            triger_hout(this);
-        });
-        // First button keyboard focus
-        all_step1_buttons.first().focus();
+    $(function set_UI_nav_events(){
+        // class names of elements indicating selection states
+        var selected = 'btn-info';
+        var selected_preselected = 'btn-success';
+        var selected_chosen = 'btn-primary';
+        // form elements selector name
+        var form_element_names = 'button.step1';
 
-        return false;
-    }
-    $(function(){
-        var all_step1_buttons = $('button.step1');
-        set_step1_events(all_step1_buttons);
+        var all_step1_buttons = $(form_element_names);
+
+        function reinit_buttons() {
+            // removing focus from all the selected buttons. e.g. by mouse
+            all_step1_buttons.removeClass(selected);
+            all_step1_buttons.removeClass(selected_preselected);
+            return false
+        }
+        function trigger_hover(this_) {
+            reinit_buttons();
+            // actions on focus into the button
+            if ($(this_).hasClass(selected_chosen)) {
+                $(this_).addClass(selected_preselected);
+            } else {
+                $(this_).addClass(selected);
+            }
+            return false
+        }
+        function trigger_hout(this_) {
+            // actions on focus out of the button
+            if ($(this_).hasClass(selected_chosen)) {
+                $(this_).removeClass(selected_preselected);
+            } else {
+                $(this_).removeClass(selected);
+            }
+            return false;
+        }
+        function set_mouse_tab_events() {
+
+            // Hover color events handler
+            all_step1_buttons.hover(function(){
+                trigger_hover(this);
+            }, function(){
+                trigger_hout(this);
+            });
+            // keyboard focusing events handler
+            all_step1_buttons.focusin(function(){
+                trigger_hover(this);
+            });
+            all_step1_buttons.focusout(function(){
+                trigger_hout(this);
+            });
+            // First button keyboard focus
+            var cur_item = get_current_item(all_step1_buttons);
+            if (!cur_item[0]) {
+                cur_item = init_first_item();
+            }
+            cur_item.focus();
+            return false
+        }
+
+        function init_first_item() {
+                var first_item = all_step1_buttons[0];
+                first_item.focus();
+                return first_item
+        }
+
+        function get_current_item(all_step_items) {
+            // getting current button that is selected
+            var cur_item = $('.'+selected);
+            // if not selected preselected == selected
+            if (!cur_item[0]) {
+                cur_item = $('.'+selected_preselected)
+            }
+            // if not current button yet then current button == preselected
+            if (!cur_item[0]) {
+                cur_item = $('.'+selected_chosen);
+                cur_item.focus();
+            }
+            return cur_item;
+        }
+
+        // Setting events
+        set_mouse_tab_events();
+        key('down', function(){
+            // accessing current button
+            var cur_item = get_current_item(all_step1_buttons);
+            // no current item, selecting first item
+            if (!cur_item[0]) {
+                cur_item = init_first_item();
+                return false;
+            }
+            var next_item = cur_item.next().next();
+            next_item.focus();
+            return false
+        });
+        key('up', function(){
+            // accessing current button
+            var cur_item = get_current_item(all_step1_buttons);
+            // no current item, selecting first item
+            if (!cur_item[0]) {
+                cur_item = init_first_item();
+                return false;
+            }
+            var next_item = cur_item.prev().prev();
+            next_item.focus();
+            return false
+        });
     });
 
 </script>
