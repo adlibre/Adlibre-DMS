@@ -619,7 +619,7 @@ class MDTUI(TestCase):
         """
         # Selecting Document Type Rule
         url = reverse('mdtui-index-type')
-        response = self.client.post(url, {'docrule': test_mdt_docrule_id})
+        response = self.client.post(url, {test_mdt_docrule_id: 'docrule'})
         self.assertEqual(response.status_code, 302)
         # Getting indexes form and matching form Indexing Form fields names
         url = reverse('mdtui-index-details')
@@ -659,7 +659,7 @@ class MDTUI(TestCase):
         # POSTING DOCUMENT 2
         # Selecting Document Type Rule
         url = reverse('mdtui-index-type')
-        response = self.client.post(url, {'docrule': test_mdt_docrule_id})
+        response = self.client.post(url, {test_mdt_docrule_id: 'docrule'})
         self.assertEqual(response.status_code, 302)
         # Getting indexes form and matching form Indexing Form fields names
         url = reverse('mdtui-index-details')
@@ -688,7 +688,7 @@ class MDTUI(TestCase):
         # POSTING DOCUMENT 1
         # Selecting Document Type Rule
         url = reverse('mdtui-index-type')
-        response = self.client.post(url, {'docrule': test_mdt_docrule_id})
+        response = self.client.post(url, {test_mdt_docrule_id: 'docrule'})
         self.assertEqual(response.status_code, 302)
         # Getting indexes form and matching form Indexing Form fields names
         url = reverse('mdtui-index-details')
@@ -717,7 +717,7 @@ class MDTUI(TestCase):
         # POSTING DOCUMENT 3
         # Selecting Document Type Rule
         url = reverse('mdtui-index-type')
-        response = self.client.post(url, {'docrule': test_mdt_docrule_id})
+        response = self.client.post(url, {test_mdt_docrule_id: 'docrule'})
         self.assertEqual(response.status_code, 302)
         # Getting indexes form and matching form Indexing Form fields names
         url = reverse('mdtui-index-details')
@@ -752,7 +752,7 @@ class MDTUI(TestCase):
         for doc_dict in [m2_doc1_dict, m2_doc2_dict, m2_doc3_dict]:
             # Selecting Document Type Rule
             url = reverse('mdtui-index-type')
-            response = self.client.post(url, {'docrule': test_mdt_docrule_id2})
+            response = self.client.post(url, {test_mdt_docrule_id2: 'docrule'})
             self.assertEqual(response.status_code, 302)
             # Getting indexes form and matching form Indexing Form fields names
             url = reverse('mdtui-index-details')
@@ -789,7 +789,7 @@ class MDTUI(TestCase):
         for doc_dict in [m5_doc1_dict, m5_doc2_dict]:
             # Selecting Document Type Rule
             url = reverse('mdtui-index-type')
-            response = self.client.post(url, {'docrule': test_mdt_docrule_id3})
+            response = self.client.post(url, {test_mdt_docrule_id3: 'docrule'})
             self.assertEqual(response.status_code, 302)
             # Getting indexes form and matching form Indexing Form fields names
             url = reverse('mdtui-index-details')
@@ -833,7 +833,7 @@ class MDTUI(TestCase):
         """
         MDTUI Indexing has step 1 rendered properly.
         """
-        url = reverse('mdtui-index')
+        url = reverse('mdtui-index-type')
         response = self.client.get(url)
         self.assertContains(response, '<legend>Step 1: Select Document Type</legend>')
         self.assertContains(response, 'Adlibre Invoices')
@@ -844,7 +844,7 @@ class MDTUI(TestCase):
         MDTUI Displays Step 2 Properly (after proper call)
         """
         url = reverse('mdtui-index-type')
-        response = self.client.post(url, {'docrule': test_mdt_docrule_id})
+        response = self.client.post(url, {test_mdt_docrule_id: 'docrule'})
         self.assertEqual(response.status_code, 302)
         new_url = self._retrieve_redirect_response_url(response)
         response = self.client.get(new_url)
@@ -859,7 +859,7 @@ class MDTUI(TestCase):
         """
         # Selecting Document Type Rule
         url = reverse('mdtui-index-type')
-        response = self.client.post(url, {'docrule': test_mdt_docrule_id})
+        response = self.client.post(url, {test_mdt_docrule_id: 'docrule'})
         self.assertEqual(response.status_code, 302)
         # Checking Step 2 Form
         url = reverse("mdtui-index-details")
@@ -891,7 +891,7 @@ class MDTUI(TestCase):
         """
         # Selecting Document Type Rule
         url = reverse('mdtui-index-type')
-        response = self.client.post(url, {'docrule': test_mdt_docrule_id})
+        response = self.client.post(url, {test_mdt_docrule_id: 'docrule'})
         self.assertEqual(response.status_code, 302)
         url = reverse("mdtui-index-details")
         # Getting indexes form and matching form Indexing Form fields names
@@ -1098,7 +1098,7 @@ class MDTUI(TestCase):
         """
         # Selecting Document Type Rule
         url = reverse('mdtui-index-type')
-        response = self.client.post(url, {'docrule': test_mdt_docrule_id})
+        response = self.client.post(url, {test_mdt_docrule_id: 'docrule'})
         self.assertEqual(response.status_code, 302)
         url = reverse("mdtui-index-details")
         # Getting indexes form and matching form Indexing Form fields names
@@ -1118,8 +1118,8 @@ class MDTUI(TestCase):
         self.assertContains(response, 'Andrew')
         self.assertContains(response, '123456')
         self.assertContains(response, 'Iurii Garmash')
-        self.assertContains(response, '// autocomplete for field Friends ID') # autocomplete (typehead) scripts rendered
-        self.assertContains(response, '// autocomplete for field Friends Name')
+        self.assertContains(response, """connect_typeahead("#id_0", "Friends ID", '/mdtui/parallel/');""") # autocomplete (typehead) scripts rendered
+        self.assertContains(response, """connect_typeahead("#id_1", "Friends Name", '/mdtui/parallel/');""")
         self.assertContains(response, 'This field is required') # form renders errors
 
     def test_22_parallel_keys_indexing_proper(self):
@@ -1128,7 +1128,7 @@ class MDTUI(TestCase):
         """
         # Selecting Document Type Rule
         url = reverse('mdtui-index-type')
-        response = self.client.post(url, {'docrule': test_mdt_docrule_id})
+        response = self.client.post(url, {test_mdt_docrule_id: 'docrule'})
         self.assertEqual(response.status_code, 302)
         url = reverse("mdtui-parallel-keys")
         response = self.client.post(url, typehead_call1)
@@ -1149,7 +1149,7 @@ class MDTUI(TestCase):
         """
         # Selecting Document Type Rule
         url = reverse('mdtui-index-type')
-        response = self.client.post(url, {'docrule': test_mdt_docrule_id})
+        response = self.client.post(url, {test_mdt_docrule_id: 'docrule'})
         self.assertEqual(response.status_code, 302)
         url = reverse("mdtui-parallel-keys")
         response = self.client.post(url, typehead_call3)
@@ -1170,7 +1170,7 @@ class MDTUI(TestCase):
         """
         # Selecting Document Type Rule
         url = reverse('mdtui-index-type')
-        response = self.client.post(url, {'docrule': test_mdt_docrule_id})
+        response = self.client.post(url, {test_mdt_docrule_id: 'docrule'})
         self.assertEqual(response.status_code, 302)
         url = reverse("mdtui-parallel-keys")
         response = self.client.post(url, typehead_call2)
@@ -1671,7 +1671,7 @@ class MDTUI(TestCase):
         """
         # Lowercase field provided
         url = reverse('mdtui-index-type')
-        response = self.client.post(url, {'docrule': test_mdt_docrule_id3})
+        response = self.client.post(url, {test_mdt_docrule_id3: 'docrule'})
         self.assertEqual(response.status_code, 302)
         # Getting indexes form and matching form Indexing Form fields names
         url = reverse('mdtui-index-details')
@@ -1689,7 +1689,7 @@ class MDTUI(TestCase):
     def test_38_uppercase_fields_UPPERCASE_DATA(self):
         # Normal uppercase field rendering and using
         url = reverse('mdtui-index-type')
-        response = self.client.post(url, {'docrule': test_mdt_docrule_id3})
+        response = self.client.post(url, {test_mdt_docrule_id3: 'docrule'})
         self.assertEqual(response.status_code, 302)
         url = reverse('mdtui-index-details')
         post_dict = upper_right_dict
@@ -1773,7 +1773,7 @@ class MDTUI(TestCase):
         """
         # Selecting Document Type Rule
         url = reverse('mdtui-index-type')
-        response = self.client.post(url, {'docrule': test_mdt_docrule_id2})
+        response = self.client.post(url, {test_mdt_docrule_id2: 'docrule'})
         self.assertEqual(response.status_code, 302)
         url = reverse("mdtui-parallel-keys")
         response = self.client.post(url, typehead_call4)
@@ -1789,7 +1789,7 @@ class MDTUI(TestCase):
         """
         # Selecting Document Type Rule
         url = reverse('mdtui-index-type')
-        response = self.client.post(url, {'docrule': test_mdt_docrule_id2})
+        response = self.client.post(url, {test_mdt_docrule_id2: 'docrule'})
         self.assertEqual(response.status_code, 302)
         url = reverse("mdtui-parallel-keys")
         response = self.client.post(url, typehead_call5)
@@ -1803,7 +1803,7 @@ class MDTUI(TestCase):
         """
         # Selecting Document Type Rule
         url = reverse('mdtui-index-type')
-        response = self.client.post(url, {'docrule': test_mdt_docrule_id2})
+        response = self.client.post(url, {test_mdt_docrule_id2: 'docrule'})
         self.assertEqual(response.status_code, 302)
         # Getting indexes form and matching form Indexing Form fields names
         url = reverse('mdtui-index-details')
@@ -1870,7 +1870,7 @@ class MDTUI(TestCase):
         """
         # Selecting DocumentTypeRule
         url = reverse('mdtui-index-type')
-        response = self.client.post(url, {'docrule': test_mdt_docrule_id})
+        response = self.client.post(url, {test_mdt_docrule_id: 'docrule'})
         self.assertEqual(response.status_code, 302)
         # Getting indexes form and matching form Indexing Form fields names
         url = reverse('mdtui-index-details')
@@ -2346,7 +2346,7 @@ class MDTUI(TestCase):
         """
         # Selecting Document Type Rule
         url = reverse('mdtui-index-type')
-        response = self.client.post(url, {'docrule': test_mdt_docrule_id2})
+        response = self.client.post(url, {test_mdt_docrule_id2: 'docrule'})
         self.assertEqual(response.status_code, 302)
         url = reverse("mdtui-parallel-keys")
         response = self.client.post(url, typehead_call6)
