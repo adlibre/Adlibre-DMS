@@ -587,7 +587,7 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
     document_keys = temp_vars['document_keys']
     barcode = temp_vars['barcode']
     index_info = temp_vars['index_info']
-    docrule = temp_vars['docrule']
+    docrule = str(temp_vars['docrule'])
 
     # Init Forms correctly depending on url posted
     if request.GET.get('uploaded') is None:

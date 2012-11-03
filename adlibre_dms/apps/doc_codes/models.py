@@ -220,7 +220,9 @@ class DocumentTypeRuleManager(object):
         self.doccodes = DocumentTypeRule.objects.all()
 
     def find_for_string(self, string):
-        res = DocumentTypeRule.objects.filter(no_doccode = True, active = True)[0]
+        # TODO: understand why we needed this and can we drop it? (Probabaly No doccode = Default Document Type
+        # res = DocumentTypeRule.objects.filter(no_doccode = True, active = True)[0]
+        res = None
         for doccode in self.doccodes:
             #print "%s is validated by %s: %s" % (string, doccode, doccode.validate(string))
             if doccode.validate(string):
