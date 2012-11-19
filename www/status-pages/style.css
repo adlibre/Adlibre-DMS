@@ -1,0 +1,13 @@
+* { color: black; }
+body {
+    font-family:Helvetica, Arial, Tahoma, sans-serif;
+    margin: 0px auto;
+    padding: 100px;
+    width: 400px;
+}
+h1 {
+    background-image: url('adlibre-dms-logo.png');
+    width: 278px;
+    height: 51px;
+    text-indent: -9999px;
+}
