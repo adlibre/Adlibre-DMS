@@ -246,6 +246,23 @@ def search_results(request, step=None, template='mdtui/search.html'):
     export = False
     cache_documents_for = 3600 # Seconds
     page = request.GET.get('page')
+    # Sorting UI interactions
+    sorting_field = request.POST.get('sorting_key', '') or ''
+    order = request.POST.get('order', '') or ''
+    query_order = ''
+    if order == "icon-chevron-up":
+        query_order = "ascending"
+    elif order == "descending":
+        query_order = "descending"
+    if sorting_field and order:
+        request.session["sorting_field"] = sorting_field
+        request.session["order"] = order
+    else:
+        try:
+            sorting_field = request.session["sorting_field"]
+            order = request.session["order"]
+        except KeyError:
+            pass
     if not page:
         page = 1
     else:
@@ -293,15 +310,30 @@ def search_results(request, step=None, template='mdtui/search.html'):
 
     cache = get_cache('mui_search_results')
     # Caching by document keys and docrules list, as a cache key
-    cache_key = json.dumps(document_keys)+json.dumps(docrule_ids)
+    cache_key = json.dumps(document_keys)+json.dumps(docrule_ids)+json.dumps(sorting_field)+json.dumps(order)
     cached_documents = cache.get(cache_key, None)
     if cleaned_document_keys and not cached_documents:
         if cleaned_document_keys:
+            # TODO: speedup sorting using document_names from cache not to search again.
+            # Redefining proper sorting results request
+            if sorting_field:
+                if sorting_field == "Creation Date":
+                    sorting_field_query = "metadata_created_date"
+                elif sorting_field == "Description":
+                    sorting_field_query = "metadata_description"
+                elif sorting_field == "Type":
+                    sorting_field_query = "metadata_doc_type_rule_id"
+                else:
+                    sorting_field_query = sorting_field
+            else:
+                sorting_field_query = ''
             # Using DMS actual search method for this
             query = DMSSearchQuery({
                 'document_keys':cleaned_document_keys,
                 'docrules':docrule_ids,
                 'only_names': True,
+                'sorting_key': sorting_field_query,
+                'sorting_order': query_order,
             })
             document_names = DMSSearchManager().search_dms(query).get_document_names()
         cache.set(cache_key, document_names, cache_documents_for)
@@ -340,6 +372,8 @@ def search_results(request, step=None, template='mdtui/search.html'):
                 'document_keys': document_keys,
                 'mdts': mdts_list,
                 'warnings': warnings,
+                'sorting_field': sorting_field,
+                'order': order
                 }
     return render_to_response(template, context, context_instance=RequestContext(request))
 

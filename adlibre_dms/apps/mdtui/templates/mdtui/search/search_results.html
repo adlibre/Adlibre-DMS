@@ -5,7 +5,7 @@
 <fieldset>
     <legend>{% if request.session.searching_docrule_id %}{% get_docrule_name_by_id request.session.searching_docrule_id %}{% endif %}{% if request.session.search_mdt_id %}{% get_used_in_search_mdt %}{% endif %} Results</legend>
 </fieldset>
-
+<form id="dummy" style="display:none;" action="{{ request.path }}" method="post">{% csrf_token %}</form>
 <table class="table table-striped" id="results-table">
     <caption>Search with keys:
         <ul class="metainfo">
@@ -16,17 +16,27 @@
             {% endfor %}
         </ul>
     </caption>
-    <thead>
+    <colgroup>
+        <col class="">
+        <col class="{% ifequal sorting_field "Creation Date" %}selected{% endifequal %}">
+        {% for key in mdts %}
+        {% if not key == "metadata_user_name" and not key == "metadata_user_id" %}
+        <col class="{% ifequal sorting_field key %}selected{% endifequal %}">
+        {% endif %}
+        {% endfor %}
+        <col class="{% ifequal sorting_field "Description" %}selected{% endifequal %}">
+        <col class="{% ifequal sorting_field "Document Type" %}selected{% endifequal %}">
+        <col class="">
+    </colgroup>
+    <thead id="results-table-head">
     <tr>
         <th>{% trans 'View' %}</th>
-        <th><a href="{# TODO: sort on this#}">{% trans 'Creation Date' %}</a></th>
+        {% set_key 'Creation Date' %}{% include "mdtui/search/search_results_header_field.html" %}
         {% for key in mdts %}
-            {% if not key == "metadata_user_name" and not key == "metadata_user_id" %}
-                <th><a href="{# TODO: sort on this#}">{{ key }}</a></th>
-            {% endif %}
+        {% include "mdtui/search/search_results_header_field.html" %}
         {% endfor %}
-        <th><a href="{# TODO: sort on this#}">{% trans 'Description' %}</a></th>
-        <th><a href="{# TODO: sort on this#}">{% trans 'Type' %}</a></th>
+        {% set_key 'Description' %}{% include "mdtui/search/search_results_header_field.html" %}
+        {% set_key 'Type' %}{% include "mdtui/search/search_results_header_field.html" %}
         <th>{% trans 'Actions' %}</th>
     </tr>
     </thead>

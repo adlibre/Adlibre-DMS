@@ -1,0 +1,6 @@
+{% if not key == "metadata_user_name" and not key == "metadata_user_id" %}
+    <th {% ifequal sorting_field key %} class="selected"{% endifequal %} rel="tooltip" data-original-title="Click to sort on this">
+        <p class="sort_key_field" data-id="{{ key }}">{{ key }}</p>
+        <i class="{% ifequal sorting_field key %}{{ order }}{% endifequal %}"></i>
+    </th>
+{% endif %}

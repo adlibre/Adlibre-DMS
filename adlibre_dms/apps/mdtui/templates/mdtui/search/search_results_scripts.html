@@ -1,5 +1,51 @@
 <script type="text/javascript">
     $(document).ready(function(){
+
+        function highlight_row(th) {
+                var col = $($(th).parent()).index();
+                $($("#results-table col")[col]).addClass("selected");
+        }
+
+        function request_sorting(field) {
+            // add loading icon to th element
+            $(field).parent().addClass("loading");
+            $(field).parent().children().hide();
+            var even_order = "icon-chevron-up";
+            var odd_order = "icon-chevron-down";
+            var pathname = window.location.pathname;
+            var text = $(field).attr("data-id");
+            // select the row and add the sorting order arrow
+            var order = even_order;
+            if (!$(field).next().hasClass(order)) {
+                $(field).next().removeClass(odd_order);
+                order = even_order;
+            } else {
+                $(field).next().removeClass(order);
+                order = odd_order
+            }
+            // cleaning all "i" elements from arrows and deselecting all fields
+            $("i").removeClass(even_order).removeClass(odd_order);
+            $(field).next().addClass(order);
+            // deselecting all columns
+            $(".selected").removeClass("selected");
+            // selecting chosen col
+            highlight_row(field);
+
+            // adding csrf token
+            var csrftoken = $("form#dummy div input").attr("value");
+            $.post(pathname,
+                        {
+                            'sorting_key': text,
+                            'csrfmiddlewaretoken': csrftoken,
+                            'order': order
+                        },
+                        function () {window.location.reload(true)}
+                   );
+            //alert(text);
+            return false;
+        }
+
+
         // Apply a class on mouse over and remove it on mouse out.
         $('#results-table tbody tr').hover(function() {
             $(this).toggleClass('highlight');
@@ -12,6 +58,33 @@
         });
         // Remove Assigned click handler from last col item
         $('#results-table tbody tr').find('td:last').unbind('click');
-    });
+        // Posts sorting request
+        $('p.sort_key_field').click(function () {
+                request_sorting(this);
+            });
+        $('.descending').next().show();
 
+        // helping tooltips
+        $('[rel=tooltip]').tooltip();
+    });
 </script>
+
+<style type="text/css">
+    {# TODO: Normal design color of highlighting here #}
+    .selected {
+        background-color: #F9F9F9!important;
+    }
+    .loading {
+        background-image: url("{{ STATIC_URL }}img/uploading.gif") !important ;
+        background-position: center center ;
+        background-repeat: no-repeat;
+    }
+    .sort_key_field {
+        color: #0088CC;
+    }
+    .sort_key_field:hover {
+        color: #005580;
+        text-decoration: underline;
+    }
+
+</style>
