@@ -28,12 +28,12 @@ class DMSSearchQuery(object):
 
     it axepts those paramethers:
 
-    - docrule_ids must be an iterable of docrule.pk numbers that range search query.
+    @param docrules: must be an iterable of docrule.pk numbers that range search query.
         to search in several ids you must have e.g.:
 
-        'docrule_ids' == ['1', '2', '3', ...]
+        'docrules' == ['1', '2', '3', ...]
 
-    - document_keys must be a dictionary of secondary keys + optional fixed keys.
+    @param document_keys: must be a dictionary of secondary keys + optional fixed keys.
         e.g. to search with document's creation date and some keys document_keys must be like:
 
         'document_keys' == {
@@ -47,10 +47,21 @@ class DMSSearchQuery(object):
     'Report Date' with using of 'Creation Date' Specified.
     Each additional key will add 1 more search query.
     Search results will be a mixed set of those documents matching query.
+
+    @param sorting_key: Can be either "mdt_indexes" key name, e.g. "Employee"
+                    or one of "metadata_created_date", "metadata_description", "metadata_doc_type_rule_id"
+    @param sorting_order: Must be string == "ascending" or "descending", indicates results order.
+    more detailed about those methods can be looked in search_results_sorted method of DMSSearchManager
     """
     def __init__(self, *args):
         """Dynamicaly initialising set of properties"""
-        kwargs_possible_params = ['document_keys', 'docrules', 'only_names']
+        kwargs_possible_params = [
+            'document_keys',
+            'docrules',
+            'only_names',
+            'sorting_key',
+            'sorting_order'
+        ]
         for param in kwargs_possible_params:
             if param in args[0]:
                 self.add_property(param, args[0][param])
@@ -71,6 +82,18 @@ class DMSSearchQuery(object):
 
     def set_docrules(self, rule_ids_list):
         self.docrules = rule_ids_list
+
+    def get_sorting_key(self):
+        return self.sorting_key
+
+    def set_sorting_key(self, sorting_key):
+        self.sorting_key = sorting_key
+
+    def get_sorting_order(self):
+        return self.sorting_order
+
+    def set_sorting_order(self, sorting_order):
+        self.sorting_order = sorting_order
 
 class DMSSearchResponse(object):
     """Defines data to be ruturned by DMS Search Manager class"""
@@ -110,6 +133,8 @@ class DMSSearchManager(object):
         try:
             cleaned_document_keys = dms_search_query.get_document_keys()
             docrule_ids = dms_search_query.get_docrules()
+            sorting_key = dms_search_query.get_sorting_key()
+            sorting_order = dms_search_query.get_sorting_order()
         except Exception, e:
             error_message = 'DMS Search error, Insufficient search query data: %s' % e
             log.error(error_message)
@@ -125,7 +150,13 @@ class DMSSearchManager(object):
                 document_names = self.document_date_range_with_keys_search(cleaned_document_keys, docrule_ids)
         # Search request finished if we need only names
         if dms_search_query.only_names:
+            if sorting_key:
+                reverse = False
+                if sorting_order == "ascending":
+                    reverse = True
+                document_names = self.search_results_sorted(sorting_key, document_names, reverse=reverse)
             return DMSSearchResponse({'document_names': document_names})
+        # TODO: test if we use this part, and delete if not (maybe leave for other method calls, e.g. future api)
         # Actually retrieving documents
         documents = self.get_found_documents(document_names)
         # Not passing CouchDB search results object to template system to avoid bugs, in case it contains no documents
@@ -168,12 +199,12 @@ class DMSSearchManager(object):
                 docs_ids_mentions.append(docname)
                 all_docs[docname] = 0
             set_list.append(docs_ids_mentions)
-            # Counting docs mentioned in all sets
+        # Counting docs mentioned in all sets
         for doc in all_docs:
             for set in set_list:
                 if doc in set:
                     all_docs[doc] += 1
-                    # Comparing search mentions and adding to response if all keys match
+        # Comparing search mentions and adding to response if all keys match
         docs_ids_list = []
         for key, value in all_docs.iteritems():
             if value >= resp_set[docrule_id].__len__():
@@ -226,10 +257,68 @@ class DMSSearchManager(object):
         new_str_date = datetime.datetime.strftime(new_date, settings.DATE_FORMAT)
         return new_str_date
 
+    ################################# Search Sorting Methods ##################################
     def search_results_by_date(self, documents):
         """Sorts search results into list by CouchDB document's 'created date'."""
         newlist = sorted(documents, key=itemgetter('metadata_created_date'))
         return newlist
+
+    def search_results_sorted(self, key, document_list, reverse=False):
+        """
+        Sorting method of DMS search.
+
+        Sorts documents making query of required data by itself from CouchDB.
+        Appends documents that have no key to the end of the list in uncontrolled order.
+        e.g. order they appear in iteration.
+
+        @param key: Can be either "mdt_indexes" key name, e.g. "Employee"
+                    or one of "metadata_created_date", "metadata_description", "metadata_doc_type_rule_id"
+        @param document_list: List of document names to sort. e.g.: ['ADL-0001', 'CCC-0001', ... ]
+        @param reverse: Direction of sorting (True/False)
+
+        @return: Sorted list of document names using given @param key e.g.: ['CCC-0001', 'ADL-0001', ... ]
+        """
+        if document_list:
+            values_list = []
+            empty_values_list = []
+            documents = self.get_sorting_docs_indexes(document_list)
+            # Selecting proper sorting couch query params
+            if key in ["metadata_created_date", "metadata_description", "metadata_doc_type_rule_id"]:
+                doc_field = key
+            else:
+                doc_field = 'mdt_indexes'
+            # Creating special, sorting capable list of tuples (Docname, Sorting field value)
+            for doc in documents:
+                if doc_field == 'mdt_indexes':
+                    if key in doc[doc_field]:
+                        value = doc[doc_field][key]
+                    else:
+                        value = ''
+                else:
+                    value = doc[key]
+                if value:
+                    values_list.append((doc.get_id, value))
+                else:
+                    empty_values_list.append(doc.get_id)
+            document_list = sorted(values_list, key=itemgetter(1), reverse=reverse)
+            document_list = map(lambda doc: doc[0],  document_list)
+            document_list = document_list + empty_values_list
+        return document_list
+
+    def get_sorting_docs_indexes(self, document_list):
+        """
+        Retrieves main document indexes from CouchDB view.
+
+        @param document_list: list of document names, e.g. ['ADL-0001', 'CCC-0001', ... ]
+        @return: CouchDB documents "view results" Object.
+                 each document contains:
+                     "mdt_indexes"
+                     "metadata_created_date"
+                     "metadata_description"
+                     "metadata_doc_type_rule_id"
+        """
+        documents = CouchDocument.view('dmscouch/search_main_indexes', keys=document_list)
+        return documents
 
     ##################################### Search Methods ######################################
     def document_date_range_with_keys_search(self, cleaned_document_keys, docrule_ids):
@@ -257,7 +346,7 @@ class DMSSearchManager(object):
                             resp_set[docrule_id].append(search_res)
                         else:
                             resp_set[docrule_id] = [search_res]
-                            # Extracting documents for each CouchDB response set.
+            # Extracting documents for each CouchDB response set.
             docs_list[docrule_id] = self.convert_search_res_for_range(resp_set, cleaned_document_keys, docrule_id)
         # Listing all documents to retrieve and getting them
         retrieve_docs = []
@@ -286,9 +375,13 @@ class DMSSearchManager(object):
                 doc_name = doc.get_id
                 if not doc_name in resp_list:
                     resp_list.append(doc_name)
+        if resp_list:
+            log_data = resp_list.__len__()
+        else:
+            log_data = None
         log.debug(
             'Search results by date range: from: "%s", to: "%s", docrules: "%s", documents: "%s"' %
-            (startkey[0], endkey[0], docrule_ids, resp_list)
+            (startkey[0], endkey[0], docrule_ids, log_data)
         )
         return resp_list
 
