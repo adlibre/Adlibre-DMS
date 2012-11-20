@@ -7,9 +7,9 @@
         }
 
         function request_sorting(field) {
-            // add loading icon to th element
+            // add loading icon to th element and make element transparent
             $(field).parent().addClass("loading");
-            $(field).parent().children().hide();
+            $(field).parent().children().css({ opacity: 0.1 });
             var even_order = "icon-chevron-up";
             var odd_order = "icon-chevron-down";
             var pathname = window.location.pathname;
@@ -31,7 +31,6 @@
             // selecting chosen col
             highlight_row(field);
 
-            // adding csrf token
             var csrftoken = $("form#dummy div input").attr("value");
             $.post(pathname,
                         {
@@ -70,7 +69,6 @@
 </script>
 
 <style type="text/css">
-    {# TODO: Normal design color of highlighting here #}
     .selected {
         background-color: #F9F9F9!important;
     }
@@ -85,6 +83,9 @@
     .sort_key_field:hover {
         color: #005580;
         text-decoration: underline;
+        cursor: pointer;
     }
-
+    th {
+        cursor: pointer;
+    }
 </style>
