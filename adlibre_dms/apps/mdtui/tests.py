@@ -2485,59 +2485,59 @@ class MDTUI(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Adlibre invoices Results")
 
-def test_65_search_results_sorting(self):
-    """Refs #766 MUI: Sortable Search Results"""
-    unordered_docs = ['CCC-0002', 'CCC-0001', 'BBB-0003']
-    descending_test1 = ['CCC-0001', 'CCC-0002', 'BBB-0003']
-    ascending_date1 = ['BBB-0003', 'CCC-0002', 'CCC-0001']
-    descending_description = ['BBB-0003', 'CCC-0001', 'CCC-0002']
-    sort1_query1 = { "order": "icon-chevron-up",
-                     "sorting_key": "Tests Uppercase Field", }
-    sort1_query2 = { "order": "icon-chevron-down",
-                     "sorting_key": "Tests Uppercase Field", }
-    sort2_query1 = { "order": "icon-chevron-up",
-                     "sorting_key": "Creation Date", }
-    sort2_query2 = { "order": "icon-chevron-down",
-                     "sorting_key": "Creation Date", }
-    sort3_query1 = { "order": "icon-chevron-up",
-                     "sorting_key": "Description", }
-    sort3_query2 = { "order": "icon-chevron-down",
-                     "sorting_key": "Description", }
-    # Getting normal default results
-    url = reverse('mdtui-search')
-    response = self.client.post(url, select_mdt5)
-    self.assertEqual(response.status_code, 302)
-    new_url = self._retrieve_redirect_response_url(response)
-    response = self.client.get(new_url)
-    self.assertEqual(response.status_code, 200)
-    self.assertContains(response, 'Employee')
-    response = self.client.post(new_url, search_MDT_5)
-    self.assertEqual(response.status_code, 302)
-    results_url = self._retrieve_redirect_response_url(response)
-    response = self.client.get(results_url)
-    self.assertEqual(response.status_code, 200)
-    # Proper responce check (Just in case...)
-    self.assertContains(response, 'BBB-0003')
-    self.assertNotContains(response, 'BBB-0002')
-    self.assertNotContains(response, 'BBB-0001')
-    self.assertContains(response, 'CCC-0001')
-    self.assertContains(response, 'CCC-0002')
-    self.assertNotContains(response, 'CCC-0003')
-    # Checking order we have here (default order)
-    code_order = self._check_search_results_order(response)
-    self.assertEqual(code_order, unordered_docs)
-    # Getting new ordered list of docs
-    self._check_sorting_order_results(results_url, sort1_query1, unordered_docs)
-    # Getting docs in descending order now with docs without this key in the bottom of results
-    self._check_sorting_order_results(results_url, sort1_query2, descending_test1)
-    # Getting docs in ascending order sorting by Creation Date
-    self._check_sorting_order_results(results_url, sort2_query1, ascending_date1)
-    # Descending order by Creation Date
-    self._check_sorting_order_results(results_url, sort2_query2, descending_test1)
-    # Description sorting ascending
-    self._check_sorting_order_results(results_url, sort3_query1, unordered_docs)
-    # Description sorting descending
-    self._check_sorting_order_results(results_url, sort3_query2, descending_description)
+    def test_65_search_results_sorting(self):
+        """Refs #766 MUI: Sortable Search Results"""
+        unordered_docs = ['CCC-0002', 'CCC-0001', 'BBB-0003']
+        descending_test1 = ['CCC-0001', 'CCC-0002', 'BBB-0003']
+        ascending_date1 = ['BBB-0003', 'CCC-0002', 'CCC-0001']
+        descending_description = ['BBB-0003', 'CCC-0001', 'CCC-0002']
+        sort1_query1 = { "order": "icon-chevron-up",
+                         "sorting_key": "Tests Uppercase Field", }
+        sort1_query2 = { "order": "icon-chevron-down",
+                         "sorting_key": "Tests Uppercase Field", }
+        sort2_query1 = { "order": "icon-chevron-up",
+                         "sorting_key": "Creation Date", }
+        sort2_query2 = { "order": "icon-chevron-down",
+                         "sorting_key": "Creation Date", }
+        sort3_query1 = { "order": "icon-chevron-up",
+                         "sorting_key": "Description", }
+        sort3_query2 = { "order": "icon-chevron-down",
+                         "sorting_key": "Description", }
+        # Getting normal default results
+        url = reverse('mdtui-search')
+        response = self.client.post(url, select_mdt5)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Employee')
+        response = self.client.post(new_url, search_MDT_5)
+        self.assertEqual(response.status_code, 302)
+        results_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(results_url)
+        self.assertEqual(response.status_code, 200)
+        # Proper responce check (Just in case...)
+        self.assertContains(response, 'BBB-0003')
+        self.assertNotContains(response, 'BBB-0002')
+        self.assertNotContains(response, 'BBB-0001')
+        self.assertContains(response, 'CCC-0001')
+        self.assertContains(response, 'CCC-0002')
+        self.assertNotContains(response, 'CCC-0003')
+        # Checking order we have here (default order)
+        code_order = self._check_search_results_order(response)
+        self.assertEqual(code_order, unordered_docs)
+        # Getting new ordered list of docs
+        self._check_sorting_order_results(results_url, sort1_query1, unordered_docs)
+        # Getting docs in descending order now with docs without this key in the bottom of results
+        self._check_sorting_order_results(results_url, sort1_query2, descending_test1)
+        # Getting docs in ascending order sorting by Creation Date
+        self._check_sorting_order_results(results_url, sort2_query1, ascending_date1)
+        # Descending order by Creation Date
+        self._check_sorting_order_results(results_url, sort2_query2, descending_test1)
+        # Description sorting ascending
+        self._check_sorting_order_results(results_url, sort3_query1, unordered_docs)
+        # Description sorting descending
+        self._check_sorting_order_results(results_url, sort3_query2, descending_description)
 
     def test_66_edit_document_indexes_access(self):
         """
@@ -3228,7 +3228,7 @@ def test_65_search_results_sorting(self):
 
     def _check_search_results_order(self, response):
         """Checks MUI search results page against regexp to determine document names order in a page"""
-        prog = re.compile("\/mdtui\/view\/(?P<code>[A-Z]{3}-[0-9]{4})", re.DOTALL)
+        prog = re.compile("""\/mdtui\/view\/(?P<code>[A-Z]{3}-[0-9]{4})""", re.DOTALL)
         matches = prog.findall(str(response))
         return matches
 
