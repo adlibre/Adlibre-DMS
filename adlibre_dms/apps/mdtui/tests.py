@@ -208,6 +208,21 @@ mdt6 = {
     "parallel": {}
 }
 
+mdt7 = {
+    "_id": "mdt7",
+    "description": "Test MDT 7",
+    "docrule_id": [str(test_mdt_docrule_id3), ],
+    "fields": {
+        "1": {
+            "field_name": "Chosen Field",
+            "description": "defines fixed amount of choices",
+            "type": "choice",
+            "choices": ["choice one", "choice two", "choice three", "choice four", "choice 5"]
+        }
+    },
+    "parallel": {}
+}
+
 # Static dictionary of documents to be indexed for mdt1 and mdt2
 doc1_dict = {
     'date': date_standardized('2012-03-06'),
@@ -605,6 +620,7 @@ class MDTUI(TestCase):
                     mdt4,
                     mdt5,
                     mdt6,
+                    mdt7,
                  ]:
             mdt = json.dumps(m)
             response = self.client.post(url, {"mdt": mdt})

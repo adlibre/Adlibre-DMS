@@ -68,6 +68,20 @@ def render_fields_from_docrules(mdts_dict, init_dict=None, search=False):
             sorted_fields.sort()
             for field_key, field_value in sorted_fields:
                 form_field = None
+                if field_value["type"]==u'choice':
+                    mdt_choices = field_value['choices']
+                    choices = zip(range(mdt_choices.__len__()), mdt_choices)
+                    if unicode(counter) in init_dict and init_dict[unicode(counter)]:
+                        # Has initial value
+                        choice_value = init_dict[unicode(counter)]
+                        initial_choice = ('', '')
+                        for choice in choices:
+                            if choice[1]==choice_value:
+                                initial_choice = choice
+                        form_field = forms.ChoiceField(choices, label=field_value["field_name"], help_text=field_value["description"], initial=initial_choice)
+                    else:
+                        # Blank field
+                        form_field = forms.ChoiceField(choices, label=field_value["field_name"], help_text=field_value["description"])
                 if field_value["type"]==u'integer':
                     if unicode(counter) in init_dict and init_dict[unicode(counter)]:
                         # Has initial value

@@ -211,3 +211,27 @@ def set_key(context, key):
     else:
         context['key'] = ''
     return ''
+
+@register.filter
+def choice_id(choice):
+    """
+    Returns Choice type field's choice id for form rendering
+    """
+    try:
+        resp = choice[0]
+    except IndexError:
+        resp = ''
+        pass
+    return resp
+
+@register.filter
+def choice_name(choice):
+    """
+    Returns Choice type field's choice Name (Text) for form rendering
+    """
+    try:
+        resp = choice[1]
+    except IndexError:
+        resp = ''
+        pass
+    return resp
