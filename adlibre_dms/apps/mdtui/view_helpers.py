@@ -130,19 +130,19 @@ def process_indexes_field(key, field, data):
         if fvalue:
             index_tuple = (field.field_name, fvalue)
     else:
-        if key in data.iterkeys():
-            # For native form fields
-            if not force_upper:
-                index_tuple = (key, data[unicode(key)].strip(' \t\n\r'))
-            else:
-                index_tuple = (key, data[unicode(key)].upper().strip(' \t\n\r'))
-        else:
+        if unicode(key) in data.iterkeys():
             if "field_name" in field.__dict__:
                 # For Dynamic form fields
                 if not force_upper:
                     index_tuple = (field.field_name, data[unicode(key)].strip(' \t\n\r'))
                 else:
                     index_tuple = (field.field_name, data[unicode(key)].upper().strip(' \t\n\r'))
+            else:
+                # For native form fields
+                if not force_upper:
+                    index_tuple = (key, data[unicode(key)].strip(' \t\n\r'))
+                else:
+                    index_tuple = (key, data[unicode(key)].upper().strip(' \t\n\r'))
     return index_tuple
 
 def initEditIndexesForm(request, doc, given_indexes=None):
