@@ -369,7 +369,7 @@ def search_results(request, step=None, template='mdtui/search.html'):
     context = { 'step': step,
                 'paginated_documents': paginated_documents,
                 'page': page,
-                'document_keys': document_keys,
+                'document_keys': cleaned_document_keys,
                 'mdts': mdts_list,
                 'warnings': warnings,
                 'sorting_field': sorting_field,

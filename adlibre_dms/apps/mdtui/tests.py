@@ -79,6 +79,7 @@ indexes_match_strings = [
     'Employee',
     'Tests Uppercase Field',
     'Additional',
+    'Chosen Field',
 ]
 main_form_match_regexp = ').+?name=\"(\d+|\d+_from|\d+_to)\"'
 indexes_form_match_pattern = ''
@@ -315,6 +316,7 @@ m5_doc1_dict = {
     'description': 'Test Document Number 1 for MDT 5',
     'Employee': 'Andrew',
     'Tests Uppercase Field': 'some data',
+    'Chosen Field': "3",
 }
 
 m5_doc2_dict = {
@@ -322,6 +324,7 @@ m5_doc2_dict = {
     'description': 'Test Document Number 2 for MDT 5',
     'Employee': 'Andrew',
     'Tests Uppercase Field': 'some other data',
+    'Chosen Field': "4",
 }
 
 doc1 = 'ADL-0001'
@@ -2861,12 +2864,14 @@ class MDTUI(TestCase):
         second_doc_name = 'CCC-0002'
         first_doc_new_indexes = {
             '0': 'SOME DATA',
-            '1': 'Andrew and his friend',
+            '1': '4',
+            '2': 'Andrew and his friend',
             'description': 'Editing of builtin field test',
         }
         second_doc_new_indexes = {
             '0': 'SOME OTHER DATA',
-            '1': 'Andrew',
+            '1': '4',
+            '2': 'Andrew',
             'description': 'Test Document Number 2 for MDT 5',
         }
         first_only_should_contain = 'Andrew and his friend'
