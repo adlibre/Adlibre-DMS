@@ -232,8 +232,8 @@ def unify_index_info_couch_dates_fmt(index_info):
         if not index_key=='date':
             try:
                 value = index_info[index_key]
-                # TODO: check if next string is relevant to method implementation
-                index_date = datetime.datetime.strptime(value, settings.DATE_FORMAT)
+                # Simple check if we can convert it...
+                datetime.datetime.strptime(value, settings.DATE_FORMAT)
                 clean_info[index_key] = str_date_to_couch(value)
             except ValueError:
                 clean_info[index_key] = index_info[index_key]
