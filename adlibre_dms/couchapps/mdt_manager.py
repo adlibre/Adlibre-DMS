@@ -148,6 +148,29 @@ class MetaDataTemplateManager(object):
             return False
         return True
 
+    def get_restricted_keys_names(self, mdts):
+        """ Checking MDTs provided for locked indexes
+        @param mdts is a list of MDT's for analysis
+        @return 2 lists of field names locked for adding indexes and admin ability to add new indexes.
+        """
+        admin_locked_keys = []
+        locked_keys = []
+        # Checking mdts configuration for keys (fields) that have restriction in adding new indexes
+        for mdt in mdts:
+            for field_id, field in mdts[mdt]["fields"].iteritems():
+                if "create_new_indexes" in field.iterkeys():
+                    if field["create_new_indexes"]=="open":
+                        # normal fileld
+                        pass
+                    elif field["create_new_indexes"]=="admincreate":
+                        # Only admin list adding
+                        admin_locked_keys.append(field["field_name"])
+                    elif field["create_new_indexes"]=="locked":
+                        # None has ability to add new indexes
+                        locked_keys.append(field["field_name"])
+        log.debug("Document has keys available for edit for admin only: %s and locked for adding: %s" % (admin_locked_keys, locked_keys))
+        return admin_locked_keys, locked_keys
+
     def validate_mdt(self, mdt):
         # TODO: uploading MDT validation sequence here
         return True
