@@ -106,7 +106,8 @@ mdt1 = {
            "type": "string",
            "length": 60,
            "field_name": "Friends Name",
-           "description": "Name of tests person"
+           "description": "Name of tests person",
+           "edit": "locked"
        },
        "3": {
            "type": "date",
@@ -127,12 +128,14 @@ mdt2 = {
        "1": {
            "type": "integer",
            "field_name": "Employee ID",
-           "description": "Unique (Staff) ID of the person associated with the document"
+           "description": "Unique (Staff) ID of the person associated with the document",
+           "create_new_indexes": "open" # TODO: modify this dynamically upon tests execution and then return back to normal mdt...
        },
        "2": {
            "type": "string",
            "field_name": "Employee Name",
-           "description": "Name of the person associated with the document"
+           "description": "Name of the person associated with the document",
+           "create_new_indexes": "admincreate" # TODO: modify this dynamically upon tests execution and then return back to normal mdt...
        },
     },
     "parallel": {

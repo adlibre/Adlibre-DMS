@@ -165,7 +165,7 @@ def check_for_forbidden_new_keys_created(document_indexes, docrule, user):
     """Checks for user ability to add new key's value
 
     @param document_indexes is a set of user entered indexing data of specific document
-    @param docrule integer of current docrule id
+    @param docrule is current docrule id
     @param user is a current request.user"""
     user_locked_keys = []
     mdts = get_mdts_for_docrule(docrule)
