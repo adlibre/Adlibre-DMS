@@ -22,6 +22,7 @@ from couchdbkit import Server
 from adlibre.date_converter import date_standardized
 from mdtui.views import MDTUI_ERROR_STRINGS
 from mdtui.templatetags.paginator_tags import rebuild_sequence_digg
+from mdtcouch.models import MetaDataTemplate
 
 # auth user
 username = 'admin'
@@ -53,6 +54,7 @@ password_6 = 'test6'
 
 couchdb_url = 'http://127.0.0.1:5984'
 couchdb_name = 'dmscouch_test'
+couchdb_mdts_name = 'mdtcouch_test'
 
 test_mdt_docrule_id = 2 # should be properly assigned to fixtures docrule that uses CouchDB plugins
 test_mdt_docrule_id2 = 7 # should be properly assigned to fixtures docrule that uses CouchDB plugins
@@ -129,13 +131,15 @@ mdt2 = {
            "type": "integer",
            "field_name": "Employee ID",
            "description": "Unique (Staff) ID of the person associated with the document",
-           "create_new_indexes": "open" # TODO: modify this dynamically upon tests execution and then return back to normal mdt...
+
+           #"create_new_indexes": "open" # TODO: modify this dynamically upon tests execution and then return back to normal mdt...
        },
        "2": {
            "type": "string",
            "field_name": "Employee Name",
            "description": "Name of the person associated with the document",
-           "create_new_indexes": "admincreate" # TODO: modify this dynamically upon tests execution and then return back to normal mdt...
+
+           #"create_new_indexes": "admincreate" # TODO: modify this dynamically upon tests execution and then return back to normal mdt...
        },
     },
     "parallel": {
@@ -3045,6 +3049,88 @@ class MDTUI(TestCase):
         self.assertNotContains(response, "end_date")
         self.assertNotContains(response, "Undefined")
 
+    def test_78_forbidden_indexes_adding_restrictions(self):
+        """
+        Refs #700 Feature: MDT/MUI fixed choice index fields
+
+        Fully tests part 2 of this feature
+        (with warning and blocking farther document upload for new indexes)
+        """
+        # Modified doc1 dict for our needs
+        test_doc_dict = {
+            'date': date_standardized('2012-03-06'),
+            'description': 'Test Document Number 1',
+            'Employee ID': '1234567890',
+            'Required Date': date_standardized('2012-03-07'),
+            'Employee Name': 'Someone Special',
+            'Friends ID': '123',
+            'Friends Name': 'Andrew',
+            'Additional': 'Something for 1',
+            }
+        # Changing MDT to have 1 admincreate perms field.
+        operating_mdt = 'mdt2'
+        mdt = MetaDataTemplate.get(docid=operating_mdt)
+        mdt.fields[u'1'][u'create_new_indexes'] = u'open'
+        mdt.fields[u'2'][u'create_new_indexes'] = u'admincreate'
+        mdt.save()
+
+        # Check new indexes are normally added with admin priviledges.
+        response = self._78_test_helper(test_doc_dict)
+        self.assertContains(response, MDTUI_ERROR_STRINGS['NEW_KEY_VALUE_PAIR']+'Employee Name: Someone Special')
+        self.assertContains(response, MDTUI_ERROR_STRINGS['NEW_KEY_VALUE_PAIR']+'Employee ID: 1234567890')
+        self.assertNotContains(response, MDTUI_ERROR_STRINGS['ADMINLOCKED_KEY_ATTEMPT'])
+
+        # Relogin with non admin user
+        self.client.logout()
+        self.client.login(username=username_2, password=password_2)
+
+        # Check new indexes are disabling the upload form with non staff/admin person
+        response = self._78_test_helper(test_doc_dict)
+        self.assertContains(response, MDTUI_ERROR_STRINGS['NEW_KEY_VALUE_PAIR']+'Employee Name: Someone Special')
+        self.assertContains(response, MDTUI_ERROR_STRINGS['NEW_KEY_VALUE_PAIR']+'Employee ID: 1234567890')
+        self.assertContains(response, MDTUI_ERROR_STRINGS['ADMINLOCKED_KEY_ATTEMPT']+'Employee Name')
+
+        # Making this field locked
+        mdt.fields[u'2'][u'create_new_indexes'] = u'locked'
+        mdt.save()
+
+        # Check both admin and non admin can not add new values to locked key
+        response = self._78_test_helper(test_doc_dict)
+        self.assertContains(response, MDTUI_ERROR_STRINGS['LOCKED_KEY_ATTEMPT']+'Employee Name')
+
+        self.client.logout()
+        self.client.login(username=username, password=password)
+
+        response = self._78_test_helper(test_doc_dict)
+        self.assertContains(response, MDTUI_ERROR_STRINGS['LOCKED_KEY_ATTEMPT']+'Employee Name')
+
+        # Cleaning up MDT for farther tests
+        del mdt.fields[u'1'][u'create_new_indexes']
+        del mdt.fields[u'2'][u'create_new_indexes']
+        mdt.save()
+
+    def _78_test_helper(self, test_doc_dict):
+        url = reverse('mdtui-index-type')
+        response = self.client.post(url, {test_mdt_docrule_id: 'docrule'})
+        self.assertEqual(response.status_code, 302)
+        url = reverse('mdtui-index-details')
+        response = self.client.get(url)
+        rows_dict = self._read_indexes_form(response)
+        post_dict = self._convert_doc_to_post_dict(rows_dict, test_doc_dict)
+        response = self.client.post(url, post_dict)
+        self.assertEqual(response.status_code, 302)
+        url = reverse('mdtui-index-source')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        return response
+
+    def test_79_choice_type_field(self):
+        """
+        Refs #700 Feature: MDT/MUI fixed choice index fields
+        """
+        # TODO: Make testing of search and adding indexes for documents with choice fields.
+        pass
+
     def test_z_cleanup(self):
         """
         Cleaning up after all tests finished.
@@ -3071,9 +3157,9 @@ class MDTUI(TestCase):
 
         # Compacting CouchDB dmscouch/mdtcouch DB's after tests
         server = Server()
-        db1 = server.get_or_create_db("dmscouch")
+        db1 = server.get_or_create_db(couchdb_name)
         db1.compact()
-        db2 = server.get_or_create_db("mdtcouch")
+        db2 = server.get_or_create_db(couchdb_mdts_name)
         db2.compact()
 
     def _read_indexes_form(self, response):
@@ -3249,6 +3335,20 @@ class MDTUI(TestCase):
         for row in r:
             firstdoc = row['doc']
         return firstdoc
+
+    def _open_mdt(self, mdt_name, db_name='mdtcouch_test'):
+        """Opens reads and returns an instance of MDT in CouchDB"""
+        mdt = {}
+        server = Server()
+        db = server.get_or_create_db(db_name)
+        r = db.view(
+            '_all_docs',
+            key=mdt_name,
+            include_docs=True,
+        )
+        for row in r:
+            mdt = row['doc']
+        return mdt
 
     def _check_search_results_order(self, response):
         """Checks MUI search results page against regexp to determine document names order in a page"""
