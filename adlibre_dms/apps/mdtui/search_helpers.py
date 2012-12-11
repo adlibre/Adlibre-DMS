@@ -10,6 +10,7 @@ Author: Iurii Garmash
 import logging
 
 from forms_representator import SEARCH_STRING_REPR
+from forms_representator import get_mdts_for_docrule
 
 from parallel_keys import ParallelKeysManager
 from mdt_manager import MetaDataTemplateManager
@@ -159,3 +160,41 @@ def get_mdts_by_names(names_list):
     manager = MetaDataTemplateManager()
     mdts = manager.get_mdts_by_name(names_list)
     return mdts
+
+def check_for_forbidden_new_keys_created(document_indexes, docrule, user):
+    """Checks for user ability to add new key's value
+
+    @param document_indexes is a set of user entered indexing data of specific document
+    @param docrule is current docrule id
+    @param user is a current request.user"""
+    user_locked_keys = []
+    mdts = get_mdts_for_docrule(docrule)
+    manager = MetaDataTemplateManager()
+    # Parsing MDT's
+    admin_restricted_keys, locked_keys = manager.get_restricted_keys_names(mdts)
+    # doing nothig for admincreate keys if user is staff or superuser
+    if user.is_staff or user.is_superuser:
+        admin_restricted_keys = []
+        # Checking all keys locked for editing to staff or superuser only
+    for key in admin_restricted_keys:
+        value = document_indexes[key]
+        exists = check_docs_for_existence(key, value, docrule)
+        if not exists:
+            user_locked_keys.append((key, 'adminlock'))
+            # Checking all the keys that are marked locked
+    for key in locked_keys:
+        value = document_indexes[key]
+        exists = check_docs_for_existence(key, value, docrule)
+        if not exists:
+            user_locked_keys.append((key, 'locked'))
+    return user_locked_keys
+
+def check_docs_for_existence(key, value, docrule):
+    """Check if at least one document with specified docrule, key and value exist"""
+    documents = CouchDocument.view('dmscouch/search_autocomplete', key=[docrule, key, value], reduce=False)
+    if documents.__len__() > 0:
+        # There is at least one this type document...
+        return True
+    else:
+        # No such documents
+        return False
