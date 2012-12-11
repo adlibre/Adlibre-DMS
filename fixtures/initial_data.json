@@ -984,6 +984,42 @@
         }
     },
     {
+        "pk": 9,
+        "model": "dms_plugins.doccodepluginmapping",
+        "fields": {
+            "before_retrieval_plugins": [
+                5,
+                7,
+                15,
+                17,
+                24
+            ],
+            "doccode": 9,
+            "storage_plugins": [
+                4,
+                14
+            ],
+            "database_storage_plugins": [
+                23
+            ],
+            "before_removal_plugins": [
+                12,
+                20,
+                22
+            ],
+            "before_update_plugins": [
+                19,
+                21,
+                25
+            ],
+            "active": true,
+            "before_storage_plugins": [
+                1,
+                2
+            ]
+        }
+    },
+    {
         "pk": 1, 
         "model": "doc_codes.documenttyperule", 
         "fields": {
@@ -1107,6 +1143,22 @@
             "split_string": "0:3,4:8",
             "active": true,
             "barcode_format": "CCC-%s",
+            "doccode_type": "1",
+            "no_doccode": false
+        }
+    },
+    {
+        "pk": 9,
+        "model": "doc_codes.documenttyperule",
+        "fields": {
+            "regex": "TST[0-9]{8}",
+            "sequence_last": 0,
+            "description": "Testig Docrule for Android scan and upload to DMS API example",
+            "title": "Barcode test",
+            "barcode_zfill": 0,
+            "split_string": "0:3,4:8",
+            "active": true,
+            "barcode_format": "TST%s",
             "doccode_type": "1",
             "no_doccode": false
         }
