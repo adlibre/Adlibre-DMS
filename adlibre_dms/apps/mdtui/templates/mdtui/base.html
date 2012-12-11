@@ -16,6 +16,7 @@
     <script src="{{ STATIC_URL }}js/bootstrap-collapse.js"></script>
     <script src="{{ STATIC_URL }}js/bootstrap-tab.js"></script>
     <script src="{{ STATIC_URL }}js/bootstrap-datepicker.js"></script>
+    <script src="{{ STATIC_URL }}js/bootstrap-tooltip.js"></script>
     <script src="{{ STATIC_URL }}js/bootstrap-modal.js"></script>
     <script src="{{ STATIC_URL }}js/keymaster.min.js"></script>
     {% compress js %}
@@ -95,6 +96,14 @@
             background-color: #fafad2;
         }
         {% endif %}
+
+        /* Fix for Search/Index forms to highlight elements like other form one's  */
+        select:focus {
+            border-color: rgba(82, 168, 236, 0.8);
+            box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(82, 168, 236, 0.6);
+            outline: 0 none;
+        }
+
     </style>
     <link href="{{ STATIC_URL }}css/dms-icons.css" rel="stylesheet">
     {% endblock %}

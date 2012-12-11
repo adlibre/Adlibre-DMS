@@ -104,30 +104,45 @@ def processEditDocumentIndexForm(request, doc):
         return None
 
 def process_indexes_field(key, field, data):
+    """Convertor of field sbmited data to DMS secondary key"""
     index_tuple = ()
     # UPPERCASE Init if set attribute
-    upper = False
-    try:
-        if field.is_uppercase:
-            upper = True
-    except AttributeError:
-        pass
-        # FIXME: Nested exceptions.. bad
-    try:
-        # For dynamic form fields
-        if not upper:
-            index_tuple = (field.field_name, data[unicode(key)].strip(' \t\n\r'))
+    force_upper = False
+    if "is_uppercase" in field.__dict__ and field.is_uppercase == True:
+        force_upper = True
+    # Choices field processing init
+    choice_field = False
+    if field.__class__.__name__ == "ChoiceField":
+        choice_field = True
+    if choice_field:
+        fvalue = False
+        if unicode(key) in data.iterkeys():
+            searched_value = int(data[unicode(key)])
+            for choice in field.choices:
+                if choice[0]==searched_value:
+                    fvalue = choice[1]
+                    break
         else:
-            index_tuple = (field.field_name, data[unicode(key)].upper().strip(' \t\n\r'))
-    except (AttributeError, KeyError):
-        try:
-            # For native form fields
-            if not upper:
-                index_tuple = (key, data[unicode(key)].strip(' \t\n\r'))
+            for choice in field.choices:
+                if choice[0]==key:
+                    fvalue = choice[1]
+                    break
+        if fvalue:
+            index_tuple = (field.field_name, fvalue)
+    else:
+        if unicode(key) in data.iterkeys():
+            if "field_name" in field.__dict__:
+                # For Dynamic form fields
+                if not force_upper:
+                    index_tuple = (field.field_name, data[unicode(key)].strip(' \t\n\r'))
+                else:
+                    index_tuple = (field.field_name, data[unicode(key)].upper().strip(' \t\n\r'))
             else:
-                index_tuple = (key, data[unicode(key)].upper().strip(' \t\n\r'))
-        except KeyError:
-            pass
+                # For native form fields
+                if not force_upper:
+                    index_tuple = (key, data[unicode(key)].strip(' \t\n\r'))
+                else:
+                    index_tuple = (key, data[unicode(key)].upper().strip(' \t\n\r'))
     return index_tuple
 
 def initEditIndexesForm(request, doc, given_indexes=None):
@@ -199,7 +214,8 @@ def extract_secondary_keys_from_form(form):
         try:
             # if field is dynamic
             if field.field_name:
-                if not field.__class__.__name__ == "DateField":
+                f_name = field.__class__.__name__
+                if f_name != "DateField" or f_name != "ChoiceField":
                     keys_list.append(field.field_name)
         except AttributeError:
             # standard field
@@ -216,7 +232,8 @@ def unify_index_info_couch_dates_fmt(index_info):
         if not index_key=='date':
             try:
                 value = index_info[index_key]
-                index_date = datetime.datetime.strptime(value, settings.DATE_FORMAT)
+                # Simple check if we can convert it...
+                datetime.datetime.strptime(value, settings.DATE_FORMAT)
                 clean_info[index_key] = str_date_to_couch(value)
             except ValueError:
                 clean_info[index_key] = index_info[index_key]

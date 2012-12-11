@@ -33,7 +33,7 @@ test_tag = 'test_tag'
 
 class APITest(DMSTestCase):
 
-    def test_00_setup(self):
+    def test_100_setup(self):
         """
         Load Test Data
         """
@@ -80,6 +80,12 @@ class APITest(DMSTestCase):
         url = reverse('api_file', kwargs={'code': doc, 'suggested_format': 'pdf',}) + '?r=%s&h=%s' % (revision, hash)
         response = self.client.get(url)
         self.assertContains(response, '', status_code=200)
+
+    def test_api_file_jpeg(self):
+        """ Testing upload of JPG file into DMS api"""
+        self.client.login(username=self.username, password=self.password)
+        response = self._upload_file('TST12345678', suggested_format='jpg', check_response=False)
+        self.assertEqual(response.status_code, 200)
 
     def test_api_fileinfo(self):
         self.client.login(username=self.username, password=self.password)

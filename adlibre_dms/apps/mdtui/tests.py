@@ -79,6 +79,7 @@ indexes_match_strings = [
     'Employee',
     'Tests Uppercase Field',
     'Additional',
+    'Chosen Field',
 ]
 main_form_match_regexp = ').+?name=\"(\d+|\d+_from|\d+_to)\"'
 indexes_form_match_pattern = ''
@@ -105,7 +106,8 @@ mdt1 = {
            "type": "string",
            "length": 60,
            "field_name": "Friends Name",
-           "description": "Name of tests person"
+           "description": "Name of tests person",
+           "edit": "locked"
        },
        "3": {
            "type": "date",
@@ -126,12 +128,14 @@ mdt2 = {
        "1": {
            "type": "integer",
            "field_name": "Employee ID",
-           "description": "Unique (Staff) ID of the person associated with the document"
+           "description": "Unique (Staff) ID of the person associated with the document",
+           "create_new_indexes": "open" # TODO: modify this dynamically upon tests execution and then return back to normal mdt...
        },
        "2": {
            "type": "string",
            "field_name": "Employee Name",
-           "description": "Name of the person associated with the document"
+           "description": "Name of the person associated with the document",
+           "create_new_indexes": "admincreate" # TODO: modify this dynamically upon tests execution and then return back to normal mdt...
        },
     },
     "parallel": {
@@ -203,6 +207,21 @@ mdt6 = {
             "field_name": "Additional",
             "description": "shouldd have 2 docrules but include Adlibre invoi.... and so on",
             "type": "string"
+        }
+    },
+    "parallel": {}
+}
+
+mdt7 = {
+    "_id": "mdt7",
+    "description": "Test MDT 7",
+    "docrule_id": [str(test_mdt_docrule_id3), ],
+    "fields": {
+        "1": {
+            "field_name": "Chosen Field",
+            "description": "defines fixed amount of choices",
+            "type": "choice",
+            "choices": ["choice one", "choice two", "choice three", "choice four", "choice 5"]
         }
     },
     "parallel": {}
@@ -300,6 +319,7 @@ m5_doc1_dict = {
     'description': 'Test Document Number 1 for MDT 5',
     'Employee': 'Andrew',
     'Tests Uppercase Field': 'some data',
+    'Chosen Field': "3",
 }
 
 m5_doc2_dict = {
@@ -307,6 +327,7 @@ m5_doc2_dict = {
     'description': 'Test Document Number 2 for MDT 5',
     'Employee': 'Andrew',
     'Tests Uppercase Field': 'some other data',
+    'Chosen Field': "4",
 }
 
 doc1 = 'ADL-0001'
@@ -605,6 +626,7 @@ class MDTUI(TestCase):
                     mdt4,
                     mdt5,
                     mdt6,
+                    mdt7,
                  ]:
             mdt = json.dumps(m)
             response = self.client.post(url, {"mdt": mdt})
@@ -2485,7 +2507,61 @@ class MDTUI(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Adlibre invoices Results")
 
-    def test_65_edit_document_indexes_access(self):
+    def test_65_search_results_sorting(self):
+        """Refs #766 MUI: Sortable Search Results"""
+        unordered_docs = ['CCC-0002', 'CCC-0001', 'BBB-0003']
+        descending_test1 = ['CCC-0001', 'CCC-0002', 'BBB-0003']
+        ascending_date1 = ['BBB-0003', 'CCC-0002', 'CCC-0001']
+        descending_description = ['BBB-0003', 'CCC-0001', 'CCC-0002']
+        sort1_query1 = { "order": "icon-chevron-up",
+                         "sorting_key": "Tests Uppercase Field", }
+        sort1_query2 = { "order": "icon-chevron-down",
+                         "sorting_key": "Tests Uppercase Field", }
+        sort2_query1 = { "order": "icon-chevron-up",
+                         "sorting_key": "Creation Date", }
+        sort2_query2 = { "order": "icon-chevron-down",
+                         "sorting_key": "Creation Date", }
+        sort3_query1 = { "order": "icon-chevron-up",
+                         "sorting_key": "Description", }
+        sort3_query2 = { "order": "icon-chevron-down",
+                         "sorting_key": "Description", }
+        # Getting normal default results
+        url = reverse('mdtui-search')
+        response = self.client.post(url, select_mdt5)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Employee')
+        response = self.client.post(new_url, search_MDT_5)
+        self.assertEqual(response.status_code, 302)
+        results_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(results_url)
+        self.assertEqual(response.status_code, 200)
+        # Proper responce check (Just in case...)
+        self.assertContains(response, 'BBB-0003')
+        self.assertNotContains(response, 'BBB-0002')
+        self.assertNotContains(response, 'BBB-0001')
+        self.assertContains(response, 'CCC-0001')
+        self.assertContains(response, 'CCC-0002')
+        self.assertNotContains(response, 'CCC-0003')
+        # Checking order we have here (default order)
+        code_order = self._check_search_results_order(response)
+        self.assertEqual(code_order, unordered_docs)
+        # Getting new ordered list of docs
+        self._check_sorting_order_results(results_url, sort1_query1, unordered_docs)
+        # Getting docs in descending order now with docs without this key in the bottom of results
+        self._check_sorting_order_results(results_url, sort1_query2, descending_test1)
+        # Getting docs in ascending order sorting by Creation Date
+        self._check_sorting_order_results(results_url, sort2_query1, ascending_date1)
+        # Descending order by Creation Date
+        self._check_sorting_order_results(results_url, sort2_query2, descending_test1)
+        # Description sorting ascending
+        self._check_sorting_order_results(results_url, sort3_query1, unordered_docs)
+        # Description sorting descending
+        self._check_sorting_order_results(results_url, sort3_query2, descending_description)
+
+    def test_66_edit_document_indexes_access(self):
         """
         Refs #764 - Feature: MUI Edit Metadata
 
@@ -2575,7 +2651,7 @@ class MDTUI(TestCase):
         self.assertNotContains(response, edit_btn_string)
         self.assertNotContains(response, "BBB-0003") # We're not under admin now
 
-    def test_66_edit_document_indexes_step_rendered_properly(self):
+    def test_67_edit_document_indexes_step_rendered_properly(self):
         """
         Refs #764 - Feature: MUI Edit Metadata
 
@@ -2587,7 +2663,7 @@ class MDTUI(TestCase):
         self._check_edit_step_with_document(edit_document_name_1,  m5_doc1_dict)
         self._check_edit_step_with_document(edit_document_name_2, m2_doc1_dict)
 
-    def test_67_edit_document_indexes_updating_index(self):
+    def test_68_edit_document_indexes_updating_index(self):
         """
         Refs #764 - Feature: MUI Edit Metadata
 
@@ -2626,7 +2702,7 @@ class MDTUI(TestCase):
         if not '1' in couch_doc['index_revisions']:
             raise AssertionError('CouchDB Document index_revisions has no revisions')
 
-    def test_68_edit_document_indexes_updating_index(self):
+    def test_69_edit_document_indexes_updating_index(self):
         """
         Refs #764 - Feature: MUI Edit Metadata
 
@@ -2699,7 +2775,7 @@ class MDTUI(TestCase):
         if not '2' in couch_doc['revisions']:
             raise AssertionError('Document has not been updated by API. Something went wrong there.')
 
-    def test_69_only_DMS_superuser_sees_admin_entry_menu_title(self):
+    def test_70_only_DMS_superuser_sees_admin_entry_menu_title(self):
         """ Superuser only has shortcut in me to acces django admin"""
         url = reverse('mdtui-home')
         django_admin_btn_name = 'DMS Admin'
@@ -2713,7 +2789,7 @@ class MDTUI(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, django_admin_btn_name)
 
-    def test_70_edit_document_indexes_updating_index(self):
+    def test_71_edit_document_indexes_updating_index(self):
         """
         Refs #829 Bug: Files Secondary indexes contain username and user PK
 
@@ -2728,7 +2804,7 @@ class MDTUI(TestCase):
         if 'metadata_user_name' in couch_doc['mdt_indexes']:
             raise AssertionError("""CouchDB Document's secondary indexes Contains wrong indexes: "metadata_user_name" """)
 
-    def test_71_redirect_after_successful_edit(self):
+    def test_72_redirect_after_successful_edit(self):
         """
         Refs #832 Edit indexes preserves META_HTTP_REFERER url through whole process
         Refs #833: Edit document indexes new error handling	New	Iurii Garmash
@@ -2779,7 +2855,7 @@ class MDTUI(TestCase):
         response = self.client.get(new_url)
         self.assertContains(response, MDTUI_ERROR_STRINGS['ERROR_EDIT_INDEXES_FINISHED'])
 
-    def test_71_preserving_editing_indexes_only_where_needed(self):
+    def test_73_preserving_editing_indexes_only_where_needed(self):
         """
         Refs #835 Edit metadata provides wrong file index
 
@@ -2791,12 +2867,14 @@ class MDTUI(TestCase):
         second_doc_name = 'CCC-0002'
         first_doc_new_indexes = {
             '0': 'SOME DATA',
-            '1': 'Andrew and his friend',
+            '1': '4',
+            '2': 'Andrew and his friend',
             'description': 'Editing of builtin field test',
         }
         second_doc_new_indexes = {
             '0': 'SOME OTHER DATA',
-            '1': 'Andrew',
+            '1': '4',
+            '2': 'Andrew',
             'description': 'Test Document Number 2 for MDT 5',
         }
         first_only_should_contain = 'Andrew and his friend'
@@ -2825,7 +2903,7 @@ class MDTUI(TestCase):
         self.assertContains(response, first_doc_name)
         self.assertNotContains(response, first_only_should_contain)
 
-    def test_72_typeahead_working_in_edit_indexes(self):
+    def test_74_typeahead_working_in_edit_indexes(self):
         """
         Refs #836 Typeahead not working with single key (non parallel) field.
 
@@ -2864,7 +2942,7 @@ class MDTUI(TestCase):
         for value in typ_call_2.itervalues():
             self.assertContains(response, value)
 
-    def test_73_paginator_exists(self):
+    def test_75_paginator_exists(self):
         """Refs #805: Simple paginator rendering test"""
         url = reverse('mdtui-search-type')
         data = {'mdt': test_mdt_id_5}
@@ -2882,25 +2960,7 @@ class MDTUI(TestCase):
         self.assertContains(response, '/mdtui/search/results?page=1">1') # Paginator page one present
         self.assertNotContains(response, 'Next') # Paginator page next
 
-#    def test_74_paginator_empty_search_results(self):
-#        """Refs 805: Paginator rendering in empty search results conditions"""
-#        url = reverse('mdtui-search-type')
-#        data = {'mdt': test_mdt_id_5}
-#        response = self.client.post(url, data)
-#        self.assertEqual(response.status_code, 302)
-#        url = reverse('mdtui-search-options')
-#        response = self.client.get(url)
-#        response = self.client.post(url, search_MDT_5_wrong)
-#        self.assertEqual(response.status_code, 302)
-#        new_url = self._retrieve_redirect_response_url(response)
-#        response = self.client.get(new_url)
-#        self.assertEqual(response.status_code, 200)
-#        self.assertNotContains(response, 'results matching query.')
-#        self.assertNotContains(response, 'Page')
-#        self.assertNotContains(response, '/mdtui/search/results?page=1">1') # Paginator page one present
-#        self.assertNotContains(response, 'Next') # Paginator page next
-
-    def test_75_search_includes_ending_date_range_variable(self):
+    def test_76_search_includes_ending_date_range_variable(self):
         """
         Refs bug #840 Search date range with one date bug
 
@@ -2963,7 +3023,7 @@ class MDTUI(TestCase):
         self.assertNotContains(response, 'ADL-')
         self.assertNotContains(response, 'CCC-0002')
 
-    def test_76_indexing_date_rendering(self):
+    def test_77_indexing_date_rendering(self):
         """Refs #786 Checking if 'Creation date' Rendered properly in both index and search."""
         # Testing search results for proper rendering
         url = reverse('mdtui-search-type')
@@ -3190,3 +3250,14 @@ class MDTUI(TestCase):
             firstdoc = row['doc']
         return firstdoc
 
+    def _check_search_results_order(self, response):
+        """Checks MUI search results page against regexp to determine document names order in a page"""
+        prog = re.compile("""\/mdtui\/view\/(?P<code>[A-Z]{3}-[0-9]{4})""", re.DOTALL)
+        matches = prog.findall(str(response))
+        return matches
+
+    def _check_sorting_order_results(self, results_url, sort_query, result):
+        """Helper for test (search_results_sorting) to reduce redundancy in check results"""
+        response = self.client.post(results_url, sort_query)
+        code_order = self._check_search_results_order(response)
+        self.assertEqual(code_order, result)

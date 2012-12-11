@@ -13,6 +13,9 @@
                     {% if field|field_type = "CharField" %}
                         <span class="add-on"><i class="dms-page-white-edit"></i></span>
                     {% endif %}
+                    {% if field|field_type = "ChoiceField" %}
+                        <span class="add-on"><i class="dms-application-view-list"></i></span>
+                    {% endif %}
                 {% endif %}
                 {% if not field.value and field.field.initial %}
                     {# Taking field initial data for dynamic fields #}
@@ -22,8 +25,15 @@
                     {% set_field_value field.value %}
                      {# {{ field|attr:'class:input-xxlarge'|attr:'placeholder:{{ placeholder }}' }}  #}
                 {% endif %}
+                {% if not field|field_type = "ChoiceField" %}
                 <input id="{{ field.id_for_label }}" class="input-xxlarge" type="text" maxlength="{{ field.field.max_length }}" value="{{ field_value }}" name="{{ field.name }}" placeholder="{% if field|field_type = "IntegerField" %}1234567890{% endif %}{% if field|field_type = "CharField" %}text{% endif %}" autocomplete="off" required="required" {% if field.name == "description" %}autofocus="autofocus"{% endif %}>
-
+                {% else %}
+                    <select id="{{ field.id_for_label }}" class="input-xxlarge" name="{{ field.name }}" value="{{ field_value|choice_id }}" required="required">
+                        {% for choice in field.field.choices %}
+                            <option {% if field_value|choice_id == choice|choice_id %}selected="selected" {% endif %}value="{{ choice|choice_id }}">{{ choice|choice_name }}</option>
+                        {% endfor %}
+                    </select>
+                {% endif %}
                 {%  if field.errors %}
                     {%  for message in field.errors.messages %}
                         <span class="help-inline">
@@ -54,6 +64,5 @@
                 </div>
             </div>
         </div>
-
     </div>
 {% endif %}

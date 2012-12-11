@@ -38,6 +38,7 @@ from view_helpers import cleanup_indexing_session
 from view_helpers import cleanup_mdts
 from view_helpers import _cleanup_session_var
 from view_helpers import unify_index_info_couch_dates_fmt
+from search_helpers import check_for_forbidden_new_keys_created
 from search_helpers import ranges_validator
 from search_helpers import recognise_dates_in_search
 from search_helpers import cleanup_document_keys
@@ -68,6 +69,8 @@ MDTUI_ERROR_STRINGS = {
     'NO_MDT_NO_DOCRULE': 'You must select Meta Data Template or Document Type.',
     'NOT_VALID_INDEXING': 'You can not barcode or upload document without any indexes',
     'ERROR_EDIT_INDEXES_FINISHED': 'You can not visit this page directly',
+    'LOCKED_KEY_ATTEMPT': 'You are trying to add forbidden value to a restricted key: ',
+    'ADMINLOCKED_KEY_ATTEMPT': 'Only Administrator can add a value to this key: ',
 }
 
 MUI_SEARCH_PAGINATE = getattr(settings, 'MUI_SEARCH_PAGINATE', 20)
@@ -246,6 +249,23 @@ def search_results(request, step=None, template='mdtui/search.html'):
     export = False
     cache_documents_for = 3600 # Seconds
     page = request.GET.get('page')
+    # Sorting UI interactions
+    sorting_field = request.POST.get('sorting_key', '') or ''
+    order = request.POST.get('order', '') or ''
+    query_order = ''
+    if order == "icon-chevron-up":
+        query_order = "ascending"
+    elif order == "descending":
+        query_order = "descending"
+    if sorting_field and order:
+        request.session["sorting_field"] = sorting_field
+        request.session["order"] = order
+    else:
+        try:
+            sorting_field = request.session["sorting_field"]
+            order = request.session["order"]
+        except KeyError:
+            pass
     if not page:
         page = 1
     else:
@@ -293,15 +313,30 @@ def search_results(request, step=None, template='mdtui/search.html'):
 
     cache = get_cache('mui_search_results')
     # Caching by document keys and docrules list, as a cache key
-    cache_key = json.dumps(document_keys)+json.dumps(docrule_ids)
+    cache_key = json.dumps(document_keys)+json.dumps(docrule_ids)+json.dumps(sorting_field)+json.dumps(order)
     cached_documents = cache.get(cache_key, None)
     if cleaned_document_keys and not cached_documents:
         if cleaned_document_keys:
+            # TODO: speedup sorting using document_names from cache not to search again.
+            # Redefining proper sorting results request
+            if sorting_field:
+                if sorting_field == "Creation Date":
+                    sorting_field_query = "metadata_created_date"
+                elif sorting_field == "Description":
+                    sorting_field_query = "metadata_description"
+                elif sorting_field == "Type":
+                    sorting_field_query = "metadata_doc_type_rule_id"
+                else:
+                    sorting_field_query = sorting_field
+            else:
+                sorting_field_query = ''
             # Using DMS actual search method for this
             query = DMSSearchQuery({
                 'document_keys':cleaned_document_keys,
                 'docrules':docrule_ids,
                 'only_names': True,
+                'sorting_key': sorting_field_query,
+                'sorting_order': query_order,
             })
             document_names = DMSSearchManager().search_dms(query).get_document_names()
         cache.set(cache_key, document_names, cache_documents_for)
@@ -337,9 +372,11 @@ def search_results(request, step=None, template='mdtui/search.html'):
     context = { 'step': step,
                 'paginated_documents': paginated_documents,
                 'page': page,
-                'document_keys': document_keys,
+                'document_keys': cleaned_document_keys,
                 'mdts': mdts_list,
                 'warnings': warnings,
+                'sorting_field': sorting_field,
+                'order': order
                 }
     return render_to_response(template, context, context_instance=RequestContext(request))
 
@@ -566,6 +603,7 @@ def indexing_details(request, step=None, template='mdtui/indexing.html'):
 def indexing_source(request, step=None, template='mdtui/indexing.html'):
     """Indexing: Step 3: Upload File / Associate File / Print Barcode"""
     context = {}
+    errors = []
     warnings = []
     valid_call = True
     temp_vars = {}
@@ -606,7 +644,17 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
         for new_key, new_value in new_sec_key_pairs.iteritems():
             warnings.append(MDTUI_ERROR_STRINGS['NEW_KEY_VALUE_PAIR'] + new_key + ': ' + new_value)
 
-    if upload_form.is_valid() or barcode_form.is_valid():
+    # Checking for forbidden keys and changing view behaviour if found
+    forbidden_keys = check_for_forbidden_new_keys_created(document_keys, docrule, request.user)
+    if forbidden_keys:
+        valid_call = False
+        for forbidden_key in forbidden_keys:
+            if forbidden_key[1] == 'adminlock':
+                errors.append(MDTUI_ERROR_STRINGS['ADMINLOCKED_KEY_ATTEMPT'] + forbidden_key[0])
+            elif forbidden_key[1] == 'locked':
+                errors.append(MDTUI_ERROR_STRINGS['LOCKED_KEY_ATTEMPT'] + forbidden_key[0])
+
+    if upload_form.is_valid() or barcode_form.is_valid() and valid_call:
         if upload_form.is_valid():
             upload_file = upload_form.files['file']
         else:
@@ -638,6 +686,7 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
                       'document_keys': document_keys,
                       'warnings': warnings,
                       'barcode': barcode,
+                      'error_warnings': errors,
                     })
 
     return render_to_response(template, context, context_instance=RequestContext(request))

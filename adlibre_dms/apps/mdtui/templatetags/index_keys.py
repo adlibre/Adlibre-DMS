@@ -202,3 +202,36 @@ def set_field_value(context, field_value):
     else:
         context['field_value'] = ''
     return ''
+
+@register.simple_tag(takes_context=True)
+def set_key(context, key):
+    """populates variable into a context"""
+    if key:
+        context['key'] = key
+    else:
+        context['key'] = ''
+    return ''
+
+@register.filter
+def choice_id(choice):
+    """
+    Returns Choice type field's choice id for form rendering
+    """
+    try:
+        resp = choice[0]
+    except IndexError:
+        resp = ''
+        pass
+    return resp
+
+@register.filter
+def choice_name(choice):
+    """
+    Returns Choice type field's choice Name (Text) for form rendering
+    """
+    try:
+        resp = choice[1]
+    except IndexError:
+        resp = ''
+        pass
+    return resp
