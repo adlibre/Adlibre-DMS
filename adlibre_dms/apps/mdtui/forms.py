@@ -60,7 +60,6 @@ class DocumentIndexForm(forms.Form):
         setFormData(self, kwds)
 
     def populateFormSecondary(self, kwds):
-        print kwds
         data = {}
         if kwds:
             keys = [k for k in kwds.iterkeys()]
@@ -69,21 +68,21 @@ class DocumentIndexForm(forms.Form):
                     for field in self.fields:
                         if 'field_name' in self.fields[field].__dict__:
                             if key==self.fields[field].__dict__['field_name']:
-                                # TODO: construct set data dict here
-                                print key
-
-                                #self.fields[field].initial = kwds[key]
                                 data[field] = kwds[key]
                                 self.data[field] = kwds[key]
                                 try:
-                                    self.fields[field].initial = int(kwds[key])
+                                    int_value = int(kwds[key])
+                                    self.fields[field].initial = int_value
+                                    self.initial[field] = int_value
                                 except ValueError:
                                     try:
                                         dt = datetime.datetime.strptime(kwds[key], settings.DATE_FORMAT)
                                         self.fields[field].initial = dt
+                                        self.initial[field] = dt
                                     except ValueError:
                                         try:
                                             self.fields[field].initial = kwds[key]
+                                            self.initial[field] = kwds[key]
                                         except ValueError:
                                             pass
         # Form description populated on non search requests
