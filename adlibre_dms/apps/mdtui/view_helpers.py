@@ -45,6 +45,11 @@ def initIndexesForm(request):
         except KeyError:
             pass
 
+    initial_data = {}
+    if not search:
+        if 'document_keys_dict' in request.session.iterkeys():
+            initial_data = request.session['document_keys_dict']
+
     # Selecting form depending on request type
     if search:
         form = DocumentSearchOptionsForm()
@@ -64,9 +69,12 @@ def initIndexesForm(request):
             form.setFields(fields)
 
     if request.POST:
+        # Populating ata into form for POST data
         form.setData(request.POST)
-        form.validation_ok()
-
+    elif initial_data:
+        # Populating initial data for partially proper form rendering
+        form.populateFormSecondary(initial_data)
+    form.validation_ok()
     return form
 
 def processDocumentIndexForm(request):
