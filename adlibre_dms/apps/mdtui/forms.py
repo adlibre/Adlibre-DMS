@@ -59,6 +59,39 @@ class DocumentIndexForm(forms.Form):
     def setData(self, kwds):
         setFormData(self, kwds)
 
+    def populateFormSecondary(self, kwds):
+        print kwds
+        data = {}
+        if kwds:
+            keys = [k for k in kwds.iterkeys()]
+            if keys:
+                for key in keys:
+                    for field in self.fields:
+                        if 'field_name' in self.fields[field].__dict__:
+                            if key==self.fields[field].__dict__['field_name']:
+                                # TODO: construct set data dict here
+                                print key
+
+                                #self.fields[field].initial = kwds[key]
+                                data[field] = kwds[key]
+                                self.data[field] = kwds[key]
+                                try:
+                                    self.fields[field].initial = int(kwds[key])
+                                except ValueError:
+                                    try:
+                                        dt = datetime.datetime.strptime(kwds[key], settings.DATE_FORMAT)
+                                        self.fields[field].initial = dt
+                                    except ValueError:
+                                        try:
+                                            self.fields[field].initial = kwds[key]
+                                        except ValueError:
+                                            pass
+        # Form description populated on non search requests
+        if 'description' in keys:
+            self.fields['description'].initial = kwds['description']
+            self.base_fields['description'].initial = kwds['description']
+        pass
+
     def validation_ok(self):
         """
         Form validation sequence overridden here.
