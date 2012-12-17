@@ -71,6 +71,7 @@ def show_doc_report(parsable=False):
         d = json.loads(d_js)
         revisions = d['revisions']
         mdt_indexes = d['mdt_indexes']
+        metadata_created_date = str(d['metadata_created_date'])
 
         # Get employee Name (JTG Specific index)
         try:
@@ -105,9 +106,9 @@ def show_doc_report(parsable=False):
 
         # Format the output
         if parsable:
-            print '"%s", "%s", "%s", "%s"' % (bar_code, revisions_count, employee, h_code)
+            print '"%s", "%s", "%s", "%s", "%s"' % (bar_code, revisions_count, employee, h_code, metadata_created_date)
         else:
-            print '%s, revision count: %s, names: %s, employee: %s, hashcode: %s' % (bar_code, revisions_count, str(revision_names), employee, h_code)
+            print '%s, revision count: %s, names: %s, employee: %s, hashcode: %s, date: %s' % (bar_code, revisions_count, str(revision_names), employee, h_code, metadata_created_date)
 
 if __name__ == "__main__":
     """
