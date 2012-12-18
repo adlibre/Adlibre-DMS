@@ -3124,7 +3124,38 @@ class MDTUI(TestCase):
         self.assertEqual(response.status_code, 200)
         return response
 
-    def test_79_choice_type_field(self):
+    def test_79_indexes_persistent_after_revisit_on_indexing_form(self):
+        """Refs #869 MUI Improvement Indexing Step2 Indexes values
+
+        Values stay after submitting them and returning for step 2 again.
+        e.g. to correct any value or because of non field form errors"""
+        # Selecting Document Type Rule
+        url = reverse('mdtui-index-type')
+        response = self.client.post(url, {test_mdt_docrule_id: 'docrule'})
+        self.assertEqual(response.status_code, 302)
+        # Getting indexes form and matching form Indexing Form fields names
+        url = reverse('mdtui-index-details')
+        response = self.client.get(url)
+        rows_dict = self._read_indexes_form(response)
+        post_dict = self._convert_doc_to_post_dict(rows_dict, doc1_dict)
+        # Adding Document Indexes
+        response = self.client.post(url, post_dict)
+        self.assertEqual(response.status_code, 302)
+        url = reverse('mdtui-index-source')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        # check indexes on next page
+        for key in rows_dict.iterkeys():
+            self.assertContains(response, key)
+        for key in post_dict.itervalues():
+            self.assertContains(response, key)
+        # Going back to step 2 (adding indexes form) and checking if it's populated.
+        url = reverse('mdtui-index-details')
+        response = self.client.get(url)
+        for key, value in post_dict.iteritems():
+            self.assertContains(response, key)
+
+    def test_80_choice_type_field(self):
         """
         Refs #700 Feature: MDT/MUI fixed choice index fields
         """
