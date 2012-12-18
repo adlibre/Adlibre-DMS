@@ -85,11 +85,10 @@ class DocumentIndexForm(forms.Form):
                                             self.initial[field] = kwds[key]
                                         except ValueError:
                                             pass
-        # Form description populated on non search requests
-        if 'description' in keys:
-            self.fields['description'].initial = kwds['description']
-            self.base_fields['description'].initial = kwds['description']
-        pass
+                # Form description populated on non search requests
+                if 'description' in keys:
+                    self.fields['description'].initial = kwds['description']
+                    self.base_fields['description'].initial = kwds['description']
 
     def validation_ok(self):
         """
