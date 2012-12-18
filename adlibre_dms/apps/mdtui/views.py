@@ -560,6 +560,7 @@ def indexing_details(request, step=None, template='mdtui/indexing.html'):
     context = {}
     document_keys = None
     warnings = []
+    errors = []
     cleanup_search_session(request)
     docrule_id = None
 
@@ -576,8 +577,19 @@ def indexing_details(request, step=None, template='mdtui/indexing.html'):
     if request.POST:
         secondary_indexes = processDocumentIndexForm(request)
         if secondary_indexes:
-                request.session["document_keys_dict"] = secondary_indexes
-                # Success, allocate barcode
+            request.session["document_keys_dict"] = secondary_indexes
+            # Checking for forbidden keys and changing view behaviour if found
+            forbidden_keys = check_for_forbidden_new_keys_created(secondary_indexes, docrule_id, request.user)
+            if forbidden_keys:
+                for forbidden_key in forbidden_keys:
+                    if forbidden_key[1] == 'adminlock':
+                        errors.append(MDTUI_ERROR_STRINGS['ADMINLOCKED_KEY_ATTEMPT'] + forbidden_key[0])
+                    elif forbidden_key[1] == 'locked':
+                        errors.append(MDTUI_ERROR_STRINGS['LOCKED_KEY_ATTEMPT'] + forbidden_key[0])
+                # Reinitializing form
+                form = initIndexesForm(request)
+            else:
+                # Success, allocate barcode and move on
                 dtr = DocumentTypeRule.objects.get(pk=docrule_id)
                 request.session["barcode"] = dtr.allocate_barcode()
                 return HttpResponseRedirect(reverse('mdtui-index-source'))
@@ -594,6 +606,7 @@ def indexing_details(request, step=None, template='mdtui/indexing.html'):
                       'document_keys': document_keys,
                       'autocomplete_fields': autocomplete_list,
                       'warnings': warnings,
+                      'error_warnings': errors,
                     })
     return render_to_response(template, context, context_instance=RequestContext(request))
 
@@ -603,7 +616,6 @@ def indexing_details(request, step=None, template='mdtui/indexing.html'):
 def indexing_source(request, step=None, template='mdtui/indexing.html'):
     """Indexing: Step 3: Upload File / Associate File / Print Barcode"""
     context = {}
-    errors = []
     warnings = []
     valid_call = True
     temp_vars = {}
@@ -644,16 +656,6 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
         for new_key, new_value in new_sec_key_pairs.iteritems():
             warnings.append(MDTUI_ERROR_STRINGS['NEW_KEY_VALUE_PAIR'] + new_key + ': ' + new_value)
 
-    # Checking for forbidden keys and changing view behaviour if found
-    forbidden_keys = check_for_forbidden_new_keys_created(document_keys, docrule, request.user)
-    if forbidden_keys:
-        valid_call = False
-        for forbidden_key in forbidden_keys:
-            if forbidden_key[1] == 'adminlock':
-                errors.append(MDTUI_ERROR_STRINGS['ADMINLOCKED_KEY_ATTEMPT'] + forbidden_key[0])
-            elif forbidden_key[1] == 'locked':
-                errors.append(MDTUI_ERROR_STRINGS['LOCKED_KEY_ATTEMPT'] + forbidden_key[0])
-
     if upload_form.is_valid() or barcode_form.is_valid() and valid_call:
         if upload_form.is_valid():
             upload_file = upload_form.files['file']
@@ -686,7 +688,6 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
                       'document_keys': document_keys,
                       'warnings': warnings,
                       'barcode': barcode,
-                      'error_warnings': errors,
                     })
 
     return render_to_response(template, context, context_instance=RequestContext(request))
