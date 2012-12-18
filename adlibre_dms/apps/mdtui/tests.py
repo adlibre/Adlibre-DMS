@@ -3076,6 +3076,10 @@ class MDTUI(TestCase):
 
         # Check new indexes are normally added with admin priviledges.
         response = self._78_test_helper(test_doc_dict)
+        self.assertEqual(response.status_code, 302)
+        url = reverse('mdtui-index-source')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
         self.assertContains(response, MDTUI_ERROR_STRINGS['NEW_KEY_VALUE_PAIR']+'Employee Name: Someone Special')
         self.assertContains(response, MDTUI_ERROR_STRINGS['NEW_KEY_VALUE_PAIR']+'Employee ID: 1234567890')
         self.assertNotContains(response, MDTUI_ERROR_STRINGS['ADMINLOCKED_KEY_ATTEMPT'])
@@ -3086,8 +3090,9 @@ class MDTUI(TestCase):
 
         # Check new indexes are disabling the upload form with non staff/admin person
         response = self._78_test_helper(test_doc_dict)
-        self.assertContains(response, MDTUI_ERROR_STRINGS['NEW_KEY_VALUE_PAIR']+'Employee Name: Someone Special')
-        self.assertContains(response, MDTUI_ERROR_STRINGS['NEW_KEY_VALUE_PAIR']+'Employee ID: 1234567890')
+        self.assertEqual(response.status_code, 200)
+        for value in test_doc_dict.itervalues():
+            self.assertContains(response, value)
         self.assertContains(response, MDTUI_ERROR_STRINGS['ADMINLOCKED_KEY_ATTEMPT']+'Employee Name')
 
         # Making this field locked
@@ -3096,12 +3101,14 @@ class MDTUI(TestCase):
 
         # Check both admin and non admin can not add new values to locked key
         response = self._78_test_helper(test_doc_dict)
+        self.assertEqual(response.status_code, 200)
         self.assertContains(response, MDTUI_ERROR_STRINGS['LOCKED_KEY_ATTEMPT']+'Employee Name')
 
         self.client.logout()
         self.client.login(username=username, password=password)
 
         response = self._78_test_helper(test_doc_dict)
+        self.assertEqual(response.status_code, 200)
         self.assertContains(response, MDTUI_ERROR_STRINGS['LOCKED_KEY_ATTEMPT']+'Employee Name')
 
         # Cleaning up MDT for farther tests
@@ -3118,10 +3125,6 @@ class MDTUI(TestCase):
         rows_dict = self._read_indexes_form(response)
         post_dict = self._convert_doc_to_post_dict(rows_dict, test_doc_dict)
         response = self.client.post(url, post_dict)
-        self.assertEqual(response.status_code, 302)
-        url = reverse('mdtui-index-source')
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
         return response
 
     def test_79_indexes_persistent_after_revisit_on_indexing_form(self):

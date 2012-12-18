@@ -221,18 +221,14 @@ def get_mdts_for_documents(documents):
     return resp
 
 def extract_secondary_keys_from_form(form):
-    """Extracts secondary keys list from Indexes form."""
+    """Extracts text (autocomplete capable) secondary keys list from Indexes form."""
     keys_list = []
     for field_id, field in form.fields.iteritems():
-        try:
-            # if field is dynamic
+        if 'field_name' in field.__dict__.iterkeys():
             if field.field_name:
                 f_name = field.__class__.__name__
                 if f_name != "DateField" or f_name != "ChoiceField":
                     keys_list.append(field.field_name)
-        except AttributeError:
-            # standard field
-            pass
     return keys_list
 
 def unify_index_info_couch_dates_fmt(index_info):
