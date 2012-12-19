@@ -11,6 +11,7 @@ import logging
 
 from forms_representator import SEARCH_STRING_REPR
 from forms_representator import get_mdts_for_docrule
+from security import SEC_GROUP_NAMES
 
 from parallel_keys import ParallelKeysManager
 from mdt_manager import MetaDataTemplateManager
@@ -172,10 +173,15 @@ def check_for_forbidden_new_keys_created(document_indexes, docrule, user):
     manager = MetaDataTemplateManager()
     # Parsing MDT's
     admin_restricted_keys, locked_keys = manager.get_restricted_keys_names(mdts)
-    # doing nothig for admincreate keys if user is staff or superuser
-    if user.is_staff or user.is_superuser:
+    # doing nothig for admincreate keys if user has pers or is superuser
+    permit = False
+    if user.groups.all():
+        for group in user.groups.all():
+            if group.name == SEC_GROUP_NAMES['edit_fixed_indexes']:
+                permit = True
+    if user.is_superuser or permit:
         admin_restricted_keys = []
-        # Checking all keys locked for editing to staff or superuser only
+    # Checking all keys locked for editing to staff or superuser only
     for key in admin_restricted_keys:
         value = document_indexes[key]
         exists = check_docs_for_existence(key, value, docrule)
