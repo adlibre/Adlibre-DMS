@@ -21,6 +21,7 @@ from couchdbkit import Server
 
 from adlibre.date_converter import date_standardized
 from mdtui.views import MDTUI_ERROR_STRINGS
+from mdtui.security import SEC_GROUP_NAMES
 from mdtui.templatetags.paginator_tags import rebuild_sequence_digg
 from mdtcouch.models import MetaDataTemplate
 
@@ -568,6 +569,18 @@ new_m2_doc1_dict = {
     'Report Date': '02/04/2012',
     'Additional': 'Something mdt2 1'
 }
+
+# Modified doc1 dict for testing fixed choice indexes
+doc1_dict_forbidden_indexes = {
+    'date': date_standardized('2012-03-06'),
+    'description': 'Test Document Number 1',
+    'Employee ID': '1234567890',
+    'Required Date': date_standardized('2012-03-07'),
+    'Employee Name': 'Someone Special',
+    'Friends ID': '123',
+    'Friends Name': 'Andrew',
+    'Additional': 'Something for 1',
+    }
 
 # TODO: test password reset forms/stuff
 
@@ -2580,11 +2593,14 @@ class MDTUI(TestCase):
         # Adding apecial permission to test user 1
         user = User.objects.get(username=username_1)
         # Registering that user in required security groups and removing their permissions...
-        for groupname in ['MUI can Edit Document Indexes']:
-            g = Group.objects.get(name=groupname)
-            g.user_set.add(user)
-            for perm in g.permissions.all():
-                g.permissions.remove(perm)
+        g = Group.objects.all()
+        print g
+        g, created = Group.objects.get_or_create(name=SEC_GROUP_NAMES['edit_index'])
+        if created:
+            g.save()
+        g.user_set.add(user)
+        for perm in g.permissions.all():
+            g.permissions.remove(perm)
         # Logging in with this user
         self.client.logout()
         self.client.login(username=username_1, password=password_1)
@@ -3057,16 +3073,7 @@ class MDTUI(TestCase):
         (with warning and blocking farther document upload for new indexes)
         """
         # Modified doc1 dict for our needs
-        test_doc_dict = {
-            'date': date_standardized('2012-03-06'),
-            'description': 'Test Document Number 1',
-            'Employee ID': '1234567890',
-            'Required Date': date_standardized('2012-03-07'),
-            'Employee Name': 'Someone Special',
-            'Friends ID': '123',
-            'Friends Name': 'Andrew',
-            'Additional': 'Something for 1',
-            }
+        test_doc_dict = doc1_dict_forbidden_indexes
         # Changing MDT to have 1 admincreate perms field.
         operating_mdt = 'mdt2'
         mdt = MetaDataTemplate.get(docid=operating_mdt)
@@ -3158,7 +3165,47 @@ class MDTUI(TestCase):
         for key, value in post_dict.iteritems():
             self.assertContains(response, key)
 
-    def test_80_choice_type_field(self):
+    def test_80_forbidden_indexes_adding_and_group(self):
+        """Refs #935 part 1. MDT/MUI fixed choice index fields (improving the workflow)"""
+        test_doc_dict = doc1_dict_forbidden_indexes
+        # Changing MDT to have 1 admincreate perms field.
+        operating_mdt = 'mdt2'
+        mdt = MetaDataTemplate.get(docid=operating_mdt)
+        mdt.fields[u'1'][u'create_new_indexes'] = u'open'
+        mdt.fields[u'2'][u'create_new_indexes'] = u'admincreate'
+        mdt.save()
+
+        # Check new indexes are normally added with admin priviledges.
+        response = self._78_test_helper(test_doc_dict)
+        self.assertEqual(response.status_code, 302)
+        url = reverse('mdtui-index-source')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, MDTUI_ERROR_STRINGS['NEW_KEY_VALUE_PAIR']+'Employee Name: Someone Special')
+        self.assertContains(response, MDTUI_ERROR_STRINGS['NEW_KEY_VALUE_PAIR']+'Employee ID: 1234567890')
+        self.assertNotContains(response, MDTUI_ERROR_STRINGS['ADMINLOCKED_KEY_ATTEMPT'])
+
+        # Relogin with non admin user
+        self.client.logout()
+        self.client.login(username=username_2, password=password_2)
+
+        # Check new indexes are disabling the upload form with non staff/admin person
+        response = self._78_test_helper(test_doc_dict)
+        self.assertEqual(response.status_code, 200)
+        for value in test_doc_dict.itervalues():
+            self.assertContains(response, value)
+        self.assertContains(response, MDTUI_ERROR_STRINGS['ADMINLOCKED_KEY_ATTEMPT']+'Employee Name')
+
+        # Registering that user in required security groups...
+        user = User.objects.filter(username=username_2)
+        g = Group.objects.get(name=SEC_GROUP_NAMES['edit_fixed_indexes'])
+        g.user_set.add(user[0])
+
+        # Check if redirect == Means success.
+        response = self._78_test_helper(test_doc_dict)
+        self.assertEqual(response.status_code, 302)
+
+    def test_81_choice_type_field(self):
         """
         Refs #700 Feature: MDT/MUI fixed choice index fields
         """
