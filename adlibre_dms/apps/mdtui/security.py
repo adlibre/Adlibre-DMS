@@ -16,8 +16,8 @@ from doc_codes.models import DocumentTypeRule
 SEC_GROUP_NAMES = {
     'search': 'MUI Search interaction',
     'index': 'MUI Index interaction',
-    'edit_index': 'MUI can Edit Document Indexes',
     'edit_fixed_indexes': 'MUI Edit fixed choice indexes',
+    'edit_index': 'MUI can Edit Document Indexes',
 }
 
 
