@@ -252,13 +252,6 @@ def search_results(request, step=None, template='mdtui/search.html'):
     # Sorting UI interactions
     sorting_field = request.POST.get('sorting_key', '') or ''
     order = request.POST.get('order', '') or ''
-    query_order = ''
-    if order == "icon-chevron-up":
-        query_order = "ascending"
-    elif order == "icon-chevron-down":
-        query_order = "descending"
-    # TODO: Delete this log entry. It's for teporary debugging purposes...
-    log.debug('order: %s, query_order: %s' % (order, query_order))
     if sorting_field and order:
         request.session["sorting_field"] = sorting_field
         request.session["order"] = order
@@ -268,6 +261,13 @@ def search_results(request, step=None, template='mdtui/search.html'):
             order = request.session["order"]
         except KeyError:
             pass
+    query_order = ''
+    if order == "icon-chevron-up":
+        query_order = "ascending"
+    elif order == "icon-chevron-down":
+        query_order = "descending"
+    # TODO: Delete this log entry. It's for teporary debugging purposes...
+    log.debug('order: %s, query_order: %s' % (order, query_order))
     if not page:
         page = 1
     else:
@@ -315,7 +315,7 @@ def search_results(request, step=None, template='mdtui/search.html'):
 
     cache = get_cache('mui_search_results')
     # Caching by document keys and docrules list, as a cache key
-    cache_key = json.dumps(document_keys)+json.dumps(docrule_ids)+json.dumps(sorting_field)+json.dumps(query_order)
+    cache_key = json.dumps(document_keys)+json.dumps(docrule_ids)+json.dumps(sorting_field)+json.dumps(order)
     cached_documents = cache.get(cache_key, None)
     log.debug('cache key: %s' % cache_key)
     if cleaned_document_keys and not cached_documents:
