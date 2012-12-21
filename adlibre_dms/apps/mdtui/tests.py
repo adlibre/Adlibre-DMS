@@ -2594,7 +2594,6 @@ class MDTUI(TestCase):
         user = User.objects.get(username=username_1)
         # Registering that user in required security groups and removing their permissions...
         g = Group.objects.all()
-        print g
         g, created = Group.objects.get_or_create(name=SEC_GROUP_NAMES['edit_index'])
         if created:
             g.save()
