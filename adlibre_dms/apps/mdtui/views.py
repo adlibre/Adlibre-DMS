@@ -257,6 +257,7 @@ def search_results(request, step=None, template='mdtui/search.html'):
         query_order = "ascending"
     elif order == "descending":
         query_order = "descending"
+    log.debug('order: %s, query_order: %s' % (order, query_order))
     if sorting_field and order:
         request.session["sorting_field"] = sorting_field
         request.session["order"] = order
