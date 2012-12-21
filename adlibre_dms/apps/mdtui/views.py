@@ -351,6 +351,7 @@ def search_results(request, step=None, template='mdtui/search.html'):
         log.debug('search_results exporting found documents to CSV')
         # Getting all the documents from
         documents = DMSSearchManager().get_found_documents(document_names)
+        mdts_list = get_mdts_for_documents(documents)
         csv_response = export_to_csv(document_keys, mdts_list, documents)
         return csv_response
 

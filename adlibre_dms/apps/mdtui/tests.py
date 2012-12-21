@@ -2468,6 +2468,9 @@ class MDTUI(TestCase):
         self.assertContains(response, 'BBB-0003')
         self.assertNotContains(response, 'ADL-')
         self.assertContains(response, 'Employee,Andrew')
+        # Contains secondary key (Refs Bug #941)
+        self.assertContains(response, 'Test Document Number 2 for MDT 5')
+        self.assertContains(response, 'Employee,Andrew')
 
     def test_63_mdt_search_contains_mdt_name_in_header(self):
         """
