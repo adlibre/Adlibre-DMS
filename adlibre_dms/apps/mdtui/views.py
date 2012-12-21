@@ -255,7 +255,7 @@ def search_results(request, step=None, template='mdtui/search.html'):
     query_order = ''
     if order == "icon-chevron-up":
         query_order = "ascending"
-    elif order == "descending":
+    elif order == "icon-chevron-down":
         query_order = "descending"
     # TODO: Delete this log entry. It's for teporary debugging purposes...
     log.debug('order: %s, query_order: %s' % (order, query_order))
