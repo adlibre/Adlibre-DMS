@@ -315,7 +315,7 @@ def search_results(request, step=None, template='mdtui/search.html'):
 
     cache = get_cache('mui_search_results')
     # Caching by document keys and docrules list, as a cache key
-    cache_key = json.dumps(document_keys)+json.dumps(docrule_ids)+json.dumps(sorting_field)+json.dumps(order)
+    cache_key = json.dumps(document_keys)+json.dumps(docrule_ids)+json.dumps(sorting_field)+json.dumps(query_order)
     cached_documents = cache.get(cache_key, None)
     log.debug('cache key: %s' % cache_key)
     if cleaned_document_keys and not cached_documents:
