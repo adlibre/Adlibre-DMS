@@ -417,6 +417,7 @@ def indexing_edit(request, code, step='edit', template='mdtui/indexing.html'):
         except KeyError:
             pass
 
+    log.debug('indexing_edit view called with return_url: %s, changed_indexes: %s' % (return_url, changed_indexes))
     doc = processor.read(request, code)
     # TODO: check for misconfiguration here (plugin or permission to edit indexes exists in document's DorulePluginMapping)
     if not processor.errors:
@@ -476,7 +477,7 @@ def indexing_edit_result(request, step='edit_finish', template='mdtui/indexing.h
                 if not error_name in warnings:
                     warnings.append(error_name)
             pass
-    log.debug('indexing_finished called with: step: "%s", variables: "%s",' % (step, variables))
+    log.debug('indexing_edit_result called with: step: "%s", variables: "%s",' % (step, variables))
 
     if request.POST:
         code = variables['edit_index_barcode']
@@ -515,15 +516,11 @@ def indexing_select_type(request, step=None, template='mdtui/indexing.html'):
     context = {'step': step,}
     docrule = None
     active_docrule = None
-#    autocomplete_list = []
     warnings = []
     docrules_list = make_document_type_select(user=request.user)
-#    form = filtered_form(request.POST or None)
     cleanup_search_session(request)
     cleanup_mdts(request)
-#    if docrule_id:
-#        request.session['indexing_docrule_id'] = docrule_id
-#        return HttpResponseRedirect(reverse('mdtui-index-details'))
+    log.debug('indexing_select_type view called with docrule: %s' % docrule)
     if request.POST:
         for item, value in request.POST.iteritems():
             if not item == u'csrfmiddlewaretoken':
@@ -574,6 +571,7 @@ def indexing_details(request, step=None, template='mdtui/indexing.html'):
     except KeyError:
         pass
 
+    log.debug('indexing_details view called with docrule_id: %s, document_keys: %s, warnings: %s' % (docrule_id, document_keys, warnings))
     if request.POST:
         secondary_indexes = processDocumentIndexForm(request)
         if secondary_indexes:
@@ -650,6 +648,7 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
     else:
         barcode_form = BarcodePrintedForm(request.POST or None)
 
+    log.debug('indexing_source view called with document_keys: %s, barcode: %s, index_info: %s, docrule: %s' % (document_keys, barcode, index_info, docrule))
     # Appending warnings for creating a new parrallel key/value pair.
     new_sec_key_pairs = check_for_secondary_keys_pairs(index_info, docrule)
     if new_sec_key_pairs:
