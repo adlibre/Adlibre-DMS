@@ -135,7 +135,6 @@ class DMSSearchManager(object):
             docrule_ids = dms_search_query.get_docrules()
             sorting_key = dms_search_query.get_sorting_key()
             sorting_order = dms_search_query.get_sorting_order()
-            log.debug('DMSSearchManager search_dms method called with cleaned_document_keys: %s, docrule_ids: %s, sorting_key: %s, sorting_order: %s' % (cleaned_document_keys, docrule_ids, sorting_key, sorting_order))
         except Exception, e:
             error_message = 'DMS Search error, Insufficient search query data: %s' % e
             log.error(error_message)
