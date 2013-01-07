@@ -382,10 +382,14 @@ def search_results(request, step=None, template='mdtui/search.html'):
     return render_to_response(template, context, context_instance=RequestContext(request))
 
 @login_required
-def view_pdf(request, code, step, template='mdtui/view.html'):
+def view_object(request, code, step, template='mdtui/view.html'):
     """View PDF Document"""
     pdf_url = reverse('mdtui-download-pdf', kwargs = { 'code': code, })
-    context = { 'pdf_url': pdf_url, 'code': code, 'step':step }
+    # TODO: think about the way to remove requiremnt for this request.
+    processor = DocumentProcessor()
+    document = processor.read(request, code, only_metadata=True)
+    mimetype = document.get_mimetype()
+    context = { 'pdf_url': pdf_url, 'code': code, 'step':step, 'mimetype': mimetype }
     return render(request, template, context)
 
 @login_required

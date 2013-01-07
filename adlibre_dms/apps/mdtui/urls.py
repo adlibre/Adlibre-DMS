@@ -26,7 +26,7 @@ urlpatterns = patterns('mdtui.views',
     url(r'^indexing/edit_finished$', 'indexing_edit_result', {'step': 'edit_finish'}, name='mdtui-index-edit-finished'),
     # Common
     url(r'^download/(?P<code>[\w_-]+)$', 'download_pdf', name='mdtui-download-pdf'),
-    url(r'^view/(?P<code>[\w_-]+)$', 'view_pdf', {'step':'view',}, name='mdtui-view-pdf'),
+    url(r'^view/(?P<code>[\w_-]+)$', 'view_object', {'step':'view',}, name='mdtui-view-object'),
     # AJAX
     url(r'^parallel/$', 'mdt_parallel_keys', name='mdtui-parallel-keys'),
 )
