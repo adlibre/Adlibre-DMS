@@ -2424,7 +2424,7 @@ class MDTUI(TestCase):
         self.client.logout()
         self.client.login(username=username_6, password=password_6)
         # Checking accessibility
-        url = reverse('mdtui-view-pdf', kwargs = { 'code': code1, })
+        url = reverse('mdtui-view-object', kwargs = { 'code': code1, })
         response = self.client.get(url)
         self.assertNotEqual(response.status_code, 302)
         self.assertContains(response, code1)
@@ -3212,6 +3212,10 @@ class MDTUI(TestCase):
         Refs #700 Feature: MDT/MUI fixed choice index fields
         """
         # TODO: Make testing of search and adding indexes for documents with choice fields.
+        pass
+
+    def test_82_search_by_mdt_without_indexes(self):
+        # TODO: develop this
         pass
 
     def test_z_cleanup(self):

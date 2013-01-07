@@ -43,7 +43,7 @@
     <tbody>
     {% for doc in paginated_documents.object_list %}
         <tr>
-            <td class="nw"><a href="{% url mdtui-view-pdf doc.id %}" title="{% trans 'View Document' %}" alt="{% trans 'View Document' %}" target="_blank"><i class="icon-download"></i> {{ doc.id }}</a></td>
+            <td class="nw"><a href="{% url mdtui-view-object doc.id %}" title="{% trans 'View Document' %}" alt="{% trans 'View Document' %}" target="_blank"><i class="icon-download"></i> {{ doc.id }}</a></td>
             <td class="nw">{{ doc.metadata_created_date|date:DATE_FORMAT }}</td>
             {% for key in mdts %}
                 {% if not key == "metadata_user_name" and not key == "metadata_user_id" %}
