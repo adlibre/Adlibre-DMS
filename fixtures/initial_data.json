@@ -1156,7 +1156,7 @@
             "description": "Testig Docrule for Android scan and upload to DMS API example",
             "title": "Barcode test",
             "barcode_zfill": 0,
-            "split_string": "0:3,4:8",
+            "split_string": "0:3,4:10",
             "active": true,
             "barcode_format": "TST%s",
             "doccode_type": "1",
