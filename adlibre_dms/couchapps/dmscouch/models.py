@@ -60,7 +60,16 @@ class CouchDocument(Document):
                 db_info = document.db_info
                 # trying to cleanup irrelevant fields if exist...
                 # (Bug #829 Files Secondary indexes contain username and user PK)
-                for key in ["date", "description", "metadata_user_name", "metadata_user_id"]:
+                for key in [
+                        "date",
+                        "description",
+                        "metadata_user_name",
+                        "metadata_user_id",
+                        "mdt_indexes",
+                        "metadata_created_date",
+                        "metadata_doc_type_rule_id",
+                        "tags",
+                ]:
                     try:
                         del db_info[key]
                     except: pass

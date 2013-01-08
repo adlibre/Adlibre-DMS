@@ -73,11 +73,14 @@ class CouchDBMetadata(object):
                                 document.set_db_info(old_metadata['mdt_indexes'])
                                 document.set_index_revisions(old_index_revisions)
                                 document.set_metadata(current_revisions)
+                            else:
+                                # Preserving set revisions anyway.
+                                document.set_metadata(current_revisions)
                         except ResourceNotFound:
                             pass
                 # updating tags to sync with Django DB
                 self.sync_document_tags(document)
-                # assuming no document with this _id exists. SAVING. HACK: or overwriting existing
+                # assuming no document with this _id exists. SAVING or overwriting existing
                 couchdoc=CouchDocument()
 
                 couchdoc.populate_from_dms(request, document)
