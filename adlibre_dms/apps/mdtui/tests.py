@@ -60,6 +60,7 @@ couchdb_mdts_name = 'mdtcouch_test'
 test_mdt_docrule_id = 2 # should be properly assigned to fixtures docrule that uses CouchDB plugins
 test_mdt_docrule_id2 = 7 # should be properly assigned to fixtures docrule that uses CouchDB plugins
 test_mdt_docrule_id3 = 8 # should be properly assigned to fixtures docrule that uses CouchDB plugins
+test_mdt_docrule_id4 = 9 # Barcode docrule
 
 test_mdt_id_1 = 1 # First MDT used in testing search part of MUI
 test_mdt_id_2 = 2 # Second MDT used in testing search part of MUI
@@ -3215,8 +3216,48 @@ class MDTUI(TestCase):
         pass
 
     def test_82_search_by_mdt_without_indexes(self):
-        # TODO: develop this
-        pass
+        """
+        Refs #816 (MDT's on the demo server so that we can search for the uploaded images)
+        Refs #945 Barcode Scanner Test MUI Results Colums
+
+        Check for ability to view document without indexes.
+        """
+        todays_range = {u'date': datetime.datetime.now().strftime(settings.DATE_FORMAT) }
+        test_doc1 = 'TST00000001'
+        test_doc2 = 'TST00000002'
+        # Uploading barcode (Image file into API)
+        self._api_upload_file(test_doc1, suggested_format='jpeg')
+        # Uploading second doc twice to make second revision
+        self._api_upload_file(test_doc2, suggested_format='jpeg')
+        self._api_upload_file(test_doc2, suggested_format='jpeg')
+
+        # Setting Barcode docrule
+        url = reverse('mdtui-search-type')
+        data = {'docrule': test_mdt_docrule_id4}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        url = reverse('mdtui-search-options')
+        response = self.client.get(url)
+        # Searching date range with unique doc1 keys
+        response = self.client.post(url, todays_range)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "You have not defined Document Searching Options")
+        self.assertContains(response, todays_range[u'date'])
+        self.assertContains(response, test_doc1)
+        self.assertContains(response, test_doc2)
+        # document with no indexes and mre than 1 revision rendered properly by MUI
+        self.assertNotContains(response, "metadata_doc_type_rule_id")
+        self.assertNotContains(response, "mdt_indexes")
+        self.assertNotContains(response, "metadata_created_date")
+        self.assertNotContains(response, "tags")
+
+        # Found Image rendered properly instead of pdf viewer:
+        url = reverse('mdtui-view-object', kwargs={'code': test_doc1})
+        response = self.client.get(url)
+        self.assertContains(response, 'img src="/mdtui/download/TST00000001"')
 
     def test_z_cleanup(self):
         """
@@ -3237,7 +3278,7 @@ class MDTUI(TestCase):
                 self.assertEqual(response.status_code, 204)
 
         # Deleting all docs used in tests
-        for argument in [doc1, doc2, 'ADL-0003', 'BBB-0001', 'BBB-0002', 'BBB-0003', 'CCC-0001', 'CCC-0002']:
+        for argument in [doc1, doc2, 'ADL-0003', 'BBB-0001', 'BBB-0002', 'BBB-0003', 'CCC-0001', 'CCC-0002', 'TST00000001', 'TST00000002']:
             url = reverse('api_file', kwargs={'code': argument,})
             response = self.client.delete(url)
             self.assertEqual(response.status_code, 204)
@@ -3448,3 +3489,18 @@ class MDTUI(TestCase):
         response = self.client.post(results_url, sort_query)
         code_order = self._check_search_results_order(response)
         self.assertEqual(code_order, result)
+
+    def _api_upload_file(self, doc, suggested_format='pdf', hash=None, check_response=True):
+        # Source of documents
+        self.test_document_files_dir = os.path.join(settings.FIXTURE_DIRS[0], 'testdata')
+        # Do file upload using DMS API
+        file_path = os.path.join(self.test_document_files_dir, doc + '.' + suggested_format)
+        data = { 'file': open(file_path, 'r'), }
+        url = reverse('api_file', kwargs={'code': doc, 'suggested_format': suggested_format,})
+        if hash:
+            # Add hash to payload
+            data['h'] = hash
+        response = self.client.post(url, data)
+        if check_response:
+            self.assertEqual(response.status_code, 200)
+        return response
