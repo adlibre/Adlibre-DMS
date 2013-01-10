@@ -16,6 +16,7 @@ from dms_plugins import pluginpoints
 from dms_plugins.operator import PluginsOperator
 
 from core.models import Document
+from core.errors import DmsException
 
 log = logging.getLogger('core.document_processor')
 
@@ -73,7 +74,13 @@ class DocumentProcessor(object):
             doc.set_filename(barcode)
             log.debug('Allocated Barcode %s.' % barcode)
         else:
-            doc.set_filename(os.path.basename(uploaded_file.name))
+            # Appending error to processor in case we have recieved a "No docrule" file.
+            try:
+                doc.set_filename(os.path.basename(uploaded_file.name))
+            except DmsException, e:
+                self.errors.append(unicode(e.parameter))
+                return None
+                pass
         if hasattr(uploaded_file, 'content_type'):
             doc.set_mimetype(uploaded_file.content_type)
         if index_info:
@@ -99,7 +106,13 @@ class DocumentProcessor(object):
                   % (document_name, hashcode, revision, only_metadata, extension) )
         doc = Document()
         operator = PluginsOperator()
-        doc.set_filename(document_name)
+        # Checking if name really possible in current DMS config.
+        try:
+            doc.set_filename(document_name)
+        except DmsException, e:
+            self.errors.append(unicode(e.parameter))
+            return doc
+            pass
         doc.set_hashcode(hashcode)
         doc.set_revision(revision)
         options = {'only_metadata': only_metadata,}

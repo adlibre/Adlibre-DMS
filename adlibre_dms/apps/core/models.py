@@ -78,7 +78,11 @@ class Document(object):
             self.doccode = DocumentTypeRuleManagerInstance.find_for_string(self.get_stripped_filename())
             if self.doccode is None:
                 log.error('get_docrule. doccode is None!')
-                raise DmsException("No document type rule found for file " + self.get_full_filename(), 404)
+                # Using self.get_full_filename() method here can cause race condition in some cases.
+                filename = self.full_filename
+                if not filename:
+                    filename = self.file_name
+                raise DmsException("No document type rule found for file " + filename, 404)
         log.debug('get_docrule finished for %s.' % self.doccode)
         return self.doccode
 

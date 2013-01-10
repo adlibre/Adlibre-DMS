@@ -96,24 +96,15 @@ class APITest(DMSTestCase):
             if not 'document_name' in data or not (data['document_name'] == f):
                 raise self.failureException('Invalid response: %s' % response.content)
 
-#    def test_api_rename_no_doccode(self):
-#        # Login
-#        self.client.login(username=self.username, password=self.password)
-#        # Upload no doccode
-#        response = self._upload_file(no_doccode_name)
-#        self.assertContains(response, '', status_code=200)
-#        # Do rename
-#        url = reverse('api_file', kwargs={'code': no_doccode_name, 'suggested_format': 'pdf',})
-#        data = {'filename': no_doccode_name, 'new_name': adl_invoice_name,} #FIXME should be code, new_code
-#        response = self.client.put(url, data)
-#        self.assertContains(response, '', status_code=200)
-#        # Fetch renamed file
-#        url = reverse('api_file', kwargs={'code': adl_invoice_name, 'suggested_format': 'pdf',})
-#        response = self.client.get(url)
-#        # Fail to fetch old file
-#        url = reverse('api_file', kwargs={'code': no_doccode_name, 'suggested_format': 'pdf',})
-#        response = self.client.get(url)
-#        self.assertContains(response, '', status_code=400)
+    def test_api_no_docrule_upload(self):
+        """
+        Testing upload of file with no document type assigned returns a proper response
+
+        Refs #946 Bug: API piston bug when uploading barcode with error (no document type rule)
+        """
+        no_docrule_file = 'Z50141104' # Name is set like so to be loaded in the end of all files.
+        response = self._upload_file(no_docrule_file, suggested_format='jpg', check_response=False)
+        self.assertEqual(response.status_code, 400)
 
     def test_api_tags(self):
         # Login
