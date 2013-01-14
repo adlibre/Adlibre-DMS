@@ -300,9 +300,13 @@ class DMSSearchManager(object):
                     values_list.append((doc.get_id, value))
                 else:
                     empty_values_list.append(doc.get_id)
-            document_list = sorted(values_list, key=itemgetter(1), reverse=reverse)
-            document_list = map(lambda doc: doc[0],  document_list)
-            document_list = document_list + empty_values_list
+            try:
+                document_list = sorted(values_list, key=itemgetter(1), reverse=reverse)
+                document_list = map(lambda doc: doc[0],  document_list)
+                document_list = document_list + empty_values_list
+            except TypeError, e:
+                log.error('sorting TypeError error in indexes: %s, in documents_list: %s' % (e, document_list))
+                pass
         return document_list
 
     def get_sorting_docs_indexes(self, document_list):
