@@ -3260,7 +3260,7 @@ class MDTUI(TestCase):
         response = self.client.get(url)
         self.assertContains(response, 'img src="/mdtui/download/TST00000001"')
 
-    def test_000_can_sort_improper_indexes(self):
+    def test_83_can_sort_improper_indexes(self):
         """
         Refs #948 Internal Server Error: /mdtui/search/results
         Will change one document's index and try to sort it in results response
