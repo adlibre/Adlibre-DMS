@@ -24,6 +24,7 @@ from mdtui.views import MDTUI_ERROR_STRINGS
 from mdtui.security import SEC_GROUP_NAMES
 from mdtui.templatetags.paginator_tags import rebuild_sequence_digg
 from mdtcouch.models import MetaDataTemplate
+from dmscouch.models import CouchDocument
 
 # auth user
 username = 'admin'
@@ -3258,6 +3259,50 @@ class MDTUI(TestCase):
         url = reverse('mdtui-view-object', kwargs={'code': test_doc1})
         response = self.client.get(url)
         self.assertContains(response, 'img src="/mdtui/download/TST00000001"')
+
+    def test_000_can_sort_improper_indexes(self):
+        """
+        Refs #948 Internal Server Error: /mdtui/search/results
+        Will change one document's index and try to sort it in results response
+        """
+        mdt5_docs_range ={'date':'10/03/2012',
+                          'end_date':'13/03/2012'}
+        first_doc = 'CCC-0001'
+        second_doc = 'CCC-0002'
+        sorting_dict = {'sorting_key':'Employee',
+                        'order':'icon-chevron-up'}
+        # modifying couchdoc to get emulation of mistyped user (enreing wrong data type into this index field)
+        couchdoc = CouchDocument.get(docid=second_doc)
+        previous_value = couchdoc['mdt_indexes'][u'Employee']
+        couchdoc['mdt_indexes'][u'Employee'] = mdt5_docs_range['date']
+        couchdoc.save()
+        # setting MDT
+        url = reverse('mdtui-search-type')
+        data = {'mdt': test_mdt_id_5}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        url = reverse('mdtui-search-options')
+        # Searching date range with unique doc1 keys
+        response = self.client.post(url, mdt5_docs_range)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        self.assertEqual(response.status_code, 200)
+        # No errors appeared
+        self.assertNotContains(response, "You have not defined Document Searching Options")
+        # Searching keys exist in search results
+        self.assertContains(response, mdt5_docs_range['date'])
+        self.assertContains(response, mdt5_docs_range['end_date'])
+        self.assertContains(response, first_doc)
+        self.assertContains(response, second_doc)
+        # trying new sorting causes no errors
+        response = self.client.post(new_url, sorting_dict)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, first_doc)
+        self.assertContains(response, second_doc)
+        # Cleanup to previous state
+        couchdoc['mdt_indexes'][u'Employee'] = previous_value
+        couchdoc.save()
 
     def test_z_cleanup(self):
         """
