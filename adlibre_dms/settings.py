@@ -182,29 +182,7 @@ TEMPLATE_DIRS = (
     os.path.join(PROJECT_PATH, 'templates'),
 )
 
-INSTALLED_APPS = (
-    'django.contrib.auth',
-    'django.contrib.admindocs',
-    'django.contrib.contenttypes',
-    'django.contrib.markup',
-    'django.contrib.sessions',
-#    'django.contrib.sites',
-#    'django.contrib.flatpages',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    # Uncomment the next line to enable the admin:
-    'django.contrib.admin',
-    # Uncomment the next line to enable admin documentation:
-    #'django.contrib.admindocs',
-    # 3rd party
-    'docutils',
-    'piston',
-    'djangoplugins',
-    'taggit',
-    'couchdbkit.ext.django', # needed for CouchDB usage
-    'widget_tweaks', # used by MUI templates
-    'compressor', # MUI js / css compression
-    'django-log-file-viewer',
+PROJECT_APPS = (
     # DMS Core
     'api',
     'docs',
@@ -221,8 +199,33 @@ INSTALLED_APPS = (
     # DMS Themes
     'theme.adlibre',
     'theme.basic',
-    'theme.solid',
+    'theme.solid'
 )
+
+INSTALLED_APPS = (
+    'django.contrib.auth',
+    'django.contrib.admindocs',
+    'django.contrib.contenttypes',
+    'django.contrib.markup',
+    'django.contrib.sessions',
+#    'django.contrib.sites',
+#    'django.contrib.flatpages',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'django.contrib.admin',
+    # Uncomment the next line to enable admin documentation:
+    #'django.contrib.admindocs',
+    # 3rd party
+    'docutils',
+    'piston',
+    'djangoplugins',
+    'taggit',
+    'couchdbkit.ext.django', # needed for CouchDB usage
+    'widget_tweaks', # used by MUI templates
+    'compressor', # MUI js / css compression
+    'django-log-file-viewer',
+    'django_jenkins',
+) + PROJECT_APPS
 
 # FILE_UPLOAD_HANDLERS is only necessary if you want to track upload
 # progress in your Django app -- if you have a front-end proxy like
