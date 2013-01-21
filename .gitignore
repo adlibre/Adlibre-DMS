@@ -19,3 +19,9 @@ documents_prod/*
 local_settings.py
 
 local_settings.py
+
+adlibre_dms/reports/coverage.xml
+
+adlibre_dms/reports/junit.xml
+
+adlibre_dms/reports/pylint.report
