@@ -123,7 +123,7 @@ setup(name='adlibre_dms',
             # Deployment
             'flup==1.0.3.dev-20110405',
             # Logging
-            'django-log-file-viewer==0.4'
+            'django-log-file-viewer==0.4',
             # CI integration
             'django-jenkins==0.14.0'
     ],
