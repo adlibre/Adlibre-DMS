@@ -3328,12 +3328,12 @@ class MDTUI(TestCase):
             response = self.client.delete(url)
             self.assertEqual(response.status_code, 204)
 
-        # Compacting CouchDB dmscouch/mdtcouch DB's after tests
-        server = Server()
-        db1 = server.get_or_create_db(couchdb_name)
-        db1.compact()
-        db2 = server.get_or_create_db(couchdb_mdts_name)
-        db2.compact()
+#        # Compacting CouchDB dmscouch/mdtcouch DB's after tests
+#        server = Server()
+#        db1 = server.get_or_create_db(couchdb_name)
+#        db1.compact()
+#        db2 = server.get_or_create_db(couchdb_mdts_name)
+#        db2.compact()
 
     def _read_indexes_form(self, response):
         """
