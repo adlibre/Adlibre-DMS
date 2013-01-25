@@ -338,7 +338,14 @@ def search_results(request, step=None, template='mdtui/search.html'):
                 'sorting_key': sorting_field_query,
                 'sorting_order': query_order,
             })
-            document_names = DMSSearchManager().search_dms(query).get_document_names()
+            search_results = DMSSearchManager().search_dms(query)
+            search_errors = search_results.get_errors()
+            if search_errors:
+                for error in search_errors:
+                    warnings.append(error)
+                document_names = []
+            else:
+                document_names = search_results.get_document_names()
         cache.set(cache_key, document_names, cache_documents_for)
         log.debug('search_results: Got search results with amount of results: %s' % document_names)
     else:
