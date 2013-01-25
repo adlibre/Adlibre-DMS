@@ -235,6 +235,14 @@ mdt7 = {
     "parallel": {}
 }
 
+mdt8 = {
+    "_id": "mdt8",
+    "description": "Test MDT 9 - Empty indexes",
+    "docrule_id": [str(test_mdt_docrule_id4)],
+    "fields": {},
+    "parallel": {}
+}
+
 # Static dictionary of documents to be indexed for mdt1 and mdt2
 doc1_dict = {
     'date': date_standardized('2012-03-06'),
@@ -647,6 +655,7 @@ class MDTUI(TestCase):
                     mdt5,
                     mdt6,
                     mdt7,
+                    mdt8,
                  ]:
             mdt = json.dumps(m)
             response = self.client.post(url, {"mdt": mdt})
@@ -3238,7 +3247,7 @@ class MDTUI(TestCase):
         url = reverse('mdtui-search-type')
         data = {'docrule': test_mdt_docrule_id4}
         response = self.client.post(url, data)
-        #print response
+        print response
         self.assertEqual(response.status_code, 302)
         url = reverse('mdtui-search-options')
         response = self.client.get(url)
@@ -3365,7 +3374,7 @@ class MDTUI(TestCase):
         # (with doccode from var "test_mdt_docrule_id" and "test_mdt_docrule_id2")
         # using MDT's API.
         url = reverse('api_mdt')
-        for mdt_ in [test_mdt_docrule_id, test_mdt_docrule_id2, test_mdt_docrule_id3]:
+        for mdt_ in [test_mdt_docrule_id, test_mdt_docrule_id2, test_mdt_docrule_id3, test_mdt_docrule_id4]:
             response = self.client.get(url, {"docrule_id": str(mdt_)})
             data = json.loads(str(response.content))
             for key, value in data.iteritems():
