@@ -25,6 +25,7 @@ from mdtui.security import SEC_GROUP_NAMES
 from mdtui.templatetags.paginator_tags import rebuild_sequence_digg
 from mdtcouch.models import MetaDataTemplate
 from dmscouch.models import CouchDocument
+from core.search import SEARCH_ERROR_MESSAGES
 
 # auth user
 username = 'admin'
@@ -1057,6 +1058,7 @@ class MDTUI(TestCase):
         new_url = self._retrieve_redirect_response_url(response)
         response = self.client.get(new_url)
         self.assertEqual(response.status_code, 200)
+        print response
         # no errors appeared
         self.assertNotContains(response, "You have not defined Document Searching Options")
         # documents found
@@ -3236,6 +3238,7 @@ class MDTUI(TestCase):
         url = reverse('mdtui-search-type')
         data = {'docrule': test_mdt_docrule_id4}
         response = self.client.post(url, data)
+        #print response
         self.assertEqual(response.status_code, 302)
         url = reverse('mdtui-search-options')
         response = self.client.get(url)
@@ -3303,6 +3306,54 @@ class MDTUI(TestCase):
         # Cleanup to previous state
         couchdoc['mdt_indexes'][u'Employee'] = previous_value
         couchdoc.save()
+
+    def test_84_improper_date_range_search(self):
+        """Refs #896 CORE: search bug with output for invalid ranges
+
+        When any date ranage has "To" date less than "From" date.
+        """
+        wrong_date_range1 = { 'date':'13/03/2012',
+                             'end_date':'10/03/2012' }
+        # Testing date range for "Creation Date"
+        url = reverse('mdtui-search-type')
+        data = {'mdt': test_mdt_id_5}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        url = reverse('mdtui-search-options')
+        response = self.client.post(url, wrong_date_range1)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, 'ADL-')
+        self.assertNotContains(response, 'BBB-')
+        self.assertNotContains(response, 'CCC-')
+        self.assertNotContains(response, 'TST0')
+        self.assertContains(response, SEARCH_ERROR_MESSAGES['wrong_indexing_date'])
+
+        wrong_date_range2 = { '0': '',
+                              '1': '',
+                              '3': '',
+                              '4': '',
+                              '5': '',
+                              '2_from': '25/03/2012',
+                              '2_to': '01/03/2012',
+                              'date': '',
+                              'end_date': '',
+                              'export_results': '', }
+        # Testing secondary key date range
+        url = reverse('mdtui-search-type')
+        data = {'docrule': test_mdt_docrule_id}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        url = reverse('mdtui-search-options')
+        response = self.client.post(url, wrong_date_range2)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, 'ADL-')
+        self.assertContains(response, SEARCH_ERROR_MESSAGES['wrong_date'])
 
     def test_z_cleanup(self):
         """

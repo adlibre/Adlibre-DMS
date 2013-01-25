@@ -22,6 +22,11 @@ log = logging.getLogger('dms.core.search')
 
 MUI_SEARCH_PAGINATE = getattr(settings, 'MUI_SEARCH_PAGINATE', 20)
 
+SEARCH_ERROR_MESSAGES = {
+    'wrong_date': 'Date range you have provided is wrong. FROM date should not be after TO date.',
+    'wrong_indexing_date': 'Creation Date range wrong. FROM date should not be after TO date.',
+}
+
 class DMSSearchQuery(object):
     """
     Defined data to be queried from DMS Search Manager class
@@ -99,7 +104,7 @@ class DMSSearchResponse(object):
     """Defines data to be ruturned by DMS Search Manager class"""
     def __init__(self, *args):
         """Dynamicaly initialising set of properties"""
-        kwargs_possible_params = ['documents', 'document_names']
+        kwargs_possible_params = ['documents', 'document_names', 'errors']
         for param in kwargs_possible_params:
             if param in args[0]:
                 self.add_property(param, args[0][param])
@@ -118,6 +123,9 @@ class DMSSearchResponse(object):
     def set_documents(self, documents):
         self.documents = documents
 
+    def get_errors(self):
+        return self.__dict__['errors']
+
 class DMSSearchManager(object):
     """
     Manager to handle DMS Search Logic
@@ -131,7 +139,7 @@ class DMSSearchManager(object):
         """
         document_names = []
         try:
-            cleaned_document_keys = dms_search_query.get_document_keys()
+            keys_set = dms_search_query.get_document_keys()
             docrule_ids = dms_search_query.get_docrules()
             sorting_key = dms_search_query.get_sorting_key()
             sorting_order = dms_search_query.get_sorting_order()
@@ -139,6 +147,9 @@ class DMSSearchManager(object):
             error_message = 'DMS Search error, Insufficient search query data: %s' % e
             log.error(error_message)
             raise DmsException(error_message, 400)
+        cleaned_document_keys, errors = self.validate_search_dates(keys_set)
+        if errors:
+            return DMSSearchResponse({'document_names': [], 'errors':errors})
         if cleaned_document_keys:
             keys = [key for key in cleaned_document_keys.iterkeys()]
             dd_range_keys = self.document_date_range_present_in_keys(keys)
@@ -168,6 +179,36 @@ class DMSSearchManager(object):
         return DMSSearchResponse({'documents':documents})
 
     ########################################## Internal Methods ###############################
+    def validate_search_dates(self, query_keys_dict):
+        """Method to validate search query logic. E.g. date ranges."""
+        errors = []
+        # Validating Indexing date.
+        if 'date' in query_keys_dict:
+            range_ok = self.validation_compare_dates_in_range(query_keys_dict['date'], query_keys_dict['end_date'])
+            if not range_ok:
+                errors.append(SEARCH_ERROR_MESSAGES['wrong_indexing_date'])
+        # Validating keys type of date.
+        for key, value in query_keys_dict.iteritems():
+            if value.__class__.__name__ == 'tuple':
+                range_ok = self.validation_compare_dates_in_range(value[0], value[1])
+                if not range_ok:
+                    errors.append(key + ' ' + SEARCH_ERROR_MESSAGES['wrong_date'])
+        return query_keys_dict, errors
+
+    def validation_compare_dates_in_range(self, date1, date2):
+        """Validates if date1 < date2, using DMS settings date format"""
+        try:
+            end_date = datetime.datetime.strptime(date2, settings.DATE_FORMAT)
+            date = datetime.datetime.strptime(date1, settings.DATE_FORMAT)
+            delta = end_date - date
+            if delta > datetime.timedelta(0):
+                return True
+        except Exception, e:
+            # Not datetime or improper datetime values given. Rising no exception.
+            log.error('Search validation exception: %s' % e)
+            pass
+        return False
+
     def document_date_range_present_in_keys(self, keys):
         """Helper to recognise document date range in search keys"""
         dd_range_present = False
