@@ -112,20 +112,11 @@ class PluginsOperator(object):
     We should not touch those methods directly. IT creates a mess.
     e.g. DocumentProcessor().read(document, option='revision_count')
     """
-    # TODO: make this part of retrieve workflow (like 'only_metadata' option)
-    def get_revision_count(self, document_name, doccode_plugin_mapping):
-        """
-        Refactor ME to make part of read workflow...
-        """
-        storage = self.get_storage(doccode_plugin_mapping)
-        doc = Document()
-        doc.set_filename(document_name)
-        return storage.worker.get_revision_count(doc)
-
-    def get_storage(self, doccode_plugin_mapping):
-        """
-        Maybe it is a part of read workflow to???
-        """
+    def get_file_list(self, doccode_plugin_mapping, start=0, finish=None, order=None, searchword=None,
+                      tags=None, filter_date=None):
+        # Proper tags init according to PEP
+        if not tags:
+            tags = []
         pluginpoint = pluginpoints.StoragePluginPoint
         # Plugin point does not matter here as mapping must have a storage plugin both at storage and retrieval stages
         storage = self.get_plugins_from_mapping(doccode_plugin_mapping, pluginpoint, plugin_type='storage')
@@ -134,14 +125,7 @@ class PluginsOperator(object):
             raise ConfigurationError("No storage plugin for %s" % doccode_plugin_mapping)
         # Should we validate more than one storage plugin?
         # FIXME: document should be able to work with several storage plugins.
-        return storage[0]
-
-    def get_file_list(self, doccode_plugin_mapping, start=0, finish=None, order=None, searchword=None,
-                      tags=None, filter_date=None):
-        # Proper tags init according to PEP
-        if not tags:
-            tags = []
-        storage = self.get_storage(doccode_plugin_mapping)
+        storage = storage[0]
         metadata = self.get_revisions_metadata(doccode_plugin_mapping)
         doccode = doccode_plugin_mapping.get_docrule()
         doc_models = TagsPlugin().get_doc_models(doccode=doccode_plugin_mapping.get_docrule(), tags=tags)

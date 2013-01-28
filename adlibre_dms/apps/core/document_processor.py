@@ -93,7 +93,7 @@ class DocumentProcessor(object):
         self.check_errors_in_operator(operator)
         return doc
 
-    def read(self, request, document_name, hashcode=None, revision=None, only_metadata=False, extension=None):
+    def read(self, request, document_name, hashcode=None, revision=None, only_metadata=False, extension=None, options=None):
         """
         Reads document data from DMS
 
@@ -115,10 +115,15 @@ class DocumentProcessor(object):
             pass
         doc.set_hashcode(hashcode)
         doc.set_revision(revision)
-        options = {'only_metadata': only_metadata,}
+        # Run for plugins without retriving document. Only count metadata.
+        if options:
+            if 'revision_count' in options:
+                if options['revision_count']:
+                    doc.update_options({'revision_count': True,})
+                    only_metadata = True
         if extension:
             doc.set_requested_extension(extension)
-        doc.update_options(options)
+        doc.update_options({'only_metadata': only_metadata,})
         doc = operator.process_pluginpoint(pluginpoints.BeforeRetrievalPluginPoint, request, document=doc)
         self.check_errors_in_operator(operator)
         return doc
