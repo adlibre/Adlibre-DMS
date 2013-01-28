@@ -87,8 +87,13 @@ class Local(object):
         if not os.path.exists(fullpath):
             raise PluginError("No such document: %s" % fullpath, 404)
         document.set_fullpath(fullpath)
-        # TODO: Plugin can break a plugins iteration. WRONG! Manager Task.
 
+        if 'revision_count' in document.options:
+            if document.options['revision_count']:
+                revision = self.get_revision_count(document)
+                print 'GOT Document revision: %s' % revision
+                document.revision = revision
+        # TODO: Plugin can break a plugins iteration. WRONG! Manager Task.
         #file will be read on first access lazily
         if document.get_option('only_metadata'):
             raise BreakPluginChain()
@@ -186,37 +191,6 @@ class Local(object):
                 shutil.rmtree(directory)
             except Exception, e:
                 raise PluginError(str(e), 500)
-
-        # TODO: farther test if it is proper fix for Bug #399 (will it break something more)
-        #if document.get_revision:
-        #    document.set_revision(None) # should not perform anything in later plugins.
-        """
-        if document.get_revision():
-            filename = document.get_filename_with_revision()
-            try:
-                os.unlink(os.path.join(directory, filename))
-            except Exception, e:
-                raise PluginError(str(e), 500)
-            if len(os.listdir(directory)) <= 1: # no files at all or only metadata file
-                try:
-                    shutil.rmtree(directory)
-                except Exception, e:
-                    raise PluginError(str(e), 500)
-                document.set_revision(None) # should not perform anything in later plugins.
-        else:
-            filename = document.get_full_filename()
-            try:
-                os.unlink(os.path.join(directory, filename))
-                #print "No doccode file %s unlinked!" % os.path.join(directory, filename)
-                #traceback.print_stack()
-            except Exception, e:
-                raise PluginError(str(e), 500)
-            if len(os.listdir(directory)) == 0: # no files at all for no_doccode
-                try:
-                    shutil.rmtree(directory)
-                except Exception, e:
-                    raise PluginError(str(e), 500)
-        """
         return document
 
     def get_revision_count(self, document):

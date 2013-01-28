@@ -253,31 +253,23 @@ class RevisionCountHandler(BaseHandler):
     @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def read(self, request, document):
         document, extension = os.path.splitext(document)
-        try:
-            doccode = DocumentTypeRuleManagerInstance.find_for_string(document)
-            if doccode:
-                try:
-                    mapping = models.DoccodePluginMapping.objects.get(doccode=doccode.get_id())
-                except models.DoccodePluginMapping.DoesNotExist:
-                    log.error('RevisionCountHandler.read DoccodePluginMapping.DoesNotExist exception raised')
-                    raise
-                operator = PluginsOperator()
-                rev_count = operator.get_revision_count(document, mapping)
-                if rev_count <= 0: # document without revisions is broken FIXME: In future this is ok!
-                    log.info('RevisionCountHandler.read rev_count %s.' % str(rev_count))
-                    raise Exception('No document revisions')
-                log.info('RevisionCountHandler.read request fulfilled for document %s, extension %s' % (document, extension))
-                return rev_count
+        processor = DocumentProcessor()
+        document = processor.read(request, document, options={'revision_count': True,})
+        rev_count = document.get_revision()
+        if rev_count <= 0:
+            log.info('RevisionCountHandler.read rev_count %s.' % str(rev_count))
+            if settings.DEBUG:
+                raise Exception('No document revisions')
             else:
-                log.error('RevisionCountHandler.read No Doccode')
-                raise Exception('No Doccode')
-        except Exception, e: # FIXME
+                return rc.BAD_REQUEST
+        if processor.errors:
             log.error('RevisionCountHandler.read Exception %s' % e)
             if settings.DEBUG:
                 raise
             else:
                 return rc.BAD_REQUEST
-
+        log.info('RevisionCountHandler.read request fulfilled for document %s, extension %s' % (document, extension))
+        return rev_count
 
 class RulesHandler(BaseHandler):
     """
