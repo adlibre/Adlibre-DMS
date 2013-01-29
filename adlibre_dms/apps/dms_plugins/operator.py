@@ -19,8 +19,6 @@ from workers import PluginError, PluginWarning, BreakPluginChain
 from workers.info.tags import TagsPlugin
 from dms_plugins import pluginpoints
 
-from core.models import Document
-
 # FIXME: Temporary logger
 #log = logging.getLogger('dms_plugins.operator')
 log = logging.getLogger('dms')
@@ -66,7 +64,6 @@ class PluginsOperator(object):
 
     def get_plugins_from_mapping(self, mapping, pluginpoint, plugin_type):
         """Extracts and instantiates Plugin() objects from given plugin mapping."""
-        plugins = []
         plugin_objects = getattr(mapping, 'get_' + pluginpoint.settings_field_name)()
         plugins = map(lambda plugin_obj: plugin_obj.get_plugin(), plugin_objects)
         if plugin_type:
@@ -97,14 +94,6 @@ class PluginsOperator(object):
             raise DmsException('Rule not found', 404)
         return mapping
 
-    def get_revisions_metadata(self, doccode_plugin_mapping):
-        metadata = None
-        pluginpoint=pluginpoints.StoragePluginPoint
-        metadatas = self.get_plugins_from_mapping(doccode_plugin_mapping, pluginpoint, plugin_type='metadata')
-        if metadatas:
-            metadata = metadatas[0]
-        return metadata
-
     """
     Some unusual magic with processing plugins...
 
@@ -114,9 +103,17 @@ class PluginsOperator(object):
     """
     def get_file_list(self, doccode_plugin_mapping, start=0, finish=None, order=None, searchword=None,
                       tags=None, filter_date=None):
+        """This must be a part of some retrieve workflow
+        e.g. DocumentProcessor().read(document, option='get_file_list')"""
+        # TODO: refactor this to a retrieval workflow with certain option.
         # Proper tags init according to PEP
         if not tags:
             tags = []
+        metadata = None
+        pluginpoint=pluginpoints.StoragePluginPoint
+        metadatas = self.get_plugins_from_mapping(doccode_plugin_mapping, pluginpoint, plugin_type='metadata')
+        if metadatas:
+            metadata = metadatas[0]
         pluginpoint = pluginpoints.StoragePluginPoint
         # Plugin point does not matter here as mapping must have a storage plugin both at storage and retrieval stages
         storage = self.get_plugins_from_mapping(doccode_plugin_mapping, pluginpoint, plugin_type='storage')
@@ -126,7 +123,6 @@ class PluginsOperator(object):
         # Should we validate more than one storage plugin?
         # FIXME: document should be able to work with several storage plugins.
         storage = storage[0]
-        metadata = self.get_revisions_metadata(doccode_plugin_mapping)
         doccode = doccode_plugin_mapping.get_docrule()
         doc_models = TagsPlugin().get_doc_models(doccode=doccode_plugin_mapping.get_docrule(), tags=tags)
         doc_names = map(lambda x: x.name, doc_models)
@@ -136,8 +132,3 @@ class PluginsOperator(object):
             document_directories = []
         return storage.worker.get_list(doccode, document_directories, start, finish, order, searchword,
             limit_to=doc_names)
-
-    # TODO: Convert it into workflow. Do not use Plugin() directly. WRONG!
-    # Maybe MAKE some Tags() Manager to handle it's logic with own pluginpoints etc...
-    def get_all_tags(self, doccode=None):
-        return TagsPlugin().get_all_tags(doccode = doccode)

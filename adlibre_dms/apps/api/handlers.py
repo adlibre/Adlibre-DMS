@@ -23,11 +23,10 @@ from api.decorators.group_required import group_required
 
 from core.document_processor import DocumentProcessor
 from core.http import DocumentResponse
-from dms_plugins import models
 from dms_plugins.operator import PluginsOperator
-from doc_codes.models import DocumentTypeRuleManagerInstance
 from dms_plugins.models import DoccodePluginMapping
 from mdt_manager import MetaDataTemplateManager
+from workers.info.tags import TagsPlugin
 
 from mdtui.security import list_permitted_docrules_qs
 
@@ -228,12 +227,14 @@ class TagsHandler(BaseHandler):
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
     @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def read(self, request, id_rule):
+        # FIXME: Requirement for this whole API hook is wrong.
+        # Tags should be got with document metadata. Not with a separate reequest.
         try:
             operator = PluginsOperator()
             mapping = operator.get_plugin_mapping_by_id(id_rule)
             docrule = mapping.get_docrule()
-            tags = operator.get_all_tags(doccode=docrule)
-            log.info('TagsHandler.read request fulfilled for rule %s' % (id_rule))
+            tags = TagsPlugin().get_all_tags(doccode = docrule)
+            log.info('TagsHandler.read request fulfilled for rule %s' % id_rule)
             return map(lambda x: x.name, tags)
         except Exception, e: # FIXME
             log.error('TagsHandler.read Exception %s' % e)
