@@ -26,7 +26,7 @@ from core.http import DocumentResponse
 from dms_plugins.operator import PluginsOperator
 from dms_plugins.models import DoccodePluginMapping
 from mdt_manager import MetaDataTemplateManager
-from workers.info.tags import TagsPlugin
+from dms_plugins.workers.info.tags import TagsPlugin
 
 from mdtui.security import list_permitted_docrules_qs
 
