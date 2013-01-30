@@ -145,7 +145,7 @@ class DocumentProcessor(object):
         new_name = self.check_options_for_option('new_name', options)
 
         # Sequence to make a new name for file.
-        # TODO: thui deletes all old revisions, instead of real rename...
+        # TODO: this deletes all old revisions, instead of real rename of all files...
         if new_name:
             renaming_doc = self.read(request, document_name, extension=extension)
             if new_name != renaming_doc.get_filename():
