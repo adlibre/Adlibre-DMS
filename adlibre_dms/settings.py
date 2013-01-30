@@ -385,6 +385,10 @@ if not DEBUG:
             'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
             'LOCATION': 'memory_cache'
         },
+        'core': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'memory_cache'
+        },
         'default': {
             'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
             'LOCATION': os.path.join(PROJECT_PATH, '..', '..', '..', '..', 'cache'),
@@ -393,6 +397,10 @@ if not DEBUG:
 else:
     CACHES = {
         'mui_search_results': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'memory_cache'
+        },
+        'core': {
             'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
             'LOCATION': 'memory_cache'
         },

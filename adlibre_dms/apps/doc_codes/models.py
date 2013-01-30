@@ -8,6 +8,7 @@ Author: Iurii Garmash
 """
 
 from django.db import models
+from django.core.cache import get_cache
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 
@@ -201,8 +202,6 @@ class DocumentTypeRule(models.Model):
             log.debug("False barcode")
             return False
 
-    # TODO: method should not rise anything by himself
-    # TODO: should get more than one mappings. (Need to change entire logic)
     def get_docrule_plugin_mappings(self):
         log.info('get_docrule_mapping for DocumentTypeRule : %s.' % self)
         mapping = dms_plugins.models.DoccodePluginMapping.objects.filter(
@@ -217,7 +216,17 @@ class DocumentTypeRule(models.Model):
 
 class DocumentTypeRuleManager(object):
     def __init__(self):
-        self.doccodes = DocumentTypeRule.objects.all()
+        """Every manager Instance has it's own document type rules set in memory (cache), not touching the DB often."""
+        # Using cache to store DB objects.
+        cache_docrules_for = 18000 # 5 minutes (new updated docrules will be stored)
+        cache = get_cache('core')
+        cache_key = 'docrules_objects'
+        cached_docrules = cache.get(cache_key, None)
+        if not cached_docrules:
+            self.doccodes = DocumentTypeRule.objects.all()
+            cache.set(cache_key, self.doccodes, cache_docrules_for)
+        else:
+            self.doccodes = cached_docrules
 
     def find_for_string(self, string):
         # TODO: understand why we needed this and can we drop it? (Probabaly No doccode = Default Document Type
@@ -231,7 +240,7 @@ class DocumentTypeRuleManager(object):
         return res
 
     def get_docrules(self):
-        return DocumentTypeRule.objects.all()
+        return self.doccodes
 
     def get_docrule_by_name(self, name):
         doccodes = self.get_docrules()
@@ -253,9 +262,3 @@ class DocumentTypeRuleManager(object):
         docrules = self.doccodes
         docrule_instance = docrules.get(pk=id)
         return docrule_instance
-
-# TODO: FIXME: We need to reinitialize this on saving new Document Type Rule. (Internal list of them is not updated)
-# Bug #657
-DocumentTypeRuleManagerInstance = DocumentTypeRuleManager()
-
-

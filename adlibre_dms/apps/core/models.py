@@ -17,7 +17,7 @@ import logging
 
 from django.conf import settings
 from core.errors import DmsException
-from doc_codes.models import DocumentTypeRuleManagerInstance
+from doc_codes.models import DocumentTypeRuleManager
 
 log = logging.getLogger('core.document')
 
@@ -75,7 +75,8 @@ class Document(object):
         # we can economise 1-2 SQL Db calls this way.
         # Better to implemnt through proxy for e.g.: self.get_docrule_from_db_info()
         if self.doccode is None and self.get_filename():
-            self.doccode = DocumentTypeRuleManagerInstance.find_for_string(self.get_stripped_filename())
+            dman = dman = DocumentTypeRuleManager()
+            self.doccode = dman.find_for_string(self.get_stripped_filename())
             if self.doccode is None:
                 log.error('get_docrule. doccode is None!')
                 # Using self.get_full_filename() method here can cause race condition in some cases.

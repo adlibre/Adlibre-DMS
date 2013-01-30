@@ -12,7 +12,7 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from djangoplugins import models
 
-from doc_codes.models import DocumentTypeRuleManagerInstance
+from doc_codes.models import DocumentTypeRuleManager
 from dms_plugins.models import DoccodePluginMapping
 
 from adlibre.dms.base_test import DMSTestCase
@@ -41,7 +41,8 @@ class APITest(DMSTestCase):
 
     def test_api_rule_detail(self):
         self.client.login(username=self.username, password=self.password)
-        doccode = DocumentTypeRuleManagerInstance.get_docrule_by_name('Test PDFs')
+        dman = DocumentTypeRuleManager()
+        doccode = dman.get_docrule_by_name('Test PDFs')
         mapping = DoccodePluginMapping.objects.get(doccode = doccode.get_id())
         #we don't really care if it crashes above, cause that means our database is imperfect
         url = reverse('api_rules_detail', kwargs={'id_rule': 3, 'emitter_format': 'json'})
@@ -62,7 +63,8 @@ class APITest(DMSTestCase):
 
     def test_api_files(self):
         self.client.login(username=self.username, password=self.password)
-        doccode = DocumentTypeRuleManagerInstance.get_docrule_by_name('Adlibre Invoices')
+        dman = DocumentTypeRuleManager()
+        doccode = dman.get_docrule_by_name('Adlibre Invoices')
         mapping = DoccodePluginMapping.objects.get(doccode = doccode.get_id())
         url = reverse("api_file_list", kwargs = {'id_rule': mapping.pk})
         response = self.client.get(url)

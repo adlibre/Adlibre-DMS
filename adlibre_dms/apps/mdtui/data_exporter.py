@@ -9,7 +9,7 @@ Author: Iurii Garmash
 
 import csv, re
 from django.http import HttpResponse
-from doc_codes.models import DocumentTypeRuleManagerInstance
+from doc_codes.models import DocumentTypeRuleManager
 from adlibre.date_converter import date_standardized
 
 import logging
@@ -18,6 +18,7 @@ log = logging.getLogger('dms.mdtui.data_exporter')
 
 def export_to_csv(search_keys, sec_keys_names, documents):
     """Helper to produce proper CSV file for search results export"""
+    dman = DocumentTypeRuleManager()
     # Cleaning Up documents
     docs = {}
     for document in documents:
@@ -43,7 +44,7 @@ def export_to_csv(search_keys, sec_keys_names, documents):
         cr_date = date_standardized(re.sub("T\d{2}:\d{2}:\d{2}Z", "", doc['metadata_created_date']))
         # Catching Document's type rule to name it in export
         # This way should not produce SQL DB requests (Uses DocumentTypeRuleManagerInstance for this)
-        docrule = DocumentTypeRuleManagerInstance.get_docrule_by_id(doc['metadata_doc_type_rule_id'])
+        docrule = dman.get_docrule_by_id(doc['metadata_doc_type_rule_id'])
         docrule_name = docrule.get_title()
         # Final row adding
         doc_row = [unicode(name).encode('utf8'),] + [cr_date,] + [unicode(doc['metadata_description']).encode('utf8')] + doc_sec_keys + [unicode(docrule_name).encode('utf8'),]
@@ -63,7 +64,7 @@ def export_to_csv(search_keys, sec_keys_names, documents):
         if item == u'docrule_id':
             item = u'Document Type'
             id = value
-            docrule = DocumentTypeRuleManagerInstance.get_docrule_by_id(id)
+            docrule = dman.get_docrule_by_id(id)
             value = docrule.get_title()
         if not value.__class__.__name__ == 'tuple':
             writer.writerow([unicode(item).encode('utf8'), unicode(value).encode('utf8')])
