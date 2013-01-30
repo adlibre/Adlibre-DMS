@@ -1,5 +1,5 @@
 """
-Module: DMS Core system object.
+Module: DMS Core main Document object.
 
 Project: Adlibre DMS
 Copyright: Adlibre Pty Ltd 2011
