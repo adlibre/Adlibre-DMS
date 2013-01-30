@@ -71,9 +71,6 @@ class Document(object):
 
     def get_docrule(self):
         log.debug('get_docrule for %s.' % self.doccode)
-        # TODO: add checking doccode from Couch_DB or similar (when self.db_info data present). It usually contains it.
-        # we can economise 1-2 SQL Db calls this way.
-        # Better to implemnt through proxy for e.g.: self.get_docrule_from_db_info()
         if self.doccode is None and self.get_filename():
             dman = dman = DocumentTypeRuleManager()
             self.doccode = dman.find_for_string(self.get_stripped_filename())
