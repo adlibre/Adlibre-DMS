@@ -218,7 +218,7 @@ class DocumentTypeRuleManager(object):
     def __init__(self):
         """Every manager Instance has it's own document type rules set in memory (cache), not touching the DB often."""
         # Using cache to store DB objects.
-        cache_docrules_for = 18000 # 5 minutes (new updated docrules will be stored)
+        cache_docrules_for = 300 # 5 minutes (new updated docrules will be stored)
         cache = get_cache('core')
         cache_key = 'docrules_objects'
         cached_docrules = cache.get(cache_key, None)
