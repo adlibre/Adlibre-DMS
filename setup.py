@@ -103,7 +103,7 @@ setup(name='adlibre_dms',
     ],
     install_requires=[
             # Core requirements
-            'Django==1.3.2',
+            'Django==1.4.3',
             'python-magic==0.4.2',
             'django-compressor==1.1.2',
             'docutils==0.7',
