@@ -32,6 +32,7 @@ class DMSTestCase(TestCase):
         self.documents_pdf2 = ('BBB-0001', )
         self.documents_txt = ('10001', '10006', '101',)
         self.documents_tif = ('2011-01-27-1', '2011-01-28-12',)
+        self.documents_jpg = ('TST00000001', 'TST00000002', 'TST12345678')
         self.documents_missing = ('ADL-8888', 'ADL-9999',)
         #self.documents_norule = ('ADL-54321', 'ADL-12345', ) # too long to match ADL invoices
         # These are documents that are not tested, yet exist in ./fixtures/testdata/
@@ -117,6 +118,7 @@ class DMSTestCase(TestCase):
         self.cleanUp(self.documents_tif, check_response=check_response)
         self.cleanUp(self.documents_txt, check_response=check_response)
         self.cleanUp(self.documents_pdf2, check_response=check_response)
+        self.cleanUp(self.documents_jpg, check_response=check_response)
 
         cleanup_docs_list = []
 #        # no doc code documents require full filename in order to delete FIXME!
