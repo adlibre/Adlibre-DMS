@@ -812,7 +812,6 @@ class MDTUI(TestCase):
             post_dict = self._convert_doc_to_post_dict(rows_dict, doc_dict)
             # Adding Document Indexes
             response = self.client.post(url, post_dict)
-            #print response
             self.assertEqual(response.status_code, 302)
             uurl = self._retrieve_redirect_response_url(response)
             response = self.client.get(uurl)
@@ -849,7 +848,6 @@ class MDTUI(TestCase):
             post_dict = self._convert_doc_to_post_dict(rows_dict, doc_dict)
             # Adding Document Indexes
             response = self.client.post(url, post_dict)
-            #print response
             self.assertEqual(response.status_code, 302)
             uurl = self._retrieve_redirect_response_url(response)
             response = self.client.get(uurl)
@@ -1866,7 +1864,6 @@ class MDTUI(TestCase):
         self.assertEqual(response.status_code, 302)
         uurl = self._retrieve_redirect_response_url(response)
         response = self.client.get(uurl)
-        #print response
         self.assertEqual(response.status_code, 200)
         # Keys added to indexes
         self.assertNotContains(response, 'Reporting Entity: '+ind_doc1['Reporting Entity'])
@@ -3246,7 +3243,6 @@ class MDTUI(TestCase):
         url = reverse('mdtui-search-type')
         data = {'docrule': test_mdt_docrule_id4}
         response = self.client.post(url, data)
-        print response
         self.assertEqual(response.status_code, 302)
         url = reverse('mdtui-search-options')
         response = self.client.get(url)
