@@ -1067,7 +1067,6 @@ class MDTUI(TestCase):
         new_url = self._retrieve_redirect_response_url(response)
         response = self.client.get(new_url)
         self.assertEqual(response.status_code, 200)
-        print response
         # no errors appeared
         self.assertNotContains(response, "You have not defined Document Searching Options")
         # documents found
