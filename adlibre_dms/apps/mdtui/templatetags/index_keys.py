@@ -12,7 +12,7 @@ import datetime
 from django import template
 from django.conf import settings
 
-from doc_codes.models import DocumentTypeRuleManagerInstance
+from doc_codes.models import DocumentTypeRuleManager
 register = template.Library()
 
 @register.tag(name="get_key_li_item")
@@ -54,7 +54,8 @@ class ProvideLiElement(template.Node):
             if item == u'docrule_id':
                 item = u'Document Type'
                 id = value
-                docrule = DocumentTypeRuleManagerInstance.get_docrule_by_id(id)
+                dman = DocumentTypeRuleManager()
+                docrule = dman.get_docrule_by_id(id)
                 value = docrule.get_title()
             if not value.__class__.__name__ == 'tuple':
                 resp_string = unicode(item) + u': ' + unicode(value)
@@ -88,7 +89,8 @@ class ConvertDocrule(template.Node):
             try:
                 int(item)
             except: return 'None'
-            docrule = DocumentTypeRuleManagerInstance.get_docrule_by_id(item)
+            dman = DocumentTypeRuleManager()
+            docrule = dman.get_docrule_by_id(item)
             value = docrule.get_title()
             value = unicode(value).capitalize()
             return value
