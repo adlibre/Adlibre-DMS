@@ -50,17 +50,18 @@ class DocumentProcessor(object):
 
     TODO:
         - should not use django "request" object, that is wrong and must be refactored in future releases.
+            # TODO: discuss this... may trim a bit of flexibility for potential development.
         - should have similar architecture in all calls (CRUD)
         - should have better difference between create and update
             currently: create new revision == Create task, this is wrong.
         - should not delete all the Document() revisions on rename.
     """
-    # TODO: refactor so that 'request' is not used here.
-    # TODO: new_revision == create call. This is wrong.
+    # TODO: refactor so that 'request' is not used here. # (Should we? Potential loss of flexibility in plugins.)
     def __init__(self):
         self.errors = []
         self.warnings = []
 
+    # TODO: new_revision == create call. This is wrong.
     # TODO: use options={'barcode': ... , 'index_info': ... ,} instead of adding params.
     def create(self, request, uploaded_file, index_info=None, barcode=None):
         """
