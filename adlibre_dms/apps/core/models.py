@@ -72,7 +72,7 @@ class Document(object):
     def get_docrule(self):
         log.debug('get_docrule for %s.' % self.doccode)
         if self.doccode is None and self.get_filename():
-            dman = dman = DocumentTypeRuleManager()
+            dman = DocumentTypeRuleManager()
             self.doccode = dman.find_for_string(self.get_stripped_filename())
             if self.doccode is None:
                 log.error('get_docrule. doccode is None!')
