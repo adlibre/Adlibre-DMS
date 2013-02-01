@@ -394,7 +394,7 @@ def view_object(request, code, step, template='mdtui/view.html'):
     pdf_url = reverse('mdtui-download-pdf', kwargs = { 'code': code, })
     # TODO: think about the way to remove requiremnt for this request.
     processor = DocumentProcessor()
-    document = processor.read(request, code, only_metadata=True)
+    document = processor.read(request, code, options={'only_metadata':True,})
     mimetype = document.get_mimetype()
     context = { 'pdf_url': pdf_url, 'code': code, 'step':step, 'mimetype': mimetype }
     return render(request, template, context)

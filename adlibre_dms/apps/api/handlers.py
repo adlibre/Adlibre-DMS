@@ -69,7 +69,12 @@ class FileHandler(BaseFileHandler):
     def read(self, request, code, suggested_format=None):
         revision, hashcode, extra = self._get_info(request)
         processor = DocumentProcessor()
-        document = processor.read(request, code, hashcode, revision, extension=suggested_format)
+        options = {
+            'hashcode': hashcode,
+            'revision': revision,
+            'extension': suggested_format,
+        }
+        document = processor.read(request, code, options)
         if not request.user.is_superuser:
             # Hack: Used part of the code from MDTUI Wrong!
             user_permissions = list_permitted_docrules_qs(request.user)
@@ -80,8 +85,7 @@ class FileHandler(BaseFileHandler):
             return rc.NOT_FOUND
         else:
             response = DocumentResponse(document)
-            log.info('FileHandler.read request fulfilled for code: %s, format: %s, rev %s, hash: %s.'
-                     % (code, suggested_format, revision, hashcode))
+            log.info('FileHandler.read request fulfilled for code: %s, options: %s' % (code, options))
         return response
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
@@ -94,8 +98,13 @@ class FileHandler(BaseFileHandler):
         new_name = request.PUT.get('new_name', None)
         try:
             processor = DocumentProcessor()
-            document = processor.update(request, code, tag_string=tag_string, remove_tag_string=remove_tag_string,
-                    extension=suggested_format, options={'new_name': new_name}) #FIXME hashcode missing?
+            options = {
+                'tag_string': tag_string,
+                'remove_tag_string': remove_tag_string,
+                'extension': suggested_format,
+                'new_name': new_name,
+            } #FIXME hashcode missing?
+            document = processor.update(request, code,  options)
             if len(processor.errors) > 0:
                 log.error('FileHandler.update manager errors %s' % processor.errors)
                 if settings.DEBUG:
@@ -115,14 +124,18 @@ class FileHandler(BaseFileHandler):
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
     @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def delete(self, request, code, suggested_format=None):
-    # FIXME: should return 404 if file not found, 400 if no docrule exists.
-    #        full_filename = request.REQUEST.get('full_filename', None) # what is this?
-    #        parent_directory = request.REQUEST.get('parent_directory', None) # FIXME! Used by no doccode!
+        # FIXME: should return 404 if file not found, 400 if no docrule exists.
+        #        full_filename = request.REQUEST.get('full_filename', None) # what is this?
+        #        parent_directory = request.REQUEST.get('parent_directory', None) # FIXME! Used by no doccode!
         revision, hashcode, extra = self._get_info(request)
         processor = DocumentProcessor()
         try:
-            log.debug('FileHandler.delete attempt with %s %s' % (code, revision))
-            processor.delete(request, code, revision=revision, extension=suggested_format)
+            options = {
+                'revision': revision,
+                'extension': suggested_format
+                }
+            log.debug('FileHandler.delete attempt with %s' % options)
+            processor.delete(request, code, options)
         except Exception, e:
             log.error('FileHandler.delete exception %s' % e)
             if settings.DEBUG:
@@ -148,8 +161,13 @@ class FileInfoHandler(BaseFileHandler):
     def read(self, request, code, suggested_format=None):
         revision, hashcode, extra = self._get_info(request)
         processor = DocumentProcessor()
-        document = processor.read(request, code, hashcode=hashcode, revision=revision, only_metadata=True,
-            extension=suggested_format)
+        options = {
+            'revision': revision,
+            'hashcode': hashcode,
+            'only_metadata': True,
+            'extension': suggested_format,
+        }
+        document = processor.read(request, code, options)
         docrule = document.get_docrule()
         # FIXME: there might be more than one docrules!
         mapping = docrule.get_docrule_plugin_mappings()
