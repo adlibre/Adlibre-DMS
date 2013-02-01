@@ -73,8 +73,11 @@ def error_response(errors):
 def get_file(request, code, suggested_format=None):
     hashcode = request.GET.get('hashcode', None) # Refactor me out
     processor = DocumentProcessor()
-    document = processor.read(request, code, hashcode=hashcode, extension=suggested_format,)
-    #mimetype, filename, content = manager.get_file(request, code, hashcode, suggested_format)
+    options = {
+        'hashcode': hashcode,
+        'extension': suggested_format,
+    }
+    document = processor.read(request, code, options)
     if processor.errors:
         response = error_response(processor.errors)
     else:
@@ -85,7 +88,7 @@ def get_file(request, code, suggested_format=None):
 def revision_document(request, document):
     document_name = document
     processor = DocumentProcessor()
-    document = processor.read(request, document_name, only_metadata=True)
+    document = processor.read(request, document_name, options={'only_metadata':True,})
     extra_context = {}
     metadata = document.get_metadata()
     def get_args(fileinfo):

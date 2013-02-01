@@ -20,26 +20,25 @@ from core.errors import DmsException
 
 log = logging.getLogger('core.document_processor')
 
-# TODO: AC: I think this should be refactored so that 'request' is not used here.
 class DocumentProcessor(object):
     """Main DMS CRUD logic operations handler.
 
-    TODO: refactor methods to accept only 1 additional variable 'options'
-    so instead of adding local vars:
-
-        Manager().create(request, uploaded_file, index_info, barcode)
-
-    it should list all the options required there. e.g. in this case:
-
-        options = {
-                'barcode' = 'ADL-0001' ,
-                'index_info' = {
-                           # ...
-                    },
+    Architecture:
+        - this manager defines main DMS core level of interaction.
+        - works with "options" object, that is a dict. e.g.:
+            options = {
+                'hashcode': 03245634599134569234,
+                'revision': 1,
+                'extension': pdf,
+                # ...
             }
-        class Manager()
+        - has a CRUD architecture usually taking a document_name or uploaded_file as a first variable
+            and using "options" dict for interaction/processing actions.
+        - typical intaraction cycle is:
 
-            def create(request, uploaded_file, options=None)
+            class Manager()
+
+            def create(uploaded_file, options=None)
                 # Context init
                 barcode = None
                 index_info = None
@@ -49,12 +48,20 @@ class DocumentProcessor(object):
                         barcode = options['barcode']
                     # ...
 
-    Manager should have similar behaviour at all the CRUD methods.
+    TODO:
+        - should not use django "request" object, that is wrong and must be refactored in future releases.
+        - should have similar architecture in all calls (CRUD)
+        - should have better difference between create and update
+            currently: create new revision == Create task, this is wrong.
+        - should not delete all the Document() revisions on rename.
     """
+    # TODO: refactor so that 'request' is not used here.
+    # TODO: new_revision == create call. This is wrong.
     def __init__(self):
         self.errors = []
         self.warnings = []
 
+    # TODO: use options={'barcode': ... , 'index_info': ... ,} instead of adding params.
     def create(self, request, uploaded_file, index_info=None, barcode=None):
         """
         Creates a new Document() object.
@@ -93,7 +100,7 @@ class DocumentProcessor(object):
         self.check_errors_in_operator(operator)
         return doc
 
-    def read(self, request, document_name, hashcode=None, revision=None, only_metadata=False, extension=None, options=None):
+    def read(self, request, document_name, options=None):
         """
         Reads document data from DMS
 
@@ -102,8 +109,7 @@ class DocumentProcessor(object):
 
         Currently can read Document() with file object attached or either read only metadata.
         """
-        log.debug('READ Document %s, hashcode: %s, revision: %s, only_metadata: %s, extension: %s'
-                  % (document_name, hashcode, revision, only_metadata, extension) )
+        log.debug('READ Document %s with options: %s' % (document_name, options))
         doc = Document()
         operator = PluginsOperator()
         # Checking if name really possible in current DMS config.
@@ -113,22 +119,13 @@ class DocumentProcessor(object):
             self.errors.append(unicode(e.parameter))
             return doc
             pass
-        doc.set_hashcode(hashcode)
-        doc.set_revision(revision)
-        # Run for plugins without retriving document. Only count metadata.
-        if options:
-            if 'revision_count' in options:
-                if options['revision_count']:
-                    doc.update_options({'revision_count': True,})
-                    only_metadata = True
-        if extension:
-            doc.set_requested_extension(extension)
-        doc.update_options({'only_metadata': only_metadata,})
+        doc = self.init_Document_with_data(options, doc)
         doc = operator.process_pluginpoint(pluginpoints.BeforeRetrievalPluginPoint, request, document=doc)
         self.check_errors_in_operator(operator)
         return doc
 
-    def update(self, request, document_name, tag_string=None, remove_tag_string=None, extension=None, options=None):
+    # TODO: Update should not delete all the old document's revisions on rename.
+    def update(self, request, document_name, options):
         """
         Process update plugins.
 
@@ -138,46 +135,32 @@ class DocumentProcessor(object):
             - update document indexes
             TODO: continue this...
         """
-        log.debug('UPDATE Document %s, tag_string: %s, remove_tag_string: %s, extension: %s, options: %s'
-                  % (document_name, tag_string, remove_tag_string, extension, options) )
-        # Context init
-        new_indexes = self.check_options_for_option('new_indexes', options)
+        log.debug('UPDATE Document %s, options: %s' % (document_name, options))
         new_name = self.check_options_for_option('new_name', options)
 
         # Sequence to make a new name for file.
         # TODO: this deletes all old revisions, instead of real rename of all files...
         if new_name:
-            renaming_doc = self.read(request, document_name, extension=extension)
+            extension = self.check_options_for_option('extension', options)
+            renaming_doc = self.read(request, document_name, options={'extension':extension,})
             if new_name != renaming_doc.get_filename():
                 ufile = UploadedFile(renaming_doc.get_file_obj(), new_name, content_type=renaming_doc.get_mimetype())
                 document = self.create(request, ufile)
                 if not self.errors:
-                    self.delete(request, renaming_doc.get_filename(), extension=extension)
+                    self.delete(request, renaming_doc.get_filename(), options={'extension': extension,})
                 return document
-        doc = Document()
+
         operator = PluginsOperator()
-        doc.set_filename(document_name)
-        if extension:
-            doc.set_requested_extension(extension)
-        doc.set_tag_string(tag_string)
-        doc.set_remove_tag_string(remove_tag_string)
-        if new_indexes:
-            doc.update_db_info(new_indexes)
+        doc = self.init_Document_with_data(options, document_name=document_name)
         doc = operator.process_pluginpoint(pluginpoints.BeforeUpdatePluginPoint, request, document=doc)
         self.check_errors_in_operator(operator)
         return doc
 
-    def delete(self, request, document_name, revision=None, extension=None):
+    def delete(self, request, document_name, options):
         """Deletes Document() or it's parts from DMS."""
-        log.debug('DELETEE Document %s, revision: %s, extension: %s'
-                  % (document_name, revision, extension) )
-        doc = Document()
+        log.debug('DELETEE Document %s, options: %s' % (document_name, options) )
         operator = PluginsOperator()
-        doc.set_filename(document_name)
-        if extension:
-            doc.set_requested_extension(extension)
-        if revision:
-            doc.set_revision(revision)
+        doc = self.init_Document_with_data(options, document_name=document_name)
         doc = operator.process_pluginpoint(pluginpoints.BeforeRemovalPluginPoint, request, document=doc)
         self.check_errors_in_operator(operator)
         return doc
@@ -200,6 +183,7 @@ class DocumentProcessor(object):
         else:
             return False
 
+    """Internal helper functionality"""
     def check_options_for_option(self, option, options, default=None):
         """Redundant checker if options for method has this value"""
         response = default
@@ -207,3 +191,42 @@ class DocumentProcessor(object):
             if option in options:
                 response = options[option]
         return response
+
+    def init_Document_with_data(self, options, doc=None, document_name=None ):
+        """Populate given Document() class with given properties from "options" provided
+
+        Makes expansion of interaction methods with Document() simple.
+        Expand this actions to add new interactions with Document() object...
+
+        Connector between "options" passed to this CRUD manager and later Plugin() interactions.
+        """
+        if doc is None:
+            doc = Document()
+            doc.set_filename(document_name)
+        if options:
+            try:
+                for property_name, value in options.iteritems():
+                    if property_name=='hashcode':
+                        doc.set_hashcode(value)
+                    if property_name=='revision':
+                        doc.set_revision(value)
+                    # Run for plugins without retriving document. Only count metadata.
+                    if property_name=='revision_count':
+                        doc.update_options({'revision_count': True,
+                                            'only_metadata': True,})
+                    if property_name=='extension':
+                        doc.set_requested_extension(value)
+                    if property_name=='tag_string':
+                        doc.set_tag_string(value)
+                    if property_name=='remove_tag_string':
+                        doc.set_remove_tag_string(value)
+                    if property_name=='new_indexes':
+                        doc.update_db_info(value)
+                if 'only_metadata' in options:
+                    doc.update_options({'only_metadata': options['only_metadata'],})
+            except Exception, e:
+                self.errors.append('Error working with Object: %s' % e)
+                log.error('DocumentManager().init_Document_with_data() error: %s, doc: %s, options: %s, document_name:%s'
+                          % (e, doc, options, document_name))
+                pass
+        return doc
