@@ -24,7 +24,7 @@ class FileTypeValidationPlugin(Plugin, BeforeStoragePluginPoint):
 
     mimetypes = get_mimetypes()
 
-    def work(self, request, document, **kwargs):
+    def work(self, user, document, **kwargs):
         filebuffer = document.get_file_obj()
         if filebuffer is None:
             raise PluginError('File buffer not initialized', 500)

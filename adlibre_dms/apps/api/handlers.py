@@ -57,7 +57,7 @@ class FileHandler(BaseFileHandler):
         else:
             return rc.BAD_REQUEST
         processor = DocumentProcessor()
-        document = processor.create(request, work_file)
+        document = processor.create(request.user, work_file)
         if len(processor.errors) > 0:
             log.error('FileHandler.create manager errors: %s' % processor.errors)
             return rc.BAD_REQUEST
@@ -74,7 +74,7 @@ class FileHandler(BaseFileHandler):
             'revision': revision,
             'extension': suggested_format,
         }
-        document = processor.read(request, code, options)
+        document = processor.read(request.user, code, options)
         if not request.user.is_superuser:
             # Hack: Used part of the code from MDTUI Wrong!
             user_permissions = list_permitted_docrules_qs(request.user)
@@ -104,7 +104,7 @@ class FileHandler(BaseFileHandler):
                 'extension': suggested_format,
                 'new_name': new_name,
             } #FIXME hashcode missing?
-            document = processor.update(request, code,  options)
+            document = processor.update(request.user, code,  options)
             if len(processor.errors) > 0:
                 log.error('FileHandler.update manager errors %s' % processor.errors)
                 if settings.DEBUG:
@@ -135,7 +135,7 @@ class FileHandler(BaseFileHandler):
                 'extension': suggested_format
                 }
             log.debug('FileHandler.delete attempt with %s' % options)
-            processor.delete(request, code, options)
+            processor.delete(request.user, code, options)
         except Exception, e:
             log.error('FileHandler.delete exception %s' % e)
             if settings.DEBUG:
@@ -167,7 +167,7 @@ class FileInfoHandler(BaseFileHandler):
             'only_metadata': True,
             'extension': suggested_format,
         }
-        document = processor.read(request, code, options)
+        document = processor.read(request.user, code, options)
         docrule = document.get_docrule()
         # FIXME: there might be more than one docrules!
         mapping = docrule.get_docrule_plugin_mappings()
@@ -273,7 +273,7 @@ class RevisionCountHandler(BaseHandler):
     def read(self, request, document):
         document, extension = os.path.splitext(document)
         processor = DocumentProcessor()
-        document = processor.read(request, document, options={'revision_count': True,})
+        document = processor.read(request.user, document, options={'revision_count': True,})
         rev_count = document.get_revision()
         if rev_count <= 0:
             log.info('RevisionCountHandler.read rev_count %s.' % str(rev_count))

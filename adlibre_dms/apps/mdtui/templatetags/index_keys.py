@@ -13,6 +13,7 @@ from django import template
 from django.conf import settings
 
 from doc_codes.models import DocumentTypeRuleManager
+
 register = template.Library()
 
 @register.tag(name="get_key_li_item")

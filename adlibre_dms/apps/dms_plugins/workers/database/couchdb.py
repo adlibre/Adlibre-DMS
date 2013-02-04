@@ -24,7 +24,7 @@ class CouchDBMetadata(object):
         Handles required logic for metadata <==> Document(object) manipulations.
     """
 
-    def store(self, request, document):
+    def store(self, user, document):
         """
         Stores CouchDB object into DB.
 
@@ -46,7 +46,7 @@ class CouchDBMetadata(object):
                 if not document.metadata:
                     # HACK: Preserving db_info here... (May be Solution!!!)
                     db_info = document.get_db_info()
-                    document = processor.read(request, document.file_name, options={'only_metadata':True,})
+                    document = processor.read(user, document.file_name, options={'only_metadata':True,})
 
                     # HACK: saving NEW metadata ONLY if they exist in new uploaded doc (Preserving old indexes)'
                     if db_info:
@@ -58,7 +58,7 @@ class CouchDBMetadata(object):
                         current_revisions = document.metadata
                         try:
                             # Only if document exists in DB. Falling gracefully if not.
-                            temp_doc = self.retrieve(request, document)
+                            temp_doc = self.retrieve(user, document)
                             old_metadata = temp_doc.get_db_info()
                             old_index_revisions = None
                             if old_metadata['mdt_indexes']:
@@ -83,11 +83,11 @@ class CouchDBMetadata(object):
                 # assuming no document with this _id exists. SAVING or overwriting existing
                 couchdoc=CouchDocument()
 
-                couchdoc.populate_from_dms(request, document)
+                couchdoc.populate_from_dms(user, document)
                 couchdoc.save(force_update=True)
                 return document
 
-    def update_document_metadata(self, request, document):
+    def update_document_metadata(self, user, document):
         """
         Updates document with new indexes and stores old one into another revision.
         """
@@ -95,10 +95,10 @@ class CouchDBMetadata(object):
             couchdoc = CouchDocument.get(docid=document.file_name)
             couchdoc.update_indexes_revision(document)
             couchdoc.save()
-            document = couchdoc.populate_into_dms(request, document)
+            document = couchdoc.populate_into_dms(user, document)
         return document
 
-    def update_metadata_after_removal(self, request, document):
+    def update_metadata_after_removal(self, user, document):
         """
         Updates document CouchDB metadata on removal.
 
@@ -111,7 +111,7 @@ class CouchDBMetadata(object):
             couchdoc.delete()
         return document
 
-    def retrieve(self, request, document):
+    def retrieve(self, user, document):
         docrule = document.get_docrule()
         mapping = docrule.get_docrule_plugin_mappings()
         # No actions for no doccode documents
@@ -124,7 +124,7 @@ class CouchDBMetadata(object):
             else:
                 doc_name = document.get_stripped_filename()
                 couchdoc = CouchDocument.get(docid=doc_name)
-                document = couchdoc.populate_into_dms(request, document)
+                document = couchdoc.populate_into_dms(user, document)
                 return document
 
     """
@@ -148,8 +148,8 @@ class CouchDBMetadataRetrievalPlugin(Plugin, BeforeRetrievalPluginPoint):
     plugin_type = 'database'
     worker = CouchDBMetadata()
 
-    def work(self, request, document, **kwargs):
-        return self.worker.retrieve(request, document)
+    def work(self, user, document, **kwargs):
+        return self.worker.retrieve(user, document)
 
 class CouchDBMetadataStoragePlugin(Plugin, DatabaseStoragePluginPoint):
     title = "CouchDB Metadata Storage"
@@ -158,8 +158,8 @@ class CouchDBMetadataStoragePlugin(Plugin, DatabaseStoragePluginPoint):
     plugin_type = 'database'
     worker = CouchDBMetadata()
 
-    def work(self, request, document, **kwargs):
-        return self.worker.store(request, document)
+    def work(self, user, document, **kwargs):
+        return self.worker.store(user, document)
 
 class CouchDBMetadataUpdatePlugin(Plugin, BeforeUpdatePluginPoint):
     title = "CouchDB Metadata Update Indexes"
@@ -168,8 +168,8 @@ class CouchDBMetadataUpdatePlugin(Plugin, BeforeUpdatePluginPoint):
     plugin_type = 'database'
     worker = CouchDBMetadata()
 
-    def work(self, request, document, **kwargs):
-        return self.worker.update_document_metadata(request, document)
+    def work(self, user, document, **kwargs):
+        return self.worker.update_document_metadata(user, document)
 
 class CouchDBMetadataRemovalPlugin(Plugin, BeforeRemovalPluginPoint):
     title = "CouchDB Metadata Removal"
@@ -178,5 +178,5 @@ class CouchDBMetadataRemovalPlugin(Plugin, BeforeRemovalPluginPoint):
     plugin_type = 'database'
     worker = CouchDBMetadata()
 
-    def work(self, request, document, **kwargs):
-        return self.worker.update_metadata_after_removal(request, document)
+    def work(self, user, document, **kwargs):
+        return self.worker.update_metadata_after_removal(user, document)

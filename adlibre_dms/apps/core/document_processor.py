@@ -49,21 +49,18 @@ class DocumentProcessor(object):
                     # ...
 
     TODO:
-        - should not use django "request" object, that is wrong and must be refactored in future releases.
-            # TODO: discuss this... may trim a bit of flexibility for potential development.
         - should have similar architecture in all calls (CRUD)
         - should have better difference between create and update
             currently: create new revision == Create task, this is wrong.
         - should not delete all the Document() revisions on rename.
     """
-    # TODO: refactor so that 'request' is not used here. # (Should we? Potential loss of flexibility in plugins.)
     def __init__(self):
         self.errors = []
         self.warnings = []
 
     # TODO: new_revision == create call. This is wrong.
     # TODO: use options={'barcode': ... , 'index_info': ... ,} instead of adding params.
-    def create(self, request, uploaded_file, index_info=None, barcode=None):
+    def create(self, user, uploaded_file, index_info=None, barcode=None):
         """
         Creates a new Document() object.
 
@@ -95,13 +92,13 @@ class DocumentProcessor(object):
             doc.set_db_info(index_info)
         # Processing plugins
         # FIXME: if uploaded_file is not None, then some plugins should not run because we don't have a file
-        doc = operator.process_pluginpoint(pluginpoints.BeforeStoragePluginPoint, request, document=doc)
-        operator.process_pluginpoint(pluginpoints.StoragePluginPoint, request, document=doc)
-        doc = operator.process_pluginpoint(pluginpoints.DatabaseStoragePluginPoint, request, document=doc)
+        doc = operator.process_pluginpoint(pluginpoints.BeforeStoragePluginPoint, user, document=doc)
+        operator.process_pluginpoint(pluginpoints.StoragePluginPoint, user, document=doc)
+        doc = operator.process_pluginpoint(pluginpoints.DatabaseStoragePluginPoint, user, document=doc)
         self.check_errors_in_operator(operator)
         return doc
 
-    def read(self, request, document_name, options=None):
+    def read(self, user, document_name, options=None):
         """
         Reads document data from DMS
 
@@ -121,12 +118,12 @@ class DocumentProcessor(object):
             return doc
             pass
         doc = self.init_Document_with_data(options, doc)
-        doc = operator.process_pluginpoint(pluginpoints.BeforeRetrievalPluginPoint, request, document=doc)
+        doc = operator.process_pluginpoint(pluginpoints.BeforeRetrievalPluginPoint, user, document=doc)
         self.check_errors_in_operator(operator)
         return doc
 
     # TODO: Update should not delete all the old document's revisions on rename.
-    def update(self, request, document_name, options):
+    def update(self, user, document_name, options):
         """
         Process update plugins.
 
@@ -137,32 +134,32 @@ class DocumentProcessor(object):
             TODO: continue this...
         """
         log.debug('UPDATE Document %s, options: %s' % (document_name, options))
-        new_name = self.check_options_for_option('new_name', options)
+        new_name = self.option_in_options('new_name', options)
 
         # Sequence to make a new name for file.
         # TODO: this deletes all old revisions, instead of real rename of all files...
         if new_name:
             extension = self.check_options_for_option('extension', options)
-            renaming_doc = self.read(request, document_name, options={'extension':extension,})
+            renaming_doc = self.read(user, document_name, options={'extension':extension,})
             if new_name != renaming_doc.get_filename():
                 ufile = UploadedFile(renaming_doc.get_file_obj(), new_name, content_type=renaming_doc.get_mimetype())
-                document = self.create(request, ufile)
+                document = self.create(user, ufile)
                 if not self.errors:
-                    self.delete(request, renaming_doc.get_filename(), options={'extension': extension,})
+                    self.delete(user, renaming_doc.get_filename(), options={'extension': extension,})
                 return document
 
         operator = PluginsOperator()
         doc = self.init_Document_with_data(options, document_name=document_name)
-        doc = operator.process_pluginpoint(pluginpoints.BeforeUpdatePluginPoint, request, document=doc)
+        doc = operator.process_pluginpoint(pluginpoints.BeforeUpdatePluginPoint, user, document=doc)
         self.check_errors_in_operator(operator)
         return doc
 
-    def delete(self, request, document_name, options):
+    def delete(self, user, document_name, options):
         """Deletes Document() or it's parts from DMS."""
         log.debug('DELETEE Document %s, options: %s' % (document_name, options) )
         operator = PluginsOperator()
         doc = self.init_Document_with_data(options, document_name=document_name)
-        doc = operator.process_pluginpoint(pluginpoints.BeforeRemovalPluginPoint, request, document=doc)
+        doc = operator.process_pluginpoint(pluginpoints.BeforeRemovalPluginPoint, user, document=doc)
         self.check_errors_in_operator(operator)
         return doc
 
@@ -185,7 +182,7 @@ class DocumentProcessor(object):
             return False
 
     """Internal helper functionality"""
-    def check_options_for_option(self, option, options, default=None):
+    def option_in_options(self, option, options, default=None):
         """Redundant checker if options for method has this value"""
         response = default
         if options:

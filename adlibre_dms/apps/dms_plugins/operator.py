@@ -38,7 +38,7 @@ class PluginsOperator(object):
         self.plugin_errors = []
         self.plugin_warnings = []
 
-    def process_pluginpoint(self, pluginpoint, request, document=None):
+    def process_pluginpoint(self, pluginpoint, user, document=None):
         """
         PluginsOperator() main gear.
 
@@ -49,7 +49,7 @@ class PluginsOperator(object):
         for plugin in plugins:
             try:
                 log.debug('process_pluginpoint begin processing: %s.' % plugin)
-                document = plugin.work(request, document)
+                document = plugin.work(user, document)
                 log.debug('process_pluginpoint begin processed: %s.' % plugin)
             except PluginError, e: # if some plugin throws an exception, stop processing and store the error message
                 self.plugin_errors.append(e)

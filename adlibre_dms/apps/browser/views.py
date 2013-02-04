@@ -17,7 +17,6 @@ from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
-from django.template import RequestContext, loader
 
 from dms_plugins import models, forms, representator
 from dms_plugins.operator import PluginsOperator
@@ -50,7 +49,7 @@ def upload(request, template_name='browser/upload.html', extra_context={}):
     if request.method == 'POST':
         if form.is_valid():
             processor = DocumentProcessor()
-            processor.create(request, form.files['file'])
+            processor.create(request.user, form.files['file'])
             if not processor.errors:
                 messages.success(request, 'File has been uploaded.')
                 log.info('browser.upload file: %s sucess' % form.files['file'].name)
@@ -77,7 +76,7 @@ def get_file(request, code, suggested_format=None):
         'hashcode': hashcode,
         'extension': suggested_format,
     }
-    document = processor.read(request, code, options)
+    document = processor.read(request.user, code, options)
     if processor.errors:
         response = error_response(processor.errors)
     else:
@@ -88,7 +87,7 @@ def get_file(request, code, suggested_format=None):
 def revision_document(request, document):
     document_name = document
     processor = DocumentProcessor()
-    document = processor.read(request, document_name, options={'only_metadata':True,})
+    document = processor.read(request.user, document_name, options={'only_metadata':True,})
     extra_context = {}
     metadata = document.get_metadata()
     def get_args(fileinfo):

@@ -34,6 +34,7 @@ class Document(object):
     def __init__(self):
         """List of options DMS document object may have during lifetime"""
         self.options = {}
+        self.user = None
         self.doccode = None
         self.file_name = None # Refactor out, document_manager should have this, not document
         self.full_filename = None # Refactor out, document_manager should have this, not document

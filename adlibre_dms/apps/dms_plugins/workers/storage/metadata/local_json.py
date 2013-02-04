@@ -15,14 +15,14 @@ class LocalJSONMetadata(object):
     def __init__(self):
         self.filesystem = LocalFilesystemManager()
 
-    def store(self, request, document):
+    def store(self, user, document):
         if document.get_docrule().no_doccode:
             return document
         directory = self.filesystem.get_or_create_document_directory(document)
         document = self.save_metadata(document, directory)
         return document
 
-    def retrieve(self, request, document):
+    def retrieve(self, user, document):
         directory = self.filesystem.get_or_create_document_directory(document)
         if document.get_docrule().no_doccode:
             revision = 'N/A'
@@ -169,7 +169,7 @@ class LocalJSONMetadata(object):
                     metadatas.append(self.load_from_file(os.path.join(root, fil)))
         return metadatas
 
-    def update_metadata_after_removal(self, request, document):
+    def update_metadata_after_removal(self, user, document):
         revision = document.get_revision()
         if revision:
             directory = self.filesystem.get_or_create_document_directory(document)
@@ -187,8 +187,8 @@ class LocalJSONMetadataRetrievalPlugin(Plugin, BeforeRetrievalPluginPoint):
     plugin_type = 'metadata'
     worker = LocalJSONMetadata()
 
-    def work(self, request, document, **kwargs):
-        return self.worker.retrieve(request, document)
+    def work(self, user, document, **kwargs):
+        return self.worker.retrieve(user, document)
 
 class LocalJSONMetadataStoragePlugin(Plugin, StoragePluginPoint):
     title = "Local Metadata Storage"
@@ -197,8 +197,8 @@ class LocalJSONMetadataStoragePlugin(Plugin, StoragePluginPoint):
     plugin_type = 'metadata'
     worker = LocalJSONMetadata()
 
-    def work(self, request, document, **kwargs):
-        return self.worker.store(request, document)
+    def work(self, user, document, **kwargs):
+        return self.worker.store(user, document)
 
 class LocalJSONMetadataRemovalPlugin(Plugin, BeforeRemovalPluginPoint):
     title = "Local Metadata Removal"
@@ -207,5 +207,5 @@ class LocalJSONMetadataRemovalPlugin(Plugin, BeforeRemovalPluginPoint):
     plugin_type = 'metadata'
     worker = LocalJSONMetadata()
 
-    def work(self, request, document, **kwargs):
-        return self.worker.update_metadata_after_removal(request, document)
+    def work(self, user, document, **kwargs):
+        return self.worker.update_metadata_after_removal(user, document)

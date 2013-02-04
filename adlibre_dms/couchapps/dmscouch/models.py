@@ -27,7 +27,7 @@ class CouchDocument(Document):
     class Meta:
         app_label = "dmscouch"
 
-    def populate_from_dms(self, request, document):
+    def populate_from_dms(self, user, document):
         """Populates CouchDB Document fields from DMS Document object."""
         # Setting document ID, based on filename. Using stripped (pure doccode regex readable) filename if possible.
         # TODO: to save no_docrule documents properly we need to generate metadata.
@@ -41,11 +41,11 @@ class CouchDocument(Document):
             self.metadata_user_id = document.db_info["metadata_user_id"]
         except KeyError:
             # user name/id from Django user
-            self.metadata_user_id = str(request.user.pk)
-            if request.user.first_name:
-                self.metadata_user_name = request.user.first_name + u' ' + request.user.last_name
+            self.metadata_user_id = str(user.pk)
+            if user.first_name:
+                self.metadata_user_name = user.user.first_name + u' ' + user.last_name
             else:
-                self.metadata_user_name = request.user.username
+                self.metadata_user_name = user.username
         self.set_doc_date(document)
         # adding description if exists
         try:
@@ -81,7 +81,7 @@ class CouchDocument(Document):
         if document.index_revisions:
             self.index_revisions = document.index_revisions
 
-    def populate_into_dms(self, request, document):
+    def populate_into_dms(self, user, document):
         """
         Updates DMS Document object with CouchDB fields data.
         """

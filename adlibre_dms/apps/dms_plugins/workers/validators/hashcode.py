@@ -38,9 +38,9 @@ class HashCodeValidationOnStoragePlugin(Plugin, BeforeStoragePluginPoint):
     configurable_fields = ['method',]
     form = HashForm
 
-    def work(self, request, document):
+    def work(self, user, document):
         method = self.get_option('method', document.get_docrule())
-        return HashCodeWorker(self.method).work_store(request, document, method)
+        return HashCodeWorker(self.method).work_store(user, document, method)
 
 class HashCodeValidationOnRetrievalPlugin(Plugin, BeforeRetrievalPluginPoint):
     title = 'Hash'
@@ -51,9 +51,9 @@ class HashCodeValidationOnRetrievalPlugin(Plugin, BeforeRetrievalPluginPoint):
     configurable_fields = ['method',]
     form = HashForm
     
-    def work(self, request, document):
+    def work(self, user, document):
         method = self.get_option('method', document.get_docrule())
-        return HashCodeWorker(self.method).work_retrieve(request, document, method)
+        return HashCodeWorker(self.method).work_retrieve(user, document, method)
 
 class HashCodeWorker(object):
     def __init__(self, method):
@@ -65,13 +65,13 @@ class HashCodeWorker(object):
         h.update(salt)
         return h.hexdigest()
 
-    def work_store(self, request, document, method):
+    def work_store(self, user, document, method):
         new_hashcode = self.get_hash(document.get_file_obj().read(), method)
         document.set_hashcode(new_hashcode)
         document.save_hashcode(new_hashcode)
         return document
 
-    def work_retrieve(self, request, document, method):
+    def work_retrieve(self, user, document, method):
         hashcode = document.get_hashcode()
         new_hashcode = self.get_hash(document.get_file_obj().read(), method)
         if hashcode and not (new_hashcode == hashcode):

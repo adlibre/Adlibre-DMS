@@ -67,7 +67,7 @@ class Local(object):
     def __init__(self):
         self.filesystem = LocalFilesystemManager()
 
-    def store(self, request, document):
+    def store(self, user, document):
         directory = self.filesystem.get_or_create_document_directory(document)
         #print "STORE IN %s" % directory
         destination = open(os.path.join(directory, document.get_filename_with_revision()), 'wb+')
@@ -77,7 +77,7 @@ class Local(object):
         destination.close()
         return document
 
-    def retrieve(self, request, document):
+    def retrieve(self, user, document):
         directory = self.filesystem.get_document_directory(document)
         if not document.get_docrule().no_doccode:
             fullpath = os.path.join(directory, document.get_current_metadata()['name'])
@@ -99,7 +99,7 @@ class Local(object):
             raise BreakPluginChain()
         return document
 
-    def update(self, request, document):
+    def update(self, user, document):
         return document
 
     def document_matches_search(self, metadata_info, searchword):
@@ -164,7 +164,7 @@ class Local(object):
         #print "DOCCODES: %s" % doccodes
         return doccodes
 
-    def remove(self, request, document):
+    def remove(self, user, document):
         # TODO: FIXME: Refactor this method so it's safer!
 
         directory = self.filesystem.get_document_directory(document)
@@ -213,8 +213,8 @@ class LocalStoragePlugin(Plugin, StoragePluginPoint):
     plugin_type = 'storage'
     worker = Local()
 
-    def work(self, request, document, **kwargs):
-        return self.worker.store(request, document)
+    def work(self, user, document, **kwargs):
+        return self.worker.store(user, document)
 
 class LocalRetrievalPlugin(Plugin, BeforeRetrievalPluginPoint):
     title = "Local Retrieval"
@@ -223,8 +223,8 @@ class LocalRetrievalPlugin(Plugin, BeforeRetrievalPluginPoint):
     plugin_type = 'storage'
     worker = Local()
 
-    def work(self, request, document, **kwargs):
-        return self.worker.retrieve(request, document)
+    def work(self, user, document, **kwargs):
+        return self.worker.retrieve(user, document)
 
 class LocalRemovalPlugin(Plugin, BeforeRemovalPluginPoint):
     title = "Local Removal"
@@ -233,8 +233,8 @@ class LocalRemovalPlugin(Plugin, BeforeRemovalPluginPoint):
     plugin_type = 'storage'
     worker = Local()
 
-    def work(self, request, document, **kwargs):
-        return self.worker.remove(request, document)
+    def work(self, user, document, **kwargs):
+        return self.worker.remove(user, document)
 
 class LocalUpdatePlugin(Plugin, BeforeUpdatePluginPoint):
     title = "Local Update"
@@ -243,5 +243,5 @@ class LocalUpdatePlugin(Plugin, BeforeUpdatePluginPoint):
     plugin_type = 'storage'
     worker = Local()
 
-    def work(self, request, document, **kwargs):
-        return self.worker.update(request, document)
+    def work(self, user, document, **kwargs):
+        return self.worker.update(user, document)

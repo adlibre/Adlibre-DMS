@@ -394,7 +394,7 @@ def view_object(request, code, step, template='mdtui/view.html'):
     pdf_url = reverse('mdtui-download-pdf', kwargs = { 'code': code, })
     # TODO: think about the way to remove requiremnt for this request.
     processor = DocumentProcessor()
-    document = processor.read(request, code, options={'only_metadata':True,})
+    document = processor.read(request.user, code, options={'only_metadata':True,})
     mimetype = document.get_mimetype()
     context = { 'pdf_url': pdf_url, 'code': code, 'step':step, 'mimetype': mimetype }
     return render(request, template, context)
@@ -430,7 +430,7 @@ def indexing_edit(request, code, step='edit', template='mdtui/indexing.html'):
             pass
 
     log.debug('indexing_edit view called with return_url: %s, changed_indexes: %s' % (return_url, changed_indexes))
-    doc = processor.read(request, code)
+    doc = processor.read(request.user, code)
     # TODO: check for misconfiguration here (plugin or permission to edit indexes exists in document's DorulePluginMapping)
     if not processor.errors:
         if not request.POST:
@@ -495,7 +495,7 @@ def indexing_edit_result(request, step='edit_finish', template='mdtui/indexing.h
         code = variables['edit_index_barcode']
         processor = DocumentProcessor()
         options = { 'new_indexes': variables['edit_processor_indexes'] }
-        doc = processor.update(request, code, options=options)
+        doc = processor.update(request.user, code, options=options)
         if not processor.errors:
             # cleanup session here because editing is finished
             for var in required_vars:
@@ -682,7 +682,7 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
 
             # Storing into DMS with main Document Processor and current indexes
             processor = DocumentProcessor()
-            processor.create(request, upload_file, index_info=clean_index, barcode=barcode)
+            processor.create(request.user, upload_file, index_info=clean_index, barcode=barcode)
 
             if not processor.errors:
                 return HttpResponseRedirect(reverse('mdtui-index-finished'))

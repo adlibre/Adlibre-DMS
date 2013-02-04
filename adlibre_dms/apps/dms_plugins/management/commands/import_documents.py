@@ -44,7 +44,7 @@ class Command(BaseCommand):
                     file_obj = open(os.path.join(root, fil))
                     file_obj.seek(0)
                     try:
-                        processor.create(FakeRequest(), file_obj)
+                        processor.create(User.objects.filter(is_superuser=True)[0], file_obj)
                     except Exception:
                         self.stderr.write(traceback.format_exc() + "\n")
                     else:
