@@ -14,10 +14,6 @@ from django.contrib.auth.models import User
 
 from core.document_processor import DocumentProcessor
 
-class FakeRequest(object):
-    def __init__(self):
-        self.user = User.objects.filter(is_superuser=True)[0]
-
 class Command(BaseCommand):
     args = '<directory_name directory_name ...>'
     help = 'Imports the documents from specified directory'
@@ -35,6 +31,7 @@ class Command(BaseCommand):
                 continue
             cnt = 0
             processor = DocumentProcessor()
+            admin = User.objects.filter(is_superuser=True)[0]
             for root, dirs, files in os.walk(directory):
                 if '.svn' in dirs:
                     dirs.remove('.svn')  # don't visit svn directories
@@ -44,7 +41,7 @@ class Command(BaseCommand):
                     file_obj = open(os.path.join(root, fil))
                     file_obj.seek(0)
                     try:
-                        processor.create(User.objects.filter(is_superuser=True)[0], file_obj)
+                        processor.create(admin, file_obj)
                     except Exception:
                         self.stderr.write(traceback.format_exc() + "\n")
                     else:
