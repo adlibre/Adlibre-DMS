@@ -49,7 +49,7 @@ def upload(request, template_name='browser/upload.html', extra_context={}):
     if request.method == 'POST':
         if form.is_valid():
             processor = DocumentProcessor()
-            processor.create(request.user, form.files['file'])
+            processor.create(form.files['file'], {'user': request.user})
             if not processor.errors:
                 messages.success(request, 'File has been uploaded.')
                 log.info('browser.upload file: %s sucess' % form.files['file'].name)
@@ -75,8 +75,9 @@ def get_file(request, code, suggested_format=None):
     options = {
         'hashcode': hashcode,
         'extension': suggested_format,
+        'user': request.user,
     }
-    document = processor.read(request.user, code, options)
+    document = processor.read(code, options)
     if processor.errors:
         response = error_response(processor.errors)
     else:
@@ -87,7 +88,7 @@ def get_file(request, code, suggested_format=None):
 def revision_document(request, document):
     document_name = document
     processor = DocumentProcessor()
-    document = processor.read(request.user, document_name, options={'only_metadata':True,})
+    document = processor.read(document_name, options={'only_metadata':True, 'user': request.user,})
     extra_context = {}
     metadata = document.get_metadata()
     def get_args(fileinfo):

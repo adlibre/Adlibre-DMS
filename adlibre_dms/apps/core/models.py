@@ -274,3 +274,6 @@ class Document(object):
         """Forces document to have specified index revisions"""
         if revisions_dict:
             self.index_revisions = revisions_dict
+
+    def set_user(self, user):
+        self.user = user

@@ -53,11 +53,11 @@ class FileHandler(BaseFileHandler):
     def create(self, request, code, suggested_format=None):
         # FIXME... code and file stream should be passed in separately!
         if 'file' in request.FILES:
-            work_file = request.FILES['file']
+            uploaded_file = request.FILES['file']
         else:
             return rc.BAD_REQUEST
         processor = DocumentProcessor()
-        document = processor.create(request.user, work_file)
+        document = processor.create(uploaded_file, {'user': request.user})
         if len(processor.errors) > 0:
             log.error('FileHandler.create manager errors: %s' % processor.errors)
             return rc.BAD_REQUEST
@@ -73,8 +73,9 @@ class FileHandler(BaseFileHandler):
             'hashcode': hashcode,
             'revision': revision,
             'extension': suggested_format,
+            'user': request.user,
         }
-        document = processor.read(request.user, code, options)
+        document = processor.read(code, options)
         if not request.user.is_superuser:
             # Hack: Used part of the code from MDTUI Wrong!
             user_permissions = list_permitted_docrules_qs(request.user)
@@ -103,8 +104,9 @@ class FileHandler(BaseFileHandler):
                 'remove_tag_string': remove_tag_string,
                 'extension': suggested_format,
                 'new_name': new_name,
+                'user': request.user,
             } #FIXME hashcode missing?
-            document = processor.update(request.user, code,  options)
+            document = processor.update(code, options)
             if len(processor.errors) > 0:
                 log.error('FileHandler.update manager errors %s' % processor.errors)
                 if settings.DEBUG:
@@ -132,10 +134,11 @@ class FileHandler(BaseFileHandler):
         try:
             options = {
                 'revision': revision,
-                'extension': suggested_format
+                'extension': suggested_format,
+                'user': request.user,
                 }
             log.debug('FileHandler.delete attempt with %s' % options)
-            processor.delete(request.user, code, options)
+            processor.delete(code, options)
         except Exception, e:
             log.error('FileHandler.delete exception %s' % e)
             if settings.DEBUG:
@@ -166,8 +169,9 @@ class FileInfoHandler(BaseFileHandler):
             'hashcode': hashcode,
             'only_metadata': True,
             'extension': suggested_format,
+            'user': request.user,
         }
-        document = processor.read(request.user, code, options)
+        document = processor.read(code, options)
         docrule = document.get_docrule()
         # FIXME: there might be more than one docrules!
         mapping = docrule.get_docrule_plugin_mappings()
@@ -273,7 +277,7 @@ class RevisionCountHandler(BaseHandler):
     def read(self, request, document):
         document, extension = os.path.splitext(document)
         processor = DocumentProcessor()
-        document = processor.read(request.user, document, options={'revision_count': True,})
+        document = processor.read(document, options={'revision_count': True, 'user': request.user,})
         rev_count = document.get_revision()
         if rev_count <= 0:
             log.info('RevisionCountHandler.read rev_count %s.' % str(rev_count))
@@ -282,11 +286,8 @@ class RevisionCountHandler(BaseHandler):
             else:
                 return rc.BAD_REQUEST
         if processor.errors:
-            log.error('RevisionCountHandler.read Exception %s' % e)
-            if settings.DEBUG:
-                raise
-            else:
-                return rc.BAD_REQUEST
+            log.error('RevisionCountHandler.read Exception %s' % processor.errors[0])
+            return rc.BAD_REQUEST
         log.info('RevisionCountHandler.read request fulfilled for document %s, extension %s' % (document, extension))
         return rev_count
 

@@ -30,6 +30,7 @@ class DocumentProcessor(object):
                 'hashcode': 03245634599134569234,
                 'revision': 1,
                 'extension': pdf,
+                'user': request.user,
                 # ...
             }
         - has a CRUD architecture usually taking a document_name or uploaded_file as a first variable
@@ -49,7 +50,6 @@ class DocumentProcessor(object):
                     # ...
 
     TODO:
-        - should have similar architecture in all calls (CRUD)
         - should have better difference between create and update
             currently: create new revision == Create task, this is wrong.
         - should not delete all the Document() revisions on rename.
@@ -57,23 +57,24 @@ class DocumentProcessor(object):
     def __init__(self):
         self.errors = []
         self.warnings = []
+        self.document_name = ''
+        self.document_file = None
 
     # TODO: new_revision == create call. This is wrong.
     # TODO: use options={'barcode': ... , 'index_info': ... ,} instead of adding params.
-    def create(self, user, uploaded_file, index_info=None, barcode=None):
+    def create(self, uploaded_file, options):
         """
-        Creates a new Document() object.
+        Creates a new Document() and saves it into DMS.
 
-        Responsible for adding new Document() objects into DMS.
-
-        uploaded file is http://docs.djangoproject.com/en/1.3/topics/http/file-uploads/#django.core.files.uploadedfile.UploadedFile
-        or file object
+        Should have at least 2 essential options:
+        'uploaded_file' and 'user'
+        uploaded file is http://docs.djangoproject.com/en/1.3/topics/http/file-uploads/#django.core.files.uploadedfile.UploadedFile or file object
+        user is https://docs.djangoproject.com/en/dev/topics/auth/default/#user-objects (Normal Django user)
         """
-        log.debug('CREATE Document %s, index_info: %s, barcode: %s' % (uploaded_file, index_info, barcode))
+        barcode = self.option_in_options('barcode', options)
+        log.debug('CREATE Document %s, barcode: %s' % (uploaded_file, barcode))
         operator = PluginsOperator()
-        doc = Document()
-        doc.set_file_obj(uploaded_file)
-
+        doc = self.init_Document_with_data(options, document_file=uploaded_file)
         # Setting new file name and type.
         if barcode is not None:
             doc.set_filename(barcode)
@@ -86,26 +87,23 @@ class DocumentProcessor(object):
                 self.errors.append(unicode(e.parameter))
                 return None
                 pass
-        if hasattr(uploaded_file, 'content_type'):
-            doc.set_mimetype(uploaded_file.content_type)
-        if index_info:
-            doc.set_db_info(index_info)
         # Processing plugins
         # FIXME: if uploaded_file is not None, then some plugins should not run because we don't have a file
-        doc = operator.process_pluginpoint(pluginpoints.BeforeStoragePluginPoint, user, document=doc)
-        operator.process_pluginpoint(pluginpoints.StoragePluginPoint, user, document=doc)
-        doc = operator.process_pluginpoint(pluginpoints.DatabaseStoragePluginPoint, user, document=doc)
+        doc = operator.process_pluginpoint(pluginpoints.BeforeStoragePluginPoint, document=doc)
+        operator.process_pluginpoint(pluginpoints.StoragePluginPoint, document=doc)
+        doc = operator.process_pluginpoint(pluginpoints.DatabaseStoragePluginPoint, document=doc)
         self.check_errors_in_operator(operator)
         return doc
 
-    def read(self, user, document_name, options=None):
+    def read(self, document_name, options):
         """
-        Reads document data from DMS
+        Reads Document() data from DMS
 
         Method creates, instantiates and populates new Document() object.
         Using name and/or search filter criteria provided.
 
         Currently can read Document() with file object attached or either read only metadata.
+
         """
         log.debug('READ Document %s with options: %s' % (document_name, options))
         doc = Document()
@@ -118,12 +116,12 @@ class DocumentProcessor(object):
             return doc
             pass
         doc = self.init_Document_with_data(options, doc)
-        doc = operator.process_pluginpoint(pluginpoints.BeforeRetrievalPluginPoint, user, document=doc)
+        doc = operator.process_pluginpoint(pluginpoints.BeforeRetrievalPluginPoint, document=doc)
         self.check_errors_in_operator(operator)
         return doc
 
     # TODO: Update should not delete all the old document's revisions on rename.
-    def update(self, user, document_name, options):
+    def update(self, document_name, options):
         """
         Process update plugins.
 
@@ -135,31 +133,32 @@ class DocumentProcessor(object):
         """
         log.debug('UPDATE Document %s, options: %s' % (document_name, options))
         new_name = self.option_in_options('new_name', options)
+        user = self.option_in_options('user', options)
 
         # Sequence to make a new name for file.
         # TODO: this deletes all old revisions, instead of real rename of all files...
         if new_name:
-            extension = self.check_options_for_option('extension', options)
-            renaming_doc = self.read(user, document_name, options={'extension':extension,})
+            extension = self.option_in_options('extension', options)
+            renaming_doc = self.read(document_name, options={'extension':extension, 'user':user,})
             if new_name != renaming_doc.get_filename():
                 ufile = UploadedFile(renaming_doc.get_file_obj(), new_name, content_type=renaming_doc.get_mimetype())
-                document = self.create(user, ufile)
+                document = self.create(ufile, { 'user': user,})
                 if not self.errors:
-                    self.delete(user, renaming_doc.get_filename(), options={'extension': extension,})
+                    self.delete(renaming_doc.get_filename(), options={'extension': extension, 'user':user})
                 return document
 
         operator = PluginsOperator()
         doc = self.init_Document_with_data(options, document_name=document_name)
-        doc = operator.process_pluginpoint(pluginpoints.BeforeUpdatePluginPoint, user, document=doc)
+        doc = operator.process_pluginpoint(pluginpoints.BeforeUpdatePluginPoint, document=doc)
         self.check_errors_in_operator(operator)
         return doc
 
-    def delete(self, user, document_name, options):
+    def delete(self, document_name, options):
         """Deletes Document() or it's parts from DMS."""
         log.debug('DELETEE Document %s, options: %s' % (document_name, options) )
         operator = PluginsOperator()
         doc = self.init_Document_with_data(options, document_name=document_name)
-        doc = operator.process_pluginpoint(pluginpoints.BeforeRemovalPluginPoint, user, document=doc)
+        doc = operator.process_pluginpoint(pluginpoints.BeforeRemovalPluginPoint, document=doc)
         self.check_errors_in_operator(operator)
         return doc
 
@@ -190,7 +189,7 @@ class DocumentProcessor(object):
                 response = options[option]
         return response
 
-    def init_Document_with_data(self, options, doc=None, document_name=None ):
+    def init_Document_with_data(self, options, doc=None, document_name=None, document_file=None ):
         """Populate given Document() class with given properties from "options" provided
 
         Makes expansion of interaction methods with Document() simple.
@@ -200,7 +199,14 @@ class DocumentProcessor(object):
         """
         if doc is None:
             doc = Document()
+        # All methods sequence, besides create()
+        if document_name:
             doc.set_filename(document_name)
+        # Usually create() method sequence
+        if document_file:
+            doc.set_file_obj(document_file)
+            if hasattr(document_file, 'content_type'):
+                doc.set_mimetype(document_file.content_type)
         if options:
             try:
                 for property_name, value in options.iteritems():
@@ -220,6 +226,10 @@ class DocumentProcessor(object):
                         doc.set_remove_tag_string(value)
                     if property_name=='new_indexes':
                         doc.update_db_info(value)
+                    if property_name=='user':
+                        doc.set_user(value)
+                    if property_name=='index_info':
+                        doc.set_db_info(value)
                 if 'only_metadata' in options:
                     doc.update_options({'only_metadata': options['only_metadata'],})
             except Exception, e:
@@ -227,4 +237,10 @@ class DocumentProcessor(object):
                 log.error('DocumentManager().init_Document_with_data() error: %s, doc: %s, options: %s, document_name:%s'
                           % (e, doc, options, document_name))
                 pass
+            # Every method call should have a Django User inside. Validating that.
+            if not 'user' in options and not options['user']:
+                error = 'Wrong DocumentProcessor() method call. Should have a proper "user" option set'
+                log.error(error)
+                self.errors.append(error)
+                raise DmsException(error, 500)
         return doc

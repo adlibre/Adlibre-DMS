@@ -41,7 +41,7 @@ class Command(BaseCommand):
                     file_obj = open(os.path.join(root, fil))
                     file_obj.seek(0)
                     try:
-                        processor.create(admin, file_obj)
+                        processor.create(file_obj, {'user': admin})
                     except Exception:
                         self.stderr.write(traceback.format_exc() + "\n")
                     else:

@@ -38,12 +38,16 @@ class PluginsOperator(object):
         self.plugin_errors = []
         self.plugin_warnings = []
 
-    def process_pluginpoint(self, pluginpoint, user, document=None):
+    def process_pluginpoint(self, pluginpoint, document=None):
         """
         PluginsOperator() main gear.
 
         Iterates over plugins and executes them according to config and workflow specified (PluginPoint)
         """
+        if document is not None:
+            user=document.user
+        else:
+            user=None
         plugins = self.get_plugins_for_point(pluginpoint, document)
         log.debug('process_pluginpoint: %s with %s plugins.' % (pluginpoint, plugins))
         for plugin in plugins:
