@@ -9,16 +9,16 @@ class GzipOnStorePlugin(Plugin, BeforeStoragePluginPoint):
     has_configuration = True #TODO: configure
     plugin_type = "storage_processing"
 
-    def work(self, user, document):
-        return Gzip().work_store(user, document)
+    def work(self, document):
+        return Gzip().work_store(document)
 
 class GzipOnRetrievePlugin(Plugin, BeforeRetrievalPluginPoint):
     title = 'Gzip Plugin on retrieval'
     has_configuration = True #TODO: configure
     plugin_type = "retrieval_processing"
 
-    def work(self, user, document):
-        return Gzip().work_retrieve(user, document)
+    def work(self, document):
+        return Gzip().work_retrieve(document)
 
 class Gzip(object):
     compression_type = 'GZIP'
@@ -38,13 +38,13 @@ class Gzip(object):
             tmp_file_obj.seek(0)
         return tmp_file_obj
 
-    def work_store(self, user, document):
+    def work_store(self, document):
         compressed_file = self._work(document.get_file_obj(), method = 'STORAGE')
         document.set_file_obj(compressed_file)
         document.update_current_metadata({'compression_type': self.compression_type})
         return document
 
-    def work_retrieve(self, user, document):
+    def work_retrieve(self, document):
         if document.get_current_metadata().get('compression_type', None) == self.compression_type:
             try:
                 decompressed_file = self._work(document.get_file_obj(), method = 'RETRIEVAL')

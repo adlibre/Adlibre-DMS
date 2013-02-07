@@ -10,7 +10,7 @@ class TagsPlugin(Plugin, BeforeRetrievalPluginPoint):
     description = "Populates document tags"
     plugin_type = "info"
 
-    def work(self, user, document, **kwargs):
+    def work(self, document, **kwargs):
         tags = []
         try:
             doc_model = DocTags.objects.get(name = document.get_filename())
@@ -39,7 +39,7 @@ class TagsUpdatePlugin(Plugin, BeforeUpdatePluginPoint):
     description = "Saves document tags in the database"
     plugin_type = "info"
 
-    def work(self, user, document, **kwargs):
+    def work(self, document, **kwargs):
         tag_string = document.get_tag_string()
         tag_string = tag_string.strip()
         remove_tag_string = document.get_remove_tag_string()

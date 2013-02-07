@@ -15,14 +15,14 @@ class LocalJSONMetadata(object):
     def __init__(self):
         self.filesystem = LocalFilesystemManager()
 
-    def store(self, user, document):
+    def store(self, document):
         if document.get_docrule().no_doccode:
             return document
         directory = self.filesystem.get_or_create_document_directory(document)
         document = self.save_metadata(document, directory)
         return document
 
-    def retrieve(self, user, document):
+    def retrieve(self, document):
         directory = self.filesystem.get_or_create_document_directory(document)
         if document.get_docrule().no_doccode:
             revision = 'N/A'
@@ -46,6 +46,18 @@ class LocalJSONMetadata(object):
             raise BreakPluginChain()
         return document
 
+    def update_metadata_after_removal(self, document):
+        revision = document.get_revision()
+        if revision:
+            directory = self.filesystem.get_or_create_document_directory(document)
+            fileinfo_db, new_revision = self.load_metadata(document.get_stripped_filename(), directory)
+            del fileinfo_db[str(revision)]
+            self.write_metadata(fileinfo_db, document, directory)
+        else:
+            pass # our directory with all metadata has just been deleted %)
+        return document
+
+    """Internal manager methods"""
     def load_from_file(self, json_file):
         if os.path.exists(json_file):
             revisions = []
@@ -169,17 +181,6 @@ class LocalJSONMetadata(object):
                     metadatas.append(self.load_from_file(os.path.join(root, fil)))
         return metadatas
 
-    def update_metadata_after_removal(self, user, document):
-        revision = document.get_revision()
-        if revision:
-            directory = self.filesystem.get_or_create_document_directory(document)
-            fileinfo_db, new_revision = self.load_metadata(document.get_stripped_filename(), directory)
-            del fileinfo_db[str(revision)]
-            self.write_metadata(fileinfo_db, document, directory)
-        else:
-            pass # our directory with all metadata has just been deleted %)
-        return document
-
 class LocalJSONMetadataRetrievalPlugin(Plugin, BeforeRetrievalPluginPoint):
     title = "Local Metadata Retrieval"
     description = "Loads document metadata as local file"
@@ -187,8 +188,8 @@ class LocalJSONMetadataRetrievalPlugin(Plugin, BeforeRetrievalPluginPoint):
     plugin_type = 'metadata'
     worker = LocalJSONMetadata()
 
-    def work(self, user, document, **kwargs):
-        return self.worker.retrieve(user, document)
+    def work(self, document, **kwargs):
+        return self.worker.retrieve(document)
 
 class LocalJSONMetadataStoragePlugin(Plugin, StoragePluginPoint):
     title = "Local Metadata Storage"
@@ -197,8 +198,8 @@ class LocalJSONMetadataStoragePlugin(Plugin, StoragePluginPoint):
     plugin_type = 'metadata'
     worker = LocalJSONMetadata()
 
-    def work(self, user, document, **kwargs):
-        return self.worker.store(user, document)
+    def work(self, document, **kwargs):
+        return self.worker.store(document)
 
 class LocalJSONMetadataRemovalPlugin(Plugin, BeforeRemovalPluginPoint):
     title = "Local Metadata Removal"
@@ -207,5 +208,5 @@ class LocalJSONMetadataRemovalPlugin(Plugin, BeforeRemovalPluginPoint):
     plugin_type = 'metadata'
     worker = LocalJSONMetadata()
 
-    def work(self, user, document, **kwargs):
-        return self.worker.update_metadata_after_removal(user, document)
+    def work(self, document, **kwargs):
+        return self.worker.update_metadata_after_removal(document)

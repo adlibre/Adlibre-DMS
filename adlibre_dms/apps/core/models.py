@@ -31,19 +31,20 @@ class Document(object):
     However main interaction method of this document is DocumentManager()
 
     """
+    # TODO: make it DMS_OBject (or similar) instead of document, because we would need it to store another file types
     def __init__(self):
         """List of options DMS document object may have during lifetime"""
         self.options = {}
         self.user = None
         self.doccode = None
-        self.file_name = None # Refactor out, document_manager should have this, not document
-        self.full_filename = None # Refactor out, document_manager should have this, not document
-        self.stripped_filename = None # Refactor out, document_manager should have this, not document
+        self.file_name = None
+        self.full_filename = None
+        self.stripped_filename = None
         self.revision = None
         self.hashcode = None
         self.metadata = None
-        self.fullpath = None # Refactor out, document_manager should have this, not document
-        self.file_obj = None # Refactor out, document_manager should have this, not document
+        self.fullpath = None
+        self.file_obj = None
         self.current_metadata = {}
         self.mimetype = None
         self.tags = []

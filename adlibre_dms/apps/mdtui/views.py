@@ -496,7 +496,7 @@ def indexing_edit_result(request, step='edit_finish', template='mdtui/indexing.h
         processor = DocumentProcessor()
         options = { 'new_indexes': variables['edit_processor_indexes'],
                     'user': request.user, }
-        doc = processor.update(code, options=options)
+        processor.update(code, options=options)
         if not processor.errors:
             # cleanup session here because editing is finished
             for var in required_vars:

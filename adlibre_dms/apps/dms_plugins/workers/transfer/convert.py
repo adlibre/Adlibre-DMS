@@ -8,11 +8,11 @@ class ConvertFileTypePlugin(Plugin, BeforeRetrievalPluginPoint):
     description = "Converts file types"
     plugin_type = "retrieval_processing"
 
-    def work(self, user, document):
-        return Converter().work_retrieve(user, document)
+    def work(self, document):
+        return Converter().work_retrieve(document)
 
 class Converter(object):
-    def work_retrieve(self, user, document):
+    def work_retrieve(self, document):
         to_extension = document.get_requested_extension()
         if to_extension:
             converter = NewFileConverter(document.get_file_obj(), document.get_fullpath(), to_extension)
