@@ -23,13 +23,14 @@ from adlibre.dms.base_test import DMSTestCase
 # TODO: Run all of these tests for different auth. Plain, Django, and none!
 # TODO: Test with and without correct permissions.
 
-adlibre_invoices_rule_id = 2 # FIXME, we should have a dict of rules and ids provided by DMSTestCase
+adlibre_invoices_rule_id = 2  # FIXME, we should have a dict of rules and ids provided by DMSTestCase
 
 #no_doccode_name = "test_no_doccode"
 adl_invoice_name = "ADL-1985"
 
 # tagging
 test_tag = 'test_tag'
+
 
 class APITest(DMSTestCase):
 
@@ -43,7 +44,7 @@ class APITest(DMSTestCase):
         self.client.login(username=self.username, password=self.password)
         dman = DocumentTypeRuleManager()
         doccode = dman.get_docrule_by_name('Test PDFs')
-        mapping = DoccodePluginMapping.objects.get(doccode = doccode.get_id())
+        mapping = DoccodePluginMapping.objects.get(doccode=doccode.get_id())
         #we don't really care if it crashes above, cause that means our database is imperfect
         url = reverse('api_rules_detail', kwargs={'id_rule': 3, 'emitter_format': 'json'})
         response = self.client.get(url)
@@ -65,8 +66,8 @@ class APITest(DMSTestCase):
         self.client.login(username=self.username, password=self.password)
         dman = DocumentTypeRuleManager()
         doccode = dman.get_docrule_by_name('Adlibre Invoices')
-        mapping = DoccodePluginMapping.objects.get(doccode = doccode.get_id())
-        url = reverse("api_file_list", kwargs = {'id_rule': mapping.pk})
+        mapping = DoccodePluginMapping.objects.get(doccode=doccode.get_id())
+        url = reverse("api_file_list", kwargs={'id_rule': mapping.pk})
         response = self.client.get(url)
         self.assertContains(response, 'ADL-1234')
 
@@ -79,7 +80,7 @@ class APITest(DMSTestCase):
         self.assertContains(response, '', status_code=200)
         # Download doc
         revision = 1
-        url = reverse('api_file', kwargs={'code': doc, 'suggested_format': 'pdf',}) + '?r=%s&h=%s' % (revision, hash)
+        url = reverse('api_file', kwargs={'code': doc, 'suggested_format': 'pdf'}) + '?r=%s&h=%s' % (revision, hash)
         response = self.client.get(url)
         self.assertContains(response, '', status_code=200)
 
@@ -104,7 +105,7 @@ class APITest(DMSTestCase):
 
         Refs #946 Bug: API piston bug when uploading barcode with error (no document type rule)
         """
-        no_docrule_file = 'Z50141104' # Name is set like so to be loaded in the end of all files.
+        no_docrule_file = 'Z50141104'  # Name is set like so to be loaded in the end of all files.
         response = self._upload_file(no_docrule_file, suggested_format='jpg', check_response=False)
         self.assertEqual(response.status_code, 400)
 
