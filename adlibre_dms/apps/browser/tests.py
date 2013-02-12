@@ -16,6 +16,7 @@ from adlibre.dms.base_test import DMSTestCase
 # Used in determining if current file is PDF file by 'string' inside a file content.
 pdf_file_string_part = '%PDF-1.4'
 
+
 class ViewTest(DMSTestCase):
     """
     Adlibre Browser Views and functionality test case
@@ -36,7 +37,6 @@ class ViewTest(DMSTestCase):
         """
         self.cleanAll(check_response=True)
 
-
     def browser_upload_file(self, filename):
         url = reverse('upload')
         self.client.login(username=self.username, password=self.password)
@@ -46,7 +46,7 @@ class ViewTest(DMSTestCase):
         return response
 
     def test_upload_files(self):
-        for doc_set, ext in [(self.documents_pdf, 'pdf'), (self.documents_txt, 'txt'), (self.documents_tif, 'tif') ]:
+        for doc_set, ext in [(self.documents_pdf, 'pdf'), (self.documents_txt, 'txt'), (self.documents_tif, 'tif')]:
             for f in doc_set:
                 response = self.browser_upload_file(settings.FIXTURE_DIRS[0] + '/testdata/' + f + '.' + ext)
                 self.assertContains(response, 'File has been uploaded')
@@ -65,16 +65,16 @@ class ViewTest(DMSTestCase):
             self.assertContains(response, "You're not in security group", status_code=403)
         self.client.login(username=self.username, password=self.password)
         # Check mime type
-        mime = magic.Magic( mime = True )
+        mime = magic.Magic(mime=True)
         for d in self.documents_pdf:
             url = '/get/' + d
             response = self.client.get(url)
-            mimetype = mime.from_buffer( response.content )
+            mimetype = mime.from_buffer(response.content)
             self.assertEquals(mimetype, 'application/pdf')
         for d in self.documents_pdf:
             url = '/get/' + d + '?extension=pdf'
             response = self.client.get(url)
-            mimetype = mime.from_buffer( response.content )
+            mimetype = mime.from_buffer(response.content)
             self.assertEquals(mimetype, 'application/pdf')
         # Check 404 on missing documents
         for d in self.documents_missing:
@@ -158,6 +158,7 @@ class ViewTest(DMSTestCase):
             for doc_name in not_exist_list:
                 self.assertNotContains(response, doc_name)
 
+
 class SettingsTest(DMSTestCase):
 
     def test_settings_view(self):
@@ -205,14 +206,14 @@ class ConversionTest(DMSTestCase):
     def test_tif2pdf_conversion(self):
         self.client.login(username=self.username, password=self.password)
         for d in self.documents_tif:
-            url = reverse('get_file', kwargs={'code': d, 'suggested_format': 'pdf',})
+            url = reverse('get_file', kwargs={'code': d, 'suggested_format': 'pdf'})
             response = self.client.get(url)
             self.assertContains(response, '', status_code=200)
 
     def test_txt2pdf_conversion(self):
         self.client.login(username=self.username, password=self.password)
         for d in self.documents_txt:
-            url = reverse('get_file', kwargs={'code': d, 'suggested_format': 'pdf',})
+            url = reverse('get_file', kwargs={'code': d, 'suggested_format': 'pdf'})
             response = self.client.get(url)
             self.assertContains(response, '', status_code=200)
 
@@ -220,7 +221,7 @@ class ConversionTest(DMSTestCase):
         self.client.login(username=self.username, password=self.password)
         # FIXME: real pdf to txt conversion not tested here. Do we really need it?
         for d in self.documents_pdf:
-            url = reverse('get_file', kwargs={'code': d, 'suggested_format': 'txt',})
+            url = reverse('get_file', kwargs={'code': d, 'suggested_format': 'txt'})
             response = self.client.get(url)
             self.assertEqual(response.status_code, 200)
 
