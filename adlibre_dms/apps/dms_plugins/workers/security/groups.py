@@ -3,6 +3,7 @@ from django.contrib.auth.models import Group
 from dms_plugins.pluginpoints import BeforeStoragePluginPoint, BeforeRetrievalPluginPoint, BeforeRemovalPluginPoint
 from dms_plugins.workers import Plugin, PluginError
 
+
 class GroupSecurityStore(Plugin, BeforeStoragePluginPoint):
     title = 'Security Group on storage'
     description = 'Security group member only [storage]'
@@ -10,6 +11,7 @@ class GroupSecurityStore(Plugin, BeforeStoragePluginPoint):
 
     def work(self, document):
         return GroupSecurity().work(document)
+
 
 class GroupSecurityRetrieval(Plugin, BeforeRetrievalPluginPoint):
     title = 'Security Group on retrieval'
@@ -19,6 +21,7 @@ class GroupSecurityRetrieval(Plugin, BeforeRetrievalPluginPoint):
     def work(self, document):
         return GroupSecurity().work(document)
 
+
 class GroupSecurityRemoval(Plugin, BeforeRemovalPluginPoint):
     title = 'Security Group on removal'
     description = 'Security group member only [removal]'
@@ -26,6 +29,7 @@ class GroupSecurityRemoval(Plugin, BeforeRemovalPluginPoint):
 
     def work(self, document):
         return GroupSecurity().work(document)
+
 
 class GroupSecurity(object):
     def work(self, document):
