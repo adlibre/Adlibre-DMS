@@ -3,6 +3,7 @@ from adlibre.converter import NewFileConverter
 from dms_plugins.pluginpoints import BeforeRetrievalPluginPoint
 from dms_plugins.workers import Plugin
 
+
 class ConvertFileTypePlugin(Plugin, BeforeRetrievalPluginPoint):
     title = "File Type Converter"
     description = "Converts file types"
@@ -10,6 +11,7 @@ class ConvertFileTypePlugin(Plugin, BeforeRetrievalPluginPoint):
 
     def work(self, document):
         return Converter().work_retrieve(document)
+
 
 class Converter(object):
     def work_retrieve(self, document):
