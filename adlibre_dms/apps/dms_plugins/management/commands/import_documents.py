@@ -9,10 +9,11 @@ License: See LICENSE for license information
 import os
 import traceback
 
-from django.core.management.base import BaseCommand#, CommandError
+from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
 
 from core.document_processor import DocumentProcessor
+
 
 class Command(BaseCommand):
     args = '<directory_name directory_name ...>'
@@ -35,10 +36,10 @@ class Command(BaseCommand):
             for root, dirs, files in os.walk(directory):
                 if '.svn' in dirs:
                     dirs.remove('.svn')  # don't visit svn directories
-                for fil in files:
+                for filename in files:
                     if not silent:
-                        self.stdout.write( 'Importing file: "%s"\n' % fil )
-                    file_obj = open(os.path.join(root, fil))
+                        self.stdout.write('Importing file: "%s"\n' % filename)
+                    file_obj = open(os.path.join(root, filename))
                     file_obj.seek(0)
                     try:
                         processor.create(file_obj, {'user': admin})
@@ -46,7 +47,7 @@ class Command(BaseCommand):
                         self.stderr.write(traceback.format_exc() + "\n")
                     else:
                         if processor.errors:
-                            self.stderr.write("\n".join(map(lambda x: x[0], processor.errors)) + "\n")
+                            self.stderr.write('\n%s\n' % processor.errors)
                         else:
                             cnt += 1
                     file_obj.close()
