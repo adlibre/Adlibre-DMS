@@ -10,13 +10,15 @@ import datetime
 
 from django.conf import settings
 
-from dms_plugins.pluginpoints import BeforeRetrievalPluginPoint, BeforeRemovalPluginPoint, BeforeUpdatePluginPoint, DatabaseStoragePluginPoint
+from dms_plugins.pluginpoints import BeforeRetrievalPluginPoint, BeforeRemovalPluginPoint, \
+    BeforeUpdatePluginPoint, DatabaseStoragePluginPoint
 from dms_plugins.models import DocTags
 from dms_plugins.workers import Plugin, PluginError
 from core.document_processor import DocumentProcessor
 from dmscouch.models import CouchDocument
 
 from couchdbkit.resource import ResourceNotFound
+
 
 class CouchDBMetadata(object):
     """
@@ -25,6 +27,8 @@ class CouchDBMetadata(object):
     """
 
     def store(self, document):
+        # FIXME: Refactor me. We should upload new "secondary_indexes" or metatags with update() workflow,
+        # not a create(), like it is now. Because this method is a mess.
         """
         Stores CouchDB object into DB.
 
@@ -151,6 +155,7 @@ class CouchDBMetadata(object):
             raise PluginError("Not a logged in user.", 403)
         return user
 
+
 class CouchDBMetadataRetrievalPlugin(Plugin, BeforeRetrievalPluginPoint):
     title = "CouchDB Metadata Retrieval"
     description = "Loads document metadata from CouchDB"
@@ -160,6 +165,7 @@ class CouchDBMetadataRetrievalPlugin(Plugin, BeforeRetrievalPluginPoint):
 
     def work(self, document, **kwargs):
         return self.worker.retrieve(document)
+
 
 class CouchDBMetadataStoragePlugin(Plugin, DatabaseStoragePluginPoint):
     title = "CouchDB Metadata Storage"
@@ -171,6 +177,7 @@ class CouchDBMetadataStoragePlugin(Plugin, DatabaseStoragePluginPoint):
     def work(self, document, **kwargs):
         return self.worker.store(document)
 
+
 class CouchDBMetadataUpdatePlugin(Plugin, BeforeUpdatePluginPoint):
     title = "CouchDB Metadata Update Indexes"
     description = "Updates document after new indexes added with preserving old revision of document indexes"
@@ -180,6 +187,7 @@ class CouchDBMetadataUpdatePlugin(Plugin, BeforeUpdatePluginPoint):
 
     def work(self, document, **kwargs):
         return self.worker.update_document_metadata(document)
+
 
 class CouchDBMetadataRemovalPlugin(Plugin, BeforeRemovalPluginPoint):
     title = "CouchDB Metadata Removal"
