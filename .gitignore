@@ -4,24 +4,8 @@ dist
 *.egg-info
 .DS_Store
 
-adlibre_dms/apps/mdtui/management/commands/populate_dms.py
-
-adlibre_dms/apps/mdtui/management/commands/cleanup_dms.py
-
-adlibre_dms/apps/mdtui/management/commands/__init__.py
-
-documents/*.*
-documents/*
-
-documents_prod/*.*
-documents_prod/*
-
-local_settings.py
-
-local_settings.py
-
 adlibre_dms/reports/coverage.xml
-
 adlibre_dms/reports/junit.xml
-
 adlibre_dms/reports/pylint.report
+
+.gitignore
