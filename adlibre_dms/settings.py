@@ -357,9 +357,9 @@ if DEBUG:
                 },
             # Default logger
             '': {
-                'handlers': ['file'], #, 'console'],
-                'level': 'INFO',
-                'filters': ['no_message_failures'],
+                'handlers': ['file'],  # , 'console'],  # remove 'console' to see clear output...
+                'level': 'INFO',  # Set to level 'INFO' to see clear output...
+                'filters': ['no_message_failures'],  # enable to clear out output...
                 'propagate': True,
                 },
             # DMS logger
