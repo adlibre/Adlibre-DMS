@@ -96,12 +96,18 @@ class CouchDBMetadata(object):
         """
         Updates document with new indexes and stores old one into another revision.
         """
+        user = self.check_user(document)
         if document.new_indexes and document.file_name:
-            user = self.check_user(document)
             couchdoc = CouchDocument.get(docid=document.file_name)
             couchdoc.update_indexes_revision(document)
             couchdoc.save()
             document = couchdoc.populate_into_dms(user, document)
+        if 'update_file' in document.options and document.options['update_file']:
+            name = document.get_stripped_filename()
+            # We need to create couchdb document in case it does not exists in database.
+            couchdoc = CouchDocument.get_or_create(docid=name)
+            couchdoc.update_file_revisions_metadata(document)
+            couchdoc.save()
         return document
 
     def update_metadata_after_removal(self, document):
@@ -112,7 +118,7 @@ class CouchDBMetadata(object):
         """
         if not document.get_file_obj():
             #doc is fully deleted from fs
-            stripped_filename=document.get_stripped_filename()
+            stripped_filename = document.get_stripped_filename()
             couchdoc = CouchDocument.get(docid=stripped_filename)
             couchdoc.delete()
         return document

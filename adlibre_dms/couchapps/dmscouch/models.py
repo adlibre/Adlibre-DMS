@@ -186,3 +186,15 @@ class CouchDocument(Document):
             self.metadata_user_id = document.new_indexes['metadata_user_id']
             self.metadata_user_name = document.new_indexes['metadata_user_name']
         return document
+
+    def update_file_revisions_metadata(self, document):
+        """ Stores files revisions data into CouchDB from DMS document object
+
+        E.g.: Before this function:
+            couchdoc.revisions = { '1': { ... }, }
+
+        After:
+            couchdoc.revisions = { '1': { ... }, '2': { ... }, }
+        (Loaded from a Document() object)
+        """
+        self.revisions = document.revisions

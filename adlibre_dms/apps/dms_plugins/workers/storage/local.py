@@ -1,19 +1,22 @@
 """
 Module: Local Storage
 Project: Adlibre DMS
-Copyright: Adlibre Pty Ltd 2011
+Copyright: Adlibre Pty Ltd 2013
 License: See LICENSE for license information
 """
 
 import datetime
 import os
 import shutil
+import logging
 
 from django.conf import settings
 
 from dms_plugins.pluginpoints import StoragePluginPoint, BeforeRetrievalPluginPoint, BeforeRemovalPluginPoint,\
-BeforeUpdatePluginPoint
+    BeforeUpdatePluginPoint
 from dms_plugins.workers import Plugin, PluginError, BreakPluginChain
+
+log = logging.getLogger('dms')
 
 class NoRevisionError(Exception):
     def __str__(self):
@@ -32,7 +35,7 @@ def naturalsort(L, reverse=False):
 class LocalFilesystemManager(object):
     def get_document_directory(self, document):
         root = settings.DOCUMENT_ROOT
-        # Refactoring for v2 (splitdir() method from Document() object used only here.)
+        # TODO: Refactoring for v2 (splitdir() method from Document() object used only here.)
         directory = None
         doccode = document.get_docrule()
         if doccode:
@@ -52,29 +55,27 @@ class LocalFilesystemManager(object):
             os.makedirs(directory)
         return directory
 
+
 def file_present(file_name, directory):
     """Determine if file is present in directory"""
     return file_name in os.listdir(directory)
+
 
 def filecount(directory):
     """Count the number of files in a directory"""
     try:
         return len([f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))])
     except Exception, e:
+        log.error('plugins.workers.storage.local.LocalFilesystemManager().filecount error: %s' % e)
         return None
+
 
 class Local(object):
     def __init__(self):
         self.filesystem = LocalFilesystemManager()
 
     def store(self, document):
-        directory = self.filesystem.get_or_create_document_directory(document)
-        #print "STORE IN %s" % directory
-        destination = open(os.path.join(directory, document.get_filename_with_revision()), 'wb+')
-        fil = document.get_file_obj()
-        fil.seek(0)
-        destination.write(fil.read())
-        destination.close()
+        self.store_new_file(document)
         return document
 
     def retrieve(self, document):
@@ -100,6 +101,8 @@ class Local(object):
         return document
 
     def update(self, document):
+        if 'update_file' in document.options.iterkeys() and document.options['update_file'] is not None:
+            self.store_new_file(document)
         return document
 
     def document_matches_search(self, metadata_info, searchword):
@@ -181,10 +184,11 @@ class Local(object):
             except Exception, e:
                 raise PluginError(str(e), 500)
 
-        # TODO: Fix this. Not all usecases may be covered...
         #check if only '.json' file left in the directory for e.g.
-        if not filename or (document.get_docrule().no_doccode and len(os.listdir(directory)) == 0) or\
-                (not document.get_docrule().no_doccode and len(os.listdir(directory)) <= 1):
+        if not filename or (document.get_docrule().no_doccode and len(os.listdir(directory)) == 0):  #\
+                # We no longer use no_doccode concept so this is not required for now:
+                #or\
+                # (not document.get_docrule().no_doccode and len(os.listdir(directory)) <= 1):
                 # delete everything or no files at all or only metadata file
                 # except no_doccode files which may have 1 file in the directory
             try:
@@ -206,6 +210,16 @@ class Local(object):
                 file_count -= 1
         return file_count
 
+    def store_new_file(self, document):
+        directory = self.filesystem.get_or_create_document_directory(document)
+        #print "STORE IN %s" % directory
+        destination = open(os.path.join(directory, document.get_filename_with_revision()), 'wb+')
+        fil = document.get_file_obj()
+        fil.seek(0)
+        destination.write(fil.read())
+        destination.close()
+
+
 class LocalStoragePlugin(Plugin, StoragePluginPoint):
     title = "Local Storage"
     description = "Saves document as local file"
@@ -215,6 +229,7 @@ class LocalStoragePlugin(Plugin, StoragePluginPoint):
 
     def work(self, document, **kwargs):
         return self.worker.store(document)
+
 
 class LocalRetrievalPlugin(Plugin, BeforeRetrievalPluginPoint):
     title = "Local Retrieval"
@@ -226,6 +241,7 @@ class LocalRetrievalPlugin(Plugin, BeforeRetrievalPluginPoint):
     def work(self, document, **kwargs):
         return self.worker.retrieve(document)
 
+
 class LocalRemovalPlugin(Plugin, BeforeRemovalPluginPoint):
     title = "Local Removal"
     description = "Removes document from filesystem"
@@ -235,6 +251,7 @@ class LocalRemovalPlugin(Plugin, BeforeRemovalPluginPoint):
 
     def work(self, document, **kwargs):
         return self.worker.remove(document)
+
 
 class LocalUpdatePlugin(Plugin, BeforeUpdatePluginPoint):
     title = "Local Update"

@@ -3,8 +3,9 @@ import hashlib
 from django import forms
 from django.conf import settings
 
-from dms_plugins.pluginpoints import BeforeRetrievalPluginPoint, BeforeStoragePluginPoint
+from dms_plugins.pluginpoints import BeforeRetrievalPluginPoint, BeforeStoragePluginPoint, BeforeUpdatePluginPoint
 from dms_plugins.workers import Plugin, PluginError
+
 
 class HashForm(forms.Form):
     OPTION = (
@@ -29,6 +30,7 @@ class HashForm(forms.Form):
             method.save()
         return method
 
+
 class HashCodeValidationOnStoragePlugin(Plugin, BeforeStoragePluginPoint):
     title = 'Hash'
     description = 'Hash code calculation and saving on storage'
@@ -42,6 +44,21 @@ class HashCodeValidationOnStoragePlugin(Plugin, BeforeStoragePluginPoint):
         method = self.get_option('method', document.get_docrule())
         return HashCodeWorker(self.method).work_store(document, method)
 
+
+class HashCodeValidationOnUpdatePlugin(Plugin, BeforeUpdatePluginPoint):
+    title = 'Hash'
+    description = 'Hash code calculation and saving on object update. (Usually on new revision upload)'
+    plugin_type = "update_processing"
+    method = 'md5'
+    has_configuration = True
+    configurable_fields = ['method',]
+    form = HashForm
+
+    def work(self, document):
+        method = self.get_option('method', document.get_docrule())
+        return HashCodeWorker(self.method).work_store(document, method)
+
+
 class HashCodeValidationOnRetrievalPlugin(Plugin, BeforeRetrievalPluginPoint):
     title = 'Hash'
     description = 'Hash code validation on retrieval'
@@ -54,6 +71,7 @@ class HashCodeValidationOnRetrievalPlugin(Plugin, BeforeRetrievalPluginPoint):
     def work(self, document):
         method = self.get_option('method', document.get_docrule())
         return HashCodeWorker(self.method).work_retrieve(document, method)
+
 
 class HashCodeWorker(object):
     def __init__(self, method):

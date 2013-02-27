@@ -736,7 +736,9 @@
             "before_update_plugins": [
                 19, 
                 21,
-                25
+                25,
+                26,
+                27
             ], 
             "active": true, 
             "before_storage_plugins": [
@@ -758,7 +760,7 @@
                 11, 
                 15, 
                 17
-            ], 
+            ],
             "doccode": "3",
             "storage_plugins": [
                 4, 
@@ -772,7 +774,10 @@
             ], 
             "before_update_plugins": [
                 19, 
-                21
+                21,
+                26,
+                27,
+                28
             ], 
             "active": true, 
             "before_storage_plugins": [
@@ -806,7 +811,8 @@
             ], 
             "before_update_plugins": [
                 19, 
-                21
+                21,
+                27
             ], 
             "active": true, 
             "before_storage_plugins": []
@@ -835,7 +841,8 @@
             ], 
             "before_update_plugins": [
                 19, 
-                21
+                21,
+                27
             ], 
             "active": true, 
             "before_storage_plugins": [
@@ -933,7 +940,9 @@
             "before_update_plugins": [
                 19,
                 21,
-                25
+                25,
+                26,
+                27
             ],
             "active": true,
             "before_storage_plugins": [
@@ -973,7 +982,9 @@
             "before_update_plugins": [
                 19,
                 21,
-                25
+                25,
+                26,
+                27
             ],
             "active": true,
             "before_storage_plugins": [
@@ -1010,7 +1021,9 @@
             "before_update_plugins": [
                 19,
                 21,
-                25
+                25,
+                26,
+                27
             ],
             "active": true,
             "before_storage_plugins": [
@@ -1304,7 +1317,7 @@
         "model": "djangoplugins.plugin", 
         "fields": {
             "status": 0, 
-            "index": 5, 
+            "index": 50,
             "_order": 1, 
             "name": "dms_plugins.workers.storage.local.LocalUpdatePlugin", 
             "point": 4
@@ -1447,9 +1460,42 @@
         "model": "djangoplugins.plugin",
         "fields": {
             "status": 0,
-            "index": 0,
+            "index": 60,
             "_order": 2,
             "name": "dms_plugins.workers.database.couchdb.CouchDBMetadataUpdatePlugin",
+            "point": 4
+        }
+    },
+    {
+        "pk": 26,
+        "model": "djangoplugins.plugin",
+        "fields": {
+            "status": 0,
+            "index": 20,
+            "_order": 3,
+            "name": "dms_plugins.workers.transfer.gzip.GzipOnUpdatePlugin",
+            "point": 4
+        }
+    },
+    {
+        "pk": 27,
+        "model": "djangoplugins.plugin",
+        "fields": {
+            "status": 0,
+            "index": 20,
+            "_order": 4,
+            "name": "dms_plugins.workers.storage.metadata.local_json.LocalJSONMetadataUpdatePlugin",
+            "point": 4
+        }
+    },
+    {
+        "pk": 28,
+        "model": "djangoplugins.plugin",
+        "fields": {
+            "status": 0,
+            "index": 0,
+            "_order": 5,
+            "name": "dms_plugins.workers.validators.hashcode.HashCodeValidationOnUpdatePlugin",
             "point": 4
         }
     }

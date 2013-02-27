@@ -20,6 +20,7 @@ from core.errors import DmsException
 
 log = logging.getLogger('core.document_processor')
 
+
 class DocumentProcessor(object):
     """Main DMS CRUD logic operations handler.
 
@@ -35,7 +36,7 @@ class DocumentProcessor(object):
             }
         - has a CRUD architecture usually taking a document_name or uploaded_file as a first variable
             and using "options" dict for interaction/processing actions.
-        - typical intaraction cycle is:
+        - typical interaction cycle is:
 
             class Manager()
 
@@ -61,7 +62,6 @@ class DocumentProcessor(object):
         self.document_file = None
 
     # TODO: new_revision == create call. This is wrong.
-    # TODO: use options={'barcode': ... , 'index_info': ... ,} instead of adding params.
     def create(self, uploaded_file, options):
         """
         Creates a new Document() and saves it into DMS.
@@ -70,29 +70,51 @@ class DocumentProcessor(object):
         'uploaded_file' and 'user'
         uploaded file is http://docs.djangoproject.com/en/1.3/topics/http/file-uploads/#django.core.files.uploadedfile.UploadedFile or file object
         user is https://docs.djangoproject.com/en/dev/topics/auth/default/#user-objects (Normal Django user)
+
+        Valid only if no DMS Object with such code exists in the system. Has a validation for that.
         """
         barcode = self.option_in_options('barcode', options)
+        valid = True
         log.debug('CREATE Document %s, barcode: %s' % (uploaded_file, barcode))
         operator = PluginsOperator()
+        if not uploaded_file:
+            self.read(uploaded_file.name, {'only_metadata': True})
         doc = self.init_Document_with_data(options, document_file=uploaded_file)
         # Setting new file name and type.
-        if barcode is not None:
-            doc.set_filename(barcode)
-            log.debug('Allocated Barcode %s.' % barcode)
-        else:
-            # Appending error to processor in case we have recieved a "No docrule" file.
-            try:
+        try:
+            if barcode is not None:
+                doc.set_filename(barcode)
+                log.debug('Allocated Barcode %s.' % barcode)
+            else:
                 doc.set_filename(os.path.basename(uploaded_file.name))
-            except DmsException, e:
-                self.errors.append(unicode(e.parameter))
-                return None
-                pass
+        except DmsException, e:
+            # Appending error to processor, usually in case we have received a "No docrule" file.
+            log.error(e)
+            self.errors.append(unicode(e.parameter))
+            return None
+            pass
+        # Checking if file with this code already exists in system.
+        doc_name = doc.get_filename()
+        if doc_name:
+            # Extract code from filename
+            if '.' in doc_name:
+                doc_name, extension = doc_name.split('.')
+            # Check the DMS for existence of this code
+            possible_doc = self.read(doc_name, {'only_metadata': True, 'user': doc.user})
+            if possible_doc and not self.errors:
+                error = DmsException('Document "%s" already exists' % doc_name, 409)
+                self.errors.append(error)
+                valid = False
+            if self.errors:
+                if self.errors.__len__() == 1 and self.errors[0].code == 404:
+                    self.errors = []
         # Processing plugins
-        # FIXME: if uploaded_file is not None, then some plugins should not run because we don't have a file
-        doc = operator.process_pluginpoint(pluginpoints.BeforeStoragePluginPoint, document=doc)
-        operator.process_pluginpoint(pluginpoints.StoragePluginPoint, document=doc)
-        doc = operator.process_pluginpoint(pluginpoints.DatabaseStoragePluginPoint, document=doc)
-        self.check_errors_in_operator(operator)
+        # FIXME: if uploaded_file is None, then some plugins should not run because we don't have a file
+        if valid:
+            doc = operator.process_pluginpoint(pluginpoints.BeforeStoragePluginPoint, document=doc)
+            operator.process_pluginpoint(pluginpoints.StoragePluginPoint, document=doc)
+            doc = operator.process_pluginpoint(pluginpoints.DatabaseStoragePluginPoint, document=doc)
+            self.check_errors_in_operator(operator)
         return doc
 
     def read(self, document_name, options):
@@ -129,26 +151,38 @@ class DocumentProcessor(object):
 
         Has ability to:
             - update document indexes
+            - update document revision (upload new file to existing code)
+            - update document tags
             TODO: continue this...
         """
         log.debug('UPDATE Document %s, options: %s' % (document_name, options))
         new_name = self.option_in_options('new_name', options)
+        new_file_revision = self.option_in_options('update_file', options)
         user = self.option_in_options('user', options)
 
         # Sequence to make a new name for file.
         # TODO: this deletes all old revisions, instead of real rename of all files...
+        # Must become a plugins sequence task.
         if new_name:
             extension = self.option_in_options('extension', options)
-            renaming_doc = self.read(document_name, options={'extension':extension, 'user':user,})
+            renaming_doc = self.read(document_name, options={'extension': extension, 'user': user})
             if new_name != renaming_doc.get_filename():
                 ufile = UploadedFile(renaming_doc.get_file_obj(), new_name, content_type=renaming_doc.get_mimetype())
-                document = self.create(ufile, { 'user': user,})
+                document = self.create(ufile, {'user': user})
                 if not self.errors:
-                    self.delete(renaming_doc.get_filename(), options={'extension': extension, 'user':user})
+                    self.delete(renaming_doc.get_filename(), options={'extension': extension, 'user': user})
                 return document
 
         operator = PluginsOperator()
         doc = self.init_Document_with_data(options, document_name=document_name)
+        # Storing new file revision of an object. It requires content setup from uploaded file.
+        if new_file_revision:
+            if 'content_type' in new_file_revision.__dict__.iterkeys():
+                doc.set_mimetype(new_file_revision.content_type)
+            else:
+                error = 'Error updating file revision for file: %s' % new_file_revision
+                log.error(error)
+                self.errors.append(error)
         doc = operator.process_pluginpoint(pluginpoints.BeforeUpdatePluginPoint, document=doc)
         self.check_errors_in_operator(operator)
         return doc
@@ -189,7 +223,7 @@ class DocumentProcessor(object):
                 response = options[option]
         return response
 
-    def init_Document_with_data(self, options, doc=None, document_name=None, document_file=None ):
+    def init_Document_with_data(self, options, doc=None, document_name=None, document_file=None):
         """Populate given Document() class with given properties from "options" provided
 
         Makes expansion of interaction methods with Document() simple.
@@ -210,32 +244,42 @@ class DocumentProcessor(object):
         if options:
             try:
                 for property_name, value in options.iteritems():
-                    if property_name=='hashcode':
+                    if property_name == 'hashcode':
                         doc.set_hashcode(value)
-                    if property_name=='revision':
+                    if property_name == 'revision':
                         doc.set_revision(value)
-                    # Run for plugins without retriving document. Only count metadata.
-                    if property_name=='revision_count':
+                    # Run for plugins without retrieving document. Only count metadata.
+                    if property_name == 'revision_count':
                         doc.update_options({'revision_count': True,
-                                            'only_metadata': True,})
-                    if property_name=='extension':
+                                            'only_metadata': True})
+                    if property_name == 'extension':
                         doc.set_requested_extension(value)
-                    if property_name=='tag_string':
-                        doc.set_tag_string(value)
-                    if property_name=='remove_tag_string':
-                        doc.set_remove_tag_string(value)
-                    if property_name=='new_indexes':
+                    if property_name == 'tag_string':
+                        if value:
+                            doc.set_tag_string(value)
+                            doc.update_options({property_name: value})
+                    if property_name == 'remove_tag_string':
+                        if value:
+                            doc.set_remove_tag_string(value)
+                            doc.update_options({property_name: value})
+                    if property_name == 'new_indexes':
                         doc.update_db_info(value)
-                    if property_name=='user':
+                    if property_name == 'user':
                         doc.set_user(value)
-                    if property_name=='index_info':
+                    if property_name == 'index_info':
                         doc.set_db_info(value)
+                    if property_name == 'update_file':
+                        doc.set_file_obj(value)
+                        if value:
+                            # Option for update function so we know we have a file update sequence
+                            doc.update_options({property_name: True})
                 if 'only_metadata' in options:
-                    doc.update_options({'only_metadata': options['only_metadata'],})
+                    doc.update_options({'only_metadata': options['only_metadata']})
             except Exception, e:
                 self.errors.append('Error working with Object: %s' % e)
-                log.error('DocumentManager().init_Document_with_data() error: %s, doc: %s, options: %s, document_name:%s'
-                          % (e, doc, options, document_name))
+                log.error(
+                    'DocumentManager().init_Document_with_data() error: %s, doc: %s, options: %s, document_name: %s'
+                    % (e, doc, options, document_name))
                 pass
             # Every method call should have a Django User inside. Validating that.
             if not 'user' in options and not options['user']:

@@ -1,17 +1,17 @@
-import datetime
 import json
 import os
+from datetime import datetime
 
 from django.conf import settings
 
-from dms_plugins.pluginpoints import StoragePluginPoint, BeforeRetrievalPluginPoint, BeforeRemovalPluginPoint
+from dms_plugins.pluginpoints import StoragePluginPoint, BeforeRetrievalPluginPoint,\
+    BeforeRemovalPluginPoint, BeforeUpdatePluginPoint
 from dms_plugins.workers import Plugin, PluginError, BreakPluginChain
 from dms_plugins.workers.storage.local import LocalFilesystemManager
 
+
 class LocalJSONMetadata(object):
-    """
-        Stores metadata in the same directory as document revisions in JSON format.
-    """
+    """Stores metadata in the same directory as document revisions in JSON format."""
     def __init__(self):
         self.filesystem = LocalFilesystemManager()
 
@@ -57,6 +57,14 @@ class LocalJSONMetadata(object):
             pass # our directory with all metadata has just been deleted %)
         return document
 
+    def update(self, document):
+        """Updates document metadata after it has been updated, e.g. updated revision"""
+        if 'update_file' in document.options:
+            # FIXME metadata should be updated more often if we plan to store secondary keys on a disk.
+            directory = self.filesystem.get_or_create_document_directory(document)
+            document = self.save_metadata(document, directory)
+        return document
+
     """Internal manager methods"""
     def load_from_file(self, json_file):
         if os.path.exists(json_file):
@@ -90,9 +98,9 @@ class LocalJSONMetadata(object):
 
     def string_to_date(self, string):
         try:
-            date = datetime.datetime.strptime(string, settings.DATETIME_FORMAT)
+            date = datetime.strptime(string, settings.DATETIME_FORMAT)
         except ValueError:
-            date = datetime.datetime.strptime(string[:10], settings.DATE_FORMAT)
+            date = datetime.strptime(string[:10], settings.DATE_FORMAT)
         except:
             raise
         return date
@@ -104,7 +112,7 @@ class LocalJSONMetadata(object):
         fileinfo = {
             'name' : document.get_filename_with_revision(),
             'revision' : document.get_revision(),
-            'created_date' : self.date_to_string(datetime.datetime.today())
+            'created_date' : self.date_to_string(datetime.today())
         }
 
         if document.get_current_metadata():
@@ -113,7 +121,8 @@ class LocalJSONMetadata(object):
         fileinfo_db[document.get_revision()] = fileinfo
 
         self.write_metadata(fileinfo_db, document, directory)
-
+        # Required for any update sequence
+        document.revisions = fileinfo_db
         return document
 
     def write_metadata(self, fileinfo_db, document, directory):
@@ -122,11 +131,8 @@ class LocalJSONMetadata(object):
         json.dump(fileinfo_db, json_handler, indent = 4)
 
     def get_fake_metadata(self, root, fil):
-        created_date = datetime.datetime.strptime(datetime.datetime.strftime(datetime.datetime.now(), settings.DATETIME_FORMAT), settings.DATETIME_FORMAT)
-        # TODO: Understand what the author ment by this...
-#        created_date = datetime.datetime.strptime(
-#                                                    os.path.split(root)[-1], settings.DATE_FORMAT
-#                                                    ).strftime(settings.DATETIME_FORMAT)
+        current_date = datetime.strftime(datetime.now(), settings.DATETIME_FORMAT)
+        created_date = datetime.strptime(current_date, settings.DATETIME_FORMAT)
         return {   'created_date': created_date,
                     'name': fil,
                     'revision': 'N/A'
@@ -151,7 +157,7 @@ class LocalJSONMetadata(object):
                         keys = metadatas.keys()
                         keys.sort()
                         first_metadata = metadatas[keys[0]]
-                elif doccode.no_doccode and not dirs: #leaf directory, no metadata file => NoDoccode
+                elif doccode.no_doccode and not dirs:  # leaf directory, no metadata file => NoDoccode
                     first_metadata = self.get_fake_metadata(root, fil)
                     metadatas = [first_metadata]
                     doc = fil
@@ -181,8 +187,9 @@ class LocalJSONMetadata(object):
                     metadatas.append(self.load_from_file(os.path.join(root, fil)))
         return metadatas
 
+
 class LocalJSONMetadataRetrievalPlugin(Plugin, BeforeRetrievalPluginPoint):
-    title = "Local Metadata Retrieval"
+    title = "Filesystem Metadata Retrieval"
     description = "Loads document metadata as local file"
 
     plugin_type = 'metadata'
@@ -191,8 +198,9 @@ class LocalJSONMetadataRetrievalPlugin(Plugin, BeforeRetrievalPluginPoint):
     def work(self, document, **kwargs):
         return self.worker.retrieve(document)
 
+
 class LocalJSONMetadataStoragePlugin(Plugin, StoragePluginPoint):
-    title = "Local Metadata Storage"
+    title = "Filesystem Metadata Storage"
     description = "Saves document metadata as local file"
 
     plugin_type = 'metadata'
@@ -201,8 +209,9 @@ class LocalJSONMetadataStoragePlugin(Plugin, StoragePluginPoint):
     def work(self, document, **kwargs):
         return self.worker.store(document)
 
+
 class LocalJSONMetadataRemovalPlugin(Plugin, BeforeRemovalPluginPoint):
-    title = "Local Metadata Removal"
+    title = "Filesystem Metadata Removal"
     description = "Updates document metadata after removal of document (actualy some revisions of document)"
 
     plugin_type = 'metadata'
@@ -210,3 +219,14 @@ class LocalJSONMetadataRemovalPlugin(Plugin, BeforeRemovalPluginPoint):
 
     def work(self, document, **kwargs):
         return self.worker.update_metadata_after_removal(document)
+
+
+class LocalJSONMetadataUpdatePlugin(Plugin, BeforeUpdatePluginPoint):
+    title = "Filesystem Metadata Update"
+    description = "Updates document metadata after update. e.g. Update of document revision."
+
+    plugin_type = 'metadata'
+    worker = LocalJSONMetadata()
+
+    def work(self, document, **kwargs):
+        return self.worker.update(document)

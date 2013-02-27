@@ -35,6 +35,7 @@ log = logging.getLogger('dms.api.handlers')
 
 AUTH_REALM = 'Adlibre DMS'
 
+
 class BaseFileHandler(BaseHandler):
 
     def _get_info(self, request):
@@ -44,28 +45,32 @@ class BaseFileHandler(BaseHandler):
         log.debug('BaseFileHandler._get_info returned: %s : %s : %s.' % (revision, hashcode, extra))
         return revision, hashcode, extra
 
+
 class FileHandler(BaseFileHandler):
     """CRUD Methods for documents"""
     allowed_methods = ('GET', 'POST', 'DELETE', 'PUT')
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
+    @method_decorator(group_required('api'))  # FIXME: Should be more granular permissions
     def create(self, request, code, suggested_format=None):
-        # FIXME... code and file stream should be passed in separately!
         if 'file' in request.FILES:
             uploaded_file = request.FILES['file']
         else:
             return rc.BAD_REQUEST
         processor = DocumentProcessor()
-        document = processor.create(uploaded_file, {'user': request.user})
+        options = {
+            'user': request.user,
+            'barcode': code,
+        }
+        document = processor.create(uploaded_file, options)
         if len(processor.errors) > 0:
             log.error('FileHandler.create manager errors: %s' % processor.errors)
             return rc.BAD_REQUEST
         log.info('FileHandler.create request fulfilled for %s' % document.get_filename())
-        return document.get_filename() # FIXME, should be rc.CREATED
+        return rc.CREATED
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
+    @method_decorator(group_required('api'))  # FIXME: Should be more granular permissions
     def read(self, request, code, suggested_format=None):
         revision, hashcode, extra = self._get_info(request)
         processor = DocumentProcessor()
@@ -93,35 +98,35 @@ class FileHandler(BaseFileHandler):
     @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def update(self, request, code, suggested_format=None):
         revision, hashcode, extra = self._get_info(request)
+        uploaded_obj = None
+        if 'file' in request.FILES:
+            uploaded_obj = request.FILES['file']
         # TODO refactor these verbs
         tag_string = request.PUT.get('tag_string', None)
         remove_tag_string = request.PUT.get('remove_tag_string', None)
         new_name = request.PUT.get('new_name', None)
-        try:
-            processor = DocumentProcessor()
-            options = {
-                'tag_string': tag_string,
-                'remove_tag_string': remove_tag_string,
-                'extension': suggested_format,
-                'new_name': new_name,
-                'user': request.user,
-            } #FIXME hashcode missing?
-            document = processor.update(code, options)
-            if len(processor.errors) > 0:
-                log.error('FileHandler.update manager errors %s' % processor.errors)
-                if settings.DEBUG:
-                    raise Exception('FileHandler.update manager errors')
-                else:
-                    return rc.BAD_REQUEST
-            log.info('FileHandler.update request fulfilled for code: %s, format: %s, rev: %s, hash: %s.' % (code, suggested_format, revision, hashcode))
-            response_string = json.dumps( document.get_dict() )
-            return HttpResponse(response_string) # FIXME should be rc.ALL_OK
-        except Exception, e: # FIXME
-            log.error('FileHandler.update exception %s' % e)
+        processor = DocumentProcessor()
+        options = {
+            'tag_string': tag_string,
+            'remove_tag_string': remove_tag_string,
+            'extension': suggested_format,
+            'new_name': new_name,
+            'update_file': uploaded_obj,
+            'user': request.user,
+        }  # FIXME hashcode missing?
+        document = processor.update(code, options)
+        if len(processor.errors) > 0:
+            print processor.errors
+            log.error('FileHandler.update manager errors %s' % processor.errors)
             if settings.DEBUG:
-                raise
+                raise Exception('FileHandler.update manager errors')
             else:
-                return rc.ALL_OK
+                return rc.BAD_REQUEST
+        log.info('FileHandler.update request fulfilled for code: %s, format: %s, rev: %s, hash: %s.'
+                 % (code, suggested_format, revision, hashcode))
+        response_string = json.dumps(document.get_dict())
+        return HttpResponse(response_string)  # FIXME should be rc.ALL_OK
+
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
     @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
@@ -195,7 +200,7 @@ class FileListHandler(BaseHandler):
     """
     Provides list of documents to facilitate browsing via document type rule id.
     """
-    allowed_methods = ('GET','POST')
+    allowed_methods = ('GET', 'POST')
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
     @method_decorator(group_required('api')) # FIXME: Should be more granular permissions

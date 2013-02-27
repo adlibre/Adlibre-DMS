@@ -141,7 +141,7 @@ def render_fields_from_docrules(mdts_dict, init_dict=None, search=False):
                     form_field.field_name = field_value["field_name"]
                     form_fields_list[counter] = form_field
                 counter += 1
-    log.debug('Rendered dynamic fields to add to form: ', form_fields_list)
+    log.debug('Rendered dynamic fields to add to form: %s' % form_fields_list)
     return form_fields_list
 
 def setFormFields(fm, kwds):

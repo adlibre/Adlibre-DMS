@@ -313,7 +313,8 @@ def search_results(request, step=None, template='mdtui/search.html'):
 
     cache = get_cache('mui_search_results')
     # Caching by document keys and docrules list, as a cache key
-    cache_key = json.dumps(document_keys)+json.dumps(docrule_ids)+json.dumps(sorting_field)+json.dumps(order)
+    search_data = json.dumps(document_keys)+json.dumps(docrule_ids)+json.dumps(sorting_field)+json.dumps(order)
+    cache_key = hash(search_data)
     cached_documents = cache.get(cache_key, None)
     if cleaned_document_keys and not cached_documents:
         if cleaned_document_keys:
@@ -332,8 +333,8 @@ def search_results(request, step=None, template='mdtui/search.html'):
                 sorting_field_query = ''
             # Using DMS actual search method for this
             query = DMSSearchQuery({
-                'document_keys':cleaned_document_keys,
-                'docrules':docrule_ids,
+                'document_keys': cleaned_document_keys,
+                'docrules': docrule_ids,
                 'only_names': True,
                 'sorting_key': sorting_field_query,
                 'sorting_order': query_order,

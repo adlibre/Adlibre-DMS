@@ -16,6 +16,7 @@ from django.contrib.auth.decorators import login_required
 from ui.forms import CalendarForm
 from api.handlers import FileHandler
 
+
 def get_urls(id_rule=None, document_name=None):
     c = {   'rules_url': reverse('api_rules', kwargs={'emitter_format': 'json'}),}
     if id_rule:
@@ -36,11 +37,13 @@ def get_urls(id_rule=None, document_name=None):
                         })
     return json.dumps(c)
 
+
 @login_required
 def rule_list(request):
     template_name = "ui/rule_list.html"
     c = {   'communicator_options': get_urls(),}
     return direct_to_template(request, template_name, c)
+
 
 @login_required
 def document_list(request, id_rule):
@@ -50,6 +53,7 @@ def document_list(request, id_rule):
         'calendar_form': CalendarForm()}
     return direct_to_template(request, template_name, c)
 
+
 @login_required
 def document(request, document_name):
     template_name = "ui/document.html"
@@ -57,10 +61,14 @@ def document(request, document_name):
         'document_name': document_name}
     return direct_to_template(request, template_name, c)
 
+
 @login_required
 def upload_document(request):
     # FIXME: Refactor out this direct calling of api.
-    document_name = FileHandler().create(request, None, None)
-    if type(document_name) == unicode:
+    # TODO: THIS HACK is not working and prohibited. Because of major change in logic of DocumentProcessor() and API...
+    # TODO: uploading existing file causes bad request
+    response = FileHandler().create(request, None, None)
+    document_name = request.FILES['file'].name
+    if response.status_code == 201:
         return document(request, document_name)
-    return HttpResponse(str(document_name))
+    return HttpResponse(str(response))

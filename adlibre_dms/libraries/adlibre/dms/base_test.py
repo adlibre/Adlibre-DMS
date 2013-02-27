@@ -7,7 +7,8 @@ from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.test.client import Client
 
-__all__ = ['DMSTestCase', 'DMSBasicAuthenticatedTestCase',]
+__all__ = ['DMSTestCase', 'DMSBasicAuthenticatedTestCase']
+
 
 class DMSTestCase(TestCase):
     """
@@ -15,7 +16,7 @@ class DMSTestCase(TestCase):
 
     Provides a standardized set of test data and ensures that each test run has a clean set of data.
     """
-    fixtures = ['test_initial_data.json',]
+    fixtures = ['initial_data.json']
 
     def __init__(self, *args, **kwargs):
         super(DMSTestCase, self).__init__(*args, **kwargs)
@@ -28,16 +29,18 @@ class DMSTestCase(TestCase):
         self.test_document_files_dir = os.path.join(settings.FIXTURE_DIRS[0], 'testdata')
 
         # Test Data
-        self.documents_pdf = ('ADL-0001', 'ADL-0002', 'ADL-1111', 'ADL-1234', 'ADL-2222',)
+        self.documents_pdf = ('ADL-0001', 'ADL-0002', 'ADL-1111', 'ADL-1234', 'ADL-2222')
         self.documents_pdf2 = ('BBB-0001', )
+        self.documents_pdf_test_string = '%PDF-1.4'
         self.documents_txt = ('10001', '10006', '101',)
         self.documents_tif = ('2011-01-27-1', '2011-01-28-12',)
         self.documents_jpg = ('TST00000001', 'TST00000002', 'TST12345678')
         self.documents_missing = ('ADL-8888', 'ADL-9999',)
-        #self.documents_norule = ('ADL-54321', 'ADL-12345', ) # too long to match ADL invoices
-        # These are documents that are not tested, yet exist in ./fixtures/testdata/
-        #self.unlisted_files_used = ('test_document_template.odt', 'test_no_doccode.pdf', )
+        self.documents_codes = ('abcde333', )
+        self.jpg_codes = ('TST12345679', )
+        self.no_docrule_files = ('Z50141104', )
 
+        self.hash_method = 'md5'
         # Documents that exist, and have valid hash
         self.documents_hash = [
             ('abcde111', 'cad121990e04dcd5631a9239b3467ee9'),
@@ -47,59 +50,67 @@ class DMSTestCase(TestCase):
 
         # Documents that are missing, but have correct hash
         self.documents_missing_hash = [
-            ('abcde888','e9c84a6bcdefb9d01e7c0f9eabba5581',),
-            ('abcde999','58a38de7b3652391f888f4e971c6e12e',),
+            ('abcde888', 'e9c84a6bcdefb9d01e7c0f9eabba5581',),
+            ('abcde999', '58a38de7b3652391f888f4e971c6e12e',),
         ]
 
         # Documents with incorrect hashes
         self.documents_incorrect_hash = [
-            # DEFINE ME
+            # TODO: DEFINE ME
         ]
 
         self.rules = (1, 2, 3, 4, 5,)
         self.rules_missing = (99,)
 
-    def _upload_file(self, doc, suggested_format='pdf', hash=None, check_response=True):
+    def _upload_file(self, doc_name, suggested_format='pdf', hashcode=None, check_response=True, code=None):
+        """Upload initial version of a file into DMS
+
+        @param suggested_format - is used to set up an extension of uploaded file to search in fixtures dir
+        @param hashcode - sets up a hash of an uploaded file
+        @param check_response - is used to confirm file has been successfully uploaded
+        @param code - is to set up a code for file (Upload this file with different name specified)
+        """
         self.client.login(username=self.username, password=self.password)
-        # Do upload
-        file_path = os.path.join(self.test_document_files_dir, doc + '.' + suggested_format)
-        data = { 'file': open(file_path, 'r'), }
-        url = reverse('api_file', kwargs={'code': doc, 'suggested_format': suggested_format,})
-        if hash:
-            # Add hash to payload
-            data['h'] = hash
+        url, data = self._get_tests_file(doc_name, code, suggested_format, hashcode)
         response = self.client.post(url, data)
+        if check_response:
+            self.assertEqual(response.status_code, 201)
+        return response
+
+    def _update_code(self, doc_name, code=None, suggested_format='pdf', check_response=True):
+        """Method to uploade an already existing document into DMS"""
+        self.client.login(username=self.username, password=self.password)
+        url, data = self._get_tests_file(doc_name, code, suggested_format)
+        response = self.client.put(url, data)
         if check_response:
             self.assertEqual(response.status_code, 200)
         return response
 
-    def loadTestData(self, check_response=True):
+    def _get_tests_file(self, name, code, suggested_format, hashcode=None):
+        """Retrieve required file from fixtures into special format for posting returning an API url and data to post"""
+        file_path = os.path.join(self.test_document_files_dir, name + '.' + suggested_format)
+        data = {'file': open(file_path, 'r')}
+        if not code:
+            code = name
+        url = reverse('api_file', kwargs={'code': code, 'suggested_format': suggested_format})
+        if hashcode:
+            # Add hash to payload
+            data['h'] = hashcode
+        return url, data
+
+    def loadTestData(self):
         # Load a copy of all our fixtures using the management command
         return call_command('import_documents', self.test_document_files_dir, silent=False)
 
-#    def loadDocuments(self, documents, suggested_format='pdf', check_response=True):
-#
-#        for doc in documents:
-#            self._upload_file(self, doc, suggested_format=suggested_format, check_response=check_response)
-#
-#
-#        # Load Test Data
-#        self.loadDocuments(self.documents_pdf, suggested_format='pdf', check_response=check_response)
-#        self.loadDocuments(self.documents_tif, suggested_format='tif', check_response=check_response)
-#        self.loadDocuments(self.documents_txt, suggested_format='txt', check_response=check_response)
-
-
     def cleanUp(self, documents, check_response=True, nodocrule=False, ):
-        """
-        Cleanup Helper
-        """
+        """Cleanup Helper"""
         self.client.login(username=self.username, password=self.password)
         for doc in documents:
             code, suggested_format = os.path.splitext(doc)
-            url = reverse('api_file', kwargs={'code': code,})
+            url = reverse('api_file', kwargs={'code': code})
             if nodocrule:
-                from datetime import date # Hack
-                data = {'parent_directory': str(date.today()), 'full_filename': doc, } # hack
+                from datetime import date   # Hack
+                data = {'parent_directory': str(date.today()), 'full_filename': doc, }  # hack
             else:
                 data = {}
             response = self.client.delete(url, data=data)
@@ -109,9 +120,7 @@ class DMSTestCase(TestCase):
                 self.assertEqual(response.status_code, 204)
 
     def cleanAll(self, check_response=True):
-        """
-        Clean all of our test documents
-        """
+        """Clean all of our test documents"""
 
         # Cleaning up simple docs
         self.cleanUp(self.documents_pdf, check_response=check_response)
@@ -180,6 +189,7 @@ class BasicAuthClient(Client):
 
     def delete(self, *args, **kwargs):
         return super(BasicAuthClient, self).delete(*args, **self.extra)
+
 
 class DMSBasicAuthenticatedTestCase(DMSTestCase):
     """

@@ -2164,7 +2164,7 @@ class MDTUI(TestCase):
         self.assertContains(response, 'BBB-0002')
         self.assertNotContains(response, 'BBB-0003')
 
-    def test_54_core_creation_indexes_left_the_smae_on_update(self):
+    def test_54_core_creation_indexes_left_the_same_on_update(self):
         """
         Testing Doc update sequence.
         e.g.:
@@ -2178,7 +2178,7 @@ class MDTUI(TestCase):
         # Uploading file through browser app
         filename = settings.FIXTURE_DIRS[0] + '/testdata/' + doc1 + '.pdf'
         url = reverse('upload')
-        data = { 'file': open(filename, 'r'), }
+        data = {'file': open(filename, 'r'), }
         response = self.client.post(url, data)
         self.assertContains(response, 'File has been uploaded')
         # Faking 'request' object to test with assertions
@@ -2189,13 +2189,13 @@ class MDTUI(TestCase):
         r.status_code = 200
         r.content = resp
         # Checking User/Description/Creation Date in new doc
-        self.assertContains(r, doc1) # Doc name present
-        self.assertContains(r, doc1+'_r2.pdf') # Revision updated
-        self.assertContains(r, 'Iurii Garmash') # Indexes present
-        self.assertContains(r, '"metadata_created_date":"2012-03-06T00:00:00Z"') # creation date left as it is
-        self.assertContains(r, '"metadata_user_name":"admin"') # User left as is
-        self.assertContains(r, '"metadata_user_id":"1"') # User PK stored properly
-        self.assertContains(r, doc1_dict['description']) # Description preserved
+        self.assertContains(r, doc1)  # Doc name present
+        self.assertContains(r, doc1 + '_r2.pdf')  # Revision updated
+        self.assertContains(r, 'Iurii Garmash')  # Indexes present
+        self.assertContains(r, '"metadata_created_date":"2012-03-06T00:00:00Z"')  # creation date left as it is
+        self.assertContains(r, '"metadata_user_name":"admin"')  # User left as is
+        self.assertContains(r, '"metadata_user_id":"1"')  # User PK stored properly
+        self.assertContains(r, doc1_dict['description'])  # Description preserved
 
     def test_55_mdt_empty_search(self):
         """
@@ -2765,7 +2765,7 @@ class MDTUI(TestCase):
         for value in new_m2_doc1_dict.itervalues():
             self.assertContains(response, value)
         # POST to save those indexes
-        response = self.client.post(new_url,  {'something':' '})
+        response = self.client.post(new_url,  {'something': ' '})
         # Quering CouchDB directly for existence and proper document indexes rendering
         couch_doc = self._open_couchdoc(couchdb_name, edit_document_name_2)
         if not 'index_revisions' in couch_doc:
@@ -2797,7 +2797,7 @@ class MDTUI(TestCase):
         file_path = os.path.join(self.test_document_files_dir, edit_document_name_2 + '.pdf')
         data = { 'file': open(file_path, 'r'), }
         url = reverse('api_file', kwargs={'code': edit_document_name_2, 'suggested_format': 'pdf',})
-        response = self.client.post(url, data)
+        response = self.client.put(url, data)
         self.assertEqual(response.status_code, 200)
         # Checking if revision 2 of CouchDB document indexes preserved
         couch_doc = self._open_couchdoc(couchdb_name, edit_document_name_2)
@@ -3235,9 +3235,9 @@ class MDTUI(TestCase):
         test_doc2 = 'TST00000002'
         # Uploading barcode (Image file into API)
         self._api_upload_file(test_doc1, suggested_format='jpeg')
-        # Uploading second doc twice to make second revision
+        # Uploading and updating second doc to make second revision
         self._api_upload_file(test_doc2, suggested_format='jpeg')
-        self._api_upload_file(test_doc2, suggested_format='jpeg')
+        self._api_upload_file(test_doc2, suggested_format='jpeg', update=True)
 
         # Setting Barcode docrule
         url = reverse('mdtui-search-type')
@@ -3245,7 +3245,6 @@ class MDTUI(TestCase):
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 302)
         url = reverse('mdtui-search-options')
-        response = self.client.get(url)
         # Searching date range with unique doc1 keys
         response = self.client.post(url, todays_range)
         self.assertEqual(response.status_code, 302)
@@ -3272,13 +3271,13 @@ class MDTUI(TestCase):
         Refs #948 Internal Server Error: /mdtui/search/results
         Will change one document's index and try to sort it in results response
         """
-        mdt5_docs_range ={'date':'10/03/2012',
-                          'end_date':'13/03/2012'}
+        mdt5_docs_range = {'date': '10/03/2012',
+                           'end_date': '13/03/2012'}
         first_doc = 'CCC-0001'
         second_doc = 'CCC-0002'
-        sorting_dict = {'sorting_key':'Employee',
-                        'order':'icon-chevron-up'}
-        # modifying couchdoc to get emulation of mistyped user (enreing wrong data type into this index field)
+        sorting_dict = {'sorting_key': 'Employee',
+                        'order': 'icon-chevron-up'}
+        # modifying couchdoc to get emulation of mistyped user (entering wrong data type into this index field)
         couchdoc = CouchDocument.get(docid=second_doc)
         previous_value = couchdoc['mdt_indexes'][u'Employee']
         couchdoc['mdt_indexes'][u'Employee'] = mdt5_docs_range['date']
@@ -3316,8 +3315,8 @@ class MDTUI(TestCase):
 
         When any date ranage has "To" date less than "From" date.
         """
-        wrong_date_range1 = { 'date':'13/03/2012',
-                             'end_date':'10/03/2012' }
+        wrong_date_range1 = {'date': '13/03/2012',
+                             'end_date': '10/03/2012'}
         # Testing date range for "Creation Date"
         url = reverse('mdtui-search-type')
         data = {'mdt': test_mdt_id_5}
@@ -3335,16 +3334,16 @@ class MDTUI(TestCase):
         self.assertNotContains(response, 'TST0')
         self.assertContains(response, SEARCH_ERROR_MESSAGES['wrong_indexing_date'])
 
-        wrong_date_range2 = { '0': '',
-                              '1': '',
-                              '3': '',
-                              '4': '',
-                              '5': '',
-                              '2_from': '25/03/2012',
-                              '2_to': '01/03/2012',
-                              'date': '',
-                              'end_date': '',
-                              'export_results': '', }
+        wrong_date_range2 = {'0': '',
+                             '1': '',
+                             '3': '',
+                             '4': '',
+                             '5': '',
+                             '2_from': '25/03/2012',
+                             '2_to': '01/03/2012',
+                             'date': '',
+                             'end_date': '',
+                             'export_results': '', }
         # Testing secondary key date range
         url = reverse('mdtui-search-type')
         data = {'docrule': test_mdt_docrule_id}
@@ -3590,17 +3589,22 @@ class MDTUI(TestCase):
         code_order = self._check_search_results_order(response)
         self.assertEqual(code_order, result)
 
-    def _api_upload_file(self, doc, suggested_format='pdf', hash=None, check_response=True):
+    def _api_upload_file(self, doc, suggested_format='pdf', hash=None, check_response=True, update=False):
+        ok_code = 200
         # Source of documents
         self.test_document_files_dir = os.path.join(settings.FIXTURE_DIRS[0], 'testdata')
         # Do file upload using DMS API
         file_path = os.path.join(self.test_document_files_dir, doc + '.' + suggested_format)
         data = { 'file': open(file_path, 'r'), }
-        url = reverse('api_file', kwargs={'code': doc, 'suggested_format': suggested_format,})
+        url = reverse('api_file', kwargs={'code': doc, 'suggested_format': suggested_format, })
         if hash:
             # Add hash to payload
             data['h'] = hash
-        response = self.client.post(url, data)
+        if not update:
+            response = self.client.post(url, data)
+            ok_code = 201
+        else:
+            response = self.client.put(url, data)
         if check_response:
-            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.status_code, ok_code)
         return response

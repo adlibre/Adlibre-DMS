@@ -49,7 +49,15 @@ def upload(request, template_name='browser/upload.html', extra_context={}):
     if request.method == 'POST':
         if form.is_valid():
             processor = DocumentProcessor()
-            processor.create(form.files['file'], {'user': request.user})
+            upl_file = form.files['file']
+            # finding file in system. Updating if found and storing new if not.
+            processor.read(upl_file.name, {'user': request.user, 'only_metadata': True})
+            if not processor.errors:
+                processor.update(upl_file.name, {'user': request.user, 'update_file': upl_file})
+            else:
+                processor.errors = []
+                processor.create(upl_file, {'user': request.user})
+            # Handling processor errors in interactions.
             if not processor.errors:
                 messages.success(request, 'File has been uploaded.')
                 log.info('browser.upload file: %s sucess' % form.files['file'].name)

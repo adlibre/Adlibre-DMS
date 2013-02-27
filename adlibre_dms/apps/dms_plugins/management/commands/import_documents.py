@@ -2,7 +2,7 @@
 Module: Document import management script for Adlibre DMS
 
 Project: Adlibre DMS
-Copyright: Adlibre Pty Ltd 2011
+Copyright: Adlibre Pty Ltd 2013
 License: See LICENSE for license information
 """
 
@@ -47,7 +47,7 @@ class Command(BaseCommand):
                         self.stderr.write(traceback.format_exc() + "\n")
                     else:
                         if processor.errors:
-                            self.stderr.write('\n%s\n' % processor.errors)
+                            self.stderr.write('\nImport error: %s\n' % processor.errors)
                         else:
                             cnt += 1
                     file_obj.close()
