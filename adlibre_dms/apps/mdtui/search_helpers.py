@@ -173,7 +173,7 @@ def check_for_forbidden_new_keys_created(document_indexes, docrule, user):
     manager = MetaDataTemplateManager()
     # Parsing MDT's
     admin_restricted_keys, locked_keys = manager.get_restricted_keys_names(mdts)
-    # doing nothig for admincreate keys if user has pers or is superuser
+    # doing nothing for 'admincreate' keys if user has permissions or is superuser
     permit = False
     if user.groups.all():
         for group in user.groups.all():
@@ -197,7 +197,7 @@ def check_for_forbidden_new_keys_created(document_indexes, docrule, user):
 
 def check_docs_for_existence(key, value, docrule):
     """Check if at least one document with specified docrule, key and value exist"""
-    documents = CouchDocument.view('dmscouch/search_autocomplete', key=[docrule, key, value], reduce=False)
+    documents = CouchDocument.view('dmscouch/search_autocomplete', key=[str(docrule), key, value], reduce=False)
     if documents.__len__() > 0:
         # There is at least one this type document...
         return True

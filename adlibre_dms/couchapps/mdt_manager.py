@@ -169,7 +169,8 @@ class MetaDataTemplateManager(object):
                         elif field["create_new_indexes"]=="locked":
                             # None has ability to add new indexes
                             locked_keys.append(field["field_name"])
-        log.debug("Document has keys available for edit for admin only: %s and locked for adding: %s" % (admin_locked_keys, locked_keys))
+        log.debug("Document has keys available for edit for admin only: %s and locked for adding: %s" %
+                  (admin_locked_keys, locked_keys))
         return admin_locked_keys, locked_keys
 
     def validate_mdt(self, mdt):

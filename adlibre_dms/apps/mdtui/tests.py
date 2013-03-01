@@ -593,6 +593,18 @@ doc1_dict_forbidden_indexes = {
     'Additional': 'Something for 1',
     }
 
+# Modified doc1 dict for testing fixed choice indexes
+doc1_dict_existing_indexes = {
+    'date': date_standardized('2012-03-06'),
+    'description': 'Test Document Number 1',
+    'Employee ID': '1234567890',
+    'Required Date': date_standardized('2012-03-07'),
+    'Employee Name': "Andrew Cutler",
+    'Friends ID': '123',
+    'Friends Name': 'Andrew',
+    'Additional': 'Something for 1',
+    }
+
 # TODO: test password reset forms/stuff
 
 # TODO: test proper CSV export, even just simply, with date range and list of files present there
@@ -3002,12 +3014,12 @@ class MDTUI(TestCase):
         e.g. search for CON creation date 10/08/12 - 11/08/12 no records for date 11/08/12,
         but if you select 10/08/12 - 12/08/12 you find it.
         """
-        search_MDT_5_date_range_end_date =  {
+        search_MDT_5_date_range_end_date = {
             u'date': u'01/03/2012',
             u'end_date': u'10/03/2012',
             u'0': u'Andrew',
         }
-        search_MDT_5_date_range_end_date2 =  {
+        search_MDT_5_date_range_end_date2 = {
             u'date': u'01/03/2012',
             u'end_date': u'09/03/2012',
             u'0': u'Andrew',
@@ -3216,12 +3228,39 @@ class MDTUI(TestCase):
         response = self._78_test_helper(test_doc_dict)
         self.assertEqual(response.status_code, 302)
 
-    def test_81_choice_type_field(self):
+    def test_81_locked_indexes_field_works_for_non_admin(self):
+        """Refs #956 User cannot select an existing locked index
+
+        Issue with non admin user can not add an existing key into DMS Indexing when key is set to admincreate
         """
-        Refs #700 Feature: MDT/MUI fixed choice index fields
-        """
-        # TODO: Make testing of search and adding indexes for documents with choice fields.
-        pass
+        test_doc_dict = doc1_dict_existing_indexes
+        username_7 = 'tests_user_7'
+        password_7 = 'test7'
+        # Creating special user
+        user = User.objects.create_user(username_7, 'a@b.com', password_7)
+        user.save()
+        # Registering that user in required security groups and removing their permissions...
+        for groupname in ['security', 'api', 'MUI Index interaction', 'MUI Search interaction']:
+            g = Group.objects.get(name=groupname)
+            g.user_set.add(user)
+        self.client.logout()
+        self.client.login(username=username_7, password=password_7)
+        # Check existing indexes are normally added with NON aprivileges.
+        response = self._78_test_helper(test_doc_dict)
+        self.assertEqual(response.status_code, 302)
+        url = reverse('mdtui-index-source')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, MDTUI_ERROR_STRINGS['NEW_KEY_VALUE_PAIR'] + 'Employee ID: 1234567890')
+        self.assertNotContains(response, MDTUI_ERROR_STRINGS['ADMINLOCKED_KEY_ATTEMPT'])
+        # Now checking that modified Keys are not passing through.
+        new_key = test_doc_dict['Employee Name'] + 's'
+        test_doc_dict['Employee Name'] = new_key
+        response = self._78_test_helper(test_doc_dict)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, MDTUI_ERROR_STRINGS['ADMINLOCKED_KEY_ATTEMPT'])
+        self.assertNotContains(response, MDTUI_ERROR_STRINGS['NEW_KEY_VALUE_PAIR'] + 'Employee ID: 1234567890')
+        self.assertContains(response, new_key)
 
     def test_82_search_by_mdt_without_indexes(self):
         """
@@ -3315,8 +3354,10 @@ class MDTUI(TestCase):
 
         When any date ranage has "To" date less than "From" date.
         """
-        wrong_date_range1 = {'date': '13/03/2012',
-                             'end_date': '10/03/2012'}
+        wrong_date_range1 = {
+            'date': '13/03/2012',
+            'end_date': '10/03/2012'
+        }
         # Testing date range for "Creation Date"
         url = reverse('mdtui-search-type')
         data = {'mdt': test_mdt_id_5}
@@ -3334,16 +3375,18 @@ class MDTUI(TestCase):
         self.assertNotContains(response, 'TST0')
         self.assertContains(response, SEARCH_ERROR_MESSAGES['wrong_indexing_date'])
 
-        wrong_date_range2 = {'0': '',
-                             '1': '',
-                             '3': '',
-                             '4': '',
-                             '5': '',
-                             '2_from': '25/03/2012',
-                             '2_to': '01/03/2012',
-                             'date': '',
-                             'end_date': '',
-                             'export_results': '', }
+        wrong_date_range2 = {
+            '0': '',
+            '1': '',
+            '3': '',
+            '4': '',
+            '5': '',
+            '2_from': '25/03/2012',
+            '2_to': '01/03/2012',
+            'date': '',
+            'end_date': '',
+            'export_results': '',
+        }
         # Testing secondary key date range
         url = reverse('mdtui-search-type')
         data = {'docrule': test_mdt_docrule_id}
@@ -3357,6 +3400,13 @@ class MDTUI(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, 'ADL-')
         self.assertContains(response, SEARCH_ERROR_MESSAGES['wrong_date'])
+
+    def test_85_choice_type_field(self):
+        """
+        Refs #700 Feature: MDT/MUI fixed choice index fields
+        """
+        # TODO: Make testing of search and adding indexes for documents with choice fields.
+        pass
 
     def test_z_cleanup(self):
         """
