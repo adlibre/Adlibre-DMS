@@ -11,7 +11,7 @@ import datetime
 from django.conf import settings
 
 from dms_plugins.pluginpoints import BeforeRetrievalPluginPoint, BeforeRemovalPluginPoint, \
-    BeforeUpdatePluginPoint, DatabaseStoragePluginPoint
+    DatabaseUpdatePluginPoint, DatabaseStoragePluginPoint
 from dms_plugins.models import DocTags
 from dms_plugins.workers import Plugin, PluginError
 from core.document_processor import DocumentProcessor
@@ -184,7 +184,7 @@ class CouchDBMetadataStoragePlugin(Plugin, DatabaseStoragePluginPoint):
         return self.worker.store(document)
 
 
-class CouchDBMetadataUpdatePlugin(Plugin, BeforeUpdatePluginPoint):
+class CouchDBMetadataUpdatePlugin(Plugin, DatabaseUpdatePluginPoint):
     title = "CouchDB Metadata Update Indexes"
     description = "Updates document after new indexes added with preserving old revision of document indexes"
 

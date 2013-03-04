@@ -5,7 +5,7 @@ from datetime import datetime
 from django.conf import settings
 
 from dms_plugins.pluginpoints import StoragePluginPoint, BeforeRetrievalPluginPoint,\
-    BeforeRemovalPluginPoint, BeforeUpdatePluginPoint
+    BeforeRemovalPluginPoint, UpdatePluginPoint
 from dms_plugins.workers import Plugin, PluginError, BreakPluginChain
 from dms_plugins.workers.storage.local import LocalFilesystemManager
 
@@ -122,7 +122,7 @@ class LocalJSONMetadata(object):
 
         self.write_metadata(fileinfo_db, document, directory)
         # Required for any update sequence
-        document.revisions = fileinfo_db
+        document.set_metadata(fileinfo_db)
         return document
 
     def write_metadata(self, fileinfo_db, document, directory):
@@ -221,7 +221,7 @@ class LocalJSONMetadataRemovalPlugin(Plugin, BeforeRemovalPluginPoint):
         return self.worker.update_metadata_after_removal(document)
 
 
-class LocalJSONMetadataUpdatePlugin(Plugin, BeforeUpdatePluginPoint):
+class LocalJSONMetadataUpdatePlugin(Plugin, UpdatePluginPoint):
     title = "Filesystem Metadata Update"
     description = "Updates document metadata after update. e.g. Update of document revision."
 

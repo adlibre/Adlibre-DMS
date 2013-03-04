@@ -732,14 +732,18 @@
                 13, 
                 20, 
                 22
-            ], 
+            ],
             "before_update_plugins": [
-                19, 
+                19,
+                26
+            ],
+            "database_update_plugins": [
+                25
+            ],
+            "update_plugins": [
                 21,
-                25,
-                26,
                 27
-            ], 
+            ],
             "active": true, 
             "before_storage_plugins": [
                 1, 
@@ -771,14 +775,18 @@
                 12, 
                 13, 
                 20
-            ], 
+            ],
             "before_update_plugins": [
-                19, 
-                21,
+                19,
                 26,
-                27,
                 28
-            ], 
+            ],
+            "database_update_plugins": [
+                25
+            ],
+            "update_plugins": [
+                21
+            ],
             "active": true, 
             "before_storage_plugins": [
                 1, 
@@ -810,10 +818,14 @@
                 20
             ], 
             "before_update_plugins": [
-                19, 
+                19
+            ],
+            "database_update_plugins": [
+            ],
+            "update_plugins": [
                 21,
                 27
-            ], 
+            ],
             "active": true, 
             "before_storage_plugins": []
         }
@@ -840,10 +852,14 @@
                 20
             ], 
             "before_update_plugins": [
-                19, 
+                19
+            ],
+            "database_update_plugins": [
+            ],
+            "update_plugins": [
                 21,
                 27
-            ], 
+            ],
             "active": true, 
             "before_storage_plugins": [
                 2
@@ -872,9 +888,13 @@
                 20
             ], 
             "before_update_plugins": [
-                19, 
+                19
+            ],
+            "database_update_plugins": [
+            ],
+            "update_plugins": [
                 21
-            ], 
+            ],
             "active": true, 
             "before_storage_plugins": [
                 2
@@ -902,6 +922,10 @@
                 20
             ],
             "before_update_plugins": [
+            ],
+            "database_update_plugins": [
+            ],
+            "update_plugins": [
                 21
             ],
             "active": true,
@@ -939,9 +963,13 @@
             ],
             "before_update_plugins": [
                 19,
+                26
+            ],
+            "database_update_plugins": [
+                25
+            ],
+            "update_plugins": [
                 21,
-                25,
-                26,
                 27
             ],
             "active": true,
@@ -981,9 +1009,13 @@
             ],
             "before_update_plugins": [
                 19,
+                26
+            ],
+            "database_update_plugins": [
+                25
+            ],
+            "update_plugins": [
                 21,
-                25,
-                26,
                 27
             ],
             "active": true,
@@ -1020,9 +1052,13 @@
             ],
             "before_update_plugins": [
                 19,
+                26
+            ],
+            "database_update_plugins": [
+                25
+            ],
+            "update_plugins": [
                 21,
-                25,
-                26,
                 27
             ],
             "active": true,
@@ -1223,13 +1259,29 @@
             "status": 0, 
             "name": "dms_plugins.pluginpoints.DatabaseStoragePluginPoint"
         }
-    }, 
+    },
+    {
+        "pk": 7,
+        "model": "djangoplugins.pluginpoint",
+        "fields": {
+            "status": 0,
+            "name": "dms_plugins.pluginpoints.UpdatePluginPoint"
+        }
+    },
+    {
+        "pk": 8,
+        "model": "djangoplugins.pluginpoint",
+        "fields": {
+            "status": 0,
+            "name": "dms_plugins.pluginpoints.DatabaseUpdatePluginPoint"
+        }
+    },
     {
         "pk": 1, 
         "model": "djangoplugins.plugin", 
         "fields": {
             "status": 0, 
-            "index": 40, 
+            "index": 40,
             "_order": 0, 
             "name": "dms_plugins.workers.transfer.gzip.GzipOnStorePlugin", 
             "point": 1
@@ -1317,10 +1369,10 @@
         "model": "djangoplugins.plugin", 
         "fields": {
             "status": 0, 
-            "index": 50,
+            "index": 10,
             "_order": 1, 
             "name": "dms_plugins.workers.storage.local.LocalUpdatePlugin", 
-            "point": 4
+            "point": 7
         }
     }, 
     {
@@ -1460,10 +1512,10 @@
         "model": "djangoplugins.plugin",
         "fields": {
             "status": 0,
-            "index": 60,
+            "index": 0,
             "_order": 2,
             "name": "dms_plugins.workers.database.couchdb.CouchDBMetadataUpdatePlugin",
-            "point": 4
+            "point": 8
         }
     },
     {
@@ -1482,10 +1534,10 @@
         "model": "djangoplugins.plugin",
         "fields": {
             "status": 0,
-            "index": 20,
+            "index": 0,
             "_order": 4,
             "name": "dms_plugins.workers.storage.metadata.local_json.LocalJSONMetadataUpdatePlugin",
-            "point": 4
+            "point": 7
         }
     },
     {

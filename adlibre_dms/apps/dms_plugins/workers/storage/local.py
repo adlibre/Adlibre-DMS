@@ -13,7 +13,7 @@ import logging
 from django.conf import settings
 
 from dms_plugins.pluginpoints import StoragePluginPoint, BeforeRetrievalPluginPoint, BeforeRemovalPluginPoint,\
-    BeforeUpdatePluginPoint
+    UpdatePluginPoint
 from dms_plugins.workers import Plugin, PluginError, BreakPluginChain
 
 log = logging.getLogger('dms')
@@ -253,7 +253,7 @@ class LocalRemovalPlugin(Plugin, BeforeRemovalPluginPoint):
         return self.worker.remove(document)
 
 
-class LocalUpdatePlugin(Plugin, BeforeUpdatePluginPoint):
+class LocalUpdatePlugin(Plugin, UpdatePluginPoint):
     title = "Local Update"
     description = "Updates document in the filesystem"
 

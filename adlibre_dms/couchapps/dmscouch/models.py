@@ -188,7 +188,7 @@ class CouchDocument(Document):
         return document
 
     def update_file_revisions_metadata(self, document):
-        """ Stores files revisions data into CouchDB from DMS document object
+        """ Stores files revisions metadata into CouchDB from DMS document object
 
         E.g.: Before this function:
             couchdoc.revisions = { '1': { ... }, }
@@ -197,4 +197,4 @@ class CouchDocument(Document):
             couchdoc.revisions = { '1': { ... }, '2': { ... }, }
         (Loaded from a Document() object)
         """
-        self.revisions = document.revisions
+        self.revisions = document.get_metadata()

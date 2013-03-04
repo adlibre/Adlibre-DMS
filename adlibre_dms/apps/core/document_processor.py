@@ -184,6 +184,8 @@ class DocumentProcessor(object):
                 log.error(error)
                 self.errors.append(error)
         doc = operator.process_pluginpoint(pluginpoints.BeforeUpdatePluginPoint, document=doc)
+        doc = operator.process_pluginpoint(pluginpoints.UpdatePluginPoint, document=doc)
+        doc = operator.process_pluginpoint(pluginpoints.DatabaseUpdatePluginPoint, document=doc)
         self.check_errors_in_operator(operator)
         return doc
 

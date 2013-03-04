@@ -44,7 +44,15 @@ class DoccodePluginMapping(models.Model):
     before_update_plugins = ManyPluginField( pluginpoints.BeforeUpdatePluginPoint, 
                                                 related_name = 'settings_before_update',
                                                 blank = True,
-                                                verbose_name = "Modification Workflow")
+                                                verbose_name = "Pre-Modification Workflow")
+    update_plugins = ManyPluginField( pluginpoints.UpdatePluginPoint,
+                                             related_name = 'settings_update',
+                                             blank = True,
+                                             verbose_name = "Modification Workflow")
+    database_update_plugins = ManyPluginField( pluginpoints.DatabaseUpdatePluginPoint,
+                                             related_name = 'settings_database_update',
+                                             blank = True,
+                                             verbose_name = "Database Modification Workflow")
     active = models.BooleanField(default = False)
 
     def __unicode__(self):
@@ -91,6 +99,18 @@ class DoccodePluginMapping(models.Model):
         Method to get active 'before_update_plugins' plugins for Doccode Plugin Mapping instance
         """
         return self.before_update_plugins.all().order_by('index')
+
+    def get_update_plugins(self):
+        """
+        Method to get active 'update_plugins' plugins for Doccode Plugin Mapping instance
+        """
+        return self.update_plugins.all().order_by('index')
+
+    def get_database_update_plugins(self):
+        """
+        Method to get active 'database_update_plugins' plugins for Doccode Plugin Mapping instance
+        """
+        return self.database_update_plugins.all().order_by('index')
 
     def get_database_storage_plugins(self):
         """

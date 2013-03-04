@@ -1,6 +1,6 @@
 from djangoplugins import PluginMount
 
-#settings_field_name is the name of the collection of these plugins in base.models.DoccodePluginSettings
+#settings_field_name is the name of the collection of these plugins in dms_plugins.models.DoccodePluginSettings
 
 class BeforeStoragePluginPoint(object):
     __metaclass__ = PluginMount
@@ -25,3 +25,11 @@ class BeforeRemovalPluginPoint(object):
 class BeforeUpdatePluginPoint(object):
     __metaclass__ = PluginMount
     settings_field_name = 'before_update_plugins'
+
+class UpdatePluginPoint(object):
+    __metaclass__ = PluginMount
+    settings_field_name = 'update_plugins'
+
+class DatabaseUpdatePluginPoint(object):
+    __metaclass__ = PluginMount
+    settings_field_name = 'database_update_plugins'

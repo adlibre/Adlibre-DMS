@@ -3269,7 +3269,9 @@ class MDTUI(TestCase):
 
         Check for ability to view document without indexes.
         """
-        todays_range = {u'date': datetime.datetime.now().strftime(settings.DATE_FORMAT) }
+        # Should be day before due to tests issues with timezones AU/UA.
+        prev_date = (datetime.datetime.now() - datetime.timedelta(days=1)).strftime(settings.DATE_FORMAT)
+        todays_range = {u'date': prev_date}
         test_doc1 = 'TST00000001'
         test_doc2 = 'TST00000002'
         # Uploading barcode (Image file into API)
@@ -3290,6 +3292,7 @@ class MDTUI(TestCase):
         new_url = self._retrieve_redirect_response_url(response)
         response = self.client.get(new_url)
         self.assertEqual(response.status_code, 200)
+        print response
         self.assertNotContains(response, "You have not defined Document Searching Options")
         self.assertContains(response, todays_range[u'date'])
         self.assertContains(response, test_doc1)
