@@ -64,6 +64,11 @@ setup(name='adlibre_dms',
                 'apps/mdtui/templates/mdtui/*.html',
                 'apps/mdtui/templates/mdtui/index/*.html',
                 'apps/mdtui/templates/mdtui/search/*.html',
+                # Feedback app
+                'apps/feedback/templates/feedback_form/*.txt',
+                'apps/feedback/templates/feedback_form/*.html',
+                'apps/feedback/static/js/*.js',
+                'apps/feedback/static/img/*.png',
                 # Themes
                 'apps/theme/*/static/theme/*/*.png',
                 'apps/theme/*/static/theme/*/*.css',

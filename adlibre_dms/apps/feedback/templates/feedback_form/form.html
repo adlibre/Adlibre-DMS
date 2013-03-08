@@ -1,0 +1,97 @@
+{% if not feedback_form %} {# Loading jQuery by our own, version without any other libraries #}
+<div id="feedback">
+    <div class="section">
+        <h6><span class="fpointer fb-up"></span>Feedback</h6>
+        {% csrf_token %}
+        {{ form }}
+        <br/>
+        <a class="fb-submit" href="#">Submit</a>
+    </div>
+</div>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<script src="{{ STATIC_URL }}js/feedback.js"></script>
+{% else %}
+    <div id="feedback" url="{% url feedback %}">
+        <div class="section">
+            <h6 class="feedback_header">Feedback<span class="fpointer fb-up"></span></h6>
+            {% csrf_token %}
+            {{ feedback_form }}
+            <a class="fb-submit btn btn-primary" href="">Send</a>
+        </div>
+    </div>
+{% endif %}
+<style type="text/css">
+
+    #feedback{
+        background-color: #f5f5f5;
+        width:300px;
+        height:300px;
+        position:fixed;
+        bottom:0;
+        right:165px;
+        margin-bottom:-240px;
+        z-index:10000;
+        border:1px solid #ddd;
+        border-bottom:none;
+        -moz-border-radius: 5px 5px 0 0;
+        -webkit-border-radius: 5px 5px 0 0;
+        -khtml-border-radius: 5px 5px 0 0;
+        border-radius: 5px 5px 0 0;
+    }
+
+    #feedback .section{
+        padding:10px 25px 25px;
+        text-align:  center;
+    }
+
+    #feedback h6{
+        background:url("{{ STATIC_URL }}img/feedback.png") no-repeat;
+        height:38px;
+        margin:5px 0 12px;
+        text-indent:-99999px;
+        cursor:pointer;
+    }
+
+    #feedback textarea{
+        background-color:#fff;
+        border:none;
+        color:#666666;
+        font:13px;
+        height:100px;
+        padding:10px;
+        width:236px;
+        resize:none;
+        outline:none;
+        overflow:auto;
+
+        -moz-box-shadow:4px 4px 0 #ddd;
+        -webkit-box-shadow:4px 4px 0 #ddd;
+        box-shadow:4px 4px 0 #ddd;
+    }
+
+    #feedback .fpointer{
+        background:url('{{ STATIC_URL }}img/ud_arrows.png') no-repeat;
+        float:right;
+        width:40px;
+        height:40px;
+        position:relative;
+        top: -4px;
+        filter: alpha(opacity=40);
+        opacity: 0.4;
+    }
+
+    #feedback .fpointer.fb-down{ background-position:right bottom;}
+    #feedback .fpointer.fb-up{ background-position:right top;}
+
+    #feedback .response p{
+        font-size:16px !important;
+        margin-top:70px;
+        text-align:center;
+        display:block;
+    }
+
+    #feedback label{
+        display: none !important;
+    }
+
+</style>

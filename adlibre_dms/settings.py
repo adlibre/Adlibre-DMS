@@ -59,6 +59,9 @@ if DEBUG:
     EMAIL_USE_TLS = False
     DEFAULT_FROM_EMAIL = 'testing@example.com'
 
+# Override that in local_settings (we require it here to definitely exist for 'feedback' app)
+DEFAULT_FROM_EMAIL = 'DMS@adlibre.net'
+
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
@@ -191,10 +194,11 @@ PROJECT_APPS = (
     'ui',
     'mdtui',
     'bcp',
+    'feedback',
     # DMS Themes
     'theme.adlibre',
     'theme.basic',
-    'theme.solid'
+    'theme.solid',
 )
 
 INSTALLED_APPS = (

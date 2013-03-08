@@ -1,6 +1,7 @@
 {% load i18n %}
 {% load compress %}
 {% load mui_permissions %}
+{% load feedback_tags %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,6 +22,7 @@
     <script src="{{ STATIC_URL }}js/keymaster.min.js"></script>
     {% compress js %}
     <script src="{{ STATIC_URL }}js/bootstrap-typeahead.js"></script>
+    <script src="{{ STATIC_URL }}js/feedback.js"></script>
     {% endcompress %}
     {% endblock %}
 
@@ -205,6 +207,8 @@
 {% endcompress %}
 
 {% block js_extra_inline %}{% endblock %}
+
+{% feedback %}
 
 </body>
 {% endblock %}

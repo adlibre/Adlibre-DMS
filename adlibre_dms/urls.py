@@ -35,6 +35,7 @@ urlpatterns += patterns('',
     url(r'^mdtui/', include('mdtui.urls')),
     url(r'^bcp/', include('bcp.urls')),
     url(r'^user/', include('adlibre.auth.urls')),
+    url(r'^feedback/', include('feedback.urls')),
 
     # This needs to be last
     url(r'', include('browser.urls')),

@@ -1,0 +1,13 @@
+Hi there,
+
+You have received a feedback.
+
+Username: {{ request.user }}
+HTTP_REFERER: {{ referer }}
+user_ip: {{ user_ip }}
+user_agent: {{ user_agent }}
+
+Message: {{ feedback_body }}
+
+
+Have a great day!
