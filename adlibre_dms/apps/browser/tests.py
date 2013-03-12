@@ -24,7 +24,7 @@ class ViewTest(DMSTestCase):
     Test data is provided by DMSTestCase
     """
 
-    # TODO: Add test to upload files with no doccode.
+    # TODO: Add test to upload files with no docrule.
     # TODO: Add test to upload files with wrong mime type.
 
     def test_00_setup(self):
