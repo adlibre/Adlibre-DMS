@@ -45,7 +45,7 @@ class LocalFilesystemManager(object):
             directory = os.path.join(str(doccode.get_id()), splitdir)
 
         if not directory:
-            raise PluginError("The document type is not supported.", 500) # no doccode for document
+            raise PluginError("The document type is not supported.", 500)  # no doccode for document
         directory = os.path.join(root, directory)
         return directory
 
@@ -54,6 +54,23 @@ class LocalFilesystemManager(object):
         if not os.path.exists(directory):
             os.makedirs(directory)
         return directory
+
+    def move_file(self, source_path, destination_path):
+        """Filesystem worker to move file from one path to another."""
+        try:
+            os.rename(source_path, destination_path)
+        except Exception, e:
+            log.error("LocalFilesystemManager. File moving Error: %s", e)
+            return False
+        return True
+
+    def remove_file(self, path_with_file):
+        try:
+            os.remove(path_with_file)
+            return True
+        except Exception, e:
+            log.error("LocalFilesystemManager. File removal error: %s" % e)
+            return False
 
 
 def file_present(file_name, directory):
@@ -103,6 +120,27 @@ class Local(object):
     def update(self, document):
         if 'update_file' in document.options.iterkeys() and document.options['update_file'] is not None:
             self.store_new_file(document)
+        if document.old_docrule:
+            # Renaming and moving files to new location files
+            new_directory = self.filesystem.get_or_create_document_directory(document)
+            new_name = document.get_filename()
+            metadata = document.get_metadata()
+            # Making new document OLD one for retrieving data purposes
+            document.doccode = None
+            document.set_filename(document.old_name_code)
+            old_directory = self.filesystem.get_or_create_document_directory(document)
+            old_code = document.old_name_code
+            # Returning document back to normal
+            document.doccode = None
+            document.set_filename(new_name)
+            for key, value in metadata.iteritems():
+                new_file_revision = value['name']
+                new_path = os.path.join(new_directory, new_file_revision)
+                old_rev_name = self.convert_metadata_for_revision(new_file_revision, old_code, key)
+                old_path = os.path.join(old_directory, old_rev_name)
+                status = self.filesystem.move_file(old_path, new_path)
+                if not status:
+                    raise PluginError("File moving problem. File %s does not exists" % old_rev_name, 500)
         return document
 
     def document_matches_search(self, metadata_info, searchword):
@@ -112,6 +150,13 @@ class Local(object):
         if searchword.lower() in metadata_info['document_name'].lower():
             result = True
         return result
+
+    def convert_metadata_for_revision(self, old_file_name, new_name, rev_key):
+        """Converts file metadata into another docrule, changing it's file name everywhere"""
+        extension = old_file_name.split('.')[1]
+        prefix = '_r%s.%s' % (rev_key, extension)
+        changed_name = new_name + prefix
+        return changed_name
 
     def get_list(self, doccode, directories, start = 0, finish = None, order = None, searchword = None, 
                         limit_to = []):

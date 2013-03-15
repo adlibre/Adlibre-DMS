@@ -392,12 +392,12 @@ def search_results(request, step=None, template='mdtui/search.html'):
 @login_required
 def view_object(request, code, step, template='mdtui/view.html'):
     """View PDF Document"""
-    pdf_url = reverse('mdtui-download-pdf', kwargs = { 'code': code, })
-    # TODO: think about the way to remove requiremnt for this request.
+    pdf_url = reverse('mdtui-download-pdf', kwargs={ 'code': code, })
+    # TODO: think about the way to remove requirement for this request.
     processor = DocumentProcessor()
-    document = processor.read(code, options={'only_metadata':True, 'user': request.user,})
+    document = processor.read(code, options={'only_metadata': True, 'user': request.user, })
     mimetype = document.get_mimetype()
-    context = { 'pdf_url': pdf_url, 'code': code, 'step':step, 'mimetype': mimetype }
+    context = {'pdf_url': pdf_url, 'code': code, 'step': step, 'mimetype': mimetype, }
     return render(request, template, context)
 
 @login_required
@@ -431,8 +431,7 @@ def indexing_edit(request, code, step='edit', template='mdtui/indexing.html'):
             pass
 
     log.debug('indexing_edit view called with return_url: %s, changed_indexes: %s' % (return_url, changed_indexes))
-    doc = processor.read(code, {'user': request.user,})
-    # TODO: check for misconfiguration here (plugin or permission to edit indexes exists in document's DorulePluginMapping)
+    doc = processor.read(code, {'user': request.user, })
     if not processor.errors:
         if not request.POST:
             form = initEditIndexesForm(request, doc, changed_indexes)
@@ -469,6 +468,52 @@ def indexing_edit(request, code, step='edit', template='mdtui/indexing.html'):
                       'error_warnings': error_warnings,
                       })
     return render(request, template, context)
+
+@login_required
+@group_required(SEC_GROUP_NAMES['edit_index'])
+def indexing_edit_type(request, code, step='edit_type', template='mdtui/indexing.html'):
+    """Indexing step: Edit. Editing document type (in fact document rename)"""
+    context = {}
+    warnings = ['You will loose all your indexes (REFACTOR ME OUT)',]
+    error_warnings = []
+    form = False
+    processor = DocumentProcessor()
+    return_url = reverse('mdtui-index-edit', kwargs={'code': code})
+
+    log.debug('indexing_edit_type view called with code: %s' % code)
+    doc = processor.read(code, {'user': request.user,})
+    if not processor.errors:
+        empty_form = make_document_type_select_form(request.user, True, doc.get_docrule())
+        form = empty_form(request.POST or None)
+        if request.POST:
+            if form.is_valid():
+                docrule = form.cleaned_data['docrule']
+                current_docrule = doc.get_docrule()
+                if not docrule == current_docrule:
+                    options = {
+                        'user': request.user,
+                        'new_type': docrule,
+                    }
+                    doc = processor.update(code, options)
+                    if not processor.errors:
+                        return HttpResponseRedirect(reverse('mdtui-index-edit', kwargs={'code': doc.get_filename()}))
+                else:
+                    warnings = ['same docrule (REFACTOR ME OUT)', ]
+    # Can cause errors in two places here (on doc read and update)
+    if processor.errors:
+        for error in processor.errors:
+            error_warnings.append(error)
+    context.update({
+        'step': step,
+        'doc_name': code,
+        'docrule': doc.get_docrule(),
+        'warnings': warnings,
+        'form': form,
+        'type_edit_return': return_url,
+        'error_warnings': error_warnings,
+    })
+    return render(request, template, context)
+
 
 @login_required
 @group_required(SEC_GROUP_NAMES['edit_index'])

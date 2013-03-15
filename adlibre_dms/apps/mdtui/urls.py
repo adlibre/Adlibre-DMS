@@ -1,7 +1,7 @@
 """
 Module: Metadata Template UI URLS
 Project: Adlibre DMS
-Copyright: Adlibre Pty Ltd 2012
+Copyright: Adlibre Pty Ltd 2013
 License: See LICENSE for license information
 """
 
@@ -23,6 +23,7 @@ urlpatterns = patterns('mdtui.views',
     url(r'^indexing/source$', 'indexing_source', {'step':'3',}, name='mdtui-index-source'),
     url(r'^indexing/finished$', 'indexing_finished', {'step':'4',}, name='mdtui-index-finished'),
     url(r'^indexing/edit/(?P<code>[\w_-]+)$', 'indexing_edit', {'step': 'edit'}, name='mdtui-index-edit'),
+    url(r'^indexing/edit_type/(?P<code>[\w_-]+)$', 'indexing_edit_type', {'step': 'edit_type'}, name='mdtui-index-edit-type'),
     url(r'^indexing/edit_finished$', 'indexing_edit_result', {'step': 'edit_finish'}, name='mdtui-index-edit-finished'),
     # Common
     url(r'^download/(?P<code>[\w_-]+)$', 'download_pdf', name='mdtui-download-pdf'),

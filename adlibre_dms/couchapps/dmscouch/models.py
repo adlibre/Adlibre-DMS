@@ -40,12 +40,7 @@ class CouchDocument(Document):
             self.metadata_user_name = document.db_info["metadata_user_name"]
             self.metadata_user_id = document.db_info["metadata_user_id"]
         except KeyError:
-            # user name/id from Django user
-            self.metadata_user_id = str(user.pk)
-            if user.first_name:
-                self.metadata_user_name = user.user.first_name + u' ' + user.last_name
-            else:
-                self.metadata_user_name = user.username
+            self.set_user_name_for_couch(user)
         self.set_doc_date(document)
         # adding description if exists
         try:
@@ -175,7 +170,7 @@ class CouchDocument(Document):
             # Storing current index data into new revision
             if not 'index_revisions' in self:
                 # Creating index_revisions initial data dictionary.
-                self.index_revisions = { '1': self.construct_index_revision_dict(), }
+                self.index_revisions = {'1': self.construct_index_revision_dict(), }
             else:
                 # Appending new document indexes revision to revisions dict
                 new_revision = self.index_revisions.__len__() + 1
@@ -198,3 +193,35 @@ class CouchDocument(Document):
         (Loaded from a Document() object)
         """
         self.revisions = document.get_metadata()
+
+    def migrate_metadata_for_docrule(self, document, old_couchdoc):
+        """Moving a CouchDB document into another file"""
+        if not old_couchdoc.index_revisions:
+            # Creating index_revisions initial data dictionary.
+            self.index_revisions = {'1': old_couchdoc.construct_index_revision_dict(), }
+        else:
+            self.index_revisions = old_couchdoc.index_revisions
+            # Appending new document indexes revision to revisions dict
+            new_revision = self.index_revisions.__len__() + 1
+            self.index_revisions[str(new_revision)] = old_couchdoc.construct_index_revision_dict()
+        self.revisions = document.get_metadata()
+        self.metadata_description = old_couchdoc.metadata_description
+        if document.user:
+            self.set_user_name_for_couch(document.user)
+        else:
+            self.metadata_user_id = old_couchdoc.metadata_user_id
+            self.metadata_user_name = old_couchdoc.metadata_user_name
+        self.metadata_description = old_couchdoc.metadata_description
+        self.metadata_created_date = old_couchdoc.metadata_created_date
+        self.search_keywords = old_couchdoc.search_keywords
+        self.tags = old_couchdoc.tags
+        self.metadata_doc_type_rule_id = str(document.doccode.pk)
+        self.id = document.get_filename()
+
+    def set_user_name_for_couch(self, user):
+        # user name/id from Django user
+        self.metadata_user_id = str(user.pk)
+        if user.first_name:
+            self.metadata_user_name = user.user.first_name + u' ' + user.last_name
+        else:
+            self.metadata_user_name = user.username

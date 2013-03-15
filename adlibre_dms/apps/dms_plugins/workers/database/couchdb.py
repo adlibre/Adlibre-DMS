@@ -108,6 +108,12 @@ class CouchDBMetadata(object):
             couchdoc = CouchDocument.get_or_create(docid=name)
             couchdoc.update_file_revisions_metadata(document)
             couchdoc.save()
+        if document.old_docrule:
+            couchdoc = CouchDocument.get_or_create(docid=document.file_name)
+            old_couchdoc = CouchDocument.get(docid=document.old_name_code)
+            couchdoc.migrate_metadata_for_docrule(document, old_couchdoc)
+            couchdoc.save()
+            old_couchdoc.delete()
         return document
 
     def update_metadata_after_removal(self, document):

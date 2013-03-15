@@ -2,7 +2,7 @@
 Module: DMS Core main Document object.
 
 Project: Adlibre DMS
-Copyright: Adlibre Pty Ltd 2011
+Copyright: Adlibre Pty Ltd 2013
 License: See LICENSE for license information
 Author: Iurii Garmash
 """
@@ -37,6 +37,8 @@ class Document(object):
         self.options = {}
         self.user = None
         self.doccode = None
+        self.old_docrule = None
+        self.old_name_code = None
         self.file_name = None
         self.full_filename = None
         self.stripped_filename = None
@@ -85,6 +87,18 @@ class Document(object):
                 raise DmsException("No document type rule found for file " + filename, 404)
         log.debug('get_docrule finished for %s.' % self.doccode)
         return self.doccode
+
+    def set_change_type(self, new_docrule):
+        """Method to change document docrule for plugin interactions
+
+        populates hooks for plugin to know we are renaming/moving document
+        self.old_docrule
+        self.old_name
+        """
+        self.old_docrule = self.doccode
+        self.old_name_code = self.get_filename()
+        self.set_filename(new_docrule.allocate_barcode())
+        self.doccode = new_docrule
 
     def get_mimetype(self):
         if not self.mimetype and self.get_current_metadata():

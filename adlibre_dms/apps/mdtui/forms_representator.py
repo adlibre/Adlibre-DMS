@@ -185,7 +185,8 @@ def make_document_type_select(user=None):
             docrules_queryset = DocumentTypeRule.objects.filter(active=True)
     return docrules_queryset
 
-def make_document_type_select_form(user=None, required=True):
+
+def make_document_type_select_form(user=None, required=True, docrule_initial=None):
     """
     Special method to construct custom DocumentTypeSelectForm object
 
@@ -200,8 +201,12 @@ def make_document_type_select_form(user=None, required=True):
 
     # Build a form with provided queryset of DocumentTypeRules.
     class DocumentTypeSelectForm(forms.Form):
-        docrule = forms.ModelChoiceField(queryset=docrules_queryset, label="Document Type", required=required)
-
+        docrule = forms.ModelChoiceField(
+            queryset=docrules_queryset,
+            label="Document Type",
+            required=required,
+            initial=docrule_initial
+        )
     return DocumentTypeSelectForm
 
 def make_mdt_select_form(user=None, required=True):

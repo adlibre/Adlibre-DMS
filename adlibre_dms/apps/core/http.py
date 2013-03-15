@@ -14,6 +14,7 @@ from django.http import HttpResponse
 
 log = logging.getLogger('core.http')
 
+
 class DocumentResponse(HttpResponse):
     """
     HttpResponse() object containing DMS Document()'s file.

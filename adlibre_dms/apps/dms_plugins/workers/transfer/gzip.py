@@ -52,6 +52,9 @@ class Gzip(object):
         return tmp_file_obj
 
     def work_store(self, document):
+        # Doing nothing for rename/change docrule for document
+        if document.old_docrule:
+            return document
         if document.get_file_obj():
             compressed_file = self._work(document.get_file_obj(), method='STORAGE')
             document.set_file_obj(compressed_file)

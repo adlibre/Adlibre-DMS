@@ -56,6 +56,10 @@
         {% include "mdtui/index/index_edit.html" %}
     {% endif %}
 
+    {% if step == "edit_type" %}
+        {% include "mdtui/index/index_edit_type.html" %}
+    {% endif %}
+
     {% if step == "edit_finish" %}
         {% include "mdtui/index/index_edit_finished.html" %}
     {% endif %}

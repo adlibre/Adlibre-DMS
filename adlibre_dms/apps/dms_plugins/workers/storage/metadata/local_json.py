@@ -54,7 +54,7 @@ class LocalJSONMetadata(object):
             del fileinfo_db[str(revision)]
             self.write_metadata(fileinfo_db, document, directory)
         else:
-            pass # our directory with all metadata has just been deleted %)
+            pass  # our directory with all metadata has just been deleted %)
         return document
 
     def update(self, document):
@@ -63,6 +63,8 @@ class LocalJSONMetadata(object):
             # FIXME metadata should be updated more often if we plan to store secondary keys on a disk.
             directory = self.filesystem.get_or_create_document_directory(document)
             document = self.save_metadata(document, directory)
+        if document.old_docrule:
+            document = self.migrate_metadata_to_new_code(document)
         return document
 
     """Internal manager methods"""
@@ -87,6 +89,16 @@ class LocalJSONMetadata(object):
             fileinfo_db = {}
             revision = 1
         return fileinfo_db, revision
+
+    def convert_metadata_for_docrules(self, fileinfo_db, new_name):
+        """Converts file metadata into another docrule, changing it's file name everywhere"""
+        for rev_key, revision in fileinfo_db.iteritems():
+            old_file_name = revision['name']
+            extension = old_file_name.split('.')[1]
+            prefix = '_r%s.%s' % (rev_key, extension)
+            changed_name = new_name + prefix
+            revision['name'] = changed_name
+        return fileinfo_db
 
     def load_metadata(self, document_name, directory):
         json_file = os.path.join(directory, '%s.json' % (document_name,))
@@ -183,9 +195,29 @@ class LocalJSONMetadata(object):
         for root, dirs, files in os.walk(doccode_directory):
             for fil in files:
                 doc, extension = os.path.splitext(fil)
-                if extension == '.json': #dirs with metadata
+                if extension == '.json':  # dirs with metadata
                     metadatas.append(self.load_from_file(os.path.join(root, fil)))
         return metadatas
+
+    def migrate_metadata_to_new_code(self, document):
+        """Converts old metadata (file revisions) fot use with new document Code (name) and/or for new DocTypeRule"""
+        # Storing new document type metadata here
+        new_directory = self.filesystem.get_or_create_document_directory(document)
+        new_name = document.get_filename()
+        # Making new document OLD one for retrieving data purposes
+        document.doccode = None
+        document.set_filename(document.old_name_code)
+        # Converting metadata for new document name
+        old_directory = self.filesystem.get_or_create_document_directory(document)
+        fileinfo_db, new_revision = self.load_metadata(document.get_stripped_filename(), old_directory)
+        new_metadata = self.convert_metadata_for_docrules(fileinfo_db, new_name)
+        # Moving document object back
+        document.doccode = None
+        document.set_filename(new_name)
+        document.set_metadata(new_metadata)
+        document = self.save_metadata(document, new_directory)
+        self.filesystem.remove_file(os.path.join(old_directory, document.old_name_code + '.json'))
+        return document
 
 
 class LocalJSONMetadataRetrievalPlugin(Plugin, BeforeRetrievalPluginPoint):

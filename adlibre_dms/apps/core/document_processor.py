@@ -270,6 +270,8 @@ class DocumentProcessor(object):
                         doc.set_user(value)
                     if property_name == 'index_info':
                         doc.set_db_info(value)
+                    if property_name == 'new_type':
+                        doc.set_change_type(value)
                     if property_name == 'update_file':
                         doc.set_file_obj(value)
                         if value:

@@ -1,8 +1,9 @@
 {% load index_keys %}
 <form class="form-horizontal" action="{{ request.path }}" method="post">
     {% csrf_token %}
+
     <fieldset>
-        <legend>Edit index data for document: {{ doc_name }}</legend>
+        <legend>Change document type for document: {{ doc_name }}</legend>
         <br />
         {# EDIT INDEX DATA FORM RENDERING #}
         {# Form non field errors dummy #}
@@ -14,19 +15,11 @@
                 </div>
             {% endfor %}
         {% endif %}
-        {% for field in form %}
-            {% include "mdtui/index/index_form_field.html" %}
-        {% endfor %}
-        <div class="control-group">
-            <label class="control-label">Type</label>
-            <div class="controls"><div class="input-prepend">
-                <a href="{% url mdtui-index-edit-type doc_name %}" class="btn btn-info"><i class="icon-edit icon-white"></i> Change Document Type</a>
-            </div></div>
-        </div>
+        {{ form }}
     </fieldset>
 
     <div class="form-actions">
-        <a href="{{ edit_return }}" class="btn btn-danger"><i class="icon-trash icon-white"></i> Cancel</a>
+        <a href="{% url mdtui-index-edit doc_name %}" class="btn btn-danger"><i class="icon-trash icon-white"></i> Cancel</a>
         <button type="submit" class="btn btn-primary">Continue <i class="icon-chevron-right icon-white"></i></button>
     </div>
 </form>
