@@ -26,6 +26,7 @@ from mdtui.templatetags.paginator_tags import rebuild_sequence_digg
 from mdtcouch.models import MetaDataTemplate
 from dmscouch.models import CouchDocument
 from core.search import SEARCH_ERROR_MESSAGES
+from doc_codes.models import DocumentTypeRule
 
 # auth user
 username = 'admin'
@@ -3410,12 +3411,83 @@ class MDTUI(TestCase):
         # TODO: Make testing of search and adding indexes for documents with choice fields.
         pass
 
+    def test_86_editing_document_type_UI(self):
+        """Refs #957 Ability to change Document Type: UI part"""
+        # Button to change type is properly rendered
+        edit_doc_name = 'CCC-0002'
+        edit_inexistent_doc = 'BBB-0004'
+        edit_doc_decription = 'Something new here'
+        same_docrule = {'docrule': '8'}
+        url = reverse('mdtui-index-edit', kwargs={'code': edit_doc_name})
+        response = self.client.get(url)
+        self.assertContains(response, edit_doc_name)
+        self.assertContains(response, edit_doc_decription)
+        self.assertContains(response, 'Change Document Type')  # Button caption
+        ch_type_url = reverse('mdtui-index-edit-type', kwargs={'code': edit_doc_name})
+        response = self.client.get(ch_type_url)
+        self.assertContains(response, 'Document Type:')
+        self.assertContains(response, edit_doc_name)
+        self.assertContains(response, 'selected')  # Has a preselected docrule
+        self.assertContains(response, MDTUI_ERROR_STRINGS['EDIT_TYPE_WARNING'])
+        # Selecting same docrule for this document
+        response = self.client.post(ch_type_url, same_docrule)
+        self.assertContains(response, MDTUI_ERROR_STRINGS['EDIT_TYPE_ERROR'])
+        self.assertContains(response, url)  # Back button working and rendered properly
+        # Wrong document passed to view
+        ch_type_url = reverse('mdtui-index-edit-type', kwargs={'code': edit_inexistent_doc})
+        response = self.client.get(ch_type_url)
+        self.assertEqual(response.status_code, 200)
+        print response
+
+    def test_87_editing_document_move_document(self):
+        """Refs #957 Ability to change Document Type: Core logic"""
+        edit_doc_name = 'CCC-0002'
+        new_doc_name = 'BBB-0004'
+        new_doc_revision_prefix = '_r1.pdf'
+        edit_doc_decription = 'Something new here'
+        secondary_index = 'SOMETHING MORE'
+        secondary_key = 'Reporting Entity'
+        renaming_docrule = {'docrule': '7'}
+
+        ch_type_url = reverse('mdtui-index-edit-type', kwargs={'code': edit_doc_name})
+        # HACK: docrule sequence fixup.
+        docrule = DocumentTypeRule.objects.get(pk=int(renaming_docrule['docrule']))
+        docrule.sequence_last = 3
+        docrule.save()
+
+        response = self.client.post(ch_type_url, renaming_docrule)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        self.assertContains(response, new_doc_name)
+        self.assertContains(response, edit_doc_decription)
+        self.assertContains(response, secondary_key)  # Form rendered
+        self.assertNotContains(response, secondary_index)
+
+        # Testing couchdb document with indexes generated properly
+        couch_doc = self._open_couchdoc(couchdb_name, new_doc_name)
+        self.assertEqual(couch_doc['revisions']['1']['name'], new_doc_name + new_doc_revision_prefix)  # Revisions OK
+        self.assertEqual(couch_doc['index_revisions']["2"]['mdt_indexes']["Employee"], "Yuri")  # Index Revisions OK
+        self.assertEqual(couch_doc['metadata_description'], edit_doc_decription)  # Description OK
+
     def test_z_cleanup(self):
         """
         Cleaning up after all tests finished.
 
         Must be ran after all tests in this test suite.
         """
+        cleanup_docs_list = [
+            doc1,
+            doc2,
+            'ADL-0003',
+            'BBB-0001',
+            'BBB-0002',
+            'BBB-0003',
+            'BBB-0004',
+            'CCC-0001',
+            'TST00000001',
+            'TST00000002'
+        ]
         # Deleting all test MDT's
         # (with doccode from var "test_mdt_docrule_id" and "test_mdt_docrule_id2")
         # using MDT's API.
@@ -3429,17 +3501,19 @@ class MDTUI(TestCase):
                 self.assertEqual(response.status_code, 204)
 
         # Deleting all docs used in tests
-        for argument in [doc1, doc2, 'ADL-0003', 'BBB-0001', 'BBB-0002', 'BBB-0003', 'CCC-0001', 'CCC-0002', 'TST00000001', 'TST00000002']:
+        for argument in cleanup_docs_list:
             url = reverse('api_file', kwargs={'code': argument,})
             response = self.client.delete(url)
             self.assertEqual(response.status_code, 204)
 
-#        # Compacting CouchDB dmscouch/mdtcouch DB's after tests
-#        server = Server()
-#        db1 = server.get_or_create_db(couchdb_name)
-#        db1.compact()
-#        db2 = server.get_or_create_db(couchdb_mdts_name)
-#        db2.compact()
+        if settings.COUCHDB_COMPACT:  # (default is False, override in local_settings.py)
+           # Compacting CouchDB dmscouch/mdtcouch DB's after tests
+           print 'Compacting CouchDB'
+           server = Server()
+           db1 = server.get_or_create_db(couchdb_name)
+           db1.compact()
+           db2 = server.get_or_create_db(couchdb_mdts_name)
+           db2.compact()
 
     def _read_indexes_form(self, response):
         """
@@ -3660,3 +3734,25 @@ class MDTUI(TestCase):
         if check_response:
             self.assertEqual(response.status_code, ok_code)
         return response
+
+    def _shelve(self, obj, name='1.html'):
+        """Writes given object into a file on desktop. (For debug purposes only ;) """
+        fo = False
+        path = os.path.expanduser(os.path.join('~', 'Desktop', name))
+        # Cleaning existing file
+        try:
+            with open(path):
+                os.remove(path)
+                pass
+        except IOError:
+            pass
+        # Dumping object into file
+        try:
+            fo = open(path, 'w')
+        except Exception, e:
+            print e
+            pass
+        if fo:
+            fo.writelines(obj)
+            print 'file %s written' % name
+

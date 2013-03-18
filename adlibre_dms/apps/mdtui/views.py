@@ -58,11 +58,11 @@ from security import filter_permitted_docrules
 log = logging.getLogger('dms.mdtui.views')
 
 MDTUI_ERROR_STRINGS = {
-    'NO_DOCRULE':'You have not selected the Document Type.',
-    'NO_INDEX':'You have not entered Document Indexing Data. Document will not be searchable by indexes.',
-    'NO_S_KEYS':'You have not defined Document Searching Options.',
-    'NO_TYPE':'You have not defined Document Type. Can only search by "Creation Date".',
-    'NO_DB':'Database Connection absent. Check CouchDB server connection.',
+    'NO_DOCRULE': 'You have not selected the Document Type.',
+    'NO_INDEX': 'You have not entered Document Indexing Data. Document will not be searchable by indexes.',
+    'NO_S_KEYS': 'You have not defined Document Searching Options.',
+    'NO_TYPE': 'You have not defined Document Type. Can only search by "Creation Date".',
+    'NO_DB': 'Database Connection absent. Check CouchDB server connection.',
     'NO_DOCUMENTS_FOUND': 'Nothing to export because of empty documents results.',
     'NO_MDTS': 'No Meta Data templates found for selected Document Type.',
     'NEW_KEY_VALUE_PAIR': 'Adding new indexing key: ',
@@ -71,6 +71,8 @@ MDTUI_ERROR_STRINGS = {
     'ERROR_EDIT_INDEXES_FINISHED': 'You can not visit this page directly',
     'LOCKED_KEY_ATTEMPT': 'You are trying to add forbidden value to a restricted key: ',
     'ADMINLOCKED_KEY_ATTEMPT': 'Only Administrator can add a value to this key: ',
+    'EDIT_TYPE_WARNING': 'Note you will loose all your document indexes and enter them again for new document type.',
+    'EDIT_TYPE_ERROR': 'You have selected the same document type.',
 }
 
 MUI_SEARCH_PAGINATE = getattr(settings, 'MUI_SEARCH_PAGINATE', 20)
@@ -474,7 +476,7 @@ def indexing_edit(request, code, step='edit', template='mdtui/indexing.html'):
 def indexing_edit_type(request, code, step='edit_type', template='mdtui/indexing.html'):
     """Indexing step: Edit. Editing document type (in fact document rename)"""
     context = {}
-    warnings = ['You will loose all your indexes (REFACTOR ME OUT)',]
+    warnings = [MDTUI_ERROR_STRINGS['EDIT_TYPE_WARNING'], ]
     error_warnings = []
     form = False
     processor = DocumentProcessor()
@@ -498,7 +500,7 @@ def indexing_edit_type(request, code, step='edit_type', template='mdtui/indexing
                     if not processor.errors:
                         return HttpResponseRedirect(reverse('mdtui-index-edit', kwargs={'code': doc.get_filename()}))
                 else:
-                    warnings = ['same docrule (REFACTOR ME OUT)', ]
+                    warnings = [MDTUI_ERROR_STRINGS['EDIT_TYPE_ERROR'], ]
     # Can cause errors in two places here (on doc read and update)
     if processor.errors:
         for error in processor.errors:

@@ -45,7 +45,7 @@ else:
         ('dmscouch', 'http://127.0.0.1:5984/dmscouch'),
         ('mdtcouch', 'http://127.0.0.1:5984/mdtcouch'),
     )
-
+COUCHDB_COMPACT = False
 
 # Required for using password (adlibre.auth) app
 # We must override with real email server at Production
