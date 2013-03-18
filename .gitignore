@@ -9,3 +9,7 @@ adlibre_dms/reports/junit.xml
 adlibre_dms/reports/pylint.report
 
 .gitignore
+
+local_settings.py
+
+adlibre_dms/local_settings.py
