@@ -3437,7 +3437,6 @@ class MDTUI(TestCase):
         ch_type_url = reverse('mdtui-index-edit-type', kwargs={'code': edit_inexistent_doc})
         response = self.client.get(ch_type_url)
         self.assertEqual(response.status_code, 200)
-        print response
 
     def test_87_editing_document_move_document(self):
         """Refs #957 Ability to change Document Type: Core logic"""
