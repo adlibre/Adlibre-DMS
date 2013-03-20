@@ -10,7 +10,11 @@ from django.conf.urls.defaults import *
 from piston.resource import Resource
 from api import handlers
 
+# Deprecated file handler
+old_file_handler = Resource(handlers.OldFileHandler)
+
 file_handler = Resource(handlers.FileHandler)
+
 file_info_handler = Resource(handlers.FileInfoHandler)
 file_list_handler = Resource(handlers.FileListHandler)
 revision_count_handler = Resource(handlers.RevisionCountHandler)
@@ -21,10 +25,17 @@ tags_handler = Resource(handlers.TagsHandler)
 mdt_handler = Resource(handlers.MetaDataTemplateHandler)
 
 urlpatterns = patterns('',
+    # Deprecated file handlers:
     # /api/file/ABC1234
-    url(r'^file/(?P<code>[\w_-]+)$', file_handler, name='api_file'),
+    url(r'^file/(?P<code>[\w_-]+)$', old_file_handler, name='api_file_deprecated'),
     # /api/file/ABC1234.pdf
-    url(r'^file/(?P<code>[\w_-]+)\.(?P<suggested_format>[\w_-]+)$', file_handler, name='api_file'),
+    url(r'^file/(?P<code>[\w_-]+)\.(?P<suggested_format>[\w_-]+)$', old_file_handler, name='api_file_deprecated'),
+
+    # Working handlers:
+    # /api/file/ABC1234
+    url(r'^new_file/(?P<code>[\w_-]+)$', file_handler, name='api_file'),
+    # /api/file/ABC1234.pdf
+    url(r'^new_file/(?P<code>[\w_-]+)\.(?P<suggested_format>[\w_-]+)$', file_handler, name='api_file'),
     # /api/file-info/ABC1234
     url(r'^file-info/(?P<code>[\w_-]+)$', file_info_handler, name='api_file_info'),
     # /api/file-info/ABC1234.pdf

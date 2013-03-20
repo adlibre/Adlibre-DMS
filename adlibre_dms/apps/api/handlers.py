@@ -158,6 +158,61 @@ class FileHandler(BaseFileHandler):
         return rc.DELETED
 
 
+class OldFileHandler(BaseFileHandler):
+    """Deprecated Files handler logic"""
+    allowed_methods = ('GET', 'POST')
+
+    @method_decorator(logged_in_or_basicauth(AUTH_REALM))
+    @method_decorator(group_required('api'))
+    def create(self, request, code, suggested_format=None):
+        if 'file' in request.FILES:
+            uploaded_file = request.FILES['file']
+        else:
+            return rc.BAD_REQUEST
+        processor = DocumentProcessor()
+        options = {
+            'user': request.user,
+            'barcode': code,
+            }
+        document = processor.create(uploaded_file, options)
+        if len(processor.errors) > 0:
+            log.error('OldFileHandler.create errors: %s' % processor.errors)
+            error = processor.errors[0]
+            if error.code == 409:
+                new_processor = DocumentProcessor()
+                options['update_file'] = uploaded_file
+                document = new_processor.update(code, options)
+                if len(new_processor.errors) > 0:
+                    return rc.BAD_REQUEST
+        log.info('FileHandler.create request fulfilled for %s' % document.get_filename())
+        return document.get_filename()
+
+    @method_decorator(logged_in_or_basicauth(AUTH_REALM))
+    @method_decorator(group_required('api'))
+    def read(self, request, code, suggested_format=None):
+        revision, hashcode, extra = self._get_info(request)
+        processor = DocumentProcessor()
+        options = {
+            'hashcode': hashcode,
+            'revision': revision,
+            'extension': suggested_format,
+            'user': request.user,
+            }
+        document = processor.read(code, options)
+        if not request.user.is_superuser:
+            # Hack: Used part of the code from MDTUI Wrong!
+            user_permissions = list_permitted_docrules_qs(request.user)
+            if not document.doccode in user_permissions:
+                return rc.FORBIDDEN
+        if processor.errors:
+            log.error('FileHandler.read manager errors: %s' % processor.errors)
+            return rc.NOT_FOUND
+        else:
+            response = DocumentResponse(document)
+            log.info('FileHandler.read request fulfilled for code: %s, options: %s' % (code, options))
+        return response
+
+
 class FileInfoHandler(BaseFileHandler):
     """
     Returns document metadata

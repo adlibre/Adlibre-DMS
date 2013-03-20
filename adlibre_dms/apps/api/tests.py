@@ -287,6 +287,23 @@ class APITest(DMSTestCase):
         response = self.client.get(url)
         self.assertContains(response, '', status_code=200)
 
+    def test_19_deprecated_api_handler(self):
+        """Old handler that creates or updates existing document"""
+        self.client.login(username=self.username, password=self.password)
+        file_name = self.documents_pdf_this_test[1]
+        suggested_format = 'pdf'
+        url = reverse('api_file_deprecated', kwargs={'code': file_name, 'suggested_format': suggested_format})
+        rev_count_url = reverse('api_revision_count', kwargs={'document': file_name})
+        before_rev = self.client.get(rev_count_url)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        t, data = self._get_tests_file(self.documents_pdf[0], file_name, suggested_format)
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, file_name)
+        after_rev = self.client.get(rev_count_url)
+        self.assertGreater(int(after_rev.content), int(before_rev.content), 'Revision Count mismatch')
+
     def test_zz_cleanup(self):
         """Test Cleanup"""
         self.cleanAll(check_response=True)
