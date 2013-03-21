@@ -17,12 +17,17 @@
         {% for field in form %}
             {% include "mdtui/index/index_form_field.html" %}
         {% endfor %}
+        {% if form %}
         <div class="control-group">
             <label class="control-label">Type</label>
             <div class="controls"><div class="input-prepend">
-                <a href="{% url mdtui-index-edit-type doc_name %}" class="btn btn-info"><i class="icon-edit icon-white"></i> Change Document Type</a>
+                <input class="input-xlarge disabled" id="disabledInput" type="text" placeholder="{{ type_name }}" disabled="">
+                <a href="{% url mdtui-index-edit-type doc_name %}" class="btn btn-info">
+                    <i class="icon-edit icon-white"></i> Change Document Type
+                </a>
             </div></div>
         </div>
+        {% endif %}
     </fieldset>
 
     <div class="form-actions">

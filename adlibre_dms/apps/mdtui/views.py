@@ -457,13 +457,19 @@ def indexing_edit(request, code, step='edit', template='mdtui/indexing.html'):
             return HttpResponseRedirect(reverse('mdtui-index-edit-finished'))
     else:
         for error in processor.errors:
-            error_warnings.append(error.parameter)
+            # Intercepting type Exception and using it's message or using error.__str__
+            if not error.__class__.__name__ == 'unicode' and 'parameter' in error.__dict__.iterkeys():
+                error_warnings.append(error.parameter)
+            else:
+                error_warnings.append(error)
+
     if form:
         autocomplete_list = extract_secondary_keys_from_form(form)
         # No form is possible when document does not exist
         context.update( {'form': form,} )
     context.update( { 'step': step,
                       'doc_name': code,
+                      'type_name': doc.get_docrule().title,
                       'warnings': warnings,
                       'autocomplete_fields': autocomplete_list,
                       'edit_return': return_url,
