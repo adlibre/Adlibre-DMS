@@ -39,10 +39,16 @@ class DocumentResponse(HttpResponse):
 
     def retrieve_file(self, document):
         # Getting file vars we need from Document()
-
         # FIXME: Document() instance should already contain properly set up file object.
         document.get_file_obj().seek(0)
         content = document.get_file_obj().read()
         mimetype = document.get_mimetype()
-        filename = document.get_full_filename()
+        # Renaming returned document in case we have certain revision request
+        current_revision = document.get_revision()
+        metadata = document.get_metadata()
+        revisions_count = metadata.__len__()
+        if current_revision < revisions_count:
+            filename = document.get_filename_with_revision()
+        else:
+            filename = document.get_full_filename()
         return content, mimetype, filename

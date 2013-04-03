@@ -2,7 +2,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
-    {% if not mimetype == 'image/jpeg' %}
+    {% if mimetype == 'application/pdf' %}
     {# Force IE into compatibility mode, so the PDFObject works in IE9 #}
     <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -11,7 +11,7 @@
     <script type='text/javascript'>
         window.onload = function (){
             var myPDF = new PDFObject({
-                url: '{{ pdf_url }}',
+                url: '{{ pdf_url }}{% if revision %}?revision={{ revision }}{% endif %}',
                 pdfOpenParams: {
                     view: 'Fit',
                     scrollbars: '0',
@@ -28,7 +28,7 @@
 </head>
 <body>
 {% if mimetype == 'image/jpeg' %}
-<img src="{% url mdtui-download-pdf code %}" alt="{{ code }}"><img>
+<img src="{% url api_file code %}{% if revision %}?r={{ revision }}{% endif %}" alt="{{ code }}"><img>
 {% else %}
 <div id="pdfobj"></div>
 <p><a href="{% url mdtui-download-pdf code %}" title="{% trans 'Download Document' %}" class="btn"><i class="icon-download-alt"></i> Download document &ldquo;{{ code }}&rdquo;</a></p>

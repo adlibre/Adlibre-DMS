@@ -650,6 +650,7 @@ class MDTUI(TestCase):
     def setUp(self):
         # We are using only logged in client in this test
         self.client.login(username=username, password=password)
+        self.test_document_files_dir = os.path.join(settings.FIXTURE_DIRS[0], 'testdata')
         self.response = None
 
     def test_01_setup_mdts(self):
@@ -3306,7 +3307,7 @@ class MDTUI(TestCase):
         # Found Image rendered properly instead of pdf viewer:
         url = reverse('mdtui-view-object', kwargs={'code': test_doc1})
         response = self.client.get(url)
-        self.assertContains(response, 'img src="/mdtui/download/TST00000001"')
+        self.assertContains(response, 'img src="/api/new_file/TST00000001"')
 
     def test_83_can_sort_improper_indexes(self):
         """
@@ -3468,6 +3469,54 @@ class MDTUI(TestCase):
         self.assertEqual(couch_doc['revisions']['1']['name'], new_doc_name + new_doc_revision_prefix)  # Revisions OK
         self.assertEqual(couch_doc['index_revisions']["2"]['mdt_indexes']["Employee"], "Yuri")  # Index Revisions OK
         self.assertEqual(couch_doc['metadata_description'], edit_doc_decription)  # Description OK
+
+    def test_88_edit_document_revisions(self):
+        """Refs #890 When editing metadata allow user to add new document revision"""
+        doc_name = 'ADL-0001'
+        edit_revisions_list = [
+            # keys
+            'Revision:',
+            'Filename:',
+            'Compression:',
+            'File Type:',
+            'Created:',
+            # values
+            'application/pdf',
+            'GZIP',
+            # files
+            'ADL-0001_r1.pdf',
+            'ADL-0001_r2.pdf',
+            # buttons
+            'Upload New Revision',
+            'View',
+            'Finish',
+        ]
+        wrong_code = 'ADL-0100'
+        creating_doc = 'ADL-0001_r3.pdf'
+        # Edit doc indexes has this button
+        edit_doc_url = reverse('mdtui-index-edit', kwargs={'code': doc_name})
+        edit_revisions_url = reverse('mdtui-index-edit-revisions', kwargs={'code': doc_name})
+        edit_response = self.client.get(edit_doc_url)
+        self.assertContains(edit_response, edit_revisions_url)
+        # Errors not causing view problems
+        wrong_response = self.client.get(reverse('mdtui-index-edit-revisions', kwargs={'code': wrong_code}))
+        self.assertContains(wrong_response, MDTUI_ERROR_STRINGS['NO_DOC'], status_code=200)
+        # Edit revisions page proper rendering
+        revisions_response = self.client.get(edit_revisions_url)
+        self.assertContains(revisions_response, edit_doc_url)  # Has back button
+        for key in edit_revisions_list:
+            if not key in revisions_response.content:
+                raise self.failureException('Key: %s is not present in response' % key)
+        if creating_doc in revisions_response:
+            raise self.failureException('Can not test farther because filename: %s already exists' % creating_doc)
+        # Testing file upload
+        file_path = os.path.join(self.test_document_files_dir, doc_name + '.pdf')
+        data = { 'file': open(file_path, 'r'), }
+        new_revisions_response = self.client.post(edit_revisions_url, data)
+        self.assertEqual(new_revisions_response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(new_revisions_response)
+        response = self.client.get(new_url)
+        self.assertContains(response, creating_doc)
 
     def test_z_cleanup(self):
         """
@@ -3716,8 +3765,6 @@ class MDTUI(TestCase):
 
     def _api_upload_file(self, doc, suggested_format='pdf', hash=None, check_response=True, update=False):
         ok_code = 200
-        # Source of documents
-        self.test_document_files_dir = os.path.join(settings.FIXTURE_DIRS[0], 'testdata')
         # Do file upload using DMS API
         file_path = os.path.join(self.test_document_files_dir, doc + '.' + suggested_format)
         data = { 'file': open(file_path, 'r'), }

@@ -1,4 +1,3 @@
-{% load index_keys %}
 <form class="form-horizontal" action="{{ request.path }}" method="post">
     {% csrf_token %}
     <fieldset>
@@ -33,5 +32,6 @@
     <div class="form-actions">
         <a href="{{ edit_return }}" class="btn btn-danger"><i class="icon-trash icon-white"></i> Cancel</a>
         <button type="submit" class="btn btn-primary">Continue <i class="icon-chevron-right icon-white"></i></button>
+        <a href="{% url mdtui-index-edit-revisions doc_name %}" class="btn btn-info"><i class="icon-list icon-white"></i> Manage file revisions</a>
     </div>
 </form>

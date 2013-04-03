@@ -44,7 +44,7 @@ class Document(object):
         self.stripped_filename = None
         self.revision = None
         self.hashcode = None
-        self.metadata = None
+        self.metadata = None   # TODO: Refactor to file_revisions_data or something like that. This name is to broad.
         self.fullpath = None
         self.file_obj = None
         self.current_metadata = {}

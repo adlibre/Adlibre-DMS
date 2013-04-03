@@ -7,6 +7,7 @@ License: See LICENSE for license information
 """
 import json
 import os
+import time
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
@@ -271,7 +272,27 @@ class APITest(DMSTestCase):
             response = self.client.get(url)
             self.assertContains(response, self.test_tag, status_code=200)
 
-    def test_18_delete_documents(self):
+    def test_18_api_read_file_revisions(self):
+        """Refs #968 API returns revision independent filename"""
+        self.client.login(username=self.username, password=self.password)
+        doc_url = reverse('api_file', kwargs={'code': self.documents_pdf[0], 'suggested_format': 'pdf'})
+        # Download doc without certain revision
+        test_filename = 'filename=ADL-0001.pdf'
+        response = self.client.get(doc_url)
+        # File name in response contains only code
+        self.assertEqual(response._headers['content-disposition'][1], test_filename)
+        self.assertEqual(response.status_code, 200)
+
+        # Download doc with revision
+        r = 2
+        test_filename_with_revision = 'filename=ADL-0001_r%s.pdf' % r
+        url_2 = doc_url + '?r=%s' % r
+        response = self.client.get(url_2)
+        # File name in response contains revision
+        self.assertEqual(response._headers['content-disposition'][1], test_filename_with_revision)
+        self.assertEqual(response.status_code, 200)
+
+    def test_19_delete_documents(self):
         delete_doc = self.documents_pdf_this_test[0]
         remain_doc = self.documents_pdf_this_test[1]
         self._delete_documents(delete_doc, remain_doc)
@@ -287,7 +308,7 @@ class APITest(DMSTestCase):
         response = self.client.get(url)
         self.assertContains(response, '', status_code=200)
 
-    def test_19_deprecated_api_handler(self):
+    def test_20_deprecated_api_handler(self):
         """Old handler that creates or updates existing document"""
         self.client.login(username=self.username, password=self.password)
         file_name = self.documents_pdf_this_test[1]

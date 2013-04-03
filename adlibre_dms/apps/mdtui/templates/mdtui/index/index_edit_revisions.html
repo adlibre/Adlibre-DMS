@@ -1,0 +1,54 @@
+{% load revisions_tags %}
+{% load i18n %}
+    {% if metadata %}
+    <fieldset>
+        <div class="span3" style="text-align: center;">
+            <a href="#fileModal" data-toggle="modal"><img src="{{ STATIC_URL }}upload.png" /></a>
+            <p><a href="#fileModal" data-toggle="modal" class="btn"><i class="icon-upload"></i> {% trans 'Upload New Revision' %}</a></p>
+        </div>
+        {% include "mdtui/index/index_upload_file_form.html" %}
+        <legend>File revisions for code: {{ doc_name }}</legend>
+        <br />
+        <table class="table table-bordered table-striped">
+            <thead>
+            <tr>
+                <th>File</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+        {% for revision in metadata_order_list %}
+        {% set_rev_item revision %}
+            <tr>
+                <td>
+                <div class="well">
+                    <span><strong>Revision: </strong>{{ revision }}</span><br />
+                    {% if rev.name %}
+                        <span><strong>Filename: </strong>{{ rev.name }}</span><br />
+                    {% endif %}
+                    {% if rev.compression_type %}
+                        <span><strong>Compression: </strong>{{ rev.compression_type }}</span><br />
+                    {% endif %}
+                    {% if rev.mimetype %}
+                        <span><strong>File Type: </strong>{{ rev.mimetype }}</span><br />
+                    {% endif %}
+                    {% if rev.created_date %}
+                        <span><strong>Created: </strong>{{ rev.created_date }}</span><br />
+                    {% endif %}
+                </div>
+                </td>
+                <td>
+                    <div class="well">
+                        <a href="{% url mdtui-view-object doc_name %}?revision={{ revision }}" class="btn btn-primary"><i class="icon-search icon-white"></i> View</a>
+                        {# TODO: Develop this <a href="#" class="btn btn-danger"><i class="icon-trash icon-white"></i> Delete</a>  #}
+                    </div>
+                </td>
+            </tr>
+        {% endfor %}
+            </tbody>
+        </table>
+    </fieldset>
+    {% endif %}
+    <div class="form-actions">
+        <a href="{% url mdtui-index-edit doc_name %}" class="btn btn-primary"><i class="icon-ok icon-white"></i> Finish</a>
+    </div>

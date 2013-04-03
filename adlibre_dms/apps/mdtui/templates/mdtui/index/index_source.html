@@ -55,42 +55,4 @@
         <a href="#myModal" class="btn btn-danger" data-dismiss="modal"><i class="icon-trash icon-white"></i> {% trans 'Cancel' %}</a>
     </div>
 </div>
-
-<div class="modal hide bigmodal" id="fileModal">
-    <div class="modal-header">
-        <button class="close" data-dismiss="modal">×</button>
-        <h3>{% trans 'Upload File' %}</h3>
-    </div>
-    <div class="modal-body">
-        <form id="file-upload-form" class="form-horizontal well" enctype="multipart/form-data" action="{{ request.path }}?uploaded" method="post">
-            {% csrf_token %}
-            <fieldset>
-                {% for field in upload_form %}
-                    <div class="control-group">
-                        {% if field.errors %}
-                            {% for error in field.errors %}
-                                <div class="alert alert-error">
-                                    <a class="close">×</a>
-                                    <strong>{{ error }}</strong>
-                                </div>
-                            {% endfor %}
-                        {% endif %}
-                        <label class="control-label">{{ field.label }}</label>
-                        <div class="controls">
-                            {{ field }}
-                            <p class="help-block">{{ field.help_text }}</p>
-                        </div>
-                    </div>
-                {% endfor %}
-                <img id="uploading-image" src="{{ STATIC_URL }}img/uploading.gif" style="display:none;"/>
-                <div id="upload-progress" class="upload-progress"></div>
-                <div id="upload-percent"></div>
-            </fieldset>
-        </form>
-    </div>
-
-    <div class="modal-footer">
-        <a href="#" class="btn btn-primary" id="file-upload-submit">{% trans 'Continue' %} <i class="icon-chevron-right icon-white"></i></a>
-        <a href="#myModal" class="btn btn-danger" data-dismiss="modal" id="file-upload-cancel"><i class="icon-trash icon-white"></i> {% trans 'Cancel' %}</a>
-    </div>
-</div>
+{% include "mdtui/index/index_upload_file_form.html" %}

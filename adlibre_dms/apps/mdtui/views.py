@@ -59,6 +59,7 @@ log = logging.getLogger('dms.mdtui.views')
 
 MDTUI_ERROR_STRINGS = {
     'NO_DOCRULE': 'You have not selected the Document Type.',
+    'NO_DOC': 'Document does not exist',
     'NO_INDEX': 'You have not entered Document Indexing Data. Document will not be searchable by indexes.',
     'NO_S_KEYS': 'You have not defined Document Searching Options.',
     'NO_TYPE': 'You have not defined Document Type. Can only search by "Creation Date".',
@@ -71,7 +72,7 @@ MDTUI_ERROR_STRINGS = {
     'ERROR_EDIT_INDEXES_FINISHED': 'You can not visit this page directly',
     'LOCKED_KEY_ATTEMPT': 'You are trying to add forbidden value to a restricted key: ',
     'ADMINLOCKED_KEY_ATTEMPT': 'Only Administrator can add a value to this key: ',
-    'EDIT_TYPE_WARNING': 'Note you will loose all your document indexes and enter them again for new document type.',
+    'EDIT_TYPE_WARNING': 'Note you will lose all your document indexes and enter them again for new document type.',
     'EDIT_TYPE_ERROR': 'You have selected the same document type.',
 }
 
@@ -185,11 +186,11 @@ def search_type(request, step, template='mdtui/search.html'):
             mdts_form = mdts_filtered_form({'mdt': mdt_id})
 
     context = {
-                'warnings': warnings,
-                'step': step,
-                'mdts_form': mdts_form,
-                'docrules_form': docrules_form,
-               }
+        'warnings': warnings,
+        'step': step,
+        'mdts_form': mdts_form,
+        'docrules_form': docrules_form,
+    }
     return render_to_response(template, context, context_instance=RequestContext(request))
 
 
@@ -231,11 +232,11 @@ def search_options(request, step, template='mdtui/search.html'):
             return HttpResponseRedirect(reverse('mdtui-search-results'))
 
     context = {
-                'form': form,
-                'warnings': warnings,
-                'step': step,
-                'autocomplete_fields': autocomplete_list,
-               }
+        'form': form,
+        'warnings': warnings,
+        'step': step,
+        'autocomplete_fields': autocomplete_list,
+    }
     return render_to_response(template, context, context_instance=RequestContext(request))
 
 @login_required
@@ -394,12 +395,20 @@ def search_results(request, step=None, template='mdtui/search.html'):
 @login_required
 def view_object(request, code, step, template='mdtui/view.html'):
     """View PDF Document"""
+    # TODO: Add certain revision view possibility for "edit revisions" view
+    revision = request.GET.get('revision', None)
     pdf_url = reverse('mdtui-download-pdf', kwargs={ 'code': code, })
     # TODO: think about the way to remove requirement for this request.
     processor = DocumentProcessor()
-    document = processor.read(code, options={'only_metadata': True, 'user': request.user, })
+    document = processor.read(code, options={'only_metadata': True, 'user': request.user, 'revision': revision})
     mimetype = document.get_mimetype()
-    context = {'pdf_url': pdf_url, 'code': code, 'step': step, 'mimetype': mimetype, }
+    context = {
+        'pdf_url': pdf_url,
+        'code': code,
+        'step': step,
+        'mimetype': mimetype,
+        'revision': revision,
+    }
     return render(request, template, context)
 
 @login_required
@@ -522,6 +531,41 @@ def indexing_edit_type(request, code, step='edit_type', template='mdtui/indexing
     })
     return render(request, template, context)
 
+@login_required
+@group_required(SEC_GROUP_NAMES['index'])
+def indexing_edit_file_revisions(request, code, step=None, template='mdtui/indexing.html'):
+    form = DocumentUploadForm(request.POST or None, request.FILES or None)
+    revision_file = request.FILES.get('file', None)
+    errors = []
+    context = {
+        'step': step,
+        'doc_name': code,
+        'upload_form': form,
+        'barcode': None,  # for compatibility with scripts (We are reusing modal scripts in templates)
+    }
+    processor = DocumentProcessor()
+    doc = processor.read(code, {'user': request.user, 'only_metadata': True})
+    if not processor.errors:
+        if revision_file and form.is_valid():
+            options = {
+                'user': request.user,
+                'update_file': revision_file,
+            }
+            processor.update(code, options)
+            if not processor.errors:
+                return HttpResponseRedirect(request.path)
+            else:
+                errors.append(processor.errors)
+        # HACK: sorting doc.metadata to represent order in a nice way. (Should be done in core)
+        m = doc.get_metadata()
+        context.update({
+            'metadata': m,
+            'metadata_order_list': sorted(m.iterkeys()),
+        })
+    else:
+        errors = [MDTUI_ERROR_STRINGS['NO_DOC']]
+    context.update({'error_warnings': errors})
+    return render(request, template, context)
 
 @login_required
 @group_required(SEC_GROUP_NAMES['edit_index'])
@@ -537,7 +581,7 @@ def indexing_edit_result(request, step='edit_finish', template='mdtui/indexing.h
         except KeyError:
             variables[var] = ''
             # Error handling into warnings
-            if not var=='edit_return':
+            if not var == 'edit_return':
                 error_name = MDTUI_ERROR_STRINGS['ERROR_EDIT_INDEXES_FINISHED']
                 log.error('indexing_finished error: variable: %s,  %s' % (var, error_name))
                 if not error_name in warnings:
@@ -548,8 +592,10 @@ def indexing_edit_result(request, step='edit_finish', template='mdtui/indexing.h
     if request.POST:
         code = variables['edit_index_barcode']
         processor = DocumentProcessor()
-        options = { 'new_indexes': variables['edit_processor_indexes'],
-                    'user': request.user, }
+        options = {
+            'new_indexes': variables['edit_processor_indexes'],
+            'user': request.user,
+        }
         processor.update(code, options=options)
         if not processor.errors:
             # cleanup session here because editing is finished
@@ -608,11 +654,11 @@ def indexing_select_type(request, step=None, template='mdtui/indexing.html'):
         if docrule:
             active_docrule = docrule
 
-    context.update( {
-                      'active_docrule': active_docrule,
-                      'docrules_list': docrules_list,
-                      'warnings': warnings,
-                      })
+    context.update({
+        'active_docrule': active_docrule,
+        'docrules_list': docrules_list,
+        'warnings': warnings,
+    })
     return render_to_response(template, context, context_instance=RequestContext(request))
 
 
@@ -760,12 +806,6 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
                     })
 
     return render_to_response(template, context, context_instance=RequestContext(request))
-
-@login_required
-@group_required(SEC_GROUP_NAMES['index'])
-def indexing_edit_file_revisions(request, step=None, template='mdtui/indexing.html'):
-    context = {'step': step }
-    return render(request, template, context)
 
 @login_required
 @group_required(SEC_GROUP_NAMES['index'])
@@ -929,6 +969,9 @@ def mdt_parallel_keys(request):
 def download_pdf(request, code):
     """Returns Document For Download"""
     # right now we just redirect to API, but in future we might want to decouple from API app.
-    url = reverse('api_file', kwargs={'code': code, 'suggested_format': 'pdf'},)
-    log.debug('GET pdf from api url: %s for user: %s' % (url, unicode(request.user)) )
+    revision = request.GET.get('revision', None)
+    url = reverse('api_file', kwargs={'code': code, 'suggested_format': 'pdf'})
+    if revision:
+        url += '?r=%s' % revision
+    log.debug('GET pdf from api url: %s for user: %s' % (url, unicode(request.user)))
     return redirect(url)
