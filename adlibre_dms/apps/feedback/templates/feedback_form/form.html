@@ -1,7 +1,7 @@
 {% if not feedback_form %} {# Loading jQuery by our own, version without any other libraries #}
 <div id="feedback">
     <div class="section">
-        <h6><span class="fpointer fb-up"></span>Feedback</h6>
+        <h1><span class="fpointer fb-up"></span>Feedback</h1>
         {% csrf_token %}
         {{ form }}
         <br/>
@@ -13,7 +13,7 @@
 {% else %}
     <div id="feedback" url="{% url feedback %}">
         <div class="section">
-            <h6 class="feedback_header">Feedback<span class="fpointer fb-up"></span></h6>
+            <h1 class="feedback_header">Feedback<span class="fpointer fb-up"></span></h1>
             {% csrf_token %}
             {{ feedback_form }}
             <a class="fb-submit btn btn-primary" href="">Send</a>
@@ -44,11 +44,10 @@
         text-align:  center;
     }
 
-    #feedback h6{
-        background:url("{{ STATIC_URL }}img/feedback.png") no-repeat;
+    #feedback h1{
         height:38px;
+        color: #CCC;
         margin:5px 0 12px;
-        text-indent:-99999px;
         cursor:pointer;
     }
 

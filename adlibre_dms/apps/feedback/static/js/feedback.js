@@ -12,7 +12,7 @@ $(document).ready(function(){
     var feedback = $('#feedback');
     var submitURL = feedback.attr("url");
 
-    $('#feedback h6').click(function(){
+    $('#feedback h1').click(function(){
         var anim	= {
             mb : 0,			// Margin Bottom
             pt : 12			// Padding Top
