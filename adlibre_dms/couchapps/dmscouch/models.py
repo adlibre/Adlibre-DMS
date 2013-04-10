@@ -222,6 +222,6 @@ class CouchDocument(Document):
         # user name/id from Django user
         self.metadata_user_id = str(user.pk)
         if user.first_name:
-            self.metadata_user_name = user.user.first_name + u' ' + user.last_name
+            self.metadata_user_name = user.first_name + u' ' + user.last_name
         else:
             self.metadata_user_name = user.username
