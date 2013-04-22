@@ -28,38 +28,6 @@ from dmscouch.models import CouchDocument
 from core.search import SEARCH_ERROR_MESSAGES
 from doc_codes.models import DocumentTypeRule
 
-# auth user
-username = 'admin'
-password = 'admin'
-
-# test user 1
-username_1 = 'test_perms_1'
-password_1 = 'test1'
-
-# test user 2
-username_2 = 'test_perms_2'
-password_2 = 'test2'
-
-# test user 3
-username_3 = 'tests_user_3'
-password_3 = 'test3'
-
-# test user 4
-username_4 = 'tests_user_4'
-password_4 = 'test4'
-
-# test user 5
-username_5 = 'tests_user_5'
-password_5 = 'test5'
-
-# test user 6
-username_6 = 'tests_user_6'
-password_6 = 'test6'
-
-couchdb_url = 'http://127.0.0.1:5984'
-couchdb_name = 'dmscouch_test'
-couchdb_mdts_name = 'mdtcouch_test'
-
 test_mdt_docrule_id = 2 # should be properly assigned to fixtures docrule that uses CouchDB plugins
 test_mdt_docrule_id2 = 7 # should be properly assigned to fixtures docrule that uses CouchDB plugins
 test_mdt_docrule_id3 = 8 # should be properly assigned to fixtures docrule that uses CouchDB plugins
@@ -71,33 +39,6 @@ test_mdt_id_3 = 3 # Third MDT used in testing search part of MUI
 test_mdt_id_5 = 5 # Last MDT used in testing search part of MUI
 test_mdt_id_5_name = 'mdt5'
 test_mdt_id_6 = 6 # Last MDT used in testing search part of MUI
-
-############################ GENERATING REGEXP ##############################
-# to match page form and view it's fields.
-indexes_match_strings = [
-    'Employee ID',
-    'Employee Name',
-    'Friends ID',
-    'Friends Name',
-    'Required Date',
-    'Reporting Entity',
-    'Report Date',
-    'Report Type',
-    'Employee',
-    'Tests Uppercase Field',
-    'Additional',
-    'Chosen Field',
-]
-main_form_match_regexp = ').+?name=\"(\d+|\d+_from|\d+_to)\"'
-indexes_form_match_pattern = ''
-for index in indexes_match_strings:
-    indexes_form_match_pattern += index + '|'
-indexes_form_match_pattern = indexes_form_match_pattern[:-1]
-indexes_form_match_pattern = '(%s%s' % (indexes_form_match_pattern, main_form_match_regexp)
-################################# END #######################################
-
-indexing_done_string = 'Your document has been indexed'
-indexes_added_string = 'Your documents indexes'
 
 mdt1 = {
     "_id": 'mdt1',
@@ -606,6 +547,302 @@ doc1_dict_existing_indexes = {
     'Additional': 'Something for 1',
     }
 
+
+class MUITestData(TestCase):
+    """Base tests class for MUI interface. Contains basic tests data and strings
+       that are not test specific. Inherit in your MUI tests."""
+
+    def __init__(self, *args, **kwargs):
+        super(MUITestData, self).__init__(*args, **kwargs)
+        # Auth USER
+        self.username = 'admin'
+        self.password = 'admin'
+
+        # test user 1
+        self.username_1 = 'test_perms_1'
+        self.password_1 = 'test1'
+
+        # test user 2
+        self.username_2 = 'test_perms_2'
+        self.password_2 = 'test2'
+
+        # test user 4
+        self.username_4 = 'tests_user_4'
+        self.password_4 = 'test4'
+
+        # Couchdb data location
+        self.couchdb_url = 'http://127.0.0.1:5984'
+        self.couchdb_name = 'dmscouch_test'
+        self.couchdb_mdts_name = 'mdtcouch_test'
+
+        ############################ GENERATING REGEXP ##############################
+        # to match page form and view it's fields.
+        indexes_match_strings = [
+            'Employee ID',
+            'Employee Name',
+            'Friends ID',
+            'Friends Name',
+            'Required Date',
+            'Reporting Entity',
+            'Report Date',
+            'Report Type',
+            'Employee',
+            'Tests Uppercase Field',
+            'Additional',
+            'Chosen Field',
+            ]
+        main_form_match_regexp = ').+?name=\"(\d+|\d+_from|\d+_to)\"'
+        indexes_form_match_pattern = ''
+        for index in indexes_match_strings:
+            indexes_form_match_pattern += index + '|'
+        indexes_form_match_pattern = indexes_form_match_pattern[:-1]
+        self.indexes_form_match_pattern = '(%s%s' % (indexes_form_match_pattern, main_form_match_regexp)
+        ################################# END #######################################
+
+        self.indexing_done_string = 'Your document has been indexed'
+        self.indexes_added_string = 'Your documents indexes'
+
+    def _read_indexes_form(self, response):
+        """
+        Helper to parse response with Document Indexing Form (MDTUI Indexing Step 2 Form)
+        And returns key:value dict of form's dynamical fields for our tests.
+        """
+        prog = re.compile(self.indexes_form_match_pattern, re.DOTALL)
+        matches_set = prog.findall(str(response))
+        matches = {}
+        for key,value in matches_set:
+            if value.endswith('_from'):
+                matches[key+' From']=value
+            elif value.endswith('_to'):
+                matches[key+' To']=value
+            else:
+                matches[key]=value
+        return matches
+
+    def _convert_doc_to_post_dict(self, matches, doc):
+        """
+        Helper to convert Tests Documents into proper POST dictionary for Indexing Form testing.
+        """
+        post_doc_dict = {}
+        for key, value in doc.iteritems():
+            if key in matches.keys():
+                post_doc_dict[matches[key]] = value
+            else:
+                post_doc_dict[key] = value
+        return post_doc_dict
+
+    def _retrieve_redirect_response_url(self, response):
+        """
+        helper parses 302 response object.
+        Returns redirect url, parsed by regex.
+        """
+        self.assertEqual(response.status_code, 302)
+        new_url = re.search("(?P<url>https?://[^\s]+)", str(response)).group("url")
+        return new_url
+
+    def _createa_search_dict(self, doc_dict):
+        """
+        Creates a search dict to avoid rewriting document dict constants.
+        """
+        search_dict = {}
+        for key in doc_dict.keys():
+            search_dict[key] = doc_dict[key]
+        return search_dict
+
+    def _create_search_dict_for_range_and_keys(self, keys_dict, form_ids_dict, date_range=None):
+        """
+        Creates a dict for custom keys to search for date range + some keys
+        Takes into account:
+          - form dynamic id's
+          - date range provided
+          - keys provided
+        """
+        request_dict = {}
+        # Adding dates to request
+        if date_range:
+            for key, value in date_range.iteritems():
+                request_dict[key] = value
+        else:
+            request_dict[u'date'] = u''
+            request_dict[u'end_date'] = u''
+        # Converting keys data to form id's view
+        temp_keys = {}
+        for key, value in keys_dict.iteritems():
+            temp_keys[form_ids_dict[key]] = value
+        # Finally adding converted form numeric field ids with values to request data dict
+        for key, value in temp_keys.iteritems():
+            request_dict[key] = value
+        return request_dict
+
+    def _create_search_dict_range_and_keys_for_search(self, keys_dict, form_ids_dict, date_range=None):
+        """
+        Creates a dict for custom keys to search for date range + some keys
+        Takes into account:
+          - form dynamic id's
+          - date range provided
+          - keys provided
+        """
+        request_dict = {}
+        # Adding dates to request
+        if date_range:
+            for key, value in date_range.iteritems():
+                request_dict[key] = value
+        else:
+            request_dict[u'date'] = u''
+            request_dict[u'end_date'] = u''
+        # Converting keys data to form id's view
+        temp_keys = {}
+        for key, value in keys_dict.iteritems():
+            date_key = False
+            try:
+                date_key = datetime.datetime.strptime(value, settings.DATE_FORMAT)
+            except ValueError:
+                pass
+            if date_key and not key == 'date' and not key == 'end_date':
+                key1 = key + ' From'
+                key2 = key + ' To'
+                from_date = date_key - datetime.timedelta(days=1)
+                to_date = date_key + datetime.timedelta(days=1)
+                value1 = from_date.strftime(settings.DATE_FORMAT)
+                value2 = to_date.strftime(settings.DATE_FORMAT)
+                temp_keys[form_ids_dict[key1]] = value1
+                temp_keys[form_ids_dict[key2]] = value2
+            else:
+                if not key == 'description'and not key == 'date' and not key == 'end_date':
+                    try:
+                        temp_keys[form_ids_dict[key]] = value
+                    except KeyError:
+                        # key does not present in form
+                        pass
+        # Finally adding converted form numeric field ids with values to request data dict
+        for key, value in temp_keys.iteritems():
+            request_dict[key] = value
+        return request_dict
+
+    def _create_edit_indexes_post_dict(self, keys_dict, form_ids_dict):
+        """
+        Creates a dict for custom keys to edit document indexes.
+        Takes into account:
+          - form dynamic id's
+          - description provided
+        """
+        request_dict = {}
+        for key, value in keys_dict.iteritems():
+            if key == 'description':
+                request_dict[key] = value
+            else:
+                request_dict[form_ids_dict[key]] = value
+        return request_dict
+
+    def _check_edit_indexes_data_form(self, response, doc_dict):
+        """Scans Document edit indexes form for proper data and fields rendering."""
+        for field_name, field_value in doc_dict.iteritems():
+            if not field_name in ['date', 'description']:
+                self.assertContains(response, field_name)
+                # Omitting Uppercase field value exception
+                if not field_value == 'some data':
+                    self.assertContains(response, field_value)
+                else:
+                    self.assertContains(response, field_value.upper())
+            elif field_name == 'description':
+                self.assertContains(response, "Description")
+                self.assertContains(response, field_value)
+
+    def _check_edit_step_with_document(self, doc_name, doc_dict):
+        """
+        Subtest...
+
+        Checks for document dict and name rendered properly in indexing - Edit indexes step.
+        It creates self.response with form data rendered.
+        """
+        url = reverse('mdtui-index-edit', kwargs={'code': doc_name})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, doc_name)
+        self._check_edit_indexes_data_form(response, doc_dict)
+        self.response = response
+
+    def _open_couchdoc(self, db_name, barcode):
+        """Open given document in a given CouchDB database"""
+        firstdoc = {}
+        server = Server()
+        db = server.get_or_create_db(db_name)
+        r = db.view(
+            '_all_docs',
+            key=barcode,
+            include_docs=True,
+        )
+        for row in r:
+            firstdoc = row['doc']
+        return firstdoc
+
+    def _open_mdt(self, mdt_name, db_name='mdtcouch_test'):
+        """Opens reads and returns an instance of MDT in CouchDB"""
+        mdt = {}
+        server = Server()
+        db = server.get_or_create_db(db_name)
+        r = db.view(
+            '_all_docs',
+            key=mdt_name,
+            include_docs=True,
+        )
+        for row in r:
+            mdt = row['doc']
+        return mdt
+
+    def _check_search_results_order(self, response):
+        """Checks MUI search results page against regexp to determine document names order in a page"""
+        prog = re.compile("""\/mdtui\/view\/(?P<code>[A-Z]{3}-[0-9]{4})""", re.DOTALL)
+        matches = prog.findall(str(response))
+        return matches
+
+    def _check_sorting_order_results(self, results_url, sort_query, result):
+        """Helper for test (search_results_sorting) to reduce redundancy in check results"""
+        response = self.client.post(results_url, sort_query)
+        code_order = self._check_search_results_order(response)
+        self.assertEqual(code_order, result)
+
+    def _api_upload_file(self, doc, suggested_format='pdf', hash=None, check_response=True, update=False):
+        ok_code = 200
+        # Do file upload using DMS API
+        file_path = os.path.join(self.test_document_files_dir, doc + '.' + suggested_format)
+        data = { 'file': open(file_path, 'r'), }
+        url = reverse('api_file', kwargs={'code': doc, 'suggested_format': suggested_format, })
+        if hash:
+            # Add hash to payload
+            data['h'] = hash
+        if not update:
+            response = self.client.post(url, data)
+            ok_code = 201
+        else:
+            response = self.client.put(url, data)
+        if check_response:
+            self.assertEqual(response.status_code, ok_code)
+        return response
+
+    def _shelve(self, obj, name='1.html'):
+        """Writes given object into a file on desktop. (For debug purposes only ;) """
+        fo = False
+        path = os.path.expanduser(os.path.join('~', 'Desktop', name))
+        # Cleaning existing file
+        try:
+            with open(path):
+                os.remove(path)
+                pass
+        except IOError:
+            pass
+        # Dumping object into file
+        try:
+            fo = open(path, 'w')
+        except Exception, e:
+            print e
+            pass
+        if fo:
+            fo.writelines(obj)
+            print 'file %s written' % name
+
+
+
 # TODO: test password reset forms/stuff
 
 # TODO: test proper CSV export, even just simply, with date range and list of files present there
@@ -645,11 +882,11 @@ class PaginatorTestCase(TestCase):
         result_sequence = rebuild_sequence_digg(paginated.page(20))
         self.assertEqual(result_sequence, [1, 2, '...', 19, 20])
 
-class MDTUI(TestCase):
+class MDTUI(MUITestData):
 
     def setUp(self):
         # We are using only logged in client in this test
-        self.client.login(username=username, password=password)
+        self.client.login(username=self.username, password=self.password)
         self.test_document_files_dir = os.path.join(settings.FIXTURE_DIRS[0], 'testdata')
         self.response = None
 
@@ -706,7 +943,7 @@ class MDTUI(TestCase):
         self.assertEqual(response.status_code, 302)
         new_url = self._retrieve_redirect_response_url(response)
         response = self.client.get(new_url)
-        self.assertContains(response, indexing_done_string)
+        self.assertContains(response, self.indexing_done_string)
         self.assertContains(response, 'Friends Name: Andrew')
         self.assertContains(response, 'Start Again')
 
@@ -746,7 +983,7 @@ class MDTUI(TestCase):
         self.assertEqual(response.status_code, 302)
         new_url = self._retrieve_redirect_response_url(response)
         response = self.client.get(new_url)
-        self.assertContains(response, indexing_done_string)
+        self.assertContains(response, self.indexing_done_string)
         self.assertContains(response, 'Friends Name: Andrew')
         self.assertContains(response, 'Start Again')
 
@@ -775,7 +1012,7 @@ class MDTUI(TestCase):
         self.assertEqual(response.status_code, 302)
         new_url = self._retrieve_redirect_response_url(response)
         response = self.client.get(new_url)
-        self.assertContains(response, indexing_done_string)
+        self.assertContains(response, self.indexing_done_string)
         self.assertContains(response, 'Friends Name: Yuri')
         self.assertContains(response, 'Start Again')
 
@@ -804,7 +1041,7 @@ class MDTUI(TestCase):
         self.assertEqual(response.status_code, 302)
         new_url = self._retrieve_redirect_response_url(response)
         response = self.client.get(new_url)
-        self.assertContains(response, indexing_done_string)
+        self.assertContains(response, self.indexing_done_string)
         self.assertContains(response, 'Friends Name: Someone')
         self.assertContains(response, 'Start Again')
 
@@ -840,7 +1077,7 @@ class MDTUI(TestCase):
             self.assertEqual(response.status_code, 302)
             new_url = self._retrieve_redirect_response_url(response)
             response = self.client.get(new_url)
-            self.assertContains(response, indexing_done_string)
+            self.assertContains(response, self.indexing_done_string)
             self.assertContains(response, 'Report Date: '+doc_dict['Report Date'])
             self.assertContains(response, 'Start Again')
 
@@ -876,7 +1113,7 @@ class MDTUI(TestCase):
             self.assertEqual(response.status_code, 302)
             new_url = self._retrieve_redirect_response_url(response)
             response = self.client.get(new_url)
-            self.assertContains(response, indexing_done_string)
+            self.assertContains(response, self.indexing_done_string)
             self.assertContains(response, 'Employee: '+doc_dict['Employee'])
             self.assertContains(response, 'Start Again')
 
@@ -996,7 +1233,7 @@ class MDTUI(TestCase):
         Document now exists in couchDB
         Querying CouchDB itself to test docs exist.
         """
-        url = couchdb_url + '/' + couchdb_name + '/' + doc1 + '?revs_info=true'
+        url = self.couchdb_url + '/' + self.couchdb_name + '/' + doc1 + '?revs_info=true'
         # HACK: faking 'request' object here
         r = self.client.get(url)
         cou = urllib.urlopen(url)
@@ -1747,7 +1984,7 @@ class MDTUI(TestCase):
         self.assertContains(response, 'Creation Date: %s' % date_standardized('2012-04-17'))
         self.assertContains(response, 'Description: something usefull')
         self.assertContains(response, 'Tests Uppercase Field: LOWERCASE DATA')
-        self.assertContains(response,indexes_added_string)
+        self.assertContains(response, self.indexes_added_string)
 
     def test_38_uppercase_fields_UPPERCASE_DATA(self):
         # Normal uppercase field rendering and using
@@ -1765,7 +2002,7 @@ class MDTUI(TestCase):
         self.assertContains(response, 'Creation Date: %s' % date_standardized('2012-04-17'))
         self.assertContains(response, 'Description: something usefull')
         self.assertContains(response, 'Tests Uppercase Field: UPPERCASE DATA')
-        self.assertContains(response, indexes_added_string)
+        self.assertContains(response, self.indexes_added_string)
 
     def test_39_search_by_keys_only_contains_secondary_date_range(self):
         """
@@ -1996,7 +2233,7 @@ class MDTUI(TestCase):
     def test_46_security_restricts_search_or_index(self):
         # We need another logged in user for this test
         self.client.logout()
-        self.client.login(username=username_1, password=password_1)
+        self.client.login(username=self.username_1, password=self.password_1)
         # Trying to access indexing
         search_url = reverse('mdtui-search-type')
         index_url = reverse('mdtui-index-type')
@@ -2007,7 +2244,7 @@ class MDTUI(TestCase):
         response = self.client.get(index_url)
         self.assertNotEqual(response.status_code, 200)
         self.client.logout()
-        self.client.login(username=username_2, password=password_2)
+        self.client.login(username=self.username_2, password=self.password_2)
         # User test2 have access to index
         response = self.client.get(index_url)
         self.assertEqual(response.status_code, 200)
@@ -2019,7 +2256,7 @@ class MDTUI(TestCase):
     def test_47_indexing_mdt_choices_limited_by_permitted_docrules(self):
         # We need another logged in user for this test
         self.client.logout()
-        self.client.login(username=username_1, password=password_1)
+        self.client.login(username=self.username_1, password=self.password_1)
         # Checking if user sees his own permitted document type rules
         url = reverse('mdtui-search-type')
         response = self.client.get(url)
@@ -2036,7 +2273,7 @@ class MDTUI(TestCase):
     def test_48_searching_docrule_choices_limited_by_permission(self):
         # We need another logged in user for this test
         self.client.logout()
-        self.client.login(username=username_2, password=password_2)
+        self.client.login(username=self.username_2, password=self.password_2)
         # Checking if user sees his own permitted document type rules
         url = reverse('mdtui-index-type')
         response = self.client.get(url)
@@ -2188,7 +2425,7 @@ class MDTUI(TestCase):
         """
         # Changing user
         self.client.logout()
-        self.client.login(username=username_1, password=password_1)
+        self.client.login(username=self.username_1, password=self.password_1)
         # Uploading file through browser app
         filename = settings.FIXTURE_DIRS[0] + '/testdata/' + doc1 + '.pdf'
         url = reverse('upload')
@@ -2196,7 +2433,7 @@ class MDTUI(TestCase):
         response = self.client.post(url, data)
         self.assertContains(response, 'File has been uploaded')
         # Faking 'request' object to test with assertions
-        url = couchdb_url + '/' + couchdb_name + '/' + doc1 + '?revs_info=true'
+        url = self.couchdb_url + '/' + self.couchdb_name + '/' + doc1 + '?revs_info=true'
         r = self.client.get(url)
         cou = urllib.urlopen(url)
         resp = cou.read()
@@ -2267,6 +2504,8 @@ class MDTUI(TestCase):
         Generally first test of restricted MDT's search results.
         """
         # Creating special user
+        username_3 = 'tests_user_3'
+        password_3 = 'test3'
         user = User.objects.create_user(username_3, 'a@b.com', password_3)
         user.save()
         # Adding permission to interact Adlibre invoices only
@@ -2337,7 +2576,7 @@ class MDTUI(TestCase):
         This will require some template modification, and some sort of context var to expose the permissions.
         """
         # Creating special user
-        user = User.objects.create_user(username_4, 'b@c.com', password_4)
+        user = User.objects.create_user(self.username_4, 'b@c.com', self.password_4)
         user.save()
         # Adding permission to interact Adlibre invoices only
         perm = Permission.objects.filter(name=u'Can interact Adlibre Invoices')
@@ -2351,7 +2590,7 @@ class MDTUI(TestCase):
 
         # Using user 4 to check for search permissions and proper templates rendering
         self.client.logout()
-        self.client.login(username=username_4, password=password_4)
+        self.client.login(username=self.username_4, password=self.password_4)
         response = self.client.get(reverse('mdtui-home'))
         self.assertEqual(response.status_code, 200)
         # MUI search button rendered anywhere on the page
@@ -2372,6 +2611,9 @@ class MDTUI(TestCase):
         If a user doesn't have access to index or to search then those features (eg links / menu options) should be hidden.
         This will require some template modification, and some sort of context var to expose the permissions.
         """
+        # test user 5
+        username_5 = 'tests_user_5'
+        password_5 = 'test5'
         # Creating special user
         user = User.objects.create_user(username_5, 'c@d.com', password_5)
         user.save()
@@ -2429,6 +2671,8 @@ class MDTUI(TestCase):
         In fact it's a test of API response through view and download pdf view proxies.
         Reflects issue #802
         """
+        username_6 = 'tests_user_6'
+        password_6 = 'test6'
         code1 = "ADL-0001"
         code2 = 'CCC-0001'
         # Creating special user
@@ -2617,7 +2861,7 @@ class MDTUI(TestCase):
         edit_btn_string = """href="/mdtui/indexing/edit/CCC-0001"""
         data = {'mdt': test_mdt_id_5}
         # Adding apecial permission to test user 1
-        user = User.objects.get(username=username_1)
+        user = User.objects.get(username=self.username_1)
         # Registering that user in required security groups and removing their permissions...
         g = Group.objects.all()
         g, created = Group.objects.get_or_create(name=SEC_GROUP_NAMES['edit_index'])
@@ -2628,7 +2872,7 @@ class MDTUI(TestCase):
             g.permissions.remove(perm)
         # Logging in with this user
         self.client.logout()
-        self.client.login(username=username_1, password=password_1)
+        self.client.login(username=self.username_1, password=self.password_1)
         # Selecting MDT
         url = reverse('mdtui-search-type')
         response = self.client.post(url, data)
@@ -2651,7 +2895,7 @@ class MDTUI(TestCase):
 
         # Checking Superuser perms now
         self.client.logout()
-        self.client.login(username=username, password=password)
+        self.client.login(username=self.username, password=self.password)
         # Simplified search sequence, assuming all checked working before.
         url = reverse('mdtui-search-type')
         response = self.client.post(url, data)
@@ -2667,7 +2911,7 @@ class MDTUI(TestCase):
         self.assertContains(response, edit_btn_string)
 
         # Checking user without permissions now (Creating one first)
-        user = User.objects.create_user(username_4, 'b@c.com', password_4)
+        user = User.objects.create_user(self.username_4, 'b@c.com', self.password_4)
         user.save()
         # Adding permission to interact Test Doc Type 3 only
         perm = Permission.objects.filter(name=u'Can interact Test Doc Type 3')
@@ -2680,7 +2924,7 @@ class MDTUI(TestCase):
                 g.permissions.remove(perm)
         # Relogin with this user
         self.client.logout()
-        self.client.login(username=username_4, password=password_4)
+        self.client.login(username=self.username_4, password=self.password_4)
         # Simplified search sequence, assuming all checked working before.
         url = reverse('mdtui-search-type')
         response = self.client.post(url, data)
@@ -2741,7 +2985,7 @@ class MDTUI(TestCase):
         # POST to save those indexes
         response = self.client.post(reverse('mdtui-index-edit-finished'), {'something':' '})
         # Quering CouchDB directly for existence and proper document indexes rendering
-        couch_doc = self._open_couchdoc(couchdb_name, edit_document_name_1)
+        couch_doc = self._open_couchdoc(self.couchdb_name, edit_document_name_1)
         if not 'index_revisions' in couch_doc:
             raise AssertionError('CouchDB Document has not been updated')
         if not '1' in couch_doc['index_revisions']:
@@ -2781,7 +3025,7 @@ class MDTUI(TestCase):
         # POST to save those indexes
         response = self.client.post(new_url,  {'something': ' '})
         # Quering CouchDB directly for existence and proper document indexes rendering
-        couch_doc = self._open_couchdoc(couchdb_name, edit_document_name_2)
+        couch_doc = self._open_couchdoc(self.couchdb_name, edit_document_name_2)
         if not 'index_revisions' in couch_doc:
             raise AssertionError('CouchDB Document has not been updated')
         if not '1' in couch_doc['index_revisions']:
@@ -2801,7 +3045,7 @@ class MDTUI(TestCase):
         # POST to save those indexes
         response = self.client.post(new_url,  {'something':' '})
         # Checking if revision 2 of CouchDB document indexes created
-        couch_doc = self._open_couchdoc(couchdb_name, edit_document_name_2)
+        couch_doc = self._open_couchdoc(self.couchdb_name, edit_document_name_2)
         if not '2' in couch_doc['index_revisions']:
             raise AssertionError('CouchDB Document does not update indexes revisions after more than 1 edit')
         if '2' in couch_doc['revisions']:
@@ -2814,7 +3058,7 @@ class MDTUI(TestCase):
         response = self.client.put(url, data)
         self.assertEqual(response.status_code, 200)
         # Checking if revision 2 of CouchDB document indexes preserved
-        couch_doc = self._open_couchdoc(couchdb_name, edit_document_name_2)
+        couch_doc = self._open_couchdoc(self.couchdb_name, edit_document_name_2)
         if not '2' in couch_doc['index_revisions']:
             raise AssertionError('CouchDB Document fails to preserve index_revisions upon document revision update.')
         if not '2' in couch_doc['revisions']:
@@ -2829,7 +3073,7 @@ class MDTUI(TestCase):
         self.assertContains(response, django_admin_btn_name)
         # Relogin with simple user (not superuser)
         self.client.logout()
-        self.client.login(username=username_1, password=password_1)
+        self.client.login(username=self.username_1, password=self.password_1)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, django_admin_btn_name)
@@ -2841,7 +3085,7 @@ class MDTUI(TestCase):
         - Tests only proper indexes exist in secondary indexes of document that has more than 1 file revision
         """
         # Using document that has more than 1 revision for this test.
-        couch_doc = self._open_couchdoc(couchdb_name, 'ADL-0001')
+        couch_doc = self._open_couchdoc(self.couchdb_name, 'ADL-0001')
         if not '2' in couch_doc['revisions'].iterkeys():
             raise AssertionError('CouchDB Document Has insufficient amount of revisions for test (required > 1 )')
         if 'metadata_user_id' in couch_doc['mdt_indexes']:
@@ -3118,7 +3362,7 @@ class MDTUI(TestCase):
 
         # Relogin with non admin user
         self.client.logout()
-        self.client.login(username=username_2, password=password_2)
+        self.client.login(username=self.username_2, password=self.password_2)
 
         # Check new indexes are disabling the upload form with non staff/admin person
         response = self._78_test_helper(test_doc_dict)
@@ -3137,7 +3381,7 @@ class MDTUI(TestCase):
         self.assertContains(response, MDTUI_ERROR_STRINGS['LOCKED_KEY_ATTEMPT']+'Employee Name')
 
         self.client.logout()
-        self.client.login(username=username, password=password)
+        self.client.login(username=self.username, password=self.password)
 
         response = self._78_test_helper(test_doc_dict)
         self.assertEqual(response.status_code, 200)
@@ -3212,7 +3456,7 @@ class MDTUI(TestCase):
 
         # Relogin with non admin user
         self.client.logout()
-        self.client.login(username=username_2, password=password_2)
+        self.client.login(username=self.username_2, password=self.password_2)
 
         # Check new indexes are disabling the upload form with non staff/admin person
         response = self._78_test_helper(test_doc_dict)
@@ -3222,7 +3466,7 @@ class MDTUI(TestCase):
         self.assertContains(response, MDTUI_ERROR_STRINGS['ADMINLOCKED_KEY_ATTEMPT']+'Employee Name')
 
         # Registering that user in required security groups...
-        user = User.objects.filter(username=username_2)
+        user = User.objects.filter(username=self.username_2)
         g = Group.objects.get(name=SEC_GROUP_NAMES['edit_fixed_indexes'])
         g.user_set.add(user[0])
 
@@ -3465,7 +3709,7 @@ class MDTUI(TestCase):
         self.assertNotContains(response, secondary_index)
 
         # Testing couchdb document with indexes generated properly
-        couch_doc = self._open_couchdoc(couchdb_name, new_doc_name)
+        couch_doc = self._open_couchdoc(self.couchdb_name, new_doc_name)
         self.assertEqual(couch_doc['revisions']['1']['name'], new_doc_name + new_doc_revision_prefix)  # Revisions OK
         self.assertEqual(couch_doc['index_revisions']["2"]['mdt_indexes']["Employee"], "Yuri")  # Index Revisions OK
         self.assertEqual(couch_doc['metadata_description'], edit_doc_decription)  # Description OK
@@ -3518,6 +3762,9 @@ class MDTUI(TestCase):
         response = self.client.get(new_url)
         self.assertContains(response, creating_doc)
 
+    def test_89_mark_documents_deleted(self):
+        pass
+
     def test_z_cleanup(self):
         """
         Cleaning up after all tests finished.
@@ -3544,7 +3791,7 @@ class MDTUI(TestCase):
             response = self.client.get(url, {"docrule_id": str(mdt_)})
             data = json.loads(str(response.content))
             for key, value in data.iteritems():
-                mdt_id =  data[key]["mdt_id"]
+                mdt_id = data[key]["mdt_id"]
                 response = self.client.delete(url, {"mdt_id": mdt_id})
                 self.assertEqual(response.status_code, 204)
 
@@ -3558,247 +3805,9 @@ class MDTUI(TestCase):
            # Compacting CouchDB dmscouch/mdtcouch DB's after tests
            print 'Compacting CouchDB'
            server = Server()
-           db1 = server.get_or_create_db(couchdb_name)
+           db1 = server.get_or_create_db(self.couchdb_name)
            db1.compact()
-           db2 = server.get_or_create_db(couchdb_mdts_name)
+           db2 = server.get_or_create_db(self.couchdb_mdts_name)
            db2.compact()
 
-    def _read_indexes_form(self, response):
-        """
-        Helper to parse response with Document Indexing Form (MDTUI Indexing Step 2 Form)
-        And returns key:value dict of form's dynamical fields for our tests.
-        """
-        prog = re.compile(indexes_form_match_pattern, re.DOTALL)
-        matches_set = prog.findall(str(response))
-        matches = {}
-        for key,value in matches_set:
-            if value.endswith('_from'):
-                matches[key+' From']=value
-            elif value.endswith('_to'):
-                matches[key+' To']=value
-            else:
-                matches[key]=value
-        return matches
-
-    def _convert_doc_to_post_dict(self, matches, doc):
-        """
-        Helper to convert Tests Documents into proper POST dictionary for Indexing Form testing.
-        """
-        post_doc_dict = {}
-        for key, value in doc.iteritems():
-            if key in matches.keys():
-                post_doc_dict[matches[key]] = value
-            else:
-                post_doc_dict[key] = value
-        return post_doc_dict
-
-    def _retrieve_redirect_response_url(self, response):
-        """
-        helper parses 302 response object.
-        Returns redirect url, parsed by regex.
-        """
-        self.assertEqual(response.status_code, 302)
-        new_url = re.search("(?P<url>https?://[^\s]+)", str(response)).group("url")
-        return new_url
-
-    def _createa_search_dict(self, doc_dict):
-        """
-        Creates a search dict to avoid rewriting document dict constants.
-        """
-        search_dict = {}
-        for key in doc_dict.keys():
-            search_dict[key] = doc_dict[key]
-        return search_dict
-
-    def _create_search_dict_for_range_and_keys(self, keys_dict, form_ids_dict, date_range=None):
-        """
-        Creates a dict for custom keys to search for date range + some keys
-        Takes into account:
-          - form dynamic id's
-          - date range provided
-          - keys provided
-        """
-        request_dict = {}
-        # Adding dates to request
-        if date_range:
-            for key, value in date_range.iteritems():
-                request_dict[key] = value
-        else:
-            request_dict[u'date'] = u''
-            request_dict[u'end_date'] = u''
-        # Converting keys data to form id's view
-        temp_keys = {}
-        for key, value in keys_dict.iteritems():
-            temp_keys[form_ids_dict[key]] = value
-        # Finally adding converted form numeric field ids with values to request data dict
-        for key, value in temp_keys.iteritems():
-            request_dict[key] = value
-        return request_dict
-
-    def _create_search_dict_range_and_keys_for_search(self, keys_dict, form_ids_dict, date_range=None):
-        """
-        Creates a dict for custom keys to search for date range + some keys
-        Takes into account:
-          - form dynamic id's
-          - date range provided
-          - keys provided
-        """
-        request_dict = {}
-        # Adding dates to request
-        if date_range:
-            for key, value in date_range.iteritems():
-                request_dict[key] = value
-        else:
-            request_dict[u'date'] = u''
-            request_dict[u'end_date'] = u''
-        # Converting keys data to form id's view
-        temp_keys = {}
-        for key, value in keys_dict.iteritems():
-            date_key = False
-            try:
-                date_key = datetime.datetime.strptime(value, settings.DATE_FORMAT)
-            except ValueError:
-                pass
-            if date_key and not key == 'date' and not key == 'end_date':
-                key1 = key + ' From'
-                key2 = key + ' To'
-                from_date = date_key - datetime.timedelta(days=1)
-                to_date = date_key + datetime.timedelta(days=1)
-                value1 = from_date.strftime(settings.DATE_FORMAT)
-                value2 = to_date.strftime(settings.DATE_FORMAT)
-                temp_keys[form_ids_dict[key1]] = value1
-                temp_keys[form_ids_dict[key2]] = value2
-            else:
-                if not key == 'description'and not key == 'date' and not key == 'end_date':
-                    try:
-                        temp_keys[form_ids_dict[key]] = value
-                    except KeyError:
-                        # key does not present in form
-                        pass
-        # Finally adding converted form numeric field ids with values to request data dict
-        for key, value in temp_keys.iteritems():
-            request_dict[key] = value
-        return request_dict
-
-    def _create_edit_indexes_post_dict(self, keys_dict, form_ids_dict):
-        """
-        Creates a dict for custom keys to edit document indexes.
-        Takes into account:
-          - form dynamic id's
-          - description provided
-        """
-        request_dict = {}
-        for key, value in keys_dict.iteritems():
-            if key == 'description':
-                request_dict[key] = value
-            else:
-                request_dict[form_ids_dict[key]] = value
-        return request_dict
-
-    def _check_edit_indexes_data_form(self, response, doc_dict):
-        """Scans Document edit indexes form for proper data and fields rendering."""
-        for field_name, field_value in doc_dict.iteritems():
-            if not field_name in ['date', 'description']:
-                self.assertContains(response, field_name)
-                # Omitting Uppercase field value exception
-                if not field_value == 'some data':
-                    self.assertContains(response, field_value)
-                else:
-                    self.assertContains(response, field_value.upper())
-            elif field_name == 'description':
-                self.assertContains(response, "Description")
-                self.assertContains(response, field_value)
-
-    def _check_edit_step_with_document(self, doc_name, doc_dict):
-        """
-        Subtest...
-
-        Checks for document dict and name rendered properly in indexing - Edit indexes step.
-        It creates self.response with form data rendered.
-        """
-        url = reverse('mdtui-index-edit', kwargs={'code': doc_name})
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, doc_name)
-        self._check_edit_indexes_data_form(response, doc_dict)
-        self.response = response
-
-    def _open_couchdoc(self, db_name, barcode):
-        """Open given document in a given CouchDB database"""
-        firstdoc = {}
-        server = Server()
-        db = server.get_or_create_db(db_name)
-        r = db.view(
-            '_all_docs',
-            key=barcode,
-            include_docs=True,
-        )
-        for row in r:
-            firstdoc = row['doc']
-        return firstdoc
-
-    def _open_mdt(self, mdt_name, db_name='mdtcouch_test'):
-        """Opens reads and returns an instance of MDT in CouchDB"""
-        mdt = {}
-        server = Server()
-        db = server.get_or_create_db(db_name)
-        r = db.view(
-            '_all_docs',
-            key=mdt_name,
-            include_docs=True,
-        )
-        for row in r:
-            mdt = row['doc']
-        return mdt
-
-    def _check_search_results_order(self, response):
-        """Checks MUI search results page against regexp to determine document names order in a page"""
-        prog = re.compile("""\/mdtui\/view\/(?P<code>[A-Z]{3}-[0-9]{4})""", re.DOTALL)
-        matches = prog.findall(str(response))
-        return matches
-
-    def _check_sorting_order_results(self, results_url, sort_query, result):
-        """Helper for test (search_results_sorting) to reduce redundancy in check results"""
-        response = self.client.post(results_url, sort_query)
-        code_order = self._check_search_results_order(response)
-        self.assertEqual(code_order, result)
-
-    def _api_upload_file(self, doc, suggested_format='pdf', hash=None, check_response=True, update=False):
-        ok_code = 200
-        # Do file upload using DMS API
-        file_path = os.path.join(self.test_document_files_dir, doc + '.' + suggested_format)
-        data = { 'file': open(file_path, 'r'), }
-        url = reverse('api_file', kwargs={'code': doc, 'suggested_format': suggested_format, })
-        if hash:
-            # Add hash to payload
-            data['h'] = hash
-        if not update:
-            response = self.client.post(url, data)
-            ok_code = 201
-        else:
-            response = self.client.put(url, data)
-        if check_response:
-            self.assertEqual(response.status_code, ok_code)
-        return response
-
-    def _shelve(self, obj, name='1.html'):
-        """Writes given object into a file on desktop. (For debug purposes only ;) """
-        fo = False
-        path = os.path.expanduser(os.path.join('~', 'Desktop', name))
-        # Cleaning existing file
-        try:
-            with open(path):
-                os.remove(path)
-                pass
-        except IOError:
-            pass
-        # Dumping object into file
-        try:
-            fo = open(path, 'w')
-        except Exception, e:
-            print e
-            pass
-        if fo:
-            fo.writelines(obj)
-            print 'file %s written' % name
 
