@@ -20,6 +20,7 @@ from core.errors import DmsException
 
 log = logging.getLogger('core.document_processor')
 
+__all__ = ['DocumentProcessor']
 
 class DocumentProcessor(object):
     """Main DMS CRUD logic operations handler.
@@ -194,6 +195,8 @@ class DocumentProcessor(object):
         log.debug('DELETEE Document %s, options: %s' % (document_name, options) )
         operator = PluginsOperator()
         doc = self.init_Document_with_data(options, document_name=document_name)
+        if self.option_in_options('delete_revision', options):
+            doc = self.read(document_name, options)
         doc = operator.process_pluginpoint(pluginpoints.BeforeRemovalPluginPoint, document=doc)
         self.check_errors_in_operator(operator)
         return doc
@@ -272,6 +275,16 @@ class DocumentProcessor(object):
                         doc.set_db_info(value)
                     if property_name == 'new_type':
                         doc.set_change_type(value)
+                    if property_name == 'mark_deleted':
+                        if value:
+                            doc.update_options({property_name: True})
+                    if property_name == 'mark_revision_deleted':
+                        if value:
+                            doc.update_options({property_name: value})
+                    if property_name == 'delete_revision':
+                        if value:
+                            doc.update_options({property_name: value})
+                            doc.set_revision(int(value))
                     if property_name == 'update_file':
                         doc.set_file_obj(value)
                         if value:

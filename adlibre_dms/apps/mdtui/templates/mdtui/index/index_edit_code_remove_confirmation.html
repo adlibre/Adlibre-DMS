@@ -1,0 +1,19 @@
+{% load i18n %}
+<div class="modal hide bigmodal" id="deleteModal">
+    <div class="modal-header">
+        <button class="close" data-dismiss="modal">×</button>
+        <h3>{% trans 'Remove code ' %}{{ doc_name }}</h3>
+    </div>
+    <div class="modal-body">
+        <form id="file-delete-form" class="form-horizontal well" action="{% url mdtui-index-edit-delete doc_name %}" method="post">
+            {% csrf_token %}
+            <label class="control-label">{% trans "This will remove the code" %} {{ doc_name }} {% trans "comletly, including all the revisions and indexing data. Are you sure?" %}</label>
+            <img id="delete-working-image" src="{{ STATIC_URL }}img/uploading.gif" style="display:none;"/>
+        </form>
+    </div>
+
+    <div class="modal-footer">
+        <a href="#" class="btn btn-primary" id="file-delete-submit"><i class="icon-trash icon-white"></i> {% trans 'Remove' %}</a>
+        <a href="#myModal" class="btn btn-danger" data-dismiss="modal" id="file-delete-cancel"><i class="icon-remove icon-white"></i> {% trans 'Cancel' %}</a>
+    </div>
+</div>

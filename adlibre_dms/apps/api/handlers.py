@@ -89,6 +89,9 @@ class FileHandler(BaseFileHandler):
         if processor.errors:
             log.error('FileHandler.read manager errors: %s' % processor.errors)
             return rc.NOT_FOUND
+        if document.marked_deleted:
+            log.error('FileHandler.read request to marked deleted document: %s' % code)
+            return rc.NOT_FOUND
         else:
             response = DocumentResponse(document)
             log.info('FileHandler.read request fulfilled for code: %s, options: %s' % (code, options))
@@ -184,7 +187,7 @@ class OldFileHandler(BaseFileHandler):
                 document = new_processor.update(code, options)
                 if len(new_processor.errors) > 0:
                     return rc.BAD_REQUEST
-        log.info('FileHandler.create request fulfilled for %s' % document.get_filename())
+        log.info('OldFileHandler.create request fulfilled for %s' % document.get_filename())
         return document.get_filename()
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
@@ -205,11 +208,14 @@ class OldFileHandler(BaseFileHandler):
             if not document.doccode in user_permissions:
                 return rc.FORBIDDEN
         if processor.errors:
-            log.error('FileHandler.read manager errors: %s' % processor.errors)
+            log.error('OldFileHandler.read manager errors: %s' % processor.errors)
+            return rc.NOT_FOUND
+        if document.marked_deleted:
+            log.error('OldFileHandler.read request to marked deleted document: %s' % code)
             return rc.NOT_FOUND
         else:
             response = DocumentResponse(document)
-            log.info('FileHandler.read request fulfilled for code: %s, options: %s' % (code, options))
+            log.info('OldFileHandler.read request fulfilled for code: %s, options: %s' % (code, options))
         return response
 
 
@@ -232,6 +238,9 @@ class FileInfoHandler(BaseFileHandler):
             'user': request.user,
         }
         document = processor.read(code, options)
+        if document.marked_deleted:
+            log.error('FileInfoHandler.read request to marked deleted document: %s' % code)
+            return rc.NOT_FOUND
         docrule = document.get_docrule()
         # FIXME: there might be more than one docrules!
         mapping = docrule.get_docrule_plugin_mappings()

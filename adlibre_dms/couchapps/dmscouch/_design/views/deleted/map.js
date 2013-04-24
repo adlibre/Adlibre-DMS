@@ -1,9 +1,7 @@
 function(doc) {
     if (doc.doc_type == "CouchDocument") {
         if (doc.deleted == "deleted") {
-            pass
-        } else {
             emit(doc._id, {rev: doc._rev});
-        }
-    }
-}
+        }; // if deleted
+    }; // if doc_type
+} // function

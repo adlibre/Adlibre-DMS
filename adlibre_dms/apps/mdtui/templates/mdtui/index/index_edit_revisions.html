@@ -6,9 +6,16 @@
             <a href="#fileModal" data-toggle="modal"><img src="{{ STATIC_URL }}upload.png" /></a>
             <p><a href="#fileModal" data-toggle="modal" class="btn"><i class="icon-upload"></i> {% trans 'Upload New Revision' %}</a></p>
         </div>
+        <div class="span3" style="text-align: center;">
+            <a href="#deleteModal" data-toggle="modal"><img src="{{ STATIC_URL }}document_delete.png" /></a>
+            <p><a href="#deleteModal" data-toggle="modal" class="btn"><i class="icon-upload"></i> {% trans 'Delete entire document' %}</a></p>
+        </div>
         {% include "mdtui/index/index_upload_file_form.html" %}
+        {% include "mdtui/index/index_edit_code_remove_confirmation.html" %}
         <legend>File revisions for code: {{ doc_name }}</legend>
         <br />
+        {# Url to delete revisions got here #}
+        <div id="delete-url" data-id="{% url mdtui-index-edit-delete doc_name %}" style="display:none;"></div>
         <table class="table table-bordered table-striped">
             <thead>
             <tr>
@@ -19,6 +26,7 @@
             <tbody>
         {% for revision in metadata_order_list %}
         {% set_rev_item revision %}
+            {% if not rev.deleted %}
             <tr>
                 <td>
                 <div class="well">
@@ -40,10 +48,13 @@
                 <td>
                     <div class="well">
                         <a href="{% url mdtui-view-object doc_name %}?revision={{ revision }}" class="btn btn-primary"><i class="icon-search icon-white"></i> View</a>
-                        {# TODO: Develop this <a href="#" class="btn btn-danger"><i class="icon-trash icon-white"></i> Delete</a>  #}
+                        <a href="#" data-id="{{ revision }}" class="revision-delete-btn btn btn-danger"><i class="icon-trash icon-white"></i> Delete</a>
+                        <br />
+                        <img class="revision-working-image-{{ revision }}" src="{{ STATIC_URL }}img/uploading.gif" style="display:none"/>
                     </div>
                 </td>
             </tr>
+            {% endif %}
         {% endfor %}
             </tbody>
         </table>

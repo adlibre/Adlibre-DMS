@@ -437,5 +437,5 @@ class DMSSearchManager(object):
         @param document_names_list: list of document id's, e.g. ['DOC0001', 'MAS0001', '...' ]
         @return: CouchDB documents list.
         """
-        documents = CouchDocument.view('_all_docs', keys=document_names_list, include_docs=True )
+        documents = CouchDocument.view('dmscouch/all', keys=document_names_list, include_docs=True)
         return documents

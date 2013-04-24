@@ -38,21 +38,35 @@ class LocalJSONMetadata(object):
                 revision = new_revision - 1
             document.set_revision(revision)
             try:
-                fileinfo = fileinfo_db[str(revision)]
+                fileinfo_db[str(revision)]
             except:
                 raise PluginError("No such revision for this document", 404)
             document.set_metadata(fileinfo_db)
-        if document.get_option('only_metadata'):
-            raise BreakPluginChain()
         return document
 
     def update_metadata_after_removal(self, document):
+        # Doing nothing for mark deleted call
+        mark_revision = False
+        if 'mark_deleted' in document.options.iterkeys():
+            return document
         revision = document.get_revision()
+        if 'mark_revision_deleted' in document.options.iterkeys():
+            mark_revision = document.options['mark_revision_deleted']
+            revision = mark_revision
         if revision:
             directory = self.filesystem.get_or_create_document_directory(document)
             fileinfo_db, new_revision = self.load_metadata(document.get_stripped_filename(), directory)
-            del fileinfo_db[str(revision)]
+            if not mark_revision:
+                del fileinfo_db[str(revision)]
+            else:
+                if mark_revision in fileinfo_db.iterkeys():
+                    fileinfo_db[str(revision)]['deleted'] = True
+                else:
+                    raise PluginError('Revision not found', 404)
             self.write_metadata(fileinfo_db, document, directory)
+            # Empty revisions data
+            if not fileinfo_db:
+                self.remove_metadata_file(directory, document)
         else:
             pass  # our directory with all metadata has just been deleted %)
         return document
@@ -219,6 +233,9 @@ class LocalJSONMetadata(object):
         self.filesystem.remove_file(os.path.join(old_directory, document.old_name_code + '.json'))
         return document
 
+    def remove_metadata_file(self, directory, document):
+        json_file = os.path.join(directory, '%s.json' % (document.get_stripped_filename(),))
+        self.filesystem.remove_file(json_file)
 
 class LocalJSONMetadataRetrievalPlugin(Plugin, BeforeRetrievalPluginPoint):
     title = "Filesystem Metadata Retrieval"

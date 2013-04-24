@@ -96,6 +96,9 @@ class Local(object):
         return document
 
     def retrieve(self, document):
+        # Do nothing for metadata only retrieval
+        if document.get_option('only_metadata'):
+            return document
         directory = self.filesystem.get_document_directory(document)
         if not document.get_docrule().no_doccode:
             fullpath = os.path.join(directory, document.get_current_metadata()['name'])
@@ -111,10 +114,6 @@ class Local(object):
                 revision = self.get_revision_count(document)
                 print 'GOT Document revision: %s' % revision
                 document.revision = revision
-        # TODO: Plugin can break a plugins iteration. WRONG! Manager Task.
-        #file will be read on first access lazily
-        if document.get_option('only_metadata'):
-            raise BreakPluginChain()
         return document
 
     def update(self, document):
@@ -214,12 +213,13 @@ class Local(object):
 
     def remove(self, document):
         # TODO: FIXME: Refactor this method so it's safer!
-
+        # Doing nothing for mark deleted call
+        opts = [o for o in document.options.iterkeys()]
+        if ('mark_deleted' in opts) or ('mark_revision_deleted' in opts):
+            return document
         directory = self.filesystem.get_document_directory(document)
         filename = None
-        if document.get_docrule().no_doccode:
-            filename = document.get_full_filename()
-        elif document.get_revision():
+        if document.get_revision():
             filename = document.get_filename_with_revision()
         if filename:
             #print "Deleting Filename: ", filename

@@ -21,6 +21,7 @@ from doc_codes.models import DocumentTypeRuleManager
 
 log = logging.getLogger('core.document')
 
+
 class Document(object):
     """
     DMS core Document Object
@@ -56,6 +57,7 @@ class Document(object):
         self.db_info = {}
         self.new_indexes = {}
         self.index_revisions = {}
+        self.marked_deleted = False
 
     def get_name(self):
         name = self.get_filename()

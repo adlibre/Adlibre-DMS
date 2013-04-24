@@ -15,12 +15,14 @@
             <th>Download</th>
         </tr>
     {% for fileinfo in fileinfo_db %}
+        {% if not fileinfo.deleted == True %}
         <tr>
             <td>{{ fileinfo.revision }}</td>
             <td>{{ fileinfo.name }}</td>
             <td>{{ fileinfo.created_date }}</td>
             <td><a href="/get/{{ document_name }}{%if fileinfo.args%}{{ fileinfo.args }}{%endif%}">Download</a></td>
         </tr>
+        {% endif %}
     {% endfor %}
     </table>
     {% endif %}

@@ -5,7 +5,27 @@
         url = '{% url bcp-print "Code128" barcode %}'
         $('#printer').attr("src", url);
         return false;
-    }
+    };
+
+    function deleteRevision(btn_id) {
+        var del_url = $('div#delete-url').attr('data-id');
+        var csrf = $('input[name=csrfmiddlewaretoken]').attr('value');
+        $('.revision-working-image-'+btn_id).show();
+        $.ajax({
+            url: del_url,
+            data: { revision: btn_id, csrfmiddlewaretoken: csrf },
+            type: "POST",
+            complete: function (data) {
+                if(data.status == 500) {
+                    alert(data.responseText);
+                } else {
+                document.location.reload();
+                };
+            }
+        });
+
+        return false;
+    };
 
     $(document).ready(function(){
         /* Autoprint barcode */
@@ -31,6 +51,12 @@
             $('#barcode-print-form').submit();
         });
 
+        /* Make the link act as a submit button on Delete code form */
+        $('#file-delete-submit').on('click', function(e){
+            e.preventDefault();
+            $('#file-delete-form').submit();
+        });
+
         /* IE, make the file upload modal larger and the file input bigger */
         if ($.browser.msie) {
             /* Show the name of the file to be uploaded under the file upload box */
@@ -42,10 +68,25 @@
             $('#id_file').attr('class', 'input-xxlarge');
         }
 
+        /* Make the link act as a submit button on Delete code form, preventing double submit */
+        $('.revision-delete-btn').on('click', function(e){
+            e.preventDefault();
+            var id = $(this).attr('data-id');
+            deleteRevision(id);
+            this.attr('disabled', true);
+        });
+
         /* Prevent file upload double submit */
         $('#file-upload-form').on('submit', function(e){
             $('#file-upload-submit').attr('disabled', true);
             $('#file-upload-cancel').attr('disabled', true);
+        });
+
+        /* Prevent file Delete double submit */
+        $('#file-delete-form').on('submit', function(e){
+            $('#file-delete-submit').attr('disabled', true);
+            $('#file-delete-cancel').attr('disabled', true);
+            $('#delete-working-image').show();
         });
 
         /* show filemodal if there are alerts */

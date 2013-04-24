@@ -86,6 +86,9 @@ class CouchDocument(Document):
         document.db_info = self.construct_db_info()
         if 'index_revisions' in self:
             document.index_revisions = self.index_revisions
+        if 'deleted' in self:
+            if self['deleted'] == 'deleted':
+                document.marked_deleted = True
         return document
 
     def construct_db_info(self, db_info = None):

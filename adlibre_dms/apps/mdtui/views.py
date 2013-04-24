@@ -16,7 +16,7 @@ from django.core.urlresolvers import reverse
 from django.core.cache import get_cache
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.conf import settings
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import render, redirect, render_to_response, HttpResponseRedirect
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
@@ -252,6 +252,7 @@ def search_results(request, step=None, template='mdtui/search.html'):
     export = False
     cache_documents_for = 3600 # Seconds
     page = request.GET.get('page')
+    force_clean_cache = request.session.get('cleanup_caches', False)
     # Sorting UI interactions
     sorting_field = request.POST.get('sorting_key', '') or ''
     order = request.POST.get('order', '') or ''
@@ -318,7 +319,11 @@ def search_results(request, step=None, template='mdtui/search.html'):
     # Caching by document keys and docrules list, as a cache key
     search_data = json.dumps(document_keys)+json.dumps(docrule_ids)+json.dumps(sorting_field)+json.dumps(order)
     cache_key = hash(search_data)
-    cached_documents = cache.get(cache_key, None)
+    if not force_clean_cache:
+        cached_documents = cache.get(cache_key, None)
+    else:
+        cached_documents = None
+        del request.session['cleanup_caches']
     if cleaned_document_keys and not cached_documents:
         if cleaned_document_keys:
             # TODO: speedup sorting using document_names from cache not to search again.
@@ -443,7 +448,7 @@ def indexing_edit(request, code, step='edit', template='mdtui/indexing.html'):
 
     log.debug('indexing_edit view called with return_url: %s, changed_indexes: %s' % (return_url, changed_indexes))
     doc = processor.read(code, {'user': request.user, })
-    if not processor.errors:
+    if not processor.errors and not doc.marked_deleted:
         if not request.POST:
             form = initEditIndexesForm(request, doc, changed_indexes)
             # Setting context variables required for autocomplete
@@ -471,6 +476,8 @@ def indexing_edit(request, code, step='edit', template='mdtui/indexing.html'):
                 error_warnings.append(error.parameter)
             else:
                 error_warnings.append(error)
+        if doc.marked_deleted:
+            error_warnings.append(MDTUI_ERROR_STRINGS['NO_DOC'])
 
     if form:
         autocomplete_list = extract_secondary_keys_from_form(form)
@@ -532,8 +539,37 @@ def indexing_edit_type(request, code, step='edit_type', template='mdtui/indexing
     return render(request, template, context)
 
 @login_required
+@group_required(SEC_GROUP_NAMES['edit_index'])
+def indexing_edit_file_delete(request, code):
+    """Deletes specified code or revision from system (Marks deleted)"""
+    # Decision of where to go back after or instead of removal
+    return_url = reverse('mdtui-home')
+    if 'edit_return' in request.session:
+        return_url = request.session['edit_return']
+    if request.method == 'POST':
+        revision = request.POST.get('revision', False)
+
+        if revision:
+            return_url = reverse('mdtui-index-edit-revisions', kwargs={'code': code})
+        processor = DocumentProcessor()
+        processor.read(code, {'user': request.user, 'only_metadata': True})
+        if not processor.errors:
+            # Selecting to delete (Mark deleted) revision or whole document
+            options = {'user': request.user}
+            if revision:
+                options['mark_revision_deleted'] = revision
+            else:
+                options['mark_deleted'] = True
+            processor.delete(code, options)
+            if not processor.errors:
+                request.session['cleanup_caches'] = True
+                return HttpResponseRedirect(return_url)
+    return HttpResponseRedirect(return_url)
+
+@login_required
 @group_required(SEC_GROUP_NAMES['index'])
 def indexing_edit_file_revisions(request, code, step=None, template='mdtui/indexing.html'):
+    """Editing file revisions for given code"""
     form = DocumentUploadForm(request.POST or None, request.FILES or None)
     revision_file = request.FILES.get('file', None)
     errors = []
@@ -545,7 +581,7 @@ def indexing_edit_file_revisions(request, code, step=None, template='mdtui/index
     }
     processor = DocumentProcessor()
     doc = processor.read(code, {'user': request.user, 'only_metadata': True})
-    if not processor.errors:
+    if not processor.errors and not doc.marked_deleted:
         if revision_file and form.is_valid():
             options = {
                 'user': request.user,

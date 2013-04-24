@@ -86,7 +86,7 @@ class CouchDBMetadata(object):
                 # updating tags to sync with Django DB
                 self.sync_document_tags(document)
                 # assuming no document with this _id exists. SAVING or overwriting existing
-                couchdoc=CouchDocument()
+                couchdoc = CouchDocument()
 
                 couchdoc.populate_from_dms(user, document)
                 couchdoc.save(force_update=True)
@@ -116,16 +116,34 @@ class CouchDBMetadata(object):
             old_couchdoc.delete()
         return document
 
-    def update_metadata_after_removal(self, document):
+    def remove(self, document):
         """
         Updates document CouchDB metadata on removal.
 
         (Removes CouchDB document)
         """
+        # Doing nothing for mark deleted call
+        stripped_filename = document.get_stripped_filename()
+        couchdoc = CouchDocument.get(docid=stripped_filename)
+        if 'mark_deleted' in document.options.iterkeys():
+            couchdoc['deleted'] = 'deleted'
+            couchdoc.save()
+            return document
+        if 'mark_revision_deleted' in document.options.iterkeys():
+            mark_revision = document.options['mark_revision_deleted']
+            if mark_revision in couchdoc.revisions.iterkeys():
+                couchdoc.revisions[mark_revision]['deleted'] = True
+            else:
+                raise PluginError('Object has no revision: %s' % mark_revision, 404)
+            couchdoc.save()
+            return document
+        if 'delete_revision' in document.options.iterkeys():
+            revision = document.options['delete_revision']
+            del couchdoc.revisions[revision]
+            couchdoc.save()
+            return document
         if not document.get_file_obj():
             #doc is fully deleted from fs
-            stripped_filename = document.get_stripped_filename()
-            couchdoc = CouchDocument.get(docid=stripped_filename)
             couchdoc.delete()
         return document
 
@@ -153,7 +171,7 @@ class CouchDBMetadata(object):
         if not document.tags:
             tags = []
             try:
-                doc_model = DocTags.objects.get(name = document.get_stripped_filename())
+                doc_model = DocTags.objects.get(name=document.get_stripped_filename())
                 tags = doc_model.get_tag_list()
             except DocTags.DoesNotExist:
                 pass
@@ -209,4 +227,4 @@ class CouchDBMetadataRemovalPlugin(Plugin, BeforeRemovalPluginPoint):
     worker = CouchDBMetadata()
 
     def work(self, document, **kwargs):
-        return self.worker.update_metadata_after_removal(document)
+        return self.worker.remove(document)

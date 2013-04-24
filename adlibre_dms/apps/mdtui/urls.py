@@ -26,6 +26,7 @@ urlpatterns = patterns('mdtui.views',
     url(r'^indexing/edit/(?P<code>[\w_-]+)$', 'indexing_edit', {'step': 'edit'}, name='mdtui-index-edit'),
     url(r'^indexing/edit_type/(?P<code>[\w_-]+)$', 'indexing_edit_type', {'step': 'edit_type'}, name='mdtui-index-edit-type'),
     url(r'^indexing/edit_revisions/(?P<code>[\w_-]+)$', 'indexing_edit_file_revisions', {'step': 'edit_revisions'}, name='mdtui-index-edit-revisions'),
+    url(r'^indexing/edit_delete/(?P<code>[\w_-]+)$', 'indexing_edit_file_delete', name='mdtui-index-edit-delete'),
     url(r'^indexing/edit_finished$', 'indexing_edit_result', {'step': 'edit_finish'}, name='mdtui-index-edit-finished'),
     # Common
     url(r'^download/(?P<code>[\w_-]+)$', 'download_pdf', name='mdtui-download-pdf'),

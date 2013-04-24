@@ -62,12 +62,15 @@ class Gzip(object):
         return document
 
     def work_retrieve(self, document):
+        # Doing nothing for only metadata option
+        if document.get_option('only_metadata'):
+            return document
         if document.get_current_metadata().get('compression_type', None) == self.compression_type:
             try:
                 decompressed_file = self._work(document.get_file_obj(), method='RETRIEVAL')
             except:
                 raise
-                #raise PluginError("Couln't decompress file: was it compressed when stored?")
+                #raise PluginError("Couldn't decompress file: was it compressed when stored?")
             document.set_file_obj(decompressed_file)
             document.decompressed_file = decompressed_file
         return document

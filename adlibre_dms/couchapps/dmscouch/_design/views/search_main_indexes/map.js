@@ -1,5 +1,8 @@
 function(doc) {
     if (doc.doc_type == "CouchDocument") {
+        if (doc.deleted == "deleted") {
+            pass
+        } else {
             emit(
                 doc._id,
                     {
@@ -9,5 +12,6 @@ function(doc) {
                         metadata_description: doc.metadata_description,
                     }
             );// emit
-    } //if doctype
-} //function
+        } // deleted
+    } // if doctype
+} // function
