@@ -90,8 +90,9 @@ class HashCodeWorker(object):
         return document
 
     def work_retrieve(self, document, method):
-        hashcode = document.get_hashcode()
-        new_hashcode = self.get_hash(document.get_file_obj().read(), method)
-        if hashcode and not (new_hashcode == hashcode):
-            raise PluginError("Hashcode did not validate.", 500)
+        if document.get_file_obj():
+            hashcode = document.get_hashcode()
+            new_hashcode = self.get_hash(document.get_file_obj().read(), method)
+            if hashcode and not (new_hashcode == hashcode):
+                raise PluginError("Hashcode did not validate.", 500)
         return document
