@@ -7,7 +7,6 @@ License: See LICENSE for license information
 """
 import json
 import os
-import time
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
@@ -246,6 +245,7 @@ class APITest(DMSTestCase):
                 raise self.failureException('System integrity broken, file: %s absent' % fname)
 
     def test_17_api_tags(self):
+        """ Adds a tad to a file and then deletes it"""
         # Login
         self.client.login(username=self.username, password=self.password)
         for filename in [self.documents_pdf[0], self.documents_jpg[0]]:
@@ -253,7 +253,7 @@ class APITest(DMSTestCase):
             url = reverse('api_file', kwargs={'code': filename})
             data = {'filename': filename, 'remove_tag_string': self.test_tag}
             response = self.client.put(url, data)
-            self.assertContains(response, '', status_code=200)
+            self.assertEqual(response.status_code, 200)
             # Check that we don't have tag
             url = reverse('api_file_info', kwargs={'code': filename})
             response = self.client.get(url)
@@ -262,7 +262,7 @@ class APITest(DMSTestCase):
             url = reverse('api_file', kwargs={'code': filename})
             data = {'filename': filename, 'tag_string': self.test_tag}
             response = self.client.put(url, data)
-            self.assertContains(response, '', status_code=200)
+            self.assertEqual(response.status_code, 200)
             # Check that we have tag
             url = reverse('api_file_info', kwargs={'code': filename})
             response = self.client.get(url)
@@ -327,7 +327,7 @@ class APITest(DMSTestCase):
 
     def test_zz_cleanup(self):
         """Test Cleanup"""
-        self.cleanAll(check_response=True)
+        self.cleanAll()
         # Doc #0 should be already deleted in delete test
         self.cleanUp([self.documents_pdf_this_test[1], self.documents_pdf_this_test[2]])
         self.cleanUp(self.documents_codes)

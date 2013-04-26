@@ -81,7 +81,8 @@ class CouchDocument(Document):
         Updates DMS Document object with CouchDB fields data.
         """
         document.metadata = self.revisions
-        document.tags = self.tags
+        if self.tags:
+            document.tags = self.tags
         document.stripped_filename = self.id
         document.db_info = self.construct_db_info()
         if 'index_revisions' in self:
