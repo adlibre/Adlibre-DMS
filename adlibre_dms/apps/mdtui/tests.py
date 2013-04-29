@@ -3829,6 +3829,42 @@ class MDTUI(MUITestData):
         self.assertNotContains(response, t)
         self.assertContains(response, t_existing)
 
+    def test_92_wrong_mdts_after_return_from_search(self):
+        """Refs #1025 Docidx_2EmployeeResults (Wrong MDTs after return from certain state of edit_indexes views)"""
+        proper_mdt_name = 'Mdt5'
+        improper_mdt_name = 'Mdt2'
+        search_found_docs = [
+            self.edit_document_name_1,
+            self.edit_document_name_2,
+            self.edit_document_name_3,
+            self.edit_document_name_5,
+            self.edit_document_name_7,
+
+        ]
+        working_doc = self.edit_document_name_2
+        url = reverse('mdtui-search')
+        response = self.client.post(url, self.select_mdt5)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Employee')
+        # Posting ADL docs range
+        response = self.client.post(new_url, self.date_range_all_ADL)
+        self.assertEqual(response.status_code, 302)
+        results_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(results_url)
+        self.assertEqual(response.status_code, 200)
+        for d in search_found_docs:
+            self.assertContains(response, d)
+        edit_url = reverse('mdtui-index-edit', kwargs={'code': working_doc})
+        response = self.client.get(edit_url)
+        self.assertContains(response, self.m2_doc1_dict['description'])  # doc parsed and rendered
+        # Emulating cancel press (Going back to search)
+        response = self.client.get(results_url)
+        self.assertContains(response, proper_mdt_name)
+        self.assertNotContains(response, improper_mdt_name)
+
     def test_z_cleanup(self):
         """
         Cleaning up after all tests finished.

@@ -268,6 +268,7 @@ def cleanup_search_session(request):
             'search_docrule_ids',
             'searching_docrule_id',
             'search_results',
+            "edit_mdts",
     )
     for var in vars:
         _cleanup_session_var(request, var)
@@ -278,6 +279,7 @@ def cleanup_indexing_session(request):
             'document_keys_dict',
             'indexing_docrule_id',
             'barcode',
+            "edit_mdts",
     )
     for var in vars:
         _cleanup_session_var(request, var)

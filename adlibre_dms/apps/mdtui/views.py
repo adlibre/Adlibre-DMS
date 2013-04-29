@@ -454,7 +454,7 @@ def indexing_edit(request, code, step='edit', template='mdtui/indexing.html'):
             # Setting context variables required for autocomplete
             docrule_id = str(doc.get_docrule().id)
             request.session['indexing_docrule_id'] = docrule_id
-            request.session['mdts'] = get_mdts_for_docrule(docrule_id)
+            request.session['edit_mdts'] = get_mdts_for_docrule(docrule_id)
         else:
             old_db_info = doc.get_db_info()
             secondary_indexes = processEditDocumentIndexForm(request, doc)
@@ -608,7 +608,7 @@ def indexing_edit_file_revisions(request, code, step=None, template='mdtui/index
 def indexing_edit_result(request, step='edit_finish', template='mdtui/indexing.html'):
     """Confirmation step for editing indexes"""
     # initialising context
-    required_vars = ('edit_processor_indexes', 'edit_index_barcode', 'old_document_keys', 'edit_return', 'mdts')
+    required_vars = ('edit_processor_indexes', 'edit_index_barcode', 'old_document_keys', 'edit_return', "edit_mdts")
     variables = {}
     warnings = []
     for var in required_vars:
@@ -910,6 +910,11 @@ def mdt_parallel_keys(request):
 
     try:
         doc_mdts = request.session["mdts"]
+    except KeyError:
+        pass
+
+    try:
+        doc_mdts = request.session["edit_mdts"]
     except KeyError:
         pass
 
