@@ -96,12 +96,11 @@ class Local(object):
         return document
 
     def retrieve(self, document):
-        # Do nothing for metadata only retrieval
         if document.get_option('only_metadata'):
             return document
         directory = self.filesystem.get_document_directory(document)
         if not document.get_docrule().no_doccode:
-            fullpath = os.path.join(directory, document.get_current_metadata()['name'])
+            fullpath = os.path.join(directory, document.get_current_file_revision_data()['name'])
         else:
             filename = document.get_full_filename()
             fullpath = os.path.join(directory, filename)
@@ -123,7 +122,7 @@ class Local(object):
             # Renaming and moving files to new location files
             new_directory = self.filesystem.get_or_create_document_directory(document)
             new_name = document.get_filename()
-            metadata = document.get_metadata()
+            file_revision_data = document.get_file_revisions_data()
             # Making new document OLD one for retrieving data purposes
             document.doccode = None
             document.set_filename(document.old_name_code)
@@ -132,7 +131,7 @@ class Local(object):
             # Returning document back to normal
             document.doccode = None
             document.set_filename(new_name)
-            for key, value in metadata.iteritems():
+            for key, value in file_revision_data.iteritems():
                 new_file_revision = value['name']
                 new_path = os.path.join(new_directory, new_file_revision)
                 old_rev_name = self.convert_metadata_for_revision(new_file_revision, old_code, key)
@@ -162,7 +161,7 @@ class Local(object):
         """
         Return List of DocCodes in the repository for a given rule
         """
-        # Iterate through the directory hierarchy looking for metadata containing dirs.
+        # Iterate through the directory hierarchy looking for file revision data containing dirs.
         # This is more efficient than other methods of looking for leaf directories
         # and works for storage rules where the depth of the storage tree is not constant for all doccodes.
 
@@ -193,7 +192,7 @@ class Local(object):
         doccodes = []
         for directory, metadata_info in directories:
             doc_name = metadata_info['document_name']
-            if finish and len(doccodes) >= finish :
+            if finish and len(doccodes) >= finish:
                 break
             elif searchword and not self.document_matches_search(metadata_info, searchword):
                 pass
@@ -202,13 +201,14 @@ class Local(object):
                 pass
             else:
                 if doccode.no_doccode:
-                    doccodes.append({'name': doc_name,
-                        'directory': os.path.split(directory)[1]})
+                    doccodes.append({
+                        'name': doc_name,
+                        'directory': os.path.split(directory)[1]
+                    })
                 else:
                     doccodes.append({'name': doc_name})
         if start:
             doccodes = doccodes[start:]
-        #print "DOCCODES: %s" % doccodes
         return doccodes
 
     def remove(self, document):
@@ -234,7 +234,7 @@ class Local(object):
                 # We no longer use no_doccode concept so this is not required for now:
                 #or\
                 # (not document.get_docrule().no_doccode and len(os.listdir(directory)) <= 1):
-                # delete everything or no files at all or only metadata file
+                # delete everything or no files at all or only file revision data file
                 # except no_doccode files which may have 1 file in the directory
             try:
                 shutil.rmtree(directory)
@@ -243,7 +243,7 @@ class Local(object):
         return document
 
     def get_revision_count(self, document):
-        """Hacky way, but faster than reading the revs from the metadata"""
+        """Hacky way, but faster than reading the revs from the file revision data"""
         directory = self.filesystem.get_document_directory(document)
         file_count = 0
         if document.get_docrule().no_doccode:

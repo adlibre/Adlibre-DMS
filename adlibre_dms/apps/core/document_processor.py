@@ -125,7 +125,7 @@ class DocumentProcessor(object):
         Method creates, instantiates and populates new Document() object.
         Using name and/or search filter criteria provided.
 
-        Currently can read Document() with file object attached or either read only metadata.
+        Currently can read Document() with file object attached or either read only file info data.
 
         """
         log.debug('READ Document %s with options: %s' % (document_name, options))
@@ -253,7 +253,7 @@ class DocumentProcessor(object):
                         doc.set_hashcode(value)
                     if property_name == 'revision':
                         doc.set_revision(value)
-                    # Run for plugins without retrieving document. Only count metadata.
+                    # Run for plugins without retrieving document. Only count file info data.
                     if property_name == 'revision_count':
                         doc.update_options({'revision_count': True,
                                             'only_metadata': True})

@@ -592,11 +592,10 @@ def indexing_edit_file_revisions(request, code, step=None, template='mdtui/index
                 return HttpResponseRedirect(request.path)
             else:
                 errors.append(processor.errors)
-        # HACK: sorting doc.metadata to represent order in a nice way. (Should be done in core)
-        m = doc.get_metadata()
+        frd = doc.get_file_revisions_data()
         context.update({
-            'metadata': m,
-            'metadata_order_list': sorted(m.iterkeys()),
+            'file_revision_data': frd,
+            'file_revision_data_order_list': sorted(frd.iterkeys()),
         })
     else:
         errors = [MDTUI_ERROR_STRINGS['NO_DOC']]

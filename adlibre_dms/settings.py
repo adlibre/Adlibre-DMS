@@ -441,7 +441,7 @@ COMPRESS_ENABLED = False
 THEME_NAME = 'solid' # 'adlibre' or 'basic' or 'solid'
 
 # Date/time formats used throughout MUI app and (in future DMS forms)
-DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S" # format that is used in document metadata
+DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"  # format that is used in document metadata
 DATE_FORMAT = "%d/%m/%Y"
 # Note that changing this into any other 'Ymd' sequence will make dates unsearchable.
 # To change this you wold have to migrate CouchDB indexes.

@@ -80,6 +80,7 @@ class APITest(DMSTestCase):
             self.assertEqual(response.status_code, 400)
 
     def test_06_get_rev_count(self):
+        """Uploading new revision of the document and checking it exists"""
         for f in self.documents_pdf:
             url = reverse('api_revision_count', kwargs={'document': f})
             self.client.login(username=self.username, password=self.password)
@@ -141,8 +142,8 @@ class APITest(DMSTestCase):
 
     def test_13_api_fileinfo(self):
         """
-            Sometimes metadata can be corrupt due to plugins misconfiguration or improper file storage.
-            Tests this bug with metadata:
+            Sometimes file revision data can be corrupt due to plugins misconfiguration or improper file storage.
+            Tests this bug with file info data:
             {
                 "1": {
                          "mimetype": "application/pdf",
@@ -152,9 +153,9 @@ class APITest(DMSTestCase):
                          "created_date": "2013-02-20 05:06:41"
                      },
                 "2": {
-                    "created_date": "2013-02-20 05:07:38",
-                    "name": "ADL-0001_r2.pdf",
-                    "revision": 2
+                        "created_date": "2013-02-20 05:07:38",
+                        "name": "ADL-0001_r2.pdf",
+                        "revision": 2
                 }
             }
         """

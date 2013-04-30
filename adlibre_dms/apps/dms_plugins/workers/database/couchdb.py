@@ -21,9 +21,9 @@ from couchdbkit.resource import ResourceNotFound
 
 
 class CouchDBMetadata(object):
-    """
-        Stores metadata in CouchDB DatabaseManager.
-        Handles required logic for metadata <==> Document(object) manipulations.
+    """Stores metadata in CouchDB DatabaseManager.
+
+    Handles required logic for metadata <==> Document(object) manipulations.
     """
 
     def store(self, document):
@@ -48,19 +48,19 @@ class CouchDBMetadata(object):
                 return document
             else:
                 # if not exists all required metadata getting them from doccode retrieve sequence
-                if not document.metadata:
+                if not document.file_revision_data:
                     # HACK: Preserving db_info here... (May be Solution!!!)
                     db_info = document.get_db_info()
-                    document = processor.read(document.file_name, options={'only_metadata':True, 'user':document.user})
+                    document = processor.read(document.file_name, options={'only_metadata': True, 'user': document.user})
 
-                    # HACK: saving NEW metadata ONLY if they exist in new uploaded doc (Preserving old indexes)'
+                    # HACK: saving NEW file_revision_data ONLY if they exist in new uploaded doc (Preserving old indexes)
                     if db_info:
                         # Storing new indexes
                         document.set_db_info(db_info)
                     else:
                         # TODO: move this code into a proper place (UPDATE method)
-                        # Asking couchdb about if old metadata exists and updating them properly
-                        current_revisions = document.metadata
+                        # Asking couchdb about if old file_revision_data exists and updating them properly
+                        current_revisions = document.file_revision_data
                         try:
                             # Only if document exists in DB. Falling gracefully if not.
                             temp_doc = self.retrieve(document)
@@ -77,10 +77,10 @@ class CouchDBMetadata(object):
                                 old_metadata['mdt_indexes']['date'] = old_cr_date
                                 document.set_db_info(old_metadata['mdt_indexes'])
                                 document.set_index_revisions(old_index_revisions)
-                                document.set_metadata(current_revisions)
+                                document.set_file_revisions_data(current_revisions)
                             else:
                                 # Preserving set revisions anyway.
-                                document.set_metadata(current_revisions)
+                                document.set_file_revisions_data(current_revisions)
                         except ResourceNotFound:
                             pass
                 # updating tags to sync with Django DB

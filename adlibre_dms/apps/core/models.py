@@ -45,10 +45,10 @@ class Document(object):
         self.stripped_filename = None
         self.revision = None
         self.hashcode = None
-        self.metadata = None   # TODO: Refactor to file_revisions_data or something like that. This name is to broad.
+        self.file_revision_data = None
         self.fullpath = None
         self.file_obj = None
-        self.current_metadata = {}
+        self.current_file_revision_data = {}
         self.mimetype = None
         self.tags = []
         self.tag_string = ''
@@ -103,8 +103,8 @@ class Document(object):
         self.doccode = new_docrule
 
     def get_mimetype(self):
-        if not self.mimetype and self.get_current_metadata():
-            self.mimetype = self.get_current_metadata().get('mimetype', None)
+        if not self.mimetype and self.get_current_file_revision_data():
+            self.mimetype = self.get_current_file_revision_data().get('mimetype', None)
         if not self.mimetype and self.get_file_obj():
             mime = magic.Magic( mime = True )
             self.mimetype = mime.from_buffer( self.get_file_obj().read() )
@@ -113,7 +113,7 @@ class Document(object):
 
     def set_mimetype(self, mimetype):
         self.mimetype = mimetype
-        self.update_current_metadata({'mimetype': mimetype})
+        self.update_current_file_revision_data({'mimetype': mimetype})
 
     def set_file_obj(self, file_obj):
         self.file_obj = file_obj
@@ -135,18 +135,13 @@ class Document(object):
         # Need to renew docrule on document receives name
         self.doccode = self.get_docrule()
 
-    def get_current_metadata(self):
-        if not self.current_metadata and self.get_metadata() and self.get_revision():
-            self.current_metadata = self.get_metadata()[str(self.get_revision())]
-        return self.current_metadata
-
     def get_filename(self):
         try:
             name = self.file_name or self.file_obj.name
         except AttributeError:
             name = ''
         if not name and self.get_revision():
-            name = self.get_current_metadata()['name']
+            name = self.get_current_file_revision_data()['name']
         return name
 
     def get_stripped_filename(self):
@@ -214,20 +209,27 @@ class Document(object):
         self.hashcode = hashcode
 
     def save_hashcode(self, hashcode):
-        self.update_current_metadata({'hashcode': hashcode})
+        self.update_current_file_revision_data({'hashcode': hashcode})
 
     def get_hashcode(self):
         return self.hashcode
 
-    def get_metadata(self):
-        return self.metadata
+    ####################################### FILE REVISIONS HELPERS #####################################################
+    def get_file_revisions_data(self):
+        return self.file_revision_data
 
-    def set_metadata(self, metadata):
-        self.metadata = metadata
+    def set_file_revisions_data(self, file_revision_data):
+        self.file_revision_data = file_revision_data
 
-    def update_current_metadata(self, metadata):
-        self.get_current_metadata().update(metadata)
+    def update_current_file_revision_data(self, file_revision_data):
+        self.get_current_file_revision_data().update(file_revision_data)
 
+    def get_current_file_revision_data(self):
+        if not self.current_file_revision_data and self.get_file_revisions_data() and self.get_revision():
+            self.current_file_revision_data = self.get_file_revisions_data()[str(self.get_revision())]
+        return self.current_file_revision_data
+
+    ########################################### OPTIONS HELPERS ########################################################
     def get_options(self):
         return self.options
 
@@ -241,22 +243,13 @@ class Document(object):
         self.options[key] = value
 
     def get_creation_time(self):
-        metadata = self.get_current_metadata()
-        if metadata:
-            creation_time = metadata.get('creation_time', None)
+        file_revision_data = self.get_current_file_revision_data()
+        if file_revision_data:
+            creation_time = file_revision_data.get('creation_time', None)
         else:
-            creation_time = time.strftime(settings.DATETIME_FORMAT, time.localtime(os.stat(self.get_fullpath()).st_ctime))
+            creation_time = time.strftime(settings.DATETIME_FORMAT,
+                                          time.localtime(os.stat(self.get_fullpath()).st_ctime))
         return creation_time
-
-    def get_dict(self):
-        d = {}
-        d['metadata'] = self.get_metadata()
-        d['current_metadata'] = self.get_current_metadata()
-        doccode = self.get_docrule()
-        d['doccode'] = {'title': doccode.get_title(), 'id': doccode.get_id()}
-        d['document_name'] = self.get_filename()
-        d['tags'] = self.get_tags()
-        return d
 
     def get_tags(self):
         return self.tags

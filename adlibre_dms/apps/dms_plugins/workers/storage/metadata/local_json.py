@@ -11,7 +11,7 @@ from dms_plugins.workers.storage.local import LocalFilesystemManager
 
 
 class LocalJSONMetadata(object):
-    """Stores metadata in the same directory as document revisions in JSON format."""
+    """Stores file revision data in the same directory as document revisions in JSON format."""
     def __init__(self):
         self.filesystem = LocalFilesystemManager()
 
@@ -28,7 +28,7 @@ class LocalJSONMetadata(object):
             revision = 'N/A'
             fake_metadata = self.get_fake_metadata(directory, document.get_full_filename())
             document.set_revision(revision)
-            document.set_metadata({revision: fake_metadata})
+            document.set_file_revisions_data({revision: fake_metadata})
         else:
             fileinfo_db, new_revision = self.load_metadata(document.get_stripped_filename(), directory)
             if not fileinfo_db:
@@ -41,7 +41,7 @@ class LocalJSONMetadata(object):
                 fileinfo_db[str(revision)]
             except:
                 raise PluginError("No such revision for this document", 404)
-            document.set_metadata(fileinfo_db)
+            document.set_file_revisions_data(fileinfo_db)
         return document
 
     def update_metadata_after_removal(self, document):
@@ -68,13 +68,13 @@ class LocalJSONMetadata(object):
             if not fileinfo_db:
                 self.remove_metadata_file(directory, document)
         else:
-            pass  # our directory with all metadata has just been deleted %)
+                pass  # our directory with all file revision data has just been deleted %)
         return document
 
     def update(self, document):
-        """Updates document metadata after it has been updated, e.g. updated revision"""
+        """Updates document file revision data after it has been updated, e.g. updated revision"""
         if 'update_file' in document.options:
-            # FIXME metadata should be updated more often if we plan to store secondary keys on a disk.
+            # FIXME file revision data should be updated more often if we plan to store secondary keys on a disk.
             directory = self.filesystem.get_or_create_document_directory(document)
             document = self.save_metadata(document, directory)
         if document.old_docrule:
@@ -105,7 +105,7 @@ class LocalJSONMetadata(object):
         return fileinfo_db, revision
 
     def convert_metadata_for_docrules(self, fileinfo_db, new_name):
-        """Converts file metadata into another docrule, changing it's file name everywhere"""
+        """Converts file file revision data into another docrule, changing it's file name everywhere"""
         for rev_key, revision in fileinfo_db.iteritems():
             old_file_name = revision['name']
             extension = old_file_name.split('.')[1]
@@ -141,14 +141,14 @@ class LocalJSONMetadata(object):
             'created_date' : self.date_to_string(datetime.today())
         }
 
-        if document.get_current_metadata():
-            fileinfo.update(document.get_current_metadata())
+        if document.get_current_file_revision_data():
+            fileinfo.update(document.get_current_file_revision_data())
 
         fileinfo_db[document.get_revision()] = fileinfo
 
         self.write_metadata(fileinfo_db, document, directory)
         # Required for any update sequence
-        document.set_metadata(fileinfo_db)
+        document.set_file_revisions_data(fileinfo_db)
         return document
 
     def write_metadata(self, fileinfo_db, document, directory):
@@ -183,7 +183,7 @@ class LocalJSONMetadata(object):
                         keys = metadatas.keys()
                         keys.sort()
                         first_metadata = metadatas[keys[0]]
-                elif doccode.no_doccode and not dirs:  # leaf directory, no metadata file => NoDoccode
+                elif doccode.no_doccode and not dirs:  # leaf directory, no file revision data file => NoDoccode
                     first_metadata = self.get_fake_metadata(root, fil)
                     metadatas = [first_metadata]
                     doc = fil
@@ -209,26 +209,26 @@ class LocalJSONMetadata(object):
         for root, dirs, files in os.walk(doccode_directory):
             for fil in files:
                 doc, extension = os.path.splitext(fil)
-                if extension == '.json':  # dirs with metadata
+                if extension == '.json':  # dirs with file revision data
                     metadatas.append(self.load_from_file(os.path.join(root, fil)))
         return metadatas
 
     def migrate_metadata_to_new_code(self, document):
-        """Converts old metadata (file revisions) fot use with new document Code (name) and/or for new DocTypeRule"""
-        # Storing new document type metadata here
+        """Converts old file revision data fot use with new document Code (name) and/or for new DocTypeRule"""
+        # Storing new document type file revision data here
         new_directory = self.filesystem.get_or_create_document_directory(document)
         new_name = document.get_filename()
         # Making new document OLD one for retrieving data purposes
         document.doccode = None
         document.set_filename(document.old_name_code)
-        # Converting metadata for new document name
+        # Converting file revision data for new document name
         old_directory = self.filesystem.get_or_create_document_directory(document)
         fileinfo_db, new_revision = self.load_metadata(document.get_stripped_filename(), old_directory)
         new_metadata = self.convert_metadata_for_docrules(fileinfo_db, new_name)
         # Moving document object back
         document.doccode = None
         document.set_filename(new_name)
-        document.set_metadata(new_metadata)
+        document.set_file_revisions_data(new_metadata)
         document = self.save_metadata(document, new_directory)
         self.filesystem.remove_file(os.path.join(old_directory, document.old_name_code + '.json'))
         return document
@@ -239,7 +239,7 @@ class LocalJSONMetadata(object):
 
 class LocalJSONMetadataRetrievalPlugin(Plugin, BeforeRetrievalPluginPoint):
     title = "Filesystem Metadata Retrieval"
-    description = "Loads document metadata as local file"
+    description = "Loads document file revision data as local file"
 
     plugin_type = 'metadata'
     worker = LocalJSONMetadata()
@@ -250,7 +250,7 @@ class LocalJSONMetadataRetrievalPlugin(Plugin, BeforeRetrievalPluginPoint):
 
 class LocalJSONMetadataStoragePlugin(Plugin, StoragePluginPoint):
     title = "Filesystem Metadata Storage"
-    description = "Saves document metadata as local file"
+    description = "Saves document file revision data as local file"
 
     plugin_type = 'metadata'
     worker = LocalJSONMetadata()
@@ -261,7 +261,7 @@ class LocalJSONMetadataStoragePlugin(Plugin, StoragePluginPoint):
 
 class LocalJSONMetadataRemovalPlugin(Plugin, BeforeRemovalPluginPoint):
     title = "Filesystem Metadata Removal"
-    description = "Updates document metadata after removal of document (actualy some revisions of document)"
+    description = "Updates document file revision data after removal of document (actualy some revisions of document)"
 
     plugin_type = 'metadata'
     worker = LocalJSONMetadata()
@@ -272,7 +272,7 @@ class LocalJSONMetadataRemovalPlugin(Plugin, BeforeRemovalPluginPoint):
 
 class LocalJSONMetadataUpdatePlugin(Plugin, UpdatePluginPoint):
     title = "Filesystem Metadata Update"
-    description = "Updates document metadata after update. e.g. Update of document revision."
+    description = "Updates document file revision data after modification of document revisions."
 
     plugin_type = 'metadata'
     worker = LocalJSONMetadata()

@@ -1,6 +1,6 @@
 {% load revisions_tags %}
 {% load i18n %}
-    {% if metadata %}
+    {% if file_revision_data %}
     <fieldset>
         <div class="span3" style="text-align: center;">
             <a href="#fileModal" data-toggle="modal"><img src="{{ STATIC_URL }}upload.png" /></a>
@@ -24,7 +24,7 @@
             </tr>
             </thead>
             <tbody>
-        {% for revision in metadata_order_list %}
+        {% for revision in file_revision_data_order_list %}
         {% set_rev_item revision %}
             {% if not rev.deleted %}
             <tr>

@@ -22,7 +22,7 @@ from dms_plugins import models, forms, representator
 from dms_plugins.operator import PluginsOperator
 from core.document_processor import DocumentProcessor
 from browser.forms import UploadForm
-from core.http import DocumentResponse
+from core.http import DMSObjectResponse
 
 # FIXME: temporary logger
 #log = logging.getLogger('browser')
@@ -89,16 +89,16 @@ def get_file(request, code, suggested_format=None):
     if processor.errors:
         response = error_response(processor.errors)
     else:
-        response = DocumentResponse(document)
+        response = DMSObjectResponse(document)
     return response
 
 @staff_member_required
 def revision_document(request, document):
     document_name = document
     processor = DocumentProcessor()
-    document = processor.read(document_name, options={'only_metadata':True, 'user': request.user,})
+    document = processor.read(document_name, options={'only_metadata': True, 'user': request.user})
     extra_context = {}
-    metadata = document.get_metadata()
+    file_revision_data = document.get_file_revisions_data()
     def get_args(fileinfo):
         args = []
         for arg in ['revision', 'hashcode']:
@@ -109,13 +109,15 @@ def revision_document(request, document):
             arg_string = "?" + "&".join(args)
         return arg_string
     if not processor.errors:
-        if metadata:
-            revisions = map(lambda x: int(x), metadata.keys())
+        if file_revision_data:
+            revisions = map(lambda x: int(x), file_revision_data.keys())
             revisions.sort()
             fileinfos = []
             for revision in revisions:
-                fileinfo = metadata[str(revision)]
+                fileinfo = file_revision_data[str(revision)]
                 fileinfo['args'] = get_args(fileinfo)
+                if not 'deleted' in fileinfo:
+                    fileinfo['deleted'] = False
                 fileinfos.append(fileinfo)
             extra_context = {
                 'fileinfo_db': fileinfos,

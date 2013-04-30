@@ -58,14 +58,14 @@ class Gzip(object):
         if document.get_file_obj():
             compressed_file = self._work(document.get_file_obj(), method='STORAGE')
             document.set_file_obj(compressed_file)
-            document.update_current_metadata({'compression_type': self.compression_type})
+            document.update_current_file_revision_data({'compression_type': self.compression_type})
         return document
 
     def work_retrieve(self, document):
-        # Doing nothing for only metadata option
+        # Doing nothing for only_metadata option
         if document.get_option('only_metadata'):
             return document
-        if document.get_current_metadata().get('compression_type', None) == self.compression_type:
+        if document.get_current_file_revision_data().get('compression_type', None) == self.compression_type:
             try:
                 decompressed_file = self._work(document.get_file_obj(), method='RETRIEVAL')
             except:

@@ -71,8 +71,8 @@ class CouchDocument(Document):
                 self.mdt_indexes = db_info
                 # failing gracefully due to ability to save files with API (without metadata)
             except: pass
-        self.search_keywords = [] # TODO: not implemented yet
-        self.revisions = document.metadata
+        self.search_keywords = []  # TODO: not implemented yet
+        self.revisions = document.get_file_revisions_data()
         if document.index_revisions:
             self.index_revisions = document.index_revisions
 
@@ -80,7 +80,7 @@ class CouchDocument(Document):
         """
         Updates DMS Document object with CouchDB fields data.
         """
-        document.metadata = self.revisions
+        document.set_file_revisions_data(self.revisions)
         if self.tags:
             document.tags = self.tags
         document.stripped_filename = self.id
@@ -131,7 +131,8 @@ class CouchDocument(Document):
             # Setting document current revision metadata date, except not exists using now() instead.
             try:
                 revision = unicode(document.revision)
-                self.metadata_created_date = datetime.strptime(document.metadata[revision][u'created_date'], "%Y-%m-%d %H:%M:%S")
+                doc_date = document.file_revision_data[revision][u'created_date']
+                self.metadata_created_date = datetime.strptime(doc_date, "%Y-%m-%d %H:%M:%S")
             except KeyError:
                 # Model stores default "utcnow" date farther
                 pass
@@ -187,7 +188,7 @@ class CouchDocument(Document):
         return document
 
     def update_file_revisions_metadata(self, document):
-        """ Stores files revisions metadata into CouchDB from DMS document object
+        """ Stores files revision data into CouchDB from DMS document object
 
         E.g.: Before this function:
             couchdoc.revisions = { '1': { ... }, }
@@ -196,7 +197,7 @@ class CouchDocument(Document):
             couchdoc.revisions = { '1': { ... }, '2': { ... }, }
         (Loaded from a Document() object)
         """
-        self.revisions = document.get_metadata()
+        self.revisions = document.get_file_revisions_data()
 
     def migrate_metadata_for_docrule(self, document, old_couchdoc):
         """Moving a CouchDB document into another file"""
@@ -208,7 +209,7 @@ class CouchDocument(Document):
             # Appending new document indexes revision to revisions dict
             new_revision = self.index_revisions.__len__() + 1
             self.index_revisions[str(new_revision)] = old_couchdoc.construct_index_revision_dict()
-        self.revisions = document.get_metadata()
+        self.revisions = document.get_file_revisions_data()
         self.metadata_description = old_couchdoc.metadata_description
         if document.user:
             self.set_user_name_for_couch(document.user)
@@ -223,7 +224,7 @@ class CouchDocument(Document):
         self.id = document.get_filename()
 
     def set_user_name_for_couch(self, user):
-        # user name/id from Django user
+        """ user name/id from Django user """
         self.metadata_user_id = str(user.pk)
         if user.first_name:
             self.metadata_user_name = user.first_name + u' ' + user.last_name

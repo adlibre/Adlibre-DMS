@@ -22,7 +22,7 @@ from api.decorators.auth import logged_in_or_basicauth
 from api.decorators.group_required import group_required
 
 from core.document_processor import DocumentProcessor
-from core.http import DocumentResponse
+from core.http import DMSObjectResponse, DMSOBjectRevisionsData
 from dms_plugins.operator import PluginsOperator
 from dms_plugins.models import DoccodePluginMapping
 from mdt_manager import MetaDataTemplateManager
@@ -93,7 +93,7 @@ class FileHandler(BaseFileHandler):
             log.error('FileHandler.read request to marked deleted document: %s' % code)
             return rc.NOT_FOUND
         else:
-            response = DocumentResponse(document)
+            response = DMSObjectResponse(document)
             log.info('FileHandler.read request fulfilled for code: %s, options: %s' % (code, options))
         return response
 
@@ -127,8 +127,8 @@ class FileHandler(BaseFileHandler):
                 return rc.BAD_REQUEST
         log.info('FileHandler.update request fulfilled for code: %s, format: %s, rev: %s, hash: %s.'
                  % (code, suggested_format, revision, hashcode))
-        response_string = json.dumps(document.get_dict())
-        return HttpResponse(response_string)  # FIXME should be rc.ALL_OK
+        resp = DMSOBjectRevisionsData(document).jsons
+        return HttpResponse(resp)  # FIXME should be rc.ALL_OK
 
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
@@ -214,19 +214,19 @@ class OldFileHandler(BaseFileHandler):
             log.error('OldFileHandler.read request to marked deleted document: %s' % code)
             return rc.NOT_FOUND
         else:
-            response = DocumentResponse(document)
+            response = DMSObjectResponse(document)
             log.info('OldFileHandler.read request fulfilled for code: %s, options: %s' % (code, options))
         return response
 
 
 class FileInfoHandler(BaseFileHandler):
     """
-    Returns document metadata
+    Returns document file info data
     """
     allowed_methods = ('GET',)
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
+    @method_decorator(group_required('api'))  # FIXME: Should be more granular permissions
     def read(self, request, code, suggested_format=None):
         revision, hashcode, extra = self._get_info(request)
         processor = DocumentProcessor()
@@ -241,23 +241,15 @@ class FileInfoHandler(BaseFileHandler):
         if document.marked_deleted:
             log.error('FileInfoHandler.read request to marked deleted document: %s' % code)
             return rc.NOT_FOUND
-        docrule = document.get_docrule()
-        # FIXME: there might be more than one docrules!
-        mapping = docrule.get_docrule_plugin_mappings()
         if processor.errors:
             log.error('FileInfoHandler.read errors: %s' % processor.errors)
             if settings.DEBUG:
                 raise Exception('FileInfoHandler.read manager.errors')
             else:
                 return rc.BAD_REQUEST
-        # FIXME This is ugly
-        # TODO: should go into core.http
-        info = document.get_dict()
-        info['document_list_url'] = reverse('ui_document_list', kwargs={'id_rule': mapping.pk})
-        info['tags'] = document.get_tags()
-        info['no_doccode'] = docrule.no_doccode
+        info = DMSOBjectRevisionsData(document).jsons
         log.info('FileInfoHandler.read request fulfilled for %s, ext %s, rev %s, hash %s' % (code, suggested_format, revision, hashcode))
-        return HttpResponse(json.dumps(info))
+        return HttpResponse(info)
 
 
 class FileListHandler(BaseHandler):
@@ -324,10 +316,10 @@ class TagsHandler(BaseHandler):
             operator = PluginsOperator()
             mapping = operator.get_plugin_mapping_by_id(id_rule)
             docrule = mapping.get_docrule()
-            tags = TagsPlugin().get_all_tags(doccode = docrule)
+            tags = TagsPlugin().get_all_tags(doccode=docrule)
             log.info('TagsHandler.read request fulfilled for rule %s' % id_rule)
             return map(lambda x: x.name, tags)
-        except Exception, e: # FIXME
+        except Exception, e:  # FIXME
             log.error('TagsHandler.read Exception %s' % e)
             if settings.DEBUG:
                 raise
