@@ -5,7 +5,7 @@
 
     <h1 id="page-heading">{% block body_title %}{% trans 'Document Indexing' %}{% endblock %}</h1>
 
-    {% if step != 'edit' %}
+    {% if step != 'edit' or step != "edit_type" or step != "edit_finish" or step != "edit_revisions"%}
     {# Use this for a progress / step indicator / navigation #}
     <ul class="pager x-progress-tracker">
         {% url mdtui-index-type as url %}
@@ -53,19 +53,19 @@
     {% endif %}
 
     {% if step == "edit" %}
-        {% include "mdtui/index/index_edit.html" %}
+        {% include "mdtui/edit/edit.html" %}
     {% endif %}
 
     {% if step == "edit_type" %}
-        {% include "mdtui/index/index_edit_type.html" %}
+        {% include "mdtui/edit/edit_type.html" %}
     {% endif %}
 
     {% if step == "edit_finish" %}
-        {% include "mdtui/index/index_edit_finished.html" %}
+        {% include "mdtui/edit/edit_finished.html" %}
     {% endif %}
 
     {% if step == "edit_revisions" %}
-        {% include "mdtui/index/index_edit_revisions.html" %}
+        {% include "mdtui/edit/edit_revisions.html" %}
     {% endif %}
 {% endblock %}
 
