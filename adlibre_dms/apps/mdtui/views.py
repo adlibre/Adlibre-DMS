@@ -418,7 +418,7 @@ def view_object(request, code, step, template='mdtui/view.html'):
 
 @login_required
 @group_required(SEC_GROUP_NAMES['edit_index'])
-def indexing_edit(request, code, step='edit', template='mdtui/indexing.html'):
+def edit(request, code, step='edit', template='mdtui/indexing.html'):
     """Indexing step: Edit. Made for editing indexes of document that is indexed already."""
     context = {}
     warnings = []
@@ -440,7 +440,7 @@ def indexing_edit(request, code, step='edit', template='mdtui/indexing.html'):
         pass
 
     # Only preserve indexes if returning from edit indexes confirmation step
-    if 'HTTP_REFERER' in request.META and request.META['HTTP_REFERER'].endswith(reverse('mdtui-index-edit-finished')):
+    if 'HTTP_REFERER' in request.META and request.META['HTTP_REFERER'].endswith(reverse('mdtui-edit-finished')):
         try:
             changed_indexes = request.session['edit_processor_indexes']
         except KeyError:
@@ -468,7 +468,7 @@ def indexing_edit(request, code, step='edit', template='mdtui/indexing.html'):
                 else:
                     old_docs_indexes[index_name] = index_value
             request.session['old_document_keys'] = old_docs_indexes
-            return HttpResponseRedirect(reverse('mdtui-index-edit-finished'))
+            return HttpResponseRedirect(reverse('mdtui-edit-finished'))
     else:
         for error in processor.errors:
             # Intercepting type Exception and using it's message or using error.__str__
@@ -495,14 +495,14 @@ def indexing_edit(request, code, step='edit', template='mdtui/indexing.html'):
 
 @login_required
 @group_required(SEC_GROUP_NAMES['edit_index'])
-def indexing_edit_type(request, code, step='edit_type', template='mdtui/indexing.html'):
+def edit_type(request, code, step='edit_type', template='mdtui/indexing.html'):
     """Indexing step: Edit. Editing document type (in fact document rename)"""
     context = {}
     warnings = [MDTUI_ERROR_STRINGS['EDIT_TYPE_WARNING'], ]
     error_warnings = []
     form = False
     processor = DocumentProcessor()
-    return_url = reverse('mdtui-index-edit', kwargs={'code': code})
+    return_url = reverse('mdtui-edit', kwargs={'code': code})
 
     log.debug('indexing_edit_type view called with code: %s' % code)
     doc = processor.read(code, {'user': request.user,})
@@ -520,7 +520,7 @@ def indexing_edit_type(request, code, step='edit_type', template='mdtui/indexing
                     }
                     doc = processor.update(code, options)
                     if not processor.errors:
-                        return HttpResponseRedirect(reverse('mdtui-index-edit', kwargs={'code': doc.get_filename()}))
+                        return HttpResponseRedirect(reverse('mdtui-edit', kwargs={'code': doc.get_filename()}))
                 else:
                     warnings = [MDTUI_ERROR_STRINGS['EDIT_TYPE_ERROR'], ]
     # Can cause errors in two places here (on doc read and update)
@@ -540,7 +540,7 @@ def indexing_edit_type(request, code, step='edit_type', template='mdtui/indexing
 
 @login_required
 @group_required(SEC_GROUP_NAMES['edit_index'])
-def indexing_edit_file_delete(request, code):
+def edit_file_delete(request, code):
     """Deletes specified code or revision from system (Marks deleted)"""
     # Decision of where to go back after or instead of removal
     return_url = reverse('mdtui-home')
@@ -550,7 +550,7 @@ def indexing_edit_file_delete(request, code):
         revision = request.POST.get('revision', False)
 
         if revision:
-            return_url = reverse('mdtui-index-edit-revisions', kwargs={'code': code})
+            return_url = reverse('mdtui-edit-revisions', kwargs={'code': code})
         processor = DocumentProcessor()
         processor.read(code, {'user': request.user, 'only_metadata': True})
         if not processor.errors:
@@ -568,7 +568,7 @@ def indexing_edit_file_delete(request, code):
 
 @login_required
 @group_required(SEC_GROUP_NAMES['index'])
-def indexing_edit_file_revisions(request, code, step=None, template='mdtui/indexing.html'):
+def edit_file_revisions(request, code, step=None, template='mdtui/indexing.html'):
     """Editing file revisions for given code"""
     form = DocumentUploadForm(request.POST or None, request.FILES or None)
     revision_file = request.FILES.get('file', None)
@@ -604,7 +604,7 @@ def indexing_edit_file_revisions(request, code, step=None, template='mdtui/index
 
 @login_required
 @group_required(SEC_GROUP_NAMES['edit_index'])
-def indexing_edit_result(request, step='edit_finish', template='mdtui/indexing.html'):
+def edit_result(request, step='edit_finish', template='mdtui/indexing.html'):
     """Confirmation step for editing indexes"""
     # initialising context
     required_vars = ('edit_processor_indexes', 'edit_index_barcode', 'old_document_keys', 'edit_return', "edit_mdts")

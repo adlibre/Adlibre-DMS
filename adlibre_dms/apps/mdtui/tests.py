@@ -561,7 +561,7 @@ class MUITestData(TestCase):
         Checks for document dict and name rendered properly in indexing - Edit indexes step.
         It creates self.response with form data rendered.
         """
-        url = reverse('mdtui-index-edit', kwargs={'code': doc_name})
+        url = reverse('mdtui-edit', kwargs={'code': doc_name})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, doc_name)
@@ -2914,7 +2914,7 @@ class MDTUI(MUITestData):
         self._check_edit_step_with_document(self.edit_document_name_1,  self.m5_doc1_dict)
         ids = self._read_indexes_form(self.response)
         data = self._create_edit_indexes_post_dict(new_m5_doc1_dict, ids)
-        url = reverse('mdtui-index-edit', kwargs={'code': self.edit_document_name_1})
+        url = reverse('mdtui-edit', kwargs={'code': self.edit_document_name_1})
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 302)
         new_url = self._retrieve_redirect_response_url(response)
@@ -2933,7 +2933,7 @@ class MDTUI(MUITestData):
             else:
                 self.assertContains(response, 'SOME DATA')
         # POST to save those indexes
-        self.client.post(reverse('mdtui-index-edit-finished'), {'something': ' '})
+        self.client.post(reverse('mdtui-edit-finished'), {'something': ' '})
         # Quering CouchDB directly for existence and proper document indexes rendering
         couch_doc = self._open_couchdoc(self.couchdb_name, self.edit_document_name_1)
         if not 'index_revisions' in couch_doc:
@@ -2967,7 +2967,7 @@ class MDTUI(MUITestData):
         self._check_edit_step_with_document(doc_used, self.m2_doc1_dict)
         ids = self._read_indexes_form(self.response)
         data = self._create_edit_indexes_post_dict(new_m2_doc1_dict, ids)
-        url = reverse('mdtui-index-edit', kwargs={'code': doc_used})
+        url = reverse('mdtui-edit', kwargs={'code': doc_used})
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 302)
         new_url = self._retrieve_redirect_response_url(response)
@@ -2995,7 +2995,7 @@ class MDTUI(MUITestData):
             raise AssertionError('CouchDB Document has bug storing new indexes DATE format')
         # Adding revision 2 of document indexes
         data = self._create_edit_indexes_post_dict(new_m2_doc1_dict, ids)
-        url = reverse('mdtui-index-edit', kwargs={'code': doc_used})
+        url = reverse('mdtui-edit', kwargs={'code': doc_used})
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 302)
         new_url = self._retrieve_redirect_response_url(response)
@@ -3083,7 +3083,7 @@ class MDTUI(MUITestData):
 
         # EMULATE click to EDIT a document
         search_url = new_url
-        url = reverse('mdtui-index-edit', kwargs={'code': doc_name})
+        url = reverse('mdtui-edit', kwargs={'code': doc_name})
         response = self.client.get(url, {}, HTTP_REFERER=search_url)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, doc_name)
@@ -3132,7 +3132,7 @@ class MDTUI(MUITestData):
         }
         first_only_should_contain = 'Andrew and his friend'
         # Checking first document for unique index
-        url = reverse('mdtui-index-edit', kwargs={'code': first_doc_name})
+        url = reverse('mdtui-edit', kwargs={'code': first_doc_name})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         response2 = self.client.post(url, first_doc_new_indexes)
@@ -3141,7 +3141,7 @@ class MDTUI(MUITestData):
         self.assertContains(response, first_doc_name)
         self.assertContains(response, first_only_should_contain)
         # Checking second document should not contain this index
-        url = reverse('mdtui-index-edit', kwargs={'code': second_doc_name})
+        url = reverse('mdtui-edit', kwargs={'code': second_doc_name})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         response2 = self.client.post(url, second_doc_new_indexes)
@@ -3150,8 +3150,8 @@ class MDTUI(MUITestData):
         self.assertContains(response, second_doc_name)
         self.assertNotContains(response, first_only_should_contain)
         # Checking first doc now contains those indexes
-        url = reverse('mdtui-index-edit', kwargs={'code': first_doc_name})
-        response = self.client.get(url, {}, HTTP_REFERER='http://127.0.0.1/'+reverse('mdtui-index-edit-finished'))
+        url = reverse('mdtui-edit', kwargs={'code': first_doc_name})
+        response = self.client.get(url, {}, HTTP_REFERER='http://127.0.0.1/'+reverse('mdtui-edit-finished'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, first_doc_name)
         self.assertNotContains(response, first_only_should_contain)
@@ -3177,7 +3177,7 @@ class MDTUI(MUITestData):
             'autocomplete_search': 'Andre',
             }
         # Checking first document for unique index
-        url = reverse('mdtui-index-edit', kwargs={'code': doc_name})
+        url = reverse('mdtui-edit', kwargs={'code': doc_name})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         response2 = self.client.post(url, new_indexes)
@@ -3627,12 +3627,12 @@ class MDTUI(MUITestData):
         edit_inexistent_doc = self.edit_document_name_7
         edit_doc_decription = 'Something new here'
         same_docrule = {'docrule': '8'}
-        url = reverse('mdtui-index-edit', kwargs={'code': edit_doc_name})
+        url = reverse('mdtui-edit', kwargs={'code': edit_doc_name})
         response = self.client.get(url)
         self.assertContains(response, edit_doc_name)
         self.assertContains(response, edit_doc_decription)
         self.assertContains(response, 'Change Document Type')  # Button caption
-        ch_type_url = reverse('mdtui-index-edit-type', kwargs={'code': edit_doc_name})
+        ch_type_url = reverse('mdtui-edit-type', kwargs={'code': edit_doc_name})
         response = self.client.get(ch_type_url)
         self.assertContains(response, 'Document Type:')
         self.assertContains(response, edit_doc_name)
@@ -3643,7 +3643,7 @@ class MDTUI(MUITestData):
         self.assertContains(response, MDTUI_ERROR_STRINGS['EDIT_TYPE_ERROR'])
         self.assertContains(response, url)  # Back button working and rendered properly
         # Wrong document passed to view
-        ch_type_url = reverse('mdtui-index-edit-type', kwargs={'code': edit_inexistent_doc})
+        ch_type_url = reverse('mdtui-edit-type', kwargs={'code': edit_inexistent_doc})
         response = self.client.get(ch_type_url)
         self.assertEqual(response.status_code, 200)
 
@@ -3657,7 +3657,7 @@ class MDTUI(MUITestData):
         secondary_key = 'Reporting Entity'
         renaming_docrule = {'docrule': '7'}
 
-        ch_type_url = reverse('mdtui-index-edit-type', kwargs={'code': edit_doc_name})
+        ch_type_url = reverse('mdtui-edit-type', kwargs={'code': edit_doc_name})
         # HACK: docrule sequence fixup.
         docrule = DocumentTypeRule.objects.get(pk=int(renaming_docrule['docrule']))
         docrule.sequence_last = 3
@@ -3702,12 +3702,12 @@ class MDTUI(MUITestData):
         wrong_code = 'ADL-0100'
         creating_doc = 'ADL-0001_r3.pdf'
         # Edit doc indexes has this button
-        edit_doc_url = reverse('mdtui-index-edit', kwargs={'code': doc_name})
-        edit_revisions_url = reverse('mdtui-index-edit-revisions', kwargs={'code': doc_name})
+        edit_doc_url = reverse('mdtui-edit', kwargs={'code': doc_name})
+        edit_revisions_url = reverse('mdtui-edit-revisions', kwargs={'code': doc_name})
         edit_response = self.client.get(edit_doc_url)
         self.assertContains(edit_response, edit_revisions_url)
         # Errors not causing view problems
-        wrong_response = self.client.get(reverse('mdtui-index-edit-revisions', kwargs={'code': wrong_code}))
+        wrong_response = self.client.get(reverse('mdtui-edit-revisions', kwargs={'code': wrong_code}))
         self.assertContains(wrong_response, MDTUI_ERROR_STRINGS['NO_DOC'], status_code=200)
         # Edit revisions page proper rendering
         revisions_response = self.client.get(edit_revisions_url)
@@ -3730,7 +3730,7 @@ class MDTUI(MUITestData):
         """Refs #827 Mark document deleted view and actions"""
         testdoc1 = self.doc1
         redir_url = 'http://testserver/mdtui/'
-        url1 = reverse('mdtui-index-edit-delete', kwargs={'code': testdoc1})
+        url1 = reverse('mdtui-edit-delete', kwargs={'code': testdoc1})
         response = self.client.post(url1)
         self.assertEqual(response.status_code, 302)
         redir_url1 = self._retrieve_redirect_response_url(response)
@@ -3768,14 +3768,14 @@ class MDTUI(MUITestData):
         self.assertContains(response, existing_doc)
         self.assertContains(response, remaining_doc)
         # Going to edit document revisions to look for client redirect and data shown to user
-        edit_url = reverse('mdtui-index-edit', kwargs={'code': existing_doc})
+        edit_url = reverse('mdtui-edit', kwargs={'code': existing_doc})
         response = self.client.get(edit_url, HTTP_REFERER=results_url)
         self.assertEqual(response.status_code, 200)
-        edit_rev_url = reverse('mdtui-index-edit-revisions', kwargs={'code': existing_doc})
+        edit_rev_url = reverse('mdtui-edit-revisions', kwargs={'code': existing_doc})
         response = self.client.get(edit_rev_url)
         t = existing_doc + '_r1.pdf'
         self.assertContains(response, t)
-        delete_url = reverse('mdtui-index-edit-delete', kwargs={'code': existing_doc})
+        delete_url = reverse('mdtui-edit-delete', kwargs={'code': existing_doc})
         response = self.client.post(delete_url)
         # Redirects to search after delete and search results are updated
         self.assertEqual(response.status_code, 302)
@@ -3811,16 +3811,16 @@ class MDTUI(MUITestData):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, existing_doc)
         # Going to edit document revisions to look for client redirect and data shown to user
-        edit_url = reverse('mdtui-index-edit', kwargs={'code': existing_doc})
+        edit_url = reverse('mdtui-edit', kwargs={'code': existing_doc})
         response = self.client.get(edit_url, HTTP_REFERER=results_url)
         self.assertEqual(response.status_code, 200)
-        edit_rev_url = reverse('mdtui-index-edit-revisions', kwargs={'code': existing_doc})
+        edit_rev_url = reverse('mdtui-edit-revisions', kwargs={'code': existing_doc})
         response = self.client.get(edit_rev_url)
         t = existing_doc + '_r%s.pdf' % deleting_revision
         t_existing = existing_doc + '_r%s.pdf' % remaining_revision
         self.assertContains(response, t)
         self.assertContains(response, t_existing)
-        delete_url = reverse('mdtui-index-edit-delete', kwargs={'code': existing_doc})
+        delete_url = reverse('mdtui-edit-delete', kwargs={'code': existing_doc})
         response = self.client.post(delete_url, {'revision': deleting_revision})
         # Redirects to search after delete and search results are updated
         self.assertEqual(response.status_code, 302)
@@ -3857,7 +3857,7 @@ class MDTUI(MUITestData):
         self.assertEqual(response.status_code, 200)
         for d in search_found_docs:
             self.assertContains(response, d)
-        edit_url = reverse('mdtui-index-edit', kwargs={'code': working_doc})
+        edit_url = reverse('mdtui-edit', kwargs={'code': working_doc})
         response = self.client.get(edit_url)
         self.assertContains(response, self.m2_doc1_dict['description'])  # doc parsed and rendered
         # Emulating cancel press (Going back to search)

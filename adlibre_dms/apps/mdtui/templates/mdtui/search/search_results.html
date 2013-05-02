@@ -52,7 +52,7 @@
             {% endfor %}
             <td>{{ doc.metadata_description }}</td>
             <td>{% get_docrule_name_by_id doc.metadata_doc_type_rule_id %}</td>
-            <td><a href="{% url bcp-print 'Code128' doc.id %}" title="{% trans 'Reprint Barcode' %}" alt="{% trans 'Reprint Barcode' %}" target="_blank"><i class="icon-barcode"></i></a> {% if edit_index_permitted %}| <a href="{% url mdtui-index-edit doc.id %}" title="{% trans 'Edit Metadata' %}"><i class="icon-edit"></i></a>{% endif %}</td>
+            <td><a href="{% url bcp-print 'Code128' doc.id %}" title="{% trans 'Reprint Barcode' %}" alt="{% trans 'Reprint Barcode' %}" target="_blank"><i class="icon-barcode"></i></a> {% if edit_index_permitted %}| <a href="{% url mdtui-edit doc.id %}" title="{% trans 'Edit Metadata' %}"><i class="icon-edit"></i></a>{% endif %}</td>
         </tr>
     {% endfor %}
     </tbody>

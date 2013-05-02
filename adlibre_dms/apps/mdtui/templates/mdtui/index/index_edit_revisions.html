@@ -15,7 +15,7 @@
         <legend>File revisions for code: {{ doc_name }}</legend>
         <br />
         {# Url to delete revisions got here #}
-        <div id="delete-url" data-id="{% url mdtui-index-edit-delete doc_name %}" style="display:none;"></div>
+        <div id="delete-url" data-id="{% url mdtui-edit-delete doc_name %}" style="display:none;"></div>
         <table class="table table-bordered table-striped">
             <thead>
             <tr>
@@ -61,5 +61,5 @@
     </fieldset>
     {% endif %}
     <div class="form-actions">
-        <a href="{% url mdtui-index-edit doc_name %}" class="btn btn-primary"><i class="icon-ok icon-white"></i> Finish</a>
+        <a href="{% url mdtui-edit doc_name %}" class="btn btn-primary"><i class="icon-ok icon-white"></i> Finish</a>
     </div>
