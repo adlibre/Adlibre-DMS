@@ -102,17 +102,13 @@ class DMSTestCase(TestCase):
         # Load a copy of all our fixtures using the management command
         return call_command('import_documents', self.test_document_files_dir, silent=False)
 
-    def cleanUp(self, documents, check_response=True, nodocrule=False, ):
+    def cleanUp(self, documents, check_response=True):
         """Cleanup Helper"""
         self.client.login(username=self.username, password=self.password)
         for doc in documents:
             code, suggested_format = os.path.splitext(doc)
             url = reverse('api_file', kwargs={'code': code})
-            if nodocrule:
-                from datetime import date   # Hack
-                data = {'parent_directory': str(date.today()), 'full_filename': doc, }  # hack
-            else:
-                data = {}
+            data = {}
             response = self.client.delete(url, data=data)
             if response.status_code is not 204:
                 print "ERROR DATA: %s, %s" % (code, response.status_code)
