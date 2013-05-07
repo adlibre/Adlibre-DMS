@@ -708,15 +708,15 @@ class MDTUI(MUITestData):
         url = reverse('api_mdt')
         # List formatted so to comment out any MDT easily
         for m in [
-                    self.mdt1,
-                    self.mdt2,
-                    self.mdt3,
-                    self.mdt4,
-                    self.mdt5,
-                    self.mdt6,
-                    self.mdt7,
-                    self.mdt8,
-                 ]:
+            self.mdt1,
+            self.mdt2,
+            self.mdt3,
+            self.mdt4,
+            self.mdt5,
+            self.mdt6,
+            self.mdt7,
+            self.mdt8,
+        ]:
             mdt = json.dumps(m)
             response = self.client.post(url, {"mdt": mdt})
             if not response.status_code == 409:
@@ -746,7 +746,7 @@ class MDTUI(MUITestData):
         self.assertEqual(response.status_code, 200)
         # Make the file upload
         file = os.path.join(settings.FIXTURE_DIRS[0], 'testdata', self.doc1+'.pdf')
-        data = { 'file': open(file, 'rb'), 'uploaded':u''}
+        data = {'file': open(file, 'rb'), 'uploaded': u''}
         response = self.client.post(url+'?uploaded', data)
         # Follow Redirect
         self.assertEqual(response.status_code, 302)
