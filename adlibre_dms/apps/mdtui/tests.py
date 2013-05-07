@@ -32,6 +32,19 @@ from dmscouch.models import CouchDocument
 from core.search import SEARCH_ERROR_MESSAGES
 from doc_codes.models import DocumentTypeRule
 
+# TODO: test password reset forms/stuff
+
+# TODO: test proper CSV export, even just simply, with date range and list of files present there
+# TODO: add tests for Typeahead suggests values between docrules
+
+# TODO: test posting docs to 2 different document type rules and mix out parallel keys
+# and normal search here for proper behaviour:
+# THIS IS WRONG:
+# 1. search does not filter on MDT correctly. Getting results from multiple MDTs (and document types).
+# 2. parallel key lookups are not sharing parallel info across document types.
+
+# TODO: test paginator rendering in browser with more then 10 documents
+
 
 class MUITestData(TestCase):
     """Base tests class for MUI interface. Contains basic tests data and strings
@@ -39,6 +52,9 @@ class MUITestData(TestCase):
 
     def __init__(self, *args, **kwargs):
         super(MUITestData, self).__init__(*args, **kwargs)
+
+        self.test_document_files_dir = os.path.join(settings.FIXTURE_DIRS[0], 'testdata')
+
         # Auth USER
         self.username = 'admin'
         self.password = 'admin'
@@ -81,6 +97,8 @@ class MUITestData(TestCase):
         self.test_mdt_id_3 = 3  # Third MDT used in testing search part of MUI
         self.test_mdt_id_5 = 5  # Last MDT used in testing search part of MUI
         self.test_mdt_id_6 = 6  # Last MDT used in testing search part of MUI
+
+        self.response = None
 
         ############################ GENERATING REGEXP ##############################
         # to match page form and view it's fields.
@@ -648,22 +666,9 @@ class MUITestData(TestCase):
             print 'file %s written' % name
 
 
-
-# TODO: test password reset forms/stuff
-
-# TODO: test proper CSV export, even just simply, with date range and list of files present there
-# TODO: add tests for Typeahead suggests values between docrules
-
-# TODO: test posting docs to 2 different document type rules and mix out parallel keys
-# and normal search here for proper behaviour:
-# THIS IS WRONG:
-# 1. search does not filter on MDT correctly. Getting results from multiple MDTs (and document types).
-# 2. parallel key lookups are not sharing parallel info across document types.
-
-# TODO: test paginator rendering in browser with more then 10 documents
-
-
 class PaginatorTestCase(TestCase):
+    """Tests Paginator functionality and logic"""
+
     def test_paginator_tag_logic(self):
         """Refs #805: Testing Paginator tag logic
 
@@ -696,8 +701,6 @@ class MDTUI(MUITestData):
     def setUp(self):
         # We are using only logged in client in this test
         self.client.login(username=self.username, password=self.password)
-        self.test_document_files_dir = os.path.join(settings.FIXTURE_DIRS[0], 'testdata')
-        self.response = None
 
     def test_01_setup_mdts(self):
         """
@@ -3902,17 +3905,17 @@ class MDTUI(MUITestData):
 
         # Deleting all docs used in tests
         for argument in cleanup_docs_list:
-            url = reverse('api_file', kwargs={'code': argument,})
+            url = reverse('api_file', kwargs={'code': argument})
             response = self.client.delete(url)
             self.assertEqual(response.status_code, 204)
 
         if settings.COUCHDB_COMPACT:  # (default is False, override in local_settings.py)
-           # Compacting CouchDB dmscouch/mdtcouch DB's after tests
-           print 'Compacting CouchDB'
-           server = Server()
-           db1 = server.get_or_create_db(self.couchdb_name)
-           db1.compact()
-           db2 = server.get_or_create_db(self.couchdb_mdts_name)
-           db2.compact()
+            # Compacting CouchDB dmscouch/mdtcouch DB's after tests
+            print 'Compacting CouchDB'
+            server = Server()
+            db1 = server.get_or_create_db(self.couchdb_name)
+            db1.compact()
+            db2 = server.get_or_create_db(self.couchdb_mdts_name)
+            db2.compact()
 
 
