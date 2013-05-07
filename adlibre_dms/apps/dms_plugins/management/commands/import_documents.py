@@ -31,7 +31,6 @@ class Command(BaseCommand):
                 self.stderr.write('Could not import %s: no such directory\n' % directory)
                 continue
             cnt = 0
-            processor = DocumentProcessor()
             admin = User.objects.filter(is_superuser=True)[0]
             for root, dirs, files in os.walk(directory):
                 if '.svn' in dirs:
@@ -41,6 +40,7 @@ class Command(BaseCommand):
                         self.stdout.write('Importing file: "%s"\n' % filename)
                     file_obj = open(os.path.join(root, filename))
                     file_obj.seek(0)
+                    processor = DocumentProcessor()
                     try:
                         processor.create(file_obj, {'user': admin})
                     except Exception:
