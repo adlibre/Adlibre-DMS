@@ -413,7 +413,7 @@ def view_object(request, code, step, template='mdtui/view.html'):
         'mimetype': mimetype,
         'revision': revision,
     }
-    if not document.get_file_revisions_data() and document.get_db_info()['metadata_doc_type_rule_id']:
+    if not document.get_file_revisions_data() and 'metadata_doc_type_rule_id' in document.get_db_info().iterkeys():
         # Indexed Document with 0 revisions (Displaying stub document from static)
         # TODO: expand this for branding. (Using custom DMS stub document)
         stub_doc_url = settings.STATIC_URL + 'pdf/stub_document.pdf'
