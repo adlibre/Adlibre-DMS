@@ -18,12 +18,16 @@ class LocalJSONMetadata(object):
     def store(self, document):
         if document.get_docrule().no_doccode:
             return document
+        if document.get_option('only_metadata'):
+            # Doing nothing for storage of "Only code" and/or metadata (Into Indexing DB)
+            return document
         directory = self.filesystem.get_or_create_document_directory(document)
         document = self.save_metadata(document, directory)
         return document
 
     def retrieve(self, document):
-        directory = self.filesystem.get_or_create_document_directory(document)
+        only_metadata = document.get_option('only_metadata')
+        directory = self.filesystem.get_document_directory(document)
         if document.get_docrule().no_doccode:
             revision = 'N/A'
             fake_metadata = self.get_fake_metadata(directory, document.get_full_filename())
@@ -31,7 +35,7 @@ class LocalJSONMetadata(object):
             document.set_file_revisions_data({revision: fake_metadata})
         else:
             fileinfo_db, new_revision = self.load_metadata(document.get_stripped_filename(), directory)
-            if not fileinfo_db:
+            if not fileinfo_db and not only_metadata:
                 raise PluginError("No such document: %s" % document.get_stripped_filename(), 404)
             revision = document.get_revision()
             if not revision and new_revision > 0:
@@ -39,8 +43,11 @@ class LocalJSONMetadata(object):
             document.set_revision(revision)
             try:
                 fileinfo_db[str(revision)]
-            except:
-                raise PluginError("No such revision for this document", 404)
+            except KeyError:
+                if not only_metadata and revision:
+                    raise PluginError("No such revision for this document", 404)
+                else:
+                    pass
             document.set_file_revisions_data(fileinfo_db)
         return document
 
@@ -68,7 +75,7 @@ class LocalJSONMetadata(object):
             if not fileinfo_db:
                 self.remove_metadata_file(directory, document)
         else:
-                pass  # our directory with all file revision data has just been deleted %)
+            pass  # our directory with all file revision data has just been deleted %)
         return document
 
     def update(self, document):
@@ -136,9 +143,9 @@ class LocalJSONMetadata(object):
         document.set_revision(revision)
 
         fileinfo = {
-            'name' : document.get_filename_with_revision(),
-            'revision' : document.get_revision(),
-            'created_date' : self.date_to_string(datetime.today())
+            'name': document.get_filename_with_revision(),
+            'revision': document.get_revision(),
+            'created_date': self.date_to_string(datetime.today())
         }
 
         if document.get_current_file_revision_data():

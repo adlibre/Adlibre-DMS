@@ -79,6 +79,7 @@ class MUITestData(TestCase):
         self.doc1 = 'ADL-0001'
         self.doc2 = 'ADL-0002'
         self.doc3 = 'ADL-0003'
+        self.doc4 = 'ADL-0004'
         self.edit_document_name_1 = 'CCC-0001'
         self.edit_document_name_2 = 'BBB-0001'
         self.edit_document_name_3 = 'BBB-0002'
@@ -97,8 +98,6 @@ class MUITestData(TestCase):
         self.test_mdt_id_3 = 3  # Third MDT used in testing search part of MUI
         self.test_mdt_id_5 = 5  # Last MDT used in testing search part of MUI
         self.test_mdt_id_6 = 6  # Last MDT used in testing search part of MUI
-
-        self.response = None
 
         ############################ GENERATING REGEXP ##############################
         # to match page form and view it's fields.
@@ -222,6 +221,16 @@ class MUITestData(TestCase):
             'Friends ID': '222',
             'Friends Name': 'Someone',
             'Additional': 'Something for 3',
+        }
+        self.doc4_barcode_dict = {
+            'date': date_standardized('2012-03-06'),
+            'description': 'Test Document Number 4',
+            'Employee ID': '123456',
+            'Required Date': date_standardized('2012-03-07'),
+            'Employee Name': 'Iurii Garmash',
+            'Friends ID': '123',
+            'Friends Name': 'Andrew',
+            'Additional': 'Something for 4',
         }
         # Static dictionary of documents to be indexed for mdt3
         self.m2_doc1_dict = {
@@ -697,10 +706,13 @@ class PaginatorTestCase(TestCase):
 
 
 class MDTUI(MUITestData):
+    """Tests for MUI interface of DMS"""
 
     def setUp(self):
+        """Initialisation that happens for each test"""
         # We are using only logged in client in this test
         self.client.login(username=self.username, password=self.password)
+        self.response = None
 
     def test_01_setup_mdts(self):
         """
@@ -3868,6 +3880,84 @@ class MDTUI(MUITestData):
         self.assertContains(response, proper_mdt_name)
         self.assertNotContains(response, improper_mdt_name)
 
+    def test_93_barcoding_and_0_file_revisions_dms_support(self):
+        """Refs #970 Test barcode generation
+        Refs #735 MUI: Placeholder Document for barcoded documents
+
+        Loosing requirement to fake 0 revisions document and adding it's support properly
+        So we can now have Document with 0 revisions and 'only_metadata' created and stored
+        No need to store at least 1 revision with stub document now.
+        View document works this way of showing 'stub_document' instead.
+        """
+        url = reverse('mdtui-view-object', kwargs={'code': self.doc4})
+        response = self.client.get(url)
+        self.assertNotContains(response, 'stub_document.pdf')
+
+        docrule = self.test_mdt_docrule_id
+        # HACK: docrule sequence fixup.
+        rule = DocumentTypeRule.objects.get(pk=docrule)
+        rule.sequence_last = 3
+        rule.save()
+        # Going to index a doc
+        url = reverse('mdtui-index-type')
+        response = self.client.post(url, {docrule: 'docrule'})
+        self.assertEqual(response.status_code, 302)
+        # Getting indexes form and matching form Indexing Form fields names
+        url = reverse('mdtui-index-details')
+        response = self.client.get(url)
+        rows_dict = self._read_indexes_form(response)
+        post_dict = self._convert_doc_to_post_dict(rows_dict, self.doc4_barcode_dict)
+        # Adding Document Indexes
+        response = self.client.post(url, post_dict)
+        self.assertEqual(response.status_code, 302)
+        url = reverse('mdtui-index-source')
+        response = self.client.get(url)
+        self.assertContains(response, 'Friends ID: 123')
+        self.assertEqual(response.status_code, 200)
+        # Make the file upload
+        data = {'barcoded': u'', 'printed': 'printed'}
+        response = self.client.post(url+'?barcoded', data)
+        # Follow Redirect
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        self.assertContains(response, self.indexing_done_string)
+        self.assertContains(response, 'Friends Name: Andrew')
+        self.assertContains(response, 'Additional: Something for 4')
+        self.assertContains(response, 'Start Again')
+
+        # Testing this doc exists in search results now
+        url = reverse('mdtui-search-type')
+        data = {'docrule': self.test_mdt_docrule_id}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        url = reverse('mdtui-search-options')
+        # Searching by Document 1,2,3 date range
+        data = self.all_docs_range
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        self.assertEqual(response.status_code, 200)
+        # No errors appeared
+        self.assertNotContains(response, "You have not defined Document Searching Options")
+        # 2 documents (one of them 'only_metadata' document) found
+        # and 2 first docs are not shown because they are modified by indexing
+        self._shelve(response)
+        self.assertNotContains(response, self.doc1)
+        self.assertNotContains(response, self.doc1_dict['description'])
+        self.assertNotContains(response, self.doc2)
+        self.assertNotContains(response, self.doc2_dict['description'])
+        self.assertContains(response, self.doc3)
+        self.assertContains(response, self.doc3_dict['description'])
+        self.assertContains(response, self.doc4)
+        self.assertContains(response, self.doc4_barcode_dict['description'])
+
+        # Testing we can view stub document now
+        url = reverse('mdtui-view-object', kwargs={'code': self.doc4})
+        response = self.client.get(url)
+        self.assertContains(response, 'stub_document.pdf')
+
     def test_z_cleanup(self):
         """
         Cleaning up after all tests finished.
@@ -3878,6 +3968,7 @@ class MDTUI(MUITestData):
             self.doc1,
             self.doc2,
             self.doc3,
+            self.doc4,
             self.edit_document_name_2,
             self.edit_document_name_3,
             self.edit_document_name_5,
@@ -3890,12 +3981,13 @@ class MDTUI(MUITestData):
         # (with doccode from var "test_mdt_docrule_id" and "test_mdt_docrule_id2")
         # using MDT's API.
         url = reverse('api_mdt')
-        for mdt_ in [
+        docrules_list = [
             self.test_mdt_docrule_id,
             self.test_mdt_docrule_id2,
             self.test_mdt_docrule_id3,
             self.test_mdt_docrule_id4
-        ]:
+        ]
+        for mdt_ in docrules_list:
             response = self.client.get(url, {"docrule_id": str(mdt_)})
             data = json.loads(str(response.content))
             for key, value in data.iteritems():

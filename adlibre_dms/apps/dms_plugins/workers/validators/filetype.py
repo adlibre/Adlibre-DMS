@@ -15,7 +15,7 @@ MIMETYPES = [
             ]
 
 def get_mimetypes():
-    return [ x[0] for x in MIMETYPES ]
+    return [x[0] for x in MIMETYPES]
 
 class FileTypeValidationPlugin(Plugin, BeforeStoragePluginPoint):
     title = "File Type Validator"
@@ -25,17 +25,19 @@ class FileTypeValidationPlugin(Plugin, BeforeStoragePluginPoint):
     mimetypes = get_mimetypes()
 
     def work(self, document, **kwargs):
-        filebuffer = document.get_file_obj()
-        if filebuffer is None:
-            raise PluginError('File buffer not initialized', 500)
-        # TODO: FIXME: This does not actually validate the mimetype! filebuffer is not actually used!
-        #mime = magic.Magic( mime = True )
-        #content = ''
-        #for line in filebuffer:
-        #    content += line
-        #typ = mime.from_buffer( content )
-        typ = document.get_mimetype()
-        if not typ in self.mimetypes:
-            raise PluginError('File type %s is not supported' % typ, 500)
-        document.set_mimetype(typ)
+        if document.get_file_obj():
+            # Commented to support 0 revisions doc storage
+            # filebuffer = document.get_file_obj()
+            # if filebuffer is None:
+            #     raise PluginError('File buffer not initialized', 500)
+            # TODO: FIXME: This does not actually validate the mimetype! filebuffer is not actually used!
+            #mime = magic.Magic( mime = True )
+            #content = ''
+            #for line in filebuffer:
+            #    content += line
+            #typ = mime.from_buffer( content )
+            typ = document.get_mimetype()
+            if not typ in self.mimetypes:
+                raise PluginError('File type %s is not supported' % typ, 500)
+            document.set_mimetype(typ)
         return document

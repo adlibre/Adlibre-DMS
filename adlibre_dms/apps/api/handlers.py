@@ -135,27 +135,17 @@ class FileHandler(BaseFileHandler):
     @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
     def delete(self, request, code, suggested_format=None):
         # FIXME: should return 404 if file not found, 400 if no docrule exists.
-        #        full_filename = request.REQUEST.get('full_filename', None) # what is this?
-        #        parent_directory = request.REQUEST.get('parent_directory', None) # FIXME! Used by no doccode!
         revision, hashcode, extra = self._get_info(request)
         processor = DocumentProcessor()
-        try:
-            options = {
-                'revision': revision,
-                'extension': suggested_format,
-                'user': request.user,
-                }
-            log.debug('FileHandler.delete attempt with %s' % options)
-            processor.delete(code, options)
-        except Exception, e:
-            log.error('FileHandler.delete exception %s' % e)
-            if settings.DEBUG:
-                raise
-            else:
-                return rc.BAD_REQUEST
+        options = {
+            'revision': revision,
+            'extension': suggested_format,
+            'user': request.user,
+        }
+        log.debug('FileHandler.delete attempt with %s' % options)
+        processor.delete(code, options)
         if len(processor.errors) > 0:
-            if settings.DEBUG:
-                log.error('Manager Errors encountered %s' % processor.errors)
+            log.error('Manager Errors encountered %s' % processor.errors)
             return rc.BAD_REQUEST
         log.info('FileHandler.delete request fulfilled for code: %s, format: %s, rev: %s, hash: %s.' % (code, suggested_format, revision, hashcode))
         return rc.DELETED
@@ -176,7 +166,7 @@ class OldFileHandler(BaseFileHandler):
         options = {
             'user': request.user,
             'barcode': code,
-            }
+        }
         document = processor.create(uploaded_file, options)
         if len(processor.errors) > 0:
             log.error('OldFileHandler.create errors: %s' % processor.errors)
@@ -200,7 +190,7 @@ class OldFileHandler(BaseFileHandler):
             'revision': revision,
             'extension': suggested_format,
             'user': request.user,
-            }
+        }
         document = processor.read(code, options)
         if not request.user.is_superuser:
             # Hack: Used part of the code from MDTUI Wrong!

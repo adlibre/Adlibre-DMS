@@ -22,6 +22,7 @@ log = logging.getLogger('core.document_processor')
 
 __all__ = ['DocumentProcessor']
 
+
 class DocumentProcessor(object):
     """Main DMS CRUD logic operations handler.
 
@@ -68,9 +69,8 @@ class DocumentProcessor(object):
         Creates a new Document() and saves it into DMS.
 
         Should have at least 2 essential options:
-        'uploaded_file' and 'user'
-        uploaded file is http://docs.djangoproject.com/en/1.3/topics/http/file-uploads/#django.core.files.uploadedfile.UploadedFile or file object
-        user is https://docs.djangoproject.com/en/dev/topics/auth/default/#user-objects (Normal Django user)
+        @uploaded_file is http://docs.djangoproject.com/en/1.3/topics/http/file-uploads/#django.core.files.uploadedfile.UploadedFile or file object
+        @user is https://docs.djangoproject.com/en/dev/topics/auth/default/#user-objects (Normal Django user)
 
         Valid only if no DMS Object with such code exists in the system. Has a validation for that.
         """
@@ -78,8 +78,6 @@ class DocumentProcessor(object):
         valid = True
         log.debug('CREATE Document %s, barcode: %s' % (uploaded_file, barcode))
         operator = PluginsOperator()
-        if not uploaded_file:
-            self.read(uploaded_file.name, {'only_metadata': True})
         doc = self.init_Document_with_data(options, document_file=uploaded_file)
         # Setting new file name and type.
         try:
@@ -94,7 +92,7 @@ class DocumentProcessor(object):
             self.errors.append(unicode(e.parameter))
             return None
             pass
-        # Checking if file with this code already exists in system.
+        # Checking if file with this code already exists in system with certain code (barcode) is specified
         doc_name = doc.get_filename()
         if doc_name:
             # Extract code from filename
@@ -102,7 +100,7 @@ class DocumentProcessor(object):
                 doc_name, extension = doc_name.split('.')
             # Check the DMS for existence of this code
             possible_doc = self.read(doc_name, {'only_metadata': True, 'user': doc.user})
-            if possible_doc and not self.errors:
+            if possible_doc.file_revision_data and not self.errors:
                 error = DmsException('Document "%s" already exists' % doc_name, 409)
                 self.errors.append(error)
                 valid = False
@@ -221,7 +219,12 @@ class DocumentProcessor(object):
 
     """Internal helper functionality"""
     def option_in_options(self, option, options, default=None):
-        """Redundant checker if options for method has this value"""
+        """Redundant checker if options for method has this value
+
+        @option is a name of an option being requested
+        @options is a {} of options to query an option
+        @default is a value of the option that is returned if the option does not exist in options
+        """
         response = default
         if options:
             if option in options:
@@ -235,6 +238,11 @@ class DocumentProcessor(object):
         Expand this actions to add new interactions with Document() object...
 
         Connector between "options" passed to this CRUD manager and later Plugin() interactions.
+
+        @options is a dict of operation options (that change behaviour of operations)
+        @doc is a Document() instance
+        @document_name is a name of a document being processed
+        @document_file is a file object being processed
         """
         if doc is None:
             doc = Document()

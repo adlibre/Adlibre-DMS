@@ -92,7 +92,8 @@ class Local(object):
         self.filesystem = LocalFilesystemManager()
 
     def store(self, document):
-        self.store_new_file(document)
+        if not document.get_option('only_metadata'):
+            self.store_new_file(document)
         return document
 
     def retrieve(self, document):
@@ -230,16 +231,14 @@ class Local(object):
                 raise PluginError(str(e), 500)
 
         #check if only '.json' file left in the directory for e.g.
-        if not filename or (document.get_docrule().no_doccode and len(os.listdir(directory)) == 0):  #\
-                # We no longer use no_doccode concept so this is not required for now:
-                #or\
-                # (not document.get_docrule().no_doccode and len(os.listdir(directory)) <= 1):
-                # delete everything or no files at all or only file revision data file
-                # except no_doccode files which may have 1 file in the directory
+        if not filename:
             try:
                 shutil.rmtree(directory)
             except Exception, e:
-                raise PluginError(str(e), 500)
+                log.error('LocalFileStorage delete exception %s' % e)
+                pass
+                # Do not rise anything because we are now supporting delete for code with 0 file revisions
+                #raise PluginError(str(e), 500)
         return document
 
     def get_revision_count(self, document):

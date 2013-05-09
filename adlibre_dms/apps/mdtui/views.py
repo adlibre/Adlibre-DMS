@@ -403,7 +403,6 @@ def view_object(request, code, step, template='mdtui/view.html'):
     # TODO: Add certain revision view possibility for "edit revisions" view
     revision = request.GET.get('revision', None)
     pdf_url = reverse('mdtui-download-pdf', kwargs={ 'code': code, })
-    # TODO: think about the way to remove requirement for this request.
     processor = DocumentProcessor()
     document = processor.read(code, options={'only_metadata': True, 'user': request.user, 'revision': revision})
     mimetype = document.get_mimetype()
@@ -414,6 +413,11 @@ def view_object(request, code, step, template='mdtui/view.html'):
         'mimetype': mimetype,
         'revision': revision,
     }
+    if not document.get_file_revisions_data() and document.get_db_info()['metadata_doc_type_rule_id']:
+        # Indexed Document with 0 revisions (Displaying stub document from static)
+        # TODO: expand this for branding. (Using custom DMS stub document)
+        stub_doc_url = settings.STATIC_URL + 'pdf/stub_document.pdf'
+        context.update({'mimetype': 'stub_document', 'pdf_url': stub_doc_url})
     return render(request, template, context)
 
 @login_required
@@ -447,7 +451,7 @@ def edit(request, code, step='edit', template='mdtui/indexing.html'):
             pass
 
     log.debug('indexing_edit view called with return_url: %s, changed_indexes: %s' % (return_url, changed_indexes))
-    doc = processor.read(code, {'user': request.user, })
+    doc = processor.read(code, {'user': request.user, 'only_metadata': True})
     if not processor.errors and not doc.marked_deleted:
         if not request.POST:
             form = initEditIndexesForm(request, doc, changed_indexes)
@@ -596,9 +600,10 @@ def edit_file_revisions(request, code, step=None, template='mdtui/indexing.html'
         context.update({
             'file_revision_data': frd,
             'file_revision_data_order_list': sorted(frd.iterkeys()),
+            'index_data': doc.get_db_info(),
         })
     else:
-        errors = [MDTUI_ERROR_STRINGS['NO_DOC']]
+        errors = [MDTUI_ERROR_STRINGS['NO_DOC'] + '. Maybe you should go index it first?']
     context.update({'error_warnings': errors})
     return render(request, template, context)
 
@@ -765,6 +770,7 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
     warnings = []
     valid_call = True
     temp_vars = {}
+    upload_file = None
     # Check session variables, init context and add proper user warnings
     for var_name, context_var, action in [
         ('document_keys', "document_keys_dict", 'NO_INDEX'),
@@ -804,13 +810,6 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
             warnings.append(MDTUI_ERROR_STRINGS['NEW_KEY_VALUE_PAIR'] + new_key + ': ' + new_value)
 
     if upload_form.is_valid() or barcode_form.is_valid() and valid_call:
-        if upload_form.is_valid():
-            upload_file = upload_form.files['file']
-        else:
-            # HACK: upload a stub document as our first revision
-            import os
-            upload_file = open(os.path.join(os.path.split(__file__)[0], 'stub_document.pdf'), 'rb')
-
         if valid_call:
             # Unifying dates to CouchDB storage formats.
             # TODO: maybe make it a part of the CouchDB storing manager.
@@ -818,9 +817,15 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
 
             # Storing into DMS with main Document Processor and current indexes
             processor = DocumentProcessor()
-            options = { 'user': request.user,
-                        'index_info': clean_index,
-                        'barcode': barcode }
+            options = {
+                'user': request.user,
+                'index_info': clean_index,
+                'barcode': barcode,
+            }
+            if upload_form.is_valid():
+                upload_file = upload_form.files['file']
+            else:
+                options['only_metadata'] = True
             processor.create(upload_file, options)
 
             if not processor.errors:
@@ -831,15 +836,15 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
         else:
             warnings.append(MDTUI_ERROR_STRINGS['NOT_VALID_INDEXING'])
 
-    context.update( { 'step': step,
-                      'valid_call': valid_call,
-                      'upload_form': upload_form,
-                      'barcode_form': barcode_form,
-                      'document_keys': document_keys,
-                      'warnings': warnings,
-                      'barcode': barcode,
-                    })
-
+    context.update({
+        'step': step,
+        'valid_call': valid_call,
+        'upload_form': upload_form,
+        'barcode_form': barcode_form,
+        'document_keys': document_keys,
+        'warnings': warnings,
+        'barcode': barcode,
+    })
     return render_to_response(template, context, context_instance=RequestContext(request))
 
 @login_required

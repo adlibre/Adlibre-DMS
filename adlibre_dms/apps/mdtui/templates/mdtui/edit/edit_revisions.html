@@ -1,15 +1,16 @@
 {% load revisions_tags %}
 {% load i18n %}
-    {% if file_revision_data %}
     <fieldset>
+        {% if index_data or file_revision_data %}{# Delete and upload only if there is it was somehow indexed or file persists #}
         <div class="span3" style="text-align: center;">
             <a href="#fileModal" data-toggle="modal"><img src="{{ STATIC_URL }}upload.png" /></a>
             <p><a href="#fileModal" data-toggle="modal" class="btn"><i class="icon-upload"></i> {% trans 'Upload New Revision' %}</a></p>
         </div>
         <div class="span3" style="text-align: center;">
             <a href="#deleteModal" data-toggle="modal"><img src="{{ STATIC_URL }}document_delete.png" /></a>
-            <p><a href="#deleteModal" data-toggle="modal" class="btn"><i class="icon-upload"></i> {% trans 'Delete entire document' %}</a></p>
+            <p><a href="#deleteModal" data-toggle="modal" class="btn"><i class="icon-trash"></i> {% trans 'Delete entire document' %}</a></p>
         </div>
+        {% endif %}
         {% include "mdtui/index/index_upload_file_form.html" %}
         {% include "mdtui/edit/edit_code_remove_confirmation.html" %}
         <legend>File revisions for code: {{ doc_name }}</legend>
@@ -17,6 +18,7 @@
         {# Url to delete revisions got here #}
         <div id="delete-url" data-id="{% url mdtui-edit-delete doc_name %}" style="display:none;"></div>
         <table class="table table-bordered table-striped">
+        {% if file_revision_data %}
             <thead>
             <tr>
                 <th>File</th>
@@ -57,9 +59,31 @@
             {% endif %}
         {% endfor %}
             </tbody>
+        {% else %}
+            <thead>
+            <tr>
+                <th>File</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <strong>No files assigned for this code.</strong>
+                    </td>
+                    <td>
+                        {% if index_info %}
+                        <p><a href="#fileModal" data-toggle="modal" class="btn"><i class="icon-upload"></i> {% trans 'Upload New Revision' %}</a></p>
+                        {% else %}
+                        <p> None available.</p>
+                        {% endif %}
+                    </td>
+                </tr>
+            </tbody>
+        {% endif %}
         </table>
+
     </fieldset>
-    {% endif %}
     <div class="form-actions">
         <a href="{% url mdtui-edit doc_name %}" class="btn btn-primary"><i class="icon-ok icon-white"></i> Finish</a>
     </div>

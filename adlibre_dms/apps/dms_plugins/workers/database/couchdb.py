@@ -160,7 +160,14 @@ class CouchDBMetadata(object):
             else:
                 user = self.check_user(document)
                 doc_name = document.get_stripped_filename()
-                couchdoc = CouchDocument.get(docid=doc_name)
+                couchdoc = CouchDocument()
+                try:
+                    couchdoc = CouchDocument.get(docid=doc_name)
+                except Exception, e:
+                    # Skip deleted errors (they are not used in DMS)
+                    if not str(e) == 'deleted':
+                        raise PluginError('CouchDB error: %s' % e, e)
+                    pass
                 document = couchdoc.populate_into_dms(user, document)
                 return document
 
