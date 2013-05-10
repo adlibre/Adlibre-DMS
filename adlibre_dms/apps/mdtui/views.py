@@ -402,7 +402,7 @@ def view_object(request, code, step, template='mdtui/view.html'):
     """View PDF Document"""
     # TODO: Add certain revision view possibility for "edit revisions" view
     revision = request.GET.get('revision', None)
-    pdf_url = reverse('mdtui-download-pdf', kwargs={ 'code': code, })
+    pdf_url = reverse('mdtui-download-pdf', kwargs={'code': code})
     processor = DocumentProcessor()
     document = processor.read(code, options={'only_metadata': True, 'user': request.user, 'revision': revision})
     mimetype = document.get_mimetype()
@@ -413,11 +413,13 @@ def view_object(request, code, step, template='mdtui/view.html'):
         'mimetype': mimetype,
         'revision': revision,
     }
-    if not document.get_file_revisions_data() and 'metadata_doc_type_rule_id' in document.get_db_info().iterkeys():
-        # Indexed Document with 0 revisions (Displaying stub document from static)
-        # TODO: expand this for branding. (Using custom DMS stub document)
-        stub_doc_url = settings.STATIC_URL + 'pdf/stub_document.pdf'
-        context.update({'mimetype': 'stub_document', 'pdf_url': stub_doc_url})
+    if not document.get_file_revisions_data():
+        db = document.get_db_info()
+        if 'metadata_doc_type_rule_id' in db.iterkeys() and db['metadata_doc_type_rule_id']:
+            # Indexed Document with 0 revisions (Displaying stub document from static)
+            # TODO: expand this for branding. (Using custom DMS stub document)
+            stub_doc_url = settings.STATIC_URL + 'pdf/stub_document.pdf'
+            context.update({'mimetype': 'stub_document', 'pdf_url': stub_doc_url})
     return render(request, template, context)
 
 @login_required
@@ -572,7 +574,7 @@ def edit_file_delete(request, code):
 
 @login_required
 @group_required(SEC_GROUP_NAMES['index'])
-def edit_file_revisions(request, code, step=None, template='mdtui/indexing.html'):
+def edit_file_revisions(request, code, step='edit_revisions', template='mdtui/indexing.html'):
     """Editing file revisions for given code"""
     form = DocumentUploadForm(request.POST or None, request.FILES or None)
     revision_file = request.FILES.get('file', None)

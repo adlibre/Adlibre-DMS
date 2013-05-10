@@ -2818,7 +2818,7 @@ class MDTUI(MUITestData):
         - superuser
         - not permitted user
         """
-        edit_btn_string = """href="/mdtui/indexing/edit/%s""" % self.edit_document_name_1
+        edit_btn_string = """href="/mdtui/edit/%s""" % self.edit_document_name_1
         data = {'mdt': self.test_mdt_id_5}
         # Adding apecial permission to test user 1
         user = User.objects.get(username=self.username_1)
