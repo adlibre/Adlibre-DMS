@@ -322,6 +322,25 @@ class DocumentProcessorTest(CoreTestCase):
         self.assertEqual(couchdoc['id'], filecode)
         self.assertEqual(couchdoc['metadata_doc_type_rule_id'], '2')
 
+    def test_06_create_document_without_security_permission(self):
+        """Create a file request for user that is not in security group"""
+        filecode = self.documents_pdf[4]
+        tests_file = self._get_fixtures_file(filecode)
+        processor = DocumentProcessor()
+        user = User.objects.create_user(username='someone')
+        doc = processor.create(tests_file, {'user': user, 'barcode': filecode})
+        if not processor.errors:
+            raise AssertionError('Processor should fail creating file for user not in security group')
+        json_path = self._chek_documents_dir(filecode + '.' + self.fs_metadata_ext, doc.get_docrule(), check_exists=False)
+        rev1_path = self._chek_documents_dir(filecode + '_r1.pdf', doc.get_docrule(), code=filecode, check_exists=False)
+        if os.path.isfile(json_path) or os.path.isfile(rev1_path):
+            raise AssertionError('Directory should not contain files on creating code without security permission')
+        # Couchdb doc is not created
+        couchdoc = self._open_couchdoc(self.couchdb_name, filecode)
+        print couchdoc
+        if couchdoc:
+            raise AssertionError('CouchDB should not contain document: %s' % filecode)
+
     def test_zz_cleanup(self):
         """Cleaning alll the docs and data that are touched or used in those tests"""
         cleanup_docs = [

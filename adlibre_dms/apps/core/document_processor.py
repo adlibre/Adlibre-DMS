@@ -108,11 +108,13 @@ class DocumentProcessor(object):
                 if self.errors.__len__() == 1 and self.errors[0].code == 404:
                     self.errors = []
         # Processing plugins
-        # FIXME: if uploaded_file is None, then some plugins should not run because we don't have a file
         if valid:
             doc = operator.process_pluginpoint(pluginpoints.BeforeStoragePluginPoint, document=doc)
-            operator.process_pluginpoint(pluginpoints.StoragePluginPoint, document=doc)
-            doc = operator.process_pluginpoint(pluginpoints.DatabaseStoragePluginPoint, document=doc)
+            if not operator.plugin_errors:
+                if uploaded_file:
+                    # Storage plugins should not run in case Uploaded_file is none
+                    operator.process_pluginpoint(pluginpoints.StoragePluginPoint, document=doc)
+                doc = operator.process_pluginpoint(pluginpoints.DatabaseStoragePluginPoint, document=doc)
             self.check_errors_in_operator(operator)
         return doc
 
