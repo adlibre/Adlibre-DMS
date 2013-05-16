@@ -1,3 +1,10 @@
+"""
+Module: Compression Plugin
+Project: Adlibre DMS
+Copyright: Adlibre Pty Ltd 2013
+License: See LICENSE for license information
+"""
+
 import zlib
 import tempfile
 
@@ -8,6 +15,7 @@ from dms_plugins.workers import Plugin
 class GzipOnStorePlugin(Plugin, BeforeStoragePluginPoint):
     title = 'Gzip Plugin on storage'
     has_configuration = True  # TODO: configure
+    description = "Compresses files before storing"
     plugin_type = "storage_processing"
 
     def work(self, document):
@@ -17,6 +25,7 @@ class GzipOnStorePlugin(Plugin, BeforeStoragePluginPoint):
 class GzipOnUpdatePlugin(Plugin, BeforeUpdatePluginPoint):
     title = 'Gzip Plugin on update'
     has_configuration = True  # TODO: configure
+    description = "Compresses files on updating file"
     plugin_type = "update_processing"
 
     def work(self, document):
@@ -26,6 +35,7 @@ class GzipOnUpdatePlugin(Plugin, BeforeUpdatePluginPoint):
 class GzipOnRetrievePlugin(Plugin, BeforeRetrievalPluginPoint):
     title = 'Gzip Plugin on retrieval'
     has_configuration = True  # TODO: configure
+    description = "Decompresses files on retrieval"
     plugin_type = "retrieval_processing"
 
     def work(self, document):
