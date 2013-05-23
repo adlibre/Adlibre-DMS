@@ -19,5 +19,5 @@ reportlab==2.5
 restkit==4.1.2
 socketpool==0.3.0
 wsgiref==0.1.2
-django-log-file-viewer==0.4
+django-log-file-viewer==0.5
 django-jenkins==0.14.0
