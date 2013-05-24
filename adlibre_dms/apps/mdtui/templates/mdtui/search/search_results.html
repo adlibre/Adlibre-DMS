@@ -16,6 +16,7 @@
             {% endfor %}
         </ul>
     </caption>
+{% block custom_branding %}
     <colgroup>
         <col class="">
         <col class="{% ifequal sorting_field "Creation Date" %}selected{% endifequal %}">
@@ -56,6 +57,7 @@
         </tr>
     {% endfor %}
     </tbody>
+{% endblock %}
 </table>
 {% if paginated_documents.paginator %}
 <hr />
