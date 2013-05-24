@@ -1,10 +1,10 @@
 {% load index_keys %}
 {% load widget_tweaks %}
 
-{% if field.name = "export_results" %}
+{% if field.name == "export_results" %}
 {# Doing nothing for export results field #}
 {% else %}
-{% if not field|field_type = "DateField" %}
+{% if field|field_type != "DateField" %}
     {# String/Integer form field type #}
     <div class="control-group">
         {% if field.errors %}
@@ -19,10 +19,10 @@
         <div class="input">
             <div class="controls">
                 <div class="input-prepend">
-                    {% if field|field_type = "IntegerField" %}
+                    {% if field|field_type == "IntegerField" %}
                     <span class="add-on"><i class="dms-calculator-edit"></i></span>
                     {% else %}
-                    {% if field|field_type = "CharField" %}
+                    {% if field|field_type == "CharField" %}
                     <span class="add-on"><i class="dms-page-white-edit"></i></span>
                     {% endif %}
                     {% endif %}
@@ -34,7 +34,7 @@
     </div>
 {% else %}
     {# Dynamic Date type fields rendering #}
-    {% if not field.name = "date" %} {% if not field.name = "end_date" %}
+    {% if field.name != "date" %} {% if field.name != "end_date" %}
         <div class="control-group">
             {%  if field.errors %}
                 {%  for error in field.errors %}
@@ -50,7 +50,7 @@
                     <div class="input-prepend">
                         <span class="add-on"><i class="dms-calendar-edit"></i></span>
                         <input id="id_date_{{ field.name }}" type="text" value="{{ field.value|date:DATE_FORMAT }}" class="input-medium" name="{{ field.name }}" data-datepicker="datepicker" />
-                        {% if field.name = "date" %}
+                        {% if field.name == "date" %}
                             {# Additional date range field #}
                         {% endif %}
                         <p class="help-block">{{ field.help_text }}</p>
@@ -61,7 +61,7 @@
     {% endif %} {# not end_date #}
     {% endif %} {# not date #}
 
-    {% if field.name = "date" %}
+    {% if field.name == "date" %}
         <div class="row">
         <div class="span6">
             <div class="control-group">
@@ -89,7 +89,7 @@
 
     {% endif %} {# field = date #}
 
-    {% if field.name = "end_date" %}
+    {% if field.name == "end_date" %}
         {# Additional date range field (Second part) #}
         <div class="span6">
             <div class="control-group">

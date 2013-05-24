@@ -10,7 +10,7 @@
     <caption>Search with keys:
         <ul class="metainfo">
             {% for item in document_keys %}
-                {% if not item == 'end_date' %} {# 'end_date' already included via get_key_li_item templatetag #}
+                {% if item != 'end_date' %} {# 'end_date' already included via get_key_li_item templatetag #}
                 <li>{% get_key_li_item document_keys item %}</li>
                 {% endif %}
             {% endfor %}
@@ -21,7 +21,7 @@
         <col class="">
         <col class="{% ifequal sorting_field "Creation Date" %}selected{% endifequal %}">
         {% for key in mdts %}
-        {% if not key == "metadata_user_name" and not key == "metadata_user_id" %}
+        {% if key != "metadata_user_name" and key != "metadata_user_id" %}
         <col class="{% ifequal sorting_field key %}selected{% endifequal %}">
         {% endif %}
         {% endfor %}
@@ -47,7 +47,7 @@
             <td class="nw"><a href="{% url mdtui-view-object doc.id %}" title="{% trans 'View Document' %}" alt="{% trans 'View Document' %}" target="_blank"><i class="icon-download"></i> {{ doc.id }}</a></td>
             <td class="nw">{{ doc.metadata_created_date|date:DATE_FORMAT }}</td>
             {% for key in mdts %}
-                {% if not key == "metadata_user_name" and not key == "metadata_user_id" %}
+                {% if key != "metadata_user_name" and key != "metadata_user_id" %}
                     <td>{% get_sec_key_for_doc doc.mdt_indexes key %}</td>
                 {% endif %}
             {% endfor %}
