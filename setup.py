@@ -113,7 +113,7 @@ setup(name='adlibre_dms',
             'Django==1.4.3',
             'python-magic==0.4.2',
             'django-compressor==1.1.2',
-            'docutils==0.7',
+            'docutils==0.10',
             # MUI
             'couchdbkit==0.6.1',
             'django-widget-tweaks==1.0',
@@ -123,14 +123,14 @@ setup(name='adlibre_dms',
             'django-bcp',
             'adlibre-plugins',
             # not sure if we directly require these
-            'distribute==0.6.25',
-            'django-appconf==0.5',
+            'distribute==0.6.43',
+            'django-appconf==0.6',
             'http-parser==0.7.4',
             'pyPdf==1.13',
             # Deployment
             'flup==1.0.3.dev-20110405',
             # Logging
-            'django-log-file-viewer==0.4',
+            'django-log-file-viewer==0.6',
             # CI integration
             'django-jenkins==0.14.0'
     ],

@@ -6,7 +6,6 @@ couchdbkit==0.6.1
 distribute==0.6.43
 django-appconf==0.6
 django-compressor==1.1.2
-django-plugins==0.1
 django-taggit==0.9.3
 django-widget-tweaks==1.0
 docutils==0.10
@@ -19,5 +18,5 @@ reportlab==2.5
 restkit==4.2.1
 socketpool==0.5.2
 wsgiref==0.1.2
-django-log-file-viewer==0.5
+django-log-file-viewer==0.6
 django-jenkins==0.14.0
