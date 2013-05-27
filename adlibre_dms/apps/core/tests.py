@@ -190,7 +190,9 @@ class DocumentProcessorTest(CoreTestCase):
         Tests if file is compressed and stored into proper place with hashes
         Tests document created in CouchDB
         """
-        self._list_couchdocs(self.couchdb_name)
+        docs = self._list_couchdocs(self.couchdb_name)
+        for doc in docs:
+            print doc
         filecode = self.documents_pdf[0]
         test_file = self._get_fixtures_file(filecode)
         doc = self.processor.create(test_file, {'user': self.admin_user})
