@@ -128,8 +128,11 @@ class CoreTestCase(DMSTestCase):
             if couchfile:
                 print couchfile
                 print 'CouchDB file contents: \n'
-                for key, value in couchfile.__dict__.iteritems():
+                for key, value in couchfile.iteritems():
                     print '%s: %s' % (key, value)
+                all_couchdocs = self._list_couchdocs(self.couchdb_name)
+                print all_couchdocs
+
                 raise AssertionError('CouchDB document has not been removed: %s' % code)
 
     def _open_couchdoc(self, db_name, code, view_name='_all_docs'):
@@ -150,6 +153,21 @@ class CoreTestCase(DMSTestCase):
         for row in r:
             firstdoc = row['doc']
         return firstdoc
+
+    def _list_couchdocs(self,  db_name):
+        """Downloads all the documents that are currently in CouchDB now"""
+        docs = {}
+        server = Server()
+        db = server.get_or_create_db(db_name)
+        r = db.view(
+            '_all_docs',
+            key='',
+            include_docs=True,
+        )
+        for row in r:
+            docs = row['doc']
+        return docs
+
 
 
 class DocumentProcessorTest(CoreTestCase):
