@@ -132,7 +132,6 @@ class CoreTestCase(DMSTestCase):
                     print '%s: %s' % (key, value)
                 all_couchdocs = self._list_couchdocs(self.couchdb_name)
                 print all_couchdocs
-
                 raise AssertionError('CouchDB document has not been removed: %s' % code)
 
     def _open_couchdoc(self, db_name, code, view_name='_all_docs'):
@@ -161,7 +160,8 @@ class CoreTestCase(DMSTestCase):
         db = server.get_or_create_db(db_name)
         r = db.view(
             '_all_docs',
-            key='',
+            startkey="_design/",
+            endkey="_design0",
             include_docs=True,
         )
         for row in r:
@@ -472,6 +472,7 @@ class DocumentProcessorTest(CoreTestCase):
         self._chek_documents_dir(filecode + '_r1.pdf', doc.get_docrule(), code=filecode)
         self.assertEqual(doc.get_tag_string(), tagstring)
         # Deleting doc and checking tags deleted too.
+        self._list_couchdocs(self.couchdb_name)
         self._remove_file(filecode)
         try:
             tags = DocTags.objects.get(name=filecode)
