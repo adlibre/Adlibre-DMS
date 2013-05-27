@@ -5,30 +5,38 @@
 #
 # Uses UNIX sockets for FCGI
 #
-# Version 2.4
+# Version 2.5
 
-# Project Specific Config
+# Project Specific
 PROJNAME='adlibre_dms'
-WEB_USER='wwwpub'
 
-METHOD=prefork #threaded
-MAXSPARE=10
-MINSPARE=6
-MAXCHILDREN=24
-MAXREQUESTS=256
-UMASK=007
-
+# Auto config based on standard project layout
 CWD=$(cd ${0%/*} && pwd -P)
 PROJDIR=$(cd $CWD/../ && pwd -P) # Root of our project
 SRCDIR=$(cd $CWD/../${PROJNAME}/ && pwd -P) # Path to manage.py
 BINDIR=$(cd $CWD/../bin/ && pwd -P) # Path to activate / virtualenv
 
+# Source Config Overrides
+if [ -f $SRCDIR/manage-fcgi.conf ]; then
+    source $SRCDIR/manage-fcgi.conf
+fi
+
+# Config Defaults
+WEB_USER=${WEB_USER-wwwpub}
+METHOD=${METHOD-prefork} #threaded
+MAXSPARE=${MAXSPARE-10}
+MINSPARE=${MINSPARE-6}
+MAXCHILDREN=${MAXCHILDREN-24}
+MAXREQUESTS=${MAXREQUESTS-256}
+UMASK=${UMASK-007} # Shouldn't need to change this
+
 ############################################
 
 ACTION=$1
-SETTINGS=${2-settings}
-SOCKET="$PROJDIR/"${3-$(echo "${PROJNAME}")}".sock"
-PIDBASE="$PROJDIR/"${3-$(echo "${PROJNAME}")}
+SETTINGS=${2-${SETTINGS-settings}} # If $2 not set, then use from config file, otherwise default to literal 'settings'
+SOCKET="${PROJDIR}/${3-${SOCKET-$PROJNAME}}.sock"
+PIDBASE="${PROJDIR}/${3-${PIDBASE-$PROJNAME}}"
+
 WPIDFILE="${PIDBASE}.wsgi.pid"
 CPIDFILE="${PIDBASE}.celeryd.pid"
 CMD="python ${SRCDIR}/manage.py runfcgi method=${METHOD} minspare=${MINSPARE} maxspare=${MAXSPARE} maxchildren=${MAXCHILDREN} maxrequests=${MAXREQUESTS} socket=$SOCKET pidfile=${WPIDFILE} umask=${UMASK} --settings=${SETTINGS}"
