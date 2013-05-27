@@ -126,6 +126,10 @@ class CoreTestCase(DMSTestCase):
         if check_couchdb:
             couchfile = self._open_couchdoc(self.couchdb_name, code)
             if couchfile:
+                print couchfile
+                print 'CouchDB file contents: \n'
+                for key, value in couchfile.__dict__.iteritems():
+                    print '%s: %s' % (key, value)
                 raise AssertionError('CouchDB document has not been removed: %s' % code)
 
     def _open_couchdoc(self, db_name, code, view_name='_all_docs'):
