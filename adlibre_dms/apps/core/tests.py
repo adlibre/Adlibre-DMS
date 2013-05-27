@@ -159,13 +159,11 @@ class CoreTestCase(DMSTestCase):
         server = Server()
         db = server.get_or_create_db(db_name)
         r = db.view(
-            '_all_docs',
-            startkey="_design/",
-            endkey="_design0",
+            'dmscouch/all',
             include_docs=True,
         )
         for row in r:
-            docs = row['doc']
+            docs[row['doc']['_id']] = row['doc']
         return docs
 
 
@@ -192,6 +190,7 @@ class DocumentProcessorTest(CoreTestCase):
         Tests if file is compressed and stored into proper place with hashes
         Tests document created in CouchDB
         """
+        self._list_couchdocs(self.couchdb_name)
         filecode = self.documents_pdf[0]
         test_file = self._get_fixtures_file(filecode)
         doc = self.processor.create(test_file, {'user': self.admin_user})
