@@ -83,11 +83,20 @@ class CoreTestCase(DMSTestCase):
     def _check_files_equal(self, fixtures_file, dms_file, compressed=True, check=True):
         """Tests if 2 given file objects are equal. Taking compression into account
 
-        @fixtures_file is open file instance
-        @dms_file is open file instance
-        @compressed is a switch to compress @fixtures_file before comparing hashes
+        @param fixtures_file: is open file instance
+        @param dms_file: is open file instance
+        @param compressed: is a switch to compress @fixtures_file before comparing hashes
+        @param check: is a switch to really compare hash codes
+
+        @return: fixtures hash code and a hash code of a checked file from dms
         """
         def get_hash(document, method='md5', salt=settings.SECRET_KEY):
+            """Helper to get a hash for a document
+
+            @param document: hashed object
+            @param method: type of hashing
+            @param salt: is a secret phrase to hash an object
+            """
             h = hashlib.new(method)
             h.update(document)
             h.update(salt)
@@ -130,18 +139,18 @@ class CoreTestCase(DMSTestCase):
                 print 'CouchDB file contents: \n'
                 for key, value in couchfile.iteritems():
                     print '%s: %s' % (key, value)
-                all_couchdocs = self._list_couchdocs(self.couchdb_name)
+                all_couchdocs = self._list_couch_docs(self.couchdb_name)
                 print all_couchdocs
                 raise AssertionError('CouchDB document has not been removed: %s' % code)
 
     def _open_couchdoc(self, db_name, code, view_name='_all_docs'):
         """Open given document in a given CouchDB database
 
-        @db_name is a couchdb name to look in for doc
-        @code is a CouchDB document _id
-        @view_name is a non default (_all_docs) name of CouchDB view to look for code
+        @param: db_name is a couchdb name to look in for doc
+        @param: code is a CouchDB document _id
+        @param: view_name is a non default (_all_docs) name of CouchDB view to look for code
         """
-        firstdoc = {}
+        first_doc = {}
         server = Server()
         db = server.get_or_create_db(db_name)
         r = db.view(
@@ -150,22 +159,8 @@ class CoreTestCase(DMSTestCase):
             include_docs=True,
         )
         for row in r:
-            firstdoc = row['doc']
-        return firstdoc
-
-    def _list_couchdocs(self,  db_name):
-        """Downloads all the documents that are currently in CouchDB now"""
-        docs = {}
-        server = Server()
-        db = server.get_or_create_db(db_name)
-        r = db.view(
-            'dmscouch/all',
-            include_docs=True,
-        )
-        for row in r:
-            docs[row['doc']['_id']] = row['doc']
-        return docs
-
+            first_doc = row['doc']
+        return first_doc
 
 
 class DocumentProcessorTest(CoreTestCase):
@@ -191,7 +186,7 @@ class DocumentProcessorTest(CoreTestCase):
         Tests document created in CouchDB
         """
         print 'listing couchdocs for BEFORE tests to make sure we are clean'
-        docs = self._list_couchdocs(self.couchdb_name)
+        docs = self._list_couch_docs(self.couchdb_name)
         if docs:
             raise AssertionError('CouchDB is not clean for tests. Contains docs: %s' % [d for d in docs])
         filecode = self.documents_pdf[0]
@@ -329,42 +324,46 @@ class DocumentProcessorTest(CoreTestCase):
         This creation should produce CpuchDB document without storing any files,
         but reserving this code, indicating this file exists.
         """
-        filecode = self.documents_pdf[3]
+        file_code = self.documents_pdf[3]
         index_info = self.doc1
         options = {
             'user': self.admin_user,
-            'barcode': filecode,
+            'barcode': file_code,
             'index_info': index_info,
             'only_metadata': True,
         }
         doc = self.processor.create(None, options)
         if self.processor.errors:
             raise AssertionError('Processor create failed with errors: %s' % self.processor.errors)
-        json_path = self._chek_documents_dir(filecode + '.' + self.fs_metadata_ext, doc.get_docrule(), check_exists=False)
-        rev1_path = self._chek_documents_dir(filecode + '_r1.pdf', doc.get_docrule(), code=filecode, check_exists=False)
+        filename1 = basestring.join([file_code, '.', self.fs_metadata_ext])
+        filename2 = basestring.join([file_code, '_r1.pdf'])
+        json_path = self._chek_documents_dir(filename1, doc.get_docrule(), check_exists=False)
+        rev1_path = self._chek_documents_dir(filename2, doc.get_docrule(), code=file_code, check_exists=False)
         if os.path.isfile(json_path) or os.path.isfile(rev1_path):
             raise AssertionError('Directory should not contain files on creating 0 revisions file')
-        # Couchdb doc created properly
-        couchdoc = self._open_couchdoc(self.couchdb_name, filecode)
-        self.assertEqual(couchdoc['id'], filecode)
-        self.assertEqual(couchdoc['metadata_doc_type_rule_id'], '2')
+        # CouchDB doc created properly
+        couch_doc = self._open_couchdoc(self.couchdb_name, file_code)
+        self.assertEqual(couch_doc['id'], file_code)
+        self.assertEqual(couch_doc['metadata_doc_type_rule_id'], '2')
 
     def test_06_create_document_without_security_permission(self):
         """Create a file request for user that is not in security group"""
-        filecode = self.documents_pdf[4]
-        tests_file = self._get_fixtures_file(filecode)
+        file_code = self.documents_pdf[4]
+        tests_file = self._get_fixtures_file(file_code)
         user = User.objects.create_user(username='someone')
-        doc = self.processor.create(tests_file, {'user': user, 'barcode': filecode})
+        doc = self.processor.create(tests_file, {'user': user, 'barcode': file_code})
         if not self.processor.errors:
             raise AssertionError('Processor should fail creating file for user not in security group')
-        json_path = self._chek_documents_dir(filecode + '.' + self.fs_metadata_ext, doc.get_docrule(), check_exists=False)
-        rev1_path = self._chek_documents_dir(filecode + '_r1.pdf', doc.get_docrule(), code=filecode, check_exists=False)
+        filename1 = basestring.join([file_code, '.', self.fs_metadata_ext])
+        filename2 = basestring.join([file_code, '_r1.pdf'])
+        json_path = self._chek_documents_dir(filename1, doc.get_docrule(), check_exists=False)
+        rev1_path = self._chek_documents_dir(filename2, doc.get_docrule(), code=file_code, check_exists=False)
         if os.path.isfile(json_path) or os.path.isfile(rev1_path):
             raise AssertionError('Directory should not contain files on creating code without security permission')
-        # Couchdb doc is not created
-        couchdoc = self._open_couchdoc(self.couchdb_name, filecode)
-        if couchdoc:
-            raise AssertionError('CouchDB should not contain document: %s' % filecode)
+        # CouchDB doc is not created
+        couch_doc = self._open_couchdoc(self.couchdb_name, file_code)
+        if couch_doc:
+            raise AssertionError('CouchDB should not contain document: %s' % file_code)
 
     def test_07_create_by_user_in_security_group(self):
         """Create a file for user that is in security group"""
@@ -375,21 +374,21 @@ class DocumentProcessorTest(CoreTestCase):
         group = Group.objects.get(name='security')
         group.user_set.add(user)
         # Upload a doc again
-        filecode = self.documents_pdf[4]
-        tests_file = self._get_fixtures_file(filecode)
-        doc = self.processor.create(tests_file, {'user': user, 'barcode': filecode})
+        file_code = self.documents_pdf[4]
+        tests_file = self._get_fixtures_file(file_code)
+        doc = self.processor.create(tests_file, {'user': user, 'barcode': file_code})
         if self.processor.errors:
             raise AssertionError('Processor create failed with errors: %s' % self.processor.errors)
         # Only revision 1 and metadata present
-        self._chek_documents_dir(filecode + '.' + self.fs_metadata_ext, doc.get_docrule())
-        self._chek_documents_dir(filecode + '_r1.pdf', doc.get_docrule(), code=filecode)
-        path2 = self._chek_documents_dir(filecode + '_r2.pdf', doc.get_docrule(), code=filecode, check_exists=False)
+        self._chek_documents_dir(file_code + '.' + self.fs_metadata_ext, doc.get_docrule())
+        self._chek_documents_dir(file_code + '_r1.pdf', doc.get_docrule(), code=file_code)
+        path2 = self._chek_documents_dir(file_code + '_r2.pdf', doc.get_docrule(), code=file_code, check_exists=False)
         if os.path.isfile(path2):
             raise AssertionError('Revision 2 file should be absent')
-        # Couchdb doc created properly
-        couchdoc = self._open_couchdoc(self.couchdb_name, filecode)
-        self.assertEqual(couchdoc['id'], filecode)
-        self.assertEqual(couchdoc['metadata_doc_type_rule_id'], '2')
+        # CouchDB doc created properly
+        couch_doc = self._open_couchdoc(self.couchdb_name, file_code)
+        self.assertEqual(couch_doc['id'], file_code)
+        self.assertEqual(couch_doc['metadata_doc_type_rule_id'], '2')
 
     def test_08_no_code_creation(self):
         """Create a code that has no Document Type Rule set"""
@@ -454,35 +453,36 @@ class DocumentProcessorTest(CoreTestCase):
             raise AssertionError('Revision 2 file should be absent')
         # Proper files in proper places with proper data
         self._check_files_equal(self._get_fixtures_file(filecode, extension='jpg'), open(path1, 'r'))
-        hcode1, hcode2 = self._check_files_equal(self._get_fixtures_file(filecode, extension='jpg'), open(json_path, 'r'), check=False)
-        if hcode1 == hcode2:
+        file_2 = self._get_fixtures_file(filecode, extension='jpg')
+        hash_code1, hash_code2 = self._check_files_equal(file_2, open(json_path, 'r'), check=False)
+        if hash_code1 == hash_code2:
             raise AssertionError('Wrong data stored into json file.')
-        # Couchdb doc created properly
-        couchdoc = self._open_couchdoc(self.couchdb_name, filecode)
-        self.assertEqual(couchdoc['id'], filecode)
-        self.assertEqual(couchdoc['metadata_doc_type_rule_id'], '9')
+        # CouchDB doc created properly
+        couch_doc = self._open_couchdoc(self.couchdb_name, filecode)
+        self.assertEqual(couch_doc['id'], filecode)
+        self.assertEqual(couch_doc['metadata_doc_type_rule_id'], '9')
 
     def test_11_create_tags(self):
         """Create a document with Tags. Stored into SQL DB"""
-        tagstring = 'some_tag'
-        filecode = self.documents_hash[0][0]
-        test_file = self._get_fixtures_file(filecode)
-        doc = self.processor.create(test_file, {'user': self.admin_user, 'tag_string': tagstring})
+        tag_string = 'some_tag'
+        file_code = self.documents_hash[0][0]
+        test_file = self._get_fixtures_file(file_code)
+        doc = self.processor.create(test_file, {'user': self.admin_user, 'tag_string': tag_string})
         if self.processor.errors:
             raise AssertionError('Processor create failed with errors: %s' % self.processor.errors)
-        self._chek_documents_dir(filecode + '.' + self.fs_metadata_ext, doc.get_docrule())
-        self._chek_documents_dir(filecode + '_r1.pdf', doc.get_docrule(), code=filecode)
-        self.assertEqual(doc.get_tag_string(), tagstring)
+        self._chek_documents_dir(file_code + '.' + self.fs_metadata_ext, doc.get_docrule())
+        self._chek_documents_dir(file_code + '_r1.pdf', doc.get_docrule(), code=file_code)
+        self.assertEqual(doc.get_tag_string(), tag_string)
         # Deleting doc and checking tags deleted too.
-        self._remove_file(filecode)
+        self._remove_file(file_code)
         try:
-            tags = DocTags.objects.get(name=filecode)
-            raise AssertionError('Tags for document %s should be deleted' % filecode)
+            DocTags.objects.get(name=file_code)
+            raise AssertionError('Tags for document %s should be deleted' % file_code)
         except ObjectDoesNotExist:
             pass
 
     def test_12_create_with_hashcode(self):
-        """Creating a file with new code with hashcode validation for provided file"""
+        """Creating a file with new code with hash code validation for provided file"""
         # TODO: logic here is broken somewhere. I should fix it.
         # @dms_stored_hashcode should not be different
         filecode = self.documents_hash[1][0]
@@ -531,9 +531,4 @@ class DocumentProcessorTest(CoreTestCase):
             self._remove_file(code)
         for code in [self.documents_jpg[2], ]:
             self._remove_file(code, extension='jpg')
-        # TODO: remove this. This must be deleted in tests
-        for code in [self.documents_hash[0][0], ]:
-            self._remove_file(code)
-
-        # TODO: check tags deleted after deleting correspondent doc (self.documents_hash[0])
 

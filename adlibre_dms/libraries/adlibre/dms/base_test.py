@@ -1,5 +1,15 @@
+"""
+Module: DMS base tests data
+Project: Adlibre DMS
+Copyright: Adlibre Pty Ltd 2013
+License: See LICENSE for license information
+Author: Iurii Garmash
+"""
+
 import os
 import base64
+
+from couchdbkit import Server
 
 from django.conf import settings
 from django.core.management import call_command
@@ -62,16 +72,16 @@ class DMSTestCase(TestCase):
         self.rules = (1, 2, 3, 4, 5,)
         self.rules_missing = (99,)
 
-    def _upload_file(self, doc_name, suggested_format='pdf', hashcode=None, check_response=True, code=None):
+    def _upload_file(self, doc_name, suggested_format='pdf', hash_code=None, check_response=True, code=None):
         """Upload initial version of a file into DMS
 
         @param suggested_format - is used to set up an extension of uploaded file to search in fixtures dir
-        @param hashcode - sets up a hash of an uploaded file
+        @param hash_code - sets up a hash of an uploaded file
         @param check_response - is used to confirm file has been successfully uploaded
         @param code - is to set up a code for file (Upload this file with different name specified)
         """
         self.client.login(username=self.username, password=self.password)
-        url, data = self._get_tests_file(doc_name, code, suggested_format, hashcode)
+        url, data = self._get_tests_file(doc_name, code, suggested_format, hash_code)
         response = self.client.post(url, data)
         if check_response:
             self.assertEqual(response.status_code, 201)
@@ -99,11 +109,14 @@ class DMSTestCase(TestCase):
         return url, data
 
     def loadTestData(self):
-        # Load a copy of all our fixtures using the management command
+        """Load a copy of all our fixtures using the management command"""
         return call_command('import_documents', self.test_document_files_dir, silent=False)
 
     def cleanUp(self, documents, check_response=True):
-        """Cleanup Helper"""
+        """Cleanup Helper
+
+        @param documents: is an iterable list of documents to clean up
+        @param check_response: is a switch for tests to try to test if API returned ok code"""
         self.client.login(username=self.username, password=self.password)
         for doc in documents:
             code, suggested_format = os.path.splitext(doc)
@@ -116,7 +129,10 @@ class DMSTestCase(TestCase):
                 self.assertEqual(response.status_code, 204)
 
     def cleanAll(self, check_response=True):
-        """Clean all of our test documents"""
+        """Clean all of our test documents
+
+        @param check_response: is a switch for tests to try to test if API returned ok code
+        """
 
         # Cleaning up simple docs
         self.cleanUp(self.documents_pdf, check_response=check_response)
@@ -125,18 +141,12 @@ class DMSTestCase(TestCase):
         self.cleanUp(self.documents_pdf2, check_response=check_response)
         self.cleanUp(self.documents_jpg, check_response=check_response)
 
-        cleanup_docs_list = []
-#        # no doc code documents require full filename in order to delete FIXME!
-#        for doc in self.documents_norule:
-#            cleanup_docs_list.append('%s.pdf' % doc)
-#        self.cleanUp(cleanup_docs_list, check_response=check_response, nodocrule=True)
-
         # Cleanup hashed dicts
         # (I'm sure there is a more elegant way to do this)
         cleanup_docs_list = []
-        for doc, hash in self.documents_hash:
+        for doc, hashed in self.documents_hash:
             cleanup_docs_list.append(doc)
-        for doc, hash in self.documents_missing_hash:
+        for doc, hashed in self.documents_missing_hash:
             cleanup_docs_list.append(doc)
         self.cleanUp(cleanup_docs_list, check_response=check_response)
 
@@ -144,13 +154,27 @@ class DMSTestCase(TestCase):
 #        self.cleanUp(self.unlisted_files_used, check_response=check_response, nodocrule=True)
 
     def setUp(self):
-        # NB This is called once for every test, not just test case before the tests are run!
+        """NB This is called once for every test, not just test case before the tests are run!"""
         pass
 
     def tearDown(self):
-        # Cleanup
+        """ Cleanup
         # NB This is called once for every test, not just test case before the tests are run!
+        """
         pass
+
+    def _list_couch_docs(self,  db_name='dmscouch_test'):
+        """Downloads all the documents that are currently in CouchDB now"""
+        docs = {}
+        server = Server()
+        db = server.get_or_create_db(db_name)
+        r = db.view(
+            'dmscouch/all',
+            include_docs=True,
+        )
+        for row in r:
+            docs[row['doc']['_id']] = row['doc']
+        return docs
 
 
 class BasicAuthClient(Client):
@@ -160,30 +184,65 @@ class BasicAuthClient(Client):
     """
 
     def auth(self, username, password):
+        """Authenticates client
+
+        @param username: string of a username to authenticate
+        @param password: string of a password to authenticate
+        """
         auth = '%s:%s' % (username, password)
         auth = 'Basic %s' % base64.encodestring(auth)
         auth = auth.strip()
         self.extra = {
             'HTTP_AUTHORIZATION': auth,
-            }
+        }
 
     # Pass auth **extra to every method
     def get(self, *args, **kwargs):
+        """Transparent method
+
+        @param args:
+        @param kwargs:
+        """
         return super(BasicAuthClient, self).get(*args, **self.extra)
 
     def post(self, *args, **kwargs):
+        """Inherited method
+
+        @param args:
+        @param kwargs:
+        """
         return super(BasicAuthClient, self).post(*args, **self.extra)
 
     def head(self, *args, **kwargs):
+        """Inherited method
+
+        @param args:
+        @param kwargs:
+        """
         return super(BasicAuthClient, self).head(*args, **self.extra)
 
     def options(self, *args, **kwargs):
+        """Inherited method
+
+        @param args:
+        @param kwargs:
+        """
         return super(BasicAuthClient, self).options(*args, **self.extra)
 
     def put(self, *args, **kwargs):
+        """Inherited method
+
+        @param args:
+        @param kwargs:
+        """
         return super(BasicAuthClient, self).put(*args, **self.extra)
 
     def delete(self, *args, **kwargs):
+        """Inherited method
+
+        @param args:
+        @param kwargs:
+        """
         return super(BasicAuthClient, self).delete(*args, **self.extra)
 
 
@@ -195,6 +254,11 @@ class DMSBasicAuthenticatedTestCase(DMSTestCase):
     client_class = BasicAuthClient
 
     def setUp(self, *args, **kwargs):
+        """Authenticated test case
+
+        @param args:
+        @param kwargs:
+        """
         super(DMSBasicAuthenticatedTestCase, self).setUp(*args, **kwargs)
         # Create Auth data
         self.client.auth(self.username, self.password)

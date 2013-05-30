@@ -587,6 +587,8 @@ def edit_file_revisions(request, code, step='edit_revisions', template='mdtui/in
     }
     processor = DocumentProcessor()
     doc = processor.read(code, {'user': request.user, 'only_metadata': True})
+    frd = doc.get_file_revisions_data()
+    db_info = doc.get_db_info()
     if not processor.errors and not doc.marked_deleted:
         if revision_file and form.is_valid():
             options = {
@@ -598,13 +600,12 @@ def edit_file_revisions(request, code, step='edit_revisions', template='mdtui/in
                 return HttpResponseRedirect(request.path)
             else:
                 errors.append(processor.errors)
-        frd = doc.get_file_revisions_data()
         context.update({
             'file_revision_data': frd,
             'file_revision_data_order_list': sorted(frd.iterkeys()),
-            'index_data': doc.get_db_info(),
+            'index_data': db_info,
         })
-    else:
+    if processor.errors or doc.marked_deleted or (not frd and not db_info['mdt_indexes']):
         errors = [MDTUI_ERROR_STRINGS['NO_DOC'] + '. Maybe you should go index it first?']
     context.update({'error_warnings': errors})
     return render(request, template, context)

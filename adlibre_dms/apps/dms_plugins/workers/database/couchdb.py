@@ -165,15 +165,16 @@ class CouchDBMetadata(object):
                     couchdoc = CouchDocument.get(docid=doc_name)
                 except Exception, e:
                     # Skip deleted errors (they are not used in DMS)
-                    if not str(e) == 'deleted':
+                    e_message = str(e)
+                    if not e_message in ['deleted', 'missing']:
                         raise PluginError('CouchDB error: %s' % e, e)
                     pass
                 document = couchdoc.populate_into_dms(user, document)
                 return document
 
-    """
-    Helper managers:
-    """
+    ####################################################################################################################
+    #############################################   Helper managers: ###################################################
+    ####################################################################################################################
     def sync_document_tags(self, document):
         if not document.tags:
             tags = []

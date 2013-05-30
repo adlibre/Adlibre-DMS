@@ -3276,7 +3276,7 @@ class MDTUI(MUITestData):
         self.assertEqual(response.status_code, 302)
         url = reverse('mdtui-search-options')
         # Getting required indexes id's
-        response = self.client.get(url)
+        self.client.get(url)
         # Searching date range for this test
         response = self.client.post(url, search_MDT_5_date_range_end_date2)
         self.assertEqual(response.status_code, 302)
@@ -3943,7 +3943,6 @@ class MDTUI(MUITestData):
         self.assertNotContains(response, "You have not defined Document Searching Options")
         # 2 documents (one of them 'only_metadata' document) found
         # and 2 first docs are not shown because they are modified by indexing
-        self._shelve(response)
         self.assertNotContains(response, self.doc1)
         self.assertNotContains(response, self.doc1_dict['description'])
         self.assertNotContains(response, self.doc2)
