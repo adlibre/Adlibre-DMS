@@ -335,8 +335,8 @@ class DocumentProcessorTest(CoreTestCase):
         doc = self.processor.create(None, options)
         if self.processor.errors:
             raise AssertionError('Processor create failed with errors: %s' % self.processor.errors)
-        filename1 = basestring.join([file_code, '.', self.fs_metadata_ext])
-        filename2 = basestring.join([file_code, '_r1.pdf'])
+        filename1 = ''.join([file_code, '.', self.fs_metadata_ext])
+        filename2 = ''.join([file_code, '_r1.pdf'])
         json_path = self._chek_documents_dir(filename1, doc.get_docrule(), check_exists=False)
         rev1_path = self._chek_documents_dir(filename2, doc.get_docrule(), code=file_code, check_exists=False)
         if os.path.isfile(json_path) or os.path.isfile(rev1_path):
@@ -354,8 +354,8 @@ class DocumentProcessorTest(CoreTestCase):
         doc = self.processor.create(tests_file, {'user': user, 'barcode': file_code})
         if not self.processor.errors:
             raise AssertionError('Processor should fail creating file for user not in security group')
-        filename1 = basestring.join([file_code, '.', self.fs_metadata_ext])
-        filename2 = basestring.join([file_code, '_r1.pdf'])
+        filename1 = ''.join([file_code, '.', self.fs_metadata_ext])
+        filename2 = ''.join([file_code, '_r1.pdf'])
         json_path = self._chek_documents_dir(filename1, doc.get_docrule(), check_exists=False)
         rev1_path = self._chek_documents_dir(filename2, doc.get_docrule(), code=file_code, check_exists=False)
         if os.path.isfile(json_path) or os.path.isfile(rev1_path):
