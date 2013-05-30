@@ -262,3 +262,8 @@ class DocumentTypeRuleManager(object):
         docrules = self.doccodes
         docrule_instance = docrules.get(pk=id)
         return docrule_instance
+
+
+class DocumentTypeRulePermission(models.Model):
+    """Proxy model for a proper admin placement. All the magic in admin.py"""
+    pass
