@@ -72,6 +72,8 @@ class DMSTestCase(TestCase):
         self.rules = (1, 2, 3, 4, 5,)
         self.rules_missing = (99,)
 
+        self.pdf_file_contains = '%PDF-1.4'
+
     def _upload_file(self, doc_name, suggested_format='pdf', hash_code=None, check_response=True, code=None):
         """Upload initial version of a file into DMS
 

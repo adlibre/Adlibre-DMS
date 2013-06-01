@@ -19,7 +19,7 @@ from django.conf import settings
 from core.errors import DmsException
 from doc_codes.models import DocumentTypeRuleManager
 
-log = logging.getLogger('core.document')
+log = logging.getLogger('core')
 
 
 class Document(object):

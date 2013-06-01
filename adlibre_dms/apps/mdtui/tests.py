@@ -2652,7 +2652,7 @@ class MDTUI(MUITestData):
         url = reverse('api_file', kwargs={'code': code1, 'suggested_format': 'pdf'},)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, '%PDF-1.4') # PDF is there
+        self.assertContains(response, '%PDF-1.4')  # PDF is there
         # Checking API directly (must not be there)
         url = reverse('api_file', kwargs={'code': code2, 'suggested_format': 'pdf'},)
         response = self.client.get(url)
