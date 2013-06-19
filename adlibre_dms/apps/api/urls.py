@@ -6,7 +6,7 @@ Copyright: Adlibre Pty Ltd 2011
 License: See LICENSE for license information
 """
 
-from django.conf.urls.defaults import *
+from django.conf.urls import patterns, url
 from piston.resource import Resource
 from api import handlers
 
@@ -14,7 +14,6 @@ from api import handlers
 old_file_handler = Resource(handlers.OldFileHandler)
 
 file_handler = Resource(handlers.FileHandler)
-
 file_info_handler = Resource(handlers.FileInfoHandler)
 file_list_handler = Resource(handlers.FileListHandler)
 revision_count_handler = Resource(handlers.RevisionCountHandler)

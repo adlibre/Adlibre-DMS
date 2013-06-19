@@ -342,26 +342,36 @@ class RevisionCountHandler(BaseHandler):
         log.info('RevisionCountHandler.read request fulfilled for document %s, extension %s' % (document, extension))
         return rev_count
 
+
 class RulesHandler(BaseHandler):
     """
     Returns list of all doc type rules in the system
     """
-    allowed_methods = ('GET','POST')
+    allowed_methods = ('GET', 'POST')
 
     verbose_name = 'rule'
     verbose_name_plural = 'rules'
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
+    @method_decorator(group_required('api'))  # FIXME: Should be more granular permissions
     def read(self, request):
-        mappings = DoccodePluginMapping.objects.all()
-        rules = list(map(lambda x: {
-                            'doccode': x.get_docrule().get_title(),
-                            'id': x.pk,
-                            'ui_url': reverse('ui_document_list', kwargs = {'id_rule': x.pk})
-                                }, mappings))
+        """Returns list of Document Type Rule <=> Plugins mapping
+
+        @param request:
+        @return: list of document type rules
+        """
+        doc_types_mappings = DoccodePluginMapping.objects.all()
+        rules_json = []
+        for rule in doc_types_mappings:
+            rules_json.append(
+                dict(
+                    doccode=rule.get_docrule().get_title(),
+                    id=rule.pk,
+                    ui_url=reverse('ui_document_list', kwargs={'id_rule': rule.pk}),
+                )
+            )
         log.info('RulesHandler.read request fulfilled')
-        return rules
+        return rules_json
 
 
 class RulesDetailHandler(BaseHandler):
@@ -380,7 +390,7 @@ class RulesDetailHandler(BaseHandler):
     verbose_name_plural = 'rules'
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
+    @method_decorator(group_required('api'))  # FIXME: Should be more granular permissions
     def read(self, request, id_rule):
         operator = PluginsOperator()
         try:
@@ -424,11 +434,11 @@ class MetaDataTemplateHandler(BaseHandler):
     """
     Read / Create / Delete Meta Data Templates
     """
-    allowed_methods = ('GET','POST', 'DELETE')
+    allowed_methods = ('GET', 'POST', 'DELETE')
 
     """
     docrule_id is used for read
-    mdt_id is use for delete
+    mdt_id is used for delete
     """
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
