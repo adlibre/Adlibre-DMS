@@ -26,13 +26,21 @@ def product_version(context):
     """ Returns Context Variable Containing Product version """
     return {'PRODUCT_VERSION': settings.PRODUCT_VERSION}
 
+def aui_url(context):
+    """ Returns Context Variable Containing Product version """
+    return {'AUI_URL': settings.AUI_URL}
+
+def aui_dms_id(context):
+    """ Returns Context Variable Containing Product version """
+    return {'AUI_DMS_ID': settings.AUI_DMS_ID}
+
 def date_format(context):
     """ Returns Context Variable Containing Date format currently used """
-    return {'DATE_FORMAT': settings.DATE_FORMAT.replace('%','')}
+    return {'DATE_FORMAT': settings.DATE_FORMAT.replace('%', '')}
 
 def datetime_format(context):
     """ Returns Context Variable Containing Datetime format currently used """
-    return {'DATETIME_FORMAT': settings.DATETIME_FORMAT.replace('%','')}
+    return {'DATETIME_FORMAT': settings.DATETIME_FORMAT.replace('%', '')}
 
 def stage_variable(context):
     """ Determine if we currently running on stage production """

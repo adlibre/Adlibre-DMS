@@ -26,6 +26,8 @@
                 {% endif %}
                 {% if user.is_authenticated %}
                 <li class="mdtui"><a href="{% url mdtui-home %}">{% trans 'MUI' %}</a></li>
+                <!-- TODO: make this url work and cleanup -->
+                <li class="aui"><a href="{{ AUI_URL }}?sessionid={{ request.session.session_key }}&instance_id={{ AUI_DMS_ID }}&user_id={{ user.pk }}&csrf_token={{ csrf_token }}&host={{ request.META.HTTP_HOST|urlencode }}">{% trans 'AUI' %}</a></li>
                 <li class="logout"><a href="{% url logout %}">{% trans 'Log out' %}</a></li>
                 {% else %}
                 <li class="login"><a href="{% url login %}">{% trans 'Log in' %}</a></li>
