@@ -187,6 +187,6 @@ class MetaDataTemplateManager(object):
             int(self.docrule_id)
             str(self.docrule_id)
             return True
-        except Exception, e: # FIXME
+        except Exception, e:  # FIXME
             log.error(e)
             return False

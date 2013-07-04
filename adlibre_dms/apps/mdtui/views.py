@@ -16,13 +16,13 @@ from django.core.urlresolvers import reverse
 from django.core.cache import get_cache
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.conf import settings
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.http import HttpResponse
 from django.shortcuts import render, redirect, render_to_response, HttpResponseRedirect
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 
 from api.decorators.group_required import group_required
-from dmscouch.models import CouchDocument
+
 from forms import DocumentUploadForm, BarcodePrintedForm, DocumentSearchOptionsForm
 from core.document_processor import DocumentProcessor
 from core.search import DMSSearchManager, DMSSearchQuery
@@ -49,7 +49,7 @@ from forms_representator import make_mdt_select_form
 from forms_representator import get_mdt_from_search_mdt_select_form
 from forms_representator import make_document_type_select_form
 from forms_representator import make_document_type_select
-from parallel_keys import ParallelKeysManager
+from core.parallel_keys import process_pkeys_request
 from data_exporter import export_to_csv
 from security import SEC_GROUP_NAMES
 from security import filter_permitted_docrules
@@ -931,84 +931,11 @@ def mdt_parallel_keys(request):
 
     log.debug(
         'mdt_parallel_keys call: docrule_id: "%s", key_name: "%s", autocomplete: "%s" Call is valid: "%s", MDTS: %s' %
-        (docrule_id, key_name, autocomplete_req, valid_call, doc_mdts)
+        (docrule_id, key_name, autocomplete_req, valid_call, doc_mdts.__len__())
     )
-    # TODO: Can be optimised for huge document's amounts in future (Step: Scalability testing)
-    """
-    # We can collect all the documents keys for each docrule in MDT related to requested field and load them into queue.
-    # Then check them for duplicated values and/or make a big index with all the document's keys in it
-    # to fetch only document indexes we need on first request. (Instead of 'include_docs=True')
-    # E.g. Make autocomplete Couch View to output index with all Document's mdt_indexes ONLY.
-    #
-    # Total amount of requests will be 3 instead of 2 (for 2 docrules <> 1 MDT) but they will be smaller.
-    # And that will be good for say 1 000 000 documents. However, DB size will rise too.
-    # (Because we will copy all the doc's indexes into separate specific response for Typehead in fact)
-    # Final step is to load all unique suggestion documents that are passed through our filters.
-    # (Or if we will build this special index it won't be necessary)
-    # (Only if we require parallel keys to be parsed)
-    # It can be done by specifying multiple keys that we need to load here. ('key' ws 'keys' *args in CouchDB request)
-    """
+
     if valid_call:
-        manager = ParallelKeysManager()
-        for mdt in doc_mdts.itervalues():
-            mdt_keys =[mdt[u'fields'][mdt_key][u'field_name'] for mdt_key in mdt[u'fields']]
-            log.debug('mdt_parallel_keys selected for suggestion MDT-s keys: %s' % mdt_keys)
-            if key_name in mdt_keys:
-                # Autocomplete key belongs to this MDT
-                mdt_docrules = mdt[u'docrule_id']
-                if docrule_id:
-                    # In case of index get Parallel keys from all MDT for docrule
-                    mdt_fields = manager.get_keys_for_docrule(docrule_id, doc_mdts)
-                else:
-                    # In case of search get only from selected MDT
-                    mdt_fields = manager.get_parallel_keys_for_mdts(doc_mdts)
-                pkeys = manager.get_parallel_keys_for_key(mdt_fields, key_name)
-                for docrule in mdt_docrules:
-                    # Only search through another docrules if response is not full
-                    if resp.__len__() > suggestions_limit:
-                        break
-                    # db call to search in docs
-                    if pkeys:
-                        # Making no action if not enough letters
-                        if autocomplete_req.__len__() > letters_limit:
-                            # Suggestion for several parallel keys
-                            documents = CouchDocument.view(
-                                'dmscouch/search_autocomplete',
-                                startkey=[docrule, key_name, autocomplete_req],
-                                endkey=[docrule, key_name, unicode(autocomplete_req)+u'\ufff0'],
-                                include_docs=True,
-                                reduce=False
-                            )
-                            # Adding each selected value to suggestions list
-                            for doc in documents:
-                                # Only append values until we've got 'suggestions_limit' results
-                                if resp.__len__() > suggestions_limit:
-                                    break
-                                resp_array = {}
-                                if pkeys:
-                                    for pkey in pkeys:
-                                        resp_array[pkey['field_name']] = doc.mdt_indexes[pkey['field_name']]
-                                suggestion = json.dumps(resp_array)
-                                # filtering from existing results
-                                if not suggestion in resp:
-                                    resp.append(suggestion)
-                    else:
-                        # Simple 'single' key suggestion
-                        documents = CouchDocument.view(
-                            'dmscouch/search_autocomplete',
-                            startkey=[docrule, key_name, autocomplete_req],
-                            endkey=[docrule, key_name, unicode(autocomplete_req)+u'\ufff0'],
-                            group = True,
-                        )
-                        # Fetching unique responses to suggestion set
-                        for doc in documents:
-                            # Only append values until we've got 'suggestions_limit' results
-                            if resp.__len__() > suggestions_limit:
-                                break
-                            resp_array = {key_name: doc['key'][2]}
-                            suggestion = json.dumps(resp_array)
-                            if not suggestion in resp:
-                                resp.append(suggestion)
+        resp = process_pkeys_request(docrule_id, key_name, autocomplete_req, doc_mdts, letters_limit, suggestions_limit)
     log.debug('mdt_parallel_keys response: %s' % resp)
     return HttpResponse(json.dumps(resp))
 

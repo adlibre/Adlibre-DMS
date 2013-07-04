@@ -35,6 +35,9 @@ DATABASES = {
     }
 }
 
+XS_SHARING_ALLOWED_ORIGINS = '*'
+XS_SHARING_ALLOWED_METHODS = ['POST', 'GET', 'OPTIONS', 'PUT', 'DELETE']
+
 if DEBUG:
     COUCHDB_DATABASES = (
         ('dmscouch', 'http://127.0.0.1:5984/dmscouch_test'),
@@ -165,6 +168,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
 #    'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'django.contrib.auth.middleware.RemoteUserMiddleware',  # Support for Basic Auth in API
+    'django-crossdomainxhr-middleware.XsSharing',  # Support for CORS for API
 )
 
 AUTHENTICATION_BACKENDS = (

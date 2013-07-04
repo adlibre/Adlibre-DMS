@@ -22,6 +22,7 @@ from api.decorators.auth import logged_in_or_basicauth
 from api.decorators.group_required import group_required
 
 from core.document_processor import DocumentProcessor
+from core.parallel_keys import process_pkeys_request
 from core.http import DMSObjectResponse, DMSOBjectRevisionsData
 from dms_plugins.operator import PluginsOperator
 from dms_plugins.models import DoccodePluginMapping
@@ -545,4 +546,43 @@ class MetaDataTemplateHandler(BaseHandler):
             return rc.DELETED
         else:
             log.info('MetaDataTemplateHandler.delete request not found for mdt_id %s' % mdt_id)
+            return rc.NOT_FOUND
+
+
+class ParallelKeysHandler(BaseHandler):
+    """
+    Read / Create / Delete Meta Data Templates
+    """
+    allowed_methods = ('GET', 'OPTIONS')
+
+    """
+    docrule is used for indexing
+    mdt_ids is used for search, or when docrule is uncertain
+    """
+
+    def read(self, request):
+
+        if not request.user.is_authenticated():
+            log.error('ParallelKeysHandler.read attempted with unauthenticated user.')
+            return rc.FORBIDDEN
+
+        mdts_ids = None
+        docrule_id = request.GET.get('docrule', None)
+        key_name = request.GET.get('key', None)
+        autocomplete_req = request.GET.get('req', None)
+
+        if not docrule_id:
+            mdts_ids = request.GET.get('mdt_ids', None)
+            if not mdts_ids:
+                return rc.BAD_REQUEST
+
+        if (docrule_id or mdts_ids) and key_name and autocomplete_req:
+            manager = MetaDataTemplateManager()
+            if mdts_ids:
+                doc_mdts = manager.get_mdts_by_name(mdts_ids)
+            else:
+                doc_mdts = manager.get_mdts_for_docrule(docrule_id)
+            resp = process_pkeys_request(docrule_id, key_name, autocomplete_req, doc_mdts)
+            return resp
+        else:
             return rc.NOT_FOUND

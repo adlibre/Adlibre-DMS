@@ -13,7 +13,7 @@ from forms_representator import SEARCH_STRING_REPR
 from forms_representator import get_mdts_for_docrule
 from security import SEC_GROUP_NAMES
 
-from parallel_keys import ParallelKeysManager
+from core.parallel_keys import ParallelKeysManager
 from mdt_manager import MetaDataTemplateManager
 from dmscouch.models import CouchDocument
 from adlibre.date_converter import date_standardized
