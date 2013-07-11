@@ -673,8 +673,15 @@ class DocumentProcessorTest(CoreTestCase):
         # TODO: develop
         pass
 
-    def test_18_create_revision_for_existing_code(self):
+    def test_21_create_revision_for_existing_code(self):
         """Updates a code with new file revision"""
+        # TODO: develop
+        pass
+
+    def test_22_update_document_type_with_indexes(self):
+        """Update existing code with new document type and new indexes in one call (For AUI usage)
+        @return:
+        """
         # TODO: develop
         pass
 

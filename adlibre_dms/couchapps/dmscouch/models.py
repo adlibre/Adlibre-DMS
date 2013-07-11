@@ -172,19 +172,32 @@ class CouchDocument(Document):
                     except ValueError:
                         secondary_indexes[secondary_index_name] = secondary_index_value
                         pass
-            # Storing current index data into new revision
-            if not 'index_revisions' in self:
-                # Creating index_revisions initial data dictionary.
-                self.index_revisions = {'1': self.construct_index_revision_dict(), }
-            else:
-                # Appending new document indexes revision to revisions dict
-                new_revision = self.index_revisions.__len__() + 1
-                self.index_revisions[new_revision] = self.construct_index_revision_dict()
+            # Only for update without docrule change (it makes it's own indexes backup)
+            if not document.old_docrule:
+                # Storing current index data into new revision
+                if not 'index_revisions' in self:
+                    # Creating index_revisions initial data dictionary.
+                    self.index_revisions = {'1': self.construct_index_revision_dict(), }
+                else:
+                    # Appending new document indexes revision to revisions dict
+                    new_revision = self.index_revisions.__len__() + 1
+                    self.index_revisions[new_revision] = self.construct_index_revision_dict()
             # Populating self with new provided data
             self.mdt_indexes = secondary_indexes
-            self.metadata_description = document.new_indexes['description']
-            self.metadata_user_id = document.new_indexes['metadata_user_id']
-            self.metadata_user_name = document.new_indexes['metadata_user_name']
+            # Making desc and user data optional, taking them from current user
+            if 'desription' in document.new_indexes:
+                self.metadata_description = document.new_indexes['description']
+            else:
+                self.metadata_description = 'N/A'
+            if 'metadata_user_id' in document.new_indexes:
+                self.metadata_user_id = document.new_indexes['metadata_user_id']
+            else:
+                print document.user
+                self.metadata_user_id = unicode(document.user.id)
+            if 'metadata_user_name' in document.new_indexes:
+                self.metadata_user_id = document.new_indexes['metadata_user_name']
+            else:
+                self.metadata_user_name = document.user.username
         return document
 
     def update_file_revisions_metadata(self, document):

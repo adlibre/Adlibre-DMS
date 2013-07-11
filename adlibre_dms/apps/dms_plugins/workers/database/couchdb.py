@@ -10,8 +10,10 @@ import datetime
 
 from django.conf import settings
 
-from dms_plugins.pluginpoints import BeforeRetrievalPluginPoint, BeforeRemovalPluginPoint, \
-    DatabaseUpdatePluginPoint, DatabaseStoragePluginPoint
+from dms_plugins.pluginpoints import BeforeRetrievalPluginPoint
+from dms_plugins.pluginpoints import BeforeRemovalPluginPoint
+from dms_plugins.pluginpoints import DatabaseUpdatePluginPoint
+from dms_plugins.pluginpoints import DatabaseStoragePluginPoint
 from dms_plugins.models import DocTags
 from dms_plugins.workers import Plugin, PluginError
 from core.document_processor import DocumentProcessor
@@ -97,11 +99,6 @@ class CouchDBMetadata(object):
         Updates document with new indexes and stores old one into another revision.
         """
         user = self.check_user(document)
-        if document.new_indexes and document.file_name:
-            couchdoc = CouchDocument.get(docid=document.file_name)
-            couchdoc.update_indexes_revision(document)
-            couchdoc.save()
-            document = couchdoc.populate_into_dms(user, document)
         if 'update_file' in document.options and document.options['update_file']:
             name = document.get_stripped_filename()
             # We need to create couchdb document in case it does not exists in database.
@@ -114,6 +111,12 @@ class CouchDBMetadata(object):
             couchdoc.migrate_metadata_for_docrule(document, old_couchdoc)
             couchdoc.save()
             old_couchdoc.delete()
+        # We have to do it after moving document names.
+        if document.new_indexes and document.file_name:
+            couchdoc = CouchDocument.get(docid=document.file_name)
+            couchdoc.update_indexes_revision(document)
+            couchdoc.save()
+            document = couchdoc.populate_into_dms(user, document)
         return document
 
     def remove(self, document):

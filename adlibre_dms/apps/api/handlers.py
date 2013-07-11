@@ -99,7 +99,7 @@ class FileHandler(BaseFileHandler):
         return response
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api')) # FIXME: Should be more granular permissions
+    @method_decorator(group_required('api'))  # FIXME: Should be more granular permissions
     def update(self, request, code, suggested_format=None):
         revision, hashcode, extra = self._get_info(request)
         uploaded_obj = None
@@ -109,12 +109,18 @@ class FileHandler(BaseFileHandler):
         tag_string = request.PUT.get('tag_string', None)
         remove_tag_string = request.PUT.get('remove_tag_string', None)
         new_name = request.PUT.get('new_name', None)
+        new_type = extra.get('new_type', None)
+        index_data = extra.get('indexing_data', None)
+        if index_data:
+            index_data = json.loads(index_data)
         processor = DocumentProcessor()
         options = {
             'tag_string': tag_string,
             'remove_tag_string': remove_tag_string,
             'extension': suggested_format,
             'new_name': new_name,
+            'new_type': new_type,
+            'new_indexes': index_data,
             'update_file': uploaded_obj,
             'user': request.user,
         }  # FIXME hashcode missing?
@@ -129,7 +135,7 @@ class FileHandler(BaseFileHandler):
         log.info('FileHandler.update request fulfilled for code: %s, format: %s, rev: %s, hash: %s.'
                  % (code, suggested_format, revision, hashcode))
         resp = DMSOBjectRevisionsData(document).jsons
-        return HttpResponse(resp)  # FIXME should be rc.ALL_OK
+        return HttpResponse(resp)   # FIXME should be rc.ALL_OK
 
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))

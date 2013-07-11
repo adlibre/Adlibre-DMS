@@ -93,14 +93,25 @@ class Document(object):
     def set_change_type(self, new_docrule):
         """Method to change document docrule for plugin interactions
 
+        @param new_docrule: is an instance of DocumentTypeRule or a unicode pk of it e.g.: u'8'
         populates hooks for plugin to know we are renaming/moving document
         self.old_docrule
         self.old_name
+
+        preserves new_indexes
         """
+        preserved_indexes = False
+        if new_docrule.__class__.__name__ == 'unicode':
+            # Call from API. We should produce a model instance instead of id
+            new_docrule = DocumentTypeRuleManager().get_docrule_by_id(new_docrule)
+        if self.new_indexes:
+            preserved_indexes = self.new_indexes
         self.old_docrule = self.doccode
         self.old_name_code = self.get_filename()
         self.set_filename(new_docrule.allocate_barcode())
         self.doccode = new_docrule
+        if preserved_indexes:
+            self.new_indexes = preserved_indexes
 
     def get_mimetype(self):
         if not self.mimetype and self.get_current_file_revision_data():

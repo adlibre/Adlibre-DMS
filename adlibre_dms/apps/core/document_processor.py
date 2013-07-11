@@ -155,6 +155,11 @@ class DocumentProcessor(object):
             - update document revision (upload new file to existing code)
             - update document tags
             TODO: continue this...
+
+        @param options: should be dict with certain keys and values set that represent call requirements.
+            keys and their meaning:
+                - 'new_type' to change Document type.
+                    Should be of DocumentTypeRule model instance selected with desired type OR unicode PK of that model
         """
         log.debug('UPDATE Document %s, options: %s' % (document_name, options))
         new_name = self.option_in_options('new_name', options)
