@@ -43,6 +43,7 @@ class Document(object):
         self.file_name = None
         self.full_filename = None
         self.stripped_filename = None
+        self.thumbnail = None
         self.revision = None
         self.hashcode = None
         self.file_revision_data = None
