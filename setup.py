@@ -122,11 +122,14 @@ setup(name='adlibre_dms',
             # Adlibre Components
             'django-bcp',
             'adlibre-plugins',
+
+            # Y.G. We do not need to install them directly they are dependencies
             # not sure if we directly require these
-            'distribute==0.6.43',
-            'django-appconf==0.6',
-            'http-parser==0.7.4',
-            'pyPdf==1.13',
+            #'distribute==0.6.43',
+            #'django-appconf==0.6',
+            #'http-parser==0.7.4',
+            #'pyPdf==1.13',
+
             # Deployment
             'flup==1.0.3.dev-20110405',
             # Logging
