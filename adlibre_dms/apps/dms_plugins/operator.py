@@ -77,7 +77,11 @@ class PluginsOperator(object):
 
     def get_plugins_for_point(self, pluginpoint, document, plugin_type=None):
         """Retrieves Plugins for given Pluginpoint."""
-        docrule = document.get_docrule()
+        # update sequence should use old docrule and iterate through plugins, instead of new one
+        if document.old_docrule:
+            docrule = document.old_docrule
+        else:
+            docrule = document.get_docrule()
         # FIXME: with current architecture there might be more than one docrule mappings.
         mapping = docrule.get_docrule_plugin_mappings()
         if mapping:
