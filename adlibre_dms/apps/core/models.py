@@ -118,8 +118,8 @@ class Document(object):
         if not self.mimetype and self.get_current_file_revision_data():
             self.mimetype = self.get_current_file_revision_data().get('mimetype', None)
         if not self.mimetype and self.get_file_obj():
-            mime = magic.Magic( mime = True )
-            self.mimetype = mime.from_buffer( self.get_file_obj().read() )
+            mime = magic.Magic(mime=True)
+            self.mimetype = mime.from_buffer(self.get_file_obj().read())
             log.debug('get_mimetype guessed mimetype: %s.' % self.mimetype)
         return self.mimetype
 
@@ -172,7 +172,7 @@ class Document(object):
                 try:
                     if '.' in ext:
                         dot, ext = ext.split(".",1)
-                except Exception, e: #FIXME: Except WHAT?
+                except Exception, e:  #FIXME: Except WHAT?
                     log.error('get_full_filename Exception %s' % e)
                     pass # file type conversion is in progress failing gracefully
                 if ext:
@@ -203,7 +203,7 @@ class Document(object):
             try:
                 r = int(r)
             except ValueError:
-                raise # or r = None, I'm not sure which is more correct behaviour
+                raise  # or r = None, I'm not sure which is more correct behaviour
         return r
 
     def set_revision(self, revision):
