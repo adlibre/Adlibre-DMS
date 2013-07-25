@@ -717,7 +717,8 @@
                 9, 
                 15, 
                 17, 
-                24
+                24,
+                29
             ], 
             "doccode": "2", 
             "storage_plugins": [
@@ -731,11 +732,13 @@
                 12, 
                 13, 
                 20, 
-                22
+                22,
+                30
             ],
             "before_update_plugins": [
                 19,
-                26
+                26,
+                31
             ],
             "database_update_plugins": [
                 25
@@ -1081,23 +1084,7 @@
             "doccode_type": "1",
             "no_doccode": true
         }
-    }, 
-    {
-        "pk": 3,
-        "model": "doc_codes.documenttyperule", 
-        "fields": {
-            "regex": "[a-z]{5}[0-9]{3}", 
-            "sequence_last": 0, 
-            "description": "[a-z]{5}[0-9]{3}", 
-            "title": "Test PDFs", 
-            "barcode_zfill": 0, 
-            "split_string": "0:5,5:8", 
-            "active": true, 
-            "barcode_format": "", 
-            "doccode_type": "1",
-            "no_doccode": false
-        }
-    }, 
+    },
     {
         "pk": 2,
         "model": "doc_codes.documenttyperule", 
@@ -1113,7 +1100,23 @@
             "doccode_type": "1",
             "no_doccode": false
         }
-    }, 
+    },
+    {
+        "pk": 3,
+        "model": "doc_codes.documenttyperule",
+        "fields": {
+            "regex": "[a-z]{5}[0-9]{3}",
+            "sequence_last": 0,
+            "description": "[a-z]{5}[0-9]{3}",
+            "title": "Test PDFs",
+            "barcode_zfill": 0,
+            "split_string": "0:5,5:8",
+            "active": true,
+            "barcode_format": "",
+            "doccode_type": "1",
+            "no_doccode": false
+        }
+    },
     {
         "pk": 4, 
         "model": "doc_codes.documenttyperule", 
@@ -1546,6 +1549,39 @@
             "index": 0,
             "_order": 5,
             "name": "dms_plugins.workers.validators.hashcode.HashCodeValidationOnUpdatePlugin",
+            "point": 4
+        }
+    },
+    {
+        "pk": 29,
+        "model": "djangoplugins.plugin",
+        "fields": {
+            "status": 0,
+            "index": 70,
+            "_order": 8,
+            "name": "dms_plugins.workers.transfer.thumbnails.ThumbnailsLocalRetrievalPlugin",
+            "point": 2
+        }
+    },
+    {
+        "pk": 30,
+        "model": "djangoplugins.plugin",
+        "fields": {
+            "status": 0,
+            "index": 0,
+            "_order": 4,
+            "name": "dms_plugins.workers.transfer.thumbnails.ThumbnailsLocalRemovalPlugin",
+            "point": 3
+        }
+    },
+    {
+        "pk": 31,
+        "model": "djangoplugins.plugin",
+        "fields": {
+            "status": 0,
+            "index": 0,
+            "_order": 3,
+            "name": "dms_plugins.workers.transfer.thumbnails.ThumbnailsLocalUpdatePlugin",
             "point": 4
         }
     }

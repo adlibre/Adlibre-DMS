@@ -10,6 +10,11 @@ Desc: Main http objects manipulation methods here.
 
 import logging
 import json
+from wsgiref.handlers import format_date_time
+from datetime import datetime, timedelta
+from time import mktime
+
+
 
 from django.http import HttpResponse
 from django.core.urlresolvers import reverse
@@ -33,10 +38,21 @@ class DMSObjectResponse(HttpResponse):
             response = DMSObjectResponse(document)
             return response
     """
-    def __init__(self, document):
-        content, mimetype, filename = self.retrieve_file(document)
+    def __init__(self, document, thumbnail=False):
+        if thumbnail:
+            content, mimetype, filename = self.retieve_thumbnail(document)
+        else:
+            content, mimetype, filename = self.retrieve_file(document)
         super(DMSObjectResponse, self).__init__(content=content, mimetype=mimetype)
         self["Content-Length"] = len(content)
+        if thumbnail:
+            self["Content-Type"] = mimetype
+            # Cache thumbnails for 1 day
+            now = datetime.now()
+            exp = now + timedelta(days=1)
+            stamp = mktime(exp.timetuple())
+            expires = format_date_time(stamp)
+            self['Expires'] = expires
         self["Content-Disposition"] = 'filename=%s' % filename
 
     def retrieve_file(self, document):
@@ -54,6 +70,26 @@ class DMSObjectResponse(HttpResponse):
         else:
             filename = document.get_full_filename()
         return content, mimetype, filename
+
+    def retieve_thumbnail(self, document):
+        # Getting thumbnail details
+        content = document.thumbnail
+        mimetype = 'image/png'
+        filename = document.get_full_filename() + '.png'
+        return content, mimetype, filename
+
+    def httpdate(self, dt):
+        """Return a string representation of a date according to RFC 1123
+        (HTTP/1.1).
+
+        The supplied date must be in UTC.
+
+        """
+        weekday = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][dt.weekday()]
+        month = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep",
+                 "Oct", "Nov", "Dec"][dt.month - 1]
+        return "%s, %02d %s %04d %02d:%02d:%02d GMT" % (weekday, dt.day, month,
+            dt.year, dt.hour, dt.minute, dt.second)
 
 
 class DMSOBjectRevisionsData(dict):

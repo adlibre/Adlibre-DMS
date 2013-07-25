@@ -205,6 +205,28 @@ class CoreTestCase(DMSTestCase):
             first_doc = row['doc']
         return first_doc
 
+    def _chek_thumbnails_created(self, code, docrule, check_exists=True):
+        """Tests DMS documents folder (Local Storage) for existing of given file there
+
+        @code should be like 'ADL-0001' or 'ADL-0002'
+        @docrule is an instance of document's DocumentTypeRule()
+        @check_exists is a task to test if this file exists in file system
+        """
+        docs_dir = settings.DOCUMENT_ROOT
+        file_path_list = docrule.split(code)
+        check_path = os.path.join(docs_dir, str(docrule.pk))
+        for item in file_path_list:
+            check_path = os.path.join(check_path, item)
+        thumbnail_check_path = os.path.join(check_path, 'thumbnails_storage', code) + '.pdf.png'
+        if check_exists:
+            if not os.path.isfile(thumbnail_check_path):
+                raise AssertionError('No such file: %s' % thumbnail_check_path)
+            tmp_path = thumbnail_check_path.split('.png')[0]
+            if os.path.isfile(tmp_path):
+                raise AssertionError('Temporary file leftover thumbnail creation: %s' % tmp_path)
+        return thumbnail_check_path
+
+
 
 class DocumentProcessorTest(CoreTestCase):
     """Test for core.DocumentProcessor() and it's workflow"""
@@ -679,18 +701,82 @@ class DocumentProcessorTest(CoreTestCase):
         pass
 
     def test_22_update_document_type_with_indexes(self):
-        """Update existing code with new document type and new indexes in one call (For AUI usage)
-        @return:
-        """
+        """Update existing code with new document type and new indexes in one call (For AUI usage)"""
         # TODO: develop
         pass
+
+    def test_23_thumbnail_read(self):
+        """Thumbnail appearing in the destination folder without leaving temporary file and returned to caller"""
+        code = self.documents_pdf[0]
+        doc = self.processor.read(code, options={'user': self.admin_user, 'thumbnail': True})
+        if self.processor.errors:
+            raise AssertionError('DocumentProcessor failed to create a thumbnail for file: %s' % code)
+        if not doc.thumbnail:
+            raise AssertionError('thumbnail for code: %s is not present in manager run result')
+        self._chek_thumbnails_created(code, doc.get_docrule())
+
+    def test_24_thumbnail_deletion(self):
+        """Thumbnail deleted on changing this document or deleting this document"""
+        code = self.documents_pdf[3]
+        file_code = self.documents_pdf[0]
+        test_file = self._get_fixtures_file(file_code)
+        # Creating a document
+        self.processor.create(test_file, {'user': self.admin_user, 'barcode': code})
+        if self.processor.errors:
+            raise AssertionError('Can not check thumbnail deletion because of errors creating document: %s %s'
+                                 % (file_code, self.processor.errors))
+        # Touch (reading) thumbnail
+        doc = self.processor.read(code, options={'user': self.admin_user, 'thumbnail': True})
+        docrule = doc.get_docrule()  # For future checks
+        if self.processor.errors or not doc.thumbnail:
+            raise AssertionError('DocumentProcessor errors for reading a thumbnail %s' % self.processor.errors)
+        # Deletion of document and deletion of thumbnail
+        self.processor.delete(code, options={'user': self.admin_user})
+        if self.processor.errors:
+            raise AssertionError('DocumentProcessor code delete errors: %s' % self.processor.errors)
+        thumb_path = self._chek_thumbnails_created(code, docrule, check_exists=False)
+        if os.path.isfile(thumb_path):
+            raise AssertionError('Thumbnail have not been deleted: %s' % thumb_path)
+
+    def test_25_thumbnail_update(self):
+        """Thumbnail removed on document update. e.g. new file added or type changed"""
+        # import time
+        # time.sleep(20000)
+        code = self.documents_pdf[3]
+        file_code = self.documents_pdf[0]
+        indexes = {
+            u'Employee': u'dgtjtj',
+            u'Chosen Field': u'choice one',
+            u'Tests Uppercase Field': u'tyjtyjtet'
+        }
+        test_file = self._get_fixtures_file(file_code)
+        # Creating a document
+        self.processor.create(test_file, {'user': self.admin_user, 'barcode': code})
+        if self.processor.errors:
+            raise AssertionError('Can not check thumbnail update because of errors creating document: %s %s'
+                                 % (file_code, self.processor.errors))
+        # Touch (reading) thumbnail
+        doc = self.processor.read(code, options={'user': self.admin_user, 'thumbnail': True})
+        docrule = doc.get_docrule()  # For farther checks of thumbnail left
+        if self.processor.errors or not doc.thumbnail:
+            raise AssertionError('DocumentProcessor errors for reading a thumbnail %s' % self.processor.errors)
+        self.processor.update(code, options={'user': self.admin_user, 'new_type': u'8', 'new_indexes': indexes})
+        if self.processor.errors:
+            raise AssertionError('DocumentProcessor code update errors: %s' % self.processor.errors)
+        # Returning back document for tests consistency
+        self.processor.create(test_file, {'user': self.admin_user, 'barcode': code})
+        thumb_path = self._chek_thumbnails_created(code, docrule, check_exists=False)
+        if os.path.isfile(thumb_path):
+            raise AssertionError('Thumbnail have not been deleted: %s' % thumb_path)
 
     def test_zz_cleanup(self):
         """Cleaning alll the docs and data that are touched or used in those tests"""
         for code in self.documents_pdf:
-            self._remove_file(code)
+            if not code == 'ADL-1234':
+                self._remove_file(code)
         for code in [self.documents_hash[1][0], ]:
             self._remove_file(code)
         for code in [self.documents_jpg[2], ]:
             self._remove_file(code, extension='jpg')
-
+        for code in ['CCC-0001']:
+            self._remove_file(code)

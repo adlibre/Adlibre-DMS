@@ -296,6 +296,9 @@ class DocumentProcessor(object):
                     if property_name == 'mark_revision_deleted':
                         if value:
                             doc.update_options({property_name: value})
+                    if property_name == 'thumbnail':
+                        if value:
+                            doc.update_options({property_name: True})
                     if property_name == 'delete_revision':
                         if value:
                             doc.update_options({property_name: value})

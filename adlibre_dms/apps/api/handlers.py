@@ -281,10 +281,10 @@ class FileListHandler(BaseHandler):
             file_list = operator.get_file_list(mapping, start, finish, order, searchword, tags=[tag],
                                                 filter_date = filter_date)
             for item in file_list:
-                ui_url = reverse('ui_document', kwargs = {'document_name': item['name']})
-#                if 'directory' in item.keys():
-#                    ui_url += "?parent_directory=" + item['directory']
+                ui_url = reverse('ui_document', kwargs={'document_name': item['name']})
+                thumb_url = reverse('api_thumbnail', kwargs={'code': item['name']})
                 item.update({   'ui_url': ui_url,
+                                'thumb_url': thumb_url,
                                 'rule': mapping.get_name(),
                             })
             log.info('FileListHandler.read request fulfilled for start %s, finish %s, order %s, searchword %s, tag %s, filter_date %s.'
@@ -592,3 +592,23 @@ class ParallelKeysHandler(BaseHandler):
             return resp
         else:
             return rc.NOT_FOUND
+
+
+class ThumbnailsHandler(BaseHandler):
+    """Work with thumbnails of files"""
+    allowed_methods = ('GET', )
+
+    @method_decorator(logged_in_or_basicauth(AUTH_REALM))
+    def read(self, request, code):
+
+        if not request.user.is_authenticated():
+            log.error('ThumbnailsHandler.read attempted with unauthenticated user.')
+            return rc.FORBIDDEN
+
+        processor = DocumentProcessor()
+        doc = processor.read(code, options={'user': request.user, 'thumbnail': True})
+        if not processor.errors:
+            return DMSObjectResponse(doc, thumbnail=True)
+        else:
+            return rc.NOT_FOUND
+
