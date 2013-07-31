@@ -2997,7 +2997,7 @@ class MDTUI(MUITestData):
         for value in new_m2_doc1_dict.itervalues():
             self.assertContains(response, value)
         # POST to save those indexes
-        response = self.client.post(new_url,  {'something': ' '})
+        self.client.post(new_url,  {'something': ' '})
         # Quering CouchDB directly for existence and proper document indexes rendering
         couch_doc = self._open_couchdoc(self.couchdb_name, doc_used)
         if not 'index_revisions' in couch_doc:
@@ -3017,7 +3017,7 @@ class MDTUI(MUITestData):
         response = self.client.get(new_url)
         self.assertEqual(response.status_code, 200)
         # POST to save those indexes
-        response = self.client.post(new_url,  {'something':' '})
+        self.client.post(new_url,  {'something': ' '})
         # Checking if revision 2 of CouchDB document indexes created
         couch_doc = self._open_couchdoc(self.couchdb_name, doc_used)
         if not '2' in couch_doc['index_revisions']:
@@ -3028,7 +3028,7 @@ class MDTUI(MUITestData):
         self.test_document_files_dir = os.path.join(settings.FIXTURE_DIRS[0], 'testdata')
         file_path = os.path.join(self.test_document_files_dir, doc_used + '.pdf')
         data = { 'file': open(file_path, 'r'), }
-        url = reverse('api_file', kwargs={'code': doc_used, 'suggested_format': 'pdf',})
+        url = reverse('api_file', kwargs={'code': doc_used, 'suggested_format': 'pdf'})
         response = self.client.put(url, data)
         self.assertEqual(response.status_code, 200)
         # Checking if revision 2 of CouchDB document indexes preserved
@@ -3065,7 +3065,7 @@ class MDTUI(MUITestData):
         if 'metadata_user_id' in couch_doc['mdt_indexes']:
             raise AssertionError("""CouchDB Document's secondary indexes Contains wrong indexes: "metadata_user_id" """)
         if 'metadata_user_name' in couch_doc['mdt_indexes']:
-            raise AssertionError("""CouchDB Document's secondary indexes Contains wrong indexes: "metadata_user_name" """)
+            raise AssertionError("""CouchDB Document secondary indexes Contains wrong indexes: "metadata_user_name" """)
 
     def test_72_redirect_after_successful_edit(self):
         """
@@ -3086,7 +3086,7 @@ class MDTUI(MUITestData):
         self.assertEqual(response.status_code, 302)
         url = reverse('mdtui-search-options')
         # Getting required indexes id's
-        response = self.client.get(url)
+        self.client.get(url)
         # Searching date range with unique doc1 keys
         response = self.client.post(url, self.search_MDT_5)
         self.assertEqual(response.status_code, 302)
@@ -3111,10 +3111,10 @@ class MDTUI(MUITestData):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'About to store index data for document')
         # Trying to go back and forth to emulate user possibilities properly
-        response = self.client.get(url)
-        response = self.client.get(new_url)
+        self.client.get(url)
+        self.client.get(new_url)
         # POST to save those indexes
-        response = self.client.post(new_url,  {'something':' '})
+        response = self.client.post(new_url,  {'something': ' '})
         self.assertEqual(response.status_code, 302)
         # Redirect follows referrer specified (where we came into edit indexes)
         old_url = self._retrieve_redirect_response_url(response)

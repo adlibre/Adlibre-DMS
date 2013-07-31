@@ -289,7 +289,8 @@ class DocumentProcessor(object):
                     if property_name == 'index_info':
                         doc.set_db_info(value)
                     if property_name == 'new_type':
-                        doc.set_change_type(value)
+                        if value:
+                            doc.set_change_type(value)
                     if property_name == 'mark_deleted':
                         if value:
                             doc.update_options({property_name: True})
