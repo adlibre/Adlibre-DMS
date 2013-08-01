@@ -3180,24 +3180,25 @@ class MDTUI(MUITestData):
         doc_name = self.edit_document_name_1
         new_indexes = {
             '0': 'SOME DATA',
-            '1': 'Andrew and his friend',
+            '1': '1',
+            '2': 'Andrew and his friend',
             'description': 'Editing of builtin field test',
-            }
+        }
         typ_call_1 = {
             'key_name': 'Tests Uppercase Field',
             'autocomplete_search': 'SOME DAT',
-            }
+        }
         typ_call_2 = {
             'key_name': 'Employee',
             'autocomplete_search': 'Andre',
-            }
+        }
         # Checking first document for unique index
         url = reverse('mdtui-edit', kwargs={'code': doc_name})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         response2 = self.client.post(url, new_indexes)
         self.assertEqual(response2.status_code, 302)
-        response = self.client.get(url)
+        response = self.client.get(url, {}, HTTP_REFERER=reverse('mdtui-edit-finished'))
         self.assertContains(response, doc_name)
         self.assertContains(response, new_indexes['description'])
         # Checking typeahead now will provide proper results.
