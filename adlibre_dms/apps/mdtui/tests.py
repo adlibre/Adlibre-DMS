@@ -156,12 +156,12 @@ class MUITestData(TestCase):
             u'date': [u'01/01/2012'],
         }
         self.all_docs_range = {
-            u'end_date':unicode(date_standardized('2012-04-30')),
-            u'1':u'',
-            u'0':u'',
-            u'2':u'',
-            u'date':unicode(date_standardized('2012-03-01')),
-        } # Search by docrule2 MDT3
+            u'end_date': unicode(date_standardized('2012-04-30')),
+            u'1': u'',
+            u'0': u'',
+            u'2': u'',
+            u'date': unicode(date_standardized('2012-03-01')),
+        }  # Search by docrule2 MDT3
         self.date_range_1and2_not3 = {
             u'end_date': unicode(date_standardized('2012-03-20')),
             u'1': u'',
@@ -187,8 +187,8 @@ class MUITestData(TestCase):
         }
         # Date range for 3 docs
         self.date_range_with_keys_3_docs = {
-            u'date':unicode(date_standardized('2012-03-01')),
-            u'end_date':unicode(date_standardized('2012-03-30')),
+            u'date': unicode(date_standardized('2012-03-01')),
+            u'end_date': unicode(date_standardized('2012-03-30')),
         }
         ############################ Documents used in tests ###############################
         # Static dictionary of documents to be indexed for mdt1 and mdt2
@@ -329,7 +329,7 @@ class MUITestData(TestCase):
         }
         self.mdt2 = {
             "_id": 'mdt2',
-            "docrule_id": [str(self.test_mdt_docrule_id),],
+            "docrule_id": [str(self.test_mdt_docrule_id), ],
             "description": "Test MDT Number 2",
             "fields": {
                 "1": {
@@ -349,7 +349,7 @@ class MUITestData(TestCase):
         }
         self.mdt3 = {
             "_id": 'mdt3',
-            "docrule_id": [str(self.test_mdt_docrule_id2),],
+            "docrule_id": [str(self.test_mdt_docrule_id2), ],
             "description": "Test MDT Number 3",
             "fields": {
                 "1": {
@@ -374,16 +374,16 @@ class MUITestData(TestCase):
         }
         self.mdt4 = {
             "_id": 'mdt4',
-            "docrule_id": [str(self.test_mdt_docrule_id3),],
+            "docrule_id": [str(self.test_mdt_docrule_id3), ],
             "description": "Test MDT Number 4",
             "fields": {
-                    "1": {
-                        "type": "string",
-                        "uppercase": "yes",
-                        "field_name": "Tests Uppercase Field",
-                        "description": "This field's value must be converted uppercase even if entered lowercase"
-                    }
-                },
+                "1": {
+                    "type": "string",
+                    "uppercase": "yes",
+                    "field_name": "Tests Uppercase Field",
+                    "description": "This field's value must be converted uppercase even if entered lowercase"
+                }
+            },
             "parallel": {}
         }
         self.mdt5 = {
@@ -436,10 +436,8 @@ class MUITestData(TestCase):
         #################################### END of MDTS ###################################
 
     def _read_indexes_form(self, response):
-        """
-        Helper to parse response with Document Indexing Form (MDTUI Indexing Step 2 Form)
-        And returns key:value dict of form's dynamical fields for our tests.
-        """
+        """Helper to parse response with Document Indexing Form (MDTUI Indexing Step 2 Form)
+        And returns key:value dict of form's dynamical fields for our tests."""
         prog = re.compile(self.indexes_form_match_pattern, re.DOTALL)
         matches_set = prog.findall(str(response))
         matches = {}
@@ -453,9 +451,7 @@ class MUITestData(TestCase):
         return matches
 
     def _convert_doc_to_post_dict(self, matches, doc):
-        """
-        Helper to convert Tests Documents into proper POST dictionary for Indexing Form testing.
-        """
+        """Helper to convert Tests Documents into proper POST dictionary for Indexing Form testing."""
         post_doc_dict = {}
         for key, value in doc.iteritems():
             if key in matches.keys():
@@ -465,31 +461,25 @@ class MUITestData(TestCase):
         return post_doc_dict
 
     def _retrieve_redirect_response_url(self, response):
-        """
-        helper parses 302 response object.
-        Returns redirect url, parsed by regex.
-        """
+        """helper parses 302 response object.
+        Returns redirect url, parsed by regex."""
         self.assertEqual(response.status_code, 302)
         new_url = re.search("(?P<url>https?://[^\s]+)", str(response)).group("url")
         return new_url
 
     def _createa_search_dict(self, doc_dict):
-        """
-        Creates a search dict to avoid rewriting document dict constants.
-        """
+        """Creates a search dict to avoid rewriting document dict constants."""
         search_dict = {}
         for key in doc_dict.keys():
             search_dict[key] = doc_dict[key]
         return search_dict
 
     def _create_search_dict_for_range_and_keys(self, keys_dict, form_ids_dict, date_range=None):
-        """
-        Creates a dict for custom keys to search for date range + some keys
+        """Creates a dict for custom keys to search for date range + some keys
         Takes into account:
           - form dynamic id's
           - date range provided
-          - keys provided
-        """
+          - keys provided"""
         request_dict = {}
         # Adding dates to request
         if date_range:
@@ -508,13 +498,11 @@ class MUITestData(TestCase):
         return request_dict
 
     def _create_search_dict_range_and_keys_for_search(self, keys_dict, form_ids_dict, date_range=None):
-        """
-        Creates a dict for custom keys to search for date range + some keys
+        """Creates a dict for custom keys to search for date range + some keys
         Takes into account:
           - form dynamic id's
           - date range provided
-          - keys provided
-        """
+          - keys provided"""
         request_dict = {}
         # Adding dates to request
         if date_range:
@@ -553,12 +541,10 @@ class MUITestData(TestCase):
         return request_dict
 
     def _create_edit_indexes_post_dict(self, keys_dict, form_ids_dict):
-        """
-        Creates a dict for custom keys to edit document indexes.
+        """Creates a dict for custom keys to edit document indexes.
         Takes into account:
           - form dynamic id's
-          - description provided
-        """
+          - description provided"""
         request_dict = {}
         for key, value in keys_dict.iteritems():
             if key == 'description':
@@ -625,7 +611,7 @@ class MUITestData(TestCase):
 
     def _check_search_results_order(self, response):
         """Checks MUI search results page against regexp to determine document names order in a page"""
-        prog = re.compile("""\/mdtui\/view\/(?P<code>[A-Z]{3}-[0-9]{4})""", re.DOTALL)
+        prog = re.compile("""/mdtui/view/(?P<code>[A-Z]{3}-[0-9]{4})""", re.DOTALL)
         matches = prog.findall(str(response))
         return matches
 
@@ -635,15 +621,15 @@ class MUITestData(TestCase):
         code_order = self._check_search_results_order(response)
         self.assertEqual(code_order, result)
 
-    def _api_upload_file(self, doc, suggested_format='pdf', hash=None, check_response=True, update=False):
+    def _api_upload_file(self, doc, suggested_format='pdf', hash_code=None, check_response=True, update=False):
         ok_code = 200
         # Do file upload using DMS API
         file_path = os.path.join(self.test_document_files_dir, doc + '.' + suggested_format)
-        data = { 'file': open(file_path, 'r'), }
+        data = {'file': open(file_path, 'r')}
         url = reverse('api_file', kwargs={'code': doc, 'suggested_format': suggested_format, })
-        if hash:
+        if hash_code:
             # Add hash to payload
-            data['h'] = hash
+            data['h'] = hash_code
         if not update:
             response = self.client.post(url, data)
             ok_code = 201
@@ -690,7 +676,7 @@ class PaginatorTestCase(TestCase):
         result_sequence = rebuild_sequence_digg(paginated.page(2))
         self.assertEqual(result_sequence, [1, 2, 3, '...', 19, 20])
         result_sequence = rebuild_sequence_digg(paginated.page(3))
-        self.assertEqual(result_sequence, [1, 2, 3, 4,'...', 19, 20])
+        self.assertEqual(result_sequence, [1, 2, 3, 4, '...', 19, 20])
         result_sequence = rebuild_sequence_digg(paginated.page(4))
         self.assertEqual(result_sequence, [1, 2, 3, 4, 5, '...', 19, 20])
         result_sequence = rebuild_sequence_digg(paginated.page(5))
@@ -760,8 +746,8 @@ class MDTUI(MUITestData):
         self.assertContains(response, 'Friends ID: 123')
         self.assertEqual(response.status_code, 200)
         # Make the file upload
-        file = os.path.join(settings.FIXTURE_DIRS[0], 'testdata', self.doc1+'.pdf')
-        data = {'file': open(file, 'rb'), 'uploaded': u''}
+        f_name = os.path.join(settings.FIXTURE_DIRS[0], 'testdata', self.doc1+'.pdf')
+        data = {'file': open(f_name, 'rb'), 'uploaded': u''}
         response = self.client.post(url+'?uploaded', data)
         # Follow Redirect
         self.assertEqual(response.status_code, 302)
@@ -772,11 +758,9 @@ class MDTUI(MUITestData):
         self.assertContains(response, 'Start Again')
 
     def test_03_additional_docs_adding(self):
-        """
-        Changes doc1 to new one for consistency.
+        """Changes doc1 to new one for consistency.
         Adds additional document 2 and 3 for more complex tests.
-        Those docs must be used farther for complex searches.
-        """
+        Those docs must be used farther for complex searches."""
         # Delete file "doc1" to cleanup after old tests
         url = reverse('api_file', kwargs={'code': self.doc1})
         response = self.client.delete(url)
@@ -800,9 +784,9 @@ class MDTUI(MUITestData):
         self.assertContains(response, 'Friends ID: 123')
         self.assertEqual(response.status_code, 200)
         # Make the file upload
-        file = os.path.join(settings.FIXTURE_DIRS[0], 'testdata', self.doc1+'.pdf')
-        data = { 'file': open(file, 'rb') , 'uploaded':u''}
-        response = self.client.post(uurl+'?uploaded', data)
+        f_name = os.path.join(settings.FIXTURE_DIRS[0], 'testdata', self.doc1 + '.pdf')
+        data = {'file': open(f_name, 'rb'), 'uploaded': u''}
+        response = self.client.post(uurl + '?uploaded', data)
         # Follow Redirect
         self.assertEqual(response.status_code, 302)
         new_url = self._retrieve_redirect_response_url(response)
@@ -829,9 +813,9 @@ class MDTUI(MUITestData):
         self.assertContains(response, 'Friends ID: 321')
         self.assertEqual(response.status_code, 200)
         # Make the file upload
-        file = os.path.join(settings.FIXTURE_DIRS[0], 'testdata', self.doc2+'.pdf')
-        data = { 'file': open(file, 'rb') , 'uploaded':u''}
-        response = self.client.post(uurl+'?uploaded', data)
+        f = os.path.join(settings.FIXTURE_DIRS[0], 'testdata', self.doc2 + '.pdf')
+        data = {'file': open(f, 'rb'), 'uploaded': u''}
+        response = self.client.post(uurl + '?uploaded', data)
         # Follow Redirect
         self.assertEqual(response.status_code, 302)
         new_url = self._retrieve_redirect_response_url(response)
@@ -858,8 +842,8 @@ class MDTUI(MUITestData):
         self.assertContains(response, 'Friends ID: 222')
         self.assertEqual(response.status_code, 200)
         # Make the file upload
-        file = os.path.join(settings.FIXTURE_DIRS[0], 'testdata', 'ADL-1111.pdf')
-        data = { 'file': open(file, 'rb') , 'uploaded':u''}
+        f = os.path.join(settings.FIXTURE_DIRS[0], 'testdata', 'ADL-1111.pdf')
+        data = {'file': open(f, 'rb'), 'uploaded': u''}
         response = self.client.post(uurl+'?uploaded', data)
         # Follow Redirect
         self.assertEqual(response.status_code, 302)
@@ -894,8 +878,8 @@ class MDTUI(MUITestData):
             self.assertContains(response, 'Reporting Entity: '+doc_dict['Reporting Entity'])
             self.assertEqual(response.status_code, 200)
             # Make the file upload
-            file = os.path.join(settings.FIXTURE_DIRS[0], 'testdata', self.doc1+'.pdf')
-            data = { 'file': open(file, 'rb'), 'uploaded': u''}
+            f = os.path.join(settings.FIXTURE_DIRS[0], 'testdata', self.doc1+'.pdf')
+            data = {'file': open(f, 'rb'), 'uploaded': u''}
             response = self.client.post(uurl+'?uploaded', data)
             # Follow Redirect
             self.assertEqual(response.status_code, 302)
@@ -930,15 +914,15 @@ class MDTUI(MUITestData):
             self.assertContains(response, 'Description: Test Document Number')
             self.assertEqual(response.status_code, 200)
             # Make the file upload
-            file = os.path.join(settings.FIXTURE_DIRS[0], 'testdata', self.doc1+'.pdf')
-            data = { 'file': open(file, 'rb'), 'uploaded': u''}
+            f = os.path.join(settings.FIXTURE_DIRS[0], 'testdata', self.doc1 + '.pdf')
+            data = {'file': open(f, 'rb'), 'uploaded': u''}
             response = self.client.post(uurl+'?uploaded', data)
             # Follow Redirect
             self.assertEqual(response.status_code, 302)
             new_url = self._retrieve_redirect_response_url(response)
             response = self.client.get(new_url)
             self.assertContains(response, self.indexing_done_string)
-            self.assertContains(response, 'Employee: '+doc_dict['Employee'])
+            self.assertContains(response, 'Employee: ' + doc_dict['Employee'])
             self.assertContains(response, 'Start Again')
 
     def test_06_opens_app(self):
@@ -1045,18 +1029,14 @@ class MDTUI(MUITestData):
         self.assertContains(response, '<a href="#printModal')
 
     def test_11_rendering_form_without_first_step(self):
-        """
-        Indexing Page 3 without populating previous forms contains proper warnings.
-        """
+        """Indexing Page 3 without populating previous forms contains proper warnings."""
         url = reverse("mdtui-index-source")
         response = self.client.get(url)
         self.assertContains(response, "You have not entered Document Indexing Data.")
 
     def test_12_metadata_exists_for_uploaded_documents(self):
-        """
-        Document now exists in couchDB
-        Querying CouchDB itself to test docs exist.
-        """
+        """Document now exists in couchDB
+        Querying CouchDB itself to test docs exist."""
         url = self.couchdb_url + '/' + self.couchdb_name + '/' + self.doc1 + '?revs_info=true'
         # HACK: faking 'request' object here
         r = self.client.get(url)
@@ -1068,9 +1048,7 @@ class MDTUI(MUITestData):
         self.assertContains(r, 'Iurii Garmash')
 
     def test_13_search_works(self):
-        """
-        Testing Search part opens.
-        """
+        """Testing Search part opens."""
         url = reverse('mdtui-search')
         response = self.client.get(url)
         self.assertContains(response, 'mdt5')
@@ -1078,27 +1056,21 @@ class MDTUI(MUITestData):
         self.assertEqual(response.status_code, 200)
 
     def test_14_search_indexes_warning(self):
-        """
-        Testing Search part Warning for indexes.
-        """
+        """Testing Search part Warning for indexes."""
         url = reverse('mdtui-search-options')
         response = self.client.get(url)
         self.assertContains(response, MDTUI_ERROR_STRINGS['NO_MDTS'])
         self.assertEqual(response.status_code, 200)
 
     def test_15_search_results_warning(self):
-        """
-        Testing Search part  warning for results.
-        """
+        """Testing Search part  warning for results."""
         url = reverse('mdtui-search-results')
         response = self.client.get(url)
         self.assertContains(response, MDTUI_ERROR_STRINGS['NO_S_KEYS'])
         self.assertEqual(response.status_code, 200)
 
     def test_16_search_docrule_select_improper_call(self):
-        """
-        Makes wrong request to view. Response returns back to docrule selection.
-        """
+        """Makes wrong request to view. Response returns back to docrule selection."""
         url = reverse('mdtui-search-type')
         response = self.client.post(url)
         self.assertContains(response, 'mdt5')
@@ -1192,10 +1164,8 @@ class MDTUI(MUITestData):
         self.assertContains(response, "Adlibre invoices")
 
     def test_20_search_by_date_improper(self):
-        """
-        Improper call to search by date.
-        Search Step 3 does not display doc1.
-        """
+        """Improper call to search by date.
+        Search Step 3 does not display doc1."""
         # using today's date to avoid doc exists.
         date_req = datetime.datetime.now()
         date_str = datetime.datetime.strftime(date_req, settings.DATE_FORMAT)
@@ -1206,7 +1176,7 @@ class MDTUI(MUITestData):
         self.assertEqual(response.status_code, 302)
         url = reverse('mdtui-search-options')
         # Searching by Document 1 Indexes
-        response = self.client.post(url, {'date': date_str, '0':'' })
+        response = self.client.post(url, {'date': date_str, '0': ''})
         self.assertEqual(response.status_code, 302)
         new_url = self._retrieve_redirect_response_url(response)
         response = self.client.get(new_url)
@@ -1220,11 +1190,9 @@ class MDTUI(MUITestData):
         self.assertNotContains(response, self.edit_document_name_4)
 
     def test_21_add_indexes_unvalidated_form_preserves_prepopulated_data(self):
-        """
-        MDTUI Indexing Form .
+        """MDTUI Indexing Form .
         Step 2 adding indexes into several fields instead of all required
-        returns prepopulated form with errors.
-        """
+        returns prepopulated form with errors."""
         # Selecting Document Type Rule
         url = reverse('mdtui-index-type')
         response = self.client.post(url, {self.test_mdt_docrule_id: 'docrule'})
@@ -1235,26 +1203,25 @@ class MDTUI(MUITestData):
         rows_dict = self._read_indexes_form(response)
         post_dict = self._convert_doc_to_post_dict(rows_dict, self.doc1_dict)
         # Modifying post to brake it
-        post_dict["description"]=u''
+        post_dict["description"] = u''
         post_dict["0"] = u''
         # Adding Document Indexes
         response = self.client.post(url, post_dict)
         self.assertEqual(response.status_code, 200)
         # Response contains proper validation data
-        self.assertContains(response, 'Brief Document Description') # form fields help exists
+        self.assertContains(response, 'Brief Document Description')  # form fields help exists
         self.assertContains(response, 'Name of tests person')
-        self.assertContains(response, date_standardized('2012-03-06')) # docs data populated into form
+        self.assertContains(response, date_standardized('2012-03-06'))  # docs data populated into form
         self.assertContains(response, 'Andrew')
         self.assertContains(response, '123456')
         self.assertContains(response, 'Iurii Garmash')
-        self.assertContains(response, """connect_typeahead("#id_0", "Friends ID", '/mdtui/parallel/');""") # autocomplete (typehead) scripts rendered
+        # autocomplete (typehead) scripts rendered
+        self.assertContains(response, """connect_typeahead("#id_0", "Friends ID", '/mdtui/parallel/');""")
         self.assertContains(response, """connect_typeahead("#id_1", "Friends Name", '/mdtui/parallel/');""")
-        self.assertContains(response, 'This field is required') # form renders errors
+        self.assertContains(response, 'This field is required')  # form renders errors
 
     def test_22_parallel_keys_indexing_proper(self):
-        """
-        Testing Parallel keys lookup for recently uploaded document
-        """
+        """Testing Parallel keys lookup for recently uploaded document"""
         # Selecting Document Type Rule
         url = reverse('mdtui-index-type')
         response = self.client.post(url, {self.test_mdt_docrule_id: 'docrule'})
@@ -1263,19 +1230,17 @@ class MDTUI(MUITestData):
         response = self.client.post(url, self.typehead_call1)
         self.assertEqual(response.status_code, 200)
         # Response contains proper data
-        self.assertNotContains(response, '<html>') # json but not html response
-        self.assertContains(response, 'Friends ID') # Proper keys
+        self.assertNotContains(response, '<html>')  # json but not html response
+        self.assertContains(response, 'Friends ID')  # Proper keys
         self.assertContains(response, '123')
         self.assertContains(response, 'Friends Name')
         self.assertContains(response, 'Andrew')
-        self.assertNotContains(response, 'Iurii Garmash') # Improper key
+        self.assertNotContains(response, 'Iurii Garmash')  # Improper key
         self.assertNotContains(response, 'Employee Name')
         self.assertNotContains(response, 'Required Date')
 
     def test_23_parallel_keys_indexing_wrong(self):
-        """
-        Testing Parallel keys lookup for recently uploaded document
-        """
+        """Testing Parallel keys lookup for recently uploaded document"""
         # Selecting Document Type Rule
         url = reverse('mdtui-index-type')
         response = self.client.post(url, {self.test_mdt_docrule_id: 'docrule'})
@@ -1294,9 +1259,7 @@ class MDTUI(MUITestData):
         self.assertNotContains(response, 'Required Date')
 
     def test_24_parallel_keys_indexing_set2_proper(self):
-        """
-        Testing Parallel keys lookup for recently uploaded document
-        """
+        """Testing Parallel keys lookup for recently uploaded document."""
         # Selecting Document Type Rule
         url = reverse('mdtui-index-type')
         response = self.client.post(url, {self.test_mdt_docrule_id: 'docrule'})
@@ -1316,9 +1279,7 @@ class MDTUI(MUITestData):
         self.assertContains(response, '123456')
 
     def test_25_parallel_keys_search_proper(self):
-        """
-        Testing Parallel keys lookup for recently uploaded document
-        """
+        """Testing Parallel keys lookup for recently uploaded document"""
         # Selecting MDT
         url = reverse('mdtui-search-type')
         response = self.client.post(url, {'docrule': self.test_mdt_docrule_id})
@@ -1328,18 +1289,16 @@ class MDTUI(MUITestData):
         response = self.client.post(url, self.typehead_call1)
         self.assertEqual(response.status_code, 200)
         # Response contains proper data
-        self.assertNotContains(response, '<html>') # json but not html response
-        self.assertContains(response, 'Friends ID') # Proper keys
+        self.assertNotContains(response, '<html>')  # json but not html response
+        self.assertContains(response, 'Friends ID')  # Proper keys
         self.assertContains(response, '123')
         self.assertContains(response, 'Friends Name')
         self.assertContains(response, 'Andrew')
-        self.assertNotContains(response, 'Iurii Garmash') # Improper key
+        self.assertNotContains(response, 'Iurii Garmash')  # Improper key
         self.assertNotContains(response, 'Employee Name')
 
     def test_26_parallel_keys_searching_set2_proper(self):
-        """
-        Testing Parallel keys lookup for recently uploaded document
-        """
+        """Testing Parallel keys lookup for recently uploaded document"""
         # Selecting Document Type Rule
         url = reverse('mdtui-search-type')
         response = self.client.post(url, {'docrule': self.test_mdt_docrule_id})
@@ -1358,9 +1317,7 @@ class MDTUI(MUITestData):
         self.assertContains(response, '123456')
 
     def test_27_parallel_keys_indexing_wrong(self):
-        """
-        Testing Parallel keys lookup for recently uploaded document
-        """
+        """Testing Parallel keys lookup for recently uploaded document"""
         # Selecting Document Type Rule
         url = reverse('mdtui-search-type')
         response = self.client.post(url, {'docrule': self.test_mdt_docrule_id})
@@ -1378,23 +1335,21 @@ class MDTUI(MUITestData):
         self.assertNotContains(response, 'Employee Name')
 
     def test_28_search_by_date_range_only_proper_all_3_docs(self):
-        """
-        Proper call to search by date range only.
+        """Proper call to search by date range only.
         MDTUI Search By Index Form parses data properly.
         Search Step 'results' displays proper captured indexes.
         Search displays all 3 docs for given date range. (Proper)
         All docs render their indexes correctly.
         Names autogenarated for docs. e.g. ADL-0001, ADL-0002, ADL-0003
-        (Not ADL-0001, ADL-0002, ADL-1111 like files uploaded)
-        """
+        (Not ADL-0001, ADL-0002, ADL-1111 like files uploaded)"""
         all3_docs_range = {
-            u'end_date':unicode(date_standardized('2012-03-30')),
-            u'1':u'',
-            u'0':u'',
-            u'3':u'',
-            u'2':u'',
-            u'4':u'',
-            u'date':unicode(date_standardized('2012-03-01')),
+            u'end_date': unicode(date_standardized('2012-03-30')),
+            u'1': u'',
+            u'0': u'',
+            u'3': u'',
+            u'2': u'',
+            u'4': u'',
+            u'date': unicode(date_standardized('2012-03-01')),
         }
         # setting DocTypeRule
         url = reverse('mdtui-search-type')
@@ -1423,7 +1378,7 @@ class MDTUI(MUITestData):
         # 3 documents secondary keys present
         for doc in [self.doc1_dict, self.doc2_dict, self.doc3_dict]:
             for key in doc.iterkeys():
-                if not key=='date' and not key=='description':
+                if key != 'date' and key != 'description':
                     # Secondary key to test
                     self.assertContains(response, doc[key])
         # Searching keys exist in search results
@@ -1437,14 +1392,12 @@ class MDTUI(MUITestData):
         self.assertNotContains(response, self.edit_document_name_3)
 
     def test_29_search_by_date_range_only_proper_2_docs_without_1(self):
-        """
-        Proper call to search by date range only.
+        """Proper call to search by date range only.
         MDTUI Search By Index Form parses data properly.
         Search Step 'results' displays proper captured indexes.
         Search displays all 2 docs for given date range. (Proper)
         And does not contain doc3 values.
-        All docs render their indexes correctly.
-        """
+        All docs render their indexes correctly."""
         # setting DocTypeRule
         url = reverse('mdtui-search-type')
         data = {'docrule': self.test_mdt_docrule_id}
@@ -1470,7 +1423,7 @@ class MDTUI(MUITestData):
         # 2 documents secondary keys present
         for doc in [self.doc1_dict, self.doc2_dict]:
             for key in doc.iterkeys():
-                if not key=='date' and not key=='description':
+                if key != 'date' and not key != 'description':
                     # Secondary key to test
                     self.assertContains(response, doc[key])
         # No unique doc3 keys exist
@@ -1530,7 +1483,7 @@ class MDTUI(MUITestData):
         # 2 first documents secondary keys NOT present
         for doc in [self.doc1_dict, self.doc2_dict]:
             for key in doc.iterkeys():
-                if not key in ['Employee Name', 'Friends Name', 'Employee ID']: # Collision with docs 1 and 2
+                if not key in ['Employee Name', 'Friends Name', 'Employee ID']:  # Collision with docs 1 and 2
                     # Secondary key to test
                     self.assertNotContains(response, doc[key])
         # Full doc3 data exist
@@ -1587,14 +1540,12 @@ class MDTUI(MUITestData):
         self.assertNotContains(response, self.edit_document_name_3)
 
     def test_32_search_by_date_range_with_keys_1(self):
-        """
-        Proper call to search by date range with integer and string keys.
+        """Proper call to search by date range with integer and string keys.
         MDTUI Search By Index Form parses data properly.
         Search Step 'results' displays proper captured indexes.
         Search displays full doc1 only for given date range and doc1 unique keys. (Proper)
         And does not contain doc2 and3 unique values.
-        All docs render their indexes correctly.
-        """
+        All docs render their indexes correctly"""
         date_range_with_keys_doc1 = {
             u'Friends ID': u'123',
             u'Friends Name': u'Andrew',
@@ -1608,9 +1559,11 @@ class MDTUI(MUITestData):
         # Getting required indexes id's
         response = self.client.get(url)
         ids = self._read_indexes_form(response)
-        data = self._create_search_dict_for_range_and_keys( date_range_with_keys_doc1,
-                                                            ids,
-                                                            self.date_range_with_keys_3_docs,)
+        data = self._create_search_dict_for_range_and_keys(
+            date_range_with_keys_doc1,
+            ids,
+            self.date_range_with_keys_3_docs,
+        )
         # Searching date range with unique doc1 keys
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 302)
@@ -1658,9 +1611,11 @@ class MDTUI(MUITestData):
         # Getting required indexes id's
         response = self.client.get(url)
         ids = self._read_indexes_form(response)
-        data = self._create_search_dict_for_range_and_keys( date_range_with_keys_doc2,
-                                                            ids,
-                                                            self.date_range_with_keys_3_docs,)
+        data = self._create_search_dict_for_range_and_keys(
+            date_range_with_keys_doc2,
+            ids,
+            self.date_range_with_keys_3_docs,
+        )
         # Searching date range with unique doc1 keys
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 302)
@@ -1682,7 +1637,7 @@ class MDTUI(MUITestData):
                 self.assertContains(response, value)
         # Does not contain doc1 unique values
         self.assertNotContains(response, self.doc1_dict['description'])
-        self.assertNotContains(response, self.doc1_dict['Employee Name']) # Iurii Garmash
+        self.assertNotContains(response, self.doc1_dict['Employee Name'])  # Iurii Garmash
         # docs for mdt3 does not present in response
         for doc_dict in [self.m2_doc1_dict, self.m2_doc2_dict]:
             for key, value in doc_dict.iteritems():
@@ -1691,13 +1646,11 @@ class MDTUI(MUITestData):
         self.assertNotContains(response, self.edit_document_name_3)
 
     def test_34_search_date_range_withing_2_different_docrules(self):
-        """
-        MUI search collisions bugs absent.
+        """MUI search collisions bugs absent.
         Search by date range returns result for docs only from this MDT.
         Search Step 'results' displays proper captured indexes for docrule2 of those tests.
         (MDT3) keys are displayed and MDT's 1 and 2 does not displaying.
-        2 test docs for MDT3 rendered.
-        """
+        2 test docs for MDT3 rendered"""
         # Setting DocTypeRule
         url = reverse('mdtui-search-type')
         data = {'docrule': self.test_mdt_docrule_id2}
@@ -1719,7 +1672,7 @@ class MDTUI(MUITestData):
         for doc_dict in [self.m2_doc1_dict, self.m2_doc2_dict]:
             for key, value in doc_dict.iteritems():
                 self.assertContains(response, value)
-        # Test doc's filenames genrated properly
+        # Test doc's filenames generated properly
         self.assertContains(response, self.edit_document_name_2)
         self.assertContains(response, self.edit_document_name_3)
         # Does not contain unique values from docs in another docrules
@@ -1728,17 +1681,15 @@ class MDTUI(MUITestData):
             self.assertNotContains(response, doc_dict['Employee Name'])
         # Keys from MDT-s 1 and 2 not rendered vin search response
         for key in self.doc1_dict.iterkeys():
-            if not key=='date' and not key=='description' and not key=='Additional':
+            if key != 'date' and key != 'description' and key != 'Additional':
                 self.assertNotContains(response, key)
 
     def test_35_search_date_range_withing_2_different_docrules_2(self):
-        """
-        MUI search collisions bugs absent.
+        """MUI search collisions bugs absent.
         Search by date range returns result for docs only from this docrule.
         Search Step 'results' displays proper captured indexes for docrule1 of those tests.
         (MDT1 and MDT2) keys are displayed and MDT3 keys does not displaying.
-        3 test docs for MDT1 and MDT2 rendered.
-        """
+        3 test docs for MDT1 and MDT2 rendered"""
         # Setting MDT
         url = reverse('mdtui-search-type')
         data = {'mdt': self.test_mdt_id_5}
@@ -1760,7 +1711,7 @@ class MDTUI(MUITestData):
         for doc_dict in [self.m5_doc1_dict, self.m5_doc2_dict, self.m2_doc1_dict, self.m2_doc2_dict]:
             for key, value in doc_dict.iteritems():
                 # Uppercase value hack
-                if value=='some data' or value=='some other data':
+                if value == 'some data' or value == 'some other data':
                     value = value.upper()
                 self.assertContains(response, value)
         # Test doc's file-names generated properly
@@ -1807,10 +1758,10 @@ class MDTUI(MUITestData):
         for doc_dict in [self.m5_doc1_dict, self.m5_doc2_dict, self.m2_doc3_dict]:
             for key, value in doc_dict.iteritems():
                 # Uppercase value hack
-                if value=='some data' or value=='some other data':
+                if value == 'some data' or value == 'some other data':
                     value = value.upper()
                 self.assertContains(response, value)
-            # Test doc's filenames genrated properly
+            # Test doc's filenames generated properly
         self.assertContains(response, self.edit_document_name_1)
         self.assertContains(response, self.edit_document_name_4)
         self.assertContains(response, self.edit_document_name_5)
@@ -1895,8 +1846,10 @@ class MDTUI(MUITestData):
         response = self.client.get(url)
         ids = self._read_indexes_form(response)
         # Dict without actual date
-        data = self._create_search_dict_range_and_keys_for_search( date_type_key_doc1,
-                                                            ids )
+        data = self._create_search_dict_range_and_keys_for_search(
+            date_type_key_doc1,
+            ids,
+        )
         # Searching date range with unique doc1 keys
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 302)
@@ -2008,10 +1961,8 @@ class MDTUI(MUITestData):
         self.assertContains(response, 'Reporting Entity: '+ind_doc1['Reporting Entity'].strip(' \t\n\r'))
 
     def test_43_date_keys_converted_to_date_ranges_on_search(self):
-        """
-        Date keys provided converted to date ranges with start/end date period
-        for both document indexing date/secondary dates key types.
-        """
+        """Date keys provided converted to date ranges with start/end date period
+        for both document indexing date/secondary dates key types."""
         range_gen1 = {
             'end_date': date_standardized('2012-04-02'),
             'Report Date From': date_standardized('2012-03-30')
@@ -2045,10 +1996,13 @@ class MDTUI(MUITestData):
         self.assertNotContains(response, self.doc2_dict['description'])
         self.assertNotContains(response, self.doc3_dict['description'])
         # Things that should be here
-        self.assertContains(response, date_standardized('2100-01-01')) # Max date range
-        self.assertContains(response, date_standardized('1960-01-01')) # Min date range
+        self.assertContains(response, date_standardized('2100-01-01'))  # Max date range
+        self.assertContains(response, date_standardized('1960-01-01'))  # Min date range
         self.assertContains(response, date_standardized('2012-04-02'))
-        report_string = 'Report Date: (from: %s to: %s)' % (date_standardized('2012-03-30'), date_standardized('2100-01-01'))
+        report_string = 'Report Date: (from: %s to: %s)' % (
+            date_standardized('2012-03-30'),
+            date_standardized('2100-01-01')
+        )
         self.assertContains(response, report_string)  # Range recognised properly
         self.assertContains(response, self.edit_document_name_2)
         self.assertContains(response, self.edit_document_name_3)
@@ -2114,7 +2068,7 @@ class MDTUI(MUITestData):
         self.assertEqual(response.status_code, 302)
         url = reverse('mdtui-search-options')
         # Getting required indexes id's
-        response = self.client.get(url)
+        self.client.get(url)
         # Searching date range with unique doc1 keys
         response = self.client.post(url, date_range_withing_2_ranges_1)
         self.assertEqual(response.status_code, 302)
@@ -2156,6 +2110,7 @@ class MDTUI(MUITestData):
         self.client.logout()
 
     def test_47_indexing_mdt_choices_limited_by_permitted_docrules(self):
+        """Permission are disabling document type rule choices for normal user in INDEX of MUI"""
         # We need another logged in user for this test
         self.client.logout()
         self.client.login(username=self.username_1, password=self.password_1)
@@ -2173,6 +2128,7 @@ class MDTUI(MUITestData):
         self.client.logout()
 
     def test_48_searching_docrule_choices_limited_by_permission(self):
+        """Permission are disabling document type rule choices for normal user in SEARCH of MUI"""
         # We need another logged in user for this test
         self.client.logout()
         self.client.login(username=self.username_2, password=self.password_2)
@@ -2187,6 +2143,7 @@ class MDTUI(MUITestData):
         self.client.logout()
 
     def test_49_admin_sees_all_docrules_everywhere(self):
+        """Superuser sees all the document type rules"""
         search_url = reverse('mdtui-search-type')
         index_url = reverse('mdtui-index-type')
         response = self.client.get(index_url)
@@ -2201,9 +2158,7 @@ class MDTUI(MUITestData):
         self.assertContains(response, 'mdt6')
 
     def test_50_search_works_docrule(self):
-        """
-        Testing Search part renders Docrules.
-        """
+        """Testing Search part renders Docrules"""
         url = reverse('mdtui-search')
         response = self.client.get(url)
         self.assertContains(response, 'Test Doc Type 2')
@@ -2216,9 +2171,7 @@ class MDTUI(MUITestData):
         self.assertEqual(response.status_code, 200)
 
     def test_51_search_selecting_type_forms(self):
-        """
-        Testing search selection (step type) rendered correctly
-        """
+        """Testing search selection (step type) rendered correctly"""
         url = reverse('mdtui-search')
         # Selecting MDT
         response = self.client.post(url, self.select_mdt5)
@@ -2404,7 +2357,7 @@ class MDTUI(MUITestData):
         self.assertEqual(response.status_code, 302)
         url = reverse('mdtui-search-options')
         # Getting required indexes id's
-        response = self.client.get(url)
+        self.client.get(url)
         # Searching date range with unique doc1 keys
         response = self.client.post(url, search_MDT_5_empty_options_form)
         self.assertEqual(response.status_code, 302)
@@ -2502,7 +2455,7 @@ class MDTUI(MUITestData):
         self.assertEqual(response.status_code, 200)
         response = self.client.post(opt_url, search_seleect_mdt_6_date_range)
         res_url = self._retrieve_redirect_response_url(response)
-        response = self.client.get(res_url)
+        self.client.get(res_url)
         response = self.client.get(res_url)
         # Checking if search result is filtered properly
         # ('Adlibre Invoices' and 'Test Doc Type 2' Docuemnt Type's docs present)
@@ -2521,7 +2474,8 @@ class MDTUI(MUITestData):
 
         Test #1 tests proper search rendering
 
-        If a user doesn't have access to index or to search then those features (eg links / menu options) should be hidden.
+        If a user doesn't have access to index or to search then those features
+        (eg links / menu options) should be hidden.
         This will require some template modification, and some sort of context var to expose the permissions.
         """
         # Creating special user
@@ -2557,7 +2511,8 @@ class MDTUI(MUITestData):
 
         Test #2 Tests proper indexing rendering
 
-        If a user doesn't have access to index or to search then those features (eg links / menu options) should be hidden.
+        If a user doesn't have access to index or to search then those features
+        (eg links / menu options) should be hidden.
         This will require some template modification, and some sort of context var to expose the permissions.
         """
         # test user 5
@@ -2644,7 +2599,7 @@ class MDTUI(MUITestData):
         self.client.logout()
         self.client.login(username=username_6, password=password_6)
         # Checking accessibility
-        url = reverse('mdtui-view-object', kwargs = { 'code': code1, })
+        url = reverse('mdtui-view-object', kwargs={'code': code1})
         response = self.client.get(url)
         self.assertNotEqual(response.status_code, 302)
         self.assertContains(response, code1)
@@ -2656,7 +2611,7 @@ class MDTUI(MUITestData):
         # Checking API directly (must not be there)
         url = reverse('api_file', kwargs={'code': code2, 'suggested_format': 'pdf'},)
         response = self.client.get(url)
-        self.assertEqual(response.status_code, 401) # Forbidden code returned
+        self.assertEqual(response.status_code, 401)   # Forbidden code returned
 
     def test_62_mdt_empty_search(self):
         """
@@ -2677,7 +2632,7 @@ class MDTUI(MUITestData):
         self.assertEqual(response.status_code, 302)
         url = reverse('mdtui-search-options')
         # Getting required indexes id's
-        response = self.client.get(url)
+        self.client.get(url)
         # Searching date range with unique doc1 keys
         response = self.client.post(url, search_MDT_5_export_results_test)
         self.assertEqual(response.status_code, 302)
@@ -2760,18 +2715,18 @@ class MDTUI(MUITestData):
         descending_test1 = [self.edit_document_name_1, self.edit_document_name_4, self.edit_document_name_5]
         ascending_date1 = [self.edit_document_name_5, self.edit_document_name_4, self.edit_document_name_1]
         descending_description = [self.edit_document_name_5, self.edit_document_name_1, self.edit_document_name_4]
-        sort1_query1 = { "order": "icon-chevron-up",
-                         "sorting_key": "Tests Uppercase Field", }
-        sort1_query2 = { "order": "icon-chevron-down",
-                         "sorting_key": "Tests Uppercase Field", }
-        sort2_query1 = { "order": "icon-chevron-up",
-                         "sorting_key": "Creation Date", }
-        sort2_query2 = { "order": "icon-chevron-down",
-                         "sorting_key": "Creation Date", }
-        sort3_query1 = { "order": "icon-chevron-up",
-                         "sorting_key": "Description", }
-        sort3_query2 = { "order": "icon-chevron-down",
-                         "sorting_key": "Description", }
+        sort1_query1 = {"order": "icon-chevron-up",
+                        "sorting_key": "Tests Uppercase Field", }
+        sort1_query2 = {"order": "icon-chevron-down",
+                        "sorting_key": "Tests Uppercase Field", }
+        sort2_query1 = {"order": "icon-chevron-up",
+                        "sorting_key": "Creation Date", }
+        sort2_query2 = {"order": "icon-chevron-down",
+                        "sorting_key": "Creation Date", }
+        sort3_query1 = {"order": "icon-chevron-up",
+                        "sorting_key": "Description", }
+        sort3_query2 = {"order": "icon-chevron-down",
+                        "sorting_key": "Description", }
         # Getting normal default results
         url = reverse('mdtui-search')
         response = self.client.post(url, self.select_mdt5)
@@ -2785,7 +2740,7 @@ class MDTUI(MUITestData):
         results_url = self._retrieve_redirect_response_url(response)
         response = self.client.get(results_url)
         self.assertEqual(response.status_code, 200)
-        # Proper responce check (Just in case...)
+        # Proper response check (Just in case...)
         self.assertContains(response, self.edit_document_name_5)
         self.assertNotContains(response, self.edit_document_name_3)
         self.assertNotContains(response, self.edit_document_name_2)
@@ -2823,7 +2778,6 @@ class MDTUI(MUITestData):
         # Adding apecial permission to test user 1
         user = User.objects.get(username=self.username_1)
         # Registering that user in required security groups and removing their permissions...
-        g = Group.objects.all()
         g, created = Group.objects.get_or_create(name=SEC_GROUP_NAMES['edit_index'])
         if created:
             g.save()
@@ -3027,7 +2981,7 @@ class MDTUI(MUITestData):
         # Checking upload file by API to ensure revision indexes out there after document revision update
         self.test_document_files_dir = os.path.join(settings.FIXTURE_DIRS[0], 'testdata')
         file_path = os.path.join(self.test_document_files_dir, doc_used + '.pdf')
-        data = { 'file': open(file_path, 'r'), }
+        data = {'file': open(file_path, 'r')}
         url = reverse('api_file', kwargs={'code': doc_used, 'suggested_format': 'pdf'})
         response = self.client.put(url, data)
         self.assertEqual(response.status_code, 200)
@@ -3218,7 +3172,7 @@ class MDTUI(MUITestData):
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 302)
         url = reverse('mdtui-search-options')
-        response = self.client.get(url)
+        self.client.get(url)
         response = self.client.post(url, self.search_MDT_5)
         self.assertEqual(response.status_code, 302)
         new_url = self._retrieve_redirect_response_url(response)
@@ -3226,8 +3180,8 @@ class MDTUI(MUITestData):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'results matching query.')
         self.assertContains(response, 'Page')
-        self.assertContains(response, '/mdtui/search/results?page=1">1') # Paginator page one present
-        self.assertNotContains(response, 'Next') # Paginator page next
+        self.assertContains(response, '/mdtui/search/results?page=1">1')   # Paginator page one present
+        self.assertNotContains(response, 'Next')   # Paginator page next
 
     def test_76_search_includes_ending_date_range_variable(self):
         """
@@ -3256,7 +3210,7 @@ class MDTUI(MUITestData):
         self.assertEqual(response.status_code, 302)
         url = reverse('mdtui-search-options')
         # Getting required indexes id's
-        response = self.client.get(url)
+        self.client.get(url)
         # Searching date range for this test
         response = self.client.post(url, search_MDT_5_date_range_end_date)
         self.assertEqual(response.status_code, 302)
@@ -3724,7 +3678,7 @@ class MDTUI(MUITestData):
         self.assertContains(edit_response, edit_revisions_url)
         # Errors not causing view problems
         wrong_response = self.client.get(reverse('mdtui-edit-revisions', kwargs={'code': wrong_code}))
-        self.assertContains(wrong_response, MDTUI_ERROR_STRINGS['NO_DOC'], status_code=200)
+        self.assertContains(wrong_response, MDTUI_ERROR_STRINGS['NO_DOC'])
         # Edit revisions page proper rendering
         revisions_response = self.client.get(edit_revisions_url)
         self.assertContains(revisions_response, edit_doc_url)  # Has back button
@@ -3735,7 +3689,7 @@ class MDTUI(MUITestData):
             raise self.failureException('Can not test farther because filename: %s already exists' % creating_doc)
         # Testing file upload
         file_path = os.path.join(self.test_document_files_dir, doc_name + '.pdf')
-        data = { 'file': open(file_path, 'r'), }
+        data = {'file': open(file_path, 'r')}
         new_revisions_response = self.client.post(edit_revisions_url, data)
         self.assertEqual(new_revisions_response.status_code, 302)
         new_url = self._retrieve_redirect_response_url(new_revisions_response)
@@ -3763,7 +3717,7 @@ class MDTUI(MUITestData):
 
     def test_90_mark_document_deleted_from_search_workflow(self):
         """Refs #827 Mark document deleted view and actions"""
-        unexisting_doc = self.doc1
+        not_existing_doc = self.doc1
         existing_doc = self.doc2
         remaining_doc = self.doc3
         url = reverse('mdtui-search')
@@ -3780,7 +3734,7 @@ class MDTUI(MUITestData):
         results_url = self._retrieve_redirect_response_url(response)
         response = self.client.get(results_url)
         self.assertEqual(response.status_code, 200)
-        self.assertNotContains(response, unexisting_doc)
+        self.assertNotContains(response, not_existing_doc)
         self.assertContains(response, existing_doc)
         self.assertContains(response, remaining_doc)
         # Going to edit document revisions to look for client redirect and data shown to user
@@ -3797,7 +3751,7 @@ class MDTUI(MUITestData):
         self.assertEqual(response.status_code, 302)
         results_url = self._retrieve_redirect_response_url(response)
         response = self.client.get(results_url)
-        self.assertNotContains(response, unexisting_doc)
+        self.assertNotContains(response, not_existing_doc)
         self.assertNotContains(response, existing_doc)
         self.assertContains(response, remaining_doc)
         # Edit document views hide this doc too.
@@ -4009,5 +3963,3 @@ class MDTUI(MUITestData):
             db1.compact()
             db2 = server.get_or_create_db(self.couchdb_mdts_name)
             db2.compact()
-
-
