@@ -185,14 +185,13 @@ class CouchDocument(Document):
             # Populating self with new provided data
             self.mdt_indexes = secondary_indexes
             # Making desc and user data optional, taking them from current user
-            if 'desription' in document.new_indexes:
+            if 'description' in document.new_indexes:
                 self.metadata_description = document.new_indexes['description']
             else:
                 self.metadata_description = 'N/A'
             if 'metadata_user_id' in document.new_indexes:
                 self.metadata_user_id = document.new_indexes['metadata_user_id']
             else:
-                print document.user
                 self.metadata_user_id = unicode(document.user.id)
             if 'metadata_user_name' in document.new_indexes:
                 self.metadata_user_id = document.new_indexes['metadata_user_name']
