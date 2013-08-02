@@ -250,9 +250,7 @@ class BasicAuthClient(Client):
 
 
 class DMSBasicAuthenticatedTestCase(DMSTestCase):
-    """
-    Basic HTTP Authentication for our API Tests
-    """
+    """Basic HTTP Authentication for our API Tests"""
 
     client_class = BasicAuthClient
 

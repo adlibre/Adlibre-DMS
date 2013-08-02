@@ -16,10 +16,15 @@ from core.document_processor import DocumentProcessor
 
 
 class Command(BaseCommand):
-    args = '<directory_name directory_name ...>'
-    help = 'Imports the documents from specified directory'
+    """Imports the documents from specified directories"""
+    args = 'directory_name directory_name ...'
 
     def handle(self, *args, **options):
+        """Main method processor
+
+        @param args: directory_name directory_name ...
+        @param options:
+        """
 
         silent = 'silent' in options.keys() and options['silent']
         if len(args) == 0:
@@ -43,7 +48,8 @@ class Command(BaseCommand):
                     processor = DocumentProcessor()
                     try:
                         processor.create(file_obj, {'user': admin})
-                    except Exception:
+                    except Exception, e:
+                        self.stderr.write(e)
                         self.stderr.write(traceback.format_exc() + "\n")
                     else:
                         if processor.errors:
