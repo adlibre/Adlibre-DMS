@@ -10,6 +10,8 @@ MIMETYPES = [
                 ('image/gif', 'gif'),
                 ('image/png', 'png'),
                 ('text/plain', 'txt'),
+                ('text/x-c', 'txt'),  # In fact is a txt file type
+                ('text/x-c++', 'txt'),  # In fact is a txt file type
                 ('application/msword', 'doc'),
                 ('application/vnd.ms-excel', 'xls'),
             ]
