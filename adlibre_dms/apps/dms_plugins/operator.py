@@ -19,12 +19,11 @@ from workers import PluginError, PluginWarning, BreakPluginChain
 from workers.info.tags import TagsPlugin
 from dms_plugins import pluginpoints
 
-# FIXME: Temporary logger
-#log = logging.getLogger('dms_plugins.operator')
 log = logging.getLogger('dms')
 
 # PEP method to fix out redundant imports.
 __all__ = ['PluginsOperator']
+
 
 class PluginsOperator(object):
     """
@@ -33,7 +32,8 @@ class PluginsOperator(object):
     Must execute plugins for certain minor tasks. (That are not CRUD)
     e.g. PluginsOperator().rename_file(old_filename, new_filename)
     """
-    # TODO: All plugin executions must be decoupled and optional, so you can remove any plugin and it will not affect entire system.
+    # TODO: All plugin executions must be decoupled and optional,
+    # so you can remove any plugin and it will not affect entire system.
     def __init__(self):
         self.plugin_errors = []
         self.plugin_warnings = []
@@ -43,6 +43,9 @@ class PluginsOperator(object):
         PluginsOperator() main gear.
 
         Iterates over plugins and executes them according to config and workflow specified (PluginPoint)
+
+        @param pluginpoint: a special DMS internal set of plugins to be executed
+        @param document: DMS Document() instance
         """
         plugins = self.get_plugins_for_point(pluginpoint, document)
         #log.debug('process_pluginpoint: %s with %s plugins.' % (pluginpoint, plugins))
@@ -51,10 +54,10 @@ class PluginsOperator(object):
                 # log.debug('process_pluginpoint begin processing: %s.' % plugin)
                 document = plugin.work(document)
                 # log.debug('process_pluginpoint begin processed: %s.' % plugin)
-            except PluginError, e: # if some plugin throws an exception, stop processing and store the error message
+            except PluginError, e:  # if some plugin throws an exception, stop processing and store the error message
                 self.plugin_errors.append(e)
                 if settings.DEBUG:
-                    log.error('process_pluginpoint: %s.' % e) # e.parameter, e.code
+                    log.error('process_pluginpoint: %s.' % e)  # e.parameter, e.code
                 break
             except PluginWarning, e:
                 self.plugin_warnings.append(str(e))
@@ -63,11 +66,15 @@ class PluginsOperator(object):
         return document
 
     def get_plugins_from_mapping(self, mapping, pluginpoint, plugin_type):
-        """Extracts and instantiates Plugin() objects from given plugin mapping."""
+        """Extracts and instantiates Plugin() objects from given plugin mapping.
+
+        @param mapping: DocumentTYpeRulePluginMapping() instance"""
         plugin_objects = getattr(mapping, 'get_' + pluginpoint.settings_field_name)()
         plugins = map(lambda plugin_obj: plugin_obj.get_plugin(), plugin_objects)
         if plugin_type:
-            plugins = filter(lambda plugin: hasattr(plugin, 'plugin_type') and plugin.plugin_type == plugin_type, plugins)
+            plugins = filter(
+                lambda plugin: hasattr(plugin, 'plugin_type') and plugin.plugin_type == plugin_type, plugins
+            )
         return plugins
 
     def get_plugin_list(self):
@@ -98,13 +105,13 @@ class PluginsOperator(object):
             raise DmsException('Rule not found', 404)
         return mapping
 
-    """
-    Some unusual magic with processing plugins...
+    # TODO:
+    # Some unusual magic with processing plugins...
+    #
+    # I think they must be part of the retrieve workflow with some options set.
+    # We should not touch those methods directly. IT creates a mess.
+    # e.g. DocumentProcessor().read(document, option='revision_count')
 
-    I think they must be part of the retrieve workflow with some options set.
-    We should not touch those methods directly. IT creates a mess.
-    e.g. DocumentProcessor().read(document, option='revision_count')
-    """
     def get_file_list(self, doccode_plugin_mapping, start=0, finish=None, order=None, searchword=None,
                       tags=None, filter_date=None):
         """This must be a part of some retrieve workflow

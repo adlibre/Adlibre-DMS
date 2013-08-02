@@ -30,8 +30,9 @@ class HashForm(forms.Form):
         self.options = options
         super(HashForm, self).__init__(*args, **kwargs)
 
-    def save(self, commit = True):
-        """Stores setting for a plugin"""
+    def save(self, commit=True):
+        """Stores setting for a plugin
+        @param commit: execute save()"""
         method = self.options[0]
         method.name = 'method'
         method.value = self.cleaned_data['method']
@@ -51,7 +52,8 @@ class HashCodeValidationOnStoragePlugin(Plugin, BeforeStoragePluginPoint):
     form = HashForm
 
     def work(self, document):
-        """Main plugin method"""
+        """Main plugin method
+        @param document: DMS Document() instance"""
         method = self.get_option('method', document.get_docrule())
         return HashCodeWorker(self.method).work_store(document, method)
 
@@ -67,7 +69,8 @@ class HashCodeValidationOnUpdatePlugin(Plugin, BeforeUpdatePluginPoint):
     form = HashForm
 
     def work(self, document):
-        """Main plugin method"""
+        """Main plugin method
+        @param document: DMS Document() instance"""
         method = self.get_option('method', document.get_docrule())
         return HashCodeWorker(self.method).work_store(document, method)
 
@@ -83,7 +86,8 @@ class HashCodeValidationOnRetrievalPlugin(Plugin, BeforeRetrievalPluginPoint):
     form = HashForm
     
     def work(self, document):
-        """Main plugin method"""
+        """Main plugin method
+        @param document: DMS Document() instance"""
         method = self.get_option('method', document.get_docrule())
         return HashCodeWorker(self.method).work_retrieve(document, method)
 
