@@ -13,9 +13,6 @@ from django.core.urlresolvers import reverse
 
 from adlibre.dms.base_test import DMSTestCase
 
-# Used in determining if current file is PDF file by 'string' inside a file content.
-pdf_file_string_part = '%PDF-1.4'
-
 
 class ViewTest(DMSTestCase):
     """
@@ -32,16 +29,14 @@ class ViewTest(DMSTestCase):
         self.loadTestData()
 
     def test_zz_cleanup(self):
-        """
-        Test Cleanup
-        """
-        self.cleanAll(check_response=True)
+        """Test Cleanup (Executed after all tests"""
+        self.cleanAll()
 
     def browser_upload_file(self, filename):
         url = reverse('upload')
         self.client.login(username=self.username, password=self.password)
         # Do upload
-        data = { 'file': open(filename, 'r'), }
+        data = {'file': open(filename, 'r')}
         response = self.client.post(url, data)
         return response
 
@@ -87,17 +82,17 @@ class ViewTest(DMSTestCase):
         for d in self.documents_hash:
             url = '/get/%s?hashcode=%s' % (d[0], d[1])
             response = self.client.get(url)
-            self.assertContains(response, pdf_file_string_part, status_code=200)
+            self.assertContains(response, self.pdf_file_contains)
         
         for d in self.documents_hash:
             url = '/get/%s.pdf?hashcode=%s' % (d[0], d[1])
             response = self.client.get(url)
-            self.assertContains(response, pdf_file_string_part, status_code=200)
+            self.assertContains(response, self.pdf_file_contains)
 
         for d in self.documents_hash:
             url = '/get/%s.pdf?hashcode=%s&extension=txt' % (d[0], d[1])
             response = self.client.get(url)
-            self.assertContains(response, pdf_file_string_part, status_code=200)
+            self.assertContains(response, self.pdf_file_contains)
 
         # TODO: fix this it will break...
         for d in self.documents_missing_hash:
@@ -131,7 +126,7 @@ class ViewTest(DMSTestCase):
         """
         self.client.login(username=self.username, password=self.password)
         for rule_id in ['2', '7']:
-            url = reverse('files_document', kwargs={'id_rule':rule_id})
+            url = reverse('files_document', kwargs={'id_rule': rule_id})
             data = {"finish": "15",
                     "order": "created_date",
                     "start": "0"
@@ -208,14 +203,14 @@ class ConversionTest(DMSTestCase):
         for d in self.documents_tif:
             url = reverse('get_file', kwargs={'code': d, 'suggested_format': 'pdf'})
             response = self.client.get(url)
-            self.assertContains(response, '', status_code=200)
+            self.assertContains(response, '')
 
     def test_txt2pdf_conversion(self):
         self.client.login(username=self.username, password=self.password)
         for d in self.documents_txt:
             url = reverse('get_file', kwargs={'code': d, 'suggested_format': 'pdf'})
             response = self.client.get(url)
-            self.assertContains(response, '', status_code=200)
+            self.assertContains(response, '')
 
     def test_pdf2txt_conversion(self):
         self.client.login(username=self.username, password=self.password)
@@ -227,4 +222,4 @@ class ConversionTest(DMSTestCase):
 
     def test_zz_cleanup(self):
         """Test Cleanup"""
-        self.cleanAll(check_response=True)
+        self.cleanAll()

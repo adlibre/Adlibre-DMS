@@ -72,6 +72,7 @@ class DMSTestCase(TestCase):
         self.rules = (1, 2, 3, 4, 5,)
         self.rules_missing = (99,)
 
+        # Used in determining if current file is PDF file by 'string' inside a file content.
         self.pdf_file_contains = '%PDF-1.4'
 
     def _upload_file(self, doc_name, suggested_format='pdf', hash_code=None, check_response=True, code=None):
