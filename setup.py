@@ -136,6 +136,8 @@ setup(name='adlibre_dms',
             'django-log-file-viewer==0.6',
             # CI integration
             'django-jenkins==0.14.0'
+            # Thumbnails support
+            'ghostscript==0.4.1'
     ],
     dependency_links = [
         "https://github.com/adlibre/django-bcp/tarball/master#egg=django-bcp",
