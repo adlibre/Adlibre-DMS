@@ -16,9 +16,7 @@ def find_files(directory, pattern):
 
 
 def find_files_full(dir, pattern='*'):
-    """
-    Returns a dict with full relative path to files
-    """
+    """Returns a dict with full relative path to files"""
     all_files = []
     for root, dirs, files in os.walk(dir):
         if len(files) > 0:
@@ -29,9 +27,7 @@ def find_files_full(dir, pattern='*'):
 
 
 def findall(dir, pattern='*'):
-    """
-    A better finder for 'data_files'
-    """
+    """A better finder for 'data_files'"""
     all_files = []
     for root, dirs, files in os.walk(dir):
         if len(files) > 0:
