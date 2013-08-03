@@ -5,6 +5,7 @@ import fnmatch
 
 from setuptools import setup, find_packages
 
+
 def find_files(directory, pattern):
     for root, dirs, files in os.walk(directory):
         for base_name in files:
@@ -12,6 +13,7 @@ def find_files(directory, pattern):
                 filename = os.path.join(root, base_name)
                 if os.path.isfile(filename):
                     yield filename
+
 
 def find_files_full(dir, pattern='*'):
     """
@@ -24,6 +26,7 @@ def find_files_full(dir, pattern='*'):
                 file_path = os.path.join(root, file)
                 all_files.extend((file_path,))
     return all_files
+
 
 def findall(dir, pattern='*'):
     """
@@ -47,58 +50,58 @@ setup(name='adlibre_dms',
     packages=find_packages('.'),
     scripts=[],
     package_data={
-            'adlibre_dms': [
-		        'version.txt',
-                'apps/browser/static/favicon.ico',
-                'apps/browser/static/browser/*',
-                'apps/browser/templates/browser/*.html',
-                'apps/browser/templates/browser/include/*.html',
-                'apps/docs/templates/docs/*',
-                'apps/mdtui/*.pdf',
-                'apps/mdtui/static/*.ico',
-                'apps/mdtui/static/*.png',
-                'apps/mdtui/static/css/*.css',
-                'apps/mdtui/static/img/*.png',
-                'apps/mdtui/static/img/*.gif',
-                'apps/mdtui/static/js/*.js',
-                'apps/mdtui/static/pdf/*.pdf',
-                'apps/mdtui/templates/mdtui/*.html',
-                'apps/mdtui/templates/mdtui/index/*.html',
-                'apps/mdtui/templates/mdtui/edit/*.html',
-                'apps/mdtui/templates/mdtui/search/*.html',
-                # Feedback app
-                'apps/feedback/templates/feedback_form/*.txt',
-                'apps/feedback/templates/feedback_form/*.html',
-                'apps/feedback/static/js/*.js',
-                'apps/feedback/static/img/*.png',
-                # Themes
-                'apps/theme/*/static/theme/*/*.png',
-                'apps/theme/*/static/theme/*/*.css',
-                'apps/theme/*/templates/*/*.html',
-                # Admin UI
-                'apps/ui/static/css/ui/*.css',
-                'apps/ui/static/css/ui/datepick/*.css',
-                'apps/ui/static/js/ui/*.js',
-                'apps/ui/static/js/datepick/*.js',
-                'apps/ui/static/js/datepick/*.html',
-                'apps/ui/static/js/datepick/*.gif',
+        'adlibre_dms': [
+            'version.txt',
+            'apps/browser/static/favicon.ico',
+            'apps/browser/static/browser/*',
+            'apps/browser/templates/browser/*.html',
+            'apps/browser/templates/browser/include/*.html',
+            'apps/docs/templates/docs/*',
+            'apps/mdtui/*.pdf',
+            'apps/mdtui/static/*.ico',
+            'apps/mdtui/static/*.png',
+            'apps/mdtui/static/css/*.css',
+            'apps/mdtui/static/img/*.png',
+            'apps/mdtui/static/img/*.gif',
+            'apps/mdtui/static/js/*.js',
+            'apps/mdtui/static/pdf/*.pdf',
+            'apps/mdtui/templates/mdtui/*.html',
+            'apps/mdtui/templates/mdtui/index/*.html',
+            'apps/mdtui/templates/mdtui/edit/*.html',
+            'apps/mdtui/templates/mdtui/search/*.html',
+            # Feedback app
+            'apps/feedback/templates/feedback_form/*.txt',
+            'apps/feedback/templates/feedback_form/*.html',
+            'apps/feedback/static/js/*.js',
+            'apps/feedback/static/img/*.png',
+            # Themes
+            'apps/theme/*/static/theme/*/*.png',
+            'apps/theme/*/static/theme/*/*.css',
+            'apps/theme/*/templates/*/*.html',
+            # Admin UI
+            'apps/ui/static/css/ui/*.css',
+            'apps/ui/static/css/ui/datepick/*.css',
+            'apps/ui/static/js/ui/*.js',
+            'apps/ui/static/js/datepick/*.js',
+            'apps/ui/static/js/datepick/*.html',
+            'apps/ui/static/js/datepick/*.gif',
 
-                'apps/ui/templates/ui/*.html',
-                # CouchDB Components
-                'couchapps/*/_design/views/*/*.js',
+            'apps/ui/templates/ui/*.html',
+            # CouchDB Components
+            'couchapps/*/_design/views/*/*.js',
 
-                'libraries/piston/templates/*.html',
-                'libraries/piston/templates/piston/*.html',
+            'libraries/piston/templates/*.html',
+            'libraries/piston/templates/piston/*.html',
 
-                # Misc templates
-                'templates/*.html',
-                'templates/*.txt',
-                'templates/admin/*.html',
-                'templates/flatpages/*.html',
-                'templates/registration/*.html',
+            # Misc templates
+            'templates/*.html',
+            'templates/*.txt',
+            'templates/admin/*.html',
+            'templates/flatpages/*.html',
+            'templates/registration/*.html',
 
-                ], # this should be done automatically
-        },
+        ],  # this should be done automatically
+    },
     data_files=[
         ('adlibre_dms', ['settings_prod.py', 'local_settings.py.example', 'adlibre_dms/manage.py']),
         ('db', ['db/.gitignore']), # create empty dir
@@ -137,9 +140,9 @@ setup(name='adlibre_dms',
             # CI integration
             'django-jenkins==0.14.0',
             # Thumbnails support
-            'ghostscript==0.4.1'
+            'ghostscript==0.4.1',
     ],
-    dependency_links = [
+    dependency_links=[
         "https://github.com/adlibre/django-bcp/tarball/master#egg=django-bcp",
         "https://github.com/adlibre/adlibre-plugins/tarball/master#egg=adlibre-plugins"
     ],
