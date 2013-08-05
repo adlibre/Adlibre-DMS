@@ -6,25 +6,28 @@ Copyright: Adlibre Pty Ltd 2013
 License: See LICENSE for license information
 Author: Iurii Garmash
 """
+import re
+import logging
 
 from django.db import models
 from django.core.cache import get_cache
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 
-import re
-import logging
+from core.errors import DmsException
 import dms_plugins
 
 log = logging.getLogger('dms.doc_codes')
 
-# Add method here to add ability to validate and write a validator for it.
-DOCCODE_TYPES = [
-    ('1', 'Default'),
-    ('2', 'Credit Card'),
-    ('3', 'Book'),
-]
 
+def get_doctypes():
+    """returns a list of tuple for possible document types"""
+    # Add method here to add ability to validate and write a validator for it.
+    return [
+        ('1', 'Default'),
+        ('2', 'Credit Card'),
+        ('3', 'Book'),
+    ]
 
 class DocumentTypeRule(models.Model):
     """
@@ -39,7 +42,7 @@ class DocumentTypeRule(models.Model):
     Maybe we need to add function to check and store this model on init.
     For now DMS requires it to be like so.
     """
-    doccode_type = models.CharField(choices=DOCCODE_TYPES, max_length=64, default='1')
+    doccode_type = models.CharField(choices=get_doctypes(), max_length=64, default='1')
     sequence_last = models.IntegerField(
         "Number of Documents", default=0,
         help_text="Last document stored. (Don't change unless you understand the consequences.)"
@@ -98,7 +101,11 @@ class DocumentTypeRule(models.Model):
         return unicode(self.get_title())
 
     def save(self, *args, **kwargs):
-        """Overriding save method to add permissions into admin"""
+        """Overriding save method to add permissions into admin
+
+        @param args: arguments
+        @param kwargs arguments
+        """
         content_type, created = ContentType.objects.get_or_create(
             app_label='rule',
             model='',
@@ -112,9 +119,10 @@ class DocumentTypeRule(models.Model):
         super(DocumentTypeRule, self).save(*args, **kwargs)
 
     def validate(self, document_name):
-        """
-        Validates DocumentTypeRule against available "document_name" string.
-        Returns True if OK and False if not passed.
+        """Validates DocumentTypeRule against available "document_name" string.
+
+        @param document_name: is a name of a document code
+        @return True if OK and False if not passed.
         """
 
         # TODO: expansion to validate document_name against "is_luhn_valid(self, cc)" for document_type:2 (credit Card)
@@ -126,33 +134,35 @@ class DocumentTypeRule(models.Model):
         return False
 
     def split(self, document_name=''):
-        """
-        Method to generate folder hierarchy to search for document depending on name.
+        """Method to generate folder hierarchy to search for document depending on name.
+
+        @param document_name: is a nplitting dcoderelevant
+
         Returns spliting method List:
         Usage e.g.:
         File name:  abcde222.pdf (document_name = 'abcde222')
         Spliting method:  ['abcde', '222', 'abcde222']
         In case of document_type_rule == no_rule returns current DATE
         """
-#        if self.no_doccode or not document_name:
-#            # no Doccode spliting method
-#            return ['{{DATE}}']
-#        else:
         split_method = False
         if self.doccode_type == '1':
-            # Default Storing Documents
-            # Based on self.split_string
+            # Default Storing Documents based on self.split_string
             if self.split_string:
-                #print 'Splitstring: ', self.split_string
                 split_list = self.split_string.split(',')
                 split_method = []
                 for pair in split_list:
-                    s,e = pair.split(':')
+                    s, e = pair.split(':')
                     split_method.append(document_name[int(s):int(e)])
                 split_method.append(document_name)
 
         if self.doccode_type == '2':
-            split_method = [ document_name[0:4], document_name[5:9], document_name[10:13], document_name[14:18], document_name ]
+            split_method = [
+                document_name[0:4],
+                document_name[5:9],
+                document_name[10:13],
+                document_name[14:18],
+                document_name
+            ]
         if self.doccode_type == '3':
             # Split document_name as per Project Gutenberg method for 'eBook number' not, eText
             # http://www.gutenberg.org/dirs/00README.TXT
@@ -161,60 +171,60 @@ class DocumentTypeRule(models.Model):
                 split_method.append(document_name[i-1:i])
             split_method.append(document_name)
         if not split_method:
-            split_method=['Split_errors',] #folder name for improper doccdes!!!!!
-            log.error('doc_codes.models.DocumentTypeRule.split Splitting Errors exist!')
+            split_method = ['Split_errors', ]  # folder name for improper doccdes!!!!!
+            log.error('doc_codes.models.DocumentTypeRule.split Splitting Errors exist for code: %s' % document_name)
         #print "Spliting method: ", split_method
         return split_method
 
     def is_luhn_valid(self, cc):
-        """
-        Method to validate Luhn algorithm based on:
+        """Method to validate Luhn algorithm based on:
         # Credit: http://en.wikipedia.org/wiki/Luhn_algorithm
+
+        @param cc: Credit Card number
         """
         num = [int(x) for x in str(cc)]
         return sum(num[::-2] + [sum(divmod(d * 2, 10)) for d in num[-2::-2]]) % 10 == 0
 
     def get_id(self):
-        #print 'Doccode model "get_id" called.'
+        """Returns instance PK"""
         return self.pk
 
     def get_title(self):
+        """Returns instance title"""
         title = getattr(self, 'title', '')
         return title
 
     def get_directory_name(self):
+        """Returns instance directory number"""
         return str(self.get_id())
 
     def get_last_document_number(self):
-        """
-        Function to GET last document number for this Document Type Model
-        """
+        """GET last document number for this instance"""
         return self.sequence_last
 
     def set_last_document_number(self, number):
-        """
-        Function to SET last document number for this Document Type Model
+        """SET last document number for this instance.
+
+        @param number: number to be set in format int()
         """
         self.sequence_last = int(number)
         self.save()
         return self
 
     def allocate_barcode(self):
-        """
-        Function increments last document number for this Document Type Model by int(1)
-        """
+        """Function increments last document number for this Document Type Model by int(1)"""
         log.debug('doc_codes.models allocate_barcode. sequence_last: %s', self.sequence_last)
         self.sequence_last += 1
         self.save()
         return self._generate_document_barcode(self.sequence_last)
 
     def _generate_document_barcode(self, sequence):
-        """
-        Function generates next barcode in sequence. As soon as it is generated, it must be assumed to be used to avoid race.
+        """Function generates next barcode in sequence.
+        As soon as it is generated, it must be assumed to be used to avoid race.
         """
         log.debug("doc_codes.models Generate document barcode called. sequence: %s", sequence)
-        # HACK: Ideally we shouldn't need a 'barcode_format' field, as that could be inferred from the regex. (maybe?) along with the
-        # integer padding required? eg assume a fixed length integer portion of a regex is padded
+        # HACK: Ideally we shouldn't need a 'barcode_format' field, as that could be inferred from the regex. (maybe?)
+        # along with the integer padding required? eg assume a fixed length integer portion of a regex is padded
         # TODO: Validate the generated code to ensure it's valid, and not invalid according to the regex.
 
         if len(self.barcode_format) > 0:
@@ -227,22 +237,25 @@ class DocumentTypeRule(models.Model):
             return False
 
     def get_docrule_plugin_mappings(self):
+        """Returns DocumentTypeRule Mapping for this instance"""
         log.info('get_docrule_mapping for DocumentTypeRule : %s.' % self)
         mapping = dms_plugins.models.DoccodePluginMapping.objects.filter(
-            doccode = str(self.pk),
+            doccode=str(self.pk),
             active=True)
         if mapping.count():
             mapping = mapping[0]
         else:
-            raise dms_plugins.workers.DmsException('Rule not found', 404)
+            raise DmsException('Rule not found', 404)
         return mapping
 
 
 class DocumentTypeRuleManager(object):
+    """Helper to handle document type rule searches and operations"""
+
     def __init__(self):
         """Every manager Instance has it's own document type rules set in memory (cache), not touching the DB often."""
         # Using cache to store DB objects.
-        cache_docrules_for = 300 # 5 minutes (new updated docrules will be stored)
+        cache_docrules_for = 300  # 5 minutes (new updated docrules will be stored)
         cache = get_cache('core')
         cache_key = 'docrules_objects'
         cached_docrules = cache.get(cache_key, None)
@@ -253,38 +266,40 @@ class DocumentTypeRuleManager(object):
             self.doccodes = cached_docrules
 
     def find_for_string(self, string):
-        # TODO: understand why we needed this and can we drop it? (Probabaly No doccode = Default Document Type
-        # res = DocumentTypeRule.objects.filter(no_doccode = True, active = True)[0]
+        """Find a DocumentType that corresponds to certain string
+
+        @param string: a string to check"""
         res = None
         for doccode in self.doccodes:
-            #print "%s is validated by %s: %s" % (string, doccode, doccode.validate(string))
             if doccode.validate(string):
                 res = doccode
                 break
         return res
 
     def get_docrules(self):
+        """Get cached document types"""
         return self.doccodes
 
     def get_docrule_by_name(self, name):
-        doccodes = self.get_docrules()
-        try:
-            doccode = doccodes.filter(title=name)[0]
-            return doccode
-        except: pass
-        for doccode in doccodes:
-            if doccode.get_title() == name:
-                return doccode
-        return None
+        """Returns a document type rule based on it's name
 
-    def get_docrule_by_id(self, id):
+        @param name: is a name of this DocumentTypeRule"""
+        doccodes = self.get_docrules()
+        doccode_set = doccodes.filter(title=name)
+        if doccode_set:
+            return doccode_set[0]
+        else:
+            return None
+
+    def get_docrule_by_id(self, id_):
         """
         Works without making additional requests to DB.
 
         (when used with instance variable)
+        @param id_: Model PK
         """
         docrules = self.doccodes
-        docrule_instance = docrules.get(pk=id)
+        docrule_instance = docrules.get(pk=id_)
         return docrule_instance
 
 
