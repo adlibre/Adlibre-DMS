@@ -116,7 +116,7 @@ class CouchDBMetadata(object):
             couchdoc = CouchDocument.get(docid=document.file_name)
             couchdoc.update_indexes_revision(document)
             couchdoc.save()
-            document = couchdoc.populate_into_dms(user, document)
+            document = couchdoc.populate_into_dms(document)
         return document
 
     def remove(self, document):
@@ -172,7 +172,7 @@ class CouchDBMetadata(object):
                     if not e_message in ['deleted', 'missing']:
                         raise PluginError('CouchDB error: %s' % e, e)
                     pass
-                document = couchdoc.populate_into_dms(user, document)
+                document = couchdoc.populate_into_dms(document)
                 return document
 
     ####################################################################################################################
