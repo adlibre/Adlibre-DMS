@@ -1,7 +1,7 @@
 """
 Module: DMS CouchDB Plugin
 Project: Adlibre DMS
-Copyright: Adlibre Pty Ltd 2012
+Copyright: Adlibre Pty Ltd 2013
 License: See LICENSE for license information
 Author: Iurii Garmash
 """
@@ -22,20 +22,21 @@ from dmscouch.models import CouchDocument
 from couchdbkit.resource import ResourceNotFound
 
 
-class CouchDBMetadata(object):
+class CouchDBMetadataWorker(object):
     """Stores metadata in CouchDB DatabaseManager.
 
     Handles required logic for metadata <==> Document(object) manipulations.
     """
 
     def store(self, document):
-        # FIXME: Refactor me. We should upload new "secondary_indexes" or metatags with update() workflow,
-        # not a create(), like it is now. Because this method is a mess.
-        """
-        Stores CouchDB object into DB.
+        """Stores CouchDB object into DB.
 
         (Updates or overwrites CouchDB document)
+
+        @param document: is a DMS Document() instance
         """
+        # FIXME: Refactor me. We should upload new "secondary_indexes" or metatags with update() workflow,
+        # not a create(), like it is now. Because this method is a mess.
         docrule = document.get_docrule()
         # doing nothing for no doccode documents
         if docrule.no_doccode:
@@ -53,9 +54,12 @@ class CouchDBMetadata(object):
                 if not document.file_revision_data:
                     # HACK: Preserving db_info here... (May be Solution!!!)
                     db_info = document.get_db_info()
-                    document = processor.read(document.file_name, options={'only_metadata': True, 'user': document.user})
+                    document = processor.read(document.file_name, options={
+                        'only_metadata': True,
+                        'user': document.user
+                    })
 
-                    # HACK: saving NEW file_revision_data ONLY if they exist in new uploaded doc (Preserving old indexes)
+                    # saving NEW file_revision_data ONLY if they exist in new uploaded doc (Preserving old indexes)
                     if db_info:
                         # Storing new indexes
                         document.set_db_info(db_info)
@@ -75,7 +79,10 @@ class CouchDBMetadata(object):
                                 old_metadata['mdt_indexes']['description'] = old_metadata['description']
                                 old_metadata['mdt_indexes']['metadata_user_name'] = old_metadata['metadata_user_name']
                                 old_metadata['mdt_indexes']['metadata_user_id'] = old_metadata['metadata_user_id']
-                                old_cr_date = datetime.datetime.strftime(old_metadata['metadata_created_date'], settings.DATE_FORMAT)
+                                old_cr_date = datetime.datetime.strftime(
+                                    old_metadata['metadata_created_date'],
+                                    settings.DATE_FORMAT
+                                )
                                 old_metadata['mdt_indexes']['date'] = old_cr_date
                                 document.set_db_info(old_metadata['mdt_indexes'])
                                 document.set_index_revisions(old_index_revisions)
@@ -95,10 +102,11 @@ class CouchDBMetadata(object):
                 return document
 
     def update_document_metadata(self, document):
+        """Updates document with new indexes and stores old one into another revision.
+
+        @param document: is a DMS Document() instance
         """
-        Updates document with new indexes and stores old one into another revision.
-        """
-        user = self.check_user(document)
+        self.check_user(document)
         if 'update_file' in document.options and document.options['update_file']:
             name = document.get_stripped_filename()
             # We need to create couchdb document in case it does not exists in database.
@@ -120,10 +128,10 @@ class CouchDBMetadata(object):
         return document
 
     def remove(self, document):
-        """
-        Updates document CouchDB metadata on removal.
+        """Updates document CouchDB metadata on removal.
 
-        (Removes CouchDB document)
+        (Removes CouchDB document or acts as prescribed in removal workflows)
+        @param document: is a DMS Document() instance
         """
         # Doing nothing for mark deleted call
         stripped_filename = document.get_stripped_filename()
@@ -151,6 +159,10 @@ class CouchDBMetadata(object):
         return document
 
     def retrieve(self, document):
+        """Read document CouchDB metadata.
+
+        @param document: is a DMS Document() instance
+        """
         docrule = document.get_docrule()
         mapping = docrule.get_docrule_plugin_mappings()
         # No actions for no doccode documents
@@ -161,7 +173,7 @@ class CouchDBMetadata(object):
             if not mapping.get_database_storage_plugins():
                 return document
             else:
-                user = self.check_user(document)
+                self.check_user(document)
                 doc_name = document.get_stripped_filename()
                 couchdoc = CouchDocument()
                 try:
@@ -179,6 +191,10 @@ class CouchDBMetadata(object):
     #############################################   Helper managers: ###################################################
     ####################################################################################################################
     def sync_document_tags(self, document):
+        """Synchronise document's SQL tags between couchDB and SQL DB
+
+        @param document: is a DMS Document() instance
+        """
         if not document.tags:
             tags = []
             try:
@@ -190,7 +206,10 @@ class CouchDBMetadata(object):
         return document.tags
 
     def check_user(self, document):
-        """Every call of this plugin should have a valid Django User() instance"""
+        """Every call of this plugin should have a valid Django User() instance
+
+        @param document: is a DMS Document() instance
+        """
         user = document.user
         if not user:
             raise PluginError("Not a logged in user.", 403)
@@ -202,9 +221,12 @@ class CouchDBMetadataRetrievalPlugin(Plugin, BeforeRetrievalPluginPoint):
     description = "Loads document metadata from CouchDB"
 
     plugin_type = 'database'
-    worker = CouchDBMetadata()
+    worker = CouchDBMetadataWorker()
 
-    def work(self, document, **kwargs):
+    def work(self, document):
+        """Main plugin method
+
+        @param document: is a DMS Document() instance"""
         return self.worker.retrieve(document)
 
 
@@ -213,9 +235,12 @@ class CouchDBMetadataStoragePlugin(Plugin, DatabaseStoragePluginPoint):
     description = "Saves document metadata CouchDB"
 
     plugin_type = 'database'
-    worker = CouchDBMetadata()
+    worker = CouchDBMetadataWorker()
 
-    def work(self, document, **kwargs):
+    def work(self, document):
+        """Main plugin method
+
+        @param document: is a DMS Document() instance"""
         return self.worker.store(document)
 
 
@@ -224,9 +249,12 @@ class CouchDBMetadataUpdatePlugin(Plugin, DatabaseUpdatePluginPoint):
     description = "Updates document after new indexes added with preserving old revision of document indexes"
 
     plugin_type = 'database'
-    worker = CouchDBMetadata()
+    worker = CouchDBMetadataWorker()
 
-    def work(self, document, **kwargs):
+    def work(self, document):
+        """Main plugin method
+
+        @param document: is a DMS Document() instance"""
         return self.worker.update_document_metadata(document)
 
 
@@ -235,7 +263,10 @@ class CouchDBMetadataRemovalPlugin(Plugin, BeforeRemovalPluginPoint):
     description = "Updates document metadata after removal of document (or some revisions of document)"
 
     plugin_type = 'database'
-    worker = CouchDBMetadata()
+    worker = CouchDBMetadataWorker()
 
-    def work(self, document, **kwargs):
+    def work(self, document):
+        """Main plugin method
+
+        @param document: is a DMS Document() instance"""
         return self.worker.remove(document)
