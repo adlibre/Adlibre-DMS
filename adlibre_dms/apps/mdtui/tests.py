@@ -3443,11 +3443,10 @@ class MDTUI(MUITestData):
         self.assertContains(response, new_key)
 
     def test_82_search_by_mdt_without_indexes(self):
-        """
+        """Check for ability to view document without indexes.
+
         Refs #816 (MDT's on the demo server so that we can search for the uploaded images)
         Refs #945 Barcode Scanner Test MUI Results Colums
-
-        Check for ability to view document without indexes.
         """
         # Should be day before due to tests issues with timezones AU/UA.
         prev_date = (datetime.datetime.now() - datetime.timedelta(days=1)).strftime(settings.DATE_FORMAT)
