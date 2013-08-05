@@ -13,7 +13,7 @@ The following system libraries are required:
 * libtiff
 * poppler
 * a2ps
-* ghostscript.
+* ghostscript == 8.X
 
 Supported Linux Distributions:
 
@@ -40,6 +40,10 @@ and the following for converter.py to function (libtiff, poppler, a2ps, ghostscr
     port install poppler
     port install a2ps
     port install ghostscript
+
+for a proper thumbnails generation we (thumbnails.py plugin) we require version of ghostscript:
+
+    ghostscript == 8.X (tested with ghostscript 8.70)
 
 ## Windows Requirements
 
