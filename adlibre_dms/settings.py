@@ -399,9 +399,13 @@ if not DEBUG:
             'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
             'LOCATION': 'memory_cache'
         },
-        'default': {
+        'filesystem': {
             'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
             'LOCATION': os.path.join(PROJECT_PATH, '..', '..', '..', '..', 'cache'),
+        },
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'memory_cache'
         },
     }
 else:
