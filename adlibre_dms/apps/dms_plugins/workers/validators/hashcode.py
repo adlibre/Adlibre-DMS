@@ -10,8 +10,11 @@ import hashlib
 from django import forms
 from django.conf import settings
 
-from dms_plugins.pluginpoints import BeforeRetrievalPluginPoint, BeforeStoragePluginPoint, BeforeUpdatePluginPoint
-from dms_plugins.workers import Plugin, PluginError
+from dms_plugins.pluginpoints import BeforeRetrievalPluginPoint
+from dms_plugins.pluginpoints import BeforeStoragePluginPoint
+from dms_plugins.pluginpoints import BeforeUpdatePluginPoint
+from dms_plugins.workers import Plugin
+from dms_plugins.workers import PluginError
 
 
 class HashForm(forms.Form):
@@ -98,21 +101,33 @@ class HashCodeWorker(object):
         self.method = method
 
     def get_hash(self, document, method, salt=settings.SECRET_KEY):
-        """Retruns hash for a given document"""
+        """Retruns hash for a given document
+
+        @param document: is a DMS Document() instance
+        @param method: is a str() method of hash code checking. e.g. 'md5'
+        @param salt: is a string to encode data with"""
         h = hashlib.new(method)
         h.update(document)
         h.update(salt)
         return h.hexdigest()
 
     def work_store(self, document, method):
-        """Stores hash for given document"""
+        """Stores hash for given document
+
+        @param document: is a DMS Document() instance
+        @param method: is a str() method of hash code checking. e.g. 'md5'
+        """
         new_hashcode = self.get_hash(document.get_file_obj().read(), method)
         document.set_hashcode(new_hashcode)
         document.save_hashcode(new_hashcode)
         return document
 
     def work_retrieve(self, document, method):
-        """Reads hash for given document"""
+        """Reads hash for given document
+
+        @param document: is a DMS Document() instance
+        @param method: is a str() method of hash code checking. e.g. 'md5'
+        """
         if document.get_file_obj():
             hashcode = document.get_hashcode()
             new_hashcode = self.get_hash(document.get_file_obj().read(), method)
