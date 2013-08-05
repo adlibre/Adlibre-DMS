@@ -37,3 +37,4 @@ class DocumentTypeRulePermissionAdmin(admin.ModelAdmin):
 
 admin.site.register(DocumentTypeRule, DocumentTypeRuleAdmin)
 admin.site.register(DocumentTypeRulePermission, DocumentTypeRulePermissionAdmin)
+admin.site.register(Permission)
