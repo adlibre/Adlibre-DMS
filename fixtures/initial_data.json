@@ -595,7 +595,7 @@
         }
     },
     {
-        "pk": 1, 
+        "pk": 8,
         "model": "auth.group", 
         "fields": {
             "name": "security", 
@@ -603,7 +603,7 @@
         }
     }, 
     {
-        "pk": 2, 
+        "pk": 9,
         "model": "auth.group", 
         "fields": {
             "name": "api", 
@@ -611,7 +611,7 @@
         }
     },
     {
-        "pk": 4,
+        "pk": 2,
         "model": "auth.group",
         "fields": {
             "name": "MUI Index interaction",
@@ -625,7 +625,7 @@
         }
     },
     {
-        "pk": 5,
+        "pk": 3,
         "model": "auth.group",
         "fields": {
             "name": "MUI Search interaction",
@@ -647,8 +647,8 @@
             "is_staff": true, 
             "last_login": "2012-03-22 19:45:44", 
             "groups": [
-                1, 
-                2
+                8,
+                9
             ], 
             "user_permissions": [], 
             "password": "sha1$90c1d$b19c7957811191cefea85adbe89223c7735266e9", 
@@ -668,9 +668,9 @@
             "is_staff": false,
             "last_login": "2012-06-25 22:05:31",
             "groups": [
-                1,
-                2,
-                5
+                8,
+                9,
+                3
             ],
             "user_permissions": [
                 64,
@@ -693,9 +693,9 @@
             "is_staff": false,
             "last_login": "2012-06-25 21:15:08",
             "groups": [
-                1,
-                2,
-                4
+                8,
+                9,
+                2
             ],
             "user_permissions": [
                 59,
