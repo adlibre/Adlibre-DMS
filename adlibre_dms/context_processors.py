@@ -30,10 +30,6 @@ def aui_url(context):
     """ Returns Context Variable Containing Product version """
     return {'AUI_URL': settings.AUI_URL}
 
-def aui_dms_id(context):
-    """ Returns Context Variable Containing Product version """
-    return {'AUI_DMS_ID': settings.AUI_DMS_ID}
-
 def date_format(context):
     """ Returns Context Variable Containing Date format currently used """
     return {'DATE_FORMAT': settings.DATE_FORMAT.replace('%', '')}
