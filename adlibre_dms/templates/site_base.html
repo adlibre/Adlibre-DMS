@@ -26,14 +26,14 @@
                 {% endif %}
                 {%  if user.is_superuser %}
                 <li class="ui"><a href="/admin/">{% trans 'Admin' %}</a></li>
-                <li class="aui"><a href="{{ AUI_URL }}?sessionid={{ request.session.session_key }}&csrf_token={{ csrf_token }}&host={{ request.META.HTTP_HOST|urlencode }}">{% trans 'AUI' %}</a></li>
+                <li class="aui"><a href="{{ AUI_URL }}?sessionid={{ request.session.session_key }}&csrf_token={{ csrf_token }}&_id={{ user.pk }}&host={{ request.META.HTTP_HOST|urlencode }}">{% trans 'AUI' %}</a></li>
                 {% endif %}
                 {% if user.is_authenticated %}
                 <li class="mdtui"><a href="{% url mdtui-home %}">{% trans 'MUI' %}</a></li>
                 {% for group in user.groups.all %}
                     {% if group.name == 'AUI Interact' %}
                         {% comment %}AUI interaction user group permission{% endcomment %}
-                        <li class="aui"><a href="{{ AUI_URL }}?sessionid={{ request.session.session_key }}&csrf_token={{ csrf_token }}&host={{ request.META.HTTP_HOST|urlencode }}">{% trans 'AUI' %}</a></li>
+                        <li class="aui"><a href="{{ AUI_URL }}?sessionid={{ request.session.session_key }}&csrf_token={{ csrf_token }}& _id={{ user.pk }}&host={{ request.META.HTTP_HOST|urlencode }}">{% trans 'AUI' %}</a></li>
                     {% endif %}
                 {% endfor %}
                 <li class="logout"><a href="{% url logout %}">{% trans 'Log out' %}</a></li>

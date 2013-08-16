@@ -471,8 +471,6 @@ STAGE_KEYWORD = False
 
 # Admin UI (AUI) interface url, like: http://www.mysite.com:3000/
 AUI_URL = 'http://localhost:3000/'
-# Unique DMS instance ID to identify yourself on a AUI server.
-AUI_DMS_ID = 'sdkjjfgn345kj3214tjlkb3t'
 
 # This will import the local_settings in our virtual_env subdir next to manage.py.
 try:
