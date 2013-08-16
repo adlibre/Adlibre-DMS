@@ -154,7 +154,6 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'adlibre_dms.context_processors.theme_template_base',
     'adlibre_dms.context_processors.product_version',
     'adlibre_dms.context_processors.aui_url',
-    'adlibre_dms.context_processors.aui_dms_id',
     'adlibre_dms.context_processors.date_format',
     'adlibre_dms.context_processors.datetime_format',
     'adlibre_dms.context_processors.stage_variable',
