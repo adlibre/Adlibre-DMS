@@ -178,6 +178,8 @@ class OldFileHandler(BaseFileHandler):
         if len(processor.errors) > 0:
             log.error('OldFileHandler.create errors: %s' % processor.errors)
             error = processor.errors[0]
+            if error.__class__.__name__ in ['unicode', 'str']:
+                return rc.BAD_REQUEST  # Should be "No such document type error"
             if error.code == 409:
                 new_processor = DocumentProcessor()
                 options['update_file'] = uploaded_file

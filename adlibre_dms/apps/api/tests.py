@@ -326,6 +326,17 @@ class APITest(DMSTestCase):
         after_rev = self.client.get(rev_count_url)
         self.assertGreater(int(after_rev.content), int(before_rev.content), 'Revision Count mismatch')
 
+    def test_21_deprecated_file_handler_no_doc_type_upload(self):
+        """Refs #1203 Deprecated file handler upload bug with no document type rule"""
+        self.client.login(username=self.username, password=self.password)
+        file_name = 'Some-File-0001'
+        suggested_format = 'pdf'
+        url = reverse('api_file_deprecated', kwargs={'code': file_name, 'suggested_format': suggested_format})
+        t, data = self._get_tests_file(self.documents_pdf[0], file_name, suggested_format)
+        response = self.client.post(url, data)
+        self.assertContains(response, 'Bad Request', status_code=400)
+
+
     def test_zz_cleanup(self):
         """Test Cleanup"""
         self.cleanAll()
