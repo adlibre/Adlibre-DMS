@@ -469,7 +469,7 @@ NEW_SYSTEM = False
 STAGE_KEYWORD = False
 
 # Admin UI (AUI) interface url, like: http://www.mysite.com:3000/
-AUI_URL = 'http://localhost:3000/'
+AUI_URL = False
 
 # This will import the local_settings in our virtual_env subdir next to manage.py.
 try:
