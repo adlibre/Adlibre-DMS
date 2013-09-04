@@ -100,7 +100,8 @@ class DocumentProcessor(object):
                 doc_name, extension = doc_name.split('.')
             # Check the DMS for existence of this code
             possible_doc = self.read(doc_name, {'only_metadata': True, 'user': doc.user})
-            if possible_doc.file_revision_data and not self.errors:
+            if possible_doc.file_revision_data and not self.errors \
+                or ('mdt_indexes' in possible_doc.db_info and possible_doc.db_info['mdt_indexes']):
                 error = DmsException('Document "%s" already exists' % doc_name, 409)
                 self.errors.append(error)
                 valid = False

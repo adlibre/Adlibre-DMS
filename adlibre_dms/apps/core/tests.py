@@ -23,6 +23,7 @@ import json
 
 from couchdbkit import Server
 
+from django.core.files.uploadedfile import UploadedFile
 from django.contrib.auth.models import User, Group
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
@@ -717,7 +718,7 @@ class DocumentProcessorTest(CoreTestCase):
 
     def test_24_thumbnail_deletion(self):
         """Thumbnail deleted on changing this document or deleting this document"""
-        code = self.documents_pdf[3]
+        code = 'CCC-0004'
         file_code = self.documents_pdf[0]
         test_file = self._get_fixtures_file(file_code)
         # Creating a document
@@ -729,6 +730,7 @@ class DocumentProcessorTest(CoreTestCase):
         doc = self.processor.read(code, options={'user': self.admin_user, 'thumbnail': True})
         docrule = doc.get_docrule()  # For future checks
         if self.processor.errors or not doc.thumbnail:
+            print doc.thumbnail
             raise AssertionError('DocumentProcessor errors for reading a thumbnail %s' % self.processor.errors)
         # Deletion of document and deletion of thumbnail
         self.processor.delete(code, options={'user': self.admin_user})
@@ -740,9 +742,7 @@ class DocumentProcessorTest(CoreTestCase):
 
     def test_25_thumbnail_update(self):
         """Thumbnail removed on document update. e.g. new file added or type changed"""
-        # import time
-        # time.sleep(20000)
-        code = self.documents_pdf[3]
+        code = 'CCC-0004'
         file_code = self.documents_pdf[0]
         indexes = {
             u'Employee': u'dgtjtj',
@@ -754,7 +754,7 @@ class DocumentProcessorTest(CoreTestCase):
         self.processor.create(test_file, {'user': self.admin_user, 'barcode': code})
         if self.processor.errors:
             raise AssertionError('Can not check thumbnail update because of errors creating document: %s %s'
-                                 % (file_code, self.processor.errors))
+                                 % (code, self.processor.errors))
         # Touch (reading) thumbnail
         doc = self.processor.read(code, options={'user': self.admin_user, 'thumbnail': True})
         docrule = doc.get_docrule()  # For farther checks of thumbnail left
@@ -769,14 +769,64 @@ class DocumentProcessorTest(CoreTestCase):
         if os.path.isfile(thumb_path):
             raise AssertionError('Thumbnail have not been deleted: %s' % thumb_path)
 
+    def test_26_upload_first_revision_after_0_revisions_indexing(self):
+        """Refs #1211 Indexes Missed at production
+        This issue occurred after uploading file revisions to existing 0 revisions documents
+        with "only indexes" set"""
+
+        code = 'CCC-0003'
+        file_code = self.documents_pdf[0]
+        indexes = {
+            u'Employee': u'rthrthrhtw',
+            u'Chosen Field': u'choice two',
+            u'Tests Uppercase Field': u'rgeqrghqeg rgewg'
+        }
+        # Creating a document
+        self.processor.create(None, {'user': self.admin_user, 'barcode': code, 'index_info': indexes})
+        if self.processor.errors:
+            raise AssertionError('Can not create document: %s %s'
+                                 % (code, self.processor.errors))
+
+        # Trying to create document file revision 1 again
+        test_file = self._get_fixtures_file(file_code)
+        ufile = UploadedFile(test_file, code + '.pdf', content_type='application/pdf')
+
+        self.processor.create(ufile, {'user': self.admin_user, 'barcode': code})
+        if not self.processor.errors:
+            raise AssertionError('Created document: %s for existing code with indexes only present.' % code)
+        else:
+            if self.processor.errors.__len__() > 1:
+                raise AssertionError(
+                    'Created document: %s for existing code with indexes only present. MORE THEN 1 EXCEPTION RISED.'
+                    % code)
+            error1 = self.processor.errors[0]
+            if not error1.__class__.__name__ == 'DmsException' and not error1.code == 409:
+                raise AssertionError("Create existing code rises wrong Exception")
+            # Cleanup processor errors for farther interactions
+            self.processor.errors = []
+        # Updating a document with revision 1 (First file revision)
+        test_file = self._get_fixtures_file(file_code)
+        ufile = UploadedFile(test_file, code + '.pdf', content_type='application/pdf')
+        self.processor.update(code, {'user': self.admin_user, 'update_file': ufile})
+        if self.processor.errors:
+            raise AssertionError('Can not update document: %s with file revision 1: %s'
+                                 % (code, self.processor.errors))
+        doc = self.processor.read(code, options={'user': self.admin_user})
+        if not '1' in doc.file_revision_data:
+            raise AssertionError('Document file revisions absent')
+        if not doc.db_info['mdt_indexes']:
+            raise AssertionError('Document mdt_indexes deleted')
+        if not doc.get_file_obj():
+            raise AssertionError('Document has no file instance')
+
     def test_zz_cleanup(self):
         """Cleaning alll the docs and data that are touched or used in those tests"""
         for code in self.documents_pdf:
-            if not code == 'ADL-1234':
-                self._remove_file(code)
+            # if not code == 'ADL-1234':
+            self._remove_file(code)
         for code in [self.documents_hash[1][0], ]:
             self._remove_file(code)
         for code in [self.documents_jpg[2], ]:
             self._remove_file(code, extension='jpg')
-        for code in ['CCC-0001']:
+        for code in ['CCC-0001', 'CCC-0003', 'CCC-0004']:
             self._remove_file(code)
