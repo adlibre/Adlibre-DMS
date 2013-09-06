@@ -10,6 +10,8 @@ adlibre_dms/reports/pylint.report
 
 .gitignore
 
+migrations/*
+
 local_settings.py
 
 adlibre_dms/local_settings.py
