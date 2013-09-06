@@ -47,6 +47,8 @@ class CoreTestCase(DMSTestCase):
 
         self.fs_metadata_ext = 'json'
 
+        self.this_test_docs = ['ADL-0003']
+
         self.doc1 = {
             'description': u'Additional Secondary Indexes Data for file ADL-1111',
             'date': u'15/05/2013',
@@ -716,9 +718,9 @@ class DocumentProcessorTest(CoreTestCase):
             raise AssertionError('thumbnail for code: %s is not present in manager run result')
         self._chek_thumbnails_created(code, doc.get_docrule())
 
-    def test_24_thumbnail_deletion(self):
+    def test_000_thumbnail_deletion(self):
         """Thumbnail deleted on changing this document or deleting this document"""
-        code = 'CCC-0004'
+        code = self.this_test_docs[0]
         file_code = self.documents_pdf[0]
         test_file = self._get_fixtures_file(file_code)
         # Creating a document
@@ -742,7 +744,7 @@ class DocumentProcessorTest(CoreTestCase):
 
     def test_25_thumbnail_update(self):
         """Thumbnail removed on document update. e.g. new file added or type changed"""
-        code = 'CCC-0004'
+        code = self.this_test_docs[0]
         file_code = self.documents_pdf[0]
         indexes = {
             u'Employee': u'dgtjtj',
@@ -774,7 +776,7 @@ class DocumentProcessorTest(CoreTestCase):
         This issue occurred after uploading file revisions to existing 0 revisions documents
         with "only indexes" set"""
 
-        code = 'CCC-0003'
+        code = 'CCC-0002'
         file_code = self.documents_pdf[0]
         indexes = {
             u'Employee': u'rthrthrhtw',
@@ -822,11 +824,10 @@ class DocumentProcessorTest(CoreTestCase):
     def test_zz_cleanup(self):
         """Cleaning alll the docs and data that are touched or used in those tests"""
         for code in self.documents_pdf:
-            # if not code == 'ADL-1234':
             self._remove_file(code)
         for code in [self.documents_hash[1][0], ]:
             self._remove_file(code)
         for code in [self.documents_jpg[2], ]:
             self._remove_file(code, extension='jpg')
-        for code in ['CCC-0001', 'CCC-0003', 'CCC-0004']:
+        for code in ['CCC-0001', 'CCC-0002']:
             self._remove_file(code)
