@@ -489,9 +489,13 @@ def edit(request, code, step='edit', template='mdtui/indexing.html'):
         autocomplete_list = extract_secondary_keys_from_form(form)
         # No form is possible when document does not exist
         context.update( {'form': form,} )
+    # In case of no doc type (empty document) fix
+    type_name = None
+    if doc.doccode:
+        type_name = doc.get_docrule().title
     context.update( { 'step': step,
                       'doc_name': code,
-                      'type_name': doc.get_docrule().title,
+                      'type_name': type_name,
                       'warnings': warnings,
                       'autocomplete_fields': autocomplete_list,
                       'edit_return': return_url,
