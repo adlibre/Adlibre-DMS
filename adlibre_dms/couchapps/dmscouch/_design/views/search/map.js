@@ -1,7 +1,6 @@
 function(doc) {
     if (doc.doc_type == "CouchDocument") {
-        if (doc.deleted == "deleted") {
-        } else {
+        if (doc.deleted != "deleted") {
             for(var key in doc.mdt_indexes) {
                 emit(
                     [ key, doc.mdt_indexes[key] , doc.metadata_doc_type_rule_id ],
