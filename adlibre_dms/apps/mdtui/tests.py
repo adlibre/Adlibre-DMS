@@ -37,14 +37,6 @@ from doc_codes.models import DocumentTypeRule
 # TODO: test proper CSV export, even just simply, with date range and list of files present there
 # TODO: add tests for Typeahead suggests values between docrules
 
-# TODO: test posting docs to 2 different document type rules and mix out parallel keys
-# and normal search here for proper behaviour:
-# THIS IS WRONG:
-# 1. search does not filter on MDT correctly. Getting results from multiple MDTs (and document types).
-# 2. parallel key lookups are not sharing parallel info across document types.
-
-# TODO: test paginator rendering in browser with more then 10 documents
-
 
 class MUITestData(TestCase):
     """Base tests class for MUI interface. Contains basic tests data and strings
@@ -3910,6 +3902,70 @@ class MDTUI(MUITestData):
         url = reverse('mdtui-view-object', kwargs={'code': self.doc4})
         response = self.client.get(url)
         self.assertContains(response, 'stub_document.pdf')
+
+    def test_94_search_filters_by_doctype_properly(self):
+        """Refs #1212 Search by Document type in production does not actually filter by document type
+
+        Search results may contain a document with another document type rather then filtered by at search step 1"""
+        date_range_with_keys_doc1 = {
+            "Additional": "Something for 3",
+        }
+        doc2 = self.edit_document_name_2
+        # BBB-0001 keys modifications to contain same key as ADL-0003
+        doc_2_modifications = {
+            "Employee": "Vovan Patsan",
+            "Report Type": "Reconciliation",
+            "Reporting Entity": "JTG",
+            "Additional": "Something for 3",  # Same as ADL-0003
+            "Report Date": "2012-04-02T00:00:00Z"
+        }
+        # Forcing doc2 to contain key from another doc type
+        doc2_couchdoc = CouchDocument.get(docid=doc2)
+        doc2_couchdoc.mdt_indexes = doc_2_modifications
+        doc2_couchdoc.save()
+        # Setting DocTypeRule
+        url = reverse('mdtui-search-type')
+        data = {'docrule': self.test_mdt_docrule_id}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        url = reverse('mdtui-search-options')
+        # Getting required indexes id's
+        response = self.client.get(url)
+        ids = self._read_indexes_form(response)
+        data = self._create_search_dict_for_range_and_keys(
+            date_range_with_keys_doc1,
+            ids,
+            self.all_docs_range,
+        )
+        # Searching date range with unique doc1 keys
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        self.assertEqual(response.status_code, 200)
+        # No errors appeared
+        self.assertNotContains(response, "You have not defined Document Searching Options")
+        # none of 2 other documents for doc type 2 present in response
+        self.assertNotContains(response, self.doc2)
+        self.assertNotContains(response, self.doc1)
+        # Document from another doc type not present in response
+        self.assertNotContains(response, self.edit_document_name_2)
+        # Contains document it should in response (Should be only this doc at this stage)
+        self.assertContains(response, self.doc3)
+
+        # Search by date only
+        url = reverse('mdtui-search-options')
+        # Searching date range for all docs (no doc2 must be present)
+        response = self.client.post(url, self.all_docs_range)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        self.assertEqual(response.status_code, 200)
+        # Document from another doc type not present in response
+        self.assertNotContains(response, self.edit_document_name_2)
+        # Contains document it should in response (Should be only this doc at this stage)
+        self.assertContains(response, self.doc3)
+        # We dont care about another docs here
 
     def test_z_cleanup(self):
         """

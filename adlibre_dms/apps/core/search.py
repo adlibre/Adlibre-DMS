@@ -233,17 +233,19 @@ class DMSSearchManager(object):
         set_list = []
         all_docs = {}
         # Extracting documents mentions ang grouping by set
-        for set in resp_set[docrule_id]:
+        for view_set in resp_set[docrule_id]:
             docs_ids_mentions = []
-            for doc in set:
+            for doc in view_set:
                 docname = doc.get_id
-                docs_ids_mentions.append(docname)
+                # Filtering documents with those keys
+                if doc['metadata_doc_type_rule_id'] == docrule_id:
+                    docs_ids_mentions.append(docname)
                 all_docs[docname] = 0
             set_list.append(docs_ids_mentions)
         # Counting docs mentioned in all sets
         for doc in all_docs:
-            for set in set_list:
-                if doc in set:
+            for set_view in set_list:
+                if doc in set_view:
                     all_docs[doc] += 1
         # Comparing search mentions and adding to response if all keys match
         docs_ids_list = []
