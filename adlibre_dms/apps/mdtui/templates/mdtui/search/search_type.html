@@ -1,12 +1,12 @@
 {% load i18n %}
-{# MDTS FORM #}
 <fieldset>
     <legend>Step Select {{ step }}:</legend>
 </fieldset>
+{# DOCRULES FORM #}
 <form class="form-horizontal" action="{{ request.path }}" method="post">
     {% csrf_token %}
     <fieldset>
-        {{ mdts_form }}
+        {{ docrules_form }}
     </fieldset>
 
     <div class="form-actions">
@@ -14,12 +14,12 @@
         <button type="submit" class="btn btn-primary">{% trans 'Continue' %} <i class="icon-chevron-right icon-white"></i></button>
     </div>
 </form>
-{# DOCRULES FORM #}
 <legend>OR:</legend>
+{# MDTS FORM #}
 <form class="form-horizontal" action="{{ request.path }}" method="post">
     {% csrf_token %}
     <fieldset>
-        {{ docrules_form }}
+        {{ mdts_form }}
     </fieldset>
 
     <div class="form-actions">
