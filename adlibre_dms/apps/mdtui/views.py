@@ -836,6 +836,9 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
             processor.create(upload_file, options)
 
             if not processor.errors:
+                if 'only_metadata' in options and options['only_metadata'] is not None:
+                    # For silent barcode storage in MUI
+                    return HttpResponse('OK')
                 return HttpResponseRedirect(reverse('mdtui-index-finished'))
             else:
                 # FIXME: dodgy error handling

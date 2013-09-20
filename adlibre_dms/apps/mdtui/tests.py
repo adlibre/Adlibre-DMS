@@ -3791,7 +3791,9 @@ class MDTUI(MUITestData):
         self.assertContains(response, t_existing)
 
     def test_92_wrong_mdts_after_return_from_search(self):
-        """Refs #1025 Docidx_2EmployeeResults (Wrong MDTs after return from certain state of edit_indexes views)"""
+        """Refs #1025 Docidx_2EmployeeResults (Wrong MDTs after return from certain state of edit_indexes views)
+        Refs #1222 Indexes not saved after printing barcode
+        """
         proper_mdt_name = 'Mdt5'
         improper_mdt_name = 'Mdt2'
         search_found_docs = [
@@ -3863,9 +3865,9 @@ class MDTUI(MUITestData):
         # Make the file upload
         data = {'barcoded': u'', 'printed': 'printed'}
         response = self.client.post(url+'?barcoded', data)
-        # Follow Redirect
-        self.assertEqual(response.status_code, 302)
-        new_url = self._retrieve_redirect_response_url(response)
+        # Check post returns 200
+        self.assertEqual(response.status_code, 200)
+        new_url = reverse('mdtui-index-finished')
         response = self.client.get(new_url)
         self.assertContains(response, self.indexing_done_string)
         self.assertContains(response, 'Friends Name: Andrew')
