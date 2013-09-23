@@ -81,21 +81,17 @@ setup(name='adlibre_dms',
             'apps/ui/static/js/datepick/*.js',
             'apps/ui/static/js/datepick/*.html',
             'apps/ui/static/js/datepick/*.gif',
-
             'apps/ui/templates/ui/*.html',
             # CouchDB Components
             'couchapps/*/_design/views/*/*.js',
-
             'libraries/piston/templates/*.html',
             'libraries/piston/templates/piston/*.html',
-
             # Misc templates
             'templates/*.html',
             'templates/*.txt',
             'templates/admin/*.html',
             'templates/flatpages/*.html',
             'templates/registration/*.html',
-
         ],  # this should be done automatically
     },
     data_files=[
@@ -121,14 +117,6 @@ setup(name='adlibre_dms',
             # Adlibre Components
             'django-bcp',
             'adlibre-plugins',
-
-            # Y.G. We do not need to install them directly they are dependencies
-            # not sure if we directly require these
-            #'distribute==0.6.43',
-            #'django-appconf==0.6',
-            #'http-parser==0.7.4',
-            #'pyPdf==1.13',
-
             # Deployment
             'flup==1.0.3.dev-20110405',
             # Logging
@@ -139,8 +127,8 @@ setup(name='adlibre_dms',
             'ghostscript==0.4.1',
     ],
     dependency_links=[
-        "https://github.com/adlibre/django-bcp/tarball/master#egg=django-bcp",
-        "https://github.com/adlibre/adlibre-plugins/tarball/master#egg=adlibre-plugins"
+        "https://codeload.github.com/adlibre/django-bcp/legacy.tar.gz/master#egg=django-bcp",
+        "https://codeload.github.com/adlibre/adlibre-plugins/legacy.tar.gz/master#egg=adlibre-plugins",
     ],
 )
 
