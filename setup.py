@@ -116,7 +116,7 @@ setup(name='adlibre_dms',
             'django-taggit==0.9.3',
             # Adlibre Components
             'django-bcp==0.1.8',
-            'adlibre-plugins==dev',
+            'adlibre-plugins==0.1.1',
             # Deployment
             'flup==1.0.3.dev-20110405',
             # Logging
@@ -128,6 +128,6 @@ setup(name='adlibre_dms',
     ],
     dependency_links=[
         "https://codeload.github.com/adlibre/django-bcp/legacy.tar.gz/master#egg=django-bcp-0.1.8",
-        "https://codeload.github.com/adlibre/adlibre-plugins/legacy.tar.gz/master#egg=adlibre-plugins-dev",
+        "https://codeload.github.com/adlibre/adlibre-plugins/legacy.tar.gz/master#egg=adlibre-plugins-0.1.1",
     ],
 )
