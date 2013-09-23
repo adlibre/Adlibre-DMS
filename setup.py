@@ -48,6 +48,7 @@ setup(name='adlibre_dms',
     package_data={
         'adlibre_dms': [
             'version.txt',
+            'cors_middleware.py'
             'apps/browser/static/favicon.ico',
             'apps/browser/static/browser/*',
             'apps/browser/templates/browser/*.html',
