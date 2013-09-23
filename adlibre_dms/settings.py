@@ -165,9 +165,8 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-#    'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'django.contrib.auth.middleware.RemoteUserMiddleware',  # Support for Basic Auth in API
-    'django-crossdomainxhr-middleware.XsSharing',  # Support for CORS for API
+    'cors_middleware.XsSharing',  # Support for CORS for API
 )
 
 AUTHENTICATION_BACKENDS = (
