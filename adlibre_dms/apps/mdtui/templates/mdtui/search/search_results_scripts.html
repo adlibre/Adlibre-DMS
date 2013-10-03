@@ -1,4 +1,40 @@
+
 <script type="text/javascript">
+    // Updates clonned table headers on user scroll
+    function UpdateTableHeaders() {
+        $("#results-table").each(function() {
+            var el             = $(this),
+                offset         = el.offset(),
+                scrollTop      = $(window).scrollTop(),
+                floatingHeader = $(".floatingHeader", this)
+
+            if ((scrollTop > offset.top) && (scrollTop < offset.top + el.height())) {
+                floatingHeader.css({
+                    "visibility": "visible"
+                });
+            } else {
+                floatingHeader.css({
+                    "visibility": "hidden"
+                });
+            }
+        });
+    }
+
+    // Updates TH width on render
+    function update_clone_th_widths(clonedHeaderRow) {
+        var originalHeaderRow = $("#results-table-head");
+        originalHeaderRow.children().children().each(function(index, value) {
+            console.log(index);
+            console.log(value);
+            console.log($(value).width());
+            clonedHeaderRow.children().children().each(function(cl_index, cl_value) {
+                if (cl_index==index) {
+                    $(cl_value).width($(value).width());
+                }
+            });
+        });
+    }
+
     $(document).ready(function(){
 
         function highlight_row(th) {
@@ -65,6 +101,21 @@
 
         // helping tooltips
         $('[rel=tooltip]').tooltip();
+
+        $("#results-table").each(function() {
+            var clonedHeaderRow;
+            clonedHeaderRow = $("#results-table-head", this);
+            clonedHeaderRow
+                .before(clonedHeaderRow.clone())
+                .css("width", clonedHeaderRow.width())
+                .addClass("floatingHeader");
+            $(clonedHeaderRow).attr("id", "results-table-head-clone");
+            update_clone_th_widths(clonedHeaderRow);
+        });
+
+        $(window)
+            .scroll(UpdateTableHeaders)
+            .trigger("scroll");
     });
 </script>
 
@@ -87,5 +138,11 @@
     }
     th {
         cursor: pointer;
+    }
+    .floatingHeader {
+        position: fixed;
+        top: 40px;
+        visibility: hidden;
+        background: white;
     }
 </style>
