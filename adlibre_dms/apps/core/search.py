@@ -24,7 +24,7 @@ MUI_SEARCH_PAGINATE = getattr(settings, 'MUI_SEARCH_PAGINATE', 20)
 
 SEARCH_ERROR_MESSAGES = {
     'wrong_date': 'Date range you have provided is wrong. FROM date should not be after TO date.',
-    'wrong_indexing_date': 'Creation Date range wrong. FROM date should not be after TO date.',
+    'wrong_indexing_date': 'Indexing Date range wrong. FROM date should not be after TO date.',
 }
 
 class DMSSearchQuery(object):
@@ -49,7 +49,7 @@ class DMSSearchQuery(object):
         }
 
     This example will result to 1 search query for documents with key JTG and 1 query for range of dates called
-    'Report Date' with using of 'Creation Date' Specified.
+    'Report Date' with using of 'Indexing Date' Specified.
     Each additional key will add 1 more search query.
     Search results will be a mixed set of those documents matching query.
 

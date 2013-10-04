@@ -19,7 +19,7 @@
 {% block custom_branding %}
     <colgroup>
         <col class="">
-        <col class="{% ifequal sorting_field "Creation Date" %}selected{% endifequal %}">
+        <col class="{% ifequal sorting_field "Indexing Date" %}selected{% endifequal %}">
         {% for key in mdts %}
         {% if key != "metadata_user_name" and key != "metadata_user_id" %}
         <col class="{% ifequal sorting_field key %}selected{% endifequal %}">
@@ -32,7 +32,7 @@
     <thead id="results-table-head">
     <tr>
         <th>{% trans 'View' %}</th>
-        {% set_key 'Creation Date' %}{% include "mdtui/search/search_results_header_field.html" %}
+        {% set_key 'Indexing Date' %}{% include "mdtui/search/search_results_header_field.html" %}
         {% for key in mdts %}
         {% include "mdtui/search/search_results_header_field.html" %}
         {% endfor %}

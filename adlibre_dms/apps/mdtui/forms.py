@@ -47,7 +47,7 @@ class DocumentIndexForm(forms.Form):
     Form for posting document indexes.
     Has dynamic initialization abilities.
     """
-    date = forms.DateField(initial=datetime.datetime.now(), label="Creation Date", help_text="Date of the document added")
+    date = forms.DateField(initial=datetime.datetime.now(), label="Indexing Date", help_text="Date of the document added")
     description = forms.CharField(max_length=100, label="Description", help_text="Brief Document Description")
 
     def __init__(self, *args, **kwargs):
@@ -225,8 +225,8 @@ class DocumentSearchOptionsForm(forms.Form):
     Form for searching documents by indexes.
     Has dynamic initialization abilities.
     """
-    date = forms.DateField(label="Creation Date From", help_text="Date of the document added")
-    end_date = forms.DateField(required=False, label="Creation Date To", help_text="Final possible document date")
+    date = forms.DateField(label="Indexing Date From", help_text="Date of the document added")
+    end_date = forms.DateField(required=False, label="Indexing Date To", help_text="Final possible document date")
     export_results = forms.CharField(required=False)
 
     def __init__(self, *args, **kwargs):

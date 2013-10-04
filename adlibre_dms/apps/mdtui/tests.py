@@ -950,7 +950,7 @@ class MDTUI(MUITestData):
         response = self.client.get(new_url)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, '<label class="control-label">Description</label>')
-        self.assertContains(response, 'Creation Date')
+        self.assertContains(response, 'Indexing Date')
 
     def test_09_indexing_step2_proper_form_rendering(self):
         """
@@ -967,7 +967,7 @@ class MDTUI(MUITestData):
         # contains Date field
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, '<label class="control-label">Description</label>')
-        self.assertContains(response, 'Creation Date')
+        self.assertContains(response, 'Indexing Date')
         # Description field
         self.assertContains(response, 'id_description')
         # MDT based Fields:
@@ -1007,7 +1007,7 @@ class MDTUI(MUITestData):
         self.assertContains(response, 'Friends ID: 123')
         self.assertContains(response, 'Friends Name: Andrew')
         self.assertContains(response, 'Description: Test Document Number 1')
-        self.assertContains(response, 'Creation Date: %s' % date_standardized('2012-03-06'))
+        self.assertContains(response, 'Indexing Date: %s' % date_standardized('2012-03-06'))
         self.assertContains(response, 'Employee ID: 123456')
         self.assertContains(response, 'Employee Name: Iurii Garmash')
         self.assertContains(response, 'Required Date: %s' % date_standardized('2012-03-07'))
@@ -1079,8 +1079,8 @@ class MDTUI(MUITestData):
         new_url = self._retrieve_redirect_response_url(response)
         response = self.client.get(new_url)
         # checking for proper fields rendering
-        self.assertContains(response, "Creation Date From")
-        self.assertContains(response, "Creation Date To")
+        self.assertContains(response, "Indexing Date From")
+        self.assertContains(response, "Indexing Date To")
         self.assertContains(response, "Employee")
         self.assertNotContains(response, "Description</label>")
         self.assertNotContains(response, MDTUI_ERROR_STRINGS['NO_MDTS'])
@@ -1788,7 +1788,7 @@ class MDTUI(MUITestData):
         uurl = self._retrieve_redirect_response_url(response)
         response = self.client.get(uurl)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Creation Date: %s' % date_standardized('2012-04-17'))
+        self.assertContains(response, 'Indexing Date: %s' % date_standardized('2012-04-17'))
         self.assertContains(response, 'Description: something usefull')
         self.assertContains(response, 'Tests Uppercase Field: LOWERCASE DATA')
         self.assertContains(response, self.indexes_added_string)
@@ -1811,7 +1811,7 @@ class MDTUI(MUITestData):
         response = self.client.get(uurl)
         # Assert Indexing file upload step rendered with all keys
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Creation Date: %s' % date_standardized('2012-04-17'))
+        self.assertContains(response, 'Indexing Date: %s' % date_standardized('2012-04-17'))
         self.assertContains(response, 'Description: something usefull')
         self.assertContains(response, 'Tests Uppercase Field: UPPERCASE DATA')
         self.assertContains(response, self.indexes_added_string)
@@ -2322,7 +2322,7 @@ class MDTUI(MUITestData):
         resp = cou.read()
         r.status_code = 200
         r.content = resp
-        # Checking User/Description/Creation Date in new doc
+        # Checking User/Description/Indexing Date in new doc
         self.assertContains(r, self.doc1)  # Doc name present
         self.assertContains(r, self.doc1 + '_r2.pdf')  # Revision updated
         self.assertContains(r, 'Iurii Garmash')  # Indexes present
@@ -2712,9 +2712,9 @@ class MDTUI(MUITestData):
         sort1_query2 = {"order": "icon-chevron-down",
                         "sorting_key": "Tests Uppercase Field", }
         sort2_query1 = {"order": "icon-chevron-up",
-                        "sorting_key": "Creation Date", }
+                        "sorting_key": "Indexing Date", }
         sort2_query2 = {"order": "icon-chevron-down",
-                        "sorting_key": "Creation Date", }
+                        "sorting_key": "Indexing Date", }
         sort3_query1 = {"order": "icon-chevron-up",
                         "sorting_key": "Description", }
         sort3_query2 = {"order": "icon-chevron-down",
@@ -2746,9 +2746,9 @@ class MDTUI(MUITestData):
         self._check_sorting_order_results(results_url, sort1_query1, unordered_docs)
         # Getting docs in descending order now with docs without this key in the bottom of results
         self._check_sorting_order_results(results_url, sort1_query2, descending_test1)
-        # Getting docs in ascending order sorting by Creation Date
+        # Getting docs in ascending order sorting by Indexing Date
         self._check_sorting_order_results(results_url, sort2_query1, ascending_date1)
-        # Descending order by Creation Date
+        # Descending order by Indexing Date
         self._check_sorting_order_results(results_url, sort2_query2, descending_test1)
         # Description sorting ascending
         self._check_sorting_order_results(results_url, sort3_query1, unordered_docs)
@@ -3239,7 +3239,7 @@ class MDTUI(MUITestData):
         self.assertNotContains(response, self.edit_document_name_4)
 
     def test_77_indexing_date_rendering(self):
-        """Refs #786 Checking if 'Creation date' Rendered properly in both index and search."""
+        """Refs #786 Checking if 'Indexing date' Rendered properly in both index and search."""
         # Testing search results for proper rendering
         url = reverse('mdtui-search-type')
         data = {'docrule': self.test_mdt_docrule_id}
@@ -3256,7 +3256,7 @@ class MDTUI(MUITestData):
         # No errors appeared
         self.assertNotContains(response, "You have not defined Document Searching Options")
         # Real data check
-        self.assertContains(response, """Creation Date: (from: 30/03/2012 to: 31/03/2012)""")
+        self.assertContains(response, """Indexing Date: (from: 30/03/2012 to: 31/03/2012)""")
         self.assertNotContains(response, "end_date")
         self.assertNotContains(response, "Undefined")
 
@@ -3531,7 +3531,7 @@ class MDTUI(MUITestData):
             'date': '13/03/2012',
             'end_date': '10/03/2012'
         }
-        # Testing date range for "Creation Date"
+        # Testing date range for "Indexing Date"
         url = reverse('mdtui-search-type')
         data = {'mdt': self.test_mdt_id_5}
         response = self.client.post(url, data)

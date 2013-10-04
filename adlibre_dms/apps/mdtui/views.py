@@ -62,7 +62,7 @@ MDTUI_ERROR_STRINGS = {
     'NO_DOC': 'Document does not exist',
     'NO_INDEX': 'You have not entered Document Indexing Data. Document will not be searchable by indexes.',
     'NO_S_KEYS': 'You have not defined Document Searching Options.',
-    'NO_TYPE': 'You have not defined Document Type. Can only search by "Creation Date".',
+    'NO_TYPE': 'You have not defined Document Type. Can only search by "Indexing Date".',
     'NO_DB': 'Database Connection absent. Check CouchDB server connection.',
     'NO_DOCUMENTS_FOUND': 'Nothing to export because of empty documents results.',
     'NO_MDTS': 'No Meta Data templates found for selected Document Type.',
@@ -329,7 +329,7 @@ def search_results(request, step=None, template='mdtui/search.html'):
             # TODO: speedup sorting using document_names from cache not to search again.
             # Redefining proper sorting results request
             if sorting_field:
-                if sorting_field == "Creation Date":
+                if sorting_field == "Indexing Date":
                     sorting_field_query = "metadata_created_date"
                 elif sorting_field == "Description":
                     sorting_field_query = "metadata_description"

@@ -56,9 +56,9 @@ def export_to_csv(search_keys, sec_keys_names, documents):
     writer.writerow(['Key','Value'])
     for item, value in search_keys.iteritems():
         if item == u'date':
-            item = u'Creation Date'
+            item = u'Indexing Date'
         if item == u'end_date':
-            item = u'Creation Date to'
+            item = u'Indexing Date to'
         if item == u'description':
             item = u'Description'
         if item == u'docrule_id':

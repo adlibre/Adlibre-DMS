@@ -45,11 +45,11 @@ class ProvideLiElement(template.Node):
                 date = dict[u'date']
                 if u'end_date' in dict:
                     end_date = dict[u'end_date']
-                    item = u'Creation Date: (from: ' + unicode(date) + u' to: ' + unicode(end_date) + u')'
+                    item = u'Indexing Date: (from: ' + unicode(date) + u' to: ' + unicode(end_date) + u')'
                     return item
                 else:
                     # Normal rendering for indexes
-                    item = u'Creation Date'
+                    item = u'Indexing Date'
             if item == u'description':
                 item = u'Description'
             if item == u'docrule_id':
