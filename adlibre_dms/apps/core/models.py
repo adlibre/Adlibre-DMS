@@ -37,7 +37,7 @@ class Document(object):
         """List of options DMS document object may have during lifetime"""
         self.options = {}
         self.user = None
-        self.doccode = None
+        self.docrule = None
         self.old_docrule = None
         self.old_name_code = None
         self.file_name = None
@@ -77,19 +77,19 @@ class Document(object):
         return self.get_name()
 
     def get_docrule(self):
-        log.debug('get_docrule for %s.' % self.doccode)
-        if self.doccode is None and self.get_filename():
+        log.debug('get_docrule for %s.' % self.docrule)
+        if self.docrule is None and self.get_filename():
             dman = DocumentTypeRuleManager()
-            self.doccode = dman.find_for_string(self.get_stripped_filename())
-            if self.doccode is None:
-                log.error('get_docrule. doccode is None!')
+            self.docrule = dman.find_for_string(self.get_stripped_filename())
+            if self.docrule is None:
+                log.error('get_docrule. docrule is None!')
                 # Using self.get_full_filename() method here can cause race condition in some cases.
                 filename = self.full_filename
                 if not filename:
                     filename = self.file_name
                 raise DmsException("No document type rule found for file " + filename, 404)
-        log.debug('get_docrule finished for %s.' % self.doccode)
-        return self.doccode
+        log.debug('get_docrule finished for %s.' % self.docrule)
+        return self.docrule
 
     def set_change_type(self, new_docrule):
         """Method to change document docrule for plugin interactions
@@ -107,10 +107,10 @@ class Document(object):
             new_docrule = DocumentTypeRuleManager().get_docrule_by_id(new_docrule)
         if self.new_indexes:
             preserved_indexes = self.new_indexes
-        self.old_docrule = self.doccode
+        self.old_docrule = self.docrule
         self.old_name_code = self.get_filename()
         self.set_filename(new_docrule.allocate_barcode())
-        self.doccode = new_docrule
+        self.docrule = new_docrule
         if preserved_indexes:
             self.new_indexes = preserved_indexes
 
@@ -145,7 +145,7 @@ class Document(object):
     def set_filename(self, filename):
         self.file_name = filename
         # Need to renew docrule on document receives name
-        self.doccode = self.get_docrule()
+        self.docrule = self.get_docrule()
 
     def get_filename(self):
         try:

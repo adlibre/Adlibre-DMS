@@ -40,11 +40,11 @@ class CouchDocument(Document):
 
         @param user: django internal User() object instance
         @param document: DMS Document() instance"""
-        # Setting document ID, based on filename. Using stripped (pure doccode regex readable) filename if possible.
+        # Setting document ID, based on filename. Using stripped (pure docrule regex readable) filename if possible.
         if document.get_stripped_filename():
             self.id = document.get_stripped_filename()
             self._doc['_id'] = self.id
-        self.metadata_doc_type_rule_id = str(document.doccode.pk)
+        self.metadata_doc_type_rule_id = str(document.docrule.pk)
         # setting provided user name/id
         if "metadata_user_name" in document.db_info and "metadata_user_id" in document.db_info:
             self.metadata_user_name = document.db_info["metadata_user_name"]
@@ -248,7 +248,7 @@ class CouchDocument(Document):
         self.metadata_created_date = old_couchdoc.metadata_created_date
         self.search_keywords = old_couchdoc.search_keywords
         self.tags = old_couchdoc.tags
-        self.metadata_doc_type_rule_id = str(document.doccode.pk)
+        self.metadata_doc_type_rule_id = str(document.docrule.pk)
         self.id = document.get_filename()
 
     def set_user_name_for_couch(self, user):

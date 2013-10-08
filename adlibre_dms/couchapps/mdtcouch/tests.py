@@ -175,7 +175,7 @@ class MetadataCouchDB(TestCase):
 
     def test_mdt_z_proper_removing(self):
         """
-        Deleting all test MDT's (with doccode 10000).
+        Deleting all test MDT's (with docrule 10000).
 
         NOTE: Name of test should be in the end not to fail other tests...
         """
@@ -191,7 +191,7 @@ class MetadataTemplateExternalUser(TestCase):
 
     def test_mdt_remove_not_logged_in(self):
         """
-        Deleting all test MDT's (with doccode 10000).
+        Deleting all test MDT's (with docrule 10000).
 
         NOTE: Name of test should be in the end not to fail other tests...
         """

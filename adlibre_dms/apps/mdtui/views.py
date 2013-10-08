@@ -491,7 +491,7 @@ def edit(request, code, step='edit', template='mdtui/indexing.html'):
         context.update( {'form': form,} )
     # In case of no doc type (empty document) fix
     type_name = None
-    if doc.doccode:
+    if doc.docrule:
         type_name = doc.get_docrule().title
     context.update( { 'step': step,
                       'doc_name': code,

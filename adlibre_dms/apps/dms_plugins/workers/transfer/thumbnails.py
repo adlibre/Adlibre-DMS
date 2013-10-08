@@ -90,9 +90,9 @@ class ThumbnailsFilesystemHandler(object):
         new_docrule = None
         if document.old_docrule:
             new_filename = document.file_name
-            new_docrule = document.doccode
+            new_docrule = document.docrule
             document.set_filename(document.old_name_code)
-            document.doccode = document.old_docrule
+            document.docrule = document.old_docrule
         code_dir = self.filesystem.get_or_create_document_directory(document)
         thumbnail_directory = os.path.normpath(os.path.join(code_dir, self.thumbnail_folder))
         thumbnail_temporary = None
@@ -101,7 +101,7 @@ class ThumbnailsFilesystemHandler(object):
             thumbnail_temporary = os.path.normpath(os.path.join(thumbnail_directory, document.get_full_filename()))
         if document.old_docrule:
             document.file_name = new_filename
-            document.doccode = new_docrule
+            document.docrule = new_docrule
         return thumbnail_temporary, thumbnail_directory
 
 

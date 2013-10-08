@@ -581,8 +581,8 @@ class DocumentProcessorTest(CoreTestCase):
             raise AssertionError('Errors on reading a code: %s' % [e for e in self.processor.errors])
 
         # Docrule OK
-        self.assertEqual(doc.doccode.__class__.__name__, 'DocumentTypeRule')
-        self.assertEqual(doc.doccode.title, 'Adlibre Invoices')
+        self.assertEqual(doc.docrule.__class__.__name__, 'DocumentTypeRule')
+        self.assertEqual(doc.docrule.title, 'Adlibre Invoices')
 
         # Proper revision data generated and has all the indexes required
         file_rev_data = doc.get_file_revisions_data()
@@ -630,8 +630,8 @@ class DocumentProcessorTest(CoreTestCase):
         self.assertEqual(self.processor.errors[0], error)
         if len(self.processor.errors) > 1:
             warn = self.processor.errors[2]
-            raise AssertionError('DocumentProcessor should have only one warning about no doccode, instead: %s' % warn)
-        if doc.doccode:
+            raise AssertionError('DocumentProcessor should have only one warning about no docrule, instead: %s' % warn)
+        if doc.docrule:
             raise AssertionError('Should not contain DocumentTypeRule: %s' % doc.get_docrule())
         if doc.get_file_revisions_data():
             raise AssertionError('Should not contain File revisions data: %s' % doc.get_file_revisions_data())
@@ -663,7 +663,7 @@ class DocumentProcessorTest(CoreTestCase):
         doc = self.processor.read(file_code, {'user': user, 'only_metadata': True})
         if not self.processor.errors:
             raise AssertionError('Processor should not work without errors')
-        if not doc.doccode:
+        if not doc.docrule:
             raise AssertionError('Should contain Document Type Rule')
         if doc.current_file_revision_data:
             raise AssertionError('current_file_revision_data Should be empty: %s' % doc.current_file_revision_data)

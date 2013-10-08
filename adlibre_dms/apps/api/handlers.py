@@ -85,7 +85,7 @@ class FileHandler(BaseFileHandler):
         if not request.user.is_superuser:
             # Hack: Used part of the code from MDTUI Wrong!
             user_permissions = list_permitted_docrules_qs(request.user)
-            if not document.doccode in user_permissions:
+            if not document.docrule in user_permissions:
                 return rc.FORBIDDEN
         if processor.errors:
             log.error('FileHandler.read manager errors: %s' % processor.errors)
@@ -204,7 +204,7 @@ class OldFileHandler(BaseFileHandler):
         if not request.user.is_superuser:
             # Hack: Used part of the code from MDTUI Wrong!
             user_permissions = list_permitted_docrules_qs(request.user)
-            if not document.doccode in user_permissions:
+            if not document.docrule in user_permissions:
                 return rc.FORBIDDEN
         if processor.errors:
             log.error('OldFileHandler.read manager errors: %s' % processor.errors)
@@ -315,7 +315,7 @@ class TagsHandler(BaseHandler):
             operator = PluginsOperator()
             mapping = operator.get_plugin_mapping_by_id(id_rule)
             docrule = mapping.get_docrule()
-            tags = TagsPlugin().get_all_tags(doccode=docrule)
+            tags = TagsPlugin().get_all_tags(docrule=docrule)
             log.info('TagsHandler.read request fulfilled for rule %s' % id_rule)
             return map(lambda x: x.name, tags)
         except Exception, e:  # FIXME

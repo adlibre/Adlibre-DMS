@@ -71,6 +71,6 @@ class DocumentObjectTest(TestCase):
 
         doc = Document()
 	# TODO: Write some tests
-        #doc.doccode = 'ADL-1234'
+        #doc.docrule = 'ADL-1234'
         #print doc.get_docrule()
         #print doc

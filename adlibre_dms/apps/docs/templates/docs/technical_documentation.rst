@@ -57,13 +57,12 @@ Atributes:
 
 
 
-Doccode
+Docrule
 -------
 
-Doccode is a rule identifier for matching the document name with the rule that
-defines how the system processes the document. To create a new doccode, all you need to do is
-to create new python class that inherits from DoccodeProvider and put the file in
-the plugins doccode directory.
+Docrule is a rule identifier for matching the document name with the rule that
+defines how the system processes the document. To create a new docrule, all you need to do is
+to use the Django admin.
 
 As shown in the example below, two methods need to be defined:
 

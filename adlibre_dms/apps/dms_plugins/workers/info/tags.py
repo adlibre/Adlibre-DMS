@@ -13,25 +13,25 @@ class TagsPlugin(Plugin, BeforeRetrievalPluginPoint):
     def work(self, document, **kwargs):
         tags = []
         try:
-            doc_model = DocTags.objects.get(name = document.get_filename())
+            doc_model = DocTags.objects.get(name=document.get_filename())
             tags = doc_model.get_tag_list()
         except DocTags.DoesNotExist:
             pass
         document.set_tags(tags)
         return document
 
-    def get_all_tags(self, doccode = None):
+    def get_all_tags(self, docrule=None):
         tags = Tag.objects.all()
-        if doccode:
-            tags = tags.filter(taggit_taggeditem_items__doctags__doccode = doccode).distinct()
+        if docrule:
+            tags = tags.filter(taggit_taggeditem_items__doctags__doccode=docrule).distinct()
         return tags
 
-    def get_doc_models(self, doccode = None, tags = []):
+    def get_doc_models(self, docrule=None, tags=[]):
         doc_models = DocTags.objects.all()
-        if doccode:
-            doc_models = doc_models.filter(doccode = doccode)
+        if docrule:
+            doc_models = doc_models.filter(doccode=docrule)
         if tags:
-            doc_models = doc_models.filter(tags__name__in = tags)
+            doc_models = doc_models.filter(tags__name__in=tags)
         return doc_models
 
 class TagsUpdatePlugin(Plugin, BeforeUpdatePluginPoint):
@@ -44,8 +44,9 @@ class TagsUpdatePlugin(Plugin, BeforeUpdatePluginPoint):
         tag_string = tag_string.strip()
         remove_tag_string = document.get_remove_tag_string()
         remove_tag_string = remove_tag_string.strip()
-        doc_model, created = DocTags.objects.get_or_create(name = document.get_filename(),
-                                                                doccode = document.get_docrule())
+        doc_model, created = DocTags.objects.get_or_create(
+            name=document.get_filename(),
+            doccode=document.get_docrule())
         if tag_string or remove_tag_string:
             if tag_string:
                 tags = parse_tags(tag_string)

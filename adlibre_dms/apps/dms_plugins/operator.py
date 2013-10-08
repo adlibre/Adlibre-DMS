@@ -134,12 +134,12 @@ class PluginsOperator(object):
         # Should we validate more than one storage plugin?
         # FIXME: document should be able to work with several storage plugins.
         storage = storage[0]
-        doccode = doccode_plugin_mapping.get_docrule()
-        doc_models = TagsPlugin().get_doc_models(doccode=doccode_plugin_mapping.get_docrule(), tags=tags)
+        docrule = doccode_plugin_mapping.get_docrule()
+        doc_models = TagsPlugin().get_doc_models(docrule=doccode_plugin_mapping.get_docrule(), tags=tags)
         doc_names = map(lambda x: x.name, doc_models)
         if metadata:
-            document_directories = metadata.worker.get_directories(doccode, filter_date=filter_date)
+            document_directories = metadata.worker.get_directories(docrule, filter_date=filter_date)
         else:
             document_directories = []
-        return storage.worker.get_list(doccode, document_directories, start, finish, order, searchword,
+        return storage.worker.get_list(docrule, document_directories, start, finish, order, searchword,
             limit_to=doc_names)

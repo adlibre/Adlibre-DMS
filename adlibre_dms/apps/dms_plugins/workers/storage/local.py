@@ -37,15 +37,15 @@ class LocalFilesystemManager(object):
         root = settings.DOCUMENT_ROOT
         # TODO: Refactoring for v2 (splitdir() method from Document() object used only here.)
         directory = None
-        doccode = document.get_docrule()
-        if doccode:
+        docrule = document.get_docrule()
+        if docrule:
             splitdir = ''
-            for d in doccode.split(document.get_stripped_filename()):
+            for d in docrule.split(document.get_stripped_filename()):
                 splitdir = os.path.join(splitdir, d)
-            directory = os.path.join(str(doccode.get_id()), splitdir)
+            directory = os.path.join(str(docrule.get_id()), splitdir)
 
         if not directory:
-            raise PluginError("The document type is not supported.", 500)  # no doccode for document
+            raise PluginError("The document type is not supported.", 500)  # no docrule for document
         directory = os.path.join(root, directory)
         return directory
 
@@ -125,12 +125,12 @@ class Local(object):
             new_name = document.get_filename()
             file_revision_data = document.get_file_revisions_data()
             # Making new document OLD one for retrieving data purposes
-            document.doccode = None
+            document.docrule = None
             document.set_filename(document.old_name_code)
             old_directory = self.filesystem.get_or_create_document_directory(document)
             old_code = document.old_name_code
             # Returning document back to normal
-            document.doccode = None
+            document.docrule = None
             document.set_filename(new_name)
             for key, value in file_revision_data.iteritems():
                 new_file_revision = value['name']
@@ -157,7 +157,7 @@ class Local(object):
         changed_name = new_name + prefix
         return changed_name
 
-    def get_list(self, doccode, directories, start = 0, finish = None, order = None, searchword = None, 
+    def get_list(self, docrule, directories, start = 0, finish = None, order = None, searchword = None,
                         limit_to = []):
         """
         Return List of DocCodes in the repository for a given rule
@@ -201,7 +201,7 @@ class Local(object):
                 #print "LIMIT TO = %s, DOC_NAME = %s" % (limit_to, doc_name)
                 pass
             else:
-                if doccode.no_doccode:
+                if docrule.no_doccode:
                     doccodes.append({
                         'name': doc_name,
                         'directory': os.path.split(directory)[1]

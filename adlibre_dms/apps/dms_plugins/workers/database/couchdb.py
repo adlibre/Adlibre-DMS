@@ -38,7 +38,7 @@ class CouchDBMetadataWorker(object):
         # FIXME: Refactor me. We should upload new "secondary_indexes" or metatags with update() workflow,
         # not a create(), like it is now. Because this method is a mess.
         docrule = document.get_docrule()
-        # doing nothing for no doccode documents
+        # doing nothing for no docrule documents
         if docrule.no_doccode:
             return document
         else:
@@ -50,7 +50,7 @@ class CouchDBMetadataWorker(object):
             if not mapping.get_database_storage_plugins():
                 return document
             else:
-                # if not exists all required metadata getting them from doccode retrieve sequence
+                # if not exists all required metadata getting them from docrule retrieve sequence
                 if not document.file_revision_data:
                     # HACK: Preserving db_info here... (May be Solution!!!)
                     db_info = document.get_db_info()
@@ -165,7 +165,7 @@ class CouchDBMetadataWorker(object):
         """
         docrule = document.get_docrule()
         mapping = docrule.get_docrule_plugin_mappings()
-        # No actions for no doccode documents
+        # No actions for no docrule documents
         # No actions for documents without 'mapping has DB plugins'
         if document.get_docrule().no_doccode:
             return document

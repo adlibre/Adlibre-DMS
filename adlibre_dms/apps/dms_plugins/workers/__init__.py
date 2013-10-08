@@ -61,12 +61,12 @@ class Plugin(object):
     def render(self):
         return self.title + ": " + self.description
 
-    def get_option(self, option, doccode):
+    def get_option(self, option, docrule):
         value = getattr(self, option, None)
         try:
             plugin_options = PluginOption.objects.filter(
                                 plugin = self.get_model(), 
-                                pluginmapping__doccode = doccode.get_id(),
+                                pluginmapping__doccode = docrule.get_id(),
                                 name = option
                                 )
         except PluginOption.DoesNotExist:

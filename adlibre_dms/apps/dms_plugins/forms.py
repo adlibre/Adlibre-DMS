@@ -50,7 +50,7 @@ class PluginSelectorForm(forms.ModelForm):
         if not self.data['doccode'] == u'':
             return True
         else: 
-            msg = u"You have forgotten to select Doccode in order to set a mapping"
+            msg = u"You have forgotten to select Docrule in order to set a mapping"
             
             if not self._errors: self._errors = {}
             self._errors["doccode"] = self.error_class([msg])

@@ -235,7 +235,7 @@ function UICommunicator(manager, renderer){
         params = $.param.querystring(document.location.href);
         self.renderer.render_document(self.get_url('document_url', params)); //No ajax, using iframe
 //        if (params.indexOf('parent_directory') != -1){
-//            //this is a no-doccode file
+//            //this is a no docrule file
 //            self.renderer.render_document_link(self.get_url('document_url', params));
 //        }else{
 //

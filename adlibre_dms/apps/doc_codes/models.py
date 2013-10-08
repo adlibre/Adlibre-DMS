@@ -34,8 +34,7 @@ class DocumentTypeRule(models.Model):
     Main Model for Document Type Rules (Old Doccode).
 
     In order for an app to function Properly must contain:
-    Basic model for storing "No doccode" Documents.
-        - doccode_id = 1000 (or any no_doccode Id set)
+    Basic model for storing "No docrule" Documents.
         - no_doccode = True
         - active = True
         - regex = '' (no filename data)
@@ -66,7 +65,7 @@ class DocumentTypeRule(models.Model):
         max_length=100,
         blank=True,
         help_text="""
-        WARNING! Please assign a Split method for 'Default' doccode type!. <br />
+        WARNING! Please assign a Split method for 'Default' doc type rule!. <br />
         It is responsible for 'Folder hierarchy' of files stored.<br />
         E.g.:<br />
         Document name: 'abcde222'<br />
@@ -260,34 +259,34 @@ class DocumentTypeRuleManager(object):
         cache_key = 'docrules_objects'
         cached_docrules = cache.get(cache_key, None)
         if not cached_docrules:
-            self.doccodes = DocumentTypeRule.objects.all()
-            cache.set(cache_key, self.doccodes, cache_docrules_for)
+            self.docrules = DocumentTypeRule.objects.all()
+            cache.set(cache_key, self.docrules, cache_docrules_for)
         else:
-            self.doccodes = cached_docrules
+            self.docrules = cached_docrules
 
     def find_for_string(self, string):
         """Find a DocumentType that corresponds to certain string
 
         @param string: a string to check"""
         res = None
-        for doccode in self.doccodes:
-            if doccode.validate(string):
-                res = doccode
+        for docrule in self.docrules:
+            if docrule.validate(string):
+                res = docrule
                 break
         return res
 
     def get_docrules(self):
         """Get cached document types"""
-        return self.doccodes
+        return self.docrules
 
     def get_docrule_by_name(self, name):
         """Returns a document type rule based on it's name
 
         @param name: is a name of this DocumentTypeRule"""
-        doccodes = self.get_docrules()
-        doccode_set = doccodes.filter(title=name)
-        if doccode_set:
-            return doccode_set[0]
+        docrules = self.get_docrules()
+        docrule_set = docrules.filter(title=name)
+        if docrule_set:
+            return docrule_set[0]
         else:
             return None
 
@@ -298,7 +297,7 @@ class DocumentTypeRuleManager(object):
         (when used with instance variable)
         @param id_: Model PK
         """
-        docrules = self.doccodes
+        docrules = self.docrules
         docrule_instance = docrules.get(pk=id_)
         return docrule_instance
 

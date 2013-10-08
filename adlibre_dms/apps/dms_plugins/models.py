@@ -80,11 +80,11 @@ class DoccodePluginMapping(models.Model):
     def get_name(self):
         """Returns a name of this instance"""
         try:
-            doccode_name = self.doccode.get_title()
+            docrule_name = self.doccode.get_title()
         except (KeyError, AttributeError):
-            doccode_name = 'No name given'
+            docrule_name = 'No name given'
             pass
-        return unicode(doccode_name)
+        return unicode(docrule_name)
     name = property(get_name)
 
     def get_docrule(self):

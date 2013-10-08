@@ -111,10 +111,6 @@ class APITest(DMSTestCase):
 
     def test_09_api_rule_detail(self):
         self.client.login(username=self.username, password=self.password)
-        dman = DocumentTypeRuleManager()
-        doccode = dman.get_docrule_by_name('Test PDFs')
-        mapping = DoccodePluginMapping.objects.get(doccode=doccode.get_id())
-        #we don't really care if it crashes above, cause that means our database is imperfect
         url = reverse('api_rules_detail', kwargs={'id_rule': 3, 'emitter_format': 'json'})
         response = self.client.get(url)
         self.assertContains(response, 'Test PDFs')
@@ -134,8 +130,8 @@ class APITest(DMSTestCase):
     def test_12_api_files_list(self):
         self.client.login(username=self.username, password=self.password)
         dman = DocumentTypeRuleManager()
-        doccode = dman.get_docrule_by_name('Adlibre Invoices')
-        mapping = DoccodePluginMapping.objects.get(doccode=doccode.get_id())
+        docrule = dman.get_docrule_by_name('Adlibre Invoices')
+        mapping = DoccodePluginMapping.objects.get(doccode=docrule.get_id())
         url = reverse("api_file_list", kwargs={'id_rule': mapping.pk})
         response = self.client.get(url)
         self.assertContains(response, 'ADL-1234')

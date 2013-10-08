@@ -3989,7 +3989,7 @@ class MDTUI(MUITestData):
             'TST00000002'
         ]
         # Deleting all test MDT's
-        # (with doccode from var "test_mdt_docrule_id" and "test_mdt_docrule_id2")
+        # (with docrule from var "test_mdt_docrule_id" and "test_mdt_docrule_id2")
         # using MDT's API.
         url = reverse('api_mdt')
         docrules_list = [

@@ -171,13 +171,13 @@ class LocalJSONMetadata(object):
                     'revision': 'N/A'
                 }
 
-    def get_directories(self, doccode, filter_date = None):
+    def get_directories(self, docrule, filter_date = None):
         """
         Return List of directories with document files
         """
         #FIXME: seems to be rather slow for large number of docs :(
         root = settings.DOCUMENT_ROOT
-        doccode_directory = os.path.join(root, doccode.get_directory_name())
+        doccode_directory = os.path.join(root, docrule.get_directory_name())
 
         directories = []
         for root, dirs, files in os.walk(doccode_directory):
@@ -190,7 +190,7 @@ class LocalJSONMetadata(object):
                         keys = metadatas.keys()
                         keys.sort()
                         first_metadata = metadatas[keys[0]]
-                elif doccode.no_doccode and not dirs:  # leaf directory, no file revision data file => NoDoccode
+                elif docrule.no_doccode and not dirs:  # leaf directory, no file revision data file => NoDocrule
                     first_metadata = self.get_fake_metadata(root, fil)
                     metadatas = [first_metadata]
                     doc = fil
@@ -205,12 +205,12 @@ class LocalJSONMetadata(object):
                                                     }) )
         return directories
 
-    def get_metadatas(self, doccode):
+    def get_metadatas(self, docrule):
         """
         Return List of directories with document files
         """
         root = settings.DOCUMENT_ROOT
-        doccode_directory = os.path.join(root, doccode.get_directory_name())
+        doccode_directory = os.path.join(root, docrule.get_directory_name())
 
         metadatas = []
         for root, dirs, files in os.walk(doccode_directory):
@@ -226,14 +226,14 @@ class LocalJSONMetadata(object):
         new_directory = self.filesystem.get_or_create_document_directory(document)
         new_name = document.get_filename()
         # Making new document OLD one for retrieving data purposes
-        document.doccode = None
+        document.docrule = None
         document.set_filename(document.old_name_code)
         # Converting file revision data for new document name
         old_directory = self.filesystem.get_or_create_document_directory(document)
         fileinfo_db, new_revision = self.load_metadata(document.get_stripped_filename(), old_directory)
         new_metadata = self.convert_metadata_for_docrules(fileinfo_db, new_name)
         # Moving document object back
-        document.doccode = None
+        document.docrule = None
         document.set_filename(new_name)
         document.set_file_revisions_data(new_metadata)
         document = self.save_metadata(document, new_directory)
