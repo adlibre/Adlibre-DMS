@@ -164,7 +164,7 @@ class Local(object):
         """
         # Iterate through the directory hierarchy looking for file revision data containing dirs.
         # This is more efficient than other methods of looking for leaf directories
-        # and works for storage rules where the depth of the storage tree is not constant for all doccodes.
+        # and works for storage rules where the depth of the storage tree is not constant for all docrules.
 
         # FIXME: This will be inefficient at scale and will require caching
 
@@ -190,10 +190,10 @@ class Local(object):
                 else:
                     pass
 
-        doccodes = []
+        docrules = []
         for directory, metadata_info in directories:
             doc_name = metadata_info['document_name']
-            if finish and len(doccodes) >= finish:
+            if finish and len(docrules) >= finish:
                 break
             elif searchword and not self.document_matches_search(metadata_info, searchword):
                 pass
@@ -202,15 +202,15 @@ class Local(object):
                 pass
             else:
                 if docrule.no_doccode:
-                    doccodes.append({
+                    docrules.append({
                         'name': doc_name,
                         'directory': os.path.split(directory)[1]
                     })
                 else:
-                    doccodes.append({'name': doc_name})
+                    docrules.append({'name': doc_name})
         if start:
-            doccodes = doccodes[start:]
-        return doccodes
+            docrules = docrules[start:]
+        return docrules
 
     def remove(self, document):
         # TODO: FIXME: Refactor this method so it's safer!
