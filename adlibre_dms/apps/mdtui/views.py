@@ -749,7 +749,7 @@ def indexing_details(request, step=None, template='mdtui/indexing.html'):
             else:
                 # Success, allocate barcode and move on
                 dtr = DocumentTypeRule.objects.get(pk=docrule_id)
-                request.session["barcode"] = dtr.allocate_barcode()
+                request.session["barcode"] = dtr.show_last_allocated_barcode()
                 return HttpResponseRedirect(reverse('mdtui-index-source'))
         else:
             # Return validation with errors...
@@ -818,6 +818,11 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
 
     if upload_form.is_valid() or barcode_form.is_valid() and valid_call:
         if valid_call:
+            # Allocating and updating the barcode
+            dtr = DocumentTypeRule.objects.get(pk=docrule)
+            barcode = dtr.allocate_barcode()
+            request.session["barcode"] = dtr.show_last_allocated_barcode()
+
             # Unifying dates to CouchDB storage formats.
             # TODO: maybe make it a part of the CouchDB storing manager.
             clean_index = unify_index_info_couch_dates_fmt(index_info)

@@ -217,6 +217,11 @@ class DocumentTypeRule(models.Model):
         self.save()
         return self._generate_document_barcode(self.sequence_last)
 
+    def show_last_allocated_barcode(self):
+        """Function shows last available Document Code used for this Document Type Rule"""
+        self.sequence_last += 1
+        return self._generate_document_barcode(self.sequence_last)
+
     def _generate_document_barcode(self, sequence):
         """Function generates next barcode in sequence.
         As soon as it is generated, it must be assumed to be used to avoid race.
