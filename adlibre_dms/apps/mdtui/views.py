@@ -749,7 +749,7 @@ def indexing_details(request, step=None, template='mdtui/indexing.html'):
             else:
                 # Success, allocate barcode and move on
                 if "barcode" in request.session and request.session["barcode"]:
-                    print 'barcode already allocated'
+                    pass
                 else:
                     dtr = DocumentTypeRule.objects.get(pk=docrule_id)
                     request.session["barcode"] = dtr.allocate_barcode()
