@@ -3969,6 +3969,39 @@ class MDTUI(MUITestData):
         self.assertContains(response, self.doc3)
         # We dont care about another docs here
 
+    def test_95_barcode_allocation_on_step_back(self):
+        """Refs #1243 MUI: Barcode allocation issue
+        Barcode may be allocated going step back to step 2 from 3 while indexing
+        So user can click step back and step forward incrementing and allocating empty barcodes
+        """
+        proper_barcode = self.doc1
+        improper_barcode = self.doc2
+        step1_url = reverse('mdtui-index-type')
+        step3_url = reverse('mdtui-index-source')
+        step2_url = reverse('mdtui-index-details')
+        response = self.client.post(step1_url, {self.test_mdt_docrule_id: 'docrule'})
+        self.assertEqual(response.status_code, 302)
+        # Getting indexes form and matching form Indexing Form fields names
+        response = self.client.get(step2_url)
+        rows_dict = self._read_indexes_form(response)
+        post_dict = self._convert_doc_to_post_dict(rows_dict, self.doc1_dict)
+        # Adding Document Indexes
+        response = self.client.post(step2_url, post_dict)
+        self.assertEqual(response.status_code, 302)
+        response = self.client.get(step3_url)
+        self.assertContains(response, 'Friends ID: 123')
+        self.assertEqual(response.status_code, 200)
+        # Properly barcoded
+        self.assertContains(response, proper_barcode)
+        self.assertNotContains(response, improper_barcode)
+        # Changing indexes a bit to check barcode is the same
+        response = self.client.post(step2_url, post_dict)
+        self.assertEqual(response.status_code, 302)
+        response = self.client.get(step3_url)
+        self.assertContains(response, proper_barcode)
+        self.assertNotContains(response, improper_barcode)
+        self._shelve(response)
+
     def test_z_cleanup(self):
         """
         Cleaning up after all tests finished.
