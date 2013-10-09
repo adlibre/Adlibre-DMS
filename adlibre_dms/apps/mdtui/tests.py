@@ -4000,7 +4000,6 @@ class MDTUI(MUITestData):
         response = self.client.get(step3_url)
         self.assertContains(response, proper_barcode)
         self.assertNotContains(response, improper_barcode)
-        self._shelve(response)
 
     def test_z_cleanup(self):
         """
