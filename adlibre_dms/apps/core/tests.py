@@ -356,13 +356,16 @@ class DocumentProcessorTest(CoreTestCase):
         """Create a file with certain code and secondary indexes specified
 
         e.g. Using a given 'index_info' dict in MUI
+
+        Also:
+        Refs #1069 CouchDB plugin modifies provided data when storing indexes
+        original dict index_info is fed to processor and is modified during lifetime.
+        This should not happen. (Fixed for now).
         """
         file_code = self.documents_pdf[2]
         filename = self.documents_pdf[0]
         tests_file = self._get_fixtures_file(filename)
         index_info = self.doc1
-        # FIXME: this should not happen. Original dict given to plugin is modified. Bug #1069
-        description = index_info['description']
         options = {
             'user': self.admin_user,
             'barcode': file_code,
@@ -379,7 +382,7 @@ class DocumentProcessorTest(CoreTestCase):
         self.assertEqual(couchdoc['metadata_doc_type_rule_id'], '2')
         if couchdoc['index_revisions']:
             raise AssertionError('File should not contain index revisions at this stage.')
-        if not couchdoc['metadata_description'] == description:
+        if not couchdoc['metadata_description'] == index_info['description']:
             raise AssertionError('description metadata broken')
         if not '1' in couchdoc['revisions']:
             raise AssertionError('File indexing data not stored to CouchDB')
