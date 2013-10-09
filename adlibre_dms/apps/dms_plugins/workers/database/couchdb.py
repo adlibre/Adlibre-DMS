@@ -108,7 +108,7 @@ class CouchDBMetadataWorker(object):
         """
         self.check_user(document)
         if 'update_file' in document.options and document.options['update_file']:
-            name = document.get_stripped_filename()
+            name = document.get_code()
             # We need to create couchdb document in case it does not exists in database.
             couchdoc = CouchDocument.get_or_create(docid=name)
             couchdoc.update_file_revisions_metadata(document)
@@ -134,8 +134,8 @@ class CouchDBMetadataWorker(object):
         @param document: is a DMS Document() instance
         """
         # Doing nothing for mark deleted call
-        stripped_filename = document.get_stripped_filename()
-        couchdoc = CouchDocument.get(docid=stripped_filename)
+        code = document.get_code()
+        couchdoc = CouchDocument.get(docid=code)
         if 'mark_deleted' in document.options.iterkeys():
             couchdoc['deleted'] = 'deleted'
             couchdoc.save()
@@ -174,7 +174,7 @@ class CouchDBMetadataWorker(object):
                 return document
             else:
                 self.check_user(document)
-                doc_name = document.get_stripped_filename()
+                doc_name = document.get_code()
                 couchdoc = CouchDocument()
                 try:
                     couchdoc = CouchDocument.get(docid=doc_name)
@@ -198,7 +198,7 @@ class CouchDBMetadataWorker(object):
         if not document.tags:
             tags = []
             try:
-                doc_model = DocTags.objects.get(name=document.get_stripped_filename())
+                doc_model = DocTags.objects.get(name=document.get_code())
                 tags = doc_model.get_tag_list()
             except DocTags.DoesNotExist:
                 pass

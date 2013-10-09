@@ -42,7 +42,7 @@ class Document(object):
         self.old_name_code = None
         self.file_name = None
         self.full_filename = None
-        self.stripped_filename = None
+        self.code = None
         self.thumbnail = None
         self.revision = None
         self.hashcode = None
@@ -80,7 +80,7 @@ class Document(object):
         log.debug('get_docrule for %s.' % self.docrule)
         if self.docrule is None and self.get_filename():
             dman = DocumentTypeRuleManager()
-            self.docrule = dman.find_for_string(self.get_stripped_filename())
+            self.docrule = dman.find_for_string(self.get_code())
             if self.docrule is None:
                 log.error('get_docrule. docrule is None!')
                 # Using self.get_full_filename() method here can cause race condition in some cases.
@@ -156,9 +156,10 @@ class Document(object):
             name = self.get_current_file_revision_data()['name']
         return name
 
-    def get_stripped_filename(self):
-        stripped_filename = os.path.splitext(self.get_filename())[0]
-        return stripped_filename
+    def get_code(self):
+        code = os.path.splitext(self.get_filename())[0]
+        print code
+        return code
 
     def get_full_filename(self):
         if not self.full_filename:
@@ -171,7 +172,7 @@ class Document(object):
                 # Fixes extension format 2 dots in API output filename (Bug #588)
                 try:
                     if '.' in ext:
-                        dot, ext = ext.split(".",1)
+                        dot, ext = ext.split(".", 1)
                 except Exception, e:  #FIXME: Except WHAT?
                     log.error('get_full_filename Exception %s' % e)
                     pass # file type conversion is in progress failing gracefully
@@ -212,7 +213,7 @@ class Document(object):
     def get_filename_with_revision(self):
         revision = self.get_revision()
         if revision:
-            name = "%s_r%s.%s" % (self.get_stripped_filename(), self.get_revision(), self.get_extension())
+            name = "%s_r%s.%s" % (self.get_code(), self.get_revision(), self.get_extension())
         else:
             name = self.get_full_filename()
         return name

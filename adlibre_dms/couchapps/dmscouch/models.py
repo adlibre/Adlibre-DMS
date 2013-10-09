@@ -41,8 +41,8 @@ class CouchDocument(Document):
         @param user: django internal User() object instance
         @param document: DMS Document() instance"""
         # Setting document ID, based on filename. Using stripped (pure docrule regex readable) filename if possible.
-        if document.get_stripped_filename():
-            self.id = document.get_stripped_filename()
+        if document.get_code():
+            self.id = document.get_code()
             self._doc['_id'] = self.id
         self.metadata_doc_type_rule_id = str(document.docrule.pk)
         # setting provided user name/id
@@ -91,7 +91,7 @@ class CouchDocument(Document):
         document.set_file_revisions_data(self.revisions)
         if self.tags:
             document.tags = self.tags
-        document.stripped_filename = self.id
+        document.code = self.id
         document.db_info = self.construct_db_info()
         if 'index_revisions' in self:
             document.index_revisions = self.index_revisions

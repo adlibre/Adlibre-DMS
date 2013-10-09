@@ -615,7 +615,7 @@ class DocumentProcessorTest(CoreTestCase):
         # File names and path's
         # TODO: this is wrong. Must return filename with extension (Bug #1092)
         self.assertEqual(doc.get_filename(), file_code)
-        self.assertEqual(doc.stripped_filename, file_code)
+        self.assertEqual(doc.code, file_code)
         doc_rev1_name = file_code + '_r1.pdf'
         doc_rev1_path = self._chek_documents_dir(doc_rev1_name, doc.get_docrule(), code=file_code, check_exists=False)
         self.assertEqual(doc_rev1_path, doc.fullpath)

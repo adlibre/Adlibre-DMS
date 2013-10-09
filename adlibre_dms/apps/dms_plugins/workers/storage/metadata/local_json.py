@@ -34,9 +34,9 @@ class LocalJSONMetadata(object):
             document.set_revision(revision)
             document.set_file_revisions_data({revision: fake_metadata})
         else:
-            fileinfo_db, new_revision = self.load_metadata(document.get_stripped_filename(), directory)
+            fileinfo_db, new_revision = self.load_metadata(document.get_code(), directory)
             if not fileinfo_db and not only_metadata:
-                raise PluginError("No such document: %s" % document.get_stripped_filename(), 404)
+                raise PluginError("No such document: %s" % document.get_code(), 404)
             revision = document.get_revision()
             if not revision and new_revision > 0:
                 revision = new_revision - 1
@@ -62,7 +62,7 @@ class LocalJSONMetadata(object):
             revision = mark_revision
         if revision:
             directory = self.filesystem.get_or_create_document_directory(document)
-            fileinfo_db, new_revision = self.load_metadata(document.get_stripped_filename(), directory)
+            fileinfo_db, new_revision = self.load_metadata(document.get_code(), directory)
             if not mark_revision:
                 del fileinfo_db[str(revision)]
             else:
@@ -139,7 +139,7 @@ class LocalJSONMetadata(object):
         return date
 
     def save_metadata(self, document, directory):
-        fileinfo_db, revision = self.load_metadata(document.get_stripped_filename(), directory)
+        fileinfo_db, revision = self.load_metadata(document.get_code(), directory)
         document.set_revision(revision)
 
         fileinfo = {
@@ -159,7 +159,7 @@ class LocalJSONMetadata(object):
         return document
 
     def write_metadata(self, fileinfo_db, document, directory):
-        json_file = os.path.join(directory, '%s.json' % (document.get_stripped_filename(),))
+        json_file = os.path.join(directory, '%s.json' % (document.get_code(),))
         json_handler = open(json_file, mode='w')
         json.dump(fileinfo_db, json_handler, indent = 4)
 
@@ -230,7 +230,7 @@ class LocalJSONMetadata(object):
         document.set_filename(document.old_name_code)
         # Converting file revision data for new document name
         old_directory = self.filesystem.get_or_create_document_directory(document)
-        fileinfo_db, new_revision = self.load_metadata(document.get_stripped_filename(), old_directory)
+        fileinfo_db, new_revision = self.load_metadata(document.get_code(), old_directory)
         new_metadata = self.convert_metadata_for_docrules(fileinfo_db, new_name)
         # Moving document object back
         document.docrule = None
@@ -241,7 +241,7 @@ class LocalJSONMetadata(object):
         return document
 
     def remove_metadata_file(self, directory, document):
-        json_file = os.path.join(directory, '%s.json' % (document.get_stripped_filename(),))
+        json_file = os.path.join(directory, '%s.json' % (document.get_code(),))
         self.filesystem.remove_file(json_file)
 
 class LocalJSONMetadataRetrievalPlugin(Plugin, BeforeRetrievalPluginPoint):

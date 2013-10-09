@@ -121,7 +121,7 @@ def revision_document(request, document):
                 fileinfos.append(fileinfo)
             extra_context = {
                 'fileinfo_db': fileinfos,
-                'document_name': document.get_stripped_filename(),
+                'document_name': document.get_code(),
             }
         else:
             fileinfo = {    'revision': None, 

@@ -40,7 +40,7 @@ class LocalFilesystemManager(object):
         docrule = document.get_docrule()
         if docrule:
             splitdir = ''
-            for d in docrule.split(document.get_stripped_filename()):
+            for d in docrule.split(document.get_code()):
                 splitdir = os.path.join(splitdir, d)
             directory = os.path.join(str(docrule.get_id()), splitdir)
 
