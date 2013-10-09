@@ -158,7 +158,6 @@ class Document(object):
 
     def get_code(self):
         code = os.path.splitext(self.get_filename())[0]
-        print code
         return code
 
     def get_full_filename(self):
