@@ -288,6 +288,7 @@ class DocumentProcessor(object):
                     if property_name == 'user':
                         doc.set_user(value)
                     if property_name == 'index_info':
+                        # Not to modify original data during workflow
                         data = value.copy()
                         doc.set_db_info(data)
                     if property_name == 'new_type':
