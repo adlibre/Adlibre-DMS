@@ -103,7 +103,6 @@ setup(name='adlibre_dms',
         ('log', ['log/.gitignore']), # create empty dir
         ('www', ['www/.gitignore']), # create empty dir
         ('www/status-pages', find_files('www/status-pages', '*')),
-        ('.', ['Distfile', 'Procfile',]),
     ],
     install_requires=[
             # Core requirements
@@ -132,6 +131,6 @@ setup(name='adlibre_dms',
     dependency_links=[
         "https://codeload.github.com/adlibre/django-bcp/legacy.tar.gz/master#egg=django-bcp-0.1.8",
         "https://codeload.github.com/adlibre/adlibre-plugins/legacy.tar.gz/master#egg=adlibre-plugins-0.1.1",
-        "https://codeload.github.com/adlibre/python-bureaucrat/legacy.tar.gz/master#egg=bureaucrat-0.0.2",
+        "https://github.com/adlibre/python-bureaucrat/archive/0.0.2.tar.gz#egg=bureaucrat-0.0.2",
     ],
 )
