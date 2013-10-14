@@ -103,6 +103,8 @@ setup(name='adlibre_dms',
         ('log', ['log/.gitignore']), # create empty dir
         ('www', ['www/.gitignore']), # create empty dir
         ('www/status-pages', find_files('www/status-pages', '*')),
+        ('custom_static', ['custom_static/.gitignore']), # create empty dir
+        ('custom_templates', ['custom_templates/README']), 
     ],
     install_requires=[
             # Core requirements
