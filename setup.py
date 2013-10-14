@@ -121,6 +121,7 @@ setup(name='adlibre_dms',
             # Deployment
             'flup==1.0.3.dev-20110405',
             'bureaucrat==0.0.2',
+            'argpass',  # required by bureaucrat
             # Logging
             'django-log-file-viewer==0.6',
             # CI integration
