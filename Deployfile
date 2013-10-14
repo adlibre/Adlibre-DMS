@@ -1,0 +1,3 @@
+syncdb: manage.py syncdb --noinput
+syncplugins: manage.py syncplugins --noinput
+collectstatic: manage.py collectstatic --noinput
