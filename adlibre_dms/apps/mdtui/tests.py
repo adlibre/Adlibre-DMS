@@ -79,6 +79,7 @@ class MUITestData(TestCase):
         self.edit_document_name_5 = 'BBB-0003'
         self.edit_document_name_6 = 'CCC-0003'
         self.edit_document_name_7 = 'BBB-0004'
+        self.edit_type_document_name1 = 'BBB-0005'
 
         self.test_mdt_docrule_id = 2  # should be properly assigned to fixtures docrule that uses CouchDB plugins
         self.test_mdt_docrule_id2 = 7  # should be properly assigned to fixtures docrule that uses CouchDB plugins
@@ -4001,6 +4002,46 @@ class MDTUI(MUITestData):
         self.assertContains(response, proper_barcode)
         self.assertNotContains(response, improper_barcode)
 
+    def test_96_document_file_revisions_not_lost_when_changing_type(self):
+        """Refs #1246 Document revisions lost when reindexing"""
+        before_code = self.doc1
+        new_doc_name = self.edit_type_document_name1
+        renaming_docrule = {'docrule': '7'}
+        new_doc_revision_prefix1 = '_r1.pdf'
+        new_doc_revision_prefix2 = '_r2.pdf'
+        new_doc_revision_prefix3 = '_r3.pdf'
+        edit_doc_decription = 'Test Document Number 1'
+        secondary_index = 'Andrew'
+        secondary_key = 'Reporting Entity'
+        # "Undeleting" document for our needs
+        doc_before = CouchDocument.get(docid=before_code)
+        if 'deleted' in doc_before:
+            del doc_before['deleted']
+        doc_before.save()
+        ch_type_url = reverse('mdtui-edit-type', kwargs={'code': before_code})
+        # docrule sequence fixup.
+        docrule = DocumentTypeRule.objects.get(pk=int(renaming_docrule['docrule']))
+        docrule.sequence_last = 4
+        docrule.save()
+
+        # Tests itself
+        response = self.client.post(ch_type_url, renaming_docrule)
+        self.assertEqual(response.status_code, 302)
+        new_url = self._retrieve_redirect_response_url(response)
+        response = self.client.get(new_url)
+        self.assertContains(response, new_doc_name)
+        self.assertContains(response, edit_doc_decription)
+        self.assertContains(response, secondary_key)  # Form rendered
+        self.assertNotContains(response, secondary_index)
+        # Testing couchdb document with indexes generated properly
+        couch_doc = self._open_couchdoc(self.couchdb_name, new_doc_name)
+        # File revisions indexes OK
+        self.assertEqual(couch_doc['revisions']['1']['name'], new_doc_name + new_doc_revision_prefix1)
+        self.assertEqual(couch_doc['revisions']['2']['name'], new_doc_name + new_doc_revision_prefix2)  # Revisions OK
+        self.assertEqual(couch_doc['revisions']['3']['name'], new_doc_name + new_doc_revision_prefix3)  # Revisions OK
+        self.assertEqual(couch_doc['index_revisions']["1"]['mdt_indexes']["Employee Name"], "Iurii Garmash")  # Index Rev OK
+        self.assertEqual(couch_doc['metadata_description'], edit_doc_decription)  # Description OK
+
     def test_z_cleanup(self):
         """
         Cleaning up after all tests finished.
@@ -4008,7 +4049,6 @@ class MDTUI(MUITestData):
         Must be ran after all tests in this test suite.
         """
         cleanup_docs_list = [
-            self.doc1,
             self.doc2,
             self.doc3,
             self.doc4,
@@ -4017,6 +4057,7 @@ class MDTUI(MUITestData):
             self.edit_document_name_5,
             self.edit_document_name_7,
             self.edit_document_name_1,
+            self.edit_type_document_name1,
             'TST00000001',
             'TST00000002'
         ]

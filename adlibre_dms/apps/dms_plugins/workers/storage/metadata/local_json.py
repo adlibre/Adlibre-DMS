@@ -113,13 +113,15 @@ class LocalJSONMetadata(object):
 
     def convert_metadata_for_docrules(self, fileinfo_db, new_name):
         """Converts file file revision data into another docrule, changing it's file name everywhere"""
+        revisions = {}
         for rev_key, revision in fileinfo_db.iteritems():
             old_file_name = revision['name']
             extension = old_file_name.split('.')[1]
             prefix = '_r%s.%s' % (rev_key, extension)
             changed_name = new_name + prefix
             revision['name'] = changed_name
-        return fileinfo_db
+            revisions[rev_key] = revision
+        return revisions
 
     def load_metadata(self, document_name, directory):
         json_file = os.path.join(directory, '%s.json' % (document_name,))
@@ -236,7 +238,7 @@ class LocalJSONMetadata(object):
         document.docrule = None
         document.set_filename(new_name)
         document.set_file_revisions_data(new_metadata)
-        document = self.save_metadata(document, new_directory)
+        self.write_metadata(fileinfo_db, document, new_directory)
         self.filesystem.remove_file(os.path.join(old_directory, document.old_name_code + '.json'))
         return document
 
