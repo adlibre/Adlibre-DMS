@@ -103,6 +103,8 @@ setup(name='adlibre_dms',
         ('log', ['log/.gitignore']), # create empty dir
         ('www', ['www/.gitignore']), # create empty dir
         ('www/status-pages', find_files('www/status-pages', '*')),
+        ('custom_static', ['custom_static/.gitignore']), # create empty dir
+        ('custom_templates', ['custom_templates/README']), 
     ],
     install_requires=[
             # Core requirements
@@ -120,6 +122,8 @@ setup(name='adlibre_dms',
             'adlibre-plugins==0.1.1',
             # Deployment
             'flup==1.0.3.dev-20110405',
+            'bureaucrat==0.1.0',
+            'argparse',  # required by bureaucrat
             # Logging
             'django-log-file-viewer==0.6',
             # CI integration
@@ -130,5 +134,6 @@ setup(name='adlibre_dms',
     dependency_links=[
         "https://codeload.github.com/adlibre/django-bcp/legacy.tar.gz/master#egg=django-bcp-0.1.8",
         "https://codeload.github.com/adlibre/adlibre-plugins/legacy.tar.gz/master#egg=adlibre-plugins-0.1.1",
+        "https://github.com/adlibre/python-bureaucrat/archive/v0.1.0.tar.gz#egg=bureaucrat-0.1.0",
     ],
 )
