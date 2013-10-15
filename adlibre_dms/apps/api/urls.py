@@ -24,6 +24,7 @@ tags_handler = Resource(handlers.TagsHandler)
 mdt_handler = Resource(handlers.MetaDataTemplateHandler)
 parallel_handler = Resource(handlers.ParallelKeysHandler)
 thumbnail_handler = Resource(handlers.ThumbnailsHandler)
+version_handler = Resource(handlers.VersionHandler)
 
 urlpatterns = patterns('',
     # Deprecated file handlers:
@@ -50,5 +51,6 @@ urlpatterns = patterns('',
     url(r'^mdt/$', mdt_handler, name='api_mdt'),
     url(r'^parallel/$', parallel_handler, name='api_parallel'),
     url(r'^thumbnail/(?P<code>[\w_-]+)$', thumbnail_handler, name='api_thumbnail'),
+    url(r'^version$', version_handler, name='api_version'),
 )
 

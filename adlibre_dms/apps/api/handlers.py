@@ -614,3 +614,11 @@ class ThumbnailsHandler(BaseHandler):
         else:
             return rc.NOT_FOUND
 
+
+class VersionHandler(BaseHandler):
+    """Api hook to check the DMS work state"""
+    allowed_methods = ('GET', )
+
+    @method_decorator(logged_in_or_basicauth(AUTH_REALM))
+    def read(self, request):
+        return settings.PRODUCT_VERSION
