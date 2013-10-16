@@ -1,4 +1,4 @@
-# Adlibre DMS Installation and System Requirements
+# Adlibre DMS Installation
 
 Adlibre DMS can be easily installed on any operating system provided that a recent copy of a Python interpreter is
 available as well as any dependent system libraries.
