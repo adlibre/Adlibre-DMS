@@ -1,4 +1,4 @@
-# Adlibre DMS Installation and System Requirements
+# Adlibre DMS Installation
 
 Adlibre DMS can be easily installed on any operating system provided that a recent copy of a Python interpreter is
 available as well as any dependent system libraries.
@@ -14,12 +14,13 @@ The following system libraries are required:
 * poppler
 * a2ps
 * ghostscript == 8.X
+* Others as specified in _setup.py_ or [DMS Installer](https://github.com/adlibre/dms-installer/)
 
 Supported Linux Distributions:
 
-* Debian
-* Ubuntu
 * CentOS / Red Hat.
+
+Other distributions including _Debian_ and _Ubuntu_ are supported, but Enterprise Linux derivatives are recommended.
 
 ## OS X Requirements
 
@@ -51,6 +52,10 @@ For commercial Windows installation support. Please enquire at http://www.adlibr
 
 ## General Installation and Deployment
 
+By far the easiest installation method is to use (DMS Installer)[https://github.com/adlibre/dms-installer].
+
+### Manual installation
+
 We recommend deployment with _virtualenv_:
 
 You will need to specify Python version if more than one installed eg. --python /usr/bin/python2.6
@@ -62,6 +67,7 @@ Development:
     cdvirtualenv
     pip install -e git+ssh://git@github.com/adlibre/Adlibre-DMS.git#egg=dms
     ./src/dms/adlibre_dms/manage.py syncdb
+    ./src/dms/adlibre_dms/manage.py syncplugins
     ./src/dms/adlibre_dms/manage.py collectstatic
     ./src/dms/adlibre_dms/manage.py runserver
 
@@ -71,12 +77,14 @@ Production:
     workon dms
     cdvirtualenv
     pip install git+git://github.com/adlibre/Adlibre-DMS.git
-    ./adlibre_dms/manage.py syncdb
-    ./adlibre_dms/manage.py collectstatic
+    ./adlibre_dms/manage.py syncdb --settings=settings_prod
+    ./adlibre_dms/manage.py syncplugins --settings=settings_prod
+    ./adlibre_dms/manage.py collectstatic --settings=settings_prod
 
 Then setup your webserver to use a FastCGI socket.
 
-See _deployment_ directory for sample webserver configs and a _manage-fcgi.sh_ script for managing the Python FCGI processes.
+See _deployment_ directory for sample webserver configs and a _manage-fcgi.sh_ script for managing the Python FCGI 
+processes.
 
 ## Initial Data
 
