@@ -166,7 +166,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.contrib.auth.middleware.RemoteUserMiddleware',  # Support for Basic Auth in API
-    'cors_middleware.XsSharing',  # Support for CORS for API
+    'adlibre_dms.cors_middleware.XsSharing',  # Support for CORS for API
 )
 
 AUTHENTICATION_BACKENDS = (
