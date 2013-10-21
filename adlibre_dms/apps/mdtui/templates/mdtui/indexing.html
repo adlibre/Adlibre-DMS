@@ -97,6 +97,6 @@
 {% endblock %}
 
 {% block js_extra_inline %}
-{% if step == "2" or step == "edit" %}{% include "mdtui/_typeaheadjs.html" %}{% endif %}
+{% if step == "2" or step == "edit" %}{% include "mdtui/autocomplete.html" %}{% endif %}
 {% if step == "3" or step == "edit_revisions" %}{% include "mdtui/_barcode_scripts.html" %}{% endif %}
 {% endblock %}

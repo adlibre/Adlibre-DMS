@@ -921,7 +921,7 @@ def mdt_parallel_keys(request):
 
     try:
         key_name = request.POST[u'key_name']
-        autocomplete_req = request.POST[u'autocomplete_search'].strip(' \t\n\r')
+        autocomplete_req = request.POST[u'autocomplete_search[term]'].strip(' \t\n\r')
     except KeyError:
         valid_call = False
 
@@ -947,7 +947,7 @@ def mdt_parallel_keys(request):
     if valid_call:
         resp = process_pkeys_request(docrule_id, key_name, autocomplete_req, doc_mdts, letters_limit, suggestions_limit)
     log.debug('mdt_parallel_keys response: %s' % resp)
-    return HttpResponse(json.dumps(resp))
+    return HttpResponse(json.dumps(resp), mimetype="application/json")
 
 
 @login_required
