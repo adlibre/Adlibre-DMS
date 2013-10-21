@@ -1,11 +1,6 @@
 {% load index_keys %}
 <script src="{{ STATIC_URL }}js/jquery.maskedinput-1.3.min.js"></script>
 <link href="{{ STATIC_URL }}css/autocomplete_style.css" rel="stylesheet">
-<style type="text/css">
-.ui-autocomplete-loading {
-    background: white url('{{ STATIC_URL }}img/ui-anim_basic_16x16.gif') right center no-repeat;
-}
-</style>
 <script src="{{ STATIC_URL }}js/autocomplete_1.10.3.js"></script>
 <script type="text/javascript">
     // date pattern entering to all fields
@@ -44,14 +39,14 @@
                 );
             },
             // minLength: 2,
-            select: function(event, obj) { populate_indexes_form(obj); event.preventDefault(); },
-            focus: function(event, obj) { populate_indexes_form(obj); event.preventDefault(); },
+            select: function(event, obj) { populate_indexes_form(obj, key); event.preventDefault(); },
+            focus: function(event, obj) { populate_indexes_form(obj, key); event.preventDefault(); },
             open: function() { $( this ).removeClass( "ui-corner-all" ).addClass( "ui-corner-top" ); },
             close: function() { $( this ).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" ); }
         });
     }
     // form populating for autocomplete
-    function populate_indexes_form(data) {
+    function populate_indexes_form(data, key) {
         var array = data.item.value;
         var fields_data = JSON.parse(array);
         for (var item in fields_data) {
@@ -60,7 +55,14 @@
             labels.each(function() {
                 var ltext = $(this).text();
                 if (ltext == item) {
-                        $(this).parent().find(':input').val(fields_data[item]);
+                    var current_field = $(this).parent().find(':input');
+                    if (item != key) {
+                        if (current_field.val() === '') {
+                            current_field.val(fields_data[item]);
+                        }  // if val length
+                    } else {
+                        current_field.val(fields_data[item]);
+                    }
                 } // if
             }); // each
         }// for
