@@ -24,9 +24,6 @@
     function update_clone_th_widths(clonedHeaderRow) {
         var originalHeaderRow = $("#results-table-head");
         originalHeaderRow.children().children().each(function(index, value) {
-            console.log(index);
-            console.log(value);
-            console.log($(value).width());
             clonedHeaderRow.children().children().each(function(cl_index, cl_value) {
                 if (cl_index==index) {
                     $(cl_value).width($(value).width());
