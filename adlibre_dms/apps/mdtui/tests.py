@@ -126,16 +126,16 @@ class MUITestData(TestCase):
         # Typeahead calls Proper for doc1
         self.typehead_call1 = {
             'key_name': 'Friends ID',
-            'autocomplete_search': '123'
+            'autocomplete_search[term]': '123'
         }
         self.typehead_call2 = {
             'key_name': 'Employee ID',
-            'autocomplete_search': '123'
+            'autocomplete_search[term]': '123'
         }
         # Typeahead calls Improper for doc1
         self.typehead_call3 = {
             'key_name': 'Employee ID',
-            'autocomplete_search': 'And'
+            'autocomplete_search[term]': 'And'
         }
 
         # Indexes form requests
@@ -1209,8 +1209,8 @@ class MDTUI(MUITestData):
         self.assertContains(response, '123456')
         self.assertContains(response, 'Iurii Garmash')
         # autocomplete (typehead) scripts rendered
-        self.assertContains(response, """connect_typeahead("#id_0", "Friends ID", '/mdtui/parallel/');""")
-        self.assertContains(response, """connect_typeahead("#id_1", "Friends Name", '/mdtui/parallel/');""")
+        self.assertContains(response, """connect_autocomplete("#id_0", "Friends ID", '/mdtui/parallel/');""")
+        self.assertContains(response, """connect_autocomplete("#id_1", "Friends Name", '/mdtui/parallel/');""")
         self.assertContains(response, 'This field is required')  # form renders errors
 
     def test_22_parallel_keys_indexing_proper(self):
@@ -1891,7 +1891,7 @@ class MDTUI(MUITestData):
         """
         typehead_call4 = {
             'key_name': 'Reporting Entity',
-            'autocomplete_search': 'JTG'
+            'autocomplete_search[term]': 'JTG'
         }
         # Selecting Document Type Rule
         url = reverse('mdtui-index-type')
@@ -1911,7 +1911,7 @@ class MDTUI(MUITestData):
         """
         typehead_call = {
             'key_name': 'Reporting Entity',
-            'autocomplete_search': '111'
+            'autocomplete_search[term]': '111'
         }
         # Selecting Document Type Rule
         url = reverse('mdtui-index-type')
@@ -2547,7 +2547,7 @@ class MDTUI(MUITestData):
         """
         typehead_call = {
             'key_name': 'Employee',
-            'autocomplete_search': 'And'
+            'autocomplete_search[term]': 'And'
         }
         # Selecting Document Type Rule
         url = reverse('mdtui-index-type')
@@ -3133,11 +3133,11 @@ class MDTUI(MUITestData):
         }
         typ_call_1 = {
             'key_name': 'Tests Uppercase Field',
-            'autocomplete_search': 'SOME DAT',
+            'autocomplete_search[term]': 'SOME DAT',
         }
         typ_call_2 = {
             'key_name': 'Employee',
-            'autocomplete_search': 'Andre',
+            'autocomplete_search[term]': 'Andre',
         }
         # Checking first document for unique index
         url = reverse('mdtui-edit', kwargs={'code': doc_name})
