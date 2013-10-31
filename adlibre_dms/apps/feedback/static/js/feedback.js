@@ -38,8 +38,8 @@ $(document).ready(function(){
     });
 
     function create_response(text){
-        var span = $('<span>');
-            span.hide()
+        var span = $('<span>')
+                .hide()
                 .addClass('response')
                 .html(text)
                 .appendTo(feedback.find('.section'))
