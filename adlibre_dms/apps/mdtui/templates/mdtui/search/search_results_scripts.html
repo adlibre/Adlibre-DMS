@@ -1,38 +1,38 @@
 
 <script type="text/javascript">
-    // Updates clonned table headers on user scroll
-    function UpdateTableHeaders() {
-        $("#results-table").each(function() {
-            var el             = $(this),
-                offset         = el.offset(),
-                scrollTop      = $(window).scrollTop(),
-                floatingHeader = $(".floatingHeader", this)
+    $(document).ready(function(){
+        // Updates clonned table headers on user scroll
+        function UpdateTableHeaders() {
+            $("#results-table").each(function() {
+                var el             = $(this),
+                    offset         = el.offset(),
+                    scrollTop      = $(window).scrollTop(),
+                    floatingHeader = $(".floatingHeader", this)
 
-            if ((scrollTop > offset.top) && (scrollTop < offset.top + el.height())) {
-                floatingHeader.css({
-                    "visibility": "visible"
-                });
-            } else {
-                floatingHeader.css({
-                    "visibility": "hidden"
-                });
-            }
-        });
-    }
-
-    // Updates TH width on render
-    function update_clone_th_widths(clonedHeaderRow) {
-        var originalHeaderRow = $("#results-table-head");
-        originalHeaderRow.children().children().each(function(index, value) {
-            clonedHeaderRow.children().children().each(function(cl_index, cl_value) {
-                if (cl_index==index) {
-                    $(cl_value).width($(value).width());
+                if ((scrollTop > offset.top) && (scrollTop < offset.top + el.height())) {
+                    floatingHeader.css({
+                        "visibility": "visible"
+                    });
+                } else {
+                    floatingHeader.css({
+                        "visibility": "hidden"
+                    });
                 }
             });
-        });
-    }
+        }
 
-    $(document).ready(function(){
+        // Updates TH width on render
+        function update_clone_th_widths(clonedHeaderRow) {
+            var originalHeaderRow = $("#results-table-head");
+            originalHeaderRow.children().children().each(function(index, value) {
+                clonedHeaderRow.children().children().each(function(cl_index, cl_value) {
+                    if (cl_index==index) {
+                        $(cl_value).width($(value).width());
+                    }
+                });
+            });
+            return this;
+        }
 
         function highlight_row(th) {
                 var col = $($(th).parent()).index();
@@ -103,10 +103,11 @@
             var clonedHeaderRow;
             clonedHeaderRow = $("#results-table-head", this);
             clonedHeaderRow
-                .before(clonedHeaderRow.clone())
-                .css("width", clonedHeaderRow.width())
-                .addClass("floatingHeader");
-            $(clonedHeaderRow).attr("id", "results-table-head-clone");
+                .before(clonedHeaderRow.clone()
+                            .attr("id", "results-table-head-clone")
+                            .css("width", clonedHeaderRow.width())
+                            .addClass("floatingHeader")
+                    );
             update_clone_th_widths(clonedHeaderRow);
         });
 
