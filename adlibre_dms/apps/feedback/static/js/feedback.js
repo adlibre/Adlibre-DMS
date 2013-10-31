@@ -37,6 +37,15 @@ $(document).ready(function(){
         });
     });
 
+    function create_response(text){
+        var span = $('<span>');
+            span.hide()
+                .addClass('response')
+                .html(text)
+                .appendTo(feedback.find('.section'))
+                .show();
+    }
+
     $('#feedback a.fb-submit').live('click',function(){
         var button = $(this);
         var textarea = feedback.find('textarea');
@@ -72,15 +81,7 @@ $(document).ready(function(){
 
                 button.fadeOut();
 
-                textarea.fadeOut(function(){
-                    var span = $('<span>',{
-                        class	: 'response',
-                        html		: text
-                    })
-                            .hide()
-                            .appendTo(feedback.find('.section'))
-                            .show();
-                }).val('');
+                textarea.fadeOut(create_response(text)).val('');
             }
         });
 
