@@ -3638,6 +3638,7 @@ class MDTUI(MUITestData):
         couch_doc = self._open_couchdoc(self.couchdb_name, new_doc_name)
         self.assertEqual(couch_doc['revisions']['1']['name'], new_doc_name + new_doc_revision_prefix)  # Revisions OK
         self.assertEqual(couch_doc['index_revisions']["2"]['mdt_indexes']["Employee"], "Yuri")  # Index Revisions OK
+        self.assertEqual(couch_doc['index_revisions']["2"]['metadata_old_id'], 'CCC-0002')  # Contains old doc ID
         self.assertEqual(couch_doc['metadata_description'], edit_doc_decription)  # Description OK
 
     def test_88_edit_document_revisions(self):

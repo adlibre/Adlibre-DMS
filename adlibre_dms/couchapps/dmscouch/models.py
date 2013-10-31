@@ -115,8 +115,11 @@ class CouchDocument(Document):
         db_info["mdt_indexes"] = self.mdt_indexes
         return db_info
 
-    def construct_index_revision_dict(self):
-        """Constructs current indexes revision and export into result dict"""
+    def construct_index_revision_dict(self, old_couchdoc_id=False):
+        """Constructs current indexes revision and export into result dict
+
+        @param old_couchdoc_id: either to include or not old document name into metadata list
+            mus contain old couchdoc name"""
         current_index_data = {
             'metadata_created_date':   self.metadata_created_date,
             'metadata_description':    self.metadata_description,
@@ -124,6 +127,8 @@ class CouchDocument(Document):
             'metadata_user_name':      self.metadata_user_name,
             'mdt_indexes':    self.mdt_indexes,
         }
+        if old_couchdoc_id:
+            current_index_data['metadata_old_id'] = old_couchdoc_id
         return current_index_data
 
     def set_doc_date(self, document):
@@ -231,12 +236,12 @@ class CouchDocument(Document):
         @param old_couchdoc: CouchDocument instance"""
         if not old_couchdoc.index_revisions:
             # Creating index_revisions initial data dictionary.
-            self.index_revisions = {'1': old_couchdoc.construct_index_revision_dict(), }
+            self.index_revisions = {'1': old_couchdoc.construct_index_revision_dict(old_couchdoc.id), }
         else:
             self.index_revisions = old_couchdoc.index_revisions
             # Appending new document indexes revision to revisions dict
             new_revision = self.index_revisions.__len__() + 1
-            self.index_revisions[str(new_revision)] = old_couchdoc.construct_index_revision_dict()
+            self.index_revisions[str(new_revision)] = old_couchdoc.construct_index_revision_dict(old_couchdoc.id)
         self.revisions = document.get_file_revisions_data()
         self.metadata_description = old_couchdoc.metadata_description
         if document.user:
