@@ -2,7 +2,7 @@
 Module: Metadata Template UI views helpers
 
 Project: Adlibre DMS
-Copyright: Adlibre Pty Ltd 2012
+Copyright: Adlibre Pty Ltd 2013
 License: See LICENSE for license information
 Author: Iurii Garmash
 """
@@ -18,6 +18,7 @@ from forms_representator import get_mdts_for_docrule
 from forms_representator import construct_edit_indexes_data
 from adlibre.date_converter import str_date_to_couch
 
+
 def initIndexesForm(request):
     """
     DocumentIndexForm/DocumentSearchForm initialization
@@ -25,6 +26,8 @@ def initIndexesForm(request):
     in case of GET returns an empty base form,
     in case of POST returns populated (from request) form instance.
     in both cases form is rendered with MDT index fields
+
+    @param request: is a Django request object
     """
     details = None
     search = determine_search_req(request)
@@ -82,11 +85,13 @@ def initIndexesForm(request):
     form.validation_ok()
     return form
 
+
 def processDocumentIndexForm(request):
-    """
-    Handles document index form validation/population/data handling
+    """Handles document index form validation/population/data handling
 
     Works for search/indexing calls
+
+    @param request: is a Django request object
     """
     form = initIndexesForm(request)
     secondary_indexes = {}
@@ -101,7 +106,16 @@ def processDocumentIndexForm(request):
         else:
             return None
 
+
 def processEditDocumentIndexForm(request, doc):
+    """Handles document index form validation/population/data handling
+
+    Works for edit calls
+
+    @param request: is a Django request object
+    @param doc: is a DMS Object() instance
+    """
+    # TODO: maybe refactor this out to one function with previous one
     form = initEditIndexesForm(request, doc)
     secondary_indexes = {}
     if form.validation_ok():
@@ -116,12 +130,19 @@ def processEditDocumentIndexForm(request, doc):
     else:
         return None
 
+
 def process_indexes_field(key, field, data):
-    """Convertor of field sbmited data to DMS secondary key"""
+    """Converter of field submitted data to DMS secondary key
+
+    It is a "Cleanup" function for unifying user inputs and indexing data sanity in database postage
+
+    @param key: is a DMS secondary key
+    @param field: is a DMS indexes form field (Django Field() object)
+    @param data: is a set of values of fields processed, usually take from request.post validated"""
     index_tuple = ()
     # UPPERCASE Init if set attribute
     force_upper = False
-    if "is_uppercase" in field.__dict__ and field.is_uppercase == True:
+    if "is_uppercase" in field.__dict__ and field.is_uppercase is True:
         force_upper = True
     # Choices field processing init
     choice_field = False
@@ -132,12 +153,12 @@ def process_indexes_field(key, field, data):
         if unicode(key) in data.iterkeys():
             searched_value = int(data[unicode(key)])
             for choice in field.choices:
-                if choice[0]==searched_value:
+                if choice[0] == searched_value:
                     fvalue = choice[1]
                     break
         else:
             for choice in field.choices:
-                if choice[0]==key:
+                if choice[0] == key:
                     fvalue = choice[1]
                     break
         if fvalue:
@@ -158,11 +179,17 @@ def process_indexes_field(key, field, data):
                     index_tuple = (key, data[unicode(key)].upper().strip(' \t\n\r'))
     return index_tuple
 
+
 def initEditIndexesForm(request, doc, given_indexes=None):
     """
     Edit form creating with population from existing document
 
     Inherits initIndexesForm with faking it's data to be rendered properly
+
+    @param request: is a Django request object
+    @param doc: is a DMS Object() instance
+    @param given_indexes: is a set of indexes to populate for upon initializations.
+        e.g. instantiate form with provided data instead of empty fields.
     """
     initial_indexes = None
     docrule_id = str(doc.get_docrule().id)
@@ -194,22 +221,26 @@ def initEditIndexesForm(request, doc, given_indexes=None):
         form.validation_ok()
     return form
 
-def determine_search_req(request):
-    """
-    Helper to find out if provided request is search or indexing
 
-    Returns Boolean value
+def determine_search_req(request):
+    """Helper to find out if provided request is search or indexing
+
+    @return Boolean value
     Currently determining if search by the url
     Warning! (MUST BE CHANGED IF RENAMING SEARCH URL)
-    """
+
+    @param request: is a Django request object"""
     if 'search' in request.path:
         search = True
     else:
         search = False
     return search
 
+
 def get_mdts_for_documents(documents):
-    """Returns list of mdts for provided documents list"""
+    """Returns list of mdts for provided documents list
+
+    @param documents: is a set of special CouchDB documents JSON to process"""
     indexes = {}
     resp = None
     if documents:
@@ -220,8 +251,11 @@ def get_mdts_for_documents(documents):
         resp = indexes.keys()
     return resp
 
+
 def extract_secondary_keys_from_form(form):
-    """Extracts text (autocomplete capable) secondary keys list from Indexes form."""
+    """Extracts text (autocomplete capable) secondary keys list from Indexes form.
+
+    @param form: is a MUI secondary indexes form object (Django Form() object)"""
     keys_list = []
     for field_id, field in form.fields.iteritems():
         if 'field_name' in field.__dict__.iterkeys():
@@ -231,14 +265,16 @@ def extract_secondary_keys_from_form(form):
                     keys_list.append(field.field_name)
     return keys_list
 
+
 def unify_index_info_couch_dates_fmt(index_info):
-    """
-    Applies standardization to secondary keys 'date' type keys.
+    """Applies standardization to secondary keys 'date' type keys.
+
+    @param index_info: is a index data to workout for
     """
     clean_info = {}
     index_keys = [key for key in index_info.iterkeys()]
     for index_key in index_keys:
-        if not index_key=='date':
+        if not index_key == 'date':
             try:
                 value = index_info[index_key]
                 # Simple check if we can convert it...
@@ -251,39 +287,52 @@ def unify_index_info_couch_dates_fmt(index_info):
             clean_info[index_key] = index_info[index_key]
     return clean_info
 
+
 def _cleanup_session_var(request, var):
-    """Cleanup Session var helper"""
+    """Cleanup Session var helper
+
+    @param request: is a Django request object
+    @param var: is a variable to cleanup session for"""
     try:
         request.session[var] = None
         del request.session[var]
     except KeyError:
         pass
 
+
 def cleanup_search_session(request):
-    """Makes MDTUI forget abut found search data."""
-    vars = (
-            'document_search_dict',
-            'search_docrule_id',
-            'search_mdt_id',
-            'search_docrule_ids',
-            'searching_docrule_id',
-            'search_results',
-            "edit_mdts",
+    """Makes MDTUI forget abut found search data.
+
+    @param request: is a Django request object"""
+    variables = (
+        'document_search_dict',
+        'search_docrule_id',
+        'search_mdt_id',
+        'search_docrule_ids',
+        'searching_docrule_id',
+        'search_results',
+        "edit_mdts",
     )
-    for var in vars:
+    for var in variables:
         _cleanup_session_var(request, var)
+
 
 def cleanup_indexing_session(request):
-    """Makes MDTUI forget abut indexing data entered before."""
-    vars = (
-            'document_keys_dict',
-            'indexing_docrule_id',
-            'barcode',
-            "edit_mdts",
+    """Makes MDTUI forget abut indexing data entered before.
+
+    @param request: is a Django request object"""
+    variables = (
+        'document_keys_dict',
+        'indexing_docrule_id',
+        'barcode',
+        "edit_mdts",
     )
-    for var in vars:
+    for var in variables:
         _cleanup_session_var(request, var)
 
+
 def cleanup_mdts(request):
-    """Cleanup MDT's in improvised cache."""
+    """Cleanup MDT's in improvised cache.
+
+    @param request: is a Django request object"""
     _cleanup_session_var(request, 'mdts')
