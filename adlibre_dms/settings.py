@@ -1,8 +1,7 @@
-# Django settings for Adlibre DMS project.
+""" Django settings for Adlibre DMS project. """
 
 import os
 import sys
-from django.conf import global_settings
 
 
 PROJECT_PATH = os.path.abspath(os.path.split(__file__)[0])
@@ -12,7 +11,8 @@ sys.path.append(os.path.join(PROJECT_PATH, 'libraries'))
 sys.path.append(os.path.join(PROJECT_PATH, 'dmsplugins'))
 
 if len(sys.argv) > 1:
-    TEST = ['manage.py', 'test'] == [os.path.basename(sys.argv[0]), sys.argv[1],]  # Define TEST Variable if running unit tests
+    # Define TEST Variable if running unit tests
+    TEST = ['manage.py', 'test'] == [os.path.basename(sys.argv[0]), sys.argv[1], ]
 else:
     TEST = False
 DEBUG = True
@@ -26,8 +26,8 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': os.path.join(PROJECT_PATH, '..', 'db', 'dms.sqlite'),                      # Or path to database file if using sqlite3.
+        'ENGINE': 'django.db.backends.sqlite3',  # Add 'postgresql_psycopg2', 'postgresql', 'mysql' or 'sqlite3'
+        'NAME': os.path.join(PROJECT_PATH, '..', 'db', 'dms.sqlite'),  # Or path to database file if using sqlite3.
         'USER': '',                      # Not used with sqlite3.
         'PASSWORD': '',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
@@ -92,7 +92,7 @@ USE_L10N = True
 # Example: "/home/media/media.lawrence.com/media/"
 MEDIA_ROOT = os.path.join(PROJECT_PATH, '..', 'www', 'media')
 DOCUMENT_ROOT = os.path.join(PROJECT_PATH, '..', 'documents')
-FIXTURE_DIRS = ( os.path.join(PROJECT_PATH, '..', 'fixtures'), )
+FIXTURE_DIRS = (os.path.join(PROJECT_PATH, '..', 'fixtures'), )
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -122,7 +122,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    #'django.contrib.staticfiles.finders.DefaultStorageFinder',
     'compressor.finders.CompressorFinder',
 )
 
@@ -133,7 +133,7 @@ SECRET_KEY = 'z@ndqd972=9vmw0_5i^y!zwo59sxu*yru#3)5&4l*$eokb6_bp'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
+    #'django.template.loaders.eggs.Loader',
     'adlibre.freeloader.load_template_source',
     'apptemplates.Loader',
 )
@@ -192,8 +192,8 @@ PROJECT_APPS = (
     'browser',
     'dms_plugins',
     'doc_codes',
-    'dmscouch', # main couchapp
-    'mdtcouch', # Metadata Templates app
+    'dmscouch',
+    'mdtcouch',
     # DMS Standalone
     'ui',
     'mdtui',
@@ -211,8 +211,8 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.markup',
     'django.contrib.sessions',
-#    'django.contrib.sites',
-#    'django.contrib.flatpages',
+    #'django.contrib.sites',
+    #'django.contrib.flatpages',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
@@ -223,9 +223,9 @@ INSTALLED_APPS = (
     'piston',
     'djangoplugins',
     'taggit',
-    'couchdbkit.ext.django', # needed for CouchDB usage
-    'widget_tweaks', # used by MUI templates
-    'compressor', # MUI js / css compression
+    'couchdbkit.ext.django',  # needed for CouchDB usage
+    'widget_tweaks',  # used by MUI templates
+    'compressor',  # MUI js / css compression
     'django-log-file-viewer',
     'django_jenkins',
 ) + PROJECT_APPS
@@ -246,11 +246,13 @@ INSTALLED_APPS = (
 # See http://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.
 import logging
+
+
 class NoMessageFailuresFilter(logging.Filter):
-    """
-    Filter django message failures during unit tests!
-    """
+    """Filter django message failures during unit tests!"""
     def filter(self, record):
+        """Main function
+        @param record: is a logging entry instance"""
         if record.exc_info:
             from django.contrib.messages.api import MessageFailure
             exception = record.exc_info[1]
@@ -277,7 +279,7 @@ if TEST:
                 'level': 'DEBUG',
                 'class': 'django.utils.log.NullHandler',
             },
-            'console':{
+            'console': {
                 'level': 'DEBUG',
                 'class': 'logging.StreamHandler',
                 'formatter': 'simple'
@@ -291,13 +293,13 @@ if TEST:
         'loggers': {
             # Filter out restkit to null
             'restkit': {
-                'handlers': ['null',],
+                'handlers': ['null', ],
                 'level': 'DEBUG',
                 'propagate': False,
             },
             # Default logger, ERRORS Only
             '': {
-                'handlers': ['console',],
+                'handlers': ['console', ],
                 'level': 'ERROR',
                 'filters': ['no_message_failures'],
                 'propagate': True,
@@ -326,13 +328,13 @@ if DEBUG:
             'verbose': {
                 'format': '%(asctime)s [%(levelname)s] %(name)s %(message)s'
             },
-            },
+        },
         'handlers': {
             'null': {
                 'level': 'DEBUG',
                 'class': 'django.utils.log.NullHandler',
-                },
-            'console':{
+            },
+            'console': {
                 'level': 'DEBUG',
                 'class': 'logging.StreamHandler',
                 'formatter': 'simple'
@@ -342,48 +344,48 @@ if DEBUG:
                 'class': 'logging.handlers.TimedRotatingFileHandler',
                 'filename': os.path.join(PROJECT_PATH, '..', 'log', 'dms.log'),
                 'when': 'midnight',
-                'interval': 1, # 1 day
-                'backupCount': 14, # two weeks
+                'interval': 1,  # 1 day
+                'backupCount': 14,  # two weeks
                 'formatter': 'verbose',
-                },
+            },
             'mail_admins': {
                 'level': 'ERROR',
                 'class': 'django.utils.log.AdminEmailHandler',
-                }
+            }
         },
         'filters': {
             'no_message_failures': {
                 '()': NoMessageFailuresFilter,
-                },
             },
+        },
         'loggers': {
             # Filter out restkit to null
             'restkit': {
-                'handlers': ['null',],
+                'handlers': ['null', ],
                 'level': 'DEBUG',
                 'propagate': False,
-                },
+            },
             # Default logger
             '': {
                 'handlers': ['file'],  # , 'console'],  # remove 'console' to see clear output...
                 'level': 'INFO',  # Set to level 'INFO' to see clear output...
                 'filters': ['no_message_failures'],  # enable to clear out output...
                 'propagate': True,
-                },
+            },
             # DMS logger
             'dms': {
                 'handlers': ['file'],
                 'level': 'DEBUG',
                 'propagate': False,
-                },
+            },
             # Django 500 error logger
             'django.request': {
                 'handlers': ['mail_admins'],
                 'level': 'ERROR',
                 'propagate': True,
                 'filters': ['no_message_failures'],
-                },
-            }
+            },
+        }
     }
 
 # Caching settings
@@ -435,9 +437,9 @@ LOG_FILES_DIR = os.path.join(PROJECT_PATH, '..', '..', '..', '..', 'log')
 LOG_FILES_RE = '(?P<date>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3})\s\[(?P<type>[A-Z]+)\]\s(?P<message>.+)'
 LOG_FILES_PAGINATE_LINES = 20
 
-APPEND_SLASH = False # Stop Django from adding slashes to urls
+APPEND_SLASH = False  # Stop Django from adding slashes to urls
 
-RESTRUCTUREDTEXT_FILTER_SETTINGS = { 'doctitle_xform': 0, } # stop first heading being munged for page title.
+RESTRUCTUREDTEXT_FILTER_SETTINGS = {'doctitle_xform': 0, }  # stop first heading being munged for page title.
 
 # Compressor
 COMPRESS_URL = STATIC_URL
@@ -450,7 +452,7 @@ COMPRESS_ENABLED = False
 #
 
 # name of template theme, used by context_processors.py.
-THEME_NAME = 'solid' # 'adlibre' or 'basic' or 'solid'
+THEME_NAME = 'solid'  # 'adlibre' or 'basic' or 'solid'
 
 # Date/time formats used throughout MUI app and (in future DMS forms)
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"  # format that is used in document metadata
