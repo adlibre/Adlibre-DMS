@@ -30,10 +30,12 @@ def aui_url(context):
     """ Returns Context Variable Containing Product version """
     try:
         url = settings.AUI_URL
+        pool_id = settings.AUI_POOL_ID
     except AttributeError:
         url = False
+        pool_id = ''
         pass
-    return {'AUI_URL': url}
+    return {'AUI_URL': url, 'AUI_POOL_ID': pool_id}
 
 def date_format(context):
     """ Returns Context Variable Containing Date format currently used """
