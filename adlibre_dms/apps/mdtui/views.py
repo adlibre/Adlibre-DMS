@@ -78,10 +78,15 @@ MDTUI_ERROR_STRINGS = {
 
 MUI_SEARCH_PAGINATE = getattr(settings, 'MUI_SEARCH_PAGINATE', 20)
 
+
 @login_required
 @group_required(SEC_GROUP_NAMES['search'])
 def search_type(request, step, template='mdtui/search.html'):
-    """Search Step 1: Select Search MDT"""
+    """Search Step 1: Select Search MDT
+
+    @param request: is a Django request object
+    @param step: is a current step name (for template rendering)
+    @param template: is a name of template for this view"""
     warnings = []
     cleanup_indexing_session(request)
 
@@ -197,7 +202,11 @@ def search_type(request, step, template='mdtui/search.html'):
 @login_required
 @group_required(SEC_GROUP_NAMES['search'])
 def search_options(request, step, template='mdtui/search.html'):
-    """Search Step 2: Search Options"""
+    """Search Step 2: Search Options
+
+    @param request: is a Django request object
+    @param step: is a current step name (for template rendering)
+    @param template: is a name of template for this view"""
     warnings = []
     autocomplete_list = None
     mdt_id = None
@@ -216,7 +225,7 @@ def search_options(request, step, template='mdtui/search.html'):
     try:
         form = initIndexesForm(request)
         autocomplete_list = extract_secondary_keys_from_form(form)
-    except (RequestError,AttributeError) :
+    except (RequestError, AttributeError):
         form = DocumentSearchOptionsForm
         warnings.append(MDTUI_ERROR_STRINGS['NO_DB'])
 
@@ -239,10 +248,15 @@ def search_options(request, step, template='mdtui/search.html'):
     }
     return render_to_response(template, context, context_instance=RequestContext(request))
 
+
 @login_required
 @group_required(SEC_GROUP_NAMES['search'])
 def search_results(request, step=None, template='mdtui/search.html'):
-    """Search Step 3: Search Results"""
+    """Search Step 3: Search Results
+
+    @param request: is a Django request object
+    @param step: is a current step name (for template rendering)
+    @param template: is a name of template for this view"""
     document_keys = None
     docrule_ids = []
     document_names = []
@@ -250,7 +264,7 @@ def search_results(request, step=None, template='mdtui/search.html'):
     mdts_list = []
     paginated_documents = []
     export = False
-    cache_documents_for = 3600 # Seconds
+    cache_documents_for = 3600  # Seconds
     page = request.GET.get('page')
     force_clean_cache = request.session.get('cleanup_caches', False)
     # Sorting UI interactions
@@ -300,7 +314,7 @@ def search_results(request, step=None, template='mdtui/search.html'):
     if not docrule_ids:
         try:
             # If not exists making list for docrules search
-            docrule_ids = [request.session['searching_docrule_id'],]
+            docrule_ids = [request.session['searching_docrule_id'], ]
         except KeyError:
             pass
 
@@ -347,14 +361,14 @@ def search_results(request, step=None, template='mdtui/search.html'):
                 'sorting_key': sorting_field_query,
                 'sorting_order': query_order,
             })
-            search_results = DMSSearchManager().search_dms(query)
-            search_errors = search_results.get_errors()
+            search_response = DMSSearchManager().search_dms(query)
+            search_errors = search_response.get_errors()
             if search_errors:
                 for error in search_errors:
                     warnings.append(error)
                 document_names = []
             else:
-                document_names = search_results.get_document_names()
+                document_names = search_response.get_document_names()
         cache.set(cache_key, document_names, cache_documents_for)
         log.debug('search_results: Got search results with amount of results: %s' % document_names)
     else:
@@ -386,20 +400,27 @@ def search_results(request, step=None, template='mdtui/search.html'):
         paginated_documents.object_list = paginated_documents_objects
         mdts_list = get_mdts_for_documents(paginated_documents_objects)
 
-    context = { 'step': step,
-                'paginated_documents': paginated_documents,
-                'page': page,
-                'document_keys': cleaned_document_keys,
-                'mdts': mdts_list,
-                'warnings': warnings,
-                'sorting_field': sorting_field,
-                'order': order
-                }
+    context = {
+        'step': step,
+        'paginated_documents': paginated_documents,
+        'page': page,
+        'document_keys': cleaned_document_keys,
+        'mdts': mdts_list,
+        'warnings': warnings,
+        'sorting_field': sorting_field,
+        'order': order
+    }
     return render_to_response(template, context, context_instance=RequestContext(request))
+
 
 @login_required
 def view_object(request, code, step, template='mdtui/view.html'):
-    """View PDF Document"""
+    """View PDF Document
+
+    @param request: is a Django request object
+    @param code: is a DMS Object() code for view interactions
+    @param step: is a current step name (for template rendering)
+    @param template: is a name of template for this view"""
     # TODO: Add certain revision view possibility for "edit revisions" view
     revision = request.GET.get('revision', None)
     pdf_url = reverse('mdtui-download-pdf', kwargs={'code': code})
@@ -422,10 +443,16 @@ def view_object(request, code, step, template='mdtui/view.html'):
             context.update({'mimetype': 'stub_document', 'pdf_url': stub_doc_url})
     return render(request, template, context)
 
+
 @login_required
 @group_required(SEC_GROUP_NAMES['edit_index'])
 def edit(request, code, step='edit', template='mdtui/indexing.html'):
-    """Indexing step: Edit. Made for editing indexes of document that is indexed already."""
+    """Indexing step: Edit. Made for editing indexes of document that is indexed already.
+
+    @param request: is a Django request object
+    @param code: is a DMS Object() code for view interactions
+    @param step: is a current step name (for template rendering)
+    @param template: is a name of template for this view"""
     context = {}
     warnings = []
     error_warnings = []
@@ -488,25 +515,32 @@ def edit(request, code, step='edit', template='mdtui/indexing.html'):
     if form:
         autocomplete_list = extract_secondary_keys_from_form(form)
         # No form is possible when document does not exist
-        context.update( {'form': form,} )
+        context.update({'form': form, })
     # In case of no doc type (empty document) fix
     type_name = None
     if doc.docrule:
         type_name = doc.get_docrule().title
-    context.update( { 'step': step,
-                      'doc_name': code,
-                      'type_name': type_name,
-                      'warnings': warnings,
-                      'autocomplete_fields': autocomplete_list,
-                      'edit_return': return_url,
-                      'error_warnings': error_warnings,
-                      })
+    context.update({
+        'step': step,
+        'doc_name': code,
+        'type_name': type_name,
+        'warnings': warnings,
+        'autocomplete_fields': autocomplete_list,
+        'edit_return': return_url,
+        'error_warnings': error_warnings,
+    })
     return render(request, template, context)
+
 
 @login_required
 @group_required(SEC_GROUP_NAMES['edit_index'])
 def edit_type(request, code, step='edit_type', template='mdtui/indexing.html'):
-    """Indexing step: Edit. Editing document type (in fact document rename)"""
+    """Indexing step: Edit. Editing document type (in fact document rename)
+
+    @param request: is a Django request object
+    @param code: is a DMS Object() code for view interactions
+    @param step: is a current step name (for template rendering)
+    @param template: is a name of template for this view"""
     context = {}
     warnings = [MDTUI_ERROR_STRINGS['EDIT_TYPE_WARNING'], ]
     error_warnings = []
@@ -515,9 +549,9 @@ def edit_type(request, code, step='edit_type', template='mdtui/indexing.html'):
     return_url = reverse('mdtui-edit', kwargs={'code': code})
 
     log.debug('indexing_edit_type view called with code: %s' % code)
-    doc = processor.read(code, {'user': request.user,})
+    doc = processor.read(code, {'user': request.user, })
     if not processor.errors:
-        empty_form = make_document_type_select_form(request.user, True, doc.get_docrule())
+        empty_form = make_document_type_select_form(request.user, docrule_initial=doc.get_docrule())
         form = empty_form(request.POST or None)
         if request.POST:
             if form.is_valid():
@@ -548,10 +582,14 @@ def edit_type(request, code, step='edit_type', template='mdtui/indexing.html'):
     })
     return render(request, template, context)
 
+
 @login_required
 @group_required(SEC_GROUP_NAMES['edit_index'])
 def edit_file_delete(request, code):
-    """Deletes specified code or revision from system (Marks deleted)"""
+    """Deletes specified code or revision from system (Marks deleted)
+
+    @param request: is a Django request object
+    @param code is a DMS Object() code for view interactions"""
     # Decision of where to go back after or instead of removal
     return_url = reverse('mdtui-home')
     if 'edit_return' in request.session:
@@ -576,10 +614,16 @@ def edit_file_delete(request, code):
                 return HttpResponseRedirect(return_url)
     return HttpResponseRedirect(return_url)
 
+
 @login_required
 @group_required(SEC_GROUP_NAMES['index'])
 def edit_file_revisions(request, code, step='edit_revisions', template='mdtui/indexing.html'):
-    """Editing file revisions for given code"""
+    """Editing file revisions for given code
+
+    @param request: is a Django request object
+    @param code: is a DMS Object() code for view interactions
+    @param step: is a current step name (for template rendering)
+    @param template: is a name of template for this view"""
     form = DocumentUploadForm(request.POST or None, request.FILES or None)
     revision_file = request.FILES.get('file', None)
     errors = []
@@ -614,10 +658,15 @@ def edit_file_revisions(request, code, step='edit_revisions', template='mdtui/in
     context.update({'error_warnings': errors})
     return render(request, template, context)
 
+
 @login_required
 @group_required(SEC_GROUP_NAMES['edit_index'])
 def edit_result(request, step='edit_finish', template='mdtui/indexing.html'):
-    """Confirmation step for editing indexes"""
+    """Confirmation step for editing indexes
+
+    @param request: is a Django request object
+    @param step: is a current step name (for template rendering)
+    @param template: is a name of template for this view"""
     # initialising context
     required_vars = ('edit_processor_indexes', 'edit_index_barcode', 'old_document_keys', 'edit_return', "edit_mdts")
     variables = {}
@@ -658,22 +707,33 @@ def edit_result(request, step='edit_finish', template='mdtui/indexing.html'):
         for index, value in variables['edit_processor_indexes'].iteritems():
             if not index in ['metadata_user_name', 'metadata_user_id']:
                 context_secondary_indexes[index] = value
+    if 'description' in variables['edit_processor_indexes']:
+        old_description = variables['old_document_keys']['description']
+    else:
+        old_description = ''
     context = {
         'step': step,
         'document_keys': context_secondary_indexes,
+        'new_description': context_secondary_indexes.get('description', None),
         'barcode': variables['edit_index_barcode'],
         'old_document_keys': variables['old_document_keys'],
+        'old_description': old_description,
         'edit_return': variables['edit_return'],
         'warnings': warnings,
     }
     return render(request, template, context)
 
+
 @login_required
 @group_required(SEC_GROUP_NAMES['index'])
 def indexing_select_type(request, step=None, template='mdtui/indexing.html'):
-    """Indexing: Step 1 : Select Document Type"""
+    """Indexing: Step 1 : Select Document Type
+
+    @param request: is a Django request object
+    @param step: is a current step name (for template rendering)
+    @param template: is a name of template for this view"""
     # Context init
-    context = {'step': step,}
+    context = {'step': step}
     docrule = None
     active_docrule = None
     warnings = []
@@ -712,7 +772,11 @@ def indexing_select_type(request, step=None, template='mdtui/indexing.html'):
 @login_required
 @group_required(SEC_GROUP_NAMES['index'])
 def indexing_details(request, step=None, template='mdtui/indexing.html'):
-    """Indexing: Step 2 : Index Details"""
+    """Indexing: Step 2 : Index Details
+
+    @param request: is a Django request object
+    @param step: is a current step name (for template rendering)
+    @param template: is a name of template for this view"""
     # Context init
     context = {}
     document_keys = None
@@ -731,7 +795,8 @@ def indexing_details(request, step=None, template='mdtui/indexing.html'):
     except KeyError:
         pass
 
-    log.debug('indexing_details view called with docrule_id: %s, document_keys: %s, warnings: %s' % (docrule_id, document_keys, warnings))
+    log.debug('indexing_details view called with docrule_id: %s, document_keys: %s, warnings: %s' %
+              (docrule_id, document_keys, warnings))
     if request.POST:
         secondary_indexes = processDocumentIndexForm(request)
         if secondary_indexes:
@@ -762,20 +827,25 @@ def indexing_details(request, step=None, template='mdtui/indexing.html'):
 
     autocomplete_list = extract_secondary_keys_from_form(form)
 
-    context.update( { 'step': step,
-                      'form': form,
-                      'document_keys': document_keys,
-                      'autocomplete_fields': autocomplete_list,
-                      'warnings': warnings,
-                      'error_warnings': errors,
-                    })
+    context.update({
+        'step': step,
+        'form': form,
+        'document_keys': document_keys,
+        'autocomplete_fields': autocomplete_list,
+        'warnings': warnings,
+        'error_warnings': errors,
+    })
     return render_to_response(template, context, context_instance=RequestContext(request))
 
 
 @login_required
 @group_required(SEC_GROUP_NAMES['index'])
 def indexing_source(request, step=None, template='mdtui/indexing.html'):
-    """Indexing: Step 3: Upload File / Associate File / Print Barcode"""
+    """Indexing: Step 3: Upload File / Associate File / Print Barcode
+
+    @param request: is a Django request object
+    @param step: is a current step name (for template rendering)
+    @param template: is a name of template for this view"""
     context = {}
     warnings = []
     valid_call = True
@@ -789,7 +859,7 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
         ('docrule', 'indexing_docrule_id', 'NO_DOCRULE'),
     ]:
         try:
-            temp_vars[var_name] = None # Make sure it will definitely be there (Proper init)
+            temp_vars[var_name] = None  # Make sure it will definitely be there (Proper init)
             temp_var = request.session[context_var]
             temp_vars[var_name] = temp_var
         except KeyError:
@@ -812,7 +882,8 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
     else:
         barcode_form = BarcodePrintedForm(request.POST or None)
 
-    log.debug('indexing_source view called with document_keys: %s, barcode: %s, index_info: %s, docrule: %s' % (document_keys, barcode, index_info, docrule))
+    log.debug('indexing_source view called with document_keys: %s, barcode: %s, index_info: %s, docrule: %s' %
+              (document_keys, barcode, index_info, docrule))
     # Appending warnings for creating a new parrallel key/value pair.
     new_sec_key_pairs = check_for_secondary_keys_pairs(index_info, docrule)
     if new_sec_key_pairs:
@@ -845,6 +916,7 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
                 return HttpResponseRedirect(reverse('mdtui-index-finished'))
             else:
                 # FIXME: dodgy error handling
+                log.error(str(processor.errors))
                 return HttpResponse(str(processor.errors))
         else:
             warnings.append(MDTUI_ERROR_STRINGS['NOT_VALID_INDEXING'])
@@ -860,17 +932,24 @@ def indexing_source(request, step=None, template='mdtui/indexing.html'):
     })
     return render_to_response(template, context, context_instance=RequestContext(request))
 
+
 @login_required
 @group_required(SEC_GROUP_NAMES['index'])
 def indexing_finished(request, step=None, template='mdtui/indexing.html'):
-    """Indexing: Step 4: Finished"""
-    context = { 'step': step,  }
-    for name, item in ( ('document_keys', 'document_keys_dict'),
-                        ('barcode', 'barcode'),
-                        ('docrule_id', 'indexing_docrule_id') ):
+    """Indexing: Step 4: Finished
+
+    @param request: is a Django request object
+    @param step: is a current step name (for template rendering)
+    @param template: is a name of template for this view"""
+    context = {'step': step}
+    for name, item in (
+            ('document_keys', 'document_keys_dict'),
+            ('barcode', 'barcode'),
+            ('docrule_id', 'indexing_docrule_id')
+    ):
         if item in request.session:
             try:
-                context.update({name: request.session[item],})
+                context.update({name: request.session[item], })
             except KeyError:
                 pass
 
@@ -885,11 +964,12 @@ def indexing_finished(request, step=None, template='mdtui/indexing.html'):
 
 @login_required
 def mdt_parallel_keys(request):
-    """
-    Returns suggestions for typeahead.
+    """Returns suggestions for autocomplete
 
     Renders parallel keys and simple "one key" requests.
     NB, Don't rename this to parallel_keys. It conflicts with imported lib of same name.
+
+    @param request: is a Django request object
     """
     # Limiting autocomplete to start searching from NUMBER of keys
     # Change it to 0 to search all, starting from empty value
@@ -901,7 +981,7 @@ def mdt_parallel_keys(request):
     autocomplete_req = None
     docrule_id = None
     key_name = None
-    doc_mdts={}
+    doc_mdts = {}
     resp = []
     # Trying to get docrule for indexing calls
     try:
@@ -952,7 +1032,10 @@ def mdt_parallel_keys(request):
 
 @login_required
 def download_pdf(request, code):
-    """Returns Document For Download"""
+    """Returns Document For Download
+
+    @param request: Django request object
+    @param code: is a DMS Object() code to retrieve"""
     # right now we just redirect to API, but in future we might want to decouple from API app.
     revision = request.GET.get('revision', None)
     url = reverse('api_file', kwargs={'code': code, 'suggested_format': 'pdf'})

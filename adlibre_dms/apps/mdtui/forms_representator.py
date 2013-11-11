@@ -26,9 +26,10 @@ SEARCH_STRING_REPR = {
     'id_from': u'_from',
     'id_to': u'_to',
     'MDT_SEARCH': u"Custom Search",
-    }
+}
 
 log = logging.getLogger('dms.mdtui.views')
+
 
 def get_mdts_for_docrule(docrule_id):
     """
@@ -47,6 +48,84 @@ def get_mdts_for_docrule(docrule_id):
     else:
         log.debug("No MDT's found")
     return mdts_dict
+
+
+def render_choice_field(counter, field_value, init_dict):
+    """Form fields renderer for data type CHOICE
+
+    @param counter: number of field in a form
+    @param field_value: additional field data to render a field
+    @param init_dict: is a set of optional initial values"""
+    mdt_choices = field_value['choices']
+    choices = zip(range(mdt_choices.__len__()), mdt_choices)
+    initial_choice = ('', '')
+    if unicode(counter) in init_dict and init_dict[unicode(counter)]:
+        # Has initial value
+        choice_value = init_dict[unicode(counter)]
+        for choice in choices:
+            if choice[1] == choice_value:
+                initial_choice = choice
+    return forms.ChoiceField(
+        choices,
+        label=field_value["field_name"],
+        help_text=field_value["description"],
+        initial=initial_choice
+    )
+
+
+def render_string_field(counter, field_value, init_dict):
+    """Form fields renderer for data type STRING
+
+    @param counter: number of field in a form
+    @param field_value: additional field data to render a field
+    @param init_dict: is a set of optional initial values"""
+    if "length" in field_value.iterkeys():
+        max_length = field_value["length"]
+    else:
+        max_length = 100
+    initial = None
+    if unicode(counter) in init_dict and init_dict[unicode(counter)]:
+        # Has initial value
+        initial = init_dict[unicode(counter)]
+    return forms.CharField(
+        label=field_value["field_name"],
+        help_text=field_value["description"],
+        max_length=max_length,
+        initial=initial
+    )
+
+
+def render_integer_field(counter, field_value, init_dict):
+    """Form fields renderer for data type INTEGER
+
+    @param counter: number of field in a form
+    @param field_value: additional field data to render a field
+    @param init_dict: is a set of optional initial values"""
+    initial = None
+    if unicode(counter) in init_dict and init_dict[unicode(counter)]:
+        # Has initial value
+        initial = init_dict[unicode(counter)]
+    return forms.IntegerField(
+        label=field_value["field_name"],
+        help_text=field_value["description"],
+        initial=initial
+    )
+
+
+def render_date_field(counter, field_value, init_dict, label=False):
+    # Normally adding only one field for indexing
+    initial = None
+    if unicode(counter) in init_dict and init_dict[unicode(counter)]:
+        # Has initial value
+        initial = init_dict[unicode(counter)]
+    if not label:
+        label = field_value["field_name"]
+    return forms.DateField(
+        label=label,
+        help_text=field_value["description"],
+        initial=initial
+    )
+
 
 def render_fields_from_docrules(mdts_dict, init_dict=None, search=False):
     """
@@ -68,73 +147,29 @@ def render_fields_from_docrules(mdts_dict, init_dict=None, search=False):
             sorted_fields.sort()
             for field_key, field_value in sorted_fields:
                 form_field = None
-                if field_value["type"]==u'choice':
-                    mdt_choices = field_value['choices']
-                    choices = zip(range(mdt_choices.__len__()), mdt_choices)
-                    if unicode(counter) in init_dict and init_dict[unicode(counter)]:
-                        # Has initial value
-                        choice_value = init_dict[unicode(counter)]
-                        initial_choice = ('', '')
-                        for choice in choices:
-                            if choice[1]==choice_value:
-                                initial_choice = choice
-                        form_field = forms.ChoiceField(choices, label=field_value["field_name"], help_text=field_value["description"], initial=initial_choice)
-                    else:
-                        # Blank field
-                        form_field = forms.ChoiceField(choices, label=field_value["field_name"], help_text=field_value["description"])
-                if field_value["type"]==u'integer':
-                    if unicode(counter) in init_dict and init_dict[unicode(counter)]:
-                        # Has initial value
-                        form_field = forms.IntegerField(label=field_value["field_name"], help_text=field_value["description"], initial=init_dict[unicode(counter)])
-                    else:
-                        # Blank field
-                        form_field = forms.IntegerField(label=field_value["field_name"], help_text=field_value["description"])
-                if field_value["type"]==u'string':
-                    try:
-                        max_length = field_value["length"]
-                    except KeyError:
-                        max_length=100
-                    if unicode(counter) in init_dict and init_dict[unicode(counter)]:
-                        # Has initial value
-                        form_field = forms.CharField(label=field_value["field_name"], help_text=field_value["description"], max_length=max_length, initial=init_dict[unicode(counter)])
-                    else:
-                        # Blank field
-                        form_field = forms.CharField(label=field_value["field_name"], help_text=field_value["description"], max_length=max_length)
-                if field_value["type"]==u'date':
+                if field_value["type"] == u'choice':
+                    form_field = render_choice_field(counter, field_value, init_dict)
+                if field_value["type"] == u'integer':
+                    form_field = render_integer_field(counter, field_value, init_dict)
+                if field_value["type"] == u'string':
+                    form_field = render_string_field(counter, field_value, init_dict)
+                if field_value["type"] == u'date':
                     if not search:
-                        # Normally adding only one field for indexing
-                        if unicode(counter) in init_dict and init_dict[unicode(counter)]:
-                            # Has initial value
-                            form_field = forms.DateField(label=field_value["field_name"], help_text=field_value["description"], initial=init_dict[unicode(counter)])
-                        else:
-                            # Blank field
-                            form_field = forms.DateField(label=field_value["field_name"], help_text=field_value["description"])
+                        form_field = render_date_field(counter, field_value, init_dict)
                     else:
                         from_label = field_value["field_name"] + SEARCH_STRING_REPR['field_label_from']
                         to_label = field_value["field_name"] + SEARCH_STRING_REPR['field_label_to']
-                        # Normally adding only from/to fields for indexing
-                        if unicode(counter) in init_dict and init_dict[unicode(counter)]:
-                            # Has initial value
-                            form_field = forms.DateField(label=from_label, help_text=field_value["description"], initial=init_dict[unicode(counter)])
-                            # Adding first field (From)
-                            form_field.field_name = field_value["field_name"] + SEARCH_STRING_REPR['field_label_from']
-                            form_fields_list[unicode(counter) + SEARCH_STRING_REPR['id_from']] = form_field
-                            counter += 1
-                            # Second field (To)
-                            form_field = forms.DateField(label=to_label, help_text=field_value["description"], initial=init_dict[unicode(counter)])
-                        else:
-                            # Blank field
-                            form_field = forms.DateField(label=from_label, help_text=field_value["description"])
-                            # Adding first field (From)
-                            form_field.field_name = field_value["field_name"] + SEARCH_STRING_REPR['field_label_from']
-                            form_fields_list[unicode(counter) + SEARCH_STRING_REPR['id_from']] = form_field
-                            # Second field (To)
-                            form_field = forms.DateField(label=to_label, help_text=field_value["description"])
+                        # Rendering and adding From field first
+                        form_field = render_date_field(counter, field_value, init_dict, from_label)
+                        form_field.field_name = field_value["field_name"] + SEARCH_STRING_REPR['field_label_from']
+                        form_fields_list[unicode(counter) + SEARCH_STRING_REPR['id_from']] = form_field
+                        # rendering To field and processing as all other fields
+                        form_field = render_date_field(counter, field_value, init_dict, to_label)
                 if "uppercase" in field_value.iterkeys():
-                    if field_value["uppercase"]=="yes":
+                    if field_value["uppercase"] == "yes":
                         form_field.is_uppercase = True
                 # Setting additional field name (required to use for parsing in templates)
-                if search and field_value["type"]==u'date':
+                if search and field_value["type"] == u'date':
                     form_field.field_name = field_value["field_name"] + SEARCH_STRING_REPR['field_label_to']
                     form_fields_list[unicode(counter) + SEARCH_STRING_REPR['id_to']] = form_field
                 else:
@@ -144,6 +179,7 @@ def render_fields_from_docrules(mdts_dict, init_dict=None, search=False):
     log.debug('Rendered dynamic fields to add to form: %s' % form_fields_list)
     return form_fields_list
 
+
 def setFormFields(fm, kwds):
     """
     Set the fields in the dynamic form
@@ -152,6 +188,7 @@ def setFormFields(fm, kwds):
     keys.sort()
     for k in keys:
         fm.fields[k] = kwds[k]
+
 
 def setFormData(fm, kwds):
     """
@@ -174,6 +211,7 @@ def setFormData(fm, kwds):
                     fm.initial[k] = kwds[k]
                 except ValueError:
                         pass
+
 
 def make_document_type_select(user=None):
     """Returns proper set of docrules for a given request.user"""
@@ -208,6 +246,7 @@ def make_document_type_select_form(user=None, required=True, docrule_initial=Non
             initial=docrule_initial
         )
     return DocumentTypeSelectForm
+
 
 def make_mdt_select_form(user=None, required=True):
     """
@@ -256,6 +295,7 @@ def make_mdt_select_form(user=None, required=True):
 
     return MDTSelectForm
 
+
 def get_mdt_from_search_mdt_select_form(mdt_ids, form):
     """
     Method extracts MDT name from form (that has mdt names already)
@@ -268,6 +308,7 @@ def get_mdt_from_search_mdt_select_form(mdt_ids, form):
         if choice[0] in mdt_ids:
             names_list.append(choice[1])
     return names_list
+
 
 def construct_edit_indexes_data(mdts, db_info):
     """ Method to indexes dictionary with new indexes according to existing MDTS."""

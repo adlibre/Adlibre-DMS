@@ -6,16 +6,22 @@
         {% if document_keys %}
             <p>Your NEW document keys are:</p>
             <ul class="metainfo">
+                <li>Description: {{ new_description }}</li>
                 {% for item in document_keys %}
+                    {% if item != 'description' %}
                     <li>{% get_key_li_item document_keys item %}</li>
+                    {% endif %}
                 {% endfor %}
             </ul>
         {% endif %}
         {% if old_document_keys %}
             <p>Your OLD document keys were:</p>
             <ul class="metainfo">
+                <li>Description: {{ old_description }}</li>
                 {% for item in old_document_keys %}
+                    {% if item != 'description' %}
                     <li>{% get_key_li_item old_document_keys item %}</li>
+                    {% endif %}
                 {% endfor %}
             </ul>
         {% endif %}
