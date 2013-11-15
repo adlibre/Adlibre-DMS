@@ -558,9 +558,7 @@ class MetaDataTemplateHandler(BaseHandler):
 
 
 class ParallelKeysHandler(BaseHandler):
-    """
-    Read / Create / Delete Meta Data Templates
-    """
+    """Read parallel keys for autocomplete"""
     allowed_methods = ('GET', 'OPTIONS')
 
     """
@@ -568,6 +566,7 @@ class ParallelKeysHandler(BaseHandler):
     mdt_ids is used for search, or when docrule is uncertain
     """
 
+    @method_decorator(logged_in_or_basicauth(AUTH_REALM))
     def read(self, request):
 
         if not request.user.is_authenticated():
