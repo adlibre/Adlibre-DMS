@@ -16,11 +16,6 @@ from dmscouch.models import CouchDocument
 
 class ParallelKeysManager(object):
     """Helper to work with parallel keys"""
-    #
-    # def __init__(self):
-    #     self.mdts = {}
-    #     self.docrule_id = None
-    #     self.keys = {}
 
     def get_keys_for_docrule(self, docrule_id, mdts = None):
         pkeys = {}
@@ -74,8 +69,7 @@ class ParallelKeysManager(object):
 
 
 def process_pkeys_request(docrule_id, key_name, autocomplete_req, doc_mdts, letters_limit=2, suggestions_limit=8):
-    """
-    Helper method to process MDT's for special user.
+    """Helper method to process MDT's for special user.
 
     # We can collect all the documents keys for each docrule in MDT related to requested field and load them into queue.
     # Then check them for duplicated values and/or make a big index with all the document's keys in it
