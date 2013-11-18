@@ -39,7 +39,7 @@ class CouchDBMetadataWorker(object):
         # not a create(), like it is now. Because this method is a mess.
         docrule = document.get_docrule()
         # doing nothing for no docrule documents
-        if docrule.no_doccode:
+        if docrule.uncategorized:
             return document
         else:
             user = self.check_user(document)
@@ -167,7 +167,7 @@ class CouchDBMetadataWorker(object):
         mapping = docrule.get_docrule_plugin_mappings()
         # No actions for no docrule documents
         # No actions for documents without 'mapping has DB plugins'
-        if document.get_docrule().no_doccode:
+        if document.get_docrule().uncategorized:
             return document
         else:
             if not mapping.get_database_storage_plugins():

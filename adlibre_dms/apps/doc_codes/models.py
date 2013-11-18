@@ -14,10 +14,13 @@ from django.core.cache import get_cache
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 
+import core
 from core.errors import DmsException
 import dms_plugins
 
 log = logging.getLogger('dms.doc_codes')
+
+__all__ = ['DocumentTypeRule', 'DocumentTypeRuleManager', 'DocumentTypeRulePermission']
 
 
 def get_doctypes():
@@ -29,24 +32,18 @@ def get_doctypes():
         ('3', 'Book'),
     ]
 
+
 class DocumentTypeRule(models.Model):
     """
-    Main Model for Document Type Rules (Old Doccode).
+    Document Type Rules definition
 
-    In order for an app to function Properly must contain:
-    Basic model for storing "No docrule" Documents.
-        - no_doccode = True
-        - active = True
-        - regex = '' (no filename data)
-    Maybe we need to add function to check and store this model on init.
-    For now DMS requires it to be like so.
+    Sets up storage at the filesystem rules and several hooks for farther DMS interaction
     """
     doccode_type = models.CharField(choices=get_doctypes(), max_length=64, default='1')
     sequence_last = models.IntegerField(
         "Number of Documents", default=0,
         help_text="Last document stored. (Don't change unless you understand the consequences.)"
     )
-    no_doccode = models.BooleanField(default=False)
     title = models.CharField("Document Type Rule Name", max_length=60)
     description = models.TextField("Description", blank=True)
     regex = models.CharField(
@@ -125,10 +122,11 @@ class DocumentTypeRule(models.Model):
         """
 
         # TODO: expansion to validate document_name against "is_luhn_valid(self, cc)" for document_type:2 (credit Card)
+        #print '%s Uncategorized: %s' % (self, self.uncategorized)
         regex = '^' + str(self.regex) + '$'
-        if self.regex == '' and re.match(regex, document_name) and self.no_doccode:
+        if self.regex == '' and re.match(regex, document_name) and self.uncategorized:
             return True
-        if not self.no_doccode and re.match(regex, document_name):
+        if not self.uncategorized and re.match(regex, document_name):
             return True
         return False
 
@@ -251,6 +249,15 @@ class DocumentTypeRule(models.Model):
         else:
             raise DmsException('Rule not found', 404)
         return mapping
+
+    @property
+    def uncategorized(self):
+        """Boolean function to know if a model is set as uncategorised in DMS"""
+        configs = core.models.CoreConfiguration.objects.filter(uncategorized__pk__exact=self.pk)
+        if configs.count():
+            # this config is uncategorized
+            return True
+        return False
 
 
 class DocumentTypeRuleManager(object):

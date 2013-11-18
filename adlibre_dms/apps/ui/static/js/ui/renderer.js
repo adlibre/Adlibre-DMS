@@ -146,7 +146,7 @@ function UIRenderer(manager){
         self.render_document_tags(document_info.tags);
         self.render_document_metadata(document_info.current_metadata);
         self.render_document_revisions(document_info.metadata);
-        if (document_info.no_doccode){
+        if (document_info.uncategorized){
             self.process_no_doccode();
         }
         $('#' + self.options.document_container_id).trigger('ui_document_info_loaded');

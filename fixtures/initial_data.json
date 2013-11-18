@@ -707,6 +707,13 @@
         }
     },
     {
+        "pk": 1,
+        "model": "core.coreconfiguration",
+        "fields": {
+            "uncategorized": 1
+        }
+    },
+    {
         "pk": 2,
         "model": "dms_plugins.doccodepluginmapping", 
         "fields": {
@@ -1081,8 +1088,7 @@
             "split_string": "", 
             "active": false,
             "barcode_format": "", 
-            "doccode_type": "1",
-            "no_doccode": true
+            "doccode_type": "1"
         }
     },
     {
@@ -1097,8 +1103,7 @@
             "split_string": "0:3,4:8", 
             "active": true, 
             "barcode_format": "ADL-%s", 
-            "doccode_type": "1",
-            "no_doccode": false
+            "doccode_type": "1"
         }
     },
     {
@@ -1113,8 +1118,7 @@
             "split_string": "0:5,5:8",
             "active": true,
             "barcode_format": "",
-            "doccode_type": "1",
-            "no_doccode": false
+            "doccode_type": "1"
         }
     },
     {
@@ -1129,8 +1133,7 @@
             "split_string": "0:4,5:7,8:10,11:20", 
             "active": true, 
             "barcode_format": "", 
-            "doccode_type": "1",
-            "no_doccode": false
+            "doccode_type": "1"
         }
     }, 
     {
@@ -1145,8 +1148,7 @@
             "split_string": "", 
             "active": true, 
             "barcode_format": "", 
-            "doccode_type": "3",
-            "no_doccode": false
+            "doccode_type": "3"
         }
     }, 
     {
@@ -1161,8 +1163,7 @@
             "split_string": "", 
             "active": true, 
             "barcode_format": "", 
-            "doccode_type": "2",
-            "no_doccode": false
+            "doccode_type": "2"
         }
     },
     {
@@ -1177,8 +1178,7 @@
             "split_string": "0:3,4:8",
             "active": true,
             "barcode_format": "BBB-%s",
-            "doccode_type": "1",
-            "no_doccode": false
+            "doccode_type": "1"
         }
     },
     {
@@ -1193,8 +1193,7 @@
             "split_string": "0:3,4:8",
             "active": true,
             "barcode_format": "CCC-%s",
-            "doccode_type": "1",
-            "no_doccode": false
+            "doccode_type": "1"
         }
     },
     {
@@ -1209,8 +1208,7 @@
             "split_string": "0:3,4:10",
             "active": true,
             "barcode_format": "TST%s",
-            "doccode_type": "1",
-            "no_doccode": false
+            "doccode_type": "1"
         }
     },
     {

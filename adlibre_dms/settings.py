@@ -470,9 +470,9 @@ NEW_SYSTEM = False
 STAGE_KEYWORD = False
 
 # Admin UI (AUI) interface url, like: http://www.mysite.com:3000/
-AUI_URL = False
+AUI_URL = 'http://localhost:3000/'
 # Id (PK) of a document type rule that is used as an AUI pool for uncategorized documents
-AUI_POOL_ID = ''
+AUI_POOL_ID = 1
 
 # This will import the local_settings in our virtual_env subdir next to manage.py.
 try:

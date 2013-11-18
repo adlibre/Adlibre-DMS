@@ -100,7 +100,7 @@ class Local(object):
         if document.get_option('only_metadata'):
             return document
         directory = self.filesystem.get_document_directory(document)
-        if not document.get_docrule().no_doccode:
+        if not document.get_docrule().uncategorized:
             fullpath = os.path.join(directory, document.get_current_file_revision_data()['name'])
         else:
             filename = document.get_full_filename()
@@ -201,7 +201,7 @@ class Local(object):
                 #print "LIMIT TO = %s, DOC_NAME = %s" % (limit_to, doc_name)
                 pass
             else:
-                if docrule.no_doccode:
+                if docrule.uncategorized:
                     docrules.append({
                         'name': doc_name,
                         'directory': os.path.split(directory)[1]
@@ -245,7 +245,7 @@ class Local(object):
         """Hacky way, but faster than reading the revs from the file revision data"""
         directory = self.filesystem.get_document_directory(document)
         file_count = 0
-        if document.get_docrule().no_doccode:
+        if document.get_docrule().uncategorized:
             if file_present(document.get_full_filename(), directory):
                 file_count = 1
         else:

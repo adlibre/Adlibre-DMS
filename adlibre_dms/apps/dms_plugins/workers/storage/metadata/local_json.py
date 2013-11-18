@@ -16,7 +16,7 @@ class LocalJSONMetadata(object):
         self.filesystem = LocalFilesystemManager()
 
     def store(self, document):
-        if document.get_docrule().no_doccode:
+        if document.get_docrule().uncategorized:
             return document
         if document.get_option('only_metadata'):
             # Doing nothing for storage of "Only code" and/or metadata (Into Indexing DB)
@@ -28,7 +28,7 @@ class LocalJSONMetadata(object):
     def retrieve(self, document):
         only_metadata = document.get_option('only_metadata')
         directory = self.filesystem.get_document_directory(document)
-        if document.get_docrule().no_doccode:
+        if document.get_docrule().uncategorized:
             revision = 'N/A'
             fake_metadata = self.get_fake_metadata(directory, document.get_full_filename())
             document.set_revision(revision)
@@ -192,7 +192,7 @@ class LocalJSONMetadata(object):
                         keys = metadatas.keys()
                         keys.sort()
                         first_metadata = metadatas[keys[0]]
-                elif docrule.no_doccode and not dirs:  # leaf directory, no file revision data file => NoDocrule
+                elif docrule.uncategorized and not dirs:  # leaf directory, no file revision data file => NoDocrule
                     first_metadata = self.get_fake_metadata(root, fil)
                     metadatas = [first_metadata]
                     doc = fil

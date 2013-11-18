@@ -5,7 +5,7 @@ from django.contrib.auth.models import Permission, ContentType
 
 
 class DocumentTypeRuleAdmin(admin.ModelAdmin):
-    list_display = ('title', 'pk', 'regex', 'split_string', 'no_doccode', 'active', 'description', 'sequence_last')
+    list_display = ('title', 'pk', 'regex', 'split_string', 'active', 'description', 'sequence_last')
 
 
 class DocumentTypeRulePermissionAdmin(admin.ModelAdmin):

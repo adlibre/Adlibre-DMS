@@ -16,10 +16,25 @@ import logging
 
 
 from django.conf import settings
+from django.db import models
+from django.db.models import ForeignKey
 from core.errors import DmsException
+from doc_codes.models import DocumentTypeRule
 from doc_codes.models import DocumentTypeRuleManager
 
 log = logging.getLogger('core')
+
+
+class CoreConfiguration(models.Model):
+    """Basic DMS settings and main functionality"""
+    uncategorized = ForeignKey(DocumentTypeRule,
+                               help_text="""
+                               This is a setting for DMS to treat documents that do not belong to any other type.<br />
+                               DMS discards uncategorized files, in case this option is not set.<br />
+                               AUI usage requires DMS to have this option set.<br />
+                               <br />
+                               # TODO: describe this<br />
+                               Uncategorized option must be a Document Type Rule without regexp<br />""")
 
 
 class Document(object):
@@ -163,7 +178,7 @@ class Document(object):
     def get_full_filename(self):
         if not self.full_filename:
             name = self.get_filename()
-            if self.get_docrule().no_doccode:
+            if self.get_docrule().uncategorized:
                 if self.get_requested_extension():
                     name = "%s.%s" % (name, self.get_requested_extension())
             elif not os.path.splitext(name)[1][1:]:
@@ -263,6 +278,7 @@ class Document(object):
                                           time.localtime(os.stat(self.get_fullpath()).st_ctime))
         return creation_time
 
+    ################################################ SQL TAGS ##########################################################
     def get_tags(self):
         return self.tags
 
