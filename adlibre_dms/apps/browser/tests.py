@@ -12,6 +12,7 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 
 from adlibre.dms.base_test import DMSTestCase
+from core.models import CoreConfiguration
 
 
 class ViewTest(DMSTestCase):
@@ -31,6 +32,15 @@ class ViewTest(DMSTestCase):
     def test_zz_cleanup(self):
         """Test Cleanup (Executed after all tests"""
         self.cleanAll()
+
+    def test_AUI_support(self):
+        """Support of database setting for AUI"""
+        self.client.login(username=self.username, password=self.password)
+        response = self.client.get(reverse('home'))
+        # AUI uncategorized PK present in AUI call URL
+        conf = CoreConfiguration.objects.filter()[0]
+        self.assertContains(response, '&uncategorized_id=%s' % conf.uncategorized.pk)
+        self.assertContains(response, conf.aui_url)
 
     def browser_upload_file(self, filename):
         url = reverse('upload')

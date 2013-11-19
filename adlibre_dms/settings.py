@@ -153,7 +153,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'adlibre_dms.context_processors.theme_name',
     'adlibre_dms.context_processors.theme_template_base',
     'adlibre_dms.context_processors.product_version',
-    'adlibre_dms.context_processors.aui_url',
+    'adlibre_dms.context_processors.uncategorized',
     'adlibre_dms.context_processors.date_format',
     'adlibre_dms.context_processors.datetime_format',
     'adlibre_dms.context_processors.stage_variable',
@@ -468,11 +468,6 @@ MUI_SEARCH_PAGINATOR_PAGE_SEPARATOR = '...'
 DEMO = True
 NEW_SYSTEM = False
 STAGE_KEYWORD = False
-
-# Admin UI (AUI) interface url, like: http://www.mysite.com:3000/
-AUI_URL = 'http://localhost:3000/'
-# Id (PK) of a document type rule that is used as an AUI pool for uncategorized documents
-AUI_POOL_ID = 1
 
 # This will import the local_settings in our virtual_env subdir next to manage.py.
 try:

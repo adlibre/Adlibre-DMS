@@ -9,6 +9,8 @@ import os
 
 from django.conf import settings
 
+from core.models import CoreConfiguration
+
 def theme_template_base(context):
     """ Returns Global Theme Base Template """
     template_path = os.path.join(settings.THEME_NAME, 'theme.html')
@@ -26,16 +28,16 @@ def product_version(context):
     """ Returns Context Variable Containing Product version """
     return {'PRODUCT_VERSION': settings.PRODUCT_VERSION}
 
-def aui_url(context):
-    """ Returns Context Variable Containing Product version """
-    try:
-        url = settings.AUI_URL
-        pool_id = settings.AUI_POOL_ID
-    except AttributeError:
-        url = False
-        pool_id = ''
-        pass
-    return {'AUI_URL': url, 'AUI_POOL_ID': pool_id}
+def uncategorized(context):
+    """Returns uncategorized DMS model pk and AUI_URL"""
+    uid = ''
+    aui_url = False
+    configs = CoreConfiguration.objects.filter()
+    if configs.count():
+        aui_url = configs[0].aui_url
+        uid = str(configs[0].uncategorized.pk)
+    return {'UNCATEGORIZED_ID': uid,
+            'AUI_URL': aui_url}
 
 def date_format(context):
     """ Returns Context Variable Containing Date format currently used """

@@ -17,7 +17,7 @@ import logging
 
 from django.conf import settings
 from django.db import models
-from django.db.models import ForeignKey
+from django.db.models import ForeignKey, CharField
 from core.errors import DmsException
 from doc_codes.models import DocumentTypeRule
 from doc_codes.models import DocumentTypeRuleManager
@@ -27,14 +27,19 @@ log = logging.getLogger('core')
 
 class CoreConfiguration(models.Model):
     """Basic DMS settings and main functionality"""
-    uncategorized = ForeignKey(DocumentTypeRule,
-                               help_text="""
-                               This is a setting for DMS to treat documents that do not belong to any other type.<br />
-                               DMS discards uncategorized files, in case this option is not set.<br />
-                               AUI usage requires DMS to have this option set.<br />
-                               <br />
-                               # TODO: describe this<br />
-                               Uncategorized option must be a Document Type Rule without regexp<br />""")
+    uncategorized = ForeignKey(
+        DocumentTypeRule,
+        help_text="""
+        This is a setting for DMS to treat documents that do not belong to any other type.<br />
+        DMS discards uncategorized files, in case this option is not set.<br />
+        AUI usage requires DMS to have this option set.<br />
+        <br />
+        # TODO: describe this<br />
+        Uncategorized option must be a Document Type Rule without regexp<br />""")
+    aui_url = CharField(
+        max_length=150,
+        blank=True,
+        help_text="""Admin UI (AUI) interface url, like: http://www.mysite.com:3000/""")
 
 
 class Document(object):
