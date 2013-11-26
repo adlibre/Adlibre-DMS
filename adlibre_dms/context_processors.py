@@ -9,7 +9,7 @@ import os
 
 from django.conf import settings
 
-from core.models import CoreConfiguration
+from core import CoreConfiguration
 
 def theme_template_base(context):
     """ Returns Global Theme Base Template """
