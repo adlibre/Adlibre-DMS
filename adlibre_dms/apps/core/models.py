@@ -25,8 +25,6 @@ from doc_codes.models import DocumentTypeRuleManager
 
 log = logging.getLogger('core')
 
-__all__ = ['CoreConfiguration', 'Document']
-
 
 class CoreConfiguration(models.Model):
     """Basic DMS settings and main functionality"""
