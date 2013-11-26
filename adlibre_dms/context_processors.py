@@ -9,7 +9,7 @@ import os
 
 from django.conf import settings
 
-from core import CoreConfiguration
+import core
 
 def theme_template_base(context):
     """ Returns Global Theme Base Template """
@@ -32,7 +32,7 @@ def uncategorized(context):
     """Returns uncategorized DMS model pk and AUI_URL"""
     uid = ''
     aui_url = False
-    configs = CoreConfiguration.objects.filter()
+    configs = core.models.CoreConfiguration.objects.filter()
     if configs.count():
         aui_url = configs[0].aui_url
         uid = str(configs[0].uncategorized.pk)
