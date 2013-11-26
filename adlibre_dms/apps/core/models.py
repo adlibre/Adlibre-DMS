@@ -9,6 +9,7 @@ Author: Iurii Garmash
 
 
 import os
+import ntpath
 import magic
 import mimetypes
 import time
@@ -23,6 +24,8 @@ from doc_codes.models import DocumentTypeRule
 from doc_codes.models import DocumentTypeRuleManager
 
 log = logging.getLogger('core')
+
+__all__ = ['CoreConfiguration', 'Document']
 
 
 class CoreConfiguration(models.Model):
@@ -40,6 +43,11 @@ class CoreConfiguration(models.Model):
         max_length=150,
         blank=True,
         help_text="""Admin UI (AUI) interface url, like: http://www.mysite.com:3000/""")
+
+    class Meta:
+        # Add new fields here (upon migrations)
+        # to ensure it's hard to mess things up with creation of several similar configs
+        unique_together = ('uncategorized', 'aui_url')
 
 
 class Document(object):
@@ -320,3 +328,34 @@ class Document(object):
 
     def set_user(self, user):
         self.user = user
+
+    def allocate_next_uncategorized(self):
+        """Allocate next uncategorized document name and rename self into it
+
+        This function only should be called upon storing a file and being certain in it.
+        It allocates a next free code for setting it into filename, also adding self.options variable
+        'uncategorized_filename' with original stored filename (e.g.: for indexes storage)"""
+        if self.get_docrule().uncategorized:
+            # Forcing filesystem name for file
+            document_file = self.get_file_obj()
+            original_name = document_file.name
+            code = self.get_docrule().allocate_barcode()
+            # In case we have a path instead of a filename with extension
+            if os.path.sep in original_name:
+                head, tail = ntpath.split(original_name)
+                original_name = tail or ntpath.basename(head)
+            original_code, extension = os.path.splitext(original_name)
+            new_name = code + extension
+            if document_file:
+                self.update_options({'uncategorized_filename': original_name})
+            if not self.mimetype:
+                self.get_mimetype()
+            if 'barcode' in self.options:
+                self.set_option('barcode', code)
+            self.set_filename(new_name)
+            self.set_full_filename(new_name)
+        return self
+
+    def uncategorized(self):
+        """Function proxy to resolve if current document is of uncategorized type"""
+        return self.get_docrule().uncategorized

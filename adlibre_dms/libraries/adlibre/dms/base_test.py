@@ -49,6 +49,8 @@ class DMSTestCase(TestCase):
         self.documents_codes = ('abcde333', )
         self.jpg_codes = ('TST12345679', )
         self.no_docrule_files = ('Z50141104', )
+        self.uncategorized_codes = ('UNC-0001', 'UNC-0002')
+        self.uncategorized_files = ('Z50141104.jpg', )
 
         self.hash_method = 'md5'
         # Documents that exist, and have valid hash
@@ -154,7 +156,7 @@ class DMSTestCase(TestCase):
         self.cleanUp(cleanup_docs_list, check_response=check_response)
 
         # Un used file cleanup
-#        self.cleanUp(self.unlisted_files_used, check_response=check_response, nodocrule=True)
+        self.cleanUp(self.uncategorized_codes, check_response=check_response)
 
     def setUp(self):
         """NB This is called once for every test, not just test case before the tests are run!"""

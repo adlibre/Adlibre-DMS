@@ -16,6 +16,7 @@ from dms_plugins.models import DoccodePluginMapping
 from dms_plugins.workers.validators.hashcode import HashCodeWorker
 
 from adlibre.dms.base_test import DMSTestCase
+from core.models import CoreConfiguration
 
 # TODO: Create a test document code, and a set of test documents at the start of test
 # TODO: Test self.rules, self.rules_missing, self.documents_missing
@@ -32,7 +33,7 @@ class APITest(DMSTestCase):
         self.test_tag = 'test_tag'
         self.hworker = HashCodeWorker(method=self.hash_method)
 
-    def test_000_setup(self):
+    def test_00_setup(self):
         """Load Test Data required by this test"""
         self.loadTestData()
 
@@ -64,8 +65,12 @@ class APITest(DMSTestCase):
         Refs #946 Bug: API piston bug when uploading barcode with error (no document type rule)
         """
         # Name 'Z50141104' is set like so to be loaded in the end of all files.
+        self._upload_file(self.no_docrule_files[0], suggested_format='jpg')
+        # removing support of uncategorized and testing we are failing gracefully
+        config = CoreConfiguration.objects.all()[0]
+        config.delete()
         response = self._upload_file(self.no_docrule_files[0], suggested_format='jpg', check_response=False)
-        self.assertEqual(response.status_code, 400)
+        self.assertContains(response, 'Bad Request', status_code=400)
 
     def test_04_upload_files(self):
         """Upload files through API uses 1 file and exact code specified"""
@@ -330,8 +335,7 @@ class APITest(DMSTestCase):
         url = reverse('api_file_deprecated', kwargs={'code': file_name, 'suggested_format': suggested_format})
         t, data = self._get_tests_file(self.documents_pdf[0], file_name, suggested_format)
         response = self.client.post(url, data)
-        self.assertContains(response, 'Bad Request', status_code=400)
-
+        self.assertContains(response, self.uncategorized_codes[0])
 
     def test_zz_cleanup(self):
         """Test Cleanup"""

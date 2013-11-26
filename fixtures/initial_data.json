@@ -1081,14 +1081,14 @@
         "pk": 1, 
         "model": "doc_codes.documenttyperule", 
         "fields": {
-            "regex": "", 
+            "regex": "UNC-[0-9]{4}",
             "sequence_last": 0, 
             "description": "This doccode is assigned to the files that have no other suitable doccode.", 
             "title": "No doccode", 
-            "barcode_zfill": 0, 
-            "split_string": "", 
-            "active": false,
-            "barcode_format": "", 
+            "barcode_zfill": 4,
+            "split_string": "0:3,4:8",
+            "active": true,
+            "barcode_format": "UNC-%s",
             "doccode_type": "1"
         }
     },

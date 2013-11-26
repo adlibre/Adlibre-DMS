@@ -6,7 +6,7 @@ from django.conf import settings
 
 from dms_plugins.pluginpoints import StoragePluginPoint, BeforeRetrievalPluginPoint,\
     BeforeRemovalPluginPoint, UpdatePluginPoint
-from dms_plugins.workers import Plugin, PluginError, BreakPluginChain
+from dms_plugins.workers import Plugin, PluginError
 from dms_plugins.workers.storage.local import LocalFilesystemManager
 
 
@@ -16,8 +16,7 @@ class LocalJSONMetadata(object):
         self.filesystem = LocalFilesystemManager()
 
     def store(self, document):
-        if document.get_docrule().uncategorized:
-            return document
+        """Save a document's file into filesystem"""
         if document.get_option('only_metadata'):
             # Doing nothing for storage of "Only code" and/or metadata (Into Indexing DB)
             return document
@@ -28,27 +27,21 @@ class LocalJSONMetadata(object):
     def retrieve(self, document):
         only_metadata = document.get_option('only_metadata')
         directory = self.filesystem.get_document_directory(document)
-        if document.get_docrule().uncategorized:
-            revision = 'N/A'
-            fake_metadata = self.get_fake_metadata(directory, document.get_full_filename())
-            document.set_revision(revision)
-            document.set_file_revisions_data({revision: fake_metadata})
-        else:
-            fileinfo_db, new_revision = self.load_metadata(document.get_code(), directory)
-            if not fileinfo_db and not only_metadata:
-                raise PluginError("No such document: %s" % document.get_code(), 404)
-            revision = document.get_revision()
-            if not revision and new_revision > 0:
-                revision = new_revision - 1
-            document.set_revision(revision)
-            try:
-                fileinfo_db[str(revision)]
-            except KeyError:
-                if not only_metadata and revision:
-                    raise PluginError("No such revision for this document", 404)
-                else:
-                    pass
-            document.set_file_revisions_data(fileinfo_db)
+        fileinfo_db, new_revision = self.load_metadata(document.get_code(), directory)
+        if not fileinfo_db and not only_metadata:
+            raise PluginError("No such document: %s" % document.get_code(), 404)
+        revision = document.get_revision()
+        if not revision and new_revision > 0:
+            revision = new_revision - 1
+        document.set_revision(revision)
+        try:
+            fileinfo_db[str(revision)]
+        except KeyError:
+            if not only_metadata and revision:
+                raise PluginError("No such revision for this document", 404)
+            else:
+                pass
+        document.set_file_revisions_data(fileinfo_db)
         return document
 
     def update_metadata_after_removal(self, document):
@@ -125,8 +118,8 @@ class LocalJSONMetadata(object):
 
     def load_metadata(self, document_name, directory):
         json_file = os.path.join(directory, '%s.json' % (document_name,))
-        file = self.load_from_file(json_file)
-        return file
+        _file = self.load_from_file(json_file)
+        return _file
 
     def date_to_string(self, date):
         return date.strftime(settings.DATETIME_FORMAT)
@@ -149,6 +142,13 @@ class LocalJSONMetadata(object):
             'revision': document.get_revision(),
             'created_date': self.date_to_string(datetime.today())
         }
+        # Storing original filename for uncategorized document
+        if 'uncategorized_filename' in document.options:
+            fileinfo.update({'uncategorized_filename': document.options['uncategorized_filename']})
+
+        # Mimetype storage for original file
+        if document.mimetype:
+            fileinfo['mimetype'] = document.mimetype
 
         if document.get_current_file_revision_data():
             fileinfo.update(document.get_current_file_revision_data())
@@ -163,20 +163,19 @@ class LocalJSONMetadata(object):
     def write_metadata(self, fileinfo_db, document, directory):
         json_file = os.path.join(directory, '%s.json' % (document.get_code(),))
         json_handler = open(json_file, mode='w')
-        json.dump(fileinfo_db, json_handler, indent = 4)
+        json.dump(fileinfo_db, json_handler, indent=4)
 
     def get_fake_metadata(self, root, fil):
         current_date = datetime.strftime(datetime.now(), settings.DATETIME_FORMAT)
         created_date = datetime.strptime(current_date, settings.DATETIME_FORMAT)
-        return {   'created_date': created_date,
-                    'name': fil,
-                    'revision': 'N/A'
-                }
+        return {
+            'created_date': created_date,
+            'name': fil,
+            'revision': 'N/A'
+        }
 
     def get_directories(self, docrule, filter_date = None):
-        """
-        Return List of directories with document files
-        """
+        """Return List of directories with document files"""
         #FIXME: seems to be rather slow for large number of docs :(
         root = settings.DOCUMENT_ROOT
         doccode_directory = os.path.join(root, docrule.get_directory_name())
@@ -200,11 +199,13 @@ class LocalJSONMetadata(object):
                         self.string_to_date(first_metadata['created_date']).date() != self.string_to_date(filter_date).date():
                             continue
                 if metadatas and first_metadata:
-                    directories.append( (root, {
-                                                    'document_name': doc, 
-                                                    'metadatas': metadatas,
-                                                    'first_metadata': first_metadata,
-                                                    }) )
+                    directories.append(
+                        (root, {
+                            'document_name': doc,
+                            'metadatas': metadatas,
+                            'first_metadata': first_metadata,
+                        })
+                    )
         return directories
 
     def get_metadatas(self, docrule):

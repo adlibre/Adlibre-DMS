@@ -276,6 +276,16 @@ class DocumentTypeRuleManager(object):
         else:
             self.docrules = cached_docrules
 
+    def get_uncategorized(self):
+        """Returns Uncategorized document type rule (In case it is set in system) or None (In case it is not)"""
+        dtr = None
+        configs = core.models.CoreConfiguration.objects.filter()
+        if configs.count() > 0:
+            # Taking last config as a most proper one
+            config = configs.reverse()[0]
+            dtr = config.uncategorized
+        return dtr
+
     def find_for_string(self, string):
         """Find a DocumentType that corresponds to certain string
 
@@ -285,6 +295,9 @@ class DocumentTypeRuleManager(object):
             if docrule.validate(string):
                 res = docrule
                 break
+        if res is None:
+            # Assigning Uncategorized doc type
+            res = self.get_uncategorized()
         return res
 
     def get_docrules(self):

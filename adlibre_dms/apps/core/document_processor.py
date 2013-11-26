@@ -97,7 +97,7 @@ class DocumentProcessor(object):
         if doc_name:
             # Extract code from filename
             if '.' in doc_name:
-                doc_name, extension = doc_name.split('.')
+                doc_name, extension = os.path.splitext(doc_name)
             # Check the DMS for existence of this code
             possible_doc = self.read(doc_name, {'only_metadata': True, 'user': doc.user})
             if possible_doc.file_revision_data and not self.errors \
@@ -110,6 +110,8 @@ class DocumentProcessor(object):
                     self.errors = []
         # Processing plugins
         if valid:
+            if doc.uncategorized:
+                doc.allocate_next_uncategorized()
             doc = operator.process_pluginpoint(pluginpoints.BeforeStoragePluginPoint, document=doc)
             if not operator.plugin_errors:
                 if uploaded_file:
