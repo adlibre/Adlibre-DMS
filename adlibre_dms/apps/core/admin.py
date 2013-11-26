@@ -16,8 +16,8 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 from django.contrib.sessions.models import Session
 
-from core import CoreConfiguration
-
+import core
+CoreConfiguration = core.models.CoreConfiguration
 
 class CoreConfigurationAdmin(admin.ModelAdmin):
     pass
