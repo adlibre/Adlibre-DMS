@@ -2,7 +2,11 @@ from django.contrib import admin
 from doc_codes.models import DocumentTypeRule
 from doc_codes.models import DocumentTypeRulePermission
 from django.contrib.auth.models import Permission, ContentType
+from core.models import CoreConfiguration
 
+
+class CoreConfigurationAdmin(admin.ModelAdmin):
+    pass
 
 class DocumentTypeRuleAdmin(admin.ModelAdmin):
     list_display = ('title', 'pk', 'regex', 'split_string', 'active', 'description', 'sequence_last')
@@ -38,3 +42,4 @@ class DocumentTypeRulePermissionAdmin(admin.ModelAdmin):
 admin.site.register(DocumentTypeRule, DocumentTypeRuleAdmin)
 admin.site.register(DocumentTypeRulePermission, DocumentTypeRulePermissionAdmin)
 admin.site.register(Permission)
+admin.site.register(CoreConfiguration, CoreConfigurationAdmin)
