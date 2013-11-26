@@ -14,9 +14,9 @@ from django.core.cache import get_cache
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 
-import core
 from core.errors import DmsException
 import dms_plugins
+from core import models as m
 
 log = logging.getLogger('dms.doc_codes')
 
@@ -253,7 +253,7 @@ class DocumentTypeRule(models.Model):
     @property
     def uncategorized(self):
         """Boolean function to know if a model is set as uncategorised in DMS"""
-        configs = core.models.CoreConfiguration.objects.filter(uncategorized__pk__exact=self.pk)
+        configs = m.CoreConfiguration.objects.filter(uncategorized__pk__exact=self.pk)
         if configs.count():
             # this config is uncategorized
             return True
@@ -279,7 +279,7 @@ class DocumentTypeRuleManager(object):
     def get_uncategorized(self):
         """Returns Uncategorized document type rule (In case it is set in system) or None (In case it is not)"""
         dtr = None
-        configs = core.models.CoreConfiguration.objects.filter()
+        configs = m.CoreConfiguration.objects.filter()
         if configs.count() > 0:
             # Taking last config as a most proper one
             config = configs.reverse()[0]
