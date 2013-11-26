@@ -32,7 +32,7 @@ from adlibre.dms.base_test import DMSTestCase
 
 from document_processor import DocumentProcessor
 from dms_plugins.models import DocTags
-from models import CoreConfiguration
+from core.models import CoreConfiguration
 
 
 class CoreTestCase(DMSTestCase):
