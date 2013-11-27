@@ -26,7 +26,7 @@ from api.decorators.group_required import group_required
 from forms import DocumentUploadForm, BarcodePrintedForm, DocumentSearchOptionsForm
 from core.document_processor import DocumentProcessor
 from core.search import DMSSearchManager, DMSSearchQuery
-from doc_codes.models import DocumentTypeRule
+from core.models import DocumentTypeRule
 from view_helpers import initIndexesForm
 from view_helpers import processDocumentIndexForm
 from view_helpers import initEditIndexesForm

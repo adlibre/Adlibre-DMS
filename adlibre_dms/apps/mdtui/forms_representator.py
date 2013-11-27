@@ -15,7 +15,7 @@ from django.conf import settings
 
 from restkit.client import RequestError
 
-from doc_codes.models import DocumentTypeRule
+from core.models import DocumentTypeRule
 from mdt_manager import MetaDataTemplateManager
 from security import list_permitted_docrules_pks
 from security import list_permitted_docrules_qs

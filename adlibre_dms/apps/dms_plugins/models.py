@@ -14,7 +14,7 @@ from djangoplugins.models import Plugin
 from taggit.managers import TaggableManager
 
 from dms_plugins import pluginpoints
-from doc_codes.models import DocumentTypeRule
+from core.models import DocumentTypeRule
 
 log = logging.getLogger('dms_plugins.models')
 

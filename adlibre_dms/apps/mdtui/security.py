@@ -11,7 +11,7 @@ from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import signals
 
-from doc_codes.models import DocumentTypeRule
+from core.models import DocumentTypeRule
 
 SEC_GROUP_NAMES = {
     'search': 'MUI Search interaction',

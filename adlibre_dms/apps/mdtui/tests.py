@@ -30,7 +30,7 @@ from mdtui.templatetags.paginator_tags import rebuild_sequence_digg
 from mdtcouch.models import MetaDataTemplate
 from dmscouch.models import CouchDocument
 from core.search import SEARCH_ERROR_MESSAGES
-from doc_codes.models import DocumentTypeRule
+from core.models import DocumentTypeRule
 
 # TODO: test password reset forms/stuff
 

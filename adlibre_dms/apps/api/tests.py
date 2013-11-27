@@ -11,12 +11,12 @@ import os
 from django.conf import settings
 from django.core.urlresolvers import reverse
 
-from doc_codes.models import DocumentTypeRuleManager
 from dms_plugins.models import DoccodePluginMapping
 from dms_plugins.workers.validators.hashcode import HashCodeWorker
 
 from adlibre.dms.base_test import DMSTestCase
 from core.models import CoreConfiguration
+from core.models import DocumentTypeRuleManager
 
 # TODO: Create a test document code, and a set of test documents at the start of test
 # TODO: Test self.rules, self.rules_missing, self.documents_missing

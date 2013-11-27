@@ -191,7 +191,6 @@ PROJECT_APPS = (
     'core',
     'browser',
     'dms_plugins',
-    'doc_codes',
     'dmscouch',
     'mdtcouch',
     # DMS Standalone

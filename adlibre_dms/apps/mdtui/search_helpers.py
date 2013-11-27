@@ -23,7 +23,8 @@ log = logging.getLogger('dms.mdtui.views')
 DATE_RANGE_CONSTANTS = {
     'min': unicode(date_standardized('1960-01-01')),
     'max': unicode(date_standardized('2100-01-01')),
-    }
+}
+
 
 def cleanup_document_keys(document_keys):
     """
@@ -37,6 +38,7 @@ def cleanup_document_keys(document_keys):
         for key in del_list:
             del document_keys[key]
     return document_keys
+
 
 def ranges_validator(cleaned_document_keys):
     """
@@ -66,6 +68,7 @@ def ranges_validator(cleaned_document_keys):
                 if not u'date' in keys_list:
                     cleaned_document_keys[u'date'] = DATE_RANGE_CONSTANTS['min']
     return cleaned_document_keys
+
 
 def recognise_dates_in_search(cleaned_document_keys):
     """Finding ranges in cleaned keys and converting them to tuple pairs"""
@@ -100,6 +103,7 @@ def recognise_dates_in_search(cleaned_document_keys):
                     del cleaned_document_keys[desired_key]
                     cleaned_document_keys[pure_key]=(from_value, to_value)
     return cleaned_document_keys
+
 
 def check_for_secondary_keys_pairs(input_keys_list, docrule_id):
     """Checks for parallel keys pairs if they already exist in Secondary Keys.
@@ -151,6 +155,7 @@ def check_for_secondary_keys_pairs(input_keys_list, docrule_id):
         log.debug('Found NO new unique key/values in secondary keys')
     return suspicious_keys_list
 
+
 def get_mdts_by_names(names_list):
     """
     Proxy for clean implementation
@@ -161,6 +166,7 @@ def get_mdts_by_names(names_list):
     manager = MetaDataTemplateManager()
     mdts = manager.get_mdts_by_name(names_list)
     return mdts
+
 
 def check_for_forbidden_new_keys_created(document_indexes, docrule, user):
     """Checks for user ability to add new key's value

@@ -12,7 +12,7 @@ import datetime
 from django import template
 from django.conf import settings
 
-from doc_codes.models import DocumentTypeRuleManager
+from core.models import DocumentTypeRuleManager
 
 register = template.Library()
 

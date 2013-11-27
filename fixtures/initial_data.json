@@ -1079,7 +1079,7 @@
     },
     {
         "pk": 1, 
-        "model": "doc_codes.documenttyperule", 
+        "model": "core.documenttyperule",
         "fields": {
             "regex": "UNC-[0-9]{4}",
             "sequence_last": 0, 
@@ -1094,7 +1094,7 @@
     },
     {
         "pk": 2,
-        "model": "doc_codes.documenttyperule", 
+        "model": "core.documenttyperule",
         "fields": {
             "regex": "ADL-[0-9]{4}", 
             "sequence_last": 0, 
@@ -1109,7 +1109,7 @@
     },
     {
         "pk": 3,
-        "model": "doc_codes.documenttyperule",
+        "model": "core.documenttyperule",
         "fields": {
             "regex": "[a-z]{5}[0-9]{3}",
             "sequence_last": 0,
@@ -1124,7 +1124,7 @@
     },
     {
         "pk": 4, 
-        "model": "doc_codes.documenttyperule", 
+        "model": "core.documenttyperule",
         "fields": {
             "regex": "[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{1,9}", 
             "sequence_last": 0, 
@@ -1139,7 +1139,7 @@
     }, 
     {
         "pk": 5, 
-        "model": "doc_codes.documenttyperule", 
+        "model": "core.documenttyperule",
         "fields": {
             "regex": "[0-9]{1,6}", 
             "sequence_last": 0, 
@@ -1154,7 +1154,7 @@
     }, 
     {
         "pk": 6, 
-        "model": "doc_codes.documenttyperule", 
+        "model": "core.documenttyperule",
         "fields": {
             "regex": "[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{4}", 
             "sequence_last": 0, 
@@ -1169,7 +1169,7 @@
     },
     {
         "pk": 7,
-        "model": "doc_codes.documenttyperule",
+        "model": "core.documenttyperule",
         "fields": {
             "regex": "BBB-[0-9]{4}",
             "sequence_last": 0,
@@ -1184,7 +1184,7 @@
     },
     {
         "pk": 8,
-        "model": "doc_codes.documenttyperule",
+        "model": "core.documenttyperule",
         "fields": {
             "regex": "CCC-[0-9]{4}",
             "sequence_last": 0,
@@ -1199,7 +1199,7 @@
     },
     {
         "pk": 9,
-        "model": "doc_codes.documenttyperule",
+        "model": "core.documenttyperule",
         "fields": {
             "regex": "TST[0-9]{8}",
             "sequence_last": 0,

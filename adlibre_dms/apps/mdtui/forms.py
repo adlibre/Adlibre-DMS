@@ -26,8 +26,10 @@ CUSTOM_ERRORS = {
     'UPPER': 'This field should be uppercase.'
 }
 
+
 class DocumentUploadForm(forms.Form):
     file = forms.FileField()
+
 
 class BarcodePrintedForm(forms.Form):
     printed = forms.CharField(required=True,widget=forms.HiddenInput)
@@ -42,9 +44,11 @@ class BarcodePrintedForm(forms.Form):
             raise forms.ValidationError("Form not validated")
         return printed
 
+
 class DocumentIndexForm(forms.Form):
     """
     Form for posting document indexes.
+
     Has dynamic initialization abilities.
     """
     date = forms.DateField(initial=datetime.datetime.now(), label="Indexing Date", help_text="Date of the document added")
@@ -146,6 +150,7 @@ class DocumentIndexForm(forms.Form):
             return False
         return True
 
+
 class EditDocumentIndexForm(forms.Form):
     """
     Form for editing document indexes.
@@ -220,9 +225,11 @@ class EditDocumentIndexForm(forms.Form):
             return False
         return True
 
+
 class DocumentSearchOptionsForm(forms.Form):
     """
     Form for searching documents by indexes.
+
     Has dynamic initialization abilities.
     """
     date = forms.DateField(label="Indexing Date From", help_text="Date of the document added")
