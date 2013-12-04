@@ -10,6 +10,8 @@ Desc: Main http objects manipulation methods here.
 
 import logging
 import json
+import traceback
+import sys
 from wsgiref.handlers import format_date_time
 from datetime import datetime, timedelta
 from time import mktime
@@ -44,16 +46,17 @@ class DMSObjectResponse(HttpResponse):
         else:
             content, mimetype, filename = self.retrieve_file(document)
         super(DMSObjectResponse, self).__init__(content=content, mimetype=mimetype)
-        self["Content-Length"] = len(content)
-        if thumbnail:
-            self["Content-Type"] = mimetype
-            # Cache thumbnails for 1 day
-            now = datetime.now()
-            exp = now + timedelta(days=1)
-            stamp = mktime(exp.timetuple())
-            expires = format_date_time(stamp)
-            self['Expires'] = expires
-        self["Content-Disposition"] = 'filename=%s' % filename
+        if content is not None:
+            self["Content-Length"] = len(content)
+            if thumbnail:
+                self["Content-Type"] = mimetype
+                # Cache thumbnails for 1 day
+                now = datetime.now()
+                exp = now + timedelta(days=1)
+                stamp = mktime(exp.timetuple())
+                expires = format_date_time(stamp)
+                self['Expires'] = expires
+            self["Content-Disposition"] = 'filename=%s' % filename
 
     def retrieve_file(self, document):
         # Getting file vars we need from Document()

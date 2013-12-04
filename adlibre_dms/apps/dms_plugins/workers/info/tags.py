@@ -1,9 +1,10 @@
 from taggit.models import Tag
 from taggit.utils import parse_tags
 
-from dms_plugins.models import DocTags
+from core.models import DocTags
 from dms_plugins.pluginpoints import BeforeRetrievalPluginPoint, BeforeUpdatePluginPoint
 from dms_plugins.workers import Plugin, PluginError
+
 
 class TagsPlugin(Plugin, BeforeRetrievalPluginPoint):
     title = "Tags Retrieval"
@@ -33,6 +34,7 @@ class TagsPlugin(Plugin, BeforeRetrievalPluginPoint):
         if tags:
             doc_models = doc_models.filter(tags__name__in=tags)
         return doc_models
+
 
 class TagsUpdatePlugin(Plugin, BeforeUpdatePluginPoint):
     title = "Tags Update"

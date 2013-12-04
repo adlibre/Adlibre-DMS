@@ -8,6 +8,8 @@ License: See LICENSE for license information
 
 import json
 import os
+import sys
+import traceback
 import logging
 
 from django.conf import settings
@@ -268,7 +270,7 @@ class FileListHandler(BaseHandler):
     def read(self, request, id_rule):
         try:
             operator = PluginsOperator()
-            mapping = operator.get_plugin_mapping_by_id(id_rule)
+            mapping = operator.get_plugin_mapping_by_docrule_id(id_rule)
             start = int(request.GET.get('start', 0))
             finish = request.GET.get('finish', None)
             order = request.GET.get('order', None)
@@ -303,6 +305,7 @@ class FileListHandler(BaseHandler):
         except Exception, e:
             log.error('FileListHandler.read Exception %s' % e)
             if settings.DEBUG:
+                print e
                 raise
             else:
                 return rc.BAD_REQUEST
@@ -321,7 +324,7 @@ class TagsHandler(BaseHandler):
         # Tags should be got with document metadata. Not with a separate reequest.
         try:
             operator = PluginsOperator()
-            mapping = operator.get_plugin_mapping_by_id(id_rule)
+            mapping = operator.get_plugin_mapping_by_docrule_id(id_rule)
             docrule = mapping.get_docrule()
             tags = TagsPlugin().get_all_tags(docrule=docrule)
             log.info('TagsHandler.read request fulfilled for rule %s' % id_rule)
@@ -418,7 +421,7 @@ class RulesDetailHandler(BaseHandler):
         """
         operator = PluginsOperator()
         try:
-            mapping = operator.get_plugin_mapping_by_id(id_rule)
+            mapping = operator.get_plugin_mapping_by_docrule_id(id_rule)
         except Exception, e:  # FIXME
             log.error('RulesDetailHandler.read Exception %s' % e)
             if settings.DEBUG:
@@ -617,15 +620,21 @@ class ThumbnailsHandler(BaseHandler):
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
     def read(self, request, code):
 
-        if not request.user.is_authenticated():
-            log.error('ThumbnailsHandler.read attempted with unauthenticated user.')
-            return rc.FORBIDDEN
+        # TODO: stabilize by removing try/except here and fixing ALL the possible issues.
+        try:
+            if not request.user.is_authenticated():
+                log.error('ThumbnailsHandler.read attempted with unauthenticated user.')
+                return rc.FORBIDDEN
 
-        processor = DocumentProcessor()
-        doc = processor.read(code, options={'user': request.user, 'thumbnail': True})
-        if not processor.errors:
-            return DMSObjectResponse(doc, thumbnail=True)
-        else:
+            processor = DocumentProcessor()
+            doc = processor.read(code, options={'user': request.user, 'thumbnail': True})
+            if not processor.errors:
+                return DMSObjectResponse(doc, thumbnail=True)
+            else:
+                return rc.NOT_FOUND
+        except:
+            tr = traceback.print_exc(file=sys.stdout)
+            log.error('ThumbnailsHandler Error: %s' % tr)
             return rc.NOT_FOUND
 
 

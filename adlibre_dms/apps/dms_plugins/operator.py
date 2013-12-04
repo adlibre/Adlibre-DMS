@@ -18,6 +18,7 @@ from core.errors import DmsException
 from workers import PluginError, PluginWarning, BreakPluginChain
 from workers.info.tags import TagsPlugin
 from dms_plugins import pluginpoints
+from core.models import DocumentTypeRule
 
 log = logging.getLogger('dms')
 
@@ -97,13 +98,11 @@ class PluginsOperator(object):
             plugins = []
         return plugins
 
-    # FIXME: Maybe it should be some kind of DoccodePluginMapping manager or similar.
-    def get_plugin_mapping_by_id(self, pk):
-        try:
-            mapping = DoccodePluginMapping.objects.get(pk=int(pk))
-        except mapping.DoesNotExist:
+    def get_plugin_mapping_by_docrule_id(self, pk):
+        mapping = DoccodePluginMapping.objects.filter(doccode__pk=int(pk), doccode__active=True)
+        if not mapping.exists():
             raise DmsException('Rule not found', 404)
-        return mapping
+        return mapping[0]
 
     # TODO:
     # Some unusual magic with processing plugins...

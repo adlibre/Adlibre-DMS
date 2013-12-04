@@ -25,11 +25,13 @@ from django.core.cache import get_cache
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 
+from taggit.managers import TaggableManager
+
 import dms_plugins
 
 log = logging.getLogger('core')
 
-__all__ = ['DocumentTypeRule', 'DocumentTypeRuleManager', 'DocumentTypeRulePermission', 'Document']
+__all__ = ['DocumentTypeRule', 'DocumentTypeRuleManager', 'DocumentTypeRulePermission', 'Document', 'DocTags']
 
 
 def get_doctypes():
@@ -672,3 +674,21 @@ class Document(object):
     def uncategorized(self):
         """Function proxy to resolve if current document is of uncategorized type"""
         return self.get_docrule().uncategorized
+
+
+class DocTags(models.Model):
+    """A model that represents Document for maintaining Tag relations."""
+    name = models.CharField(max_length=128)
+    doccode = models.ForeignKey(DocumentTypeRule)
+    tags = TaggableManager()
+
+    class Meta:
+        verbose_name = "Document > Tags mapping"
+        verbose_name_plural = "Document > Tags mappings"
+
+    def get_tag_list(self):
+        """Returns a list of current tags"""
+        return map(lambda x: x.name, self.tags.all())
+
+    def __unicode__(self):
+        return unicode(self.name)

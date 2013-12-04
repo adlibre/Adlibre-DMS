@@ -32,7 +32,7 @@ from django.test import TestCase
 from adlibre.dms.base_test import DMSTestCase
 
 from document_processor import DocumentProcessor
-from dms_plugins.models import DocTags
+from core.models import DocTags
 from core.models import CoreConfiguration
 from core.models import DocumentTypeRule
 
@@ -232,6 +232,31 @@ class CoreTestCase(DMSTestCase):
                 raise AssertionError('Temporary file leftover thumbnail creation: %s' % tmp_path)
         return thumbnail_check_path
 
+    def _check_dms_object_empty(self, doc):
+        """Checks a DMS object for empty parameters (core integrity of the empty document object)"""
+        # TODO: this is wrong. Code should store "ADL-0010", not file_name
+        self.assertEqual(doc.code, None)
+        self.assertEqual(doc.db_info, {})
+        self.assertEqual(doc.current_file_revision_data, {})
+        self.assertEqual(doc.file_obj, None)
+        self.assertEqual(doc.file_revision_data, None)
+        self.assertEqual(doc.full_filename, None)
+        self.assertEqual(doc.fullpath, None)
+        self.assertEqual(doc.hashcode, None)
+        self.assertEqual(doc.index_revisions, {})
+        self.assertEqual(doc.marked_deleted, False)
+        self.assertEqual(doc.mimetype, None)
+        self.assertEqual(doc.new_indexes, {})
+        self.assertEqual(doc.old_docrule, None)
+        self.assertEqual(doc.old_name_code, None)
+        self.assertEqual(doc.options, {})
+        self.assertEqual(doc.remove_tag_string, '')
+        self.assertEqual(doc.requested_extension, None)
+        self.assertEqual(doc.revision, None)
+        self.assertEqual(doc.tag_string, '')
+        self.assertEqual(doc.tags, [])
+        self.assertEqual(doc.thumbnail, None)
+        self.assertEqual(doc.user, self.admin_user)
 
 
 class DocumentProcessorTest(CoreTestCase):
@@ -595,6 +620,7 @@ class DocumentProcessorTest(CoreTestCase):
         # Docrule OK
         self.assertEqual(doc.docrule.__class__.__name__, 'DocumentTypeRule')
         self.assertEqual(doc.docrule.title, 'Adlibre Invoices')
+        self.assertEqual(doc.mimetype, 'application/pdf')
 
         # Proper revision data generated and has all the indexes required
         file_rev_data = doc.get_file_revisions_data()
@@ -698,32 +724,93 @@ class DocumentProcessorTest(CoreTestCase):
             raise AssertionError("Processor should read the file's indexes")
 
     def test_17_read_not_existing(self):
+        """Read code for document with code not existing in system"""
+        inexisting_code = 'ADL-0010'
+        doc = self.processor.read(inexisting_code, {'user': self.admin_user})
+        if not self.processor.errors:
+            raise AssertionError('DocumentProcessor should contain errors about file absent!')
+        else:
+            error = self.processor.errors[0]
+            if not error.code == 404 or not self.processor.errors.__len__() == 1:
+                raise AssertionError('DocumentProcessor returned wrong error.')
+            self.assertEqual(error.parameter, 'No such document: %s' % inexisting_code)
+        self._check_dms_object_empty(doc)
+        self.assertEqual(doc.file_name, inexisting_code)
+        # Docrule Recognized
+        self.assertEqual(doc.docrule.__class__.__name__, 'DocumentTypeRule')
+        self.assertEqual(doc.docrule.title, 'Adlibre Invoices')
+
+    def test_18_read_not_existing_uncategorized(self):
+        """Read code for document with code not existing in system and being uncategorized code"""
+        inexisting_code = 'UNC-0010'
+        doc = self.processor.read(inexisting_code, {'user': self.admin_user})
+        if not self.processor.errors:
+            raise AssertionError('DocumentProcessor should contain errors about file absent!')
+        else:
+            error = self.processor.errors[0]
+            if not error.code == 404 or not self.processor.errors.__len__() == 1:
+                raise AssertionError('DocumentProcessor returned wrong error.')
+            self.assertEqual(error.parameter, 'No such document: %s' % inexisting_code)
+        self._check_dms_object_empty(doc)
+        self.assertEqual(doc.file_name, inexisting_code)
+        # Docrule Recognized
+        self.assertEqual(doc.docrule.__class__.__name__, 'DocumentTypeRule')
+        self.assertEqual(doc.docrule.title, 'No doccode')
+
+    def test_19_read_not_existing_no_rule(self):
+        """Reading a code with not existing code and no docrule assigned.
+
+        Checks for Uncategorized document type assigned properly and nothing worng returned"""
+        inexisting_code = 'abracadabra'
+        doc = self.processor.read(inexisting_code, {'user': self.admin_user})
+        print doc
+        if not self.processor.errors:
+            raise AssertionError('DocumentProcessor should contain errors about file absent!')
+        else:
+            error = self.processor.errors[0]
+            if not error.code == 404 or not self.processor.errors.__len__() == 1:
+                raise AssertionError('DocumentProcessor returned wrong error.')
+            self.assertEqual(error.parameter, 'No such document: %s' % inexisting_code)
+        self._check_dms_object_empty(doc)
+        self.assertEqual(doc.file_name, inexisting_code)
+        # Docrule Recognized
+        self.assertEqual(doc.docrule.__class__.__name__, 'DocumentTypeRule')
+        self.assertEqual(doc.docrule.title, 'No doccode')
+        # DocRule sequence last not incremented
+        self.assertEqual(doc.docrule.sequence_last, 0)
+
+    def test_20_read_0_file_revisions(self):
         # TODO: develop
         pass
 
-    def test_18_read_0_file_revisions(self):
+    def test_21_read_not_existing_only_metadata(self):
+        # TODO: develop
+        # TODO: fix bugs in this. Only_metadata call response contains lots of trash info. We should fix that and test
+        pass
+
+    def test_22_read_not_existing_with_extension(self):
         # TODO: develop
         pass
 
-    def test_19_read_with_secondary_indexes(self):
+    def test_23_read_with_secondary_indexes(self):
         # TODO: develop
         pass
 
-    def test_20_read_marked_deleted(self):
+    def test_24_read_marked_deleted(self):
         # TODO: develop
         pass
 
-    def test_21_create_revision_for_existing_code(self):
+    def test_25_create_revision_for_existing_code(self):
         """Updates a code with new file revision"""
         # TODO: develop
         pass
 
-    def test_22_update_document_type_with_indexes(self):
+    def test_26_update_document_type_with_indexes(self):
         """Update existing code with new document type and new indexes in one call (For AUI usage)"""
         # TODO: develop
         pass
 
-    def test_23_thumbnail_read(self):
+    def test_27_thumbnail_read(self):
         """Thumbnail appearing in the destination folder without leaving temporary file and returned to caller"""
         code = self.documents_pdf[0]
         doc = self.processor.read(code, options={'user': self.admin_user, 'thumbnail': True})
@@ -733,7 +820,7 @@ class DocumentProcessorTest(CoreTestCase):
             raise AssertionError('thumbnail for code: %s is not present in manager run result')
         self._chek_thumbnails_created(code, doc.get_docrule())
 
-    def test_24_thumbnail_deletion(self):
+    def test_28_thumbnail_deletion(self):
         """Thumbnail deleted on changing this document or deleting this document"""
         code = self.this_test_docs[0]
         file_code = self.documents_pdf[0]
@@ -757,7 +844,7 @@ class DocumentProcessorTest(CoreTestCase):
         if os.path.isfile(thumb_path):
             raise AssertionError('Thumbnail have not been deleted: %s' % thumb_path)
 
-    def test_25_thumbnail_update(self):
+    def test_29_thumbnail_update(self):
         """Thumbnail removed on document update. e.g. new file added or type changed"""
         code = self.this_test_docs[0]
         file_code = self.documents_pdf[0]
@@ -786,7 +873,7 @@ class DocumentProcessorTest(CoreTestCase):
         if os.path.isfile(thumb_path):
             raise AssertionError('Thumbnail have not been deleted: %s' % thumb_path)
 
-    def test_26_upload_first_revision_after_0_revisions_indexing(self):
+    def test_30_upload_first_revision_after_0_revisions_indexing(self):
         """Refs #1211: Indexes Missed at production
 
         This issue occurred after uploading file revisions to existing 0 revisions documents
@@ -838,7 +925,7 @@ class DocumentProcessorTest(CoreTestCase):
         if not doc.get_file_obj():
             raise AssertionError('Document has no file instance')
 
-    def test_27_store_uncategorized(self):
+    def test_31_store_uncategorized(self):
         """Creates an uncategorized Document
 
         Current implementation should take an uncategorized file name into account,
@@ -861,7 +948,7 @@ class DocumentProcessorTest(CoreTestCase):
         # Proper name
         self.assertEqual(doc.get_filename(), dest_name + '.' + extension)
         # Proper docrule
-        self.assertEqual(doc.get_docrule().pk, 1)
+        self.assertEqual(doc.get_docrule().pk, self.rule_uncategorized)
         # Proper revision data generated and has all the indexes required
         file_rev_data = doc.get_file_revisions_data()
         if not 1 in file_rev_data.keys():
@@ -902,7 +989,7 @@ class DocumentProcessorTest(CoreTestCase):
         if os.path.isfile(path2):
             raise AssertionError('Original Uncategorizsed file name should be absent')
 
-    def test_28_store_uncategorized_with_barcode(self):
+    def test_32_store_uncategorized_with_barcode(self):
         """Creates an uncategorized Document
 
         with Uncategorized barcode specified"""
@@ -922,7 +1009,7 @@ class DocumentProcessorTest(CoreTestCase):
         # Proper name
         self.assertEqual(doc.get_filename(), dest_name + '.' + extension)
         # Proper docrule
-        self.assertEqual(doc.get_docrule().pk, 1)
+        self.assertEqual(doc.get_docrule().pk, self.rule_uncategorized)
         # Proper revision data generated and has all the indexes required
         file_rev_data = doc.get_file_revisions_data()
         if not 1 in file_rev_data.keys():
@@ -986,7 +1073,7 @@ class DocCodeModelTest(TestCase):
 
         self.generated_barcodes = (
             #(docode_id, result)
-            (1, 'UNC-1001'),
+            (10, 'UNC-1001'),
             (2, 'ADL-1001'),
             (3, False),
             (4, False),

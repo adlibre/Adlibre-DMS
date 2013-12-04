@@ -20,6 +20,7 @@ from django.contrib.auth.models import Permission, ContentType
 from models import CoreConfiguration
 from models import DocumentTypeRule
 from models import DocumentTypeRulePermission
+from models import DocTags
 
 
 def delete_without_warning(modeladmin, request, queryset):
@@ -80,3 +81,4 @@ admin.site.register(Permission)
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
 admin.site.register(CoreConfiguration, CoreConfigurationAdmin)
+admin.site.register(DocTags)

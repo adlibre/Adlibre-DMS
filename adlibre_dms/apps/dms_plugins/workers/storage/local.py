@@ -100,11 +100,7 @@ class Local(object):
         if document.get_option('only_metadata'):
             return document
         directory = self.filesystem.get_document_directory(document)
-        if not document.get_docrule().uncategorized:
-            fullpath = os.path.join(directory, document.get_current_file_revision_data()['name'])
-        else:
-            filename = document.get_full_filename()
-            fullpath = os.path.join(directory, filename)
+        fullpath = os.path.join(directory, document.get_current_file_revision_data()['name'])
         if not os.path.exists(fullpath):
             raise PluginError("No such document: %s" % fullpath, 404)
         document.set_fullpath(fullpath)
@@ -157,8 +153,7 @@ class Local(object):
         changed_name = new_name + prefix
         return changed_name
 
-    def get_list(self, docrule, directories, start = 0, finish = None, order = None, searchword = None,
-                        limit_to = []):
+    def get_list(self, docrule, directories, start = 0, finish = None, order = None, searchword = None, limit_to = []):
         """
         Return List of DocCodes in the repository for a given rule
         """
@@ -168,7 +163,7 @@ class Local(object):
 
         # FIXME: This will be inefficient at scale and will require caching
 
-        #FIXME: very un-elegant way to define available sort functions
+        # FIXME: very un-elegant way to define available sort functions
         def sort_by_created_date(x, y):
             first = datetime.datetime.strptime(x[1]['first_metadata']['created_date'], settings.DATETIME_FORMAT)
             second = datetime.datetime.strptime(y[1]['first_metadata']['created_date'], settings.DATETIME_FORMAT)
@@ -190,10 +185,10 @@ class Local(object):
                 else:
                     pass
 
-        docrules = []
+        docs = []
         for directory, metadata_info in directories:
             doc_name = metadata_info['document_name']
-            if finish and len(docrules) >= finish:
+            if finish and len(docs) >= finish:
                 break
             elif searchword and not self.document_matches_search(metadata_info, searchword):
                 pass
@@ -201,16 +196,10 @@ class Local(object):
                 #print "LIMIT TO = %s, DOC_NAME = %s" % (limit_to, doc_name)
                 pass
             else:
-                if docrule.uncategorized:
-                    docrules.append({
-                        'name': doc_name,
-                        'directory': os.path.split(directory)[1]
-                    })
-                else:
-                    docrules.append({'name': doc_name})
+                docs.append({'name': doc_name})
         if start:
-            docrules = docrules[start:]
-        return docrules
+            docs = docs[start:]
+        return docs
 
     def remove(self, document):
         # TODO: FIXME: Refactor this method so it's safer!

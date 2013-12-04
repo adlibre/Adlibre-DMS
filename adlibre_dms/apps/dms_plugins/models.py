@@ -11,7 +11,6 @@ import logging
 
 from djangoplugins.fields import ManyPluginField
 from djangoplugins.models import Plugin
-from taggit.managers import TaggableManager
 
 from dms_plugins import pluginpoints
 from core.models import DocumentTypeRule
@@ -22,7 +21,7 @@ log = logging.getLogger('dms_plugins.models')
 class DoccodePluginMapping(models.Model):
     """A Relational storage for handling DocumentType <=> Plugins relations"""
 
-    doccode = models.ForeignKey(DocumentTypeRule)
+    doccode = models.OneToOneField(DocumentTypeRule)
     #if changing *_plugins names please change dms_plugins.pluginpoints correspondingly
     before_storage_plugins = ManyPluginField(
         pluginpoints.BeforeStoragePluginPoint,
@@ -149,21 +148,3 @@ class PluginOption(models.Model):
 
     def __unicode__(self):
         return "%s: %s" % (self.name, self.value)
-
-
-class DocTags(models.Model):
-    """A model that represents Document for maintaining Tag relations."""
-    name = models.CharField(max_length=128)
-    doccode = models.ForeignKey(DocumentTypeRule)
-    tags = TaggableManager()
-
-    class Meta:
-        verbose_name = "Document > Tags mapping"
-        verbose_name_plural = "Document > Tags mappings"
-
-    def get_tag_list(self):
-        """Returns a list of current tags"""
-        return map(lambda x: x.name, self.tags.all())
-
-    def __unicode__(self):
-        return unicode(self.name)

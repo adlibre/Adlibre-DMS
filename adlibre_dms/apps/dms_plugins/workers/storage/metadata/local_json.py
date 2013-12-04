@@ -41,6 +41,9 @@ class LocalJSONMetadata(object):
                 raise PluginError("No such revision for this document", 404)
             else:
                 pass
+        if not document.mimetype and str(revision) in fileinfo_db.iterkeys():
+            if 'mimetype' in fileinfo_db[str(revision)]:
+                document.mimetype = fileinfo_db[str(revision)]['mimetype']
         document.set_file_revisions_data(fileinfo_db)
         return document
 
@@ -191,10 +194,6 @@ class LocalJSONMetadata(object):
                         keys = metadatas.keys()
                         keys.sort()
                         first_metadata = metadatas[keys[0]]
-                elif docrule.uncategorized and not dirs:  # leaf directory, no file revision data file => NoDocrule
-                    first_metadata = self.get_fake_metadata(root, fil)
-                    metadatas = [first_metadata]
-                    doc = fil
                 if filter_date and first_metadata and first_metadata and \
                         self.string_to_date(first_metadata['created_date']).date() != self.string_to_date(filter_date).date():
                             continue

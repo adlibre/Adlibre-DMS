@@ -14,7 +14,7 @@ from dms_plugins.pluginpoints import BeforeRetrievalPluginPoint
 from dms_plugins.pluginpoints import BeforeRemovalPluginPoint
 from dms_plugins.pluginpoints import DatabaseUpdatePluginPoint
 from dms_plugins.pluginpoints import DatabaseStoragePluginPoint
-from dms_plugins.models import DocTags
+from core.models import DocTags
 from dms_plugins.workers import Plugin, PluginError
 from core.document_processor import DocumentProcessor
 from dmscouch.models import CouchDocument

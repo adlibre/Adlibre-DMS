@@ -2,7 +2,7 @@
 Module: API Unit Tests
 
 Project: Adlibre DMS
-Copyright: Adlibre Pty Ltd 2011
+Copyright: Adlibre Pty Ltd 2013
 License: See LICENSE for license information
 """
 import json
@@ -18,9 +18,7 @@ from adlibre.dms.base_test import DMSTestCase
 from core.models import CoreConfiguration
 from core.models import DocumentTypeRuleManager
 
-# TODO: Create a test document code, and a set of test documents at the start of test
 # TODO: Test self.rules, self.rules_missing, self.documents_missing
-# TODO: Write a test that checks these methods for ALL doctypes that are currently installed :)
 # TODO: Run all of these tests for different auth. Plain, Django, and none!
 # TODO: Test with and without correct permissions.
 
@@ -29,7 +27,7 @@ class APITest(DMSTestCase):
     def setUp(self):
         """Local test variables, that may override DMSTestCase"""
         self.documents_pdf_this_test = ["ADL-1985", 'ADL-1984', 'ADL-1983']
-        self.adlibre_invoices_rule_id = self.rules[1]
+        self.adlibre_invoices_rule_id = self.rules[0]
         self.test_tag = 'test_tag'
         self.hworker = HashCodeWorker(method=self.hash_method)
 
@@ -37,7 +35,24 @@ class APITest(DMSTestCase):
         """Load Test Data required by this test"""
         self.loadTestData()
 
-    def test_01_api_file(self):
+    def test_01_api_list_files(self):
+        """Testing file listing for different API calls"""
+        docrule = self.rule_uncategorized  # Uncategorized
+        url = reverse('api_file_list', kwargs={'id_rule': docrule})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 401)  # unauthorised not fetched
+        self.client.login(username=self.username, password=self.password)
+        response = self.client.get(url)
+        self.assertContains(response, 'No doccode')
+        self.assertContains(response, 'thumb_url')
+        self.assertContains(response, 'thumb_url')
+        self.assertContains(response, '/api/thumbnail/UNC-0001')
+        self.assertNotContains(response, '/api/thumbnail/UNC-0002')
+        url = reverse('api_file_list', kwargs={'id_rule': 100})  # Not existing rule
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 400)
+
+    def test_02_api_file(self):
         """Uses abcde333 document to test file upload with code. Retrieves file afterwards"""
         self.client.login(username=self.username, password=self.password)
         doc = self.documents_hash[0][0]
@@ -50,7 +65,7 @@ class APITest(DMSTestCase):
         response = self.client.get(url)
         self.assertContains(response, self.documents_pdf_test_string, status_code=200)
 
-    def test_02_api_file_jpeg(self):
+    def test_03_api_file_jpeg(self):
         """ Testing upload of JPG file into DMS api"""
         self.client.login(username=self.username, password=self.password)
         code = self.jpg_codes[0]
@@ -58,7 +73,7 @@ class APITest(DMSTestCase):
         response = self._upload_file(doc_name, suggested_format='jpg', check_response=False, code=code)
         self.assertEqual(response.status_code, 201)
 
-    def test_03_api_no_docrule_upload(self):
+    def test_04_api_no_docrule_upload(self):
         """
         Testing upload of file with no document type assigned returns a proper response
 
@@ -72,19 +87,19 @@ class APITest(DMSTestCase):
         response = self._upload_file(self.no_docrule_files[0], suggested_format='jpg', check_response=False)
         self.assertContains(response, 'Bad Request', status_code=400)
 
-    def test_04_upload_files(self):
+    def test_05_upload_files(self):
         """Upload files through API uses 1 file and exact code specified"""
         for f in self.documents_pdf_this_test:
             response = self._upload_file(self.documents_pdf[0], code=f)
             self.assertEqual(response.status_code, 201)
 
-    def test_05_api_create_existing_file(self):
+    def test_06_api_create_existing_file(self):
         """Create an existing file. We should not allow that due to CRUD architecture"""
         for f in self.documents_pdf:
             response = self._upload_file(f, check_response=False)
             self.assertEqual(response.status_code, 400)
 
-    def test_06_get_rev_count(self):
+    def test_07_get_rev_count(self):
         """Uploading new revision of the document and checking it exists"""
         for f in self.documents_pdf:
             url = reverse('api_revision_count', kwargs={'document': f})
@@ -101,38 +116,39 @@ class APITest(DMSTestCase):
                 raise self.failureException('Invalid response: %s' % response.content)
             self.assertEqual(response.content, "2")
 
-    def test_07_get_bad_rev_count(self):
+    def test_08_get_bad_rev_count(self):
+        """Wrong revision number request"""
         self.client.login(username=self.username, password=self.password)
         url = reverse('api_revision_count', kwargs={'document': 'sdfdsds42333333333333333333333333432423'})
         response = self.client.get(url)
         self.assertContains(response, 'Bad Request', status_code=400)
 
-    def test_08_api_wrong_code_shows_not_exists(self):
+    def test_09_api_wrong_code_shows_not_exists(self):
         """ Fixed Bug #785 MUI: View invalid filename causes exception"""
         self.client.login(username=self.username, password=self.password)
         url = reverse('api_file', args={"code": 'mas00000280.pdf'})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 404)
 
-    def test_09_api_rule_detail(self):
+    def test_10_api_rule_detail(self):
         self.client.login(username=self.username, password=self.password)
         url = reverse('api_rules_detail', kwargs={'id_rule': 3, 'emitter_format': 'json'})
         response = self.client.get(url)
         self.assertContains(response, 'Test PDFs')
 
-    def test_10_api_rules(self):
+    def test_11_api_rules(self):
         self.client.login(username=self.username, password=self.password)
         url = reverse('api_rules', kwargs={'emitter_format': 'json'})
         response = self.client.get(url)
         self.assertContains(response, 'Test PDFs')
 
-    def test_11_api_plugins(self):
+    def test_12_api_plugins(self):
         self.client.login(username=self.username, password=self.password)
         url = reverse('api_plugins', kwargs={'emitter_format': 'json'})
         response = self.client.get(url)
         self.assertContains(response, 'dms_plugins.workers.storage.local.LocalStoragePlugin')
 
-    def test_12_api_files_list(self):
+    def test_13_api_files_list(self):
         self.client.login(username=self.username, password=self.password)
         dman = DocumentTypeRuleManager()
         docrule = dman.get_docrule_by_name('Adlibre Invoices')
@@ -141,7 +157,7 @@ class APITest(DMSTestCase):
         response = self.client.get(url)
         self.assertContains(response, 'ADL-1234')
 
-    def test_13_api_fileinfo(self):
+    def test_14_api_fileinfo(self):
         """
             Sometimes file revision data can be corrupt due to plugins misconfiguration or improper file storage.
             Tests this bug with file info data:
@@ -180,7 +196,7 @@ class APITest(DMSTestCase):
             data = json.loads(response.content)
             check_proper_json_format(data, 2, f)
 
-    def test_14_read_api_file_content(self):
+    def test_15_read_api_file_content(self):
         """"Comparing file content to actual file, that was uploaded, using hash from our DMS hash plugin"""
         file_name = self.documents_pdf[0]
         extension = 'pdf'
@@ -195,7 +211,7 @@ class APITest(DMSTestCase):
         if not resp_h == file_h:
             raise self.failureException('Wrong file content returned by DMS: %s' % resp_h)
 
-    def test_15_complex_revisions_check__file_after_revision_update(self):
+    def test_16_complex_revisions_check__file_after_revision_update(self):
         """Upload another file revision and test it is a proper revision.
 
         (E.g. check file content for file ADL-0002 in a code ADL-0001, uploading a file ADL-0002)
@@ -229,7 +245,7 @@ class APITest(DMSTestCase):
         f.close()
         return file_h
 
-    def test_16_file_storage_structure(self):
+    def test_17_file_storage_structure(self):
         """File really exists in a directory it should.
 
         For document ADL-0001.pdf and all of it's revisions at a current state"""
@@ -246,9 +262,8 @@ class APITest(DMSTestCase):
             if not fname in required_list:
                 raise self.failureException('System integrity broken, file: %s absent' % fname)
 
-    def test_17_api_tags(self):
-        """ Adds a tad to a file and then deletes it"""
-        # Login
+    def test_18_api_tags(self):
+        """ Adds a tag to a file and then deletes it"""
         self.client.login(username=self.username, password=self.password)
         for filename in [self.documents_pdf[0], self.documents_jpg[0]]:
             # Remove tag
@@ -274,7 +289,7 @@ class APITest(DMSTestCase):
             response = self.client.get(url)
             self.assertContains(response, self.test_tag, status_code=200)
 
-    def test_18_api_read_file_revisions(self):
+    def test_19_api_read_file_revisions(self):
         """Refs #968 API returns revision independent filename"""
         self.client.login(username=self.username, password=self.password)
         doc_url = reverse('api_file', kwargs={'code': self.documents_pdf[0], 'suggested_format': 'pdf'})
@@ -294,7 +309,7 @@ class APITest(DMSTestCase):
         self.assertEqual(response._headers['content-disposition'][1], test_filename_with_revision)
         self.assertEqual(response.status_code, 200)
 
-    def test_19_delete_documents(self):
+    def test_20_delete_documents(self):
         delete_doc = self.documents_pdf_this_test[0]
         remain_doc = self.documents_pdf_this_test[1]
         self._delete_documents(delete_doc, remain_doc)
@@ -310,7 +325,7 @@ class APITest(DMSTestCase):
         response = self.client.get(url)
         self.assertContains(response, '', status_code=200)
 
-    def test_20_deprecated_api_handler(self):
+    def test_21_deprecated_api_handler(self):
         """Old handler that creates or updates existing document"""
         self.client.login(username=self.username, password=self.password)
         file_name = self.documents_pdf_this_test[1]
@@ -327,7 +342,7 @@ class APITest(DMSTestCase):
         after_rev = self.client.get(rev_count_url)
         self.assertGreater(int(after_rev.content), int(before_rev.content), 'Revision Count mismatch')
 
-    def test_21_deprecated_file_handler_no_doc_type_upload(self):
+    def test_22_deprecated_file_handler_no_doc_type_upload(self):
         """Refs #1203 Deprecated file handler upload bug with no document type rule"""
         self.client.login(username=self.username, password=self.password)
         file_name = 'Some-File-0001'

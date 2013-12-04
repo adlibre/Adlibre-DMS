@@ -71,7 +71,8 @@ class DMSTestCase(TestCase):
             # TODO: DEFINE ME
         ]
 
-        self.rules = (1, 2, 3, 4, 5,)
+        self.rules = (2, 3, 4, 5)
+        self.rule_uncategorized = 10
         self.rules_missing = (99,)
 
         # Used in determining if current file is PDF file by 'string' inside a file content.

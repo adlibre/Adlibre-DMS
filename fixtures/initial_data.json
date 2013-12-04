@@ -711,7 +711,7 @@
         "model": "core.coreconfiguration",
         "fields": {
             "aui_url": "http://localhost:3000/",
-            "uncategorized": 1
+            "uncategorized": 10
         }
     },
     {
@@ -919,7 +919,7 @@
                 7,
                 15
             ],
-            "doccode": "1",
+            "doccode": "10",
             "storage_plugins": [
                 4,
                 14
@@ -1078,7 +1078,7 @@
         }
     },
     {
-        "pk": 1, 
+        "pk": 10,
         "model": "core.documenttyperule",
         "fields": {
             "regex": "UNC-[0-9]{4}",
