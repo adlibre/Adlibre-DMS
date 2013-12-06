@@ -9,6 +9,7 @@ import os
 import shutil
 import ghostscript
 import logging
+import Image
 
 from dms_plugins.workers.storage.local import LocalFilesystemManager
 
@@ -29,6 +30,7 @@ class ThumbnailsFilesystemHandler(object):
     def __init__(self):
         self.filesystem = LocalFilesystemManager()
         self.thumbnail_folder = 'thumbnails_storage'
+        self.jpeg_size = 64, 64  # px, px (pixels size - width, height)
 
     def retrieve_thumbnail(self, document):
         """Handles retrieval of thumbnail and optional generation of it"""
@@ -37,7 +39,8 @@ class ThumbnailsFilesystemHandler(object):
         if not os.path.exists(thumbnail_location + '.png'):
             if document.mimetype == 'application/pdf':
                 self.generate_thumbnail_from_pdf(document)
-            # TODO: if document.mimetype == 'image/jpaeg':
+            if document.mimetype == 'image/jpeg':
+                self.generate_thumbnail_from_jpeg(document)
                 # resize that image to thumbnail size with ghostscript
         document.thumbnail = open(thumbnail_location + '.png').read()
         return document
@@ -78,10 +81,31 @@ class ThumbnailsFilesystemHandler(object):
             ghostscript.Ghostscript(*args)
         except Exception, e:
             print e
-            log.error('ThumbnailsFilesystemHandler.generate_thumbnail method error: %s' % e)
+            log.error('ThumbnailsFilesystemHandler.generate_thumbnail (pdf) method error: %s' % e)
             pass
         # Deleting the temp PDF
         os.unlink(thumbnail_temporary)
+
+    def generate_thumbnail_from_jpeg(self, document):
+        """Generating a thumbnail based on document first file"""
+        thumbnail_temporary, thumbnail_directory = self.get_thumbnail_path(document)
+        # Creating directory for thumbnail if not exists
+        if not os.path.exists(thumbnail_directory):
+            os.makedirs(thumbnail_directory)
+        # Storing temporary PDF file for converting
+        tmp_jpg = open(thumbnail_temporary, 'w')
+        tmp_jpg.write(document.get_file_obj().read())
+        tmp_jpg.close()
+        try:
+            im = Image.open(thumbnail_temporary)
+            im.thumbnail(self.jpeg_size, Image.ANTIALIAS)
+            im.save(thumbnail_temporary, "JPEG")
+        except Exception, e:
+            print e
+            log.error('ThumbnailsFilesystemHandler.generate_thumbnail (jpeg) method error: %s' % e)
+            pass
+        # Deleting the temp JPG
+        # os.unlink(thumbnail_temporary)
 
     def get_thumbnail_path(self, document, filename=True):
         """Produces 2 path of tmp thumbnail file and a directory for thumbnails storage"""
