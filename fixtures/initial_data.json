@@ -917,9 +917,14 @@
             "before_retrieval_plugins": [
                 6,
                 7,
-                15
+                15,
+                29
             ],
-            "doccode": "10",
+            "doccode": 10,
+            "database_update_plugins": [],
+            "update_plugins": [
+                21
+            ],
             "storage_plugins": [
                 4,
                 14
@@ -930,13 +935,7 @@
                 13,
                 20
             ],
-            "before_update_plugins": [
-            ],
-            "database_update_plugins": [
-            ],
-            "update_plugins": [
-                21
-            ],
+            "before_update_plugins": [],
             "active": true,
             "before_storage_plugins": [
                 3

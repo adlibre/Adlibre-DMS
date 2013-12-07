@@ -820,6 +820,19 @@ class DocumentProcessorTest(CoreTestCase):
             raise AssertionError('thumbnail for code: %s is not present in manager run result')
         self._chek_thumbnails_created(code, doc.get_docrule())
 
+    def test_27_thumbnail_for_uncategorized(self):
+        # TODO: develop
+        pass
+
+    def test_27_thumbnail_for_image(self):
+        # TODO: develop
+        pass
+
+    def test_27_thumbnail_for_multiple_revisions_document(self):
+        # TODO: devbelop
+        # TODO: check generated from last docuiment revision
+        pass
+
     def test_28_thumbnail_deletion(self):
         """Thumbnail deleted on changing this document or deleting this document"""
         code = self.this_test_docs[0]

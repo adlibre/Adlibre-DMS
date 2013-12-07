@@ -9,14 +9,25 @@ import os
 import shutil
 import ghostscript
 import logging
-import Image
+import traceback
 
 from dms_plugins.workers.storage.local import LocalFilesystemManager
 
 from dms_plugins.pluginpoints import BeforeRetrievalPluginPoint, BeforeRemovalPluginPoint, BeforeUpdatePluginPoint
-from dms_plugins.workers import Plugin
+from dms_plugins.workers import Plugin, PluginError
 
 log = logging.getLogger('dms_plugins')
+
+# Optional PIL (Pillow) support for generating thumbnails from JPEG
+Image = None
+try:
+    from PIL import Image
+except:
+    # Log error and traceback
+    import sys
+    tr = traceback.print_exc(file=sys.stdout)
+    log.error(tr)
+    pass
 
 
 class ThumbnailsFilesystemHandler(object):
@@ -37,11 +48,11 @@ class ThumbnailsFilesystemHandler(object):
         thumbnail_location, thumbnail_directory = self.get_thumbnail_path(document)
 
         if not os.path.exists(thumbnail_location + '.png'):
+            # To write a mimetype thumbnail handler add similar code  and create your function
             if document.mimetype == 'application/pdf':
                 self.generate_thumbnail_from_pdf(document)
             if document.mimetype == 'image/jpeg':
                 self.generate_thumbnail_from_jpeg(document)
-                # resize that image to thumbnail size with ghostscript
         document.thumbnail = open(thumbnail_location + '.png').read()
         return document
 
@@ -80,14 +91,17 @@ class ThumbnailsFilesystemHandler(object):
             ]
             ghostscript.Ghostscript(*args)
         except Exception, e:
-            print e
-            log.error('ThumbnailsFilesystemHandler.generate_thumbnail (pdf) method error: %s' % e)
-            pass
+            error = 'ThumbnailsFilesystemHandler.generate_thumbnail (pdf) method error: %s' % e
+            log.error(error)
+            raise PluginError(error, 404)
         # Deleting the temp PDF
         os.unlink(thumbnail_temporary)
 
     def generate_thumbnail_from_jpeg(self, document):
         """Generating a thumbnail based on document first file"""
+        # Raising exception in case requiring to generate a thumbnail and Image module is not supported by virtualenv
+        if Image is not None:
+            raise PluginError('Can not generate thumbnail for JPEG file. PIL (Pillow) is not set up correctly.', 404)
         thumbnail_temporary, thumbnail_directory = self.get_thumbnail_path(document)
         # Creating directory for thumbnail if not exists
         if not os.path.exists(thumbnail_directory):
@@ -99,13 +113,13 @@ class ThumbnailsFilesystemHandler(object):
         try:
             im = Image.open(thumbnail_temporary)
             im.thumbnail(self.jpeg_size, Image.ANTIALIAS)
-            im.save(thumbnail_temporary, "JPEG")
+            im.save(thumbnail_temporary + '.png', "PNG")
         except Exception, e:
-            print e
-            log.error('ThumbnailsFilesystemHandler.generate_thumbnail (jpeg) method error: %s' % e)
-            pass
+            error = 'ThumbnailsFilesystemHandler.generate_thumbnail (jpeg) method error: %s' % e
+            log.error(error)
+            raise PluginError(error, 404)
         # Deleting the temp JPG
-        # os.unlink(thumbnail_temporary)
+        os.unlink(thumbnail_temporary)
 
     def get_thumbnail_path(self, document, filename=True):
         """Produces 2 path of tmp thumbnail file and a directory for thumbnails storage"""
