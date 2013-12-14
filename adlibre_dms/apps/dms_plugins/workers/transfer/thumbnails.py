@@ -9,7 +9,6 @@ import os
 import shutil
 import ghostscript
 import logging
-import traceback
 
 from dms_plugins.workers.storage.local import LocalFilesystemManager
 
@@ -17,17 +16,6 @@ from dms_plugins.pluginpoints import BeforeRetrievalPluginPoint, BeforeRemovalPl
 from dms_plugins.workers import Plugin, PluginError
 
 log = logging.getLogger('dms_plugins')
-
-# Optional PIL (Pillow) support for generating thumbnails from JPEG
-Image = None
-try:
-    from PIL import Image
-except:
-    # Log error and traceback
-    import sys
-    tr = traceback.print_exc(file=sys.stdout)
-    log.error(tr)
-    pass
 
 
 class ThumbnailsFilesystemHandler(object):
@@ -63,7 +51,9 @@ class ThumbnailsFilesystemHandler(object):
             shutil.rmtree(thumbnail_directory)
         return document
 
-    """Helper methods (Internal)"""
+    # ******************************************************************************************************************
+    # ****************************************** Helper methods (Internal) *********************************************
+    # ******************************************************************************************************************
 
     def generate_thumbnail_from_pdf(self, document):
         """Generating a thumbnail based on document first file"""
@@ -100,6 +90,11 @@ class ThumbnailsFilesystemHandler(object):
     def generate_thumbnail_from_jpeg(self, document):
         """Generating a thumbnail based on document first file"""
         # Raising exception in case requiring to generate a thumbnail and Image module is not supported by virtualenv
+        try:
+            from PIL import Image
+        except ImportError:
+            Image = None
+            pass
         if Image is None:
             raise PluginError('Can not generate thumbnail for JPEG file. PIL (Pillow) is not set up correctly.', 404)
         thumbnail_temporary, thumbnail_directory = self.get_thumbnail_path(document)
