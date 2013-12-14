@@ -4,6 +4,8 @@ dist
 *.egg-info
 .DS_Store
 
+documents/*
+
 adlibre_dms/reports/coverage.xml
 adlibre_dms/reports/junit.xml
 adlibre_dms/reports/pylint.report
