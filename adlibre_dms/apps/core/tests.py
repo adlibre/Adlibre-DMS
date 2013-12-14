@@ -28,6 +28,7 @@ from django.contrib.auth.models import User, Group
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.test import TestCase
+from django.core.files.uploadedfile import UploadedFile
 
 from adlibre.dms.base_test import DMSTestCase
 
@@ -820,20 +821,33 @@ class DocumentProcessorTest(CoreTestCase):
             raise AssertionError('thumbnail for code: %s is not present in manager run result')
         self._chek_thumbnails_created(code, doc.get_docrule())
 
-    def test_27_thumbnail_for_uncategorized(self):
-        # TODO: develop
-        pass
+    def test_28_thumbnail_for_uncategorized(self):
+        """Upload an uncategorized PDF file and generate a thumbnail for it"""
+        # making current code - UNC-0003
+        dr = CoreConfiguration.objects.filter()[0].uncategorized
+        dr.sequence_last = 2
+        dr.save()
+        code = self.uncategorized_codes[2]
+        test_file = self._get_fixtures_file(self.documents_pdf[0])
+        doc = self.processor.create(test_file, {'user': self.admin_user, 'barcode': code})
+        if self.processor.errors:
+            raise AssertionError('Can not create uncategorized document with errors creating document: %s %s'
+                                 % (code, self.processor.errors))
+        # Original filename is there in revision data
+        self.assertEqual(doc.file_revision_data[1]['uncategorized_filename'], 'ADL-0001.pdf')
+        self.assertEqual(doc.full_filename, 'UNC-0003.pdf')
+        doc = self.processor.read(code, options={'user': self.admin_user, 'thumbnail': True})
+        if self.processor.errors or not doc.thumbnail:
+            print doc.thumbnail
+            raise AssertionError('DocumentProcessor errors for reading a thumbnail %s' % self.processor.errors)
+        # Another usecase here to check for whole code thumbnail. Rather then code + extension
+        thumb_path = self._chek_thumbnails_created(code, dr, check_exists=False)
+        paths = os.path.split(thumb_path)
+        thumb_path = os.path.join(paths[0], code) + '.png'
+        if not os.path.isfile(thumb_path):
+            raise AssertionError('Thumbnail have not been generated: %s' % thumb_path)
 
-    def test_27_thumbnail_for_image(self):
-        # TODO: develop
-        pass
-
-    def test_27_thumbnail_for_multiple_revisions_document(self):
-        # TODO: devbelop
-        # TODO: check generated from last docuiment revision
-        pass
-
-    def test_28_thumbnail_deletion(self):
+    def test_29_thumbnail_deletion(self):
         """Thumbnail deleted on changing this document or deleting this document"""
         code = self.this_test_docs[0]
         file_code = self.documents_pdf[0]
@@ -857,7 +871,7 @@ class DocumentProcessorTest(CoreTestCase):
         if os.path.isfile(thumb_path):
             raise AssertionError('Thumbnail have not been deleted: %s' % thumb_path)
 
-    def test_29_thumbnail_update(self):
+    def test_30_thumbnail_update(self):
         """Thumbnail removed on document update. e.g. new file added or type changed"""
         code = self.this_test_docs[0]
         file_code = self.documents_pdf[0]
@@ -886,7 +900,7 @@ class DocumentProcessorTest(CoreTestCase):
         if os.path.isfile(thumb_path):
             raise AssertionError('Thumbnail have not been deleted: %s' % thumb_path)
 
-    def test_30_upload_first_revision_after_0_revisions_indexing(self):
+    def test_31_upload_first_revision_after_0_revisions_indexing(self):
         """Refs #1211: Indexes Missed at production
 
         This issue occurred after uploading file revisions to existing 0 revisions documents
@@ -938,7 +952,7 @@ class DocumentProcessorTest(CoreTestCase):
         if not doc.get_file_obj():
             raise AssertionError('Document has no file instance')
 
-    def test_31_store_uncategorized(self):
+    def test_32_store_uncategorized(self):
         """Creates an uncategorized Document
 
         Current implementation should take an uncategorized file name into account,
@@ -1002,11 +1016,10 @@ class DocumentProcessorTest(CoreTestCase):
         if os.path.isfile(path2):
             raise AssertionError('Original Uncategorizsed file name should be absent')
 
-    def test_32_store_uncategorized_with_barcode(self):
+    def test_33_store_uncategorized_with_barcode(self):
         """Creates an uncategorized Document
 
         with Uncategorized barcode specified"""
-        # TODO: create this to upload ADL-0001.pdf with uncategorized code
         # Making last Uncategorized file UNC-0001 (not absent)
         config = CoreConfiguration.objects.all()[0]
         config.uncategorized.sequence_last += 1
@@ -1062,6 +1075,63 @@ class DocumentProcessorTest(CoreTestCase):
         )
         if os.path.isfile(path2):
             raise AssertionError('Original Uncategorizsed file name should be absent')
+
+    def test_34_thumbnail_for_image(self):
+        """Thumbnail generated for JPEG image document"""
+        code = self.uncategorized_codes[0]  # Should be image (jpeg)
+        doc = self.processor.read(code, options={'user': self.admin_user, 'thumbnail': True})
+        if self.processor.errors or not doc.thumbnail:
+            raise AssertionError('DocumentProcessor errors for reading a thumbnail %s' % self.processor.errors)
+        # Another usecase here to check for whole code thumbnail. Rather then code + extension
+        thumb_path = self._chek_thumbnails_created(code, doc.get_docrule(), check_exists=False)
+        paths = os.path.split(thumb_path)
+        thumb_path = os.path.join(paths[0], code) + '.png'
+        if not os.path.isfile(thumb_path):
+            raise AssertionError('Thumbnail have not been generated: %s' % thumb_path)
+
+    def test_35_thumbnail_for_multiple_revisions_document(self):
+        """Thumbnail generated for LAST JPEG image of the multiple revisions document
+
+        adds revisions to the document by uploading another image after another image.
+        check previous image does not equal to the new generated one."""
+        code = self.uncategorized_codes[0]  # Should be image (jpeg)
+        doc = self.processor.read(code, options={'user': self.admin_user, 'thumbnail': True})
+        if self.processor.errors or not doc.thumbnail:
+            raise AssertionError('DocumentProcessor errors for reading a thumbnail %s' % self.processor.errors)
+        # Another usecase here to check for whole code thumbnail. Rather then code + extension
+        thumbnail_1 = doc.thumbnail
+        ext = 'jpg'
+        new_file = self.fixtures_files[18]
+        filename, extension = os.path.splitext(new_file)
+        test_file = self._get_fixtures_file(filename, extension=ext)
+        f = UploadedFile(test_file, test_file.name, content_type='image/jpeg')
+        doc = self.processor.update(code + extension, options={'user': self.admin_user, 'update_file': f})
+        if self.processor.errors:
+            raise AssertionError('DocumentProcessor errors updateing athumbnails code: %s' % self.processor.errors)
+        doc_file_revisions = doc.get_file_revisions_data()
+        if not 2 in doc_file_revisions.iterkeys():
+            raise AssertionError('New revision of a file is not present in metadata')
+        if 3 in doc_file_revisions.iterkeys() or '3' in doc_file_revisions.iterkeys():
+            raise AssertionError('File contains wrong metadata')
+        self._chek_documents_dir(code + '_r2.' + ext, doc.get_docrule(), code=code)
+        path = self._chek_documents_dir(
+            code + '_r3.' + ext,
+            doc.get_docrule(),
+            code=code,
+            check_exists=False
+        )
+        if os.path.isfile(path):
+            raise AssertionError('Revision 3 file should be absent')
+        # Check thumbnails absent after update
+        thumb_path = self._chek_thumbnails_created(code, doc.get_docrule(), check_exists=False)
+        paths = os.path.split(thumb_path)
+        thumb_path = os.path.join(paths[0], code) + '.png'
+        if os.path.isfile(thumb_path):
+            raise AssertionError('Thumbnail have left over after update of a file: %s' % thumb_path)
+        doc = self.processor.read(code, options={'user': self.admin_user, 'thumbnail': True})
+        if self.processor.errors or not doc.thumbnail:
+            raise AssertionError('DocumentProcessor errors for reading a thumbnail %s' % self.processor.errors)
+        self.assertNotEqual(doc.thumbnail, thumbnail_1)
 
     def test_zz_cleanup(self):
         """Cleaning alll the docs and data that are touched or used in those tests"""

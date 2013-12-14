@@ -100,7 +100,7 @@ class ThumbnailsFilesystemHandler(object):
     def generate_thumbnail_from_jpeg(self, document):
         """Generating a thumbnail based on document first file"""
         # Raising exception in case requiring to generate a thumbnail and Image module is not supported by virtualenv
-        if Image is not None:
+        if Image is None:
             raise PluginError('Can not generate thumbnail for JPEG file. PIL (Pillow) is not set up correctly.', 404)
         thumbnail_temporary, thumbnail_directory = self.get_thumbnail_path(document)
         # Creating directory for thumbnail if not exists

@@ -728,7 +728,7 @@
                 24,
                 29
             ], 
-            "doccode": "2", 
+            "doccode": 2,
             "storage_plugins": [
                 4, 
                 14
@@ -776,7 +776,7 @@
                 15, 
                 17
             ],
-            "doccode": "3",
+            "doccode": 3,
             "storage_plugins": [
                 4, 
                 14
@@ -815,7 +815,7 @@
                 15, 
                 17
             ], 
-            "doccode": "4",
+            "doccode": 4,
             "storage_plugins": [
                 4, 
                 14
@@ -849,7 +849,7 @@
                 15, 
                 17
             ], 
-            "doccode": "5",
+            "doccode": 5,
             "storage_plugins": [
                 4, 
                 14
@@ -885,7 +885,7 @@
                 15, 
                 17
             ], 
-            "doccode": "6",
+            "doccode": 6,
             "storage_plugins": [
                 4, 
                 14
@@ -923,7 +923,8 @@
             "doccode": 10,
             "database_update_plugins": [],
             "update_plugins": [
-                21
+                21,
+                27
             ],
             "storage_plugins": [
                 4,
@@ -933,9 +934,12 @@
             "before_removal_plugins": [
                 12,
                 13,
-                20
+                20,
+                30
             ],
-            "before_update_plugins": [],
+            "before_update_plugins": [
+                31
+            ],
             "active": true,
             "before_storage_plugins": [
                 3
@@ -955,7 +959,7 @@
                 17,
                 24
             ],
-            "doccode": "7",
+            "doccode": 7,
             "storage_plugins": [
                 4,
                 14
@@ -1001,7 +1005,7 @@
                 17,
                 24
             ],
-            "doccode": "8",
+            "doccode": 8,
             "storage_plugins": [
                 4,
                 14

@@ -49,7 +49,7 @@ class DMSTestCase(TestCase):
         self.documents_codes = ('abcde333', )
         self.jpg_codes = ('TST12345679', )
         self.no_docrule_files = ('Z50141104', )
-        self.uncategorized_codes = ('UNC-0001', 'UNC-0002')
+        self.uncategorized_codes = ('UNC-0001', 'UNC-0002', 'UNC-0003')
         self.uncategorized_files = ('Z50141104.jpg', )
 
         self.hash_method = 'md5'
@@ -77,6 +77,35 @@ class DMSTestCase(TestCase):
 
         # Used in determining if current file is PDF file by 'string' inside a file content.
         self.pdf_file_contains = '%PDF-1.4'
+
+        # TODO: refactor tests for this
+        # This list of filenames for fixtures files.
+        # Upon updating a fixtures file (testdata) it should be listed here.
+        # Tests in it's part must reference those strings directly, rather then filename.
+        # They can not be used however for dynamic tests.
+        # (Dynamic, e.g. API tests should scan directory and only reference here for strings parts to check for)
+        self.fixtures_files = [
+            '101.txt',
+            '2011-01-27-1.tif',
+            '2011-01-28-12.tif',
+            '10001.txt',
+            '10006.txt',
+            'abcde111.pdf',
+            'abcde123.pdf',
+            'abcde222.pdf',
+            'abcde888.pdf',
+            'abcde999.pdf',
+            'ADL-0001.pdf',
+            'ADL-0002.pdf',
+            'ADL-1111.pdf',
+            'ADL-1234.pdf',
+            'ADL-2222.pdf',
+            'BBB-0001.pdf',
+            'TST00000001.jpg',
+            'TST00000002.jpg',
+            'TST12345678.jpg',
+            'Z50141104.jpg',
+        ]
 
     def _upload_file(self, doc_name, suggested_format='pdf', hash_code=None, check_response=True, code=None):
         """Upload initial version of a file into DMS
@@ -184,8 +213,8 @@ class DMSTestCase(TestCase):
 
 
 class BasicAuthClient(Client):
-    """
-    Basic HTTP Authentication Client
+    """Basic HTTP Authentication Client
+
     user for testing Piston API
     """
 

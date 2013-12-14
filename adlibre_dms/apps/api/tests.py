@@ -45,8 +45,8 @@ class APITest(DMSTestCase):
         response = self.client.get(url)
         self.assertContains(response, 'No doccode')
         self.assertContains(response, 'thumb_url')
-        self.assertContains(response, 'thumb_url')
         self.assertContains(response, '/api/thumbnail/UNC-0001')
+        self.assertContains(response, '/api/thumbnail/UNC-0001_r1.jpg')
         self.assertNotContains(response, '/api/thumbnail/UNC-0002')
         url = reverse('api_file_list', kwargs={'id_rule': 100})  # Not existing rule
         response = self.client.get(url)
@@ -56,12 +56,14 @@ class APITest(DMSTestCase):
         """Uses abcde333 document to test file upload with code. Retrieves file afterwards"""
         self.client.login(username=self.username, password=self.password)
         doc = self.documents_hash[0][0]
-        hash = self.documents_hash[0][1]
+        hash_code = self.documents_hash[0][1]
         # Upload a document with code
         self._upload_file(doc, code=self.documents_codes[0])
         # Download doc
         revision = 1
-        url = reverse('api_file', kwargs={'code': self.documents_codes[0], 'suggested_format': 'pdf'}) + '?r=%s&h=%s' % (revision, hash)
+        url = reverse('api_file', kwargs={
+            'code': self.documents_codes[0],
+            'suggested_format': 'pdf'}) + '?r=%s&h=%s' % (revision, hash_code)
         response = self.client.get(url)
         self.assertContains(response, self.documents_pdf_test_string, status_code=200)
 
@@ -359,5 +361,3 @@ class APITest(DMSTestCase):
         self.cleanUp([self.documents_pdf_this_test[1], self.documents_pdf_this_test[2]])
         self.cleanUp(self.documents_codes)
         self.cleanUp(self.jpg_codes)
-
-
