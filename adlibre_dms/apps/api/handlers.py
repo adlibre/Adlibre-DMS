@@ -632,7 +632,7 @@ class ThumbnailsHandler(BaseHandler):
             else:
                 return rc.NOT_FOUND
         except Exception, e:
-            log.error('ThumbnailsHandler Error: %s' % e)
+            logging.exception('ThumbnailsHandler Error: %s' % e)
             return rc.NOT_FOUND
 
 
