@@ -631,8 +631,8 @@ class ThumbnailsHandler(BaseHandler):
                 return DMSObjectResponse(doc, thumbnail=True)
             else:
                 return rc.NOT_FOUND
-        except Exception, e:
-            logging.exception('ThumbnailsHandler Error: %s' % e)
+        except:
+            logging.exception('ThumbnailsHandler Error!')
             return rc.NOT_FOUND
 
 
