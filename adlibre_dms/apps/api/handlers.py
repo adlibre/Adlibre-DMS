@@ -9,7 +9,6 @@ License: See LICENSE for license information
 import json
 import os
 import sys
-import traceback
 import logging
 
 from django.conf import settings
@@ -632,9 +631,8 @@ class ThumbnailsHandler(BaseHandler):
                 return DMSObjectResponse(doc, thumbnail=True)
             else:
                 return rc.NOT_FOUND
-        except:
-            tr = traceback.print_exc(file=sys.stdout)
-            log.error('ThumbnailsHandler Error: %s' % tr)
+        except Exception, e:
+            log.error('ThumbnailsHandler Error: %s' % e)
             return rc.NOT_FOUND
 
 
