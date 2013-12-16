@@ -15,7 +15,7 @@ from dms_plugins.workers.storage.local import LocalFilesystemManager
 from dms_plugins.pluginpoints import BeforeRetrievalPluginPoint, BeforeRemovalPluginPoint, BeforeUpdatePluginPoint
 from dms_plugins.workers import Plugin, PluginError
 
-log = logging.getLogger('dms_plugins')
+log = logging.getLogger('')
 
 
 class ThumbnailsFilesystemHandler(object):
