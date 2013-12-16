@@ -10,6 +10,7 @@ import json
 import os
 import sys
 import logging
+import traceback
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
@@ -632,7 +633,7 @@ class ThumbnailsHandler(BaseHandler):
             else:
                 return rc.NOT_FOUND
         except:
-            log.exception('ThumbnailsHandler Error!')
+            log.error('ThumbnailsHandler Error: %s' % traceback.print_exc())
             raise
 
 
