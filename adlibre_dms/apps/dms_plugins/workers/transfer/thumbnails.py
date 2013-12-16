@@ -15,7 +15,7 @@ from dms_plugins.workers.storage.local import LocalFilesystemManager
 from dms_plugins.pluginpoints import BeforeRetrievalPluginPoint, BeforeRemovalPluginPoint, BeforeUpdatePluginPoint
 from dms_plugins.workers import Plugin, PluginError
 
-log = logging.getLogger('')
+log = logging.getLogger('dms')
 
 
 class ThumbnailsFilesystemHandler(object):
@@ -35,13 +35,20 @@ class ThumbnailsFilesystemHandler(object):
         """Handles retrieval of thumbnail and optional generation of it"""
         thumbnail_location, thumbnail_directory = self.get_thumbnail_path(document)
 
-        if not os.path.exists(thumbnail_location + '.png'):
-            # To write a mimetype thumbnail handler add similar code  and create your function
-            if document.mimetype == 'application/pdf':
-                self.generate_thumbnail_from_pdf(document)
-            if document.mimetype == 'image/jpeg':
-                self.generate_thumbnail_from_jpeg(document)
-        document.thumbnail = open(thumbnail_location + '.png').read()
+        try:
+            # TODO: remove this try/except block and stabilize
+            # Operations are not stable due to plugin usage of external tools that are under testing now
+            if not os.path.exists(thumbnail_location + '.png'):
+                # To write a mimetype thumbnail handler add similar code  and create your function
+                if document.mimetype == 'application/pdf':
+                    self.generate_thumbnail_from_pdf(document)
+                if document.mimetype == 'image/jpeg':
+                    self.generate_thumbnail_from_jpeg(document)
+                document.thumbnail = open(thumbnail_location + '.png').read()
+        except Exception, e:
+            error = 'ThumbnailsFilesystemHandler.generate_thumbnail method error: %s' % e
+            log.error(error)
+            raise PluginError(error, 404)
         return document
 
     def remove_thumbnail(self, document):
@@ -65,25 +72,20 @@ class ThumbnailsFilesystemHandler(object):
         tmp_pdf = open(thumbnail_temporary, 'w')
         tmp_pdf.write(document.get_file_obj().read())
         tmp_pdf.close()
-        try:
-            args = [
-                'gs',
-                '-q',  # Quiet
-                '-dSAFER',
-                '-sDEVICE=png16m',  # Type. PNG used
-                '-r10',  # resolution of the thumbnail
-                '-dBATCH',  # Quit GS after converting
-                '-dNOPAUSE',  # Do not stop on pages
-                '-dFirstPage=1',
-                '-dLastPage=1',
-                '-sOutputFile=%s.png' % thumbnail_temporary,  # Destination
-                '%s' % thumbnail_temporary,  # Source
-            ]
-            ghostscript.Ghostscript(*args)
-        except Exception, e:
-            error = 'ThumbnailsFilesystemHandler.generate_thumbnail (pdf) method error: %s' % e
-            log.error(error)
-            raise PluginError(error, 404)
+        args = [
+            'gs',
+            '-q',  # Quiet
+            '-dSAFER',
+            '-sDEVICE=png16m',  # Type. PNG used
+            '-r10',  # resolution of the thumbnail
+            '-dBATCH',  # Quit GS after converting
+            '-dNOPAUSE',  # Do not stop on pages
+            '-dFirstPage=1',
+            '-dLastPage=1',
+            '-sOutputFile=%s.png' % thumbnail_temporary,  # Destination
+            '%s' % thumbnail_temporary,  # Source
+        ]
+        ghostscript.Ghostscript(*args)
         # Deleting the temp PDF
         os.unlink(thumbnail_temporary)
 
@@ -105,14 +107,9 @@ class ThumbnailsFilesystemHandler(object):
         tmp_jpg = open(thumbnail_temporary, 'w')
         tmp_jpg.write(document.get_file_obj().read())
         tmp_jpg.close()
-        try:
-            im = Image.open(thumbnail_temporary)
-            im.thumbnail(self.jpeg_size, Image.ANTIALIAS)
-            im.save(thumbnail_temporary + '.png', "PNG")
-        except Exception, e:
-            error = 'ThumbnailsFilesystemHandler.generate_thumbnail (jpeg) method error: %s' % e
-            log.error(error)
-            raise PluginError(error, 404)
+        im = Image.open(thumbnail_temporary)
+        im.thumbnail(self.jpeg_size, Image.ANTIALIAS)
+        im.save(thumbnail_temporary + '.png', "PNG")
         # Deleting the temp JPG
         os.unlink(thumbnail_temporary)
 
