@@ -130,7 +130,7 @@ setup(name='adlibre_dms',
             'django-jenkins==0.14.0',
             # Thumbnails support
             'ghostscript==0.4.1',
-            'Pillow==2.2.2',
+            'PIL==1.1.7',
     ],
     dependency_links=[
         "https://codeload.github.com/adlibre/django-bcp/legacy.tar.gz/master#egg=django-bcp-0.1.8",

@@ -1,6 +1,6 @@
 # This file is now deprecated. All installation should be done with pip / setup.py pulling in requirements.
 Django==1.4.3
-Pillow==2.2.2
+PIL==1.1.7
 -e git+git@github.com:adlibre/django-bcp.git#egg=bcp-dev
 couchdbkit==0.6.1
 distribute==0.6.43
