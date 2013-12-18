@@ -101,14 +101,11 @@ class ThumbnailsFilesystemHandler(object):
         # Creating directory for thumbnail if not exists
         if not os.path.exists(thumbnail_directory):
             os.makedirs(thumbnail_directory)
-        log.debug('generate_thumbnail_from_jpeg attempt with Pillow')
         log.debug('try')
-        im = Image.open(document.get_file_obj())
-        log.debug('file=:%s' % document.get_file_obj())
-        log.debug('im = Image.open(document.get_file_obj())')
-        im = im.resize((64, 64))
+        img = Image.open(document.get_file_obj().name)
+        img = img.resize((64, 64))
         log.debug('im.thumbnail(self.jpeg_size, Image.ANTIALIAS)')
-        im.save(thumbnail_temporary + '.png', "PNG")
+        img.save(thumbnail_temporary + '.png', "PNG")
         log.debug("""im.save(thumbnail_temporary + '.png', "PNG")""")
 
     def get_thumbnail_path(self, document, filename=True):
