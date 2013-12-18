@@ -31,7 +31,7 @@ class ThumbnailsFilesystemHandler(object):
     def __init__(self):
         self.filesystem = LocalFilesystemManager()
         self.thumbnail_folder = 'thumbnails_storage'
-        self.jpeg_size = 64, 64  # px, px (pixels size - width, height)
+        self.jpeg_size = (64, 64)  # px, px (pixels size - width, height)
 
     def retrieve_thumbnail(self, document):
         """Handles retrieval of thumbnail and optional generation of it"""
@@ -97,24 +97,18 @@ class ThumbnailsFilesystemHandler(object):
 
     def generate_thumbnail_from_jpeg(self, document):
         """Generating a thumbnail based on document first file"""
-        # Raising exception in case requiring to generate a thumbnail and Image module is not supported by virtualenv
         thumbnail_temporary, thumbnail_directory = self.get_thumbnail_path(document)
         # Creating directory for thumbnail if not exists
         if not os.path.exists(thumbnail_directory):
             os.makedirs(thumbnail_directory)
         log.debug('generate_thumbnail_from_jpeg attempt with Pillow')
-        try:
-            log.debug('try')
-            im = Image.open(document.get_file_obj())
-            log.debug('im = Image.open(document.get_file_obj())')
-            im.thumbnail(self.jpeg_size, Image.ANTIALIAS)
-            log.debug('im.thumbnail(self.jpeg_size, Image.ANTIALIAS)')
-            im.save(thumbnail_temporary + '.png', "PNG")
-            log.debug("""im.save(thumbnail_temporary + '.png', "PNG")""")
-            im.close()
-        except Exception, e:
-            log.error('generate_thumbnail_from_jpeg error: %s' % e)
-            pass
+        log.debug('try')
+        im = Image.open(document.get_file_obj())
+        log.debug('im = Image.open(document.get_file_obj())')
+        im.thumbnail(self.jpeg_size)
+        log.debug('im.thumbnail(self.jpeg_size, Image.ANTIALIAS)')
+        im.save(thumbnail_temporary + '.png', "PNG")
+        log.debug("""im.save(thumbnail_temporary + '.png', "PNG")""")
 
     def get_thumbnail_path(self, document, filename=True):
         """Produces 2 path of tmp thumbnail file and a directory for thumbnails storage"""
