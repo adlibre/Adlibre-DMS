@@ -104,10 +104,11 @@ class ThumbnailsFilesystemHandler(object):
         log.debug('generate_thumbnail_from_jpeg attempt with Pillow')
         log.debug('try')
         im = Image.open(document.get_file_obj())
+        log.debug('file=:%s' % document.get_file_obj())
         log.debug('im = Image.open(document.get_file_obj())')
-        image = im.resize((64, 64), Image.ANTIALIAS)
+        im = im.resize((64, 64))
         log.debug('im.thumbnail(self.jpeg_size, Image.ANTIALIAS)')
-        image.save(thumbnail_temporary + '.png', "PNG")
+        im.save(thumbnail_temporary + '.png', "PNG")
         log.debug("""im.save(thumbnail_temporary + '.png', "PNG")""")
 
     def get_thumbnail_path(self, document, filename=True):
