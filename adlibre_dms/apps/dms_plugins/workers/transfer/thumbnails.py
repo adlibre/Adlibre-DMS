@@ -46,6 +46,8 @@ class ThumbnailsFilesystemHandler(object):
             try:
                 # To write a mimetype thumbnail handler add similar code  and create your function
                 log.debug('mimetype for thumbnail: %s' % document.mimetype)
+                if not document.mimetype:
+                    raise PluginError('ThumbnailsFilesystemHandler missconfiguration. Mimetype = None', 404)
                 if document.mimetype == 'application/pdf':
                     self.generate_thumbnail_from_pdf(document)
                 if document.mimetype == 'image/jpeg':
