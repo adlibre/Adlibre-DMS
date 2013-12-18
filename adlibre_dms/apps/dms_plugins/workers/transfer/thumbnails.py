@@ -46,10 +46,9 @@ class ThumbnailsFilesystemHandler(object):
                     raise PluginError('ThumbnailsFilesystemHandler missconfiguration. Mimetype = None', 404)
                 if document.mimetype == 'application/pdf':
                     self.generate_thumbnail_from_pdf(document)
-                    document.thumbnail = open(thumbnail_location + '.png').read()
                 if document.mimetype == 'image/jpeg':
-                    im = self.generate_thumbnail_from_jpeg(document)
-                    document.thumbnail = im
+                    self.generate_thumbnail_from_jpeg(document)
+                document.thumbnail = open(thumbnail_location + '.png').read()
             except Exception, e:
                 error = 'ThumbnailsFilesystemHandler.generate_thumbnail method error: %s' % e
                 log.error(error)
@@ -108,11 +107,10 @@ class ThumbnailsFilesystemHandler(object):
             im = Image.open(document.get_file_obj())
             im.thumbnail(self.jpeg_size, Image.ANTIALIAS)
             im.save(thumbnail_temporary + '.png', "PNG")
-            return im
+            im.close()
         except Exception, e:
             log.error('generate_thumbnail_from_jpeg error: %s' % e)
             pass
-        return None
 
     def get_thumbnail_path(self, document, filename=True):
         """Produces 2 path of tmp thumbnail file and a directory for thumbnails storage"""
