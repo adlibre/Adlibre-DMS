@@ -104,9 +104,13 @@ class ThumbnailsFilesystemHandler(object):
             os.makedirs(thumbnail_directory)
         log.debug('generate_thumbnail_from_jpeg attempt with Pillow')
         try:
+            log.debug('try')
             im = Image.open(document.get_file_obj())
+            log.debug('im = Image.open(document.get_file_obj())')
             im.thumbnail(self.jpeg_size, Image.ANTIALIAS)
+            log.debug('im.thumbnail(self.jpeg_size, Image.ANTIALIAS)')
             im.save(thumbnail_temporary + '.png', "PNG")
+            log.debug("""im.save(thumbnail_temporary + '.png', "PNG")""")
             im.close()
         except Exception, e:
             log.error('generate_thumbnail_from_jpeg error: %s' % e)
