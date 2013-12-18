@@ -40,11 +40,12 @@ class ThumbnailsFilesystemHandler(object):
     def retrieve_thumbnail(self, document):
         """Handles retrieval of thumbnail and optional generation of it"""
         thumbnail_location, thumbnail_directory = self.get_thumbnail_path(document)
-        # TODO: remove this try/except block and stabilize
-        # Operations are not stable due to plugin usage of external tools that are under testing now
         if not os.path.exists(thumbnail_location + '.png'):
-            # To write a mimetype thumbnail handler add similar code  and create your function
+            # TODO: remove this try/except block and stabilize
+            # Operations are not stable due to plugin usage of external tools that are under testing now
             try:
+                # To write a mimetype thumbnail handler add similar code  and create your function
+                log.debug('mimetype for thumbnail: %s' % document.mimetype)
                 if document.mimetype == 'application/pdf':
                     self.generate_thumbnail_from_pdf(document)
                 if document.mimetype == 'image/jpeg':
