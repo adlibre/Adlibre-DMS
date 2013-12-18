@@ -15,6 +15,7 @@ class XsSharing(object):
         Access-Control-Allow-Origin: http://foo.example
         Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE
     """
+    # Not sure we require this directly. Maybe some day in future we need CORS for request enabled
     # def process_request(self, request):
     #
     #     if 'HTTP_ACCESS_CONTROL_REQUEST_METHOD' in request.META:
@@ -32,6 +33,6 @@ class XsSharing(object):
             return response
 
         response['Access-Control-Allow-Origin'] = XS_SHARING_ALLOWED_ORIGINS
-        response['Access-Control-Allow-Methods'] = ",".join( XS_SHARING_ALLOWED_METHODS)
+        response['Access-Control-Allow-Methods'] = ",".join(XS_SHARING_ALLOWED_METHODS)
 
         return response

@@ -15,6 +15,12 @@ from dms_plugins.workers.storage.local import LocalFilesystemManager
 from dms_plugins.pluginpoints import BeforeRetrievalPluginPoint, BeforeRemovalPluginPoint, BeforeUpdatePluginPoint
 from dms_plugins.workers import Plugin, PluginError
 
+try:
+    from PIL import Image
+except ImportError:
+    import Image
+    pass
+
 log = logging.getLogger('dms')
 
 
@@ -34,21 +40,22 @@ class ThumbnailsFilesystemHandler(object):
     def retrieve_thumbnail(self, document):
         """Handles retrieval of thumbnail and optional generation of it"""
         thumbnail_location, thumbnail_directory = self.get_thumbnail_path(document)
-
-        try:
-            # TODO: remove this try/except block and stabilize
-            # Operations are not stable due to plugin usage of external tools that are under testing now
-            if not os.path.exists(thumbnail_location + '.png'):
-                # To write a mimetype thumbnail handler add similar code  and create your function
+        # TODO: remove this try/except block and stabilize
+        # Operations are not stable due to plugin usage of external tools that are under testing now
+        if not os.path.exists(thumbnail_location + '.png'):
+            # To write a mimetype thumbnail handler add similar code  and create your function
+            try:
                 if document.mimetype == 'application/pdf':
                     self.generate_thumbnail_from_pdf(document)
                 if document.mimetype == 'image/jpeg':
                     self.generate_thumbnail_from_jpeg(document)
                 document.thumbnail = open(thumbnail_location + '.png').read()
-        except Exception, e:
-            error = 'ThumbnailsFilesystemHandler.generate_thumbnail method error: %s' % e
-            log.error(error)
-            raise PluginError(error, 404)
+            except Exception, e:
+                error = 'ThumbnailsFilesystemHandler.generate_thumbnail method error: %s' % e
+                log.error(error)
+                raise PluginError(error, 404)
+        else:
+            document.thumbnail = open(thumbnail_location + '.png').read()
         return document
 
     def remove_thumbnail(self, document):
@@ -92,13 +99,6 @@ class ThumbnailsFilesystemHandler(object):
     def generate_thumbnail_from_jpeg(self, document):
         """Generating a thumbnail based on document first file"""
         # Raising exception in case requiring to generate a thumbnail and Image module is not supported by virtualenv
-        try:
-            from PIL import Image
-        except ImportError:
-            Image = None
-            pass
-        if Image is None:
-            raise PluginError('Can not generate thumbnail for JPEG file. PIL (Pillow) is not set up correctly.', 404)
         thumbnail_temporary, thumbnail_directory = self.get_thumbnail_path(document)
         # Creating directory for thumbnail if not exists
         if not os.path.exists(thumbnail_directory):
