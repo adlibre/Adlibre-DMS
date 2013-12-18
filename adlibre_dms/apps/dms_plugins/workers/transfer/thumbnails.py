@@ -106,6 +106,7 @@ class ThumbnailsFilesystemHandler(object):
         tmp_jpg = open(thumbnail_temporary, 'w')
         tmp_jpg.write(document.get_file_obj().read())
         tmp_jpg.close()
+        log.debug('generate_thumbnail_from_jpeg attempt with Pillow')
         try:
             im = Image.open(thumbnail_temporary)
             im.thumbnail(self.jpeg_size, Image.ANTIALIAS)
