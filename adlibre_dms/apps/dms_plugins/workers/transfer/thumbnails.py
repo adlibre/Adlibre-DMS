@@ -102,20 +102,14 @@ class ThumbnailsFilesystemHandler(object):
         # Creating directory for thumbnail if not exists
         if not os.path.exists(thumbnail_directory):
             os.makedirs(thumbnail_directory)
-        # Storing temporary PDF file for converting
-        tmp_jpg = open(thumbnail_temporary, 'w')
-        tmp_jpg.write(document.get_file_obj().read())
-        tmp_jpg.close()
         log.debug('generate_thumbnail_from_jpeg attempt with Pillow')
         try:
-            im = Image.open(thumbnail_temporary)
+            im = Image.open(document.get_file_obj())
             im.thumbnail(self.jpeg_size, Image.ANTIALIAS)
             im.save(thumbnail_temporary + '.png', "PNG")
         except Exception, e:
             log.error('generate_thumbnail_from_jpeg error: %s' % e)
             pass
-        # Deleting the temp JPG
-        os.unlink(thumbnail_temporary)
 
     def get_thumbnail_path(self, document, filename=True):
         """Produces 2 path of tmp thumbnail file and a directory for thumbnails storage"""
