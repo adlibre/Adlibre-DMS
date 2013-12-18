@@ -49,12 +49,12 @@ class PluginsOperator(object):
         @param document: DMS Document() instance
         """
         plugins = self.get_plugins_for_point(pluginpoint, document)
-        #log.debug('process_pluginpoint: %s with %s plugins.' % (pluginpoint, plugins))
+        log.debug('process_pluginpoint: %s with %s plugins.' % (pluginpoint, plugins))
         for plugin in plugins:
             try:
-                # log.debug('process_pluginpoint begin processing: %s.' % plugin)
+                log.debug('process_pluginpoint begin processing: %s.' % plugin)
                 document = plugin.work(document)
-                # log.debug('process_pluginpoint begin processed: %s.' % plugin)
+                log.debug('process_pluginpoint begin processed: %s.' % plugin)
             except PluginError, e:  # if some plugin throws an exception, stop processing and store the error message
                 self.plugin_errors.append(e)
                 if settings.DEBUG:
