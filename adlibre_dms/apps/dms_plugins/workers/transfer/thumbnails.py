@@ -105,9 +105,9 @@ class ThumbnailsFilesystemHandler(object):
         log.debug('try')
         im = Image.open(document.get_file_obj())
         log.debug('im = Image.open(document.get_file_obj())')
-        im.resize((64, 64), Image.ANTIALIAS)
+        image = im.resize((64, 64), Image.ANTIALIAS)
         log.debug('im.thumbnail(self.jpeg_size, Image.ANTIALIAS)')
-        im.save(thumbnail_temporary + '.png', "PNG")
+        image.save(thumbnail_temporary + '.png', "PNG")
         log.debug("""im.save(thumbnail_temporary + '.png', "PNG")""")
 
     def get_thumbnail_path(self, document, filename=True):
