@@ -105,7 +105,7 @@ class ThumbnailsFilesystemHandler(object):
         log.debug('try')
         im = Image.open(document.get_file_obj())
         log.debug('im = Image.open(document.get_file_obj())')
-        im.thumbnail(self.jpeg_size)
+        im.resize(self.jpeg_size, Image.ANTIALIAS)
         log.debug('im.thumbnail(self.jpeg_size, Image.ANTIALIAS)')
         im.save(thumbnail_temporary + '.png', "PNG")
         log.debug("""im.save(thumbnail_temporary + '.png', "PNG")""")
