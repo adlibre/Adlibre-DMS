@@ -9,6 +9,7 @@ import os
 import shutil
 import ghostscript
 import logging
+import traceback
 
 from PIL import Image
 
@@ -103,7 +104,11 @@ class ThumbnailsFilesystemHandler(object):
             os.makedirs(thumbnail_directory)
         log.debug('try')
         img = Image.open(document.get_file_obj().name)
-        img = img.resize((64, 64))
+        try:
+            img = img.resize((64, 64))
+        except:
+            log.exception('PIL error')
+            raise
         log.debug('im.thumbnail(self.jpeg_size, Image.ANTIALIAS)')
         img.save(thumbnail_temporary + '.png', "PNG")
         log.debug("""im.save(thumbnail_temporary + '.png', "PNG")""")
