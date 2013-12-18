@@ -10,16 +10,12 @@ import shutil
 import ghostscript
 import logging
 
+from PIL import Image
+
 from dms_plugins.workers.storage.local import LocalFilesystemManager
 
 from dms_plugins.pluginpoints import BeforeRetrievalPluginPoint, BeforeRemovalPluginPoint, BeforeUpdatePluginPoint
 from dms_plugins.workers import Plugin, PluginError
-
-try:
-    from PIL import Image
-except ImportError:
-    import Image
-    pass
 
 log = logging.getLogger('dms')
 
@@ -110,9 +106,13 @@ class ThumbnailsFilesystemHandler(object):
         tmp_jpg = open(thumbnail_temporary, 'w')
         tmp_jpg.write(document.get_file_obj().read())
         tmp_jpg.close()
-        im = Image.open(thumbnail_temporary)
-        im.thumbnail(self.jpeg_size, Image.ANTIALIAS)
-        im.save(thumbnail_temporary + '.png', "PNG")
+        try:
+            im = Image.open(thumbnail_temporary)
+            im.thumbnail(self.jpeg_size, Image.ANTIALIAS)
+            im.save(thumbnail_temporary + '.png', "PNG")
+        except Exception, e:
+            log.error('generate_thumbnail_from_jpeg error: %s' % e)
+            pass
         # Deleting the temp JPG
         os.unlink(thumbnail_temporary)
 
