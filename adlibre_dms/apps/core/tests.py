@@ -21,6 +21,8 @@ import zlib
 import hashlib
 import json
 
+from PIL import Image
+
 from couchdbkit import Server
 
 from django.core.files.uploadedfile import UploadedFile
@@ -1180,3 +1182,19 @@ class DocCodeModelTest(TestCase):
             obj.set_last_document_number(1000)
             self.assertEquals(obj.allocate_barcode(), result)
             self.assertEquals(obj.get_last_document_number(), 1001)
+
+
+class APILTest(DMSTestCase):
+    """Testing work with PIL (Pillow) under current system configuration.
+
+    In order for DMS to function properly - This must pass"""
+
+    def test_01_Pillow_thumbnail(self):
+        """Conversion of a thumbnail with Pillow.
+
+        Indicates Pil/Pillow installed and used/configured correctly for project"""
+        file_name = os.path.join(self.test_document_files_dir, self.fixtures_files[18])
+        im = Image.open(file_name)
+        img = im.resize((64, 64), Image.ANTIALIAS)
+        img.save(file_name + '.png', 'PNG')
+        os.unlink(file_name + '.png')
