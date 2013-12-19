@@ -1,5 +1,6 @@
 """
 Module: DMS Thumbnails Local Plugin
+
 Project: Adlibre DMS
 Copyright: Adlibre Pty Ltd 2013
 License: See LICENSE for license information
@@ -48,18 +49,7 @@ class ThumbnailsFilesystemHandler(object):
                 if document.mimetype == 'application/pdf':
                     self.generate_thumbnail_from_pdf(document)
                 if document.mimetype == 'image/jpeg':
-                    if not os.path.exists(thumbnail_directory):
-                        os.makedirs(thumbnail_directory)
-                    log.debug('try')
-                    img = Image.open(document.get_file_obj().name)
-                    try:
-                        img = img.resize((64, 64))
-                    except:
-                        log.exception('PIL error')
-                        raise
-                    log.debug('im.thumbnail(self.jpeg_size, Image.ANTIALIAS)')
-                    img.save(thumbnail_temporary + '.png', "JPEG")
-                    log.debug("""im.save(thumbnail_temporary + '.png', "PNG")""")
+                    self.generate_thumbnail_from_jpeg(document)
                 document.thumbnail = open(thumbnail_location + '.png').read()
             except Exception, e:
                 error = 'ThumbnailsFilesystemHandler.generate_thumbnail method error: %s' % e
@@ -114,14 +104,15 @@ class ThumbnailsFilesystemHandler(object):
         if not os.path.exists(thumbnail_directory):
             os.makedirs(thumbnail_directory)
         log.debug('try')
-        img = Image.open(document.get_file_obj().name)
+        im = Image.open(document.get_file_obj().name)
+        log.debug('im = Image.open(document.get_file_obj().name)')
         try:
-            img = img.resize((64, 64))
+            img = im.resize((64, 64), Image.ANTIALIAS)
         except:
             log.exception('PIL error')
             raise
         log.debug('im.thumbnail(self.jpeg_size, Image.ANTIALIAS)')
-        img.save(thumbnail_temporary + '.png', "JPEG")
+        img.save(thumbnail_temporary + '.png', 'PNG')
         log.debug("""im.save(thumbnail_temporary + '.png', "PNG")""")
 
     def get_thumbnail_path(self, document, filename=True):
