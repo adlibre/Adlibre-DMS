@@ -48,7 +48,18 @@ class ThumbnailsFilesystemHandler(object):
                 if document.mimetype == 'application/pdf':
                     self.generate_thumbnail_from_pdf(document)
                 if document.mimetype == 'image/jpeg':
-                    self.generate_thumbnail_from_jpeg(document)
+                    if not os.path.exists(thumbnail_directory):
+                        os.makedirs(thumbnail_directory)
+                    log.debug('try')
+                    img = Image.open(document.get_file_obj().name)
+                    try:
+                        img = img.resize((64, 64))
+                    except:
+                        log.exception('PIL error')
+                        raise
+                    log.debug('im.thumbnail(self.jpeg_size, Image.ANTIALIAS)')
+                    img.save(thumbnail_temporary + '.png', "JPEG")
+                    log.debug("""im.save(thumbnail_temporary + '.png', "PNG")""")
                 document.thumbnail = open(thumbnail_location + '.png').read()
             except Exception, e:
                 error = 'ThumbnailsFilesystemHandler.generate_thumbnail method error: %s' % e
