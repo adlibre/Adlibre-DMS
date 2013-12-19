@@ -110,7 +110,7 @@ class ThumbnailsFilesystemHandler(object):
             log.exception('PIL error')
             raise
         log.debug('im.thumbnail(self.jpeg_size, Image.ANTIALIAS)')
-        img.save(thumbnail_temporary + '.png', "PNG")
+        img.save(thumbnail_temporary + '.png', "JPEG")
         log.debug("""im.save(thumbnail_temporary + '.png', "PNG")""")
 
     def get_thumbnail_path(self, document, filename=True):
