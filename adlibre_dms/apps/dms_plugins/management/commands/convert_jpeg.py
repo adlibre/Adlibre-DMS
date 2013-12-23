@@ -15,7 +15,7 @@ from django.core.management.base import BaseCommand
 
 class Command(BaseCommand):
     """Converts from JPEG image into PNG thumbnail"""
-    args = 'directory_name'
+    args = 'thumbnail_path'
 
     def __init__(self):
         BaseCommand.__init__(self)
@@ -44,7 +44,7 @@ class Command(BaseCommand):
         thumbnail_path = args[0]
         im = Image.open(thumbnail_path)
         try:
-            img = im.resize((64, 64), Image.ANTIALIAS)
+            img = im.resize(64, 64, Image.ANTIALIAS)
         except:
             if not quiet:
                 self.stderr.write('PIL error resizing.\n')

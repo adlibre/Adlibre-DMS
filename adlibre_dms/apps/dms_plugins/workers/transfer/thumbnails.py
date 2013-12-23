@@ -101,7 +101,7 @@ class ThumbnailsFilesystemHandler(object):
         thumbnail_temporary, thumbnail_directory = self.get_thumbnail_path(document)
         # Creating directory for thumbnail if not exists
         if not os.path.exists(thumbnail_directory):
-            os.makedirs(thumbnail_directory)
+            os.makedirs(thumbnail_directory + '.jpg')
         tmp_jpg = open(thumbnail_temporary, 'w')
         tmp_jpg.write(document.get_file_obj().read())
         tmp_jpg.close()
