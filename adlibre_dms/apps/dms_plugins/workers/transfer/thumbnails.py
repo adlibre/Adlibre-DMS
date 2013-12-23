@@ -10,9 +10,8 @@ import os
 import shutil
 import ghostscript
 import logging
-import traceback
 
-from PIL import Image
+from django.core.management import call_command
 
 from dms_plugins.workers.storage.local import LocalFilesystemManager
 
@@ -103,17 +102,10 @@ class ThumbnailsFilesystemHandler(object):
         # Creating directory for thumbnail if not exists
         if not os.path.exists(thumbnail_directory):
             os.makedirs(thumbnail_directory)
-        log.debug('try')
-        im = Image.open(document.get_file_obj().name)
-        log.debug('im = Image.open(document.get_file_obj().name)')
-        try:
-            img = im.resize((64, 64), Image.ANTIALIAS)
-        except:
-            log.exception('PIL error')
-            raise
-        log.debug('im.thumbnail(self.jpeg_size, Image.ANTIALIAS)')
-        img.save(thumbnail_temporary + '.png', 'PNG')
-        log.debug("""im.save(thumbnail_temporary + '.png', "PNG")""")
+        tmp_jpg = open(thumbnail_temporary, 'w')
+        tmp_jpg.write(document.get_file_obj().read())
+        tmp_jpg.close()
+        call_command('convert_jpeg', '%s' % thumbnail_temporary)
 
     def get_thumbnail_path(self, document, filename=True):
         """Produces 2 path of tmp thumbnail file and a directory for thumbnails storage"""
