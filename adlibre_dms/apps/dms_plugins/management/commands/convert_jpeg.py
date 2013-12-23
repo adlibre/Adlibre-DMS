@@ -43,13 +43,12 @@ class Command(BaseCommand):
             self.stdout.write('Converting thumbnail\n')
 
         thumbnail_path = args[0]
-        im = Image.open(thumbnail_path)
-        try:
-            img = im.resize(size, Image.ANTIALIAS)
-        except:
-            if not quiet:
-                self.stderr.write('PIL error resizing.\n')
-            raise
+        with Image.open(thumbnail_path) as im:
+            self.stdout.write('%s %s\n' % im.size)
+            self.stderr.write('resizing\n')
+            img = im.thumbnail(size)
+            img.save(thumbnail_path + '.png', 'PNG')
+
         img.save(thumbnail_path + '.png', 'PNG')
         if not quiet:
             self.stdout.write('Done!\n')
