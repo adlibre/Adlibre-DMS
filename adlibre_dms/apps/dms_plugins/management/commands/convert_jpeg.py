@@ -28,6 +28,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        size = 65, 65
         quiet = options.get('quiet', False)
         if len(args) == 0:
             if not quiet:
@@ -44,7 +45,7 @@ class Command(BaseCommand):
         thumbnail_path = args[0]
         im = Image.open(thumbnail_path)
         try:
-            img = im.resize(64, 64, Image.ANTIALIAS)
+            img = im.resize(size, Image.ANTIALIAS)
         except:
             if not quiet:
                 self.stderr.write('PIL error resizing.\n')
