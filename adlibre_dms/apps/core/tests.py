@@ -1189,12 +1189,21 @@ class APILTest(DMSTestCase):
 
     In order for DMS to function properly - This must pass"""
 
-    def test_01_Pillow_thumbnail(self):
+    def test_01_Pillow_open_save_image(self):
+        file_name = os.path.join(self.test_document_files_dir, self.fixtures_files[18])
+        im = Image.open(file_name)
+        im.save(file_name + '.png', 'PNG')
+        os.unlink(file_name + '.png')
+
+    def test_02_Pillow_thumbnail(self):
         """Conversion of a thumbnail with Pillow.
 
         Indicates Pil/Pillow installed and used/configured correctly for project"""
         file_name = os.path.join(self.test_document_files_dir, self.fixtures_files[18])
         im = Image.open(file_name)
-        img = im.resize((64, 64), Image.ANTIALIAS)
-        img.save(file_name + '.png', 'PNG')
-        os.unlink(file_name + '.png')
+        img = im.resize((128, 128), Image.ANTIALIAS)
+        if img is not None:
+            img.save(file_name + '.png', 'PNG')
+            os.unlink(file_name + '.png')
+        else:
+            raise AssertionError('PIL can not resize JPEG file!')
