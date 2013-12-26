@@ -8,7 +8,7 @@ Author: Iurii Garmash (yuri@adlibre.com.au)
 """
 
 from optparse import make_option
-from PIL import Image
+from wand.image import Image
 
 from django.core.management.base import BaseCommand
 
@@ -17,38 +17,19 @@ class Command(BaseCommand):
     """Converts from JPEG image into PNG thumbnail"""
     args = 'thumbnail_path'
 
-    def __init__(self):
-        BaseCommand.__init__(self)
-        self.option_list += (
-            make_option(
-                '--quiet', '-q',
-                default=False,
-                action='store_true',
-                help='Hide all command output'),
-        )
-
     def handle(self, *args, **options):
-        size = 65, 65
-        quiet = options.get('quiet', False)
         if len(args) == 0:
-            if not quiet:
-                self.stdout.write('No arguments specified\n')
+            self.stdout.write('No arguments specified\n')
             return
 
         if len(args) > 1:
-            if not quiet:
-                self.stdout.write('Please specify one path at a time\n')
+            self.stdout.write('Please specify one path at a time\n')
             return
-        if not quiet:
-            self.stdout.write('Converting thumbnail\n')
 
+        self.stdout.write('Converting thumbnail\n')
         thumbnail_path = args[0]
-        with Image.open(thumbnail_path) as im:
-            self.stdout.write('%s %s\n' % im.size)
-            self.stderr.write('resizing\n')
-            img = im.thumbnail(size)
-            img.save(thumbnail_path + '.png', 'PNG')
-
-        img.save(thumbnail_path + '.png', 'PNG')
-        if not quiet:
-            self.stdout.write('Done!\n')
+        with Image(filename=thumbnail_path) as img:
+            with img.convert('png') as converted:
+                converted.resize(64, 64)
+                converted.save(filename=thumbnail_path + '.png')
+        self.stdout.write('Done!\n')
