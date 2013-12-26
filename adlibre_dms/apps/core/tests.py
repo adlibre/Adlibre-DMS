@@ -1194,11 +1194,22 @@ class AJpgConversionTest(DMSTestCase):
 
         Indicates Wand installed and used/configured correctly for project"""
         file_name = os.path.join(self.test_document_files_dir, self.fixtures_files[18])
+        print 'Command called!\n'
         with Image(filename=file_name) as img:
-            with img.convert('png') as converted:
+            with img.clone() as im:
+                print 'clone!\n'
+                converted = im.convert('png')
+                print 'converted!\n'
                 converted.resize(64, 64)
-                converted.save(filename=file_name+'.png')
+                print 'resized!\n'
+                converted.save(filename=file_name + '.png')
+                print 'saved!\n'
                 os.unlink(file_name + '.png')
+        # with Image(filename=file_name) as img:
+        #     with img.convert('png') as converted:
+        #         converted.resize(64, 64)
+        #         converted.save(filename=file_name+'.png')
+        #         os.unlink(file_name + '.png')
 
     # def test_02_Pillow_thumbnail(self):
     #     """Conversion of a thumbnail with Pillow.

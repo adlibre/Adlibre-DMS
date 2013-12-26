@@ -28,8 +28,14 @@ class Command(BaseCommand):
 
         self.stdout.write('Converting thumbnail\n')
         thumbnail_path = args[0]
+        print 'Command called!\n'
         with Image(filename=thumbnail_path) as img:
-            with img.convert('png') as converted:
+            with img.clone() as im:
+                print 'clone!\n'
+                converted = im.convert('png')
+                print 'converted!\n'
                 converted.resize(64, 64)
+                print 'resized!\n'
                 converted.save(filename=thumbnail_path + '.png')
+                print 'saved!\n'
         self.stdout.write('Done!\n')
