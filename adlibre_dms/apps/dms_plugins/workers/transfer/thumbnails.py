@@ -10,8 +10,9 @@ import os
 import shutil
 import ghostscript
 import logging
+import traceback
 
-from django.core.management import call_command
+from subprocess import call
 
 from dms_plugins.workers.storage.local import LocalFilesystemManager
 
@@ -51,6 +52,7 @@ class ThumbnailsFilesystemHandler(object):
                     self.generate_thumbnail_from_jpeg(document)
                 document.thumbnail = open(thumbnail_location + '.png').read()
             except Exception, e:
+                traceback.print_exc()
                 error = 'ThumbnailsFilesystemHandler.generate_thumbnail method error: %s' % e
                 log.error(error)
                 raise PluginError(error, 404)
@@ -105,12 +107,14 @@ class ThumbnailsFilesystemHandler(object):
         tmp_jpg = open(thumbnail_temporary + '.jpg', 'w')
         tmp_jpg.write(document.get_file_obj().read())
         tmp_jpg.close()
-        call_command(
+        print thumbnail_temporary
+        call([
             'convert',
-            '-resize %sx%s' % (self.jpeg_size[0], self.jpeg_size[1]),
             '%s' % thumbnail_temporary + '.jpg',
+            '-resize %sx%s' % (self.jpeg_size[0], self.jpeg_size[1]),
             '%s' % thumbnail_temporary + '.png'
-        )
+        ])
+
         os.unlink(thumbnail_temporary + '.jpg')
 
     def get_thumbnail_path(self, document, filename=True):
