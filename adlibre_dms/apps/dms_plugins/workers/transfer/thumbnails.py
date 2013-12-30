@@ -33,7 +33,7 @@ class ThumbnailsFilesystemHandler(object):
     def __init__(self):
         self.filesystem = LocalFilesystemManager()
         self.thumbnail_folder = 'thumbnails_storage'
-        self.jpeg_size = (64, 64)  # px, px (pixels size - width, height)
+        self.thumb_size = (64, 64)  # px, px (pixels size - width, height)
 
     def retrieve_thumbnail(self, document):
         """Handles retrieval of thumbnail and optional generation of it"""
@@ -108,13 +108,7 @@ class ThumbnailsFilesystemHandler(object):
         tmp_jpg.write(document.get_file_obj().read())
         tmp_jpg.close()
         print thumbnail_temporary
-        call([
-            'convert',
-            '%s' % thumbnail_temporary + '.jpg',
-            '-resize %sx%s' % (self.jpeg_size[0], self.jpeg_size[1]),
-            '%s' % thumbnail_temporary + '.png'
-        ])
-
+        os.system('convert %s.jpg -resize 65x65 %s.png' % (thumbnail_temporary, thumbnail_temporary))
         os.unlink(thumbnail_temporary + '.jpg')
 
     def get_thumbnail_path(self, document, filename=True):
