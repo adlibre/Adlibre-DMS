@@ -21,8 +21,6 @@ import zlib
 import hashlib
 import json
 
-from wand.image import Image
-
 from couchdbkit import Server
 
 from django.core.files.uploadedfile import UploadedFile
