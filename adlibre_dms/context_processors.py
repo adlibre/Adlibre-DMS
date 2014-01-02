@@ -30,12 +30,16 @@ def product_version(context):
 def uncategorized(context):
     """Returns uncategorized DMS model pk and AUI_URL"""
     uid = ''
+    dmid = ''
     aui_url = False
     configs = CoreConfiguration.objects.filter()
     if configs.count():
-        aui_url = configs[0].aui_url
-        uid = str(configs[0].uncategorized.pk)
+        conf = configs[0]
+        aui_url = conf.aui_url
+        uid = str(conf.uncategorized.pk)
+        dmid = str(conf.uncategorized.doccodepluginmapping.pk)
     return {'UNCATEGORIZED_ID': uid,
+            'UNCATEGORIZED_MAPPING_ID': dmid,
             'AUI_URL': aui_url}
 
 def date_format(context):

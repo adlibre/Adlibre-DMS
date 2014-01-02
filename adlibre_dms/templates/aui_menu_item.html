@@ -1,13 +1,13 @@
 {% if user.is_superuser %}
     {% if AUI_URL %}
-        <li class="aui"><a href="{{ AUI_URL }}?sessionid={{ request.session.session_key }}&csrf_token={{ csrf_token }}&_id={{ user.pk }}&uncategorized_id={{ UNCATEGORIZED_ID }}&host={{ request.META.HTTP_HOST|urlencode }}">AUI</a></li>
+        <li class="aui"><a href="{{ AUI_URL }}?sessionid={{ request.session.session_key }}&csrf_token={{ csrf_token }}&_id={{ user.pk }}&uncategorized_id={{ UNCATEGORIZED_ID }}&uncategorized_dm_id={{ UNCATEGORIZED_MAPPING_ID }}&host={{ request.META.HTTP_HOST|urlencode }}">AUI</a></li>
     {% endif %}
 {% endif %}
 {% if AUI_URL%}
 {% for group in user.groups.all %}
     {% if group.name == 'AUI Interact' %}
         {% comment %}AUI interaction user group permission{% endcomment %}
-        <li class="aui"><a href="{{ AUI_URL }}?sessionid={{ request.session.session_key }}&csrf_token={{ csrf_token }}&_id={{ user.pk }}&uncategorized_id={{ UNCATEGORIZED_ID }}&host={{ request.META.HTTP_HOST|urlencode }}">AUI</a></li>
+        <li class="aui"><a href="{{ AUI_URL }}?sessionid={{ request.session.session_key }}&csrf_token={{ csrf_token }}&_id={{ user.pk }}&uncategorized_id={{ UNCATEGORIZED_ID }}&uncategorized_dm_id={{ UNCATEGORIZED_MAPPING_ID }}&host={{ request.META.HTTP_HOST|urlencode }}">AUI</a></li>
     {% endif %}
 {% endfor %}
 {% endif %}

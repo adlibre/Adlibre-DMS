@@ -766,7 +766,6 @@ class DocumentProcessorTest(CoreTestCase):
         Checks for Uncategorized document type assigned properly and nothing worng returned"""
         inexisting_code = 'abracadabra'
         doc = self.processor.read(inexisting_code, {'user': self.admin_user})
-        print doc
         if not self.processor.errors:
             raise AssertionError('DocumentProcessor should contain errors about file absent!')
         else:
@@ -840,7 +839,6 @@ class DocumentProcessorTest(CoreTestCase):
         self.assertEqual(doc.full_filename, 'UNC-0003.pdf')
         doc = self.processor.read(code, options={'user': self.admin_user, 'thumbnail': True})
         if self.processor.errors or not doc.thumbnail:
-            print doc.thumbnail
             raise AssertionError('DocumentProcessor errors for reading a thumbnail %s' % self.processor.errors)
         # Another usecase here to check for whole code thumbnail. Rather then code + extension
         thumb_path = self._chek_thumbnails_created(code, dr, check_exists=False)
@@ -863,7 +861,6 @@ class DocumentProcessorTest(CoreTestCase):
         doc = self.processor.read(code, options={'user': self.admin_user, 'thumbnail': True})
         docrule = doc.get_docrule()  # For future checks
         if self.processor.errors or not doc.thumbnail:
-            print doc.thumbnail
             raise AssertionError('DocumentProcessor errors for reading a thumbnail %s' % self.processor.errors)
         # Deletion of document and deletion of thumbnail
         self.processor.delete(code, options={'user': self.admin_user})

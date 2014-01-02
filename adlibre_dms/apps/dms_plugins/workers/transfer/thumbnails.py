@@ -12,8 +12,6 @@ import ghostscript
 import logging
 import traceback
 
-from subprocess import call
-
 from dms_plugins.workers.storage.local import LocalFilesystemManager
 
 from dms_plugins.pluginpoints import BeforeRetrievalPluginPoint, BeforeRemovalPluginPoint, BeforeUpdatePluginPoint
@@ -107,7 +105,6 @@ class ThumbnailsFilesystemHandler(object):
         tmp_jpg = open(thumbnail_temporary + '.jpg', 'w')
         tmp_jpg.write(document.get_file_obj().read())
         tmp_jpg.close()
-        print thumbnail_temporary
         os.system('convert %s.jpg -resize 65x65 %s.png' % (thumbnail_temporary, thumbnail_temporary))
         os.unlink(thumbnail_temporary + '.jpg')
 
