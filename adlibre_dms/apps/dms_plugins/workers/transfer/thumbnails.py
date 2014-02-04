@@ -58,7 +58,7 @@ class ThumbnailsFilesystemHandler(object):
             document.thumbnail = open(thumbnail_location + '.png').read()
         return document
 
-    def remove_thumbnail(self, document):
+    def remove_thumbnails(self, document):
         """Removes existing thumbnails path along with all files inside it"""
         thumbnail_location, thumbnail_directory = self.get_thumbnail_path(document, filename=False)
         if os.path.isdir(thumbnail_directory):
@@ -139,6 +139,9 @@ class ThumbnailsLocalRetrievalPlugin(Plugin, BeforeRetrievalPluginPoint):
     def work(self, document):
         if 'thumbnail' in document.options and document.options['thumbnail']:
             document = ThumbnailsFilesystemHandler().retrieve_thumbnail(document)
+        if 'remove_thumbnails' in document.options and document.options['remove_thumbnails']:
+            # HACK: This call is executed on a read method, because of update sequence requirement (to economise 1 call)
+            document = ThumbnailsFilesystemHandler().remove_thumbnails(document)
         return document
 
 
@@ -149,7 +152,7 @@ class ThumbnailsLocalRemovalPlugin(Plugin, BeforeRemovalPluginPoint):
     plugin_type = "retrieval_processing"
 
     def work(self, document):
-        return ThumbnailsFilesystemHandler().remove_thumbnail(document)
+        return ThumbnailsFilesystemHandler().remove_thumbnails(document)
 
 
 class ThumbnailsLocalUpdatePlugin(Plugin, BeforeUpdatePluginPoint):
@@ -159,4 +162,4 @@ class ThumbnailsLocalUpdatePlugin(Plugin, BeforeUpdatePluginPoint):
     plugin_type = "retrieval_processing"
 
     def work(self, document):
-        return ThumbnailsFilesystemHandler().remove_thumbnail(document)
+        return ThumbnailsFilesystemHandler().remove_thumbnails(document)

@@ -212,6 +212,20 @@ class CoreTestCase(DMSTestCase):
             first_doc = row['doc']
         return first_doc
 
+    def _get_thumbnail_dir(self, code, docrule):
+        """Create a thumbnail path for given document code.
+        @param code: should be like 'ADL-0001' or 'ADL-0002'
+        @param docrule: is an instance of document's DocumentTypeRule()
+        @return: thumbnails path for current code
+        """
+        docs_dir = settings.DOCUMENT_ROOT
+        file_path_list = docrule.split(code)
+        docrule_id = str(docrule.pk)
+        check_path = os.path.join(docs_dir, docrule_id)
+        for item in file_path_list:
+            check_path = os.path.join(check_path, item)
+        return os.path.join(check_path, 'thumbnails_storage')
+
     def _chek_thumbnails_created(self, code, docrule, check_exists=True):
         """Tests DMS documents folder (Local Storage) for existing of given file there
 
@@ -219,12 +233,8 @@ class CoreTestCase(DMSTestCase):
         @docrule is an instance of document's DocumentTypeRule()
         @check_exists is a task to test if this file exists in file system
         """
-        docs_dir = settings.DOCUMENT_ROOT
-        file_path_list = docrule.split(code)
-        check_path = os.path.join(docs_dir, str(docrule.pk))
-        for item in file_path_list:
-            check_path = os.path.join(check_path, item)
-        thumbnail_check_path = os.path.join(check_path, 'thumbnails_storage', code) + '.pdf.png'
+        p = self._get_thumbnail_dir(code, docrule)
+        thumbnail_check_path = os.path.join(p, code) + '.pdf.png'
         if check_exists:
             if not os.path.isfile(thumbnail_check_path):
                 raise AssertionError('No such file: %s' % thumbnail_check_path)
@@ -805,12 +815,77 @@ class DocumentProcessorTest(CoreTestCase):
         # TODO: develop
         pass
 
-    def test_26_update_document_type_with_indexes(self):
-        """Update existing code with new document type and new indexes in one call (For AUI usage)"""
-        # TODO: develop
+    def test_26_update_document_type_with_indexes_pdf(self):
+        """Update existing code with new document type and new indexes in one call (For AUI usage)
+
+        Refs #1349 CORE: zlib decompress issue with moved JPEG file (from AUI indexing)
+        Refs #1353 CORE: Logic with revisions bug on update()
+        """
+        target_code = 'CCC-0001'
+        options = {
+            'new_name': None,
+            'new_type': u'8',
+            'extension': None,
+            'remove_tag_string': None,
+            'tag_string': None,
+            'user': self.admin_user,
+            'new_indexes': {
+                u'Employee': u'tdyjetyj',
+                u'Chosen Field': u'choice one',
+                u'Tests Uppercase Field': u'ghmte'
+            },
+            'update_file': None,
+        }
+        code = self.uncategorized_codes[0]
+        file_code = self.documents_pdf[0]
+        test_file = self._get_fixtures_file(file_code)
+        doc = self.processor.create(test_file, {'user': self.admin_user, 'barcode': code})
+        if self.processor.errors:
+            raise AssertionError('DocumentProcessor failed to create uncategorized file: %s' % code)
+        self._chek_documents_dir(code + '_r1.pdf', doc.get_docrule(), code=code)
+
+        doc = self.processor.update(code, options)
+        if self.processor.errors:
+            raise AssertionError('DocumentProcessor did not move document: %s, from uncategorized with indexes' % code)
+        old_doc_path = self._chek_documents_dir(code, doc.get_docrule(), code=code, check_exists=False)
+        if os.path.isfile(old_doc_path + '_r1.pdf'):
+            raise AssertionError('DocumentProcessor left document: %s' % old_doc_path + '_r1.pdf')
+        if os.path.isfile(old_doc_path + '.json'):
+            raise AssertionError('DocumentProcessor left metadata indexes: %s' % old_doc_path + '.json')
+        path1 = self._chek_documents_dir(target_code + '_r1.pdf', doc.get_docrule(), code=target_code)
+        self._chek_documents_dir(target_code + '.json', doc.get_docrule(), code=target_code)
+
+        # Proper files in proper places with proper data
+        self._check_files_equal(self._get_fixtures_file(file_code), open(path1, 'r'))
+        # CouchDB doc created properly
+        couch_doc = self._open_couchdoc(self.couchdb_name, target_code)
+        self.assertEqual(couch_doc['id'], target_code)
+        self.assertEqual(couch_doc['metadata_doc_type_rule_id'], '8')
+        self.assertEqual(couch_doc['mdt_indexes'], options['new_indexes'])
+        if not u'1' in couch_doc['revisions'].iterkeys():
+            raise AssertionError('File revisions metadata not present in CouchDB')
+        if not u'compression_type' in couch_doc['revisions']['1'].iterkeys():
+            raise AssertionError('Compression file metadata did not pass to CouchDB')
+
+        self.assertEqual(doc.db_info['mdt_indexes'], options['new_indexes'])  # Indexing data present
+        self.assertEqual(doc.code, target_code)
+        self.assertEqual(doc.get_docrule().pk, 8)
+        self.assertEqual(doc.file_obj, None)
+        self.assertIn('1', doc.file_revision_data.iterkeys())
+        self.assertIn('compression_type', doc.file_revision_data['1'].iterkeys())
+
+        self.processor.delete(target_code, {'user': self.admin_user})
+        if self.processor.errors:
+            raise AssertionError('DocumentProcessor failed to remove file: %s' % target_code)
+
+    def test_27_update_document_type_with_indexes_right_compression_jpeg(self):
+        """Refs #1349 zlib decompress issue with moved JPEG file (from AUI indexing)"""
+        # import time
+        # time.sleep(20000)
+        # TODO: develop this
         pass
 
-    def test_27_thumbnail_read(self):
+    def test_28_thumbnail_read(self):
         """Thumbnail appearing in the destination folder without leaving temporary file and returned to caller"""
         code = self.documents_pdf[0]
         doc = self.processor.read(code, options={'user': self.admin_user, 'thumbnail': True})
@@ -820,7 +895,7 @@ class DocumentProcessorTest(CoreTestCase):
             raise AssertionError('thumbnail for code: %s is not present in manager run result')
         self._chek_thumbnails_created(code, doc.get_docrule())
 
-    def test_28_thumbnail_for_uncategorized(self):
+    def test_29_thumbnail_for_uncategorized(self):
         """Upload an uncategorized PDF file and generate a thumbnail for it"""
         # making current code - UNC-0003
         dr = CoreConfiguration.objects.filter()[0].uncategorized
@@ -845,7 +920,7 @@ class DocumentProcessorTest(CoreTestCase):
         if not os.path.isfile(thumb_path):
             raise AssertionError('Thumbnail have not been generated: %s' % thumb_path)
 
-    def test_29_thumbnail_deletion(self):
+    def test_30_thumbnail_deletion(self):
         """Thumbnail deleted on changing this document or deleting this document"""
         code = self.this_test_docs[0]
         file_code = self.documents_pdf[0]
@@ -868,7 +943,7 @@ class DocumentProcessorTest(CoreTestCase):
         if os.path.isfile(thumb_path):
             raise AssertionError('Thumbnail have not been deleted: %s' % thumb_path)
 
-    def test_30_thumbnail_update(self):
+    def test_31_thumbnail_update(self):
         """Thumbnail removed on document update. e.g. new file added or type changed"""
         code = self.this_test_docs[0]
         file_code = self.documents_pdf[0]
@@ -897,7 +972,7 @@ class DocumentProcessorTest(CoreTestCase):
         if os.path.isfile(thumb_path):
             raise AssertionError('Thumbnail have not been deleted: %s' % thumb_path)
 
-    def test_31_upload_first_revision_after_0_revisions_indexing(self):
+    def test_32_upload_first_revision_after_0_revisions_indexing(self):
         """Refs #1211: Indexes Missed at production
 
         This issue occurred after uploading file revisions to existing 0 revisions documents
@@ -949,7 +1024,7 @@ class DocumentProcessorTest(CoreTestCase):
         if not doc.get_file_obj():
             raise AssertionError('Document has no file instance')
 
-    def test_32_store_uncategorized(self):
+    def test_33_store_uncategorized(self):
         """Creates an uncategorized Document
 
         Current implementation should take an uncategorized file name into account,
@@ -1013,7 +1088,7 @@ class DocumentProcessorTest(CoreTestCase):
         if os.path.isfile(path2):
             raise AssertionError('Original Uncategorizsed file name should be absent')
 
-    def test_33_store_uncategorized_with_barcode(self):
+    def test_34_store_uncategorized_with_barcode(self):
         """Creates an uncategorized Document
 
         with Uncategorized barcode specified"""
@@ -1073,7 +1148,7 @@ class DocumentProcessorTest(CoreTestCase):
         if os.path.isfile(path2):
             raise AssertionError('Original Uncategorizsed file name should be absent')
 
-    def test_34_thumbnail_for_image(self):
+    def test_35_thumbnail_for_image(self):
         """Thumbnail generated for JPEG image document"""
         code = self.uncategorized_codes[0]  # Should be image (jpeg)
         doc = self.processor.read(code, options={'user': self.admin_user, 'thumbnail': True})
@@ -1086,7 +1161,7 @@ class DocumentProcessorTest(CoreTestCase):
         if not os.path.isfile(thumb_path):
             raise AssertionError('Thumbnail have not been generated: %s' % thumb_path)
 
-    def test_35_thumbnail_for_multiple_revisions_document(self):
+    def test_36_thumbnail_for_multiple_revisions_document(self):
         """Thumbnail generated for LAST JPEG image of the multiple revisions document
 
         adds revisions to the document by uploading another image after another image.

@@ -7,6 +7,7 @@ Author: Iurii Garmash
 """
 
 import datetime
+import logging
 
 from django.conf import settings
 
@@ -21,6 +22,7 @@ from dmscouch.models import CouchDocument
 
 from couchdbkit.resource import ResourceNotFound
 
+log = logging.getLogger('plugins.workers.database.couchdb')
 
 class CouchDBMetadataWorker(object):
     """Stores metadata in CouchDB DatabaseManager.
@@ -114,11 +116,23 @@ class CouchDBMetadataWorker(object):
             couchdoc.update_file_revisions_metadata(document)
             couchdoc.save()
         if document.old_docrule:
+            old_couchdoc = None
             couchdoc = CouchDocument.get_or_create(docid=document.file_name)
-            old_couchdoc = CouchDocument.get(docid=document.old_name_code)
-            couchdoc.migrate_metadata_for_docrule(document, old_couchdoc)
-            couchdoc.save()
-            old_couchdoc.delete()
+            try:
+                old_couchdoc = CouchDocument.get(docid=document.old_name_code)
+            except Exception, e:
+                log.error('%s' % e)
+                pass
+            if old_couchdoc:
+                # Migrate from existing CouchDB document
+                couchdoc.migrate_metadata_for_docrule(document, old_couchdoc)
+                couchdoc.save()
+                old_couchdoc.delete()
+            else:
+                # store from current Document() instance
+                user = document.user
+                couchdoc.populate_from_dms(user, document)
+                couchdoc.save()
         # We have to do it after moving document names.
         if document.new_indexes and document.file_name:
             couchdoc = CouchDocument.get(docid=document.file_name)

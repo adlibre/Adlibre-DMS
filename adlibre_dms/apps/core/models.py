@@ -390,6 +390,7 @@ class Document(object):
         self.revision = None
         self.hashcode = None
         self.file_revision_data = None
+        self.file_revisions = {}
         self.fullpath = None
         self.file_obj = None
         self.current_file_revision_data = {}

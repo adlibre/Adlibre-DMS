@@ -55,6 +55,18 @@ class LocalFilesystemManager(object):
             os.makedirs(directory)
         return directory
 
+    def store_file(self, file_obj, fpath):
+        """Filesystem worker to store a file from one given object to destination path."""
+        try:
+            destination = open(fpath, 'wb+')
+            file_obj.seek(0)
+            destination.write(file_obj.read())
+            destination.close()
+        except Exception, e:
+            log.error("LocalFilesystemManager. File storing Error: %s", e)
+            return False
+        return True
+
     def move_file(self, source_path, destination_path):
         """Filesystem worker to move file from one path to another."""
         try:
@@ -133,9 +145,12 @@ class Local(object):
                 new_path = os.path.join(new_directory, new_file_revision)
                 old_rev_name = self.convert_metadata_for_revision(new_file_revision, old_code, key)
                 old_path = os.path.join(old_directory, old_rev_name)
-                status = self.filesystem.move_file(old_path, new_path)
-                if not status:
-                    raise PluginError("File moving problem. File %s does not exists" % old_rev_name, 500)
+                f = document.file_revisions[key]
+                status_store = self.filesystem.store_file(f, new_path)
+                f.close()
+                status_remove = self.filesystem.remove_file(old_path)
+                if not status_store or not status_remove:
+                    raise PluginError("File moving problem. From: %s to: %s" % (old_path, new_path), 500)
         return document
 
     def document_matches_search(self, metadata_info, searchword):
@@ -246,12 +261,11 @@ class Local(object):
     def store_new_file(self, document):
         directory = self.filesystem.get_or_create_document_directory(document)
         #print "STORE IN %s" % directory
-        destination = open(os.path.join(directory, document.get_filename_with_revision()), 'wb+')
-        fil = document.get_file_obj()
-        fil.seek(0)
-        destination.write(fil.read())
-        destination.close()
-
+        destination = os.path.join(directory, document.get_filename_with_revision())
+        file_obj = document.get_file_obj()
+        status_ok = self.filesystem.store_file(file_obj, destination)
+        if not status_ok:
+            raise PluginError("File storing problem to: %s" % destination, 500)
 
 class LocalStoragePlugin(Plugin, StoragePluginPoint):
     title = "Local Storage"

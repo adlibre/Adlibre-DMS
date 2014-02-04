@@ -166,6 +166,7 @@ class DocumentProcessor(object):
         """
         log.debug('UPDATE Document %s, options: %s' % (document_name, options))
         new_name = self.option_in_options('new_name', options)
+        new_type = self.option_in_options('new_type', options)
         new_file_revision = self.option_in_options('update_file', options)
         user = self.option_in_options('user', options)
 
@@ -184,6 +185,14 @@ class DocumentProcessor(object):
 
         operator = PluginsOperator()
         doc = self.init_Document_with_data(options, document_name=document_name)
+        if new_type is not None:
+            # HACK: Read the data and remove thumbnails in one call
+            old_document = self.read(document_name, {'user': user, 'only_metadata': True, 'remove_thumbnails': True})
+            # Retrieving file revisions and storing into self for plugins modifications.
+            fr_data = old_document.get_file_revisions_data()
+            for rev_id in fr_data.iterkeys():
+                temp_doc = self.read(document_name, {'user': user, 'revision': rev_id})
+                doc.file_revisions[rev_id] = temp_doc.get_file_obj()
         # Storing new file revision of an object. It requires content setup from uploaded file.
         if new_file_revision:
             if 'content_type' in new_file_revision.__dict__.iterkeys():
@@ -303,6 +312,9 @@ class DocumentProcessor(object):
                         if value:
                             doc.update_options({property_name: value})
                     if property_name == 'thumbnail':
+                        if value:
+                            doc.update_options({property_name: True})
+                    if property_name == 'remove_thumbnails':
                         if value:
                             doc.update_options({property_name: True})
                     if property_name == 'delete_revision':

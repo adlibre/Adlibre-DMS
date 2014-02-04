@@ -237,7 +237,14 @@ class LocalJSONMetadata(object):
         # Moving document object back
         document.docrule = None
         document.set_filename(new_name)
-        document.set_file_revisions_data(new_metadata)
+        # Merging new metadata from Gzip plugin if present
+        current_data = document.get_current_file_revision_data()
+        if current_data:
+            for k, v in current_data.iteritems():
+                if k == 'compression_type':
+                    new_metadata[str(new_revision - 1)][u'compression_type'] = v
+                    fileinfo_db[str(new_revision - 1)][u'compression_type'] = v
+        document.set_file_revisions_data(new_metadata.copy())
         self.write_metadata(fileinfo_db, document, new_directory)
         self.filesystem.remove_file(os.path.join(old_directory, document.old_name_code + '.json'))
         return document

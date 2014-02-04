@@ -62,11 +62,20 @@ class Gzip(object):
         return tmp_file_obj
 
     def work_store(self, document):
-        # Doing nothing for rename/change docrule for document
-        if document.old_docrule:
-            return document
-        if document.get_file_obj():
-            compressed_file = self._work(document.get_file_obj(), method='STORAGE')
+        # Treating as multiple revisions object
+        if document.file_revisions:
+            processing_document = None
+            compressed_file_revisions = {}
+            # Updating document to be compressed from an old document
+            for file_revision, file_obj in document.file_revisions.iteritems():
+                compressed_file = self._work(file_obj, method='STORAGE')
+                compressed_file_revisions[file_revision] = compressed_file
+            document.file_revisions = compressed_file_revisions
+            document.file_revisions['compression_type'] = self.compression_type
+            document.update_current_file_revision_data({'compression_type': self.compression_type})
+        processing_document = document.get_file_obj()
+        if processing_document:
+            compressed_file = self._work(processing_document, method='STORAGE')
             document.set_file_obj(compressed_file)
             document.update_current_file_revision_data({'compression_type': self.compression_type})
         return document
