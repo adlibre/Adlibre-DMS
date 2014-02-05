@@ -36,7 +36,7 @@ $('#upload_file_fake_filename').click(function(){
 
 // changing function for fileinput value
 $('#upload_file_fileinput').change(function(){
-    $('#upload_file_fake_filename').val($(this).val());
+    $('#upload_file_fake_filename').val($(this).val().replace(/^C:\\fakepath\\/i, ''));
 });//DjangoCon 2008_
 </script>
 {% endblock %}
