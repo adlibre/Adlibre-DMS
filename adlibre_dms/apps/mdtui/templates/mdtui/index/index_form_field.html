@@ -26,7 +26,7 @@
                      {# {{ field|attr:'class:input-xxlarge'|attr:'placeholder:{{ placeholder }}' }}  #}
                 {% endif %}
                 {% if field|field_type != "ChoiceField" %}
-                <input id="{{ field.id_for_label }}" class="input-xxlarge" type="text" maxlength="{{ field.field.max_length }}" value="{{ field_value }}" name="{{ field.name }}" placeholder="{% if field|field_type = "IntegerField" %}1234567890{% endif %}{% if field|field_type == "CharField" %}text{% endif %}" autocomplete="off" required="required" {% if field.name == "description" %}autofocus="autofocus"{% endif %}>
+                <input id="{{ field.id_for_label }}" class="input-xxlarge" type="text" maxlength="{{ field.field.max_length }}" value="{{ field_value }}" name="{{ field.name }}" placeholder="{% if field|field_type == "IntegerField" %}1234567890{% endif %}{% if field|field_type == "CharField" %}text{% endif %}" autocomplete="off" required="required" {% if field.name == "description" %}autofocus="autofocus"{% endif %}>
                 {% else %}
                     <select id="{{ field.id_for_label }}" class="input-xxlarge" name="{{ field.name }}" value="{{ field_value|choice_id }}" required="required">
                         {% for choice in field.field.choices %}
