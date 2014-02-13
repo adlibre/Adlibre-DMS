@@ -40,13 +40,13 @@
             },
             // minLength: 2,
             select: function(event, obj) { populate_indexes_form(obj, key); event.preventDefault(); },
-            focus: function(event) { event.preventDefault(); },
+            focus: function(event, ui) { event.preventDefault(); },
             open: function() { $( this ).removeClass( "ui-corner-all" ).addClass( "ui-corner-top" ); },
             close: function() { $( this ).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" ); }
         });
     }
     // form populating for autocomplete
-    function populate_indexes_form(data, key, force) {
+    function populate_indexes_form(data, key) {
         var array = data.item.value;
         var fields_data = JSON.parse(array);
         for (var item in fields_data) {
