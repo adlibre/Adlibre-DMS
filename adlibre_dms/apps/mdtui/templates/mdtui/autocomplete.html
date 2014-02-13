@@ -39,14 +39,14 @@
                 );
             },
             // minLength: 2,
-            select: function(event, obj) { populate_indexes_form(obj, key); event.preventDefault(); },
-            focus: function(event, obj) { populate_indexes_form(obj, key); event.preventDefault(); },
+            select: function(event, obj) { populate_indexes_form(obj, key, false); event.preventDefault(); },
+            focus: function(event, obj) { populate_indexes_form(obj, key, true); event.preventDefault(); },
             open: function() { $( this ).removeClass( "ui-corner-all" ).addClass( "ui-corner-top" ); },
             close: function() { $( this ).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" ); }
         });
     }
     // form populating for autocomplete
-    function populate_indexes_form(data, key) {
+    function populate_indexes_form(data, key, force) {
         var array = data.item.value;
         var fields_data = JSON.parse(array);
         for (var item in fields_data) {
@@ -57,7 +57,7 @@
                 if (ltext == item) {
                     var current_field = $(this).parent().find(':input');
                     if (item != key) {
-                        if (current_field.val() === '') {
+                        if (current_field.val() === '' && !force) {
                             current_field.val(fields_data[item]);
                         }  // if val length
                     } else {
