@@ -39,8 +39,8 @@
                 );
             },
             // minLength: 2,
-            select: function(event, obj) { populate_indexes_form(obj, key, false); event.preventDefault(); },
-            focus: function(event, obj) { populate_indexes_form(obj, key, true); event.preventDefault(); },
+            select: function(event, obj) { populate_indexes_form(obj, key); event.preventDefault(); },
+            focus: function(event) { event.preventDefault(); },
             open: function() { $( this ).removeClass( "ui-corner-all" ).addClass( "ui-corner-top" ); },
             close: function() { $( this ).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" ); }
         });
@@ -57,7 +57,7 @@
                 if (ltext == item) {
                     var current_field = $(this).parent().find(':input');
                     if (item != key) {
-                        if (current_field.val() === '' && !force) {
+                        if (current_field.val() === '') {
                             current_field.val(fields_data[item]);
                         }  // if val length
                     } else {
