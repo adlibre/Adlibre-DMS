@@ -227,6 +227,7 @@ INSTALLED_APPS = (
     'compressor',  # MUI js / css compression
     'django-log-file-viewer',
     'django_jenkins',
+    'south',
 ) + PROJECT_APPS
 
 # FILE_UPLOAD_HANDLERS is only necessary if you want to track upload

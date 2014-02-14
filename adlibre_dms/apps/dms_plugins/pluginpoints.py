@@ -1,4 +1,4 @@
-from djangoplugins import PluginMount
+from djangoplugins.point import PluginMount
 
 #settings_field_name is the name of the collection of these plugins in dms_plugins.models.DoccodePluginSettings
 

@@ -2,7 +2,7 @@
 Module: DMS Plugins DB connections module
 
 Project: Adlibre DMS
-Copyright: Adlibre Pty Ltd 2012
+Copyright: Adlibre Pty Ltd 2014
 License: See LICENSE for license information
 """
 

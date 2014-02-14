@@ -119,7 +119,7 @@ setup(name='adlibre_dms',
             'django-taggit==0.9.3',
             # Adlibre Components
             'django-bcp==0.1.8',
-            'adlibre-plugins==0.1.1',
+            'adlibre-plugins==0.2.3',
             # Deployment
             'flup==1.0.3.dev-20110405',
             'bureaucrat==0.1.0',
