@@ -469,6 +469,9 @@ DEMO = True
 NEW_SYSTEM = False
 STAGE_KEYWORD = False
 
+# South settings
+SOUTH_TESTS_MIGRATE = False
+
 # This will import the local_settings in our virtual_env subdir next to manage.py.
 try:
     from local_settings import *
