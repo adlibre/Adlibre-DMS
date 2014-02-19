@@ -26,7 +26,7 @@ class DMSTestCase(TestCase):
 
     Provides a standardized set of test data and ensures that each test run has a clean set of data.
     """
-    fixtures = ['initial_data.json']
+    fixtures = ['initial_datas.json', 'djangoplugins.json', 'dms_plugins.json', 'core.json', ]
 
     def __init__(self, *args, **kwargs):
         super(DMSTestCase, self).__init__(*args, **kwargs)

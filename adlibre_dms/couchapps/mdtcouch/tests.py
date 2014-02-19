@@ -37,7 +37,10 @@ template = {
     }
 }
 
+
 class MetadataCouchDB(TestCase):
+    fixtures = ['initial_datas.json', 'djangoplugins.json', 'dms_plugins.json', 'core.json', ]
+
     def setUp(self):
         # We-re using only logged in client in this test
         self.client.login(username=username, password=password)
@@ -187,7 +190,9 @@ class MetadataCouchDB(TestCase):
             response = self.client.delete(url, {"mdt_id": mdt_id})
             self.assertEqual(response.status_code, 204)
 
+
 class MetadataTemplateExternalUser(TestCase):
+    fixtures = ['initial_datas.json', 'djangoplugins.json', 'dms_plugins.json', 'core.json', ]
 
     def test_mdt_remove_not_logged_in(self):
         """

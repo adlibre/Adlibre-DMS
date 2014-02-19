@@ -40,6 +40,7 @@ from core.models import DocumentTypeRule
 
 class CoreTestCase(DMSTestCase):
     """Data for testing Core specific workflows"""
+    fixtures = ['initial_datas.json', 'djangoplugins.json', 'dms_plugins.json', 'core.json', ]
 
     def __init__(self, *args, **kwargs):
         """Per test suite initialisation"""
@@ -1221,6 +1222,8 @@ class DocumentProcessorTest(CoreTestCase):
 
 class DocCodeModelTest(TestCase):
     """DocCode Model Tests"""
+    fixtures = ['initial_datas.json', 'djangoplugins.json', 'dms_plugins.json', 'core.json', ]
+
     def setUp(self):
         """Populate test database with model instances."""
         # DocCodeModelTest Test Data

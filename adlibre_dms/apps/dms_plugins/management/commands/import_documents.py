@@ -49,7 +49,7 @@ class Command(BaseCommand):
                     try:
                         processor.create(file_obj, {'user': admin})
                     except Exception, e:
-                        self.stderr.write(e)
+                        self.stderr.write(str(e))
                         self.stderr.write(traceback.format_exc() + "\n")
                     else:
                         if processor.errors:

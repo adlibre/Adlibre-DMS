@@ -6,13 +6,14 @@ Copyright: Adlibre Pty Ltd 2011
 License: See LICENSE for license information
 Author: Iurii Garmash
 """
+
 import os
 
 from django.core.urlresolvers import reverse
 from adlibre.dms.base_test import DMSTestCase
 
 
-class Main_DMS_UI_Test(DMSTestCase):
+class MainDmsUiTest(DMSTestCase):
     """Main test for UI app"""
 
     def setUp(self):

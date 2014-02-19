@@ -656,6 +656,7 @@ class MUITestData(TestCase):
 
 class PaginatorTestCase(TestCase):
     """Tests Paginator functionality and logic"""
+    fixtures = ['initial_datas.json', 'djangoplugins.json', 'dms_plugins.json', 'core.json', ]
 
     def test_paginator_tag_logic(self):
         """Refs #805: Testing Paginator tag logic
@@ -686,6 +687,7 @@ class PaginatorTestCase(TestCase):
 
 class MDTUI(MUITestData):
     """Tests for MUI interface of DMS"""
+    fixtures = ['initial_datas.json', 'djangoplugins.json', 'dms_plugins.json', 'core.json', ]
 
     def setUp(self):
         """Initialisation that happens for each test"""

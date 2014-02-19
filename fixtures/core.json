@@ -1,0 +1,145 @@
+[
+    {
+        "pk": 10,
+        "model": "core.documenttyperule",
+        "fields": {
+            "regex": "UNC-[0-9]{4}",
+            "sequence_last": 0,
+            "description": "This doccode is assigned to the files that have no other suitable doccode.",
+            "title": "No doccode",
+            "barcode_zfill": 4,
+            "split_string": "0:3,4:8",
+            "active": true,
+            "barcode_format": "UNC-%s",
+            "doccode_type": "1"
+        }
+    },
+    {
+        "pk": 2,
+        "model": "core.documenttyperule",
+        "fields": {
+            "regex": "ADL-[0-9]{4}",
+            "sequence_last": 0,
+            "description": "ADL-[0-9]{4}]",
+            "title": "Adlibre Invoices",
+            "barcode_zfill": 4,
+            "split_string": "0:3,4:8",
+            "active": true,
+            "barcode_format": "ADL-%s",
+            "doccode_type": "1"
+        }
+    },
+    {
+        "pk": 3,
+        "model": "core.documenttyperule",
+        "fields": {
+            "regex": "[a-z]{5}[0-9]{3}",
+            "sequence_last": 0,
+            "description": "[a-z]{5}[0-9]{3}",
+            "title": "Test PDFs",
+            "barcode_zfill": 0,
+            "split_string": "0:5,5:8",
+            "active": true,
+            "barcode_format": "",
+            "doccode_type": "1"
+        }
+    },
+    {
+        "pk": 4,
+        "model": "core.documenttyperule",
+        "fields": {
+            "regex": "[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{1,9}",
+            "sequence_last": 0,
+            "description": "[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{1,9}",
+            "title": "Fax Tiff documents",
+            "barcode_zfill": 0,
+            "split_string": "0:4,5:7,8:10,11:20",
+            "active": true,
+            "barcode_format": "",
+            "doccode_type": "1"
+        }
+    },
+    {
+        "pk": 5,
+        "model": "core.documenttyperule",
+        "fields": {
+            "regex": "[0-9]{1,6}",
+            "sequence_last": 0,
+            "description": "[0-9]{1,6}",
+            "title": "Project Gutenberg eBooks",
+            "barcode_zfill": 0,
+            "split_string": "",
+            "active": true,
+            "barcode_format": "",
+            "doccode_type": "3"
+        }
+    },
+    {
+        "pk": 6,
+        "model": "core.documenttyperule",
+        "fields": {
+            "regex": "[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{4}",
+            "sequence_last": 0,
+            "description": "[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{4}",
+            "title": "Credit Card Scans",
+            "barcode_zfill": 0,
+            "split_string": "",
+            "active": true,
+            "barcode_format": "",
+            "doccode_type": "2"
+        }
+    },
+    {
+        "pk": 7,
+        "model": "core.documenttyperule",
+        "fields": {
+            "regex": "BBB-[0-9]{4}",
+            "sequence_last": 0,
+            "description": "BBB-[0-9]{4}]",
+            "title": "Test Doc Type 2",
+            "barcode_zfill": 4,
+            "split_string": "0:3,4:8",
+            "active": true,
+            "barcode_format": "BBB-%s",
+            "doccode_type": "1"
+        }
+    },
+    {
+        "pk": 8,
+        "model": "core.documenttyperule",
+        "fields": {
+            "regex": "CCC-[0-9]{4}",
+            "sequence_last": 0,
+            "description": "CCC-[0-9]{4}]",
+            "title": "Test Doc Type 3",
+            "barcode_zfill": 4,
+            "split_string": "0:3,4:8",
+            "active": true,
+            "barcode_format": "CCC-%s",
+            "doccode_type": "1"
+        }
+    },
+    {
+        "pk": 9,
+        "model": "core.documenttyperule",
+        "fields": {
+            "regex": "TST[0-9]{8}",
+            "sequence_last": 0,
+            "description": "Testig Docrule for Android scan and upload to DMS API example",
+            "title": "Barcode test",
+            "barcode_zfill": 0,
+            "split_string": "0:3,4:10",
+            "active": true,
+            "barcode_format": "TST%s",
+            "doccode_type": "1"
+        }
+    },
+    {
+        "pk": 1,
+        "model": "core.coreconfiguration",
+        "fields": {
+            "aui_url": "http://localhost:3000/",
+            "uncategorized": 10
+        }
+    }
+]

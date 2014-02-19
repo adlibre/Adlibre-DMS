@@ -1,0 +1,438 @@
+[
+    {
+        "pk": 1,
+        "model": "djangoplugins.pluginpoint",
+        "fields": {
+            "status": 0,
+            "pythonpath": "dms_plugins.pluginpoints.BeforeStoragePluginPoint",
+            "title": "BeforeStoragePluginPoint"
+        }
+    },
+    {
+        "pk": 2,
+        "model": "djangoplugins.pluginpoint",
+        "fields": {
+            "status": 0,
+            "pythonpath": "dms_plugins.pluginpoints.BeforeRetrievalPluginPoint",
+            "title": "BeforeRetrievalPluginPoint"
+        }
+    },
+    {
+        "pk": 3,
+        "model": "djangoplugins.pluginpoint",
+        "fields": {
+            "status": 0,
+            "pythonpath": "dms_plugins.pluginpoints.BeforeRemovalPluginPoint",
+            "title": "BeforeRemovalPluginPoint"
+        }
+    },
+    {
+        "pk": 4,
+        "model": "djangoplugins.pluginpoint",
+        "fields": {
+            "status": 0,
+            "pythonpath": "dms_plugins.pluginpoints.BeforeUpdatePluginPoint",
+            "title": "BeforeUpdatePluginPoint"
+        }
+    },
+    {
+        "pk": 5,
+        "model": "djangoplugins.pluginpoint",
+        "fields": {
+            "status": 0,
+            "pythonpath": "dms_plugins.pluginpoints.StoragePluginPoint",
+            "title": "StoragePluginPoint"
+        }
+    },
+    {
+        "pk": 6,
+        "model": "djangoplugins.pluginpoint",
+        "fields": {
+            "status": 0,
+            "pythonpath": "dms_plugins.pluginpoints.DatabaseStoragePluginPoint",
+            "title": "DatabaseStoragePluginPoint"
+        }
+    },
+    {
+        "pk": 7,
+        "model": "djangoplugins.pluginpoint",
+        "fields": {
+            "status": 0,
+            "pythonpath": "dms_plugins.pluginpoints.UpdatePluginPoint",
+            "title": "UpdatePluginPoint"
+        }
+    },
+    {
+        "pk": 8,
+        "model": "djangoplugins.pluginpoint",
+        "fields": {
+            "status": 0,
+            "pythonpath": "dms_plugins.pluginpoints.DatabaseUpdatePluginPoint",
+            "title": "DatabaseUpdatePluginPoint"
+        }
+    },
+    {
+        "pk": 1,
+        "model": "djangoplugins.plugin",
+        "fields": {
+            "status": 0,
+            "index": 40,
+            "_order": 0,
+            "pythonpath": "dms_plugins.workers.transfer.gzip.GzipOnStorePlugin",
+            "name": "dms_plugins.workers.transfer.gzip.GzipOnStorePlugin",
+            "title": "GzipOnStorePlugin",
+            "point": 1
+        }
+    },
+    {
+        "pk": 5,
+        "model": "djangoplugins.plugin",
+        "fields": {
+            "status": 0,
+            "index": 60,
+            "_order": 0,
+            "pythonpath": "dms_plugins.workers.transfer.gzip.GzipOnRetrievePlugin",
+            "name": "dms_plugins.workers.transfer.gzip.GzipOnRetrievePlugin",
+            "title": "GzipOnRetrievePlugin",
+            "point": 2
+        }
+    },
+    {
+        "pk": 12,
+        "model": "djangoplugins.plugin",
+        "fields": {
+            "status": 0,
+            "index": 20,
+            "_order": 0,
+            "pythonpath": "dms_plugins.workers.storage.local.LocalRemovalPlugin",
+            "name": "dms_plugins.workers.storage.local.LocalRemovalPlugin",
+            "title": "LocalRemovalPlugin",
+            "point": 3
+        }
+    },
+    {
+        "pk": 19,
+        "model": "djangoplugins.plugin",
+        "fields": {
+            "status": 0,
+            "index": 10,
+            "_order": 0,
+            "pythonpath": "dms_plugins.workers.info.tags.TagsUpdatePlugin",
+            "name": "dms_plugins.workers.info.tags.TagsUpdatePlugin",
+            "title": "TagsUpdatePlugin",
+            "point": 4
+        }
+    },
+    {
+        "pk": 23,
+        "model": "djangoplugins.plugin",
+        "fields": {
+            "status": 0,
+            "index": 46,
+            "_order": 0,
+            "pythonpath": "dms_plugins.workers.database.couchdb.CouchDBMetadataStoragePlugin",
+            "name": "dms_plugins.workers.database.couchdb.CouchDBMetadataStoragePlugin",
+            "title": "CouchDBMetadataStoragePlugin",
+            "point": 6
+        }
+    },
+    {
+        "pk": 2,
+        "model": "djangoplugins.plugin",
+        "fields": {
+            "status": 0,
+            "index": 10,
+            "_order": 1,
+            "pythonpath": "dms_plugins.workers.validators.filetype.FileTypeValidationPlugin",
+            "name": "dms_plugins.workers.validators.filetype.FileTypeValidationPlugin",
+            "title": "FileTypeValidationPlugin",
+            "point": 1
+        }
+    },
+    {
+        "pk": 6,
+        "model": "djangoplugins.plugin",
+        "fields": {
+            "status": 0,
+            "index": 0,
+            "_order": 1,
+            "pythonpath": "dms_plugins.workers.security.groups.GroupSecurityRetrieval",
+            "name": "dms_plugins.workers.security.groups.GroupSecurityRetrieval",
+            "title": "GroupSecurityRetrieval",
+            "point": 2
+        }
+    },
+    {
+        "pk": 13,
+        "model": "djangoplugins.plugin",
+        "fields": {
+            "status": 0,
+            "index": 10,
+            "_order": 1,
+            "pythonpath": "dms_plugins.workers.security.groups.GroupSecurityRemoval",
+            "name": "dms_plugins.workers.security.groups.GroupSecurityRemoval",
+            "title": "GroupSecurityRemoval",
+            "point": 3
+        }
+    },
+    {
+        "pk": 21,
+        "model": "djangoplugins.plugin",
+        "fields": {
+            "status": 0,
+            "index": 10,
+            "_order": 1,
+            "pythonpath": "dms_plugins.workers.storage.local.LocalUpdatePlugin",
+            "name": "dms_plugins.workers.storage.local.LocalUpdatePlugin",
+            "title": "LocalUpdatePlugin",
+            "point": 7
+        }
+    },
+    {
+        "pk": 3,
+        "model": "djangoplugins.plugin",
+        "fields": {
+            "status": 0,
+            "index": 0,
+            "_order": 2,
+            "pythonpath": "dms_plugins.workers.security.groups.GroupSecurityStore",
+            "name": "dms_plugins.workers.security.groups.GroupSecurityStore",
+            "title": "GroupSecurityStore",
+            "point": 1
+        }
+    },
+    {
+        "pk": 7,
+        "model": "djangoplugins.plugin",
+        "fields": {
+            "status": 0,
+            "index": 50,
+            "_order": 2,
+            "pythonpath": "dms_plugins.workers.storage.local.LocalRetrievalPlugin",
+            "name": "dms_plugins.workers.storage.local.LocalRetrievalPlugin",
+            "title": "LocalRetrievalPlugin",
+            "point": 2
+        }
+    },
+    {
+        "pk": 20,
+        "model": "djangoplugins.plugin",
+        "fields": {
+            "status": 0,
+            "index": 30,
+            "_order": 2,
+            "pythonpath": "dms_plugins.workers.storage.metadata.local_json.LocalJSONMetadataRemovalPlugin",
+            "name": "dms_plugins.workers.storage.metadata.local_json.LocalJSONMetadataRemovalPlugin",
+            "title": "LocalJSONMetadataRemovalPlugin",
+            "point": 3
+        }
+    },
+    {
+        "pk": 4,
+        "model": "djangoplugins.plugin",
+        "fields": {
+            "status": 0,
+            "index": 50,
+            "_order": 3,
+            "pythonpath": "dms_plugins.workers.storage.local.LocalStoragePlugin",
+            "name": "dms_plugins.workers.storage.local.LocalStoragePlugin",
+            "title": "LocalStoragePlugin",
+            "point": 5
+        }
+    },
+    {
+        "pk": 9,
+        "model": "djangoplugins.plugin",
+        "fields": {
+            "status": 0,
+            "index": 90,
+            "_order": 3,
+            "pythonpath": "dms_plugins.workers.transfer.convert.ConvertFileTypePlugin",
+            "name": "dms_plugins.workers.transfer.convert.ConvertFileTypePlugin",
+            "title": "ConvertFileTypePlugin",
+            "point": 2
+        }
+    },
+    {
+        "pk": 22,
+        "model": "djangoplugins.plugin",
+        "fields": {
+            "status": 0,
+            "index": 31,
+            "_order": 3,
+            "pythonpath": "dms_plugins.workers.database.couchdb.CouchDBMetadataRemovalPlugin",
+            "name": "dms_plugins.workers.database.couchdb.CouchDBMetadataRemovalPlugin",
+            "title": "CouchDBMetadataRemovalPlugin",
+            "point": 3
+        }
+    },
+    {
+        "pk": 10,
+        "model": "djangoplugins.plugin",
+        "fields": {
+            "status": 0,
+            "index": 30,
+            "_order": 4,
+            "pythonpath": "dms_plugins.workers.validators.hashcode.HashCodeValidationOnStoragePlugin",
+            "name": "dms_plugins.workers.validators.hashcode.HashCodeValidationOnStoragePlugin",
+            "title": "HashCodeValidationOnStoragePlugin",
+            "point": 1
+        }
+    },
+    {
+        "pk": 11,
+        "model": "djangoplugins.plugin",
+        "fields": {
+            "status": 0,
+            "index": 80,
+            "_order": 4,
+            "pythonpath": "dms_plugins.workers.validators.hashcode.HashCodeValidationOnRetrievalPlugin",
+            "name": "dms_plugins.workers.validators.hashcode.HashCodeValidationOnRetrievalPlugin",
+            "title": "HashCodeValidationOnRetrievalPlugin",
+            "point": 2
+        }
+    },
+    {
+        "pk": 14,
+        "model": "djangoplugins.plugin",
+        "fields": {
+            "status": 0,
+            "index": 45,
+            "_order": 5,
+            "pythonpath": "dms_plugins.workers.storage.metadata.local_json.LocalJSONMetadataStoragePlugin",
+            "name": "dms_plugins.workers.storage.metadata.local_json.LocalJSONMetadataStoragePlugin",
+            "title": "LocalJSONMetadataStoragePlugin",
+            "point": 5
+        }
+    },
+    {
+        "pk": 15,
+        "model": "djangoplugins.plugin",
+        "fields": {
+            "status": 0,
+            "index": 45,
+            "_order": 5,
+            "pythonpath": "dms_plugins.workers.storage.metadata.local_json.LocalJSONMetadataRetrievalPlugin",
+            "name": "dms_plugins.workers.storage.metadata.local_json.LocalJSONMetadataRetrievalPlugin",
+            "title": "LocalJSONMetadataRetrievalPlugin",
+            "point": 2
+        }
+    },
+    {
+        "pk": 17,
+        "model": "djangoplugins.plugin",
+        "fields": {
+            "status": 0,
+            "index": 40,
+            "_order": 6,
+            "pythonpath": "dms_plugins.workers.info.tags.TagsPlugin",
+            "name": "dms_plugins.workers.info.tags.TagsPlugin",
+            "title": "TagsPlugin",
+            "point": 2
+        }
+    },
+    {
+        "pk": 24,
+        "model": "djangoplugins.plugin",
+        "fields": {
+            "status": 0,
+            "index": 46,
+            "_order": 7,
+            "pythonpath": "dms_plugins.workers.database.couchdb.CouchDBMetadataRetrievalPlugin",
+            "name": "dms_plugins.workers.database.couchdb.CouchDBMetadataRetrievalPlugin",
+            "title": "CouchDBMetadataRetrievalPlugin",
+            "point": 2
+        }
+    },
+    {
+        "pk": 25,
+        "model": "djangoplugins.plugin",
+        "fields": {
+            "status": 0,
+            "index": 0,
+            "_order": 2,
+            "pythonpath": "dms_plugins.workers.database.couchdb.CouchDBMetadataUpdatePlugin",
+            "name": "dms_plugins.workers.database.couchdb.CouchDBMetadataUpdatePlugin",
+            "title": "CouchDBMetadataUpdatePlugin",
+            "point": 8
+        }
+    },
+    {
+        "pk": 26,
+        "model": "djangoplugins.plugin",
+        "fields": {
+            "status": 0,
+            "index": 20,
+            "_order": 3,
+            "pythonpath": "dms_plugins.workers.transfer.gzip.GzipOnUpdatePlugin",
+            "name": "dms_plugins.workers.transfer.gzip.GzipOnUpdatePlugin",
+            "title": "GzipOnUpdatePlugin",
+            "point": 4
+        }
+    },
+    {
+        "pk": 27,
+        "model": "djangoplugins.plugin",
+        "fields": {
+            "status": 0,
+            "index": 0,
+            "_order": 4,
+            "pythonpath": "dms_plugins.workers.storage.metadata.local_json.LocalJSONMetadataUpdatePlugin",
+            "name": "dms_plugins.workers.storage.metadata.local_json.LocalJSONMetadataUpdatePlugin",
+            "title": "LocalJSONMetadataUpdatePlugin",
+            "point": 7
+        }
+    },
+    {
+        "pk": 28,
+        "model": "djangoplugins.plugin",
+        "fields": {
+            "status": 0,
+            "index": 0,
+            "_order": 5,
+            "pythonpath": "dms_plugins.workers.validators.hashcode.HashCodeValidationOnUpdatePlugin",
+            "name": "dms_plugins.workers.validators.hashcode.HashCodeValidationOnUpdatePlugin",
+            "title": "HashCodeValidationOnUpdatePlugin",
+            "point": 4
+        }
+    },
+    {
+        "pk": 29,
+        "model": "djangoplugins.plugin",
+        "fields": {
+            "status": 0,
+            "index": 70,
+            "_order": 8,
+            "pythonpath": "dms_plugins.workers.transfer.thumbnails.ThumbnailsLocalRetrievalPlugin",
+            "name": "dms_plugins.workers.transfer.thumbnails.ThumbnailsLocalRetrievalPlugin",
+            "title": "ThumbnailsLocalRetrievalPlugin",
+            "point": 2
+        }
+    },
+    {
+        "pk": 30,
+        "model": "djangoplugins.plugin",
+        "fields": {
+            "status": 0,
+            "index": 0,
+            "_order": 4,
+            "pythonpath": "dms_plugins.workers.transfer.thumbnails.ThumbnailsLocalRemovalPlugin",
+            "name": "dms_plugins.workers.transfer.thumbnails.ThumbnailsLocalRemovalPlugin",
+            "title": "ThumbnailsLocalRemovalPlugin",
+            "point": 3
+        }
+    },
+    {
+        "pk": 31,
+        "model": "djangoplugins.plugin",
+        "fields": {
+            "status": 0,
+            "index": 0,
+            "_order": 3,
+            "pythonpath": "dms_plugins.workers.transfer.thumbnails.ThumbnailsLocalUpdatePlugin",
+            "name": "dms_plugins.workers.transfer.thumbnails.ThumbnailsLocalUpdatePlugin",
+            "title": "ThumbnailsLocalUpdatePlugin",
+            "point": 4
+        }
+    }
+]

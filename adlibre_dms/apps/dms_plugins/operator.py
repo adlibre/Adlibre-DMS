@@ -80,7 +80,7 @@ class PluginsOperator(object):
 
     def get_plugin_list(self):
         """Gets a list of all installed into DMS plugins."""
-        all_plugins = djangoplugins.models.Plugin.objects.all().order_by('point__name', 'index')
+        all_plugins = djangoplugins.models.Plugin.objects.all().order_by('point__title', 'index')
         return all_plugins
 
     def get_plugins_for_point(self, pluginpoint, document, plugin_type=None):
@@ -136,5 +136,12 @@ class PluginsOperator(object):
             document_directories = metadata.worker.get_directories(docrule, filter_date=filter_date)
         else:
             document_directories = []
-        return storage.worker.get_list(docrule, document_directories, start, finish, order, searchword,
-            limit_to=doc_names)
+        return storage.worker.get_list(
+            docrule,
+            document_directories,
+            start,
+            finish,
+            order,
+            searchword,
+            limit_to=doc_names
+        )

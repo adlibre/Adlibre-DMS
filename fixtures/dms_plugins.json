@@ -1,0 +1,368 @@
+[
+    {
+        "pk": 2,
+        "model": "dms_plugins.doccodepluginmapping",
+        "fields": {
+            "before_retrieval_plugins": [
+                5,
+                6,
+                7,
+                9,
+                15,
+                17,
+                24,
+                29
+            ],
+            "doccode": 2,
+            "storage_plugins": [
+                4,
+                14
+            ],
+            "database_storage_plugins": [
+                23
+            ],
+            "before_removal_plugins": [
+                12,
+                13,
+                20,
+                22,
+                30
+            ],
+            "before_update_plugins": [
+                19,
+                26,
+                31
+            ],
+            "database_update_plugins": [
+                25
+            ],
+            "update_plugins": [
+                21,
+                27
+            ],
+            "active": true,
+            "before_storage_plugins": [
+                1,
+                2,
+                3
+            ]
+        }
+    },
+    {
+        "pk": 3,
+        "model": "dms_plugins.doccodepluginmapping",
+        "fields": {
+            "before_retrieval_plugins": [
+                5,
+                6,
+                7,
+                9,
+                11,
+                15,
+                17
+            ],
+            "doccode": 3,
+            "storage_plugins": [
+                4,
+                14
+            ],
+            "database_storage_plugins": [],
+            "before_removal_plugins": [
+                12,
+                13,
+                20
+            ],
+            "before_update_plugins": [
+                19,
+                26,
+                28
+            ],
+            "database_update_plugins": [],
+            "update_plugins": [
+                21
+            ],
+            "active": true,
+            "before_storage_plugins": [
+                1,
+                2,
+                3,
+                10
+            ]
+        }
+    },
+    {
+        "pk": 4,
+        "model": "dms_plugins.doccodepluginmapping",
+        "fields": {
+            "before_retrieval_plugins": [
+                6,
+                7,
+                15,
+                17
+            ],
+            "doccode": 4,
+            "storage_plugins": [
+                4,
+                14
+            ],
+            "database_storage_plugins": [],
+            "before_removal_plugins": [
+                12,
+                13,
+                20
+            ],
+            "before_update_plugins": [
+                19
+            ],
+            "database_update_plugins": [
+            ],
+            "update_plugins": [
+                21,
+                27
+            ],
+            "active": true,
+            "before_storage_plugins": []
+        }
+    },
+    {
+        "pk": 5,
+        "model": "dms_plugins.doccodepluginmapping",
+        "fields": {
+            "before_retrieval_plugins": [
+                6,
+                7,
+                15,
+                17
+            ],
+            "doccode": 5,
+            "storage_plugins": [
+                4,
+                14
+            ],
+            "database_storage_plugins": [],
+            "before_removal_plugins": [
+                12,
+                13,
+                20
+            ],
+            "before_update_plugins": [
+                19
+            ],
+            "database_update_plugins": [
+            ],
+            "update_plugins": [
+                21,
+                27
+            ],
+            "active": true,
+            "before_storage_plugins": [
+                2
+            ]
+        }
+    },
+    {
+        "pk": 6,
+        "model": "dms_plugins.doccodepluginmapping",
+        "fields": {
+            "before_retrieval_plugins": [
+                6,
+                7,
+                15,
+                17
+            ],
+            "doccode": 6,
+            "storage_plugins": [
+                4,
+                14
+            ],
+            "database_storage_plugins": [],
+            "before_removal_plugins": [
+                12,
+                13,
+                20
+            ],
+            "before_update_plugins": [
+                19
+            ],
+            "database_update_plugins": [
+            ],
+            "update_plugins": [
+                21
+            ],
+            "active": true,
+            "before_storage_plugins": [
+                2
+            ]
+        }
+    },
+    {
+        "pk": 1,
+        "model": "dms_plugins.doccodepluginmapping",
+        "fields": {
+            "before_retrieval_plugins": [
+                6,
+                7,
+                15,
+                29
+            ],
+            "doccode": 10,
+            "database_update_plugins": [],
+            "update_plugins": [
+                21,
+                27
+            ],
+            "storage_plugins": [
+                4,
+                14
+            ],
+            "database_storage_plugins": [],
+            "before_removal_plugins": [
+                12,
+                13,
+                20,
+                30
+            ],
+            "before_update_plugins": [
+                31
+            ],
+            "active": true,
+            "before_storage_plugins": [
+                3
+            ]
+        }
+    },
+    {
+        "pk": 7,
+        "model": "dms_plugins.doccodepluginmapping",
+        "fields": {
+            "before_retrieval_plugins": [
+                5,
+                6,
+                7,
+                9,
+                15,
+                17,
+                24
+            ],
+            "doccode": 7,
+            "storage_plugins": [
+                4,
+                14
+            ],
+            "database_storage_plugins": [
+                23
+            ],
+            "before_removal_plugins": [
+                12,
+                13,
+                20,
+                22
+            ],
+            "before_update_plugins": [
+                19,
+                26
+            ],
+            "database_update_plugins": [
+                25
+            ],
+            "update_plugins": [
+                21,
+                27
+            ],
+            "active": true,
+            "before_storage_plugins": [
+                1,
+                2,
+                3
+            ]
+        }
+    },
+    {
+        "pk": 8,
+        "model": "dms_plugins.doccodepluginmapping",
+        "fields": {
+            "before_retrieval_plugins": [
+                5,
+                6,
+                7,
+                9,
+                15,
+                17,
+                24
+            ],
+            "doccode": 8,
+            "storage_plugins": [
+                4,
+                14
+            ],
+            "database_storage_plugins": [
+                23
+            ],
+            "before_removal_plugins": [
+                12,
+                13,
+                20,
+                22
+            ],
+            "before_update_plugins": [
+                19,
+                26
+            ],
+            "database_update_plugins": [
+                25
+            ],
+            "update_plugins": [
+                21,
+                27
+            ],
+            "active": true,
+            "before_storage_plugins": [
+                1,
+                2,
+                3
+            ]
+        }
+    },
+    {
+        "pk": 9,
+        "model": "dms_plugins.doccodepluginmapping",
+        "fields": {
+            "before_retrieval_plugins": [
+                5,
+                7,
+                15,
+                17,
+                24
+            ],
+            "doccode": 9,
+            "storage_plugins": [
+                4,
+                14
+            ],
+            "database_storage_plugins": [
+                23
+            ],
+            "before_removal_plugins": [
+                12,
+                20,
+                22
+            ],
+            "before_update_plugins": [
+                19,
+                26
+            ],
+            "database_update_plugins": [
+                25
+            ],
+            "update_plugins": [
+                21,
+                27
+            ],
+            "active": true,
+            "before_storage_plugins": [
+                1,
+                2
+            ]
+        }
+    }
+]
