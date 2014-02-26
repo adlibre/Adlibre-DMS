@@ -1,3 +1,4 @@
+#!/bin/sh
 rm -rf ve
 rm -rf reports
 mkdir reports
