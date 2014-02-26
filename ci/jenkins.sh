@@ -2,7 +2,7 @@
 rm -rf ve
 rm -rf reports
 mkdir reports
-virtualenv ve
+virtualenv ve > ./create_virtualenv.log
 ve/bin/pip install git+ssh://git@github-Adlibre-DMS/adlibre/Adlibre-DMS.git --upgrade
 cp -rf fixtures ve/lib/python2.6/site-packages/fixtures
 mkdir ve/lib/python2.6/site-packages/db
