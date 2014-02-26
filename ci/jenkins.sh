@@ -23,4 +23,6 @@ ve/bin/python adlibre_dms/manage.py loaddata ve/lib/python2.6/site-packages/fixt
 ve/bin/python adlibre_dms/manage.py loaddata ve/lib/python2.6/site-packages/fixtures/dms_plugins.json
 
 echo "########################################## Running code test ####################################################"
-ve/bin/python adlibre_dms/manage.py jenkins --verbosity 2
+# Change into this to make detailed tests report
+# ve/bin/python adlibre_dms/manage.py jenkins --verbosity 2
+ve/bin/python adlibre_dms/manage.py jenkins
