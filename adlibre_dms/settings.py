@@ -198,6 +198,9 @@ PROJECT_APPS = (
     'mdtui',
     'bcp',
     'feedback',
+)
+
+ADDITIONAL_APPS = (
     # DMS Themes
     'theme.adlibre',
     'theme.basic',
@@ -228,7 +231,7 @@ INSTALLED_APPS = (
     'django-log-file-viewer',
     'django_jenkins',
     'south',
-) + PROJECT_APPS
+) + PROJECT_APPS + ADDITIONAL_APPS
 
 # FILE_UPLOAD_HANDLERS is only necessary if you want to track upload
 # progress in your Django app -- if you have a front-end proxy like
