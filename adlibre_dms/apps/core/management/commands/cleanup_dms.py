@@ -100,7 +100,7 @@ class Command(BaseCommand):
             if not quiet:
                 self.stdout.write('Applying schema migrations for South app: %s.\n' % app)
 
-            subprocess.call(['python', 'manage.py', 'migrate', app, '--fake', ])
+            subprocess.call(['django-admin.py', 'migrate', app, '--fake', ])
             if not quiet:
                 self.stdout.write('Done migrating app: %s\n' % app)
 
