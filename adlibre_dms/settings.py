@@ -187,7 +187,6 @@ TEMPLATE_DIRS = (
 PROJECT_APPS = (
     # DMS Core
     'api',
-    'docs',
     'core',
     'browser',
     'dms_plugins',
@@ -201,10 +200,11 @@ PROJECT_APPS = (
 )
 
 ADDITIONAL_APPS = (
-    # DMS Themes
+    # They do not require testing
     'theme.adlibre',
     'theme.basic',
     'theme.solid',
+    'docs',
 )
 
 INSTALLED_APPS = (
