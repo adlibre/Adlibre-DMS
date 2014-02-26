@@ -92,9 +92,17 @@ class Command(BaseCommand):
             self.stdout.write('Recreating SQL DB: %s.\n' % db_file)
         os.remove(db_file)
         # Using django-admin.py to populate and create main config DB
-        subprocess.call(['django-admin.py', 'syncdb', '--noinput'])
+        subprocess.call(['django-admin.py', 'syncdb', '--noinput', '--all', ])
         if not quiet:
             self.stdout.write('Done DB.\n')
+
+        for app in ['core', 'dms_plugins']:
+            if not quiet:
+                self.stdout.write('Applying schema migrations for South app: %s.\n' % app)
+
+            subprocess.call(['python', 'manage.py', 'migrate', app, '--fake', ])
+            if not quiet:
+                self.stdout.write('Done migrating app: %s\n' % app)
 
         if not quiet:
             self.stdout.write('Finished!\n')
