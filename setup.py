@@ -128,7 +128,7 @@ setup(name='adlibre_dms',
             # Logging
             'django-log-file-viewer==0.6',
             # CI integration
-            'django-jenkins==0.14.0',
+            'django-jenkins==0.15.0',
             # Thumbnails support
             'ghostscript==0.4.1',
     ],
