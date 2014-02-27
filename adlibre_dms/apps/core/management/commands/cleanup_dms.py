@@ -104,6 +104,12 @@ class Command(BaseCommand):
             if not quiet:
                 self.stdout.write('Done migrating app: %s\n' % app)
 
+        for fixture in ['initial_datas.json', 'djangoplugins.json', 'core.json', 'dms_plugins.json']:
+            if not quiet:
+                self.stdout.write('Loading fixture: %s.\n' % fixture)
+            p = os.path.join(settings.FIXTURE_DIRS[0], fixture)
+            subprocess.call(['django-admin.py', 'loaddata', p, ])
+
         if not quiet:
             self.stdout.write('Finished!\n')
 
