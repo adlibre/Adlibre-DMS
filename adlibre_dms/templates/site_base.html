@@ -1,11 +1,11 @@
 {% load i18n %}
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<!DOCTYPE html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<title>{% block title %}{% trans 'Welcome' %}{% endblock %} - {% trans 'Adlibre DMS' %}</title>
     {% block theme_css %}{% endblock %}
     <link rel="shortcut icon" href="{{ STATIC_URL }}favicon.ico" />
+    <script type="text/javascript" language="javascript" charset="utf-8" src="{{ STATIC_URL }}js/jquery-1.7.1.min.js"></script>
     {%block extra_head%}{%endblock%}
 </head>
 <body class="{% block body_class %}{% endblock %}">
@@ -17,22 +17,22 @@
         {% block header %}
         <div id="menu">
             <ul>
-                <li class="home"><a href="{% url home %}">{% trans 'Home' %}</a></li>
+                <li class="home"><a href="{% url "home" %}">{% trans 'Home' %}</a></li>
                 {% if user.is_staff %}
-                <li class="files"><a href="{% url files_index %}">{% trans 'Files' %}</a></li>
-                <li class="settings"><a href="{% url setting %}">{% trans 'Settings' %}</a></li>
-                <li class="plugins"><a href="{% url plugins %}">{% trans 'Plugins' %}</a></li>
-                <li class="ui"><a href="{% url ui_rule_list %}">{% trans 'Admin UI' %}</a></li>
+                <li class="files"><a href="{% url "files_index" %}">{% trans 'Files' %}</a></li>
+                <li class="settings"><a href="{% url "setting" %}">{% trans 'Settings' %}</a></li>
+                <li class="plugins"><a href="{% url "plugins" %}">{% trans 'Plugins' %}</a></li>
+                <li class="ui"><a href="{% url "ui_rule_list" %}">{% trans 'Admin UI' %}</a></li>
                 {% endif %}
                 {% if user.is_superuser %}
-                <li class="ui"><a href="/admin/">{% trans 'Admin' %}</a></li>
+                <li class="ui"><a href="{% url "admin:index" %}">{% trans 'Admin' %}</a></li>
                 {% endif %}
                 {% if user.is_authenticated %}
                 {% include 'aui_menu_item.html' %}
-                <li class="mdtui"><a href="{% url mdtui-home %}">{% trans 'MUI' %}</a></li>
-                <li class="logout"><a href="{% url logout %}">{% trans 'Log out' %}</a></li>
+                <li class="mdtui"><a href="{% url "mdtui-home" %}">{% trans 'MUI' %}</a></li>
+                <li class="logout"><a href="{% url "logout" %}">{% trans 'Log out' %}</a></li>
                 {% else %}
-                <li class="login"><a href="{% url login %}">{% trans 'Log in' %}</a></li>
+                <li class="login"><a href="{% url "login" %}">{% trans 'Log in' %}</a></li>
                 {% endif %}
             </ul>
         </div>
@@ -45,9 +45,9 @@
         {% block footer %}
             <p>
                 {% trans 'Adlibre DMS' %} - &copy; Adlibre {% now "Y" %}
-                &middot; <a href="{% url about_documentation %}">{% trans 'About' %}</a>
-                &middot; <a href="{% url documentation_index %}">{% trans 'Docs' %}</a>
-                &middot; <a href="{% url upload %}">{% trans 'Upload' %}</a>
+                &middot; <a href="{% url "about_documentation" %}">{% trans 'About' %}</a>
+                &middot; <a href="{% url "documentation_index" %}">{% trans 'Docs' %}</a>
+                &middot; <a href="{% url "upload" %}">{% trans 'Upload' %}</a>
                 <span>{% trans 'Version' %}: {{ PRODUCT_VERSION }}. {% if user.is_authenticated %}{% trans 'Logged in as' %} {{ user }}{% else %}{% trans 'Logged out' %}{% endif %}.</span>
             </p>
         {% endblock %}

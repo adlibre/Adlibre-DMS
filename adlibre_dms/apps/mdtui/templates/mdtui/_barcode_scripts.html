@@ -30,7 +30,7 @@
 
         /* Print Barcode with the url */
         function printBarcode() {
-            url = '{% url bcp-print "Code128" barcode %}'
+            url = '{% url "bcp-print" "Code128" barcode %}'
             $('#printer').attr("src", url);
             store_barcode();
             return false;

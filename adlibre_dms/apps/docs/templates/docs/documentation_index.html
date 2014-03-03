@@ -1,15 +1,14 @@
 {% extends THEME_TEMPLATE %}
 
-{% load markup %}
-
 {% block title %}Documentation{% endblock %}
 
 {% block content %}
 <h1>Documentation</h1>
 
 <ul>
-    <li><a href="{% url api_documentation %}">API</a></li>
-    <li><a href="{% url technical_documentation %}">Technical</a></li>
+    <li><a href="{% url "documentation_index" %}">Main</a></li>
+    <li><a href="{% url "about_documentation" %}">About</a></li>
+    <li><a href="{% url "api_documentation" %}">API</a></li>
+    <li><a href="{% url "technical_documentation" %}">Technical</a></li>
 </ul>
 {% endblock %}
-

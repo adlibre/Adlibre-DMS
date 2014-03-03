@@ -111,22 +111,24 @@ setup(name='adlibre_dms',
             'Django==1.4.10',
             'South==0.8.4',
             'python-magic==0.4.2',
-            'django-compressor==1.1.2',
+            'django-compressor==1.3',
             'docutils==0.10',
+            # Docs
+            'markdown2==2.2.0',
             # MUI
             'couchdbkit==0.6.1',
             'django-widget-tweaks==1.0',
             # Tagging
-            'django-taggit==0.9.3',
+            'django-taggit==0.11.2',
             # Adlibre Components
-            'django-bcp==0.1.8',
+            'django-bcp==0.1.9',
             'adlibre-plugins==0.2.3',
             # Deployment
             'flup==1.0.3.dev-20110405',
             'bureaucrat==0.1.0',
             'argparse',  # required by bureaucrat
             # Logging
-            'django-log-file-viewer==0.6',
+            'django-log-file-viewer==0.7',
             # CI integration
             'django-jenkins==0.15.0',
             # Thumbnails support

@@ -152,28 +152,28 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </a>
-                <a class="brand" href="{% url home %}">{% trans 'Adlibre DMS' %}</a>
+                <a class="brand" href="{% url 'home' %}">{% trans 'Adlibre DMS' %}</a>
                 <div class="nav-collapse">
                     <ul class="nav">
                         {% check_index_permit %}
                         {% check_search_permit %}
-                        {% url mdtui-home as url %}
-                        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}"><i class="icon-home icon-white"></i> {% trans 'Home' %}</a></li>
+                        {% url "mdtui-home" as u %}
+                        <li{% if request.path == u %} class="active"{% endif %}><a href="{{ u }}"><i class="icon-home icon-white"></i> {% trans 'Home' %}</a></li>
                     {% if search_permitted %}
-                        {% url mdtui-search as url %}
-                        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}"><i class="icon-search icon-white"></i> {% trans 'Search' %}</a></li>
+                        {% url "mdtui-search" as u %}
+                        <li{% if request.path == u %} class="active"{% endif %}><a href="{{ u }}"><i class="icon-search icon-white"></i> {% trans 'Search' %}</a></li>
                     {% endif %}
                     {% if index_permitted %}
-                        {% url mdtui-index-type as url %}
-                        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}"><i class="icon-barcode icon-white"></i> {% trans 'Index' %}</a></li>
+                        {% url "mdtui-index-type" as u %}
+                        <li{% if request.path == u %} class="active"{% endif %}><a href="{{ u }}"><i class="icon-barcode icon-white"></i> {% trans 'Index' %}</a></li>
                     {% endif %}
                     {% if request.user.is_superuser %}
-                        <li><a href="{% url admin:index %}"><i class="icon-list icon-white"></i> {% trans 'DMS Admin' %}</a></li>
+                        <li><a href="{% url 'admin:index' %}"><i class="icon-list icon-white"></i> {% trans 'DMS Admin' %}</a></li>
                     {% endif %}
                         {% if user.is_authenticated %}
-                        <li class="logout"><a href="{% url logout %}?next={{ request.path }}"><i class="icon-user icon-white"></i> {% trans 'Log out' %}</a></li>
+                        <li class="logout"><a href="{% url 'logout' %}?next={{ request.path }}"><i class="icon-user icon-white"></i> {% trans 'Log out' %}</a></li>
                         {% else %}
-                        <li class="login"><a href="{% url login %}?next={{ request.path }}"><i class="icon-user icon-white"></i> {% trans 'Log in' %}</a></li>
+                        <li class="login"><a href="{% url 'login' %}?next={{ request.path }}"><i class="icon-user icon-white"></i> {% trans 'Log in' %}</a></li>
                         {% endif %}
                     </ul>
                 </div><!--/.nav-collapse -->

@@ -8,14 +8,14 @@
     {% if step == '1' or step == "2" or step == "3" or step != "4"%}
     {# Use this for a progress / step indicator / navigation #}
     <ul class="pager x-progress-tracker">
-        {% url mdtui-index-type as url %}
-        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">{% trans 'Step 1: Select Type' %} &rarr;</a></li>
-        {% url mdtui-index-details as url %}
-        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">{% trans 'Step 2: Index Details' %} &rarr;</a></li>
-        {% url mdtui-index-source as url %}
-        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">{% trans 'Step 3: Select Source' %} &rarr;</a></li>
-        {% url mdtui-index-finished as url %}
-        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">{% trans 'Step 4: Finish' %}</a></li>
+        {% url "mdtui-index-type" as u %}
+        <li{% if request.path == u %} class="active"{% endif %}><a href="{{ u }}">{% trans 'Step 1: Select Type' %} &rarr;</a></li>
+        {% url "mdtui-index-details" as u %}
+        <li{% if request.path == u %} class="active"{% endif %}><a href="{{ u }}">{% trans 'Step 2: Index Details' %} &rarr;</a></li>
+        {% url "mdtui-index-source" as u %}
+        <li{% if request.path == u %} class="active"{% endif %}><a href="{{ u }}">{% trans 'Step 3: Select Source' %} &rarr;</a></li>
+        {% url "mdtui-index-finished" as u %}
+        <li{% if request.path == u %} class="active"{% endif %}><a href="{{ u }}">{% trans 'Step 4: Finish' %}</a></li>
     </ul>
     {% endif %}
 

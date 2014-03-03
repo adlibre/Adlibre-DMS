@@ -44,7 +44,7 @@
     <tbody>
     {% for doc in paginated_documents.object_list %}
         <tr>
-            <td class="nw"><a href="{% url mdtui-view-object doc.id %}" title="{% trans 'View Document' %}" alt="{% trans 'View Document' %}" target="_blank"><i class="icon-download"></i> {{ doc.id }}</a></td>
+            <td class="nw"><a href="{% url 'mdtui-view-object' doc.id %}" title="{% trans 'View Document' %}" alt="{% trans 'View Document' %}" target="_blank"><i class="icon-download"></i> {{ doc.id }}</a></td>
             <td class="nw">{{ doc.metadata_created_date|date:DATE_FORMAT }}</td>
             {% for key in mdts %}
                 {% if key != "metadata_user_name" and key != "metadata_user_id" %}
@@ -53,7 +53,7 @@
             {% endfor %}
             <td>{{ doc.metadata_description }}</td>
             <td>{% get_docrule_name_by_id doc.metadata_doc_type_rule_id %}</td>
-            <td><a href="{% url bcp-print 'Code128' doc.id %}" title="{% trans 'Reprint Barcode' %}" alt="{% trans 'Reprint Barcode' %}" target="_blank"><i class="icon-barcode"></i></a> {% if edit_index_permitted %}| <a href="{% url mdtui-edit doc.id %}" title="{% trans 'Edit Metadata' %}"><i class="icon-edit"></i></a>{% endif %}</td>
+            <td><a href="{% url 'bcp-print' 'Code128' doc.id %}" title="{% trans 'Reprint Barcode' %}" alt="{% trans 'Reprint Barcode' %}" target="_blank"><i class="icon-barcode"></i></a> {% if edit_index_permitted %}| <a href="{% url 'mdtui-edit' doc.id %}" title="{% trans 'Edit Metadata' %}"><i class="icon-edit"></i></a>{% endif %}</td>
         </tr>
     {% endfor %}
     </tbody>
@@ -63,4 +63,4 @@
 <hr />
 {% include "mdtui/search/search_results_paginator.html" %}
 {% endif %}
-<p><a href="{% url mdtui-search-export %}" title="{% trans 'Download Results to CSV' %}" class="btn"><i class="icon-download-alt"></i> {% trans 'Export Results' %}</a></p>
+<p><a href="{% url "mdtui-search-export" %}" title="{% trans 'Download Results to CSV' %}" class="btn"><i class="icon-download-alt"></i> {% trans 'Export Results' %}</a></p>

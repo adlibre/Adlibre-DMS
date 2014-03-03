@@ -211,15 +211,10 @@ INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.admindocs',
     'django.contrib.contenttypes',
-    'django.contrib.markup',
     'django.contrib.sessions',
-    #'django.contrib.sites',
-    #'django.contrib.flatpages',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
-    # Uncomment the next line to enable admin documentation:
-    #'django.contrib.admindocs',
     # 3rd party
     'docutils',
     'piston',

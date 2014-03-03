@@ -26,7 +26,8 @@ parallel_handler = Resource(handlers.ParallelKeysHandler)
 thumbnail_handler = Resource(handlers.ThumbnailsHandler)
 version_handler = Resource(handlers.VersionHandler)
 
-urlpatterns = patterns('',
+urlpatterns = patterns(
+    '',
     # Deprecated file handlers:
     # /api/file/ABC1234
     url(r'^file/(?P<code>[\w_-]+)$', old_file_handler, name='api_file_deprecated'),

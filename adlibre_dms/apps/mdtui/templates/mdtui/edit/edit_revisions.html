@@ -16,7 +16,7 @@
         <legend>File revisions for code: {{ doc_name }}</legend>
         <br />
         {# Url to delete revisions got here #}
-        <div id="delete-url" data-id="{% url mdtui-edit-delete doc_name %}" style="display:none;"></div>
+        <div id="delete-url" data-id="{% url "mdtui-edit-delete" doc_name %}" style="display:none;"></div>
         <table class="table table-bordered table-striped">
         {% if file_revision_data %}
             <thead>
@@ -49,7 +49,7 @@
                 </td>
                 <td>
                     <div class="well">
-                        <a href="{% url mdtui-view-object doc_name %}?revision={{ revision }}" class="btn btn-primary"><i class="icon-search icon-white"></i> View</a>
+                        <a href="{% url "mdtui-view-object" doc_name %}?revision={{ revision }}" class="btn btn-primary"><i class="icon-search icon-white"></i> View</a>
                         <a href="#" data-id="{{ revision }}" class="revision-delete-btn btn btn-danger"><i class="icon-trash icon-white"></i> Delete</a>
                         <br />
                         <img class="revision-working-image-{{ revision }}" src="{{ STATIC_URL }}img/uploading.gif" style="display:none"/>
@@ -85,5 +85,5 @@
 
     </fieldset>
     <div class="form-actions">
-        <a href="{% url mdtui-edit doc_name %}" class="btn btn-primary"><i class="icon-ok icon-white"></i> Finish</a>
+        <a href="{% url "mdtui-edit" doc_name %}" class="btn btn-primary"><i class="icon-ok icon-white"></i> Finish</a>
     </div>

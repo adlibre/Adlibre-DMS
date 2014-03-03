@@ -5,7 +5,7 @@
         <h3>{% trans 'Remove code ' %}{{ doc_name }}</h3>
     </div>
     <div class="modal-body">
-        <form id="file-delete-form" class="form-horizontal well" action="{% url mdtui-edit-delete doc_name %}" method="post">
+        <form id="file-delete-form" class="form-horizontal well" action="{% url "mdtui-edit-delete" doc_name %}" method="post">
             {% csrf_token %}
             <label class="control-label">{% trans "This will remove the code" %} {{ doc_name }} {% trans "comletly, including all the revisions and indexing data. Are you sure?" %}</label>
             <img id="delete-working-image" src="{{ STATIC_URL }}img/uploading.gif" style="display:none;"/>

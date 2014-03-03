@@ -5,15 +5,15 @@ Copyright: Adlibre Pty Ltd 2013
 License: See LICENSE for license information
 """
 
-from django.conf.urls.defaults import *
-from django.views.generic.simple import direct_to_template
+from django.conf.urls import patterns, url
+from django.views.generic import TemplateView
 
 urlpatterns = patterns('mdtui.views',
     # Home
-    url(r'^$', direct_to_template, {'template': 'mdtui/home.html'}, name='mdtui-home'),
+    url(r'^$', TemplateView.as_view(template_name='mdtui/home.html'), name='mdtui-home'),
     # Search
-    url(r'^search/type$', 'search_type', {'step': 'type',}, name='mdtui-search'),
-    url(r'^search/type', 'search_type', {'step': 'type',}, name='mdtui-search-type'),
+    url(r'^search/type$', 'search_type', {'step': 'type', }, name='mdtui-search'),
+    url(r'^search/type', 'search_type', {'step': 'type', }, name='mdtui-search-type'),
     url(r'^search/options$', 'search_options', {'step': 'options'}, name='mdtui-search-options'),
     url(r'^search/results$', 'search_results', {'step': 'results'}, name='mdtui-search-results'),
     url(r'^search/export/$', 'search_results', {'step': 'export'}, name='mdtui-search-export'),

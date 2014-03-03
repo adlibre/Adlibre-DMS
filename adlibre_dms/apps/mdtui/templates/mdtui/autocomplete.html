@@ -8,7 +8,7 @@
     // adding manual browser autocomplete disabling
     $(document).ready(function() {
     {% for document_key in autocomplete_fields %}{% if document_key != "date" or document_key != "description" %}
-        connect_autocomplete("{% get_form_id_for_key form document_key %}", "{{ document_key }}", '{% url mdtui-parallel-keys %}');{% endif %}
+        connect_autocomplete("{% get_form_id_for_key form document_key %}", "{{ document_key }}", '{% url "mdtui-parallel-keys" %}');{% endif %}
     {% endfor %}
     });
 

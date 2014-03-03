@@ -1,11 +1,11 @@
 {% extends THEME_TEMPLATE %}
 
-{% load markup %}
+{% load m2 %}
 
 {% block title %}About{% endblock %}
 
 {% block content %}
-{% filter restructuredtext %}
+{% filter md2 %}
 {% include "docs/about_documentation.rst" %}
 {% endfilter %}
 {% endblock %}

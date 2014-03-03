@@ -1,7 +1,7 @@
 {% load i18n %}
 
 <div id="login">
-<form action="{% url django.contrib.auth.views.login %}" method="post" id="login-form">
+<form action="{% url "django.contrib.auth.views.login" %}" method="post" id="login-form">
 
     {% csrf_token %}
     <p>{{ form.non_field_errors }}</p>
@@ -37,7 +37,7 @@
         <input name="" type="submit" value="Try Demo Now" class="submit" />
     </div>
 {% endif %}
-    <a href="{% url pwd_reset %}">Reset Password</a>
+    <a href="{% url "pwd_reset" %}">Reset Password</a>
     <input type="hidden" name="next" value="{{ next }}" />
 </form>
 </div>
