@@ -1,5 +1,117 @@
 [
     {
+        "pk": 1,
+        "model": "auth.user",
+        "fields": {
+            "username": "admin",
+            "first_name": "",
+            "last_name": "",
+            "is_active": true,
+            "is_superuser": true,
+            "is_staff": true,
+            "last_login": "2012-03-22 19:45:44",
+            "groups": [
+                8,
+                9
+            ],
+            "user_permissions": [],
+            "password": "sha1$90c1d$b19c7957811191cefea85adbe89223c7735266e9",
+            "email": "a@b.cc",
+            "date_joined": "2010-11-05 06:01:20"
+        }
+    },
+    {
+        "pk": 2,
+        "model": "auth.user",
+        "fields": {
+            "username": "test_perms_1",
+            "first_name": "",
+            "last_name": "",
+            "is_active": true,
+            "is_superuser": false,
+            "is_staff": false,
+            "last_login": "2012-06-25 22:05:31",
+            "groups": [
+                8,
+                9,
+                3
+            ],
+            "user_permissions": [
+                64,
+                65
+            ],
+            "password": "sha1$e1ae4$93f05c23640b59fee4a7488d7f383b348c7cbde1",
+            "email": "",
+            "date_joined": "2012-06-23 01:24:03"
+        }
+    },
+    {
+        "pk": 3,
+        "model": "auth.user",
+        "fields": {
+            "username": "test_perms_2",
+            "first_name": "",
+            "last_name": "",
+            "is_active": true,
+            "is_superuser": false,
+            "is_staff": false,
+            "last_login": "2012-06-25 21:15:08",
+            "groups": [
+                8,
+                9,
+                2
+            ],
+            "user_permissions": [
+                59,
+                60
+            ],
+            "password": "sha1$5b5aa$362cfd1e10dfa6ec9e614b2953d2fe6dc547460f",
+            "email": "",
+            "date_joined": "2012-06-23 01:24:26"
+        }
+    },
+    {
+        "pk": 2,
+        "model": "auth.group",
+        "fields": {
+            "name": "MUI_Index_interaction",
+            "permissions": [
+                59,
+                63,
+                61,
+                58,
+                62
+            ]
+        }
+    },
+    {
+        "pk": 8,
+        "model": "auth.group",
+        "fields": {
+            "name": "security",
+            "permissions": []
+        }
+    },
+    {
+        "pk": 9,
+        "model": "auth.group",
+        "fields": {
+            "name": "api",
+            "permissions": []
+        }
+    },
+    {
+        "pk": 3,
+        "model": "auth.group",
+        "fields": {
+            "name": "MUI Search interaction",
+            "permissions": [
+                64,
+                65
+            ]
+        }
+    },
+    {
         "pk": 20,
         "model": "contenttypes.contenttype",
         "fields": {
@@ -592,118 +704,6 @@
             "codename": "delete_nonce",
             "name": "Can delete nonce",
             "content_type": 11
-        }
-    },
-    {
-        "pk": 8,
-        "model": "auth.group", 
-        "fields": {
-            "name": "security", 
-            "permissions": []
-        }
-    }, 
-    {
-        "pk": 9,
-        "model": "auth.group", 
-        "fields": {
-            "name": "api", 
-            "permissions": []
-        }
-    },
-    {
-        "pk": 2,
-        "model": "auth.group",
-        "fields": {
-            "name": "MUI Index interaction",
-            "permissions": [
-                59,
-                63,
-                61,
-                58,
-                62
-            ]
-        }
-    },
-    {
-        "pk": 3,
-        "model": "auth.group",
-        "fields": {
-            "name": "MUI Search interaction",
-            "permissions": [
-                64,
-                65
-            ]
-        }
-    },
-    {
-        "pk": 1, 
-        "model": "auth.user", 
-        "fields": {
-            "username": "admin", 
-            "first_name": "", 
-            "last_name": "", 
-            "is_active": true, 
-            "is_superuser": true, 
-            "is_staff": true, 
-            "last_login": "2012-03-22 19:45:44", 
-            "groups": [
-                8,
-                9
-            ], 
-            "user_permissions": [], 
-            "password": "sha1$90c1d$b19c7957811191cefea85adbe89223c7735266e9", 
-            "email": "a@b.cc", 
-            "date_joined": "2010-11-05 06:01:20"
-        }
-    },
-    {
-        "pk": 2,
-        "model": "auth.user",
-        "fields": {
-            "username": "test_perms_1",
-            "first_name": "",
-            "last_name": "",
-            "is_active": true,
-            "is_superuser": false,
-            "is_staff": false,
-            "last_login": "2012-06-25 22:05:31",
-            "groups": [
-                8,
-                9,
-                3
-            ],
-            "user_permissions": [
-                64,
-                65
-            ],
-            "password": "sha1$e1ae4$93f05c23640b59fee4a7488d7f383b348c7cbde1",
-            "email": "",
-            "date_joined": "2012-06-23 01:24:03"
-        }
-    },
-    {
-        "pk": 3,
-        "model": "auth.user",
-        "fields": {
-            "username": "test_perms_2",
-            "first_name": "",
-            "last_name": "",
-            "is_active": true,
-            "is_superuser": false,
-            "is_staff": false,
-            "last_login": "2012-06-25 21:15:08",
-            "groups": [
-                8,
-                9,
-                2
-            ],
-            "user_permissions": [
-                59,
-                60
-            ],
-            "password": "sha1$5b5aa$362cfd1e10dfa6ec9e614b2953d2fe6dc547460f",
-            "email": "",
-            "date_joined": "2012-06-23 01:24:26"
         }
     }
 ]

@@ -4080,6 +4080,8 @@ class MDTUI(MUITestData):
             for key, value in data.iteritems():
                 mdt_id = data[key]["mdt_id"]
                 response = self.client.delete(url, {"mdt_id": mdt_id})
+                if response.status_code != 204:
+                    print 'cant delete MDT: %s' % mdt_id
                 self.assertEqual(response.status_code, 204)
 
         # Deleting all docs used in tests

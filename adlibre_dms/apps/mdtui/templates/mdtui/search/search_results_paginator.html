@@ -3,7 +3,7 @@
 <div class="pagination">
     <ul>
         {% if paginated_documents.has_previous %}
-        <li><a href="{% url mdtui-search-results %}?page={{ paginated_documents.previous_page_number }}">{% trans 'Prev' %}</a></li>
+        <li><a href="{% url "mdtui-search-results" %}?page={{ paginated_documents.previous_page_number }}">{% trans 'Prev' %}</a></li>
         {%  endif %}
         {% if paginated_documents.paginator.num_pages < 10 %}
         {% for page_num in paginated_documents.paginator.page_range %}
