@@ -16,8 +16,6 @@ from wsgiref.handlers import format_date_time
 from datetime import datetime, timedelta
 from time import mktime
 
-
-
 from django.http import HttpResponse
 from django.core.urlresolvers import reverse
 
@@ -45,7 +43,7 @@ class DMSObjectResponse(HttpResponse):
             content, mimetype, filename = self.retieve_thumbnail(document)
         else:
             content, mimetype, filename = self.retrieve_file(document)
-        super(DMSObjectResponse, self).__init__(content=content, mimetype=mimetype)
+        super(DMSObjectResponse, self).__init__(content=content, content_type=mimetype)
         if content is not None:
             self["Content-Length"] = len(content)
             if thumbnail:

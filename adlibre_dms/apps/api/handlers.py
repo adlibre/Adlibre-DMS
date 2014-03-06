@@ -560,6 +560,15 @@ class MetaDataTemplateHandler(BaseHandler):
             else:
                 return rc.BAD_REQUEST
 
+        if mdt_id is None:
+            if request.body:
+                try:
+                    d = json.loads(request.body)
+                    mdt_id = d['mdt_id']
+                except:
+                    log.error('MetaDataTemplateHandler.delete attempted with invalid request %s' % request.body)
+                    return rc.BAD_REQUEST
+
         # Catch mdt_id is None
         if mdt_id is None:
             return rc.BAD_REQUEST

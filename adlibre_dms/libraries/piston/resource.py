@@ -174,7 +174,7 @@ class Resource(object):
             if self.stream: stream = srl.stream_render(request)
             else: stream = srl.render(request)
 
-            resp = HttpResponse(stream, mimetype=ct)
+            resp = HttpResponse(stream, content_type=ct)
 
             resp.streaming = self.stream
 

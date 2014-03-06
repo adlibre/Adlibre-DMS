@@ -85,8 +85,6 @@ setup(name='adlibre_dms',
             'apps/ui/templates/ui/*.html',
             # CouchDB Components
             'couchapps/*/_design/views/*/*.js',
-            'libraries/piston/templates/*.html',
-            'libraries/piston/templates/piston/*.html',
             # Misc templates
             'templates/*.html',
             'templates/*.txt',
@@ -113,6 +111,10 @@ setup(name='adlibre_dms',
             'python-magic==0.4.2',
             'django-compressor==1.3',
             'docutils==0.10',
+            # TODO: change to this after removing piston
+            # # Django-Piston for api app and piston patch
+            # 'django-piston==0.2.3',
+            # 'django-piston-0-2-3-patch-init==0.2.3',
             # Docs
             'markdown2==2.2.0',
             # MUI

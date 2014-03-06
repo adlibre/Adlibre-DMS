@@ -695,6 +695,37 @@ class MDTUI(MUITestData):
         self.client.login(username=self.username, password=self.password)
         self.response = None
 
+        # TODO: wrap into method and use only when required
+        security_group = Group.objects.get(name='security')
+        api_group = Group.objects.get(name='api')
+
+        # Modifying groups permissions for farther tests
+        index_group = Group.objects.get(name="MUI Index interaction")
+        for permission_id in [59, 63, 61, 58, 62, ]:
+            perm = Permission.objects.get(pk=permission_id)
+            index_group.permissions.add(perm)
+
+        search_group = Group.objects.get(name="MUI Search interaction")
+        for permission_id in [64, 65, ]:
+            perm = Permission.objects.get(pk=permission_id)
+            search_group.permissions.add(perm)
+
+        user1 = User.objects.get(username=self.username_1)
+        user1.groups.add(search_group)
+        user1.groups.add(security_group)
+        user1.groups.add(api_group)
+        for p_id in [64, 65]:
+            perm = Permission.objects.get(pk=p_id)
+            user1.user_permissions.add(perm)
+
+        user2 = User.objects.get(username=self.username_2)
+        user2.groups.add(security_group)
+        user2.groups.add(api_group)
+        user2.groups.add(index_group)
+        for p_id in [59, 60]:
+            perm = Permission.objects.get(pk=p_id)
+            user2.user_permissions.add(perm)
+
     def test_01_setup_mdts(self):
         """
         Setup all MDTs for the test suite.
@@ -4079,7 +4110,7 @@ class MDTUI(MUITestData):
             data = json.loads(str(response.content))
             for key, value in data.iteritems():
                 mdt_id = data[key]["mdt_id"]
-                response = self.client.delete(url, {"mdt_id": mdt_id})
+                response = self.client.delete(url, json.dumps({"mdt_id": str(mdt_id)}))
                 if response.status_code != 204:
                     print 'cant delete MDT: %s' % mdt_id
                 self.assertEqual(response.status_code, 204)

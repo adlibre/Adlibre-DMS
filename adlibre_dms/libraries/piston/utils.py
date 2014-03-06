@@ -209,15 +209,17 @@ class Mimer(object):
         
         if not self.is_multipart() and ctype:
             loadee = self.loader_for_type(ctype)
-            try:
-                self.request.data = loadee(self.request.raw_post_data)
-                
-                # Reset both POST and PUT from request, as its
-                # misleading having their presence around.
-                self.request.POST = self.request.PUT = dict()
-            except (TypeError, ValueError):
-                raise MimerDataException
+            if loadee:
+                try:
+                    self.request.data = loadee(self.request.body)
 
+                    # Reset both POST and PUT from request, as its
+                    # misleading having their presence around.
+                    self.request.POST = self.request.PUT = dict()
+                except (TypeError, ValueError):
+                    raise MimerDataException
+            else:
+                self.request.data = None
         return self.request
                 
     @classmethod

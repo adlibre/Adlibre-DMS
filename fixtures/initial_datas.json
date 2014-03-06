@@ -31,15 +31,8 @@
             "is_superuser": false,
             "is_staff": false,
             "last_login": "2012-06-25 22:05:31",
-            "groups": [
-                8,
-                9,
-                3
-            ],
-            "user_permissions": [
-                64,
-                65
-            ],
+            "groups": [],
+            "user_permissions": [],
             "password": "sha1$e1ae4$93f05c23640b59fee4a7488d7f383b348c7cbde1",
             "email": "",
             "date_joined": "2012-06-23 01:24:03"
@@ -56,32 +49,11 @@
             "is_superuser": false,
             "is_staff": false,
             "last_login": "2012-06-25 21:15:08",
-            "groups": [
-                8,
-                9,
-                2
-            ],
-            "user_permissions": [
-                59,
-                60
-            ],
+            "groups": [],
+            "user_permissions": [],
             "password": "sha1$5b5aa$362cfd1e10dfa6ec9e614b2953d2fe6dc547460f",
             "email": "",
             "date_joined": "2012-06-23 01:24:26"
-        }
-    },
-    {
-        "pk": 2,
-        "model": "auth.group",
-        "fields": {
-            "name": "MUI_Index_interaction",
-            "permissions": [
-                59,
-                63,
-                61,
-                58,
-                62
-            ]
         }
     },
     {
@@ -98,17 +70,6 @@
         "fields": {
             "name": "api",
             "permissions": []
-        }
-    },
-    {
-        "pk": 3,
-        "model": "auth.group",
-        "fields": {
-            "name": "MUI Search interaction",
-            "permissions": [
-                64,
-                65
-            ]
         }
     },
     {
