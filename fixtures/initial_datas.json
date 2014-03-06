@@ -10,10 +10,7 @@
             "is_superuser": true,
             "is_staff": true,
             "last_login": "2012-03-22 19:45:44",
-            "groups": [
-                8,
-                9
-            ],
+            "groups": [],
             "user_permissions": [],
             "password": "sha1$90c1d$b19c7957811191cefea85adbe89223c7735266e9",
             "email": "a@b.cc",
@@ -54,22 +51,6 @@
             "password": "sha1$5b5aa$362cfd1e10dfa6ec9e614b2953d2fe6dc547460f",
             "email": "",
             "date_joined": "2012-06-23 01:24:26"
-        }
-    },
-    {
-        "pk": 8,
-        "model": "auth.group",
-        "fields": {
-            "name": "security",
-            "permissions": []
-        }
-    },
-    {
-        "pk": 9,
-        "model": "auth.group",
-        "fields": {
-            "name": "api",
-            "permissions": []
         }
     },
     {

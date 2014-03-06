@@ -653,6 +653,43 @@ class MUITestData(TestCase):
             fo.writelines(obj)
             print 'file %s written' % name
 
+    def _produce_groups_and_permissions(self):
+        """Creates test_perm_1 and test_perm_2 users with membership in apropriate
+        groups and with apropriate permissions.
+
+        This method used because of migration to Django 1.6 with it's disability to use fixtures for that case.
+        """
+        # TODO: tests generate users 1 and 2 by themselves
+        security_group = Group.objects.get(name='security')
+        api_group = Group.objects.get(name='api')
+
+        # Modifying groups permissions for farther tests
+        index_group = Group.objects.get(name="MUI Index interaction")
+        for permission_id in [59, 63, 61, 58, 62, ]:
+            perm = Permission.objects.get(pk=permission_id)
+            index_group.permissions.add(perm)
+
+        search_group = Group.objects.get(name="MUI Search interaction")
+        for permission_id in [64, 65, ]:
+            perm = Permission.objects.get(pk=permission_id)
+            search_group.permissions.add(perm)
+
+        user1 = User.objects.get(username=self.username_1)
+        user1.groups.add(search_group)
+        user1.groups.add(security_group)
+        user1.groups.add(api_group)
+        for p_id in [64, 65]:
+            perm = Permission.objects.get(pk=p_id)
+            user1.user_permissions.add(perm)
+
+        user2 = User.objects.get(username=self.username_2)
+        user2.groups.add(security_group)
+        user2.groups.add(api_group)
+        user2.groups.add(index_group)
+        for p_id in [59, 60]:
+            perm = Permission.objects.get(pk=p_id)
+            user2.user_permissions.add(perm)
+
 
 class PaginatorTestCase(TestCase):
     """Tests Paginator functionality and logic"""
@@ -694,37 +731,6 @@ class MDTUI(MUITestData):
         # We are using only logged in client in this test
         self.client.login(username=self.username, password=self.password)
         self.response = None
-
-        # TODO: wrap into method and use only when required
-        security_group = Group.objects.get(name='security')
-        api_group = Group.objects.get(name='api')
-
-        # Modifying groups permissions for farther tests
-        index_group = Group.objects.get(name="MUI Index interaction")
-        for permission_id in [59, 63, 61, 58, 62, ]:
-            perm = Permission.objects.get(pk=permission_id)
-            index_group.permissions.add(perm)
-
-        search_group = Group.objects.get(name="MUI Search interaction")
-        for permission_id in [64, 65, ]:
-            perm = Permission.objects.get(pk=permission_id)
-            search_group.permissions.add(perm)
-
-        user1 = User.objects.get(username=self.username_1)
-        user1.groups.add(search_group)
-        user1.groups.add(security_group)
-        user1.groups.add(api_group)
-        for p_id in [64, 65]:
-            perm = Permission.objects.get(pk=p_id)
-            user1.user_permissions.add(perm)
-
-        user2 = User.objects.get(username=self.username_2)
-        user2.groups.add(security_group)
-        user2.groups.add(api_group)
-        user2.groups.add(index_group)
-        for p_id in [59, 60]:
-            perm = Permission.objects.get(pk=p_id)
-            user2.user_permissions.add(perm)
 
     def test_01_setup_mdts(self):
         """
@@ -1155,7 +1161,7 @@ class MDTUI(MUITestData):
         # context processors provide Document Type names
         self.assertContains(response, "Test doc type 3")
         self.assertContains(response, "Test doc type 3")
-        # Contains only apropriate content types
+        # Contains only appropriate content types
         self.assertNotContains(response, "Adlibre invoices")
 
     def test_19_search_docrule_by_key_proper(self):
@@ -2113,6 +2119,7 @@ class MDTUI(MUITestData):
 
     def test_46_security_restricts_search_or_index(self):
         """Groups for accessing search or index sections of MUI """
+        self._produce_groups_and_permissions()
         # We need another logged in user for this test
         self.client.logout()
         self.client.login(username=self.username_1, password=self.password_1)
@@ -2137,6 +2144,7 @@ class MDTUI(MUITestData):
 
     def test_47_indexing_mdt_choices_limited_by_permitted_docrules(self):
         """Permission are disabling document type rule choices for normal user in INDEX of MUI"""
+        self._produce_groups_and_permissions()
         # We need another logged in user for this test
         self.client.logout()
         self.client.login(username=self.username_1, password=self.password_1)
@@ -2155,6 +2163,7 @@ class MDTUI(MUITestData):
 
     def test_48_searching_docrule_choices_limited_by_permission(self):
         """Permission are disabling document type rule choices for normal user in SEARCH of MUI"""
+        self._produce_groups_and_permissions()
         # We need another logged in user for this test
         self.client.logout()
         self.client.login(username=self.username_2, password=self.password_2)
@@ -2333,13 +2342,13 @@ class MDTUI(MUITestData):
         self.assertNotContains(response, self.edit_document_name_5)
 
     def test_54_core_creation_indexes_left_the_same_on_update(self):
-        """
-        Testing Doc update sequence.
+        """Testing Doc update sequence.
         e.g.:
         You have indexed document through MUI and printed a barcode.
         You now try to upload a document through API (e.g. from scanning house)
         Your document's User, Description and created date are left the same.
         """
+        self._produce_groups_and_permissions()
         # Changing user
         self.client.logout()
         self.client.login(username=self.username_1, password=self.password_1)
@@ -2799,6 +2808,7 @@ class MDTUI(MUITestData):
         - superuser
         - not permitted user
         """
+        self._produce_groups_and_permissions()
         edit_btn_string = """href="/mdtui/edit/%s""" % self.edit_document_name_1
         data = {'mdt': self.test_mdt_id_5}
         # Adding apecial permission to test user 1
@@ -3038,6 +3048,7 @@ class MDTUI(MUITestData):
 
         - Tests only proper indexes exist in secondary indexes of document that has more than 1 file revision
         """
+        self._produce_groups_and_permissions()
         # Using document that has more than 1 revision for this test.
         couch_doc = self._open_couchdoc(self.couchdb_name, self.doc1)
         if not '2' in couch_doc['revisions'].iterkeys():
@@ -3301,6 +3312,7 @@ class MDTUI(MUITestData):
         Fully tests part 2 of this feature
         (with warning and blocking farther document upload for new indexes)
         """
+        self._produce_groups_and_permissions()
         # Modified doc1 dict for our needs
         test_doc_dict = self.doc1_dict_forbidden_indexes
         # Changing MDT to have 1 admincreate perms field.
@@ -3396,6 +3408,7 @@ class MDTUI(MUITestData):
 
     def test_80_forbidden_indexes_adding_and_group(self):
         """Refs #935 part 1. MDT/MUI fixed choice index fields (improving the workflow)"""
+        self._produce_groups_and_permissions()
         test_doc_dict = self.doc1_dict_forbidden_indexes
         # Changing MDT to have 1 admincreate perms field.
         operating_mdt = 'mdt2'
@@ -3474,6 +3487,7 @@ class MDTUI(MUITestData):
         Refs #816 (MDT's on the demo server so that we can search for the uploaded images)
         Refs #945 Barcode Scanner Test MUI Results Colums
         """
+        self._produce_groups_and_permissions()
         # Should be day before due to tests issues with timezones AU/UA.
         prev_date = (datetime.datetime.now() - datetime.timedelta(days=1)).strftime(settings.DATE_FORMAT)
         todays_range = {u'date': prev_date}
@@ -4038,6 +4052,7 @@ class MDTUI(MUITestData):
 
     def test_96_document_file_revisions_not_lost_when_changing_type(self):
         """Refs #1246 Document revisions lost when reindexing"""
+        self._produce_groups_and_permissions()
         before_code = self.doc1
         new_doc_name = self.edit_type_document_name1
         renaming_docrule = {'docrule': '7'}

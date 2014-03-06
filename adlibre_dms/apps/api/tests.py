@@ -116,6 +116,7 @@ class APITest(DMSTestCase):
             response = self.client.get(url)
             if not response.content.isdigit():
                 raise self.failureException('Invalid response: %s' % response.content)
+            print f
             self.assertEqual(response.content, "2")
 
     def test_08_get_bad_rev_count(self):
@@ -271,7 +272,7 @@ class APITest(DMSTestCase):
             # Remove tag
             url = reverse('api_file', kwargs={'code': filename})
             data = {'filename': filename, 'remove_tag_string': self.test_tag}
-            response = self.client.put(url, data)
+            response = self.client.put(url, json.dumps(data))
             self.assertEqual(response.status_code, 200)
             # Check that we don't have tag
             url = reverse('api_file_info', kwargs={'code': filename})
@@ -280,7 +281,7 @@ class APITest(DMSTestCase):
             # Set tags
             url = reverse('api_file', kwargs={'code': filename})
             data = {'filename': filename, 'tag_string': self.test_tag}
-            response = self.client.put(url, data)
+            response = self.client.put(url, json.dumps(data))
             self.assertEqual(response.status_code, 200)
             # Check that we have tag
             url = reverse('api_file_info', kwargs={'code': filename})

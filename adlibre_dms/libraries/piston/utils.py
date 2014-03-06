@@ -219,7 +219,7 @@ class Mimer(object):
                 except (TypeError, ValueError):
                     raise MimerDataException
             else:
-                self.request.data = None
+                self.request.data = self.request.body or None
         return self.request
                 
     @classmethod

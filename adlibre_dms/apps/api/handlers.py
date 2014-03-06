@@ -30,6 +30,7 @@ from dms_plugins.operator import PluginsOperator
 from dms_plugins.models import DoccodePluginMapping
 from mdt_manager import MetaDataTemplateManager
 from dms_plugins.workers.info.tags import TagsPlugin
+from models import API_GROUP_NAME
 
 from mdtui.security import list_permitted_docrules_qs
 
@@ -55,7 +56,7 @@ class FileHandler(BaseFileHandler):
     allowed_methods = ('GET', 'POST', 'DELETE', 'PUT')
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api'))  # FIXME: Should be more granular permissions
+    @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
     def create(self, request, code, suggested_format=None):
         if 'file' in request.FILES:
             uploaded_file = request.FILES['file']
@@ -74,7 +75,7 @@ class FileHandler(BaseFileHandler):
         return rc.CREATED
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api'))  # FIXME: Should be more granular permissions
+    @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
     def read(self, request, code, suggested_format=None):
         revision, hashcode, extra = self._get_info(request)
         processor = DocumentProcessor()
@@ -102,7 +103,7 @@ class FileHandler(BaseFileHandler):
         return response
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api'))  # FIXME: Should be more granular permissions
+    @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
     def update(self, request, code, suggested_format=None):
         revision, hashcode, extra = self._get_info(request)
         uploaded_obj = None
@@ -141,7 +142,7 @@ class FileHandler(BaseFileHandler):
         return HttpResponse(resp)   # FIXME should be rc.ALL_OK
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api'))  # FIXME: Should be more granular permissions
+    @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
     def delete(self, request, code, suggested_format=None):
         # FIXME: should return 404 if file not found, 400 if no docrule exists.
         revision, hashcode, extra = self._get_info(request)
@@ -168,7 +169,7 @@ class OldFileHandler(BaseFileHandler):
     allowed_methods = ('GET', 'POST')
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api'))
+    @method_decorator(group_required(API_GROUP_NAME))
     def create(self, request, code, suggested_format=None):
         if 'file' in request.FILES:
             uploaded_file = request.FILES['file']
@@ -195,7 +196,7 @@ class OldFileHandler(BaseFileHandler):
         return document.get_filename()
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api'))
+    @method_decorator(group_required(API_GROUP_NAME))
     def read(self, request, code, suggested_format=None):
         revision, hashcode, extra = self._get_info(request)
         processor = DocumentProcessor()
@@ -230,7 +231,7 @@ class FileInfoHandler(BaseFileHandler):
     allowed_methods = ('GET',)
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api'))  # FIXME: Should be more granular permissions
+    @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
     def read(self, request, code, suggested_format=None):
         revision, hashcode, extra = self._get_info(request)
         processor = DocumentProcessor()
@@ -266,7 +267,7 @@ class FileListHandler(BaseHandler):
     allowed_methods = ('GET', 'POST')
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api'))  # FIXME: Should be more granular permissions
+    @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
     def read(self, request, id_rule):
         try:
             operator = PluginsOperator()
@@ -318,7 +319,7 @@ class TagsHandler(BaseHandler):
     allowed_methods = ('GET',)
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api'))  # FIXME: Should be more granular permissions
+    @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
     def read(self, request, id_rule):
         # FIXME: Requirement for this whole API hook is wrong.
         # Tags should be got with document metadata. Not with a separate reequest.
@@ -344,7 +345,7 @@ class RevisionCountHandler(BaseHandler):
     allowed_methods = ('GET', 'POST')
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api'))  # FIXME: Should be more granular permissions
+    @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
     def read(self, request, document):
         document, extension = os.path.splitext(document)
         processor = DocumentProcessor()
@@ -373,7 +374,7 @@ class RulesHandler(BaseHandler):
     verbose_name_plural = 'rules'
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api'))  # FIXME: Should be more granular permissions
+    @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
     def read(self, request):
         """Returns list of Document Type Rule <=> Plugins mapping
 
@@ -412,7 +413,7 @@ class RulesDetailHandler(BaseHandler):
     verbose_name_plural = 'rules'
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api'))  # FIXME: Should be more granular permissions
+    @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
     def read(self, request, id_rule):
         """RulesDetailHandler READ method for GET requests
 
@@ -442,7 +443,7 @@ class PluginsHandler(BaseHandler):
     verbose_name_plural = 'plugins'
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api'))  # FIXME: Should be more granular permissions
+    @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
     def read(self, request):
         operator = PluginsOperator()
         try:
@@ -469,7 +470,7 @@ class MetaDataTemplateHandler(BaseHandler):
     """
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api'))  # FIXME: Should be more granular permissions
+    @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
     def create(self, request):
 
         if not request.user.is_authenticated():
@@ -511,7 +512,7 @@ class MetaDataTemplateHandler(BaseHandler):
         return result
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api'))  # FIXME: Should be more granular permissions
+    @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
     def read(self, request):
         if not request.user.is_authenticated():
             log.error('MetaDataTemplateHandler.read attempted with unauthenticated user.')
@@ -543,7 +544,7 @@ class MetaDataTemplateHandler(BaseHandler):
         return result
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api'))  # FIXME: Should be more granular permissions
+    @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
     def delete(self, request):
         if not request.user.is_authenticated():
             log.error('MetaDataTemplateHandler.delete attempted with unauthenticated user.')
