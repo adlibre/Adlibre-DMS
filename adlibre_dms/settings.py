@@ -217,7 +217,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     # 3rd party
     'docutils',
-    'piston',
+    'rest_framework',
     'djangoplugins',
     'taggit',
     'couchdbkit.ext.django',  # needed for CouchDB usage

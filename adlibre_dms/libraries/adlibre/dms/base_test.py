@@ -16,6 +16,7 @@ from django.core.management import call_command
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.test.client import Client
+from django.test.client import encode_multipart
 
 __all__ = ['DMSTestCase', 'DMSBasicAuthenticatedTestCase']
 
@@ -126,7 +127,8 @@ class DMSTestCase(TestCase):
         """Method to uploade an already existing document into DMS"""
         self.client.login(username=self.username, password=self.password)
         url, data = self._get_tests_file(doc_name, code, suggested_format)
-        response = self.client.put(url, data)
+        content = encode_multipart('BoUnDaRyStRiNg', data)
+        response = self.client.put(url, content, content_type='multipart/form-data; boundary=BoUnDaRyStRiNg')
         if check_response:
             self.assertEqual(response.status_code, 200)
         return response

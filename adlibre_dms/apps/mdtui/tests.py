@@ -17,6 +17,7 @@ from django.test import TestCase
 from django.core.urlresolvers import reverse
 from django.core.paginator import Paginator
 from django.conf import settings
+from django.test.client import encode_multipart
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
 from django.contrib.auth.models import Permission
@@ -627,7 +628,8 @@ class MUITestData(TestCase):
             response = self.client.post(url, data)
             ok_code = 201
         else:
-            response = self.client.put(url, data)
+            content = encode_multipart('BoUnDaRyStRiNg', data)
+            response = self.client.put(url, content, content_type='multipart/form-data; boundary=BoUnDaRyStRiNg')
         if check_response:
             self.assertEqual(response.status_code, ok_code)
         return response
@@ -3015,12 +3017,7 @@ class MDTUI(MUITestData):
         if '2' in couch_doc['revisions']:
             raise AssertionError('Document has revision 2 already. can not test farther')
         # Checking upload file by API to ensure revision indexes out there after document revision update
-        self.test_document_files_dir = os.path.join(settings.FIXTURE_DIRS[0], 'testdata')
-        file_path = os.path.join(self.test_document_files_dir, doc_used + '.pdf')
-        data = {'file': open(file_path, 'r')}
-        url = reverse('api_file', kwargs={'code': doc_used, 'suggested_format': 'pdf'})
-        response = self.client.put(url, data)
-        self.assertEqual(response.status_code, 200)
+        self._api_upload_file(doc_used, update=True)
         # Checking if revision 2 of CouchDB document indexes preserved
         couch_doc = self._open_couchdoc(self.couchdb_name, doc_used)
         if not '2' in couch_doc['index_revisions']:

@@ -22,10 +22,13 @@ class TagsPlugin(Plugin, BeforeRetrievalPluginPoint):
         return document
 
     def get_all_tags(self, docrule=None):
-        tags = Tag.objects.all()
+        tags = DocTags.objects.all()
         if docrule:
-            tags = tags.filter(taggit_taggeditem_items__doctags__doccode=docrule).distinct()
-        return tags
+            tags = tags.filter(doccode=docrule).distinct()
+        resp = []
+        for doctag in tags:
+            resp.append(map(lambda tag: tag.name, doctag.tags.all()))
+        return resp
 
     def get_doc_models(self, docrule=None, tags=[]):
         doc_models = DocTags.objects.all()
