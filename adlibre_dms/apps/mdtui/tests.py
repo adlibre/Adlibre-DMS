@@ -661,7 +661,6 @@ class MUITestData(TestCase):
 
         This method used because of migration to Django 1.6 with it's disability to use fixtures for that case.
         """
-        # TODO: tests generate users 1 and 2 by themselves
         security_group = Group.objects.get(name='security')
         api_group = Group.objects.get(name='api')
 
@@ -1224,7 +1223,8 @@ class MDTUI(MUITestData):
         self.assertNotContains(response, self.edit_document_name_4)
 
     def test_21_add_indexes_unvalidated_form_preserves_prepopulated_data(self):
-        """MDTUI Indexing Form .
+        """MUI Indexing Form.
+
         Step 2 adding indexes into several fields instead of all required
         returns prepopulated form with errors."""
         # Selecting Document Type Rule
@@ -3619,13 +3619,6 @@ class MDTUI(MUITestData):
         self.assertNotContains(response, 'ADL-')
         self.assertContains(response, SEARCH_ERROR_MESSAGES['wrong_date'])
 
-    def test_85_choice_type_field(self):
-        """
-        Refs #700 Feature: MDT/MUI fixed choice index fields
-        """
-        # TODO: Make testing of search and adding indexes for documents with choice fields.
-        pass
-
     def test_86_editing_document_type_UI(self):
         """Refs #957 Ability to change Document Type: UI part"""
         # Button to change type is properly rendered
@@ -3664,7 +3657,7 @@ class MDTUI(MUITestData):
         renaming_docrule = {'docrule': '7'}
 
         ch_type_url = reverse('mdtui-edit-type', kwargs={'code': edit_doc_name})
-        # HACK: docrule sequence fixup.
+        # docrule sequence fixup.
         docrule = DocumentTypeRule.objects.get(pk=int(renaming_docrule['docrule']))
         docrule.sequence_last = 3
         docrule.save()
@@ -3888,7 +3881,7 @@ class MDTUI(MUITestData):
         self.assertNotContains(response, 'stub_document.pdf')
 
         docrule = self.test_mdt_docrule_id
-        # HACK: docrule sequence fixup.
+        # docrule sequence fixup.
         rule = DocumentTypeRule.objects.get(pk=docrule)
         rule.sequence_last = 3
         rule.save()
@@ -4087,6 +4080,13 @@ class MDTUI(MUITestData):
         self.assertEqual(couch_doc['revisions']['3']['name'], new_doc_name + new_doc_revision_prefix3)  # Revisions OK
         self.assertEqual(couch_doc['index_revisions']["1"]['mdt_indexes']["Employee Name"], "Iurii Garmash")  # Index Rev OK
         self.assertEqual(couch_doc['metadata_description'], edit_doc_decription)  # Description OK
+
+    def test_85_choice_type_field(self):
+        """
+        Refs #700 Feature: MDT/MUI fixed choice index fields
+        """
+        # TODO: Make testing of search and adding indexes for documents with choice fields.
+        pass
 
     def test_z_cleanup(self):
         """

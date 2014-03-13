@@ -28,7 +28,7 @@
 </head>
 <body>
 {% if mimetype == 'image/jpeg' %}
-<img src="{% url "api_file code" %}{% if revision %}?r={{ revision }}{% endif %}" alt="{{ code }}"><img>
+<img src="{% url "api_file" code %}{% if revision %}?r={{ revision }}{% endif %}" alt="{{ code }}"><img>
 {% else %}
 <div id="pdfobj"></div>
 <p><a href="{% url "mdtui-download-pdf" code %}" title="{% trans 'Download Document' %}" class="btn"><i class="icon-download-alt"></i> Download document &ldquo;{{ code }}&rdquo;</a></p>
