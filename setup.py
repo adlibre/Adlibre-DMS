@@ -106,15 +106,13 @@ setup(name='adlibre_dms',
     ],
     install_requires=[
             # Core requirements
-            'Django==1.4.10',
+            'Django==1.6.2',
             'South==0.8.4',
             'python-magic==0.4.2',
             'django-compressor==1.3',
             'docutils==0.10',
-            # # TODO: change to this after removing piston
-            # # Django-Piston for api app and piston patch
-            # 'django-piston==0.2.3',
-            # 'django-piston-0-2-3-patch-init==0.2.3',
+            # API
+            'djangorestframework==2.3.13',
             # Docs
             'markdown2==2.2.0',
             # MUI
