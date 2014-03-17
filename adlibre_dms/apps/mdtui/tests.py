@@ -4122,7 +4122,11 @@ class MDTUI(MUITestData):
             data = json.loads(str(response.content))
             for key, value in data.iteritems():
                 mdt_id = data[key]["mdt_id"]
-                response = self.client.delete(url, json.dumps({"mdt_id": str(mdt_id)}))
+                response = self.client.delete(
+                    url,
+                    json.dumps({"mdt_id": str(mdt_id)}),
+                    content_type='application/x-www-form-urlencoded',
+                )
                 if response.status_code != 204:
                     print 'cant delete MDT: %s' % mdt_id
                 self.assertEqual(response.status_code, 204)

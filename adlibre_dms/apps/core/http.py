@@ -40,14 +40,14 @@ class DMSObjectResponse(HttpResponse):
     """
     def __init__(self, document, thumbnail=False):
         if thumbnail:
-            content, mimetype, filename = self.retieve_thumbnail(document)
+            content, content_type, filename = self.retieve_thumbnail(document)
         else:
-            content, mimetype, filename = self.retrieve_file(document)
-        super(DMSObjectResponse, self).__init__(content=content, content_type=mimetype)
+            content, content_type, filename = self.retrieve_file(document)
+        super(DMSObjectResponse, self).__init__(content=content, content_type=content_type)
         if content is not None:
             self["Content-Length"] = len(content)
             if thumbnail:
-                self["Content-Type"] = mimetype
+                self["Content-Type"] = content_type
                 # Cache thumbnails for 1 day
                 now = datetime.now()
                 exp = now + timedelta(days=1)
@@ -61,7 +61,7 @@ class DMSObjectResponse(HttpResponse):
         # FIXME: Document() instance should already contain properly set up file object.
         document.get_file_obj().seek(0)
         content = document.get_file_obj().read()
-        mimetype = document.get_mimetype()
+        content_type = document.get_mimetype()
         # Renaming returned document in case we have certain revision request
         current_revision = document.get_revision()
         file_revision_data = document.get_file_revisions_data()
@@ -70,14 +70,14 @@ class DMSObjectResponse(HttpResponse):
             filename = document.get_filename_with_revision()
         else:
             filename = document.get_full_filename()
-        return content, mimetype, filename
+        return content, content_type, filename
 
     def retieve_thumbnail(self, document):
         # Getting thumbnail details
         content = document.thumbnail
-        mimetype = 'image/png'
+        content_type = 'image/png'
         filename = document.get_full_filename() + '.png'
-        return content, mimetype, filename
+        return content, content_type, filename
 
     def httpdate(self, dt):
         """Return a string representation of a date according to RFC 1123

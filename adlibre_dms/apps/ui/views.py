@@ -19,11 +19,11 @@ from ui.forms import CalendarForm
 
 
 def get_urls(id_rule=None, document_name=None):
-    c = {'rules_url': reverse('api_rules', kwargs={'emitter_format': 'json'}), }
+    c = {'rules_url': reverse('api_rules'), }
     if id_rule:
         c.update({
             'documents_url': reverse("api_file_list", kwargs={'id_rule': id_rule}),
-            'tags_url': reverse('api_tags', kwargs={'emitter_format': 'json', 'id_rule': id_rule}),
+            'tags_url': reverse('api_tags', kwargs={'id_rule': id_rule}),
         })
     if document_name:
         code, suggested_format = os.path.splitext(document_name)

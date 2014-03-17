@@ -165,7 +165,11 @@ class MetadataCouchDB(TestCase):
         Testing wrong deletion calls
         """
         url = reverse('api_mdt')
-        response = self.client.delete(url, {"mdt_id": "10000000"})
+        response = self.client.delete(
+            url,
+            json.dumps({"mdt_id": "10000000"}),
+            content_type='application/x-www-form-urlencoded'
+        )
         self.assertEqual(response.status_code, 404)
 
     def test_mdt_removing_improper_call(self):
@@ -173,7 +177,7 @@ class MetadataCouchDB(TestCase):
         Testing wrong deletion calls
         """
         url = reverse('api_mdt')
-        response = self.client.delete(url)
+        response = self.client.delete(url, content_type='application/x-www-form-urlencoded')
         self.assertEqual(response.status_code, 400)
 
     def test_mdt_z_proper_removing(self):
@@ -186,8 +190,12 @@ class MetadataCouchDB(TestCase):
         response = self.client.get(url, {"docrule_id": "10000"})
         data = json.loads(str(response.content))
         for key, value in data.iteritems():
-            mdt_id =  data[key]["mdt_id"]
-            response = self.client.delete(url, {"mdt_id": mdt_id})
+            mdt_id = data[key]["mdt_id"]
+            response = self.client.delete(
+                url,
+                json.dumps({"mdt_id": mdt_id}),
+                content_type='application/x-www-form-urlencoded',
+            )
             self.assertEqual(response.status_code, 204)
 
 

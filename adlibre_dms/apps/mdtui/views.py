@@ -1027,7 +1027,7 @@ def mdt_parallel_keys(request):
     if valid_call:
         resp = process_pkeys_request(docrule_id, key_name, autocomplete_req, doc_mdts, letters_limit, suggestions_limit)
     log.debug('mdt_parallel_keys response: %s' % resp)
-    return HttpResponse(json.dumps(resp), mimetype="application/json")
+    return HttpResponse(json.dumps(resp), content_type="application/json")
 
 
 @login_required

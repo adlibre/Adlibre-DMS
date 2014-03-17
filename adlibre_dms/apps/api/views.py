@@ -148,9 +148,9 @@ class FileHandler(BaseFileHandler):
         }  # FIXME hashcode missing?
         document = processor.update(code, options)
         if len(processor.errors) > 0:
-            print processor.errors
             log.error('FileHandler.update manager errors %s' % processor.errors)
             if settings.DEBUG:
+                print processor.errors
                 raise Exception('FileHandler.update manager errors')
             else:
                 return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -345,7 +345,6 @@ class TagsHandler(APIView):
             docrule = mapping.get_docrule()
             tags = TagsPlugin().get_all_tags(docrule=docrule)
             log.info('TagsHandler.read request fulfilled for rule %s' % id_rule)
-            print tags
             return Response(json.dumps(tags), status=status.HTTP_200_OK)
         except Exception, e:  # FIXME
             log.error('TagsHandler.read Exception %s' % e)
@@ -585,9 +584,10 @@ class MetaDataTemplateHandler(APIView):
             log.error('MetaDataTemplateHandler.delete attempted with unauthenticated user.')
             return Response(status=status.HTTP_401_UNAUTHORIZED)
 
+        body = request.body
         # Catch improper mdt_id in request
         try:
-            mdt_id = request.REQUEST.get('mdt_id')
+            mdt_id = request.DATA.get('mdt_id')
             log.info('MetaDataTemplateHandler.delete attempted with valid request %s' % mdt_id)
         except KeyError, e:
             log.error('MetaDataTemplateHandler.delete attempted with invalid request %s' % e)
@@ -597,12 +597,12 @@ class MetaDataTemplateHandler(APIView):
                 return Response(status=status.HTTP_400_BAD_REQUEST)
 
         if mdt_id is None:
-            if request.body:
+            if body:
                 try:
-                    d = json.loads(request.body)
+                    d = json.loads(body)
                     mdt_id = d['mdt_id']
                 except:
-                    log.error('MetaDataTemplateHandler.delete attempted with invalid request %s' % request.body)
+                    log.error('MetaDataTemplateHandler.delete attempted with invalid request %s' % body)
                     return Response(status=status.HTTP_400_BAD_REQUEST)
 
         # Catch mdt_id is None
