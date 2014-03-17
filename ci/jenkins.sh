@@ -1,4 +1,5 @@
 #!/bin/sh
+python --version
 echo "#############################   Cleanup old virtualenvironment and reports ######################################"
 rm -rf ve
 rm -rf reports
