@@ -2,34 +2,37 @@
 Module: Piston API Handlers
 
 Project: Adlibre DMS
-Copyright: Adlibre Pty Ltd 2011, 2012
+Copyright: Adlibre Pty Ltd 2011, 2014
 License: See LICENSE for license information
 """
 
 import json
 import os
-import sys
 import logging
 import traceback
+from StringIO import StringIO
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
-
-from piston.handler import BaseHandler
-from piston.utils import rc
-
 from django.utils.decorators import method_decorator
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.parsers import FileUploadParser, MultiPartParser, FormParser
+
 from api.decorators.auth import logged_in_or_basicauth
 from api.decorators.group_required import group_required
-
 from core.document_processor import DocumentProcessor
 from core.parallel_keys import process_pkeys_request
+from core.errors import DmsException
 from core.http import DMSObjectResponse, DMSOBjectRevisionsData
 from dms_plugins.operator import PluginsOperator
 from dms_plugins.models import DoccodePluginMapping
 from mdt_manager import MetaDataTemplateManager
 from dms_plugins.workers.info.tags import TagsPlugin
+from models import API_GROUP_NAME
 
 from mdtui.security import list_permitted_docrules_qs
 
@@ -39,13 +42,13 @@ log = logging.getLogger('dms.api.handlers')
 AUTH_REALM = 'Adlibre DMS'
 
 
-class BaseFileHandler(BaseHandler):
+class BaseFileHandler(APIView):
     """Typical request parsing task handler"""
 
     def _get_info(self, request):
-        revision = request.GET.get('r', None)
-        hashcode = request.GET.get('h', None)
-        extra = request.REQUEST
+        revision = request.QUERY_PARAMS.get('r', None)
+        hashcode = request.QUERY_PARAMS.get('h', None)
+        extra = request.QUERY_PARAMS
         log.debug('BaseFileHandler._get_info returned: %s : %s : %s.' % (revision, hashcode, extra))
         return revision, hashcode, extra
 
@@ -53,14 +56,15 @@ class BaseFileHandler(BaseHandler):
 class FileHandler(BaseFileHandler):
     """CRUD Methods for documents"""
     allowed_methods = ('GET', 'POST', 'DELETE', 'PUT')
+    parser_classes = (FileUploadParser, MultiPartParser, FormParser)
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api'))  # FIXME: Should be more granular permissions
-    def create(self, request, code, suggested_format=None):
+    @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
+    def post(self, request, code, suggested_format=None):
         if 'file' in request.FILES:
             uploaded_file = request.FILES['file']
         else:
-            return rc.BAD_REQUEST
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         processor = DocumentProcessor()
         options = {
             'user': request.user,
@@ -69,13 +73,13 @@ class FileHandler(BaseFileHandler):
         document = processor.create(uploaded_file, options)
         if len(processor.errors) > 0:
             log.error('FileHandler.create manager errors: %s' % processor.errors)
-            return rc.BAD_REQUEST
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         log.info('FileHandler.create request fulfilled for %s' % document.get_filename())
-        return rc.CREATED
+        return Response(status=status.HTTP_201_CREATED)
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api'))  # FIXME: Should be more granular permissions
-    def read(self, request, code, suggested_format=None):
+    @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
+    def get(self, request, code, suggested_format=None):
         revision, hashcode, extra = self._get_info(request)
         processor = DocumentProcessor()
         options = {
@@ -89,29 +93,44 @@ class FileHandler(BaseFileHandler):
             # Hack: Used part of the code from MDTUI Wrong!
             user_permissions = list_permitted_docrules_qs(request.user)
             if not document.docrule in user_permissions:
-                return rc.FORBIDDEN
+                return Response(status=status.HTTP_401_UNAUTHORIZED)
         if processor.errors:
             log.error('FileHandler.read manager errors: %s' % processor.errors)
-            return rc.NOT_FOUND
+            return Response(status=status.HTTP_404_NOT_FOUND)
         if document.marked_deleted:
             log.error('FileHandler.read request to marked deleted document: %s' % code)
-            return rc.NOT_FOUND
+            return Response(status=status.HTTP_404_NOT_FOUND)
         else:
             response = DMSObjectResponse(document)
             log.info('FileHandler.read request fulfilled for code: %s, options: %s' % (code, options))
         return response
 
-    @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api'))  # FIXME: Should be more granular permissions
-    def update(self, request, code, suggested_format=None):
-        revision, hashcode, extra = self._get_info(request)
+    # @method_decorator(logged_in_or_basicauth(AUTH_REALM))
+    # @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
+    def put(self, request, code, suggested_format=None):
+        """Used to work with "update" sequence of DMS code.
+
+        to update a code you need to send a PUT request here.
+        PUT must contain:
+
+        @param code: the DMS "code" of file to be updated. e.g.: ADL-0001
+        @param suggested_format: format of file for code to be updated. To have ability to post files in certain format.
+        """
+        file_content = StringIO(request.body)
+        parser = MultiPartParser()
+        context = {'request': request}
+        conten_type = request.content_type
+        dnf = parser.parse(file_content, media_type=conten_type, parser_context=context)
+        extra = dnf.data
         uploaded_obj = None
-        if 'file' in request.FILES:
-            uploaded_obj = request.FILES['file']
+        if 'file' in dnf.files:
+            uploaded_obj = dnf.files['file']
         # TODO refactor these verbs
-        sql_tag_string = request.PUT.get('tag_string', None)
-        sql_remove_tag_string = request.PUT.get('remove_tag_string', None)
-        new_name = request.PUT.get('new_name', None)
+        revision = extra.get('r', None)
+        hashcode = extra.get('h', None)
+        sql_tag_string = extra.get('tag_string', None)
+        sql_remove_tag_string = extra.get('remove_tag_string', None)
+        new_name = extra.get('new_name', None)
         new_type = extra.get('new_type', None)
         index_data = extra.get('indexing_data', None)
         if index_data:
@@ -129,19 +148,19 @@ class FileHandler(BaseFileHandler):
         }  # FIXME hashcode missing?
         document = processor.update(code, options)
         if len(processor.errors) > 0:
-            print processor.errors
             log.error('FileHandler.update manager errors %s' % processor.errors)
             if settings.DEBUG:
+                print processor.errors
                 raise Exception('FileHandler.update manager errors')
             else:
-                return rc.BAD_REQUEST
+                return Response(status=status.HTTP_400_BAD_REQUEST)
         log.info('FileHandler.update request fulfilled for code: %s, format: %s, rev: %s, hash: %s.'
                  % (code, suggested_format, revision, hashcode))
-        resp = DMSOBjectRevisionsData(document).jsons
-        return HttpResponse(resp)   # FIXME should be rc.ALL_OK
+        resp = DMSOBjectRevisionsData(document).data
+        return Response(resp, status=status.HTTP_200_OK)   # FIXME should be rc.ALL_OK
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api'))  # FIXME: Should be more granular permissions
+    @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
     def delete(self, request, code, suggested_format=None):
         # FIXME: should return 404 if file not found, 400 if no docrule exists.
         revision, hashcode, extra = self._get_info(request)
@@ -155,12 +174,12 @@ class FileHandler(BaseFileHandler):
         processor.delete(code, options)
         if len(processor.errors) > 0:
             log.error('Manager Errors encountered %s' % processor.errors)
-            return rc.BAD_REQUEST
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         log.info(
             'FileHandler.delete request fulfilled for code: %s, format: %s, rev: %s, hash: %s.'
             % (code, suggested_format, revision, hashcode)
         )
-        return rc.DELETED
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class OldFileHandler(BaseFileHandler):
@@ -168,12 +187,12 @@ class OldFileHandler(BaseFileHandler):
     allowed_methods = ('GET', 'POST')
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api'))
-    def create(self, request, code, suggested_format=None):
+    @method_decorator(group_required(API_GROUP_NAME))
+    def post(self, request, code, suggested_format=None):
         if 'file' in request.FILES:
             uploaded_file = request.FILES['file']
         else:
-            return rc.BAD_REQUEST
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         processor = DocumentProcessor()
         options = {
             'user': request.user,
@@ -184,19 +203,19 @@ class OldFileHandler(BaseFileHandler):
             log.error('OldFileHandler.create errors: %s' % processor.errors)
             error = processor.errors[0]
             if error.__class__.__name__ in ['unicode', 'str']:
-                return rc.BAD_REQUEST  # Should be "No such document type error"
+                return Response(status=status.HTTP_400_BAD_REQUEST)
             if error.code == 409:
                 new_processor = DocumentProcessor()
                 options['update_file'] = uploaded_file
                 document = new_processor.update(code, options)
                 if len(new_processor.errors) > 0:
-                    return rc.BAD_REQUEST
+                    return Response(status=status.HTTP_400_BAD_REQUEST)
         log.info('OldFileHandler.create request fulfilled for %s' % document.get_filename())
-        return document.get_filename()
+        return Response(document.get_filename(), status=status.HTTP_200_OK)
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api'))
-    def read(self, request, code, suggested_format=None):
+    @method_decorator(group_required(API_GROUP_NAME))
+    def get(self, request, code, suggested_format=None):
         revision, hashcode, extra = self._get_info(request)
         processor = DocumentProcessor()
         options = {
@@ -210,13 +229,13 @@ class OldFileHandler(BaseFileHandler):
             # Hack: Used part of the code from MDTUI Wrong!
             user_permissions = list_permitted_docrules_qs(request.user)
             if not document.docrule in user_permissions:
-                return rc.FORBIDDEN
+                return Response(status=status.HTTP_401_UNAUTHORIZED)
         if processor.errors:
             log.error('OldFileHandler.read manager errors: %s' % processor.errors)
-            return rc.NOT_FOUND
+            return Response(status=status.HTTP_404_NOT_FOUND)
         if document.marked_deleted:
             log.error('OldFileHandler.read request to marked deleted document: %s' % code)
-            return rc.NOT_FOUND
+            return Response(status=status.HTTP_404_NOT_FOUND)
         else:
             response = DMSObjectResponse(document)
             log.info('OldFileHandler.read request fulfilled for code: %s, options: %s' % (code, options))
@@ -230,8 +249,8 @@ class FileInfoHandler(BaseFileHandler):
     allowed_methods = ('GET',)
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api'))  # FIXME: Should be more granular permissions
-    def read(self, request, code, suggested_format=None):
+    @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
+    def get(self, request, code, suggested_format=None):
         revision, hashcode, extra = self._get_info(request)
         processor = DocumentProcessor()
         options = {
@@ -244,30 +263,30 @@ class FileInfoHandler(BaseFileHandler):
         document = processor.read(code, options)
         if document.marked_deleted:
             log.error('FileInfoHandler.read request to marked deleted document: %s' % code)
-            return rc.NOT_FOUND
+            return Response(status=status.HTTP_404_NOT_FOUND)
         if processor.errors:
             log.error('FileInfoHandler.read errors: %s' % processor.errors)
             if settings.DEBUG:
                 raise Exception('FileInfoHandler.read manager.errors')
             else:
-                return rc.BAD_REQUEST
+                return Response(status=status.HTTP_400_BAD_REQUEST)
         info = DMSOBjectRevisionsData(document).jsons
         log.info(
             'FileInfoHandler.read request fulfilled for %s, ext %s, rev %s, hash %s'
             % (code, suggested_format, revision, hashcode)
         )
-        return HttpResponse(info)
+        return Response(info, status=status.HTTP_200_OK)
 
 
-class FileListHandler(BaseHandler):
+class FileListHandler(APIView):
     """
     Provides list of documents to facilitate browsing via document type rule id.
     """
     allowed_methods = ('GET', 'POST')
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api'))  # FIXME: Should be more granular permissions
-    def read(self, request, id_rule):
+    @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
+    def get(self, request, id_rule):
         try:
             operator = PluginsOperator()
             mapping = operator.get_plugin_mapping_by_docrule_id(id_rule)
@@ -301,25 +320,23 @@ class FileListHandler(BaseHandler):
                 start %s, finish %s, order %s, searchword %s, tag %s, filter_date %s."""
                 % (start, finish, order, searchword, tag, filter_date)
             )
-            return file_list
+            return Response(json.dumps(file_list), status=status.HTTP_200_OK)
         except Exception, e:
             log.error('FileListHandler.read Exception %s' % e)
             if settings.DEBUG:
                 print e
                 raise
             else:
-                return rc.BAD_REQUEST
+                return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
-class TagsHandler(BaseHandler):
-    """
-    Provides list of tags for id_rule
-    """
+class TagsHandler(APIView):
+    """Provides list of tags for id_rule"""
     allowed_methods = ('GET',)
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api'))  # FIXME: Should be more granular permissions
-    def read(self, request, id_rule):
+    @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
+    def get(self, request, id_rule):
         # FIXME: Requirement for this whole API hook is wrong.
         # Tags should be got with document metadata. Not with a separate reequest.
         try:
@@ -328,24 +345,24 @@ class TagsHandler(BaseHandler):
             docrule = mapping.get_docrule()
             tags = TagsPlugin().get_all_tags(docrule=docrule)
             log.info('TagsHandler.read request fulfilled for rule %s' % id_rule)
-            return map(lambda x: x.name, tags)
+            return Response(json.dumps(tags), status=status.HTTP_200_OK)
         except Exception, e:  # FIXME
             log.error('TagsHandler.read Exception %s' % e)
             if settings.DEBUG:
                 raise
             else:
-                return rc.BAD_REQUEST
+                return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
-class RevisionCountHandler(BaseHandler):
+class RevisionCountHandler(APIView):
     """
     Returns revision count for a document
     """
     allowed_methods = ('GET', 'POST')
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api'))  # FIXME: Should be more granular permissions
-    def read(self, request, document):
+    @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
+    def get(self, request, document):
         document, extension = os.path.splitext(document)
         processor = DocumentProcessor()
         document = processor.read(document, options={'revision_count': True, 'user': request.user, })
@@ -355,15 +372,15 @@ class RevisionCountHandler(BaseHandler):
             if settings.DEBUG:
                 raise Exception('No document revisions')
             else:
-                return rc.BAD_REQUEST
+                return Response(status=status.HTTP_400_BAD_REQUEST)
         if processor.errors:
             log.error('RevisionCountHandler.read Exception %s' % processor.errors[0])
-            return rc.BAD_REQUEST
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         log.info('RevisionCountHandler.read request fulfilled for document %s, extension %s' % (document, extension))
-        return rev_count
+        return HttpResponse(rev_count)
 
 
-class RulesHandler(BaseHandler):
+class RulesHandler(APIView):
     """
     Returns list of all doc type rules in the system
     """
@@ -373,8 +390,8 @@ class RulesHandler(BaseHandler):
     verbose_name_plural = 'rules'
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api'))  # FIXME: Should be more granular permissions
-    def read(self, request):
+    @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
+    def get(self, request):
         """Returns list of Document Type Rule <=> Plugins mapping
 
         @param request:
@@ -391,10 +408,10 @@ class RulesHandler(BaseHandler):
                 )
             )
         log.info('RulesHandler.read request fulfilled')
-        return rules_json
+        return Response(json.dumps(rules_json), status=status.HTTP_200_OK)
 
 
-class RulesDetailHandler(BaseHandler):
+class RulesDetailHandler(APIView):
     """Returns detailed information about a doc type rule"""
     allowed_methods = ('GET', 'POST')
 
@@ -412,8 +429,8 @@ class RulesDetailHandler(BaseHandler):
     verbose_name_plural = 'rules'
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api'))  # FIXME: Should be more granular permissions
-    def read(self, request, id_rule):
+    @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
+    def get(self, request, id_rule):
         """RulesDetailHandler READ method for GET requests
 
         @param request: is a django request object
@@ -422,17 +439,29 @@ class RulesDetailHandler(BaseHandler):
         operator = PluginsOperator()
         try:
             mapping = operator.get_plugin_mapping_by_docrule_id(id_rule)
-        except Exception, e:  # FIXME
-            log.error('RulesDetailHandler.read Exception %s' % e)
+        except DmsException:
+            log.error('RulesDetailHandler.read DmsException: Rule not found. 404')
             if settings.DEBUG:
                 raise
             else:
-                return rc.BAD_REQUEST
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+        # Removing mapping key that is not json serializable.
+        resp_data = dict(
+            active=mapping.active,
+            doccode_id=mapping.doccode_id,
+            id=mapping.id,
+            doccode=mapping.doccode.title,
+            before_retrieval_plugins=[plugin.name for plugin in mapping.before_retrieval_plugins.all()],
+            storage_plugins=[plugin.name for plugin in mapping.storage_plugins.all()],
+            database_storage_plugins=[plugin.name for plugin in mapping.database_storage_plugins.all()],
+            before_removal_plugins=[plugin.name for plugin in mapping.before_removal_plugins.all()],
+            before_storage_plugins=[plugin.name for plugin in mapping.before_storage_plugins.all()],
+        )
         log.info('RulesDetailHandler.read request fulfilled for rule %s' % id_rule)
-        return mapping
+        return Response(json.dumps(resp_data), status=status.HTTP_200_OK)
 
 
-class PluginsHandler(BaseHandler):
+class PluginsHandler(APIView):
     """
     Returns a list of plugins installed in the system
     """
@@ -442,8 +471,8 @@ class PluginsHandler(BaseHandler):
     verbose_name_plural = 'plugins'
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api'))  # FIXME: Should be more granular permissions
-    def read(self, request):
+    @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
+    def get(self, request):
         operator = PluginsOperator()
         try:
             plugin_list = operator.get_plugin_list()
@@ -452,12 +481,18 @@ class PluginsHandler(BaseHandler):
             if settings.DEBUG:
                 raise
             else:
-                return rc.BAD_REQUEST
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+        # Removing plugins key that is not json serializable.
+        def clean_keys(p):
+            if "_state" in p.__dict__:
+                del p.__dict__["_state"]
+            return p
+        p_list = [clean_keys(p).__dict__ for p in plugin_list]
         log.info('PluginsHandler.read request fulfilled')
-        return plugin_list
+        return Response(p_list, status=status.HTTP_200_OK)
 
 
-class MetaDataTemplateHandler(BaseHandler):
+class MetaDataTemplateHandler(APIView):
     """
     Read / Create / Delete Meta Data Templates
     """
@@ -469,12 +504,12 @@ class MetaDataTemplateHandler(BaseHandler):
     """
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api'))  # FIXME: Should be more granular permissions
-    def create(self, request):
+    @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
+    def post(self, request):
 
         if not request.user.is_authenticated():
             log.error('MetaDataTemplateHandler.create attempted with unauthenticated user.')
-            return rc.FORBIDDEN
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
 
         # Catch post with no payload
         try:
@@ -484,7 +519,7 @@ class MetaDataTemplateHandler(BaseHandler):
             if settings.DEBUG:
                 raise
             else:
-                return rc.BAD_REQUEST
+                return Response(status=status.HTTP_400_BAD_REQUEST)
 
         # Catch improper MDT payload
         try:
@@ -494,28 +529,28 @@ class MetaDataTemplateHandler(BaseHandler):
             if settings.DEBUG:
                 raise
             else:
-                return rc.BAD_REQUEST
+                return Response(status=status.HTTP_400_BAD_REQUEST)
 
         # Try and validate MDT
         manager = MetaDataTemplateManager()
         if not manager.validate_mdt(mdt):
-            return rc.BAD_REQUEST
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
         # Store MDT
         result = manager.store(data)
         if result is False:
             log.error('MetaDataTemplateHandler.create error occurred on store.')
-            return rc.DUPLICATE_ENTRY
+            return Response(status=status.HTTP_409_CONFLICT)
 
         log.info('MetaDataTemplateHandler.create request fulfilled.')
-        return result
+        return Response(result, status=status.HTTP_200_OK)
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api'))  # FIXME: Should be more granular permissions
-    def read(self, request):
+    @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
+    def get(self, request):
         if not request.user.is_authenticated():
             log.error('MetaDataTemplateHandler.read attempted with unauthenticated user.')
-            return rc.FORBIDDEN
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
 
         # Catch get with no payload
         try:
@@ -525,7 +560,7 @@ class MetaDataTemplateHandler(BaseHandler):
             if settings.DEBUG:
                 raise
             else:
-                return rc.BAD_REQUEST
+                return Response(status=status.HTTP_400_BAD_REQUEST)
 
         log.debug('MetaDataTemplateHandler.read underway with docrule_id %s.' % docrule_id)
 
@@ -537,45 +572,55 @@ class MetaDataTemplateHandler(BaseHandler):
 
         if not result:
             log.error('MetaDataTemplateHandler.read error with docrule_id %s' % docrule_id)
-            return rc.NOT_FOUND
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
         log.info('MetaDataTemplateHandler.read request fulfilled for docrule_id %s' % docrule_id)
-        return result
+        return Response(result, status=status.HTTP_200_OK)
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    @method_decorator(group_required('api'))  # FIXME: Should be more granular permissions
+    @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
     def delete(self, request):
         if not request.user.is_authenticated():
             log.error('MetaDataTemplateHandler.delete attempted with unauthenticated user.')
-            return rc.FORBIDDEN
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
 
+        body = request.body
         # Catch improper mdt_id in request
         try:
-            mdt_id = request.REQUEST.get('mdt_id')
+            mdt_id = request.DATA.get('mdt_id')
             log.info('MetaDataTemplateHandler.delete attempted with valid request %s' % mdt_id)
         except KeyError, e:
             log.error('MetaDataTemplateHandler.delete attempted with invalid request %s' % e)
             if settings.DEBUG:
                 raise
             else:
-                return rc.BAD_REQUEST
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        if mdt_id is None:
+            if body:
+                try:
+                    d = json.loads(body)
+                    mdt_id = d['mdt_id']
+                except:
+                    log.error('MetaDataTemplateHandler.delete attempted with invalid request %s' % body)
+                    return Response(status=status.HTTP_400_BAD_REQUEST)
 
         # Catch mdt_id is None
         if mdt_id is None:
-            return rc.BAD_REQUEST
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
         # Delete MDT via Manager
         manager = MetaDataTemplateManager()
         result = manager.delete_mdt(mdt_id)
         if result is True:
             log.info('MetaDataTemplateHandler.delete request fulfilled for mdt_id %s' % mdt_id)
-            return rc.DELETED
+            return Response(status=status.HTTP_204_NO_CONTENT)
         else:
             log.info('MetaDataTemplateHandler.delete request not found for mdt_id %s' % mdt_id)
-            return rc.NOT_FOUND
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
 
-class ParallelKeysHandler(BaseHandler):
+class ParallelKeysHandler(APIView):
     """Read parallel keys for autocomplete"""
     allowed_methods = ('GET', 'OPTIONS')
 
@@ -585,11 +630,11 @@ class ParallelKeysHandler(BaseHandler):
     """
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    def read(self, request):
+    def get(self, request):
 
         if not request.user.is_authenticated():
             log.error('ParallelKeysHandler.read attempted with unauthenticated user.')
-            return rc.FORBIDDEN
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
 
         mdts_ids = None
         docrule_id = request.GET.get('docrule', None)
@@ -599,7 +644,7 @@ class ParallelKeysHandler(BaseHandler):
         if not docrule_id:
             mdts_ids = request.GET.get('mdt_ids', None)
             if not mdts_ids:
-                return rc.BAD_REQUEST
+                return Response(status=status.HTTP_400_BAD_REQUEST)
 
         if (docrule_id or mdts_ids) and key_name and autocomplete_req:
             manager = MetaDataTemplateManager()
@@ -608,39 +653,39 @@ class ParallelKeysHandler(BaseHandler):
             else:
                 doc_mdts = manager.get_mdts_for_docrule(docrule_id)
             resp = process_pkeys_request(docrule_id, key_name, autocomplete_req, doc_mdts)
-            return resp
+            return Response(resp, status=status.HTTP_200_OK)
         else:
-            return rc.NOT_FOUND
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
 
-class ThumbnailsHandler(BaseHandler):
+class ThumbnailsHandler(APIView):
     """Work with thumbnails of files"""
     allowed_methods = ('GET', )
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    def read(self, request, code):
+    def get(self, request, code):
 
         # TODO: stabilize by removing try/except here and fixing ALL the possible issues.
         try:
             if not request.user.is_authenticated():
                 log.error('ThumbnailsHandler.read attempted with unauthenticated user.')
-                return rc.FORBIDDEN
+                return Response(status=status.HTTP_401_UNAUTHORIZED)
 
             processor = DocumentProcessor()
             doc = processor.read(code, options={'user': request.user, 'thumbnail': True})
             if not processor.errors:
                 return DMSObjectResponse(doc, thumbnail=True)
             else:
-                return rc.NOT_FOUND
+                return Response(status=status.HTTP_404_NOT_FOUND)
         except:
             log.error('ThumbnailsHandler Error: %s' % traceback.print_exc())
             raise
 
 
-class VersionHandler(BaseHandler):
+class VersionHandler(APIView):
     """Api hook to check the DMS work state"""
     allowed_methods = ('GET', )
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    def read(self, request):
-        return settings.PRODUCT_VERSION
+    def get(self, request):
+        return Response(settings.PRODUCT_VERSION, status=status.HTTP_200_OK)

@@ -27,15 +27,15 @@
     <div id="ui_page_header_wrapper">
     {% if THEME_NAME == 'solid' %}{# FIXME Don't reference theme in template. this is a hack! #}
         <ul id="logotype">
-            <a href="{% url home %}"><img src="{{ STATIC_URL }}theme/{{ THEME_NAME }}/adlibre-dms-logo.png" title="Adlibre DMS" alt="Adlibre DMS" /></a>
+            <a href="{% url "home" %}"><img src="{{ STATIC_URL }}theme/{{ THEME_NAME }}/adlibre-dms-logo.png" title="Adlibre DMS" alt="Adlibre DMS" /></a>
         </ul>
     {% endif %}
         <ul id="ui_breadcrumbs">
-            <li><a href="{%url ui_rule_list%}">Document Types</a></li>
+            <li><a href="{% url "ui_rule_list" %}">Document Types</a></li>
         </ul>
         <ul id="ui_upload_file_form_wrapper">
-            <form id="ui_upload_file_form" enctype="multipart/form-data" action="{%url ui_upload_document%}" method="post">
-                {%csrf_token%}
+            <form id="ui_upload_file_form" enctype="multipart/form-data" action="{% url "ui_upload_document" %}" method="post">
+                {% csrf_token %}
                 <span id="ui_upload_file_form_name" class="float-left">Upload File</span>
                 <input type="file" value="" name="file" id="upload_file_fileinput" />
                 <input type="text" id="upload_file_fake_filename" readonly="readonly" class="textareas" />
@@ -56,9 +56,9 @@
 {% block footer %}
     <p>
         Adlibre DMS - &copy; Adlibre {% now "Y" %}
-        &middot; <a href="{% url about_documentation %}">About</a>
-        &middot; <a href="{% url documentation_index %}">Docs</a>
-        &middot; <a href="{% url upload %}">Upload</a>
+        &middot; <a href="{% url "about_documentation" %}">About</a>
+        &middot; <a href="{% url "documentation_index" %}">Docs</a>
+        &middot; <a href="{% url "upload" %}">Upload</a>
         <span>{% trans 'Version' %}: {{ PRODUCT_VERSION }}. {% if user.is_authenticated %}Logged in as {{ user }}{% else %}Logged out{% endif %}.</span>
     </p>
 {% endblock %}

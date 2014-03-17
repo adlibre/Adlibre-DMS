@@ -7,12 +7,12 @@
     {% if step != None %}
     {# Use this for a progress / step indicator / navigation #}
     <ul class="pager x-progress-tracker">
-        {% url mdtui-search-type as url %}
-        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">{% trans 'Step 1: Select Type' %} &rarr;</a></li>
-        {% url mdtui-search-options as url %}
-        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">{% trans 'Step 2: Options' %} &rarr;</a></li>
-        {% url mdtui-search-results as url %}
-        <li{% if request.path == url %} class="active"{% endif %}><a href="{{ url }}">{% trans 'Step 3: Results' %} &rarr;</a></li>
+        {% url "mdtui-search-type" as u %}
+        <li{% if request.path == u %} class="active"{% endif %}><a href="{{ url }}">{% trans 'Step 1: Select Type' %} &rarr;</a></li>
+        {% url "mdtui-search-options" as u %}
+        <li{% if request.path == u %} class="active"{% endif %}><a href="{{ url }}">{% trans 'Step 2: Options' %} &rarr;</a></li>
+        {% url "mdtui-search-results" as u %}
+        <li{% if request.path == u %} class="active"{% endif %}><a href="{{ url }}">{% trans 'Step 3: Results' %} &rarr;</a></li>
     </ul>
     {% endif %}
 

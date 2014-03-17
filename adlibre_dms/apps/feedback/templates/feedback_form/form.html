@@ -8,10 +8,9 @@
         <a class="fb-submit" href="#">Submit</a>
     </div>
 </div>
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
 <script src="{{ STATIC_URL }}js/feedback.js"></script>
 {% else %}
-    <div id="feedback" url="{% url feedback %}">
+    <div id="feedback" url="{% url "feedback" %}">
         <div class="section">
             <h1 class="feedback_header">Feedback<span class="fpointer fb-up"></span></h1>
             {% csrf_token %}

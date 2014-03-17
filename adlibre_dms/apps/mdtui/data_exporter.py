@@ -27,7 +27,7 @@ def export_to_csv(search_keys, sec_keys_names, documents):
     for document in documents:
         docs[document.id] = document._doc
     # Init response CSV file
-    response = HttpResponse(mimetype='text/csv')
+    response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename=search_results.csv'
     writer = csv.writer(response)
     # Writing table headers

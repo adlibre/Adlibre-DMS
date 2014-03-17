@@ -7,11 +7,12 @@ License: See LICENSE for license information
 
 import os
 from subprocess import Popen, PIPE
-import mimetypes
 import magic
+import tempfile
 
 # FIXME: All of these converters write their temp file into the repository! This is a bad idea.
 # FIXME: These should work with a fileobject, not filepath!
+
 
 class FileConverter:
     """
@@ -34,8 +35,8 @@ class FileConverter:
             self.file_obj.seek(0)
             content = self.file_obj.read()
             self.file_obj.close()
-            mime = magic.Magic( mime = True )
-            mimetype = mime.from_buffer( content )
+            mime = magic.Magic(mime=True)
+            mimetype = mime.from_buffer(content)
             return [mimetype, content]
         try:
             func = getattr(self, '%s_to_%s' % (extension_from, self.extension_to))
@@ -43,11 +44,8 @@ class FileConverter:
         except AttributeError:
             return None
 
-
     def tif_to_pdf(self):
-        """
-        tiff to pdf conversion, use tiff2pdf command (libtiff)
-        """
+        """tiff to pdf conversion, use tiff2pdf command (libtiff)"""
         path = os.path.join(os.path.dirname(self.filepath), self.document) + '.pdf'
         p = Popen('tiff2pdf -o %s %s' % (path, self.filepath), shell=True, stdout=PIPE, stderr=PIPE)
         stdout, stderr = p.communicate()
@@ -55,11 +53,8 @@ class FileConverter:
         p = Popen('rm -rf %s' % path, shell=True,stdout=PIPE, stderr=PIPE)
         return ['application/pdf', content]
 
-
     def pdf_to_txt(self):
-        """
-        pdf to txt conversion, use pdftotext command (poppler)
-        """
+        """pdf to txt conversion, use pdftotext command (poppler)"""
         #path = '%s/%s.txt' % (os.path.dirname(self.filepath), self.document)
         path = os.path.join(os.path.dirname(self.filepath), self.document) + '.txt'
         p = Popen('pdftotext -enc Latin1 %s %s' % (self.filepath, path), shell=True, stdout=PIPE, stderr=PIPE)
@@ -68,11 +63,8 @@ class FileConverter:
         p = Popen('rm -rf %s' % path, shell=True,stdout=PIPE, stderr=PIPE)
         return ['text/plain', content]
 
-
     def txt_to_pdf(self):
-        """
-        text to pdf conversion, use a2ps and ps2pdf command (a2ps & ghostscript)
-        """
+        """text to pdf conversion, use a2ps and ps2pdf command (a2ps & ghostscript)"""
         #path = '%s/%s.pdf' % (os.path.dirname(self.filepath), self.document)
         path = os.path.join(os.path.dirname(self.filepath), self.document) + '.pdf'
         p = Popen('a2ps --quiet --portrait --columns=1 --rows=1 -L 100 --no-header --borders=off -o - %s | ps2pdf -sPAPERSIZE=a4 - %s' % (self.filepath, path), shell=True, stdout=PIPE, stderr=PIPE)
@@ -81,12 +73,9 @@ class FileConverter:
         p = Popen('rm -rf %s' % path, shell=True,stdout=PIPE, stderr=PIPE)
         return ['application/pdf', content]
 
-import tempfile
 
 class NewFileConverter(object):
-    """
-    Convert file from one mimetype to another mimetype
-    """
+    """Convert file from one mimetype to another mimetype"""
 
     def __init__(self, file_obj, file_path, extension):
         self.file_obj = file_obj
@@ -129,25 +118,18 @@ class NewFileConverter(object):
         return temp_output
 
     def tif_to_pdf(self):
-        """
-        tiff to pdf conversion, use tiff2pdf command (libtiff)
-        """
+        """tiff to pdf conversion, use tiff2pdf command (libtiff)"""
         file_obj = self.do_convert('tiff2pdf -o %(to)s %(from)s')
         return ['application/pdf', file_obj]
 
-
     def pdf_to_txt(self):
-        """
-        pdf to txt conversion, use pdftotext command (poppler)
-        """
+        """pdf to txt conversion, use pdftotext command (poppler)"""
         file_obj = self.do_convert('pdftotext -enc Latin1 %(from)s %(to)s')
         return ['text/plain', file_obj]
 
 
     def txt_to_pdf(self):
-        """
-        text to pdf conversion, use a2ps and ps2pdf command (a2ps & ghostscript)
-        """
+        """text to pdf conversion, use a2ps and ps2pdf command (a2ps & ghostscript)"""
         file_obj = self.do_convert('a2ps --quiet --portrait --columns=1 --rows=1 -L 100 --no-header --borders=off -o - %(from)s | ps2pdf -sPAPERSIZE=a4 - %(to)s')
         return ['application/pdf', file_obj]
 

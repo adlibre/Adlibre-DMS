@@ -17,6 +17,7 @@ from django.test import TestCase
 from django.core.urlresolvers import reverse
 from django.core.paginator import Paginator
 from django.conf import settings
+from django.test.client import encode_multipart
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
 from django.contrib.auth.models import Permission
@@ -627,7 +628,8 @@ class MUITestData(TestCase):
             response = self.client.post(url, data)
             ok_code = 201
         else:
-            response = self.client.put(url, data)
+            content = encode_multipart('BoUnDaRyStRiNg', data)
+            response = self.client.put(url, content, content_type='multipart/form-data; boundary=BoUnDaRyStRiNg')
         if check_response:
             self.assertEqual(response.status_code, ok_code)
         return response
@@ -652,6 +654,42 @@ class MUITestData(TestCase):
         if fo:
             fo.writelines(obj)
             print 'file %s written' % name
+
+    def _produce_groups_and_permissions(self):
+        """Creates test_perm_1 and test_perm_2 users with membership in apropriate
+        groups and with apropriate permissions.
+
+        This method used because of migration to Django 1.6 with it's disability to use fixtures for that case.
+        """
+        security_group = Group.objects.get(name='security')
+        api_group = Group.objects.get(name='api')
+
+        # Modifying groups permissions for farther tests
+        index_group = Group.objects.get(name="MUI Index interaction")
+        for permission_id in [59, 63, 61, 58, 62, ]:
+            perm = Permission.objects.get(pk=permission_id)
+            index_group.permissions.add(perm)
+
+        search_group = Group.objects.get(name="MUI Search interaction")
+        for permission_id in [64, 65, ]:
+            perm = Permission.objects.get(pk=permission_id)
+            search_group.permissions.add(perm)
+
+        user1 = User.objects.get(username=self.username_1)
+        user1.groups.add(search_group)
+        user1.groups.add(security_group)
+        user1.groups.add(api_group)
+        for p_id in [64, 65]:
+            perm = Permission.objects.get(pk=p_id)
+            user1.user_permissions.add(perm)
+
+        user2 = User.objects.get(username=self.username_2)
+        user2.groups.add(security_group)
+        user2.groups.add(api_group)
+        user2.groups.add(index_group)
+        for p_id in [59, 60]:
+            perm = Permission.objects.get(pk=p_id)
+            user2.user_permissions.add(perm)
 
 
 class PaginatorTestCase(TestCase):
@@ -1124,7 +1162,7 @@ class MDTUI(MUITestData):
         # context processors provide Document Type names
         self.assertContains(response, "Test doc type 3")
         self.assertContains(response, "Test doc type 3")
-        # Contains only apropriate content types
+        # Contains only appropriate content types
         self.assertNotContains(response, "Adlibre invoices")
 
     def test_19_search_docrule_by_key_proper(self):
@@ -1185,7 +1223,8 @@ class MDTUI(MUITestData):
         self.assertNotContains(response, self.edit_document_name_4)
 
     def test_21_add_indexes_unvalidated_form_preserves_prepopulated_data(self):
-        """MDTUI Indexing Form .
+        """MUI Indexing Form.
+
         Step 2 adding indexes into several fields instead of all required
         returns prepopulated form with errors."""
         # Selecting Document Type Rule
@@ -2082,6 +2121,7 @@ class MDTUI(MUITestData):
 
     def test_46_security_restricts_search_or_index(self):
         """Groups for accessing search or index sections of MUI """
+        self._produce_groups_and_permissions()
         # We need another logged in user for this test
         self.client.logout()
         self.client.login(username=self.username_1, password=self.password_1)
@@ -2106,6 +2146,7 @@ class MDTUI(MUITestData):
 
     def test_47_indexing_mdt_choices_limited_by_permitted_docrules(self):
         """Permission are disabling document type rule choices for normal user in INDEX of MUI"""
+        self._produce_groups_and_permissions()
         # We need another logged in user for this test
         self.client.logout()
         self.client.login(username=self.username_1, password=self.password_1)
@@ -2124,6 +2165,7 @@ class MDTUI(MUITestData):
 
     def test_48_searching_docrule_choices_limited_by_permission(self):
         """Permission are disabling document type rule choices for normal user in SEARCH of MUI"""
+        self._produce_groups_and_permissions()
         # We need another logged in user for this test
         self.client.logout()
         self.client.login(username=self.username_2, password=self.password_2)
@@ -2302,13 +2344,13 @@ class MDTUI(MUITestData):
         self.assertNotContains(response, self.edit_document_name_5)
 
     def test_54_core_creation_indexes_left_the_same_on_update(self):
-        """
-        Testing Doc update sequence.
+        """Testing Doc update sequence.
         e.g.:
         You have indexed document through MUI and printed a barcode.
         You now try to upload a document through API (e.g. from scanning house)
         Your document's User, Description and created date are left the same.
         """
+        self._produce_groups_and_permissions()
         # Changing user
         self.client.logout()
         self.client.login(username=self.username_1, password=self.password_1)
@@ -2768,6 +2810,7 @@ class MDTUI(MUITestData):
         - superuser
         - not permitted user
         """
+        self._produce_groups_and_permissions()
         edit_btn_string = """href="/mdtui/edit/%s""" % self.edit_document_name_1
         data = {'mdt': self.test_mdt_id_5}
         # Adding apecial permission to test user 1
@@ -2974,12 +3017,7 @@ class MDTUI(MUITestData):
         if '2' in couch_doc['revisions']:
             raise AssertionError('Document has revision 2 already. can not test farther')
         # Checking upload file by API to ensure revision indexes out there after document revision update
-        self.test_document_files_dir = os.path.join(settings.FIXTURE_DIRS[0], 'testdata')
-        file_path = os.path.join(self.test_document_files_dir, doc_used + '.pdf')
-        data = {'file': open(file_path, 'r')}
-        url = reverse('api_file', kwargs={'code': doc_used, 'suggested_format': 'pdf'})
-        response = self.client.put(url, data)
-        self.assertEqual(response.status_code, 200)
+        self._api_upload_file(doc_used, update=True)
         # Checking if revision 2 of CouchDB document indexes preserved
         couch_doc = self._open_couchdoc(self.couchdb_name, doc_used)
         if not '2' in couch_doc['index_revisions']:
@@ -3007,6 +3045,7 @@ class MDTUI(MUITestData):
 
         - Tests only proper indexes exist in secondary indexes of document that has more than 1 file revision
         """
+        self._produce_groups_and_permissions()
         # Using document that has more than 1 revision for this test.
         couch_doc = self._open_couchdoc(self.couchdb_name, self.doc1)
         if not '2' in couch_doc['revisions'].iterkeys():
@@ -3270,6 +3309,7 @@ class MDTUI(MUITestData):
         Fully tests part 2 of this feature
         (with warning and blocking farther document upload for new indexes)
         """
+        self._produce_groups_and_permissions()
         # Modified doc1 dict for our needs
         test_doc_dict = self.doc1_dict_forbidden_indexes
         # Changing MDT to have 1 admincreate perms field.
@@ -3365,6 +3405,7 @@ class MDTUI(MUITestData):
 
     def test_80_forbidden_indexes_adding_and_group(self):
         """Refs #935 part 1. MDT/MUI fixed choice index fields (improving the workflow)"""
+        self._produce_groups_and_permissions()
         test_doc_dict = self.doc1_dict_forbidden_indexes
         # Changing MDT to have 1 admincreate perms field.
         operating_mdt = 'mdt2'
@@ -3443,6 +3484,7 @@ class MDTUI(MUITestData):
         Refs #816 (MDT's on the demo server so that we can search for the uploaded images)
         Refs #945 Barcode Scanner Test MUI Results Colums
         """
+        self._produce_groups_and_permissions()
         # Should be day before due to tests issues with timezones AU/UA.
         prev_date = (datetime.datetime.now() - datetime.timedelta(days=1)).strftime(settings.DATE_FORMAT)
         todays_range = {u'date': prev_date}
@@ -3577,13 +3619,6 @@ class MDTUI(MUITestData):
         self.assertNotContains(response, 'ADL-')
         self.assertContains(response, SEARCH_ERROR_MESSAGES['wrong_date'])
 
-    def test_85_choice_type_field(self):
-        """
-        Refs #700 Feature: MDT/MUI fixed choice index fields
-        """
-        # TODO: Make testing of search and adding indexes for documents with choice fields.
-        pass
-
     def test_86_editing_document_type_UI(self):
         """Refs #957 Ability to change Document Type: UI part"""
         # Button to change type is properly rendered
@@ -3622,7 +3657,7 @@ class MDTUI(MUITestData):
         renaming_docrule = {'docrule': '7'}
 
         ch_type_url = reverse('mdtui-edit-type', kwargs={'code': edit_doc_name})
-        # HACK: docrule sequence fixup.
+        # docrule sequence fixup.
         docrule = DocumentTypeRule.objects.get(pk=int(renaming_docrule['docrule']))
         docrule.sequence_last = 3
         docrule.save()
@@ -3846,7 +3881,7 @@ class MDTUI(MUITestData):
         self.assertNotContains(response, 'stub_document.pdf')
 
         docrule = self.test_mdt_docrule_id
-        # HACK: docrule sequence fixup.
+        # docrule sequence fixup.
         rule = DocumentTypeRule.objects.get(pk=docrule)
         rule.sequence_last = 3
         rule.save()
@@ -4007,6 +4042,7 @@ class MDTUI(MUITestData):
 
     def test_96_document_file_revisions_not_lost_when_changing_type(self):
         """Refs #1246 Document revisions lost when reindexing"""
+        self._produce_groups_and_permissions()
         before_code = self.doc1
         new_doc_name = self.edit_type_document_name1
         renaming_docrule = {'docrule': '7'}
@@ -4045,6 +4081,13 @@ class MDTUI(MUITestData):
         self.assertEqual(couch_doc['index_revisions']["1"]['mdt_indexes']["Employee Name"], "Iurii Garmash")  # Index Rev OK
         self.assertEqual(couch_doc['metadata_description'], edit_doc_decription)  # Description OK
 
+    def test_85_choice_type_field(self):
+        """
+        Refs #700 Feature: MDT/MUI fixed choice index fields
+        """
+        # TODO: Make testing of search and adding indexes for documents with choice fields.
+        pass
+
     def test_z_cleanup(self):
         """
         Cleaning up after all tests finished.
@@ -4079,7 +4122,13 @@ class MDTUI(MUITestData):
             data = json.loads(str(response.content))
             for key, value in data.iteritems():
                 mdt_id = data[key]["mdt_id"]
-                response = self.client.delete(url, {"mdt_id": mdt_id})
+                response = self.client.delete(
+                    url,
+                    json.dumps({"mdt_id": str(mdt_id)}),
+                    content_type='application/x-www-form-urlencoded',
+                )
+                if response.status_code != 204:
+                    print 'cant delete MDT: %s' % mdt_id
                 self.assertEqual(response.status_code, 204)
 
         # Deleting all docs used in tests

@@ -8,21 +8,21 @@
 {% block logo %}{% endblock %}
 
 {% block header %}
-    <span><a href="{% url home %}">{% trans 'Home' %}</a></span>
+    <span><a href="{% url "home" %}">{% trans 'Home' %}</a></span>
     {% if user.is_authenticated %}
         {% trans 'Loggin in as' %} {{ user }}
 
         {% if user.is_staff %}
-            &middot; <a href="{% url files_index %}">{% trans 'Files' %}</a>
-            &middot; <a href="{% url setting %}">{% trans 'Settings' %}</a>
-            &middot; <a href="{% url plugins %}">{% trans 'Plugins' %}</a>
-            &middot; <a href="{% url ui_rule_list %}">{% trans 'Admin UI' %}</a>
+            &middot; <a href="{% url "files_index" %}">{% trans 'Files' %}</a>
+            &middot; <a href="{% url "setting" %}">{% trans 'Settings' %}</a>
+            &middot; <a href="{% url "plugins" %}">{% trans 'Plugins' %}</a>
+            &middot; <a href="{% url "ui_rule_list" %}">{% trans 'Admin UI' %}</a>
         {% endif %}
-            &middot; <a href="{% url mdtui-home %}">{% trans 'MUI' %}</a>
-            &middot; <a href="{% url logout %}">{% trans 'Log out' %}</a>
+            &middot; <a href="{% url "mdtui-home" %}">{% trans 'MUI' %}</a>
+            &middot; <a href="{% url "logout" %}">{% trans 'Log out' %}</a>
     {% else %}
             {% trans 'Logged out' %}
-            &middot; <a href="{% url login %}">{% trans 'Log in' %}</a>
+            &middot; <a href="{% url "login" %}">{% trans 'Log in' %}</a>
     {% endif %}
 
 {% endblock %}

@@ -21,7 +21,7 @@
             <label class="control-label">Type</label>
             <div class="controls"><div class="input-prepend">
                 <input class="input-xlarge disabled" id="disabledInput" type="text" placeholder="{{ type_name }}" disabled="">
-                <a href="{% url mdtui-edit-type doc_name %}" class="btn btn-info">
+                <a href="{% url "mdtui-edit-type" doc_name %}" class="btn btn-info">
                     <i class="icon-edit icon-white"></i> Change Document Type
                 </a>
             </div></div>
@@ -32,6 +32,6 @@
     <div class="form-actions">
         <a href="{{ edit_return }}" class="btn btn-danger"><i class="icon-trash icon-white"></i> Cancel</a>
         <button type="submit" class="btn btn-primary">Continue <i class="icon-chevron-right icon-white"></i></button>
-        {% if form %}<a href="{% url mdtui-edit-revisions doc_name %}" class="btn btn-info"><i class="icon-list icon-white"></i> Manage file revisions</a>{% endif %}
+        {% if form %}<a href="{% url "mdtui-edit-revisions" doc_name %}" class="btn btn-info"><i class="icon-list icon-white"></i> Manage file revisions</a>{% endif %}
     </div>
 </form>

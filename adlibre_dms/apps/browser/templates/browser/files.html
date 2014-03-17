@@ -12,7 +12,7 @@
       {% for document in document_list %}
         <tr>
           <td>{{ document.name }}</td>
-          <td><a href="{% url revision_document document.name %}{%if document.directory%}?dir={{document.directory}}{%endif%}">Revisions</a></td>
+          <td><a href="{% url "revision_document" document.name %}{%if document.directory%}?dir={{document.directory}}{%endif%}">Revisions</a></td>
         </tr>
       {% endfor %}
       </table>

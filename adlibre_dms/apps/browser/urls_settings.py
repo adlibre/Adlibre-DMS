@@ -6,7 +6,7 @@ Copyright: Adlibre Pty Ltd 2011
 License: See LICENSE for license information
 """
 
-from django.conf.urls.defaults import *
+from django.conf.urls import patterns, url
 
 urlpatterns = patterns('browser.views',
     url(r'^$', 'setting', name='setting'),

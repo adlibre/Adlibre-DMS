@@ -10,6 +10,7 @@ import os
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
+from django.test.client import encode_multipart
 
 from dms_plugins.models import DoccodePluginMapping
 from dms_plugins.workers.validators.hashcode import HashCodeWorker
@@ -87,7 +88,7 @@ class APITest(DMSTestCase):
         config = CoreConfiguration.objects.all()[0]
         config.delete()
         response = self._upload_file(self.no_docrule_files[0], suggested_format='jpg', check_response=False)
-        self.assertContains(response, 'Bad Request', status_code=400)
+        self.assertEqual(response.status_code, 400)
 
     def test_05_upload_files(self):
         """Upload files through API uses 1 file and exact code specified"""
@@ -123,7 +124,7 @@ class APITest(DMSTestCase):
         self.client.login(username=self.username, password=self.password)
         url = reverse('api_revision_count', kwargs={'document': 'sdfdsds42333333333333333333333333432423'})
         response = self.client.get(url)
-        self.assertContains(response, 'Bad Request', status_code=400)
+        self.assertEqual(response.status_code, 400)
 
     def test_09_api_wrong_code_shows_not_exists(self):
         """ Fixed Bug #785 MUI: View invalid filename causes exception"""
@@ -134,19 +135,19 @@ class APITest(DMSTestCase):
 
     def test_10_api_rule_detail(self):
         self.client.login(username=self.username, password=self.password)
-        url = reverse('api_rules_detail', kwargs={'id_rule': 3, 'emitter_format': 'json'})
+        url = reverse('api_rules_detail', kwargs={'id_rule': 3})
         response = self.client.get(url)
         self.assertContains(response, 'Test PDFs')
 
     def test_11_api_rules(self):
         self.client.login(username=self.username, password=self.password)
-        url = reverse('api_rules', kwargs={'emitter_format': 'json'})
+        url = reverse('api_rules')
         response = self.client.get(url)
         self.assertContains(response, 'Test PDFs')
 
     def test_12_api_plugins(self):
         self.client.login(username=self.username, password=self.password)
-        url = reverse('api_plugins', kwargs={'emitter_format': 'json'})
+        url = reverse('api_plugins')
         response = self.client.get(url)
         self.assertContains(response, 'dms_plugins.workers.storage.local.LocalStoragePlugin')
 
@@ -179,7 +180,8 @@ class APITest(DMSTestCase):
             }
         """
         def check_proper_json_format(data, rev_count, f, extension='pdf'):
-            if not 'document_name' in data or not (data['document_name'] == f):
+            data = json.loads(data)
+            if not 'document_name' in data or data['document_name'] != f:
                 raise self.failureException('Invalid response: %s' % data)
             for rev_num in range(1, rev_count):
                 md = data['metadata'][str(rev_num)]
@@ -192,11 +194,11 @@ class APITest(DMSTestCase):
                     raise self.failureException('Improper stored filename in file revision: %s' % md)
 
         self.client.login(username=self.username, password=self.password)
-        for f in self.documents_pdf:
-            url = reverse('api_file_info', kwargs={'code': f, })
+        for f_name in self.documents_pdf:
+            url = reverse('api_file_info', kwargs={'code': f_name})
             response = self.client.get(url)
-            data = json.loads(response.content)
-            check_proper_json_format(data, 2, f)
+            r_data = json.loads(response.content)
+            check_proper_json_format(r_data, 2, f_name)
 
     def test_15_read_api_file_content(self):
         """"Comparing file content to actual file, that was uploaded, using hash from our DMS hash plugin"""
@@ -271,7 +273,8 @@ class APITest(DMSTestCase):
             # Remove tag
             url = reverse('api_file', kwargs={'code': filename})
             data = {'filename': filename, 'remove_tag_string': self.test_tag}
-            response = self.client.put(url, data)
+            content = encode_multipart('BoUnDaRyStRiNg', data)
+            response = self.client.put(url, content, content_type='multipart/form-data; boundary=BoUnDaRyStRiNg')
             self.assertEqual(response.status_code, 200)
             # Check that we don't have tag
             url = reverse('api_file_info', kwargs={'code': filename})
@@ -280,14 +283,15 @@ class APITest(DMSTestCase):
             # Set tags
             url = reverse('api_file', kwargs={'code': filename})
             data = {'filename': filename, 'tag_string': self.test_tag}
-            response = self.client.put(url, data)
+            content = encode_multipart('BoUnDaRyStRiNg', data)
+            response = self.client.put(url, content, content_type='multipart/form-data; boundary=BoUnDaRyStRiNg')
             self.assertEqual(response.status_code, 200)
             # Check that we have tag
             url = reverse('api_file_info', kwargs={'code': filename})
             response = self.client.get(url)
             self.assertContains(response, self.test_tag, status_code=200)
             # Get all tags for rule, check our tag
-            url = reverse('api_tags', kwargs={'id_rule': self.adlibre_invoices_rule_id, 'emitter_format': 'json'})
+            url = reverse('api_tags', kwargs={'id_rule': self.adlibre_invoices_rule_id})
             response = self.client.get(url)
             self.assertContains(response, self.test_tag, status_code=200)
 
