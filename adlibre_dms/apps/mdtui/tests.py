@@ -4081,6 +4081,31 @@ class MDTUI(MUITestData):
         self.assertEqual(couch_doc['index_revisions']["1"]['mdt_indexes']["Employee Name"], "Iurii Garmash")  # Index Rev OK
         self.assertEqual(couch_doc['metadata_description'], edit_doc_decription)  # Description OK
 
+    def test_97_mui_barcode_bug(self):
+        """Refs #1422 MUI: 500 Bug
+
+        A bug with barcoding an empty document and no document type selected.
+        To reproduce: relogin, hit indexing and then follow to step 2, details form without selecting a doc type"""
+        post_data = {
+            'description': 'something to test for',
+            'date': '19/03/2014',
+        }
+        self.client.logout()
+        self.client.login(username=self.username, password=self.password)
+        url = reverse('mdtui-search-type')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        url = reverse('mdtui-index-details')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        response = self.client.post(url, post_data)
+        url = reverse('mdtui-index-source')
+        self.assertRedirects(response, url)
+        response = self.client.get(url)
+        self.assertContains(response, post_data['description'])
+        self.assertContains(response, 'Step 3')
+        self.assertContains(response, 'Barcode: None')
+
     def test_85_choice_type_field(self):
         """
         Refs #700 Feature: MDT/MUI fixed choice index fields

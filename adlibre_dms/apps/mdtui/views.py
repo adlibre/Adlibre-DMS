@@ -816,8 +816,10 @@ def indexing_details(request, step=None, template='mdtui/indexing.html'):
                 if "barcode" in request.session and request.session["barcode"]:
                     pass
                 else:
-                    dtr = DocumentTypeRule.objects.get(pk=docrule_id)
-                    request.session["barcode"] = dtr.allocate_barcode()
+                    if docrule_id:
+                        dtr = DocumentTypeRule.objects.get(pk=docrule_id)
+                        request.session["barcode"] = dtr.allocate_barcode()
+
                 return HttpResponseRedirect(reverse('mdtui-index-source'))
         else:
             # Return validation with errors...
