@@ -51,7 +51,6 @@ class DocumentIndexForm(forms.Form):
 
     Has dynamic initialization abilities.
     """
-    date = forms.DateField(initial=datetime.datetime.now(), label="Indexing Date", help_text="Date of the document added")
     description = forms.CharField(max_length=100, label="Description", help_text="Brief Document Description")
 
     def __init__(self, *args, **kwargs):

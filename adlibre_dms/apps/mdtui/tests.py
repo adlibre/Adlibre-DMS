@@ -115,6 +115,8 @@ class MUITestData(TestCase):
             indexes_form_match_pattern += index + '|'
         indexes_form_match_pattern = indexes_form_match_pattern[:-1]
         self.indexes_form_match_pattern = '(%s%s' % (indexes_form_match_pattern, main_form_match_regexp)
+
+        self.barcode_regexp = r"Barcode: (.+)<"
         ################################# END #######################################
 
         self.indexing_done_string = 'Your document has been indexed'
@@ -448,10 +450,11 @@ class MUITestData(TestCase):
         """Helper to convert Tests Documents into proper POST dictionary for Indexing Form testing."""
         post_doc_dict = {}
         for key, value in doc.iteritems():
-            if key in matches.keys():
-                post_doc_dict[matches[key]] = value
-            else:
-                post_doc_dict[key] = value
+            if not key == 'date':
+                if key in matches.keys():
+                    post_doc_dict[matches[key]] = value
+                else:
+                    post_doc_dict[key] = value
         return post_doc_dict
 
     def _retrieve_redirect_response_url(self, response):
@@ -691,6 +694,12 @@ class MUITestData(TestCase):
             perm = Permission.objects.get(pk=p_id)
             user2.user_permissions.add(perm)
 
+    def _set_doc_indexing_date(self, doc_id, date):
+        """Method updates document indexing date in CouchDB to specified one"""
+        cd = CouchDocument.get(docid=doc_id)
+        cd.metadata_created_date = datetime.datetime.strptime(date, settings.DATE_FORMAT)
+        cd.save()
+
 
 class PaginatorTestCase(TestCase):
     """Tests Paginator functionality and logic"""
@@ -789,6 +798,7 @@ class MDTUI(MUITestData):
         self.assertContains(response, self.indexing_done_string)
         self.assertContains(response, 'Friends Name: Andrew')
         self.assertContains(response, 'Start Again')
+        self._set_doc_indexing_date(self.doc1, self.doc1_dict['date'])
 
     def test_03_additional_docs_adding(self):
         """Changes doc1 to new one for consistency.
@@ -827,6 +837,7 @@ class MDTUI(MUITestData):
         self.assertContains(response, self.indexing_done_string)
         self.assertContains(response, 'Friends Name: Andrew')
         self.assertContains(response, 'Start Again')
+        self._set_doc_indexing_date(self.doc1, self.doc1_dict['date'])
 
         # POSTING DOCUMENT 1
         # Selecting Document Type Rule
@@ -856,6 +867,7 @@ class MDTUI(MUITestData):
         self.assertContains(response, self.indexing_done_string)
         self.assertContains(response, 'Friends Name: Yuri')
         self.assertContains(response, 'Start Again')
+        self._set_doc_indexing_date(self.doc2, self.doc2_dict['date'])
 
         # POSTING DOCUMENT 3
         # Selecting Document Type Rule
@@ -885,6 +897,7 @@ class MDTUI(MUITestData):
         self.assertContains(response, self.indexing_done_string)
         self.assertContains(response, 'Friends Name: Someone')
         self.assertContains(response, 'Start Again')
+        self._set_doc_indexing_date(self.doc3, self.doc3_dict['date'])
 
     def test_04_additional_docs_adding_another_docrule(self):
         """
@@ -921,6 +934,12 @@ class MDTUI(MUITestData):
             self.assertContains(response, self.indexing_done_string)
             self.assertContains(response, 'Report Date: '+doc_dict['Report Date'])
             self.assertContains(response, 'Start Again')
+            m = re.search(self.barcode_regexp, str(response))
+            if m:
+                code = m.group(1)
+                self._set_doc_indexing_date(code, doc_dict['date'])
+            else:
+                raise AssertionError('No barcode in response for dict: %s' % doc_dict)
 
     def test_05_additional_docs_adding_third_docrule(self):
         """
@@ -957,6 +976,12 @@ class MDTUI(MUITestData):
             self.assertContains(response, self.indexing_done_string)
             self.assertContains(response, 'Employee: ' + doc_dict['Employee'])
             self.assertContains(response, 'Start Again')
+            m = re.search(self.barcode_regexp, str(response))
+            if m:
+                code = m.group(1)
+                self._set_doc_indexing_date(code, doc_dict['date'])
+            else:
+                raise AssertionError('No barcode in response for dict: %s' % doc_dict)
 
     def test_06_opens_app(self):
         """
@@ -991,7 +1016,7 @@ class MDTUI(MUITestData):
         response = self.client.get(new_url)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, '<label class="control-label">Description</label>')
-        self.assertContains(response, 'Indexing Date')
+        self.assertNotContains(response, 'Indexing Date')
 
     def test_09_indexing_step2_proper_form_rendering(self):
         """
@@ -1008,7 +1033,7 @@ class MDTUI(MUITestData):
         # contains Date field
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, '<label class="control-label">Description</label>')
-        self.assertContains(response, 'Indexing Date')
+        self.assertNotContains(response, 'Indexing Date')
         # Description field
         self.assertContains(response, 'id_description')
         # MDT based Fields:
@@ -1044,11 +1069,11 @@ class MDTUI(MUITestData):
         self.assertEqual(response.status_code, 302)
         new_url = self._retrieve_redirect_response_url(response)
         response = self.client.get(new_url)
+        self.assertNotContains(response, 'Indexing Date')
         # Response contains proper document indexes
         self.assertContains(response, 'Friends ID: 123')
         self.assertContains(response, 'Friends Name: Andrew')
         self.assertContains(response, 'Description: Test Document Number 1')
-        self.assertContains(response, 'Indexing Date: %s' % date_standardized('2012-03-06'))
         self.assertContains(response, 'Employee ID: 123456')
         self.assertContains(response, 'Employee Name: Iurii Garmash')
         self.assertContains(response, 'Required Date: %s' % date_standardized('2012-03-07'))
@@ -1109,7 +1134,7 @@ class MDTUI(MUITestData):
         self.assertContains(response, 'mdt5')
         self.assertEqual(response.status_code, 200)
 
-    def test_17_search_MDT_selection(self):
+    def test_17_search_mdt_selection(self):
         """
         Proper Searching call.
         """
@@ -1133,7 +1158,7 @@ class MDTUI(MUITestData):
         MDTUI Search By Indexes Form parses data properly.
         Search Step 3 displays proper captured indexes.
         """
-        search_MDT_date_range_1 = {
+        search_mdt_date_range_1 = {
             u'date': self.doc1_dict["date"],
             u'end_date': u'',
             u'0': u'',
@@ -1145,7 +1170,7 @@ class MDTUI(MUITestData):
         self.assertEqual(response.status_code, 302)
         url = reverse('mdtui-search-options')
         # Searching by Document 1 Indexes
-        response = self.client.post(url, search_MDT_date_range_1)
+        response = self.client.post(url, search_mdt_date_range_1)
         self.assertEqual(response.status_code, 302)
         new_url = self._retrieve_redirect_response_url(response)
         response = self.client.get(new_url)
@@ -1245,7 +1270,6 @@ class MDTUI(MUITestData):
         # Response contains proper validation data
         self.assertContains(response, 'Brief Document Description')  # form fields help exists
         self.assertContains(response, 'Name of tests person')
-        self.assertContains(response, date_standardized('2012-03-06'))  # docs data populated into form
         self.assertContains(response, 'Andrew')
         self.assertContains(response, '123456')
         self.assertContains(response, 'Iurii Garmash')
@@ -1814,7 +1838,6 @@ class MDTUI(MUITestData):
         Adds MDT indexes to test Uppercase fields behaviour.
         """
         upper_wrong_dict = {
-            u'date': [unicode(date_standardized('2012-04-17'))],
             u'0': [u'lowercase data'],
             u'description': [u'something usefull']
         }
@@ -1830,15 +1853,13 @@ class MDTUI(MUITestData):
         uurl = self._retrieve_redirect_response_url(response)
         response = self.client.get(uurl)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Indexing Date: %s' % date_standardized('2012-04-17'))
         self.assertContains(response, 'Description: something usefull')
         self.assertContains(response, 'Tests Uppercase Field: LOWERCASE DATA')
         self.assertContains(response, self.indexes_added_string)
 
-    def test_38_uppercase_fields_UPPERCASE_DATA(self):
+    def test_38_uppercase_fields_uppercase_data(self):
         """" Normal uppercase field rendering and using """
         upper_right_dict = {
-            u'date': [unicode(date_standardized('2012-04-17'))],
             u'0': [u'UPPERCASE DATA'],
             u'description': [u'something usefull']
         }
@@ -1853,7 +1874,6 @@ class MDTUI(MUITestData):
         response = self.client.get(uurl)
         # Assert Indexing file upload step rendered with all keys
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Indexing Date: %s' % date_standardized('2012-04-17'))
         self.assertContains(response, 'Description: something usefull')
         self.assertContains(response, 'Tests Uppercase Field: UPPERCASE DATA')
         self.assertContains(response, self.indexes_added_string)
@@ -2383,7 +2403,7 @@ class MDTUI(MUITestData):
         After selection of MDT and submitting "Search Options" form with empty results
         we have a bug that rises an exception in search results. Prevents from rendering.
         """
-        search_MDT_5_empty_options_form = {
+        search_mdt_5_empty_options_form = {
             u'date': u'',
             u'end_date': u'',
             u'0': u'',
@@ -2396,7 +2416,7 @@ class MDTUI(MUITestData):
         # Getting required indexes id's
         self.client.get(url)
         # Searching date range with unique doc1 keys
-        response = self.client.post(url, search_MDT_5_empty_options_form)
+        response = self.client.post(url, search_mdt_5_empty_options_form)
         self.assertEqual(response.status_code, 302)
         new_url = self._retrieve_redirect_response_url(response)
         response = self.client.get(new_url)
@@ -2427,7 +2447,7 @@ class MDTUI(MUITestData):
         self.assertNotContains(response, '<a href="#fileModal')
         self.assertNotContains(response, '<a href="#printModal')
 
-    def test_57_searching_by_MDT_filters_permitted_results(self):
+    def test_57_searching_by_mdt_filters_permitted_results(self):
         """
         Feature #716 Search by metadata template
 
@@ -2505,7 +2525,7 @@ class MDTUI(MUITestData):
         self.assertContains(response, self.edit_document_name_5)
         self.assertNotContains(response, self.edit_document_name_1)
 
-    def test_58_user_sees_only_permitted_choices_MUI(self):
+    def test_58_user_sees_only_permitted_choices_mui(self):
         """
         Feature  #755 MUI: Hide features user doesn't have access to
 
@@ -2542,7 +2562,7 @@ class MDTUI(MUITestData):
         # MUI Searching big logo rendered
         self.assertContains(response, 'search.png')
 
-    def test_59_user_sees_only_permitted_choices_MUI(self):
+    def test_59_user_sees_only_permitted_choices_mui(self):
         """
         Feature  #755 MUI: Hide features user doesn't have access to
 
@@ -2657,7 +2677,7 @@ class MDTUI(MUITestData):
         Added additional button that returns export results rather than.
         Testing if it returns results in proper form. E.g. CSV file with all the data should be there.
         """
-        search_MDT_5_export_results_test = {
+        search_mdt_5_export_results_test = {
             u'0': u'Andrew',
             u'date': u'',
             u'end_date': u'',
@@ -2671,7 +2691,7 @@ class MDTUI(MUITestData):
         # Getting required indexes id's
         self.client.get(url)
         # Searching date range with unique doc1 keys
-        response = self.client.post(url, search_MDT_5_export_results_test)
+        response = self.client.post(url, search_mdt_5_export_results_test)
         self.assertEqual(response.status_code, 302)
         new_url = self._retrieve_redirect_response_url(response)
         response = self.client.get(new_url)
@@ -3025,7 +3045,7 @@ class MDTUI(MUITestData):
         if not '2' in couch_doc['revisions']:
             raise AssertionError('Document has not been updated by API. Something went wrong there.')
 
-    def test_70_only_DMS_superuser_sees_admin_entry_menu_title(self):
+    def test_70_only_dms_superuser_sees_admin_entry_menu_title(self):
         """ Superuser only has shortcut in me to acces django admin"""
         url = reverse('mdtui-home')
         django_admin_btn_name = 'DMS Admin'
@@ -3228,12 +3248,12 @@ class MDTUI(MUITestData):
         e.g. search for CON creation date 10/08/12 - 11/08/12 no records for date 11/08/12,
         but if you select 10/08/12 - 12/08/12 you find it.
         """
-        search_MDT_5_date_range_end_date = {
+        search_mdt_5_date_range_end_date = {
             u'date': u'01/03/2012',
             u'end_date': u'10/03/2012',
             u'0': u'Andrew',
         }
-        search_MDT_5_date_range_end_date2 = {
+        search_mdt_5_date_range_end_date2 = {
             u'date': u'01/03/2012',
             u'end_date': u'09/03/2012',
             u'0': u'Andrew',
@@ -3246,7 +3266,7 @@ class MDTUI(MUITestData):
         # Getting required indexes id's
         self.client.get(url)
         # Searching date range for this test
-        response = self.client.post(url, search_MDT_5_date_range_end_date)
+        response = self.client.post(url, search_mdt_5_date_range_end_date)
         self.assertEqual(response.status_code, 302)
         new_url = self._retrieve_redirect_response_url(response)
         response = self.client.get(new_url)
@@ -3267,7 +3287,7 @@ class MDTUI(MUITestData):
         # Getting required indexes id's
         self.client.get(url)
         # Searching date range for this test
-        response = self.client.post(url, search_MDT_5_date_range_end_date2)
+        response = self.client.post(url, search_mdt_5_date_range_end_date2)
         self.assertEqual(response.status_code, 302)
         new_url = self._retrieve_redirect_response_url(response)
         response = self.client.get(new_url)
@@ -3336,8 +3356,9 @@ class MDTUI(MUITestData):
         # Check new indexes are disabling the upload form with non staff/admin person
         response = self._78_test_helper(test_doc_dict)
         self.assertEqual(response.status_code, 200)
-        for value in test_doc_dict.itervalues():
-            self.assertContains(response, value)
+        for key, value in test_doc_dict.iteritems():
+            if key != 'date':
+                self.assertContains(response, value)
         self.assertContains(response, MDTUI_ERROR_STRINGS['ADMINLOCKED_KEY_ATTEMPT']+'Employee Name')
 
         # Making this field locked
@@ -3431,8 +3452,9 @@ class MDTUI(MUITestData):
         # Check new indexes are disabling the upload form with non staff/admin person
         response = self._78_test_helper(test_doc_dict)
         self.assertEqual(response.status_code, 200)
-        for value in test_doc_dict.itervalues():
-            self.assertContains(response, value)
+        for key, value in test_doc_dict.iteritems():
+            if key != 'date':
+                self.assertContains(response, value)
         self.assertContains(response, MDTUI_ERROR_STRINGS['ADMINLOCKED_KEY_ATTEMPT']+'Employee Name')
 
         # Registering that user in required security groups...
@@ -3619,7 +3641,7 @@ class MDTUI(MUITestData):
         self.assertNotContains(response, 'ADL-')
         self.assertContains(response, SEARCH_ERROR_MESSAGES['wrong_date'])
 
-    def test_86_editing_document_type_UI(self):
+    def test_86_editing_document_type_ui(self):
         """Refs #957 Ability to change Document Type: UI part"""
         # Button to change type is properly rendered
         edit_doc_name = self.edit_document_name_4
@@ -3912,6 +3934,12 @@ class MDTUI(MUITestData):
         self.assertContains(response, 'Friends Name: Andrew')
         self.assertContains(response, 'Additional: Something for 4')
         self.assertContains(response, 'Start Again')
+        m = re.search(self.barcode_regexp, str(response))
+        if m:
+            code = m.group(1)
+            self._set_doc_indexing_date(code, self.doc4_barcode_dict['date'])
+        else:
+            raise AssertionError('No barcode in response for dict: %s' % self.doc4_barcode_dict)
 
         # Testing this doc exists in search results now
         url = reverse('mdtui-search-type')
@@ -4078,7 +4106,7 @@ class MDTUI(MUITestData):
         self.assertEqual(couch_doc['revisions']['1']['name'], new_doc_name + new_doc_revision_prefix1)
         self.assertEqual(couch_doc['revisions']['2']['name'], new_doc_name + new_doc_revision_prefix2)  # Revisions OK
         self.assertEqual(couch_doc['revisions']['3']['name'], new_doc_name + new_doc_revision_prefix3)  # Revisions OK
-        self.assertEqual(couch_doc['index_revisions']["1"]['mdt_indexes']["Employee Name"], "Iurii Garmash")  # Index Rev OK
+        self.assertEqual(couch_doc['index_revisions']["1"]['mdt_indexes']["Employee Name"], "Iurii Garmash")
         self.assertEqual(couch_doc['metadata_description'], edit_doc_decription)  # Description OK
 
     def test_97_mui_barcode_bug(self):

@@ -14,10 +14,12 @@ from django.conf import settings
 
 log = logging.getLogger('dms')
 
+
 def date_standardized(date_string):
     """Converts date from format %Y-%m-%d into proper DMS global date format"""
     new_date_str = datetime.datetime.strptime(date_string, '%Y-%m-%d').strftime(settings.DATE_FORMAT)
     return new_date_str
+
 
 def str_date_to_couch(from_date):
     """
