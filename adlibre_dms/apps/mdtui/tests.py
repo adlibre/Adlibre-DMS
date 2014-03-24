@@ -3891,8 +3891,8 @@ class MDTUI(MUITestData):
 
     def test_93_barcoding_and_0_file_revisions_dms_support(self):
         """Refs #970 Test barcode generation
-        Refs #735 MUI: Placeholder Document for barcoded documents
 
+        Refs #735 MUI: Placeholder Document for barcoded documents
         Loosing requirement to fake 0 revisions document and adding it's support properly
         So we can now have Document with 0 revisions and 'only_metadata' created and stored
         No need to store at least 1 revision with stub document now.
