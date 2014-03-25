@@ -109,7 +109,7 @@ setup(name='adlibre_dms',
             'Django==1.6.2',
             'South==0.8.4',
             'python-magic==0.4.2',
-            'django-compressor==1.3',
+            'django-compressor==1.4a1',
             'docutils==0.10',
             # API
             'djangorestframework==2.3.13',
