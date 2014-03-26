@@ -1879,13 +1879,15 @@ class MDTUI(MUITestData):
         self.assertContains(response, self.indexes_added_string)
 
     def test_39_search_by_keys_only_contains_secondary_date_range(self):
-        """
-        Proper call to search by secondary key date range key.
+        """Proper call to search by secondary key date range key.
+
         MDTUI Search By Search Form parses data properly.
         Search Step 'results' displays proper captured indexes.
         Search displays full doc1 for given secondary key of 'date' type. (Proper)
         And does not contain doc2 and doc3 unique values.
         All docs render their indexes correctly.
+
+        Refs #1427 TEST: Search results DATE type keys rendering bugs
         """
         date_type_key_doc1 = {
             u'Required Date': unicode(date_standardized('2012-03-07')),
@@ -1917,6 +1919,8 @@ class MDTUI(MUITestData):
         self.assertNotContains(response, self.doc3)
         self.assertNotContains(response, self.doc2_dict['description'])
         self.assertNotContains(response, self.doc3_dict['description'])
+        self.assertNotContains(response, "[u'")  # Date range keys renderd properly without bugs
+        self.assertNotContains(response, "[u")  # Date range keys renderd properly without bugs
         # Searching keys exist in search results
         for key, value in date_type_key_doc1.iteritems():
             self.assertContains(response, value)
