@@ -85,13 +85,13 @@ class PluginsOperator(object):
 
     def get_plugins_for_point(self, pluginpoint, document, plugin_type=None):
         """Retrieves Plugins for given Pluginpoint."""
+        plugins = []
         docrule = document.get_docrule()
         # FIXME: with current architecture there might be more than one docrule mappings.
-        mapping = docrule.get_docrule_plugin_mappings()
-        if mapping:
-            plugins = self.get_plugins_from_mapping(mapping, pluginpoint, plugin_type)
-        else:
-            plugins = []
+        if docrule:
+            mapping = docrule.get_docrule_plugin_mappings()
+            if mapping:
+                plugins = self.get_plugins_from_mapping(mapping, pluginpoint, plugin_type)
         return plugins
 
     def get_plugin_mapping_by_docrule_id(self, pk):
