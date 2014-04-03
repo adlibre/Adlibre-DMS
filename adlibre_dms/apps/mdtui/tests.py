@@ -1096,7 +1096,7 @@ class MDTUI(MUITestData):
         """Document now exists in couchDB
         Querying CouchDB itself to test docs exist."""
         url = self.couchdb_url + '/' + self.couchdb_name + '/' + self.doc1 + '?revs_info=true'
-        # HACK: faking 'request' object here
+        # faking 'request' object here
         r = self.client.get(url)
         cou = urllib.urlopen(url)
         resp = cou.read()
@@ -1768,7 +1768,7 @@ class MDTUI(MUITestData):
         # doc1, doc2 for MDTs 2 and 3 data exist in response
         for doc_dict in [self.m5_doc1_dict, self.m5_doc2_dict, self.m2_doc1_dict, self.m2_doc2_dict]:
             for key, value in doc_dict.iteritems():
-                # Uppercase value hack
+                # Uppercase value hacking
                 if value == 'some data' or value == 'some other data':
                     value = value.upper()
                 self.assertContains(response, value)
@@ -1815,7 +1815,7 @@ class MDTUI(MUITestData):
         # doc1, doc2 for MDTs 2 and 3 data exist in response
         for doc_dict in [self.m5_doc1_dict, self.m5_doc2_dict, self.m2_doc3_dict]:
             for key, value in doc_dict.iteritems():
-                # Uppercase value hack
+                # Uppercase value hacking
                 if value == 'some data' or value == 'some other data':
                     value = value.upper()
                 self.assertContains(response, value)
