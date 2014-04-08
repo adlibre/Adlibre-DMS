@@ -358,6 +358,21 @@ class APITest(DMSTestCase):
         response = self.client.post(url, data)
         self.assertContains(response, self.uncategorized_codes[0])
 
+    def test_23_rules_api_hook(self):
+        """Refs #1436 TEST: Rules handler
+
+        Checking rules API hook provides rules in JSON parsed format
+        and all the doc types present there"""
+        self.client.login(username=self.username, password=self.password)
+        url = reverse('api_rules')
+        response = self.client.get(url)
+        parsed_data = json.loads(response.content)
+        rule_names_parsed = [r['doccode'] for r in parsed_data]
+        docrules = DoccodePluginMapping.objects.all()
+        for docrule in docrules:
+            if not docrule.name in rule_names_parsed:
+                raise AssertionError('Docrule is not present in API response!')
+
     def test_zz_cleanup(self):
         """Test Cleanup"""
         self.cleanAll()
