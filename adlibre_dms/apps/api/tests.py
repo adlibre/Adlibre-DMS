@@ -152,13 +152,31 @@ class APITest(DMSTestCase):
         self.assertContains(response, 'dms_plugins.workers.storage.local.LocalStoragePlugin')
 
     def test_13_api_files_list(self):
+        """Refs #1434 TEST: API file list url
+
+        Added response JSON parsing check to existing files list test"""
+        fixed_codes = [
+            u'ADL-0001',
+            u'ADL-0002',
+            u'ADL-0003',
+            u'ADL-1111',
+            u'ADL-1234',
+            u'ADL-1983',
+            u'ADL-1984',
+            u'ADL-1985',
+            u'ADL-2222',
+        ]
         self.client.login(username=self.username, password=self.password)
         dman = DocumentTypeRuleManager()
         docrule = dman.get_docrule_by_name('Adlibre Invoices')
         mapping = DoccodePluginMapping.objects.get(doccode=docrule.get_id())
         url = reverse("api_file_list", kwargs={'id_rule': mapping.pk})
         response = self.client.get(url)
-        self.assertContains(response, 'ADL-1234')
+        data = json.loads(response.content)
+        current_files_list = [d['name'] for d in data]
+        for code in fixed_codes:
+            if not code in current_files_list:
+                raise AssertionError('File code absent in list! Code: %s' % code)
 
     def test_14_api_fileinfo(self):
         """
