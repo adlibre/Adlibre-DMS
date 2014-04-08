@@ -64,7 +64,7 @@
             // selecting chosen col
             highlight_row(field);
 
-            var csrftoken = $("form#dummy div input").attr("value");
+            var csrftoken = $('input[name="csrfmiddlewaretoken"]').attr("value");
             $.post(pathname,
                         {
                             'sorting_key': text,
