@@ -501,6 +501,7 @@ class MetaDataTemplateHandler(APIView):
     Read / Create / Delete Meta Data Templates
     """
     allowed_methods = ('GET', 'POST', 'DELETE')
+    parser_classes = (FormParser, MultiPartParser)
 
     """
     docrule_id is used for read
@@ -510,11 +511,6 @@ class MetaDataTemplateHandler(APIView):
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
     @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
     def post(self, request):
-
-        if not request.user.is_authenticated():
-            log.error('MetaDataTemplateHandler.create attempted with unauthenticated user.')
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-
         # Catch post with no payload
         try:
             mdt = request.POST['mdt']
@@ -552,10 +548,6 @@ class MetaDataTemplateHandler(APIView):
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
     @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
     def get(self, request):
-        if not request.user.is_authenticated():
-            log.error('MetaDataTemplateHandler.read attempted with unauthenticated user.')
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-
         # Catch get with no payload
         try:
             docrule_id = request.GET['docrule_id']  # FIXME: Need to standardize the arguments / nomenclature
@@ -584,10 +576,6 @@ class MetaDataTemplateHandler(APIView):
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
     @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
     def delete(self, request):
-        if not request.user.is_authenticated():
-            log.error('MetaDataTemplateHandler.delete attempted with unauthenticated user.')
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-
         body = request.body
         # Catch improper mdt_id in request
         try:

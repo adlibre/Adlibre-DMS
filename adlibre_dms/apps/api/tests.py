@@ -391,6 +391,43 @@ class APITest(DMSTestCase):
             if not docrule.name in rule_names_parsed:
                 raise AssertionError('Docrule is not present in API response!')
 
+    def test_24_mdt_handler(self):
+        """Refs #1435 TEST: MDT handler"""
+        mdt_name = 'mdt1.json'
+        mdt_id = 'mytesttemplate'
+        self.client.login(username=self.username, password=self.password)
+        url = reverse('api_mdt')
+        response = self.client.get(url)
+        # TODO: This is wrong! look at issue #1437
+        # (TEST MetaDataTemplateHandler.read attempted with no payload should be changed)
+        self.assertEqual(response.status_code, 400)
+        mdt_path = os.path.join(self.test_document_files_dir, '..', 'mdts_json', mdt_name)
+        data = {'mdt': str(open(mdt_path, 'r').read())}
+        response = self.client.post(url, data)
+        if response.status_code == 409:
+            raise AssertionError('MDT for tests exists')
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '"ok"')
+        self.assertContains(response, '"mdt_id"')
+        self.assertContains(response, mdt_id)
+        ok_resp_data = json.loads(response.content)
+        if not 'status' in ok_resp_data.iterkeys():
+            raise AssertionError('MDT POST wrong parsed result data.')
+        # Retrieving MDT that was posted via API
+        response = self.client.get(url, {'docrule_id': "100000"})
+        self.assertEqual(response.status_code, 200)
+        got_mdts = json.loads(response.content)
+        if not '1' in got_mdts.iterkeys():
+            raise AssertionError('no MDT returned')
+        self.assertEqual(mdt_id, got_mdts['1']['mdt_id'])
+        # Deleting mdt that exists in the API
+        content = encode_multipart('BoUnDaRyStRiNg', {'mdt_id': mdt_id})
+        response = self.client.delete(url, content, content_type='multipart/form-data; boundary=BoUnDaRyStRiNg')
+        self.assertEqual(response.status_code, 204)
+        # Checking now for mdt presence
+        response = self.client.get(url, {'docrule_id': "100000"})
+        self.assertEqual(response.status_code, 404)
+
     def test_zz_cleanup(self):
         """Test Cleanup"""
         self.cleanAll()
