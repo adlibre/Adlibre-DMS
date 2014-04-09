@@ -21,6 +21,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.parsers import FileUploadParser, MultiPartParser, FormParser
+from rest_framework.decorators import renderer_classes
+from rest_framework.renderers import JSONPRenderer, JSONRenderer
 
 from api.decorators.auth import logged_in_or_basicauth
 from api.decorators.group_required import group_required
@@ -612,6 +614,7 @@ class MetaDataTemplateHandler(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
 
+@renderer_classes((JSONPRenderer, JSONRenderer))
 class ParallelKeysHandler(APIView):
     """Read parallel keys for autocomplete"""
     allowed_methods = ('GET', 'OPTIONS')
@@ -645,7 +648,7 @@ class ParallelKeysHandler(APIView):
             else:
                 doc_mdts = manager.get_mdts_for_docrule(docrule_id)
             resp = process_pkeys_request(docrule_id, key_name, autocomplete_req, doc_mdts)
-            return Response(resp, status=status.HTTP_200_OK)
+            return Response(resp)
         else:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
