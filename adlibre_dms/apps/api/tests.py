@@ -158,7 +158,6 @@ class APITest(DMSTestCase):
         fixed_codes = [
             u'ADL-0001',
             u'ADL-0002',
-            u'ADL-0003',
             u'ADL-1111',
             u'ADL-1234',
             u'ADL-1983',
