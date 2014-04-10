@@ -21,6 +21,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.parsers import FileUploadParser, MultiPartParser, FormParser
+from rest_framework.decorators import renderer_classes
+from rest_framework.renderers import JSONPRenderer, JSONRenderer
 
 from api.decorators.auth import logged_in_or_basicauth
 from api.decorators.group_required import group_required
@@ -105,8 +107,8 @@ class FileHandler(BaseFileHandler):
             log.info('FileHandler.read request fulfilled for code: %s, options: %s' % (code, options))
         return response
 
-    # @method_decorator(logged_in_or_basicauth(AUTH_REALM))
-    # @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
+    @method_decorator(logged_in_or_basicauth(AUTH_REALM))
+    @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
     def put(self, request, code, suggested_format=None):
         """Used to work with "update" sequence of DMS code.
 
@@ -116,15 +118,19 @@ class FileHandler(BaseFileHandler):
         @param code: the DMS "code" of file to be updated. e.g.: ADL-0001
         @param suggested_format: format of file for code to be updated. To have ability to post files in certain format.
         """
-        file_content = StringIO(request.body)
-        parser = MultiPartParser()
         context = {'request': request}
         conten_type = request.content_type
-        dnf = parser.parse(file_content, media_type=conten_type, parser_context=context)
-        extra = dnf.data
         uploaded_obj = None
-        if 'file' in dnf.files:
-            uploaded_obj = dnf.files['file']
+        if 'multipart/form-data' in conten_type:
+            # We have a file upload encoded with multipart/form-data
+            file_content = StringIO(request.body)
+            parser = MultiPartParser()
+            dnf = parser.parse(file_content, media_type=conten_type, parser_context=context)
+            extra = dnf.data
+            if 'file' in dnf.files:
+                uploaded_obj = dnf.files['file']
+        else:
+            extra = request.QUERY_PARAMS
         # TODO refactor these verbs
         revision = extra.get('r', None)
         hashcode = extra.get('h', None)
@@ -320,7 +326,7 @@ class FileListHandler(APIView):
                 start %s, finish %s, order %s, searchword %s, tag %s, filter_date %s."""
                 % (start, finish, order, searchword, tag, filter_date)
             )
-            return Response(json.dumps(file_list), status=status.HTTP_200_OK)
+            return Response(file_list, status=status.HTTP_200_OK)
         except Exception, e:
             log.error('FileListHandler.read Exception %s' % e)
             if settings.DEBUG:
@@ -408,7 +414,7 @@ class RulesHandler(APIView):
                 )
             )
         log.info('RulesHandler.read request fulfilled')
-        return Response(json.dumps(rules_json), status=status.HTTP_200_OK)
+        return Response(rules_json, status=status.HTTP_200_OK)
 
 
 class RulesDetailHandler(APIView):
@@ -497,6 +503,7 @@ class MetaDataTemplateHandler(APIView):
     Read / Create / Delete Meta Data Templates
     """
     allowed_methods = ('GET', 'POST', 'DELETE')
+    parser_classes = (FormParser, MultiPartParser)
 
     """
     docrule_id is used for read
@@ -506,11 +513,6 @@ class MetaDataTemplateHandler(APIView):
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
     @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
     def post(self, request):
-
-        if not request.user.is_authenticated():
-            log.error('MetaDataTemplateHandler.create attempted with unauthenticated user.')
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-
         # Catch post with no payload
         try:
             mdt = request.POST['mdt']
@@ -548,10 +550,6 @@ class MetaDataTemplateHandler(APIView):
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
     @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
     def get(self, request):
-        if not request.user.is_authenticated():
-            log.error('MetaDataTemplateHandler.read attempted with unauthenticated user.')
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-
         # Catch get with no payload
         try:
             docrule_id = request.GET['docrule_id']  # FIXME: Need to standardize the arguments / nomenclature
@@ -580,10 +578,6 @@ class MetaDataTemplateHandler(APIView):
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
     @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
     def delete(self, request):
-        if not request.user.is_authenticated():
-            log.error('MetaDataTemplateHandler.delete attempted with unauthenticated user.')
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-
         body = request.body
         # Catch improper mdt_id in request
         try:
@@ -620,6 +614,7 @@ class MetaDataTemplateHandler(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
 
+@renderer_classes((JSONPRenderer, JSONRenderer))
 class ParallelKeysHandler(APIView):
     """Read parallel keys for autocomplete"""
     allowed_methods = ('GET', 'OPTIONS')
@@ -653,7 +648,7 @@ class ParallelKeysHandler(APIView):
             else:
                 doc_mdts = manager.get_mdts_for_docrule(docrule_id)
             resp = process_pkeys_request(docrule_id, key_name, autocomplete_req, doc_mdts)
-            return Response(resp, status=status.HTTP_200_OK)
+            return Response(resp)
         else:
             return Response(status=status.HTTP_404_NOT_FOUND)
 

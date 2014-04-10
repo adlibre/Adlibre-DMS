@@ -1096,7 +1096,7 @@ class MDTUI(MUITestData):
         """Document now exists in couchDB
         Querying CouchDB itself to test docs exist."""
         url = self.couchdb_url + '/' + self.couchdb_name + '/' + self.doc1 + '?revs_info=true'
-        # HACK: faking 'request' object here
+        # faking 'request' object here
         r = self.client.get(url)
         cou = urllib.urlopen(url)
         resp = cou.read()
@@ -1768,7 +1768,7 @@ class MDTUI(MUITestData):
         # doc1, doc2 for MDTs 2 and 3 data exist in response
         for doc_dict in [self.m5_doc1_dict, self.m5_doc2_dict, self.m2_doc1_dict, self.m2_doc2_dict]:
             for key, value in doc_dict.iteritems():
-                # Uppercase value hack
+                # Uppercase value hacking
                 if value == 'some data' or value == 'some other data':
                     value = value.upper()
                 self.assertContains(response, value)
@@ -1815,7 +1815,7 @@ class MDTUI(MUITestData):
         # doc1, doc2 for MDTs 2 and 3 data exist in response
         for doc_dict in [self.m5_doc1_dict, self.m5_doc2_dict, self.m2_doc3_dict]:
             for key, value in doc_dict.iteritems():
-                # Uppercase value hack
+                # Uppercase value hacking
                 if value == 'some data' or value == 'some other data':
                     value = value.upper()
                 self.assertContains(response, value)
@@ -1879,13 +1879,15 @@ class MDTUI(MUITestData):
         self.assertContains(response, self.indexes_added_string)
 
     def test_39_search_by_keys_only_contains_secondary_date_range(self):
-        """
-        Proper call to search by secondary key date range key.
+        """Proper call to search by secondary key date range key.
+
         MDTUI Search By Search Form parses data properly.
         Search Step 'results' displays proper captured indexes.
         Search displays full doc1 for given secondary key of 'date' type. (Proper)
         And does not contain doc2 and doc3 unique values.
         All docs render their indexes correctly.
+
+        Refs #1427 TEST: Search results DATE type keys rendering bugs
         """
         date_type_key_doc1 = {
             u'Required Date': unicode(date_standardized('2012-03-07')),
@@ -1917,6 +1919,8 @@ class MDTUI(MUITestData):
         self.assertNotContains(response, self.doc3)
         self.assertNotContains(response, self.doc2_dict['description'])
         self.assertNotContains(response, self.doc3_dict['description'])
+        self.assertNotContains(response, "[u'")  # Date range keys renderd properly without bugs
+        self.assertNotContains(response, "[u")  # Date range keys renderd properly without bugs
         # Searching keys exist in search results
         for key, value in date_type_key_doc1.iteritems():
             self.assertContains(response, value)
