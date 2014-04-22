@@ -1,5 +1,4 @@
-"""
-Module: Piston API Handlers
+"""Module: Django REST framewor API Handlers
 
 Project: Adlibre DMS
 Copyright: Adlibre Pty Ltd 2011, 2014
@@ -285,55 +284,54 @@ class FileInfoHandler(BaseFileHandler):
 
 
 class FileListHandler(APIView):
-    """
-    Provides list of documents to facilitate browsing via document type rule id.
-    """
-    allowed_methods = ('GET', 'POST')
+    """Provides list of documents to be able to browse via document type rule id."""
+    allowed_methods = ('GET', )
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
     @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
     def get(self, request, id_rule):
+        operator = PluginsOperator()
         try:
-            operator = PluginsOperator()
             mapping = operator.get_plugin_mapping_by_docrule_id(id_rule)
-            start = int(request.GET.get('start', 0))
-            finish = request.GET.get('finish', None)
-            order = request.GET.get('order', None)
-            searchword = request.GET.get('q', None)
-            tag = request.GET.get('tag', None)
-            filter_date = request.GET.get('created_date', None)
-            if finish:
-                finish = int(finish)
-            file_list = operator.get_file_list(
-                mapping,
-                start,
-                finish,
-                order,
-                searchword,
-                tags=[tag],
-                filter_date=filter_date
-            )
-            for item in file_list:
-                ui_url = reverse('ui_document', kwargs={'document_name': item['name']})
-                thumb_url = reverse('api_thumbnail', kwargs={'code': item['name']})
-                item.update({
-                    'ui_url': ui_url,
-                    'thumb_url': thumb_url,
-                    'rule': mapping.get_name(),
-                })
-            log.info(
-                """FileListHandler.read request fulfilled for:
-                start %s, finish %s, order %s, searchword %s, tag %s, filter_date %s."""
-                % (start, finish, order, searchword, tag, filter_date)
-            )
-            return Response(file_list, status=status.HTTP_200_OK)
-        except Exception, e:
-            log.error('FileListHandler.read Exception %s' % e)
-            if settings.DEBUG:
-                print e
-                raise
+        except DmsException:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        start = int(request.GET.get('start', 0))
+        finish = request.GET.get('finish', None)
+        order = request.GET.get('order', None)
+        searchword = request.GET.get('q', None)
+        tag = request.GET.get('tag', None)
+        filter_date = request.GET.get('created_date', None)
+        if finish:
+            finish = int(finish)
+        file_list = operator.get_file_list(
+            mapping,
+            start,
+            finish,
+            order,
+            searchword,
+            tags=[tag],
+            filter_date=filter_date
+        )
+        for item in file_list:
+            document_name = item['name']
+            code, suggested_format = os.path.splitext(document_name)
+            if not suggested_format:
+                api_url = reverse('api_file', kwargs={'code': code, })
             else:
-                return Response(status=status.HTTP_400_BAD_REQUEST)
+                suggested_format = suggested_format[1:]  # Remove . from file ext
+                api_url = reverse('api_file', kwargs={'code': code, 'suggested_format': suggested_format, })
+            thumb_url = reverse('api_thumbnail', kwargs={'code': item['name']})
+            item.update({
+                'ui_url': api_url,
+                'thumb_url': thumb_url,
+                'rule': mapping.get_name(),
+            })
+        log.info(
+            """FileListHandler.read request fulfilled for:
+            start %s, finish %s, order %s, searchword %s, tag %s, filter_date %s."""
+            % (start, finish, order, searchword, tag, filter_date)
+        )
+        return Response(file_list, status=status.HTTP_200_OK)
 
 
 class TagsHandler(APIView):
@@ -364,7 +362,7 @@ class RevisionCountHandler(APIView):
     """
     Returns revision count for a document
     """
-    allowed_methods = ('GET', 'POST')
+    allowed_methods = ('GET', )
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
     @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
@@ -390,7 +388,7 @@ class RulesHandler(APIView):
     """
     Returns list of all doc type rules in the system
     """
-    allowed_methods = ('GET', 'POST')
+    allowed_methods = ('GET', )
 
     verbose_name = 'rule'
     verbose_name_plural = 'rules'
@@ -410,7 +408,6 @@ class RulesHandler(APIView):
                 dict(
                     doccode=rule.get_docrule().get_title(),
                     id=rule.pk,
-                    ui_url=reverse('ui_document_list', kwargs={'id_rule': rule.pk}),
                 )
             )
         log.info('RulesHandler.read request fulfilled')
@@ -419,7 +416,7 @@ class RulesHandler(APIView):
 
 class RulesDetailHandler(APIView):
     """Returns detailed information about a doc type rule"""
-    allowed_methods = ('GET', 'POST')
+    allowed_methods = ('GET', )
 
     fields = [
         'id',
@@ -471,7 +468,7 @@ class PluginsHandler(APIView):
     """
     Returns a list of plugins installed in the system
     """
-    allowed_methods = ('GET', 'POST')
+    allowed_methods = ('GET', )
 
     verbose_name = 'plugin'
     verbose_name_plural = 'plugins'

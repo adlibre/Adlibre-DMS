@@ -47,11 +47,11 @@ class APITest(DMSTestCase):
         self.assertContains(response, 'No doccode')
         self.assertContains(response, 'thumb_url')
         self.assertContains(response, '/api/thumbnail/UNC-0001')
-        self.assertContains(response, '/ui/document-UNC-0001')
+        self.assertContains(response, '/api/new_file/UNC-0001')
         self.assertNotContains(response, '/api/thumbnail/UNC-0002')
         url = reverse('api_file_list', kwargs={'id_rule': 100})  # Not existing rule
         response = self.client.get(url)
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 404)
 
     def test_02_api_file(self):
         """Uses abcde333 document to test file upload with code. Retrieves file afterwards"""

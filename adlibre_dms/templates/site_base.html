@@ -22,7 +22,6 @@
                 <li class="files"><a href="{% url "files_index" %}">{% trans 'Files' %}</a></li>
                 <li class="settings"><a href="{% url "setting" %}">{% trans 'Settings' %}</a></li>
                 <li class="plugins"><a href="{% url "plugins" %}">{% trans 'Plugins' %}</a></li>
-                <li class="ui"><a href="{% url "ui_rule_list" %}">{% trans 'Admin UI' %}</a></li>
                 {% endif %}
                 {% if user.is_superuser %}
                 <li class="ui"><a href="{% url "admin:index" %}">{% trans 'Admin' %}</a></li>

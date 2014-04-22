@@ -32,7 +32,6 @@ urlpatterns += patterns('',
     url(r'^favicon.ico$', RedirectView.as_view(url=settings.STATIC_URL+'favicon.ico')),
 
     # Independent DMS Apps
-    url(r'^ui/', include('ui.urls')),
     url(r'^mdtui/', include('mdtui.urls')),
     url(r'^bcp/', include('bcp.urls')),
     url(r'^user/', include('adlibre.auth.urls')),

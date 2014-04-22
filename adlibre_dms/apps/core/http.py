@@ -106,7 +106,7 @@ class DMSOBjectRevisionsData(dict):
         d['document_name'] = dms_object.get_filename()
         d['tags'] = dms_object.get_tags()
         obj_mapping = obj_rule.get_docrule_plugin_mappings()
-        d['document_list_url'] = reverse('ui_document_list', kwargs={'id_rule': obj_mapping.pk})
+        d['document_list_url'] = reverse("api_file_list", kwargs={'id_rule': obj_mapping.pk})
         d['uncategorized'] = obj_rule.uncategorized
         self.data = d
         self.jsons = json.dumps(d, indent=4)

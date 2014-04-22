@@ -193,7 +193,6 @@ PROJECT_APPS = (
     'dmscouch',
     'mdtcouch',
     # DMS Standalone
-    'ui',
     'mdtui',
     'bcp',
     'feedback',
