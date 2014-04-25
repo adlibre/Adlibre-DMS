@@ -27,6 +27,11 @@ urlpatterns = patterns(
     ),
 
     # Working handlers:
+    url(
+        r'^new_file/$',
+        views.FileHandler.as_view(),
+        name='api_file',
+    ),
     # /api/file/ABC1234
     url(
         r'^new_file/(?P<code>[\w_-]+)$',
@@ -100,6 +105,11 @@ urlpatterns = patterns(
         r'^version$',
         views.VersionHandler.as_view(),
         name='api_version'
+    ),
+    url(
+        r'$',
+        views.ApiDocs.as_view(),
+        name='api_main'
     ),
 )
 

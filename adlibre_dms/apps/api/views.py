@@ -22,6 +22,7 @@ from rest_framework import status
 from rest_framework.parsers import FileUploadParser, MultiPartParser, FormParser
 from rest_framework.decorators import renderer_classes
 from rest_framework.renderers import JSONPRenderer, JSONRenderer
+from rest_framework.reverse import reverse as rest_reverse
 
 from api.decorators.auth import logged_in_or_basicauth
 from api.decorators.group_required import group_required
@@ -55,7 +56,55 @@ class BaseFileHandler(APIView):
 
 
 class FileHandler(BaseFileHandler):
-    """CRUD Methods for documents"""
+    """CRUD Methods for documents
+
+    GET method file API negotiation:
+    Main request to this URL supports getting a specific DMS code with or without extension.
+    To request a file from DMS call this API hook with specifying a code after the final hook slash:
+    e.g. to request a DMS file with code AAA-0001 it is required to call:
+    /[this url]/AAA-0001
+
+    It is possible to specify a format the file is required from DMS.
+    e.g. to request a code AAA-0001 from DMS with extension .pdf enter the following:
+    /[this url]/AAA-0001.pdf
+    This extension is highly optional. DMS will make attempt to convert a file into suggested format.
+    It can only happen if configured so.
+    It is impossible to force DMS to name the file into unsupported or not configured format.
+
+    GET additional parameters:
+    @param r: is used for specifying exact revision of the requested document.
+              Omitting this parameter returns the latest revision of the document.
+    @param h: hashcode of requested dcoument. In case ve have a hashcode stamp for it.
+
+
+    POST method file API negotiation:
+    POST method is used to create new documents in the system only.
+    It is impossible to update existing documents with POST. PUT request supports that.
+    POST filename should be provided based on the same pattern as for get.
+
+    Filename without extension is counted as code. Tt will be stored under new file and uncategorized code,
+    in case file name does not correspond to any code.
+
+    PUT is a method of modifying data in DMS.
+    It is suitable to do most of the indexing logic through PUT request.
+    To call a PUT you need to have a document to update. So only possible way is specifying a code.
+
+    PUT parameters are wide enough and may be changed in near future:
+
+    @param tag_string: is a tags, separated with comas string to update for using SQL tags plugin.
+    @param remove_tag_string': is a remove tags string to update for using SQL tags plugin.
+    @param new_name: is a name of file to be updated
+    @param new_type: is an id of new document type
+    @param new_indexes: is a set of indexes in special format that used to be updated
+    @param update_file: is a file to store against that code. Update file creates new file revision.
+
+
+    DELETE is a call to remove a code from DMS.
+    It is possible to remove entire file or either particular file revision.
+
+    @param r: to remove a revision number specify this parameter.
+
+    """
     allowed_methods = ('GET', 'POST', 'DELETE', 'PUT')
     parser_classes = (FileUploadParser, MultiPartParser, FormParser)
 
@@ -80,7 +129,9 @@ class FileHandler(BaseFileHandler):
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
     @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
-    def get(self, request, code, suggested_format=None):
+    def get(self, request, code=None, suggested_format=None):
+        if not code:
+            return Response([])
         revision, hashcode, extra = self._get_info(request)
         processor = DocumentProcessor()
         options = {
@@ -130,9 +181,7 @@ class FileHandler(BaseFileHandler):
                 uploaded_obj = dnf.files['file']
         else:
             extra = request.QUERY_PARAMS
-        # TODO refactor these verbs
-        revision = extra.get('r', None)
-        hashcode = extra.get('h', None)
+        # TODO: do we require SQL tagging logic in this API call?
         sql_tag_string = extra.get('tag_string', None)
         sql_remove_tag_string = extra.get('remove_tag_string', None)
         new_name = extra.get('new_name', None)
@@ -150,7 +199,7 @@ class FileHandler(BaseFileHandler):
             'new_indexes': index_data,
             'update_file': uploaded_obj,
             'user': request.user,
-        }  # FIXME hashcode missing?
+        }
         document = processor.update(code, options)
         if len(processor.errors) > 0:
             log.error('FileHandler.update manager errors %s' % processor.errors)
@@ -160,9 +209,9 @@ class FileHandler(BaseFileHandler):
             else:
                 return Response(status=status.HTTP_400_BAD_REQUEST)
         log.info('FileHandler.update request fulfilled for code: %s, format: %s, rev: %s, hash: %s.'
-                 % (code, suggested_format, revision, hashcode))
+                 % (code, suggested_format))
         resp = DMSOBjectRevisionsData(document).data
-        return Response(resp, status=status.HTTP_200_OK)   # FIXME should be rc.ALL_OK
+        return Response(resp, status=status.HTTP_200_OK)
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
     @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
@@ -248,9 +297,7 @@ class OldFileHandler(BaseFileHandler):
 
 
 class FileInfoHandler(BaseFileHandler):
-    """
-    Returns document file info data
-    """
+    """Returns document file info data"""
     allowed_methods = ('GET',)
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
@@ -359,9 +406,7 @@ class TagsHandler(APIView):
 
 
 class RevisionCountHandler(APIView):
-    """
-    Returns revision count for a document
-    """
+    """Returns revision count for a document"""
     allowed_methods = ('GET', )
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
@@ -385,9 +430,7 @@ class RevisionCountHandler(APIView):
 
 
 class RulesHandler(APIView):
-    """
-    Returns list of all doc type rules in the system
-    """
+    """Returns list of all doc type rules in the system"""
     allowed_methods = ('GET', )
 
     verbose_name = 'rule'
@@ -398,8 +441,8 @@ class RulesHandler(APIView):
     def get(self, request):
         """Returns list of Document Type Rule <=> Plugins mapping
 
-        @param request:
-        @return: list of document type rules
+        @param request: Django request object
+        @return: json of document type rules
         """
         doc_types_mappings = DoccodePluginMapping.objects.all()
         rules_json = []
@@ -465,9 +508,7 @@ class RulesDetailHandler(APIView):
 
 
 class PluginsHandler(APIView):
-    """
-    Returns a list of plugins installed in the system
-    """
+    """Returns a list of plugins installed in the system"""
     allowed_methods = ('GET', )
 
     verbose_name = 'plugin'
@@ -496,15 +537,17 @@ class PluginsHandler(APIView):
 
 
 class MetaDataTemplateHandler(APIView):
-    """
-    Read / Create / Delete Meta Data Templates
+    """Read / Create / Delete Meta Data Templates
+
+    @param docrule_id: is used for read
+    @param mdt_id: is used for delete
+
     """
     allowed_methods = ('GET', 'POST', 'DELETE')
     parser_classes = (FormParser, MultiPartParser)
 
     """
-    docrule_id is used for read
-    mdt_id is used for delete
+
     """
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
@@ -548,14 +591,10 @@ class MetaDataTemplateHandler(APIView):
     @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
     def get(self, request):
         # Catch get with no payload
-        try:
-            docrule_id = request.GET['docrule_id']  # FIXME: Need to standardize the arguments / nomenclature
-        except KeyError:
+        docrule_id = request.GET.get('docrule_id', None)
+        if not docrule_id:
             log.error('MetaDataTemplateHandler.read attempted with no payload.')
-            if settings.DEBUG:
-                raise
-            else:
-                return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response([])
 
         log.debug('MetaDataTemplateHandler.read underway with docrule_id %s.' % docrule_id)
 
@@ -613,13 +652,12 @@ class MetaDataTemplateHandler(APIView):
 
 @renderer_classes((JSONPRenderer, JSONRenderer))
 class ParallelKeysHandler(APIView):
-    """Read parallel keys for autocomplete"""
-    allowed_methods = ('GET', 'OPTIONS')
+    """Read parallel keys for autocomplete
 
+    @param docrule: is used for indexing
+    @param mdt_ids: is used for search, or when docrule is uncertain
     """
-    docrule is used for indexing
-    mdt_ids is used for search, or when docrule is uncertain
-    """
+    allowed_methods = ('GET', 'OPTIONS')
 
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
     def get(self, request):
@@ -636,7 +674,7 @@ class ParallelKeysHandler(APIView):
         if not docrule_id:
             mdts_ids = request.GET.get('mdt_ids', None)
             if not mdts_ids:
-                return Response(status=status.HTTP_400_BAD_REQUEST)
+                return Response([], status=status.HTTP_400_BAD_REQUEST)
 
         if (docrule_id or mdts_ids) and key_name and autocomplete_req:
             manager = MetaDataTemplateManager()
@@ -681,3 +719,30 @@ class VersionHandler(APIView):
     @method_decorator(logged_in_or_basicauth(AUTH_REALM))
     def get(self, request):
         return Response(settings.PRODUCT_VERSION, status=status.HTTP_200_OK)
+
+
+class ApiDocs(APIView):
+    """API Root calls list
+
+    Returns named list of API calls to be made.
+    """
+    allowed_methods = ('GET', )
+
+    def get(self, request, format=None):
+        code='testcode'
+        urls = {
+            'main': rest_reverse('api_main', request=request, format=format),
+            'viersion': rest_reverse('api_version', request=request, format=format),
+            'api_file': rest_reverse('api_file', kwargs={'code': 'code'}, request=request, format=format),
+            'api_file_info': reverse('api_file_info', kwargs={'code': 'code'}),
+            'api_revision_count': reverse('api_revision_count', kwargs={'document': 'code'}),
+            'api_rules': rest_reverse('api_rules', request=request, format=format),
+            'api_rules_detail': reverse('api_rules_detail', kwargs={'id_rule': '1'}),
+            'api_tags': reverse('api_tags', kwargs={'id_rule': '1'}),
+            'api_plugins': rest_reverse('api_plugins', request=request, format=format),
+            'api_mdt': rest_reverse('api_mdt', request=request, format=format),
+            'api_parallel': rest_reverse('api_parallel', request=request, format=format),
+            'api_thumbnail': reverse('api_thumbnail', kwargs={'code': 'code'}),
+            'api_file_deprecated': reverse('api_file_deprecated', kwargs={'code': 'code'}),
+        }
+        return Response(urls)

@@ -397,9 +397,7 @@ class APITest(DMSTestCase):
         self.client.login(username=self.username, password=self.password)
         url = reverse('api_mdt')
         response = self.client.get(url)
-        # TODO: This is wrong! look at issue #1437
-        # (TEST MetaDataTemplateHandler.read attempted with no payload should be changed)
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 200)
         mdt_path = os.path.join(self.test_document_files_dir, '..', 'mdts_json', mdt_name)
         data = {'mdt': str(open(mdt_path, 'r').read())}
         response = self.client.post(url, data)
