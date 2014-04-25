@@ -208,7 +208,7 @@ class FileHandler(BaseFileHandler):
                 raise Exception('FileHandler.update manager errors')
             else:
                 return Response(status=status.HTTP_400_BAD_REQUEST)
-        log.info('FileHandler.update request fulfilled for code: %s, format: %s, rev: %s, hash: %s.'
+        log.info('FileHandler.update request fulfilled for code: %s, extension: %s'
                  % (code, suggested_format))
         resp = DMSOBjectRevisionsData(document).data
         return Response(resp, status=status.HTTP_200_OK)
