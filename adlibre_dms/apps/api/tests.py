@@ -20,7 +20,6 @@ from core.models import CoreConfiguration
 from core.models import DocumentTypeRuleManager
 
 # TODO: Test self.rules, self.rules_missing, self.documents_missing
-# TODO: Run all of these tests for different auth. Plain, Django, and none!
 # TODO: Test with and without correct permissions.
 
 
@@ -424,6 +423,14 @@ class APITest(DMSTestCase):
         # Checking now for mdt presence
         response = self.client.get(url, {'docrule_id': "100000"})
         self.assertEqual(response.status_code, 404)
+
+    def test_25_version(self):
+        """Refs #1446 TEST: Coverage of Version API handler"""
+        self.client.login(username=self.username, password=self.password)
+        url = reverse('api_version')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, settings.PRODUCT_VERSION)
 
     def test_zz_cleanup(self):
         """Test Cleanup"""
