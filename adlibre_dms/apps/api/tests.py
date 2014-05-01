@@ -432,6 +432,12 @@ class APITest(DMSTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, settings.PRODUCT_VERSION)
 
+    def test_26_api_docs(self):
+        """Refs #1471 /api/ url documentation"""
+        url = reverse('api_main')
+        response = self.client.get(url)
+        self.assertContains(response, 'api_rules_detail')
+
     def test_zz_cleanup(self):
         """Test Cleanup"""
         self.cleanAll()

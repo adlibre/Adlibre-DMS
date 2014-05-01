@@ -152,14 +152,6 @@ class MetadataCouchDB(TestCase):
         response = self.client.get(url, {"docrule_id": "10000000"})
         self.assertEqual(response.status_code, 404)
 
-    def test_mdt_getting_improper_call2(self):
-        """
-        Tries to get something from MDT API without proper call
-        """
-        url = reverse('api_mdt')
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 400)
-
     def test_mdt_removing_wrong_id(self):
         """
         Testing wrong deletion calls

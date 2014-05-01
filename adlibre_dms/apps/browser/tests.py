@@ -196,11 +196,6 @@ class MiscViewTest(DMSTestCase):
         response = self.client.get(url)
         self.assertContains(response, 'Adlibre DMS')
 
-    def test_documentation_view(self):
-        url = reverse('documentation_index')
-        response = self.client.get(url)
-        self.assertContains(response, 'Documentation')
-
 
 class ConversionTest(DMSTestCase):
 
