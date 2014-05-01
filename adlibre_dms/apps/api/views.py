@@ -542,6 +542,42 @@ class MetaDataTemplateHandler(APIView):
     @param docrule_id: is used for read
     @param mdt_id: is used for delete
 
+    Example MDT:
+
+    ::
+
+        {
+            "docrule_id": "used to assign this to document type rules",
+            "description": "<-- description of this metadata template -->",
+            "fields": {
+                // examples:
+                "<-- field number -->":
+                     {
+                       "type": "string|integer|date",
+                       "length": "<--optional-->",
+                       "field_name":"<-- field name used in UI -->",
+                       "description": "<-- description used in UI -->"
+                },
+                "1": {
+                       "type": "integer",
+                       "field_name": "Employee ID",
+                       "description": "Unique (Staff) ID of the person"
+                },
+                "2": {
+                       "type": "string",
+                       "length": 60,
+                       "field_name": "Employee Name",
+                       "description": "Name of the person associated with the document"
+                }
+            },
+            // parallel fields mapping
+            "parallel": {
+                "<-- set id -->": ["<-- first 'field' -->", "<-- second 'field' -->"]
+                "1": [ "1", "2"],
+            }
+        }
+
+
     """
     allowed_methods = ('GET', 'POST', 'DELETE')
     parser_classes = (FormParser, MultiPartParser)

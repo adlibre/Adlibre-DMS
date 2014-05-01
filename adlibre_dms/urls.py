@@ -20,7 +20,6 @@ if settings.DEBUG:
 urlpatterns += patterns('',
     url(r'^api/', include('api.urls')),
     url(r'^settings/', include('browser.urls_settings')),
-    url(r'^docs/', include('docs.urls')),
     url(r'^admin/', include('django-log-file-viewer.admin_urls')),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^accounts/login/$', 'django.contrib.auth.views.login', name='login'),

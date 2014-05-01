@@ -44,8 +44,6 @@
         {% block footer %}
             <p>
                 {% trans 'Adlibre DMS' %} - &copy; Adlibre {% now "Y" %}
-                &middot; <a href="{% url "about_documentation" %}">{% trans 'About' %}</a>
-                &middot; <a href="{% url "documentation_index" %}">{% trans 'Docs' %}</a>
                 &middot; <a href="{% url "upload" %}">{% trans 'Upload' %}</a>
                 <span>{% trans 'Version' %}: {{ PRODUCT_VERSION }}. {% if user.is_authenticated %}{% trans 'Logged in as' %} {{ user }}{% else %}{% trans 'Logged out' %}{% endif %}.</span>
             </p>

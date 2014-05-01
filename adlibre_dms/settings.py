@@ -203,7 +203,6 @@ ADDITIONAL_APPS = (
     'theme.adlibre',
     'theme.basic',
     'theme.solid',
-    'docs',
 )
 
 INSTALLED_APPS = (
