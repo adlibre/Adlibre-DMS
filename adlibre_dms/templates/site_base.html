@@ -44,7 +44,9 @@
         {% block footer %}
             <p>
                 {% trans 'Adlibre DMS' %} - &copy; Adlibre {% now "Y" %}
+                {% if user.is_authenticated %}
                 &middot; <a href="{% url "upload" %}">{% trans 'Upload' %}</a>
+                {% endif %}
                 <span>{% trans 'Version' %}: {{ PRODUCT_VERSION }}. {% if user.is_authenticated %}{% trans 'Logged in as' %} {{ user }}{% else %}{% trans 'Logged out' %}{% endif %}.</span>
             </p>
         {% endblock %}
