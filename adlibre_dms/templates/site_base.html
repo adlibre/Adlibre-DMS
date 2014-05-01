@@ -22,7 +22,6 @@
                 <li class="files"><a href="{% url "files_index" %}">{% trans 'Files' %}</a></li>
                 <li class="settings"><a href="{% url "setting" %}">{% trans 'Settings' %}</a></li>
                 <li class="plugins"><a href="{% url "plugins" %}">{% trans 'Plugins' %}</a></li>
-                <li class="ui"><a href="{% url "ui_rule_list" %}">{% trans 'Admin UI' %}</a></li>
                 {% endif %}
                 {% if user.is_superuser %}
                 <li class="ui"><a href="{% url "admin:index" %}">{% trans 'Admin' %}</a></li>
@@ -45,9 +44,9 @@
         {% block footer %}
             <p>
                 {% trans 'Adlibre DMS' %} - &copy; Adlibre {% now "Y" %}
-                &middot; <a href="{% url "about_documentation" %}">{% trans 'About' %}</a>
-                &middot; <a href="{% url "documentation_index" %}">{% trans 'Docs' %}</a>
+                {% if user.is_authenticated %}
                 &middot; <a href="{% url "upload" %}">{% trans 'Upload' %}</a>
+                {% endif %}
                 <span>{% trans 'Version' %}: {{ PRODUCT_VERSION }}. {% if user.is_authenticated %}{% trans 'Logged in as' %} {{ user }}{% else %}{% trans 'Logged out' %}{% endif %}.</span>
             </p>
         {% endblock %}

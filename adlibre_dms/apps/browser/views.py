@@ -18,6 +18,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
 
@@ -30,7 +31,7 @@ from core.http import DMSObjectResponse
 log = logging.getLogger('')
 
 
-# FIXME: Need to fix the @staff_required decorator to redirect to standard login form
+@login_required
 def upload(request, template_name='browser/upload.html', extra_context=None):
     """Upload file processing.
 

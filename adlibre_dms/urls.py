@@ -20,7 +20,6 @@ if settings.DEBUG:
 urlpatterns += patterns('',
     url(r'^api/', include('api.urls')),
     url(r'^settings/', include('browser.urls_settings')),
-    url(r'^docs/', include('docs.urls')),
     url(r'^admin/', include('django-log-file-viewer.admin_urls')),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^accounts/login/$', 'django.contrib.auth.views.login', name='login'),
@@ -32,7 +31,6 @@ urlpatterns += patterns('',
     url(r'^favicon.ico$', RedirectView.as_view(url=settings.STATIC_URL+'favicon.ico')),
 
     # Independent DMS Apps
-    url(r'^ui/', include('ui.urls')),
     url(r'^mdtui/', include('mdtui.urls')),
     url(r'^bcp/', include('bcp.urls')),
     url(r'^user/', include('adlibre.auth.urls')),

@@ -20,7 +20,6 @@ from core.models import CoreConfiguration
 from core.models import DocumentTypeRuleManager
 
 # TODO: Test self.rules, self.rules_missing, self.documents_missing
-# TODO: Run all of these tests for different auth. Plain, Django, and none!
 # TODO: Test with and without correct permissions.
 
 
@@ -47,11 +46,11 @@ class APITest(DMSTestCase):
         self.assertContains(response, 'No doccode')
         self.assertContains(response, 'thumb_url')
         self.assertContains(response, '/api/thumbnail/UNC-0001')
-        self.assertContains(response, '/ui/document-UNC-0001')
+        self.assertContains(response, '/api/new_file/UNC-0001')
         self.assertNotContains(response, '/api/thumbnail/UNC-0002')
         url = reverse('api_file_list', kwargs={'id_rule': 100})  # Not existing rule
         response = self.client.get(url)
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 404)
 
     def test_02_api_file(self):
         """Uses abcde333 document to test file upload with code. Retrieves file afterwards"""
@@ -397,9 +396,7 @@ class APITest(DMSTestCase):
         self.client.login(username=self.username, password=self.password)
         url = reverse('api_mdt')
         response = self.client.get(url)
-        # TODO: This is wrong! look at issue #1437
-        # (TEST MetaDataTemplateHandler.read attempted with no payload should be changed)
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 200)
         mdt_path = os.path.join(self.test_document_files_dir, '..', 'mdts_json', mdt_name)
         data = {'mdt': str(open(mdt_path, 'r').read())}
         response = self.client.post(url, data)
@@ -426,6 +423,14 @@ class APITest(DMSTestCase):
         # Checking now for mdt presence
         response = self.client.get(url, {'docrule_id': "100000"})
         self.assertEqual(response.status_code, 404)
+
+    def test_25_version(self):
+        """Refs #1446 TEST: Coverage of Version API handler"""
+        self.client.login(username=self.username, password=self.password)
+        url = reverse('api_version')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, settings.PRODUCT_VERSION)
 
     def test_zz_cleanup(self):
         """Test Cleanup"""

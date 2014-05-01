@@ -193,7 +193,6 @@ PROJECT_APPS = (
     'dmscouch',
     'mdtcouch',
     # DMS Standalone
-    'ui',
     'mdtui',
     'bcp',
     'feedback',
@@ -204,7 +203,6 @@ ADDITIONAL_APPS = (
     'theme.adlibre',
     'theme.basic',
     'theme.solid',
-    'docs',
 )
 
 INSTALLED_APPS = (
