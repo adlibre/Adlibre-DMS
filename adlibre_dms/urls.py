@@ -33,7 +33,7 @@ urlpatterns += patterns('',
     # Independent DMS Apps
     url(r'^mdtui/', include('mdtui.urls')),
     url(r'^bcp/', include('bcp.urls')),
-    url(r'^user/', include('adlibre.auth.urls')),
+    url(r'^user/', include('browser.auth_urls')),
     url(r'^feedback/', include('feedback.urls')),
 
     # This needs to be last

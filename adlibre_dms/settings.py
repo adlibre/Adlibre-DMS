@@ -13,6 +13,8 @@ sys.path.append(os.path.join(PROJECT_PATH, 'dmsplugins'))
 if len(sys.argv) > 1:
     # Define TEST Variable if running unit tests
     TEST = ['manage.py', 'test'] == [os.path.basename(sys.argv[0]), sys.argv[1], ]
+    if not TEST:
+        TEST = ['django_test_manage.py', 'test'] == [os.path.basename(sys.argv[0]), sys.argv[1], ]
 else:
     TEST = False
 DEBUG = True

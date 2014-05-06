@@ -145,6 +145,27 @@ class DMSTestCase(TestCase):
             data['h'] = hashcode
         return url, data
 
+    def _shelve(self, obj, name='1.html'):
+        """Writes given object into a file on desktop. (For debug purposes only ;) """
+        fo = False
+        path = os.path.expanduser(os.path.join('~', 'Desktop', name))
+        # Cleaning existing file
+        try:
+            with open(path):
+                os.remove(path)
+                pass
+        except IOError:
+            pass
+        # Dumping object into file
+        try:
+            fo = open(path, 'w')
+        except Exception, e:
+            print e
+            pass
+        if fo:
+            fo.writelines(obj)
+            print 'file %s written' % name
+
     def loadTestData(self):
         """Load a copy of all our fixtures using the management command"""
         return call_command('import_documents', self.test_document_files_dir, silent=False)
