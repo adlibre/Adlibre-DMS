@@ -3,5 +3,11 @@ python:
   - "2.7"
 # command to install dependencies
 install: "pip install ."
+
+before_script:
+ - cp -rf fixtures ~/virtualenv/python2.7/lib/python2.7/site-packages/fixtures
+ - mkdir ~/virtualenv/python2.7/lib/python2.7/site-packages/db
+ - mkdir ~/virtualenv/python2.7/lib/python2.7/site-packages/log
+
 # command to run tests
 script: python adlibre_dms/manage.py test
