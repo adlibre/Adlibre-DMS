@@ -122,7 +122,8 @@ setup(name='adlibre_dms',
             'django-taggit==0.11.2',
             # Adlibre Components
             'django-bcp',
-            'adlibre-plugins==0.2.3',
+            # Plugins
+            'django-plugins',
             # Deployment
             'flup==1.0.3.dev-20110405',
             'bureaucrat',
@@ -133,8 +134,5 @@ setup(name='adlibre_dms',
             'django-jenkins==0.15.0',
             # Thumbnails support
             'ghostscript==0.4.1',
-    ],
-    dependency_links=[
-        "https://codeload.github.com/adlibre/adlibre-plugins/legacy.tar.gz/master#egg=adlibre-plugins-0.2.3",
     ],
 )
