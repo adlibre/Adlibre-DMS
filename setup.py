@@ -125,7 +125,7 @@ setup(name='adlibre_dms',
             'adlibre-plugins==0.2.3',
             # Deployment
             'flup==1.0.3.dev-20110405',
-            'bureaucrat==0.1.0',
+            'bureaucrat',
             'argparse',  # required by bureaucrat
             # Logging
             'django-log-file-viewer==0.9',
@@ -136,8 +136,6 @@ setup(name='adlibre_dms',
     ],
     dependency_links=[
         "https://codeload.github.com/adlibre/django-bcp/legacy.tar.gz/master#egg=django-bcp-0.1.9",
-        "https://codeload.github.com/adlibre/django-compressor/legacy.tar.gz/develop#egg=django-compressor-1.4a1",
         "https://codeload.github.com/adlibre/adlibre-plugins/legacy.tar.gz/master#egg=adlibre-plugins-0.2.3",
-        "https://github.com/adlibre/python-bureaucrat/archive/0.1.0.tar.gz#egg=bureaucrat-0.1.0",
     ],
 )
