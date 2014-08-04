@@ -2,6 +2,6 @@ language: python
 python:
   - "2.7"
 # command to install dependencies
-install: "pip install --allow-all-external ."
+install: "pip install --allow-all-external --allow-unverified ."
 # command to run tests
 script: python adlibre_dms/manage.py test
