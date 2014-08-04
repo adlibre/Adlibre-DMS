@@ -8,6 +8,14 @@ before_script:
  - cp -rf fixtures ~/virtualenv/python2.7/lib/python2.7/site-packages/fixtures
  - mkdir ~/virtualenv/python2.7/lib/python2.7/site-packages/db
  - mkdir ~/virtualenv/python2.7/lib/python2.7/site-packages/log
+ - python adlibre_dms/manage.py syncdb --noinput --all
+ - python adlibre_dms/manage.py migrate core --fake
+ - python adlibre_dms/manage.py migrate core --fake
+ - python adlibre_dms/manage.py migrate dms_plugins --fake
+ - python adlibre_dms/manage.py loaddata ~/virtualenv/python2.7/lib/site-packages/fixttures/initial_datas.json
+ - python adlibre_dms/manage.py loaddata ~/virtualenv/python2.7/lib/site-packages/fixttures/core.json
+ - python adlibre_dms/manage.py loaddata ~/virtualenv/python2.7/lib/site-packages/fixttures/djangoplugins.json
+ - python adlibre_dms/manage.py loaddata ~/virtualenv/python2.7/lib/site-packages/fixttures/dms_plugins.json
 
 # command to run tests
 script: python adlibre_dms/manage.py test
