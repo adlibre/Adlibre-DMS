@@ -2,6 +2,6 @@ language: python
 python:
   - "2.7"
 # command to install dependencies
-install: "pip install --allow-external django-bcp ."
+install: "pip install --allow-all-external ."
 # command to run tests
 script: python adlibre_dms/manage.py test
