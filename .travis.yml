@@ -4,4 +4,4 @@ python:
 # command to install dependencies
 install: "pip install --allow-all-external --allow-unverified ."
 # command to run tests
-script: python adlibre_dms/manage.py test
+script: python adlibre/Adlibre-DMS/adlibre_dms/manage.py test
