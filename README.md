@@ -1,5 +1,7 @@
 # Adlibre DMS
 
+[![Build Status](https://travis-ci.org/adlibre/Adlibre-DMS.svg?branch=master)](https://travis-ci.org/adlibre/Adlibre-DMS)
+
 Adlibre DMS is a web based media and Document Management System (DMS / EDMS). 
 It liberates you from hard-copy paper systems by creating a digital vault for your documents
 that can be accessed from anywhere. The core philosophy is that your documents are secure, 
