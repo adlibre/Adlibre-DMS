@@ -10,17 +10,18 @@ services:
 install: "pip install ."
 
 before_script:
- - cp -rf fixtures ~/virtualenv/python2.7/lib/python2.7/site-packages/fixtures
- - mkdir ~/virtualenv/python2.7/lib/python2.7/site-packages/db
- - mkdir ~/virtualenv/python2.7/lib/python2.7/site-packages/log
+ - export SITE_PACKAGES=$(python -c "import distutils; print(distutils.sysconfig.get_python_lib())")
+ - cp -rf $SITE_PACKAGES/fixtures
+ - mkdir $SITE_PACKAGES/db
+ - mkdir $SITE_PACKAGES/log
  - python adlibre_dms/manage.py syncdb --noinput --all
  - python adlibre_dms/manage.py migrate core --fake
  - python adlibre_dms/manage.py migrate core --fake
  - python adlibre_dms/manage.py migrate dms_plugins --fake
- - python adlibre_dms/manage.py loaddata ~/virtualenv/python2.7/lib/site-packages/fixtures/initial_datas.json
- - python adlibre_dms/manage.py loaddata ~/virtualenv/python2.7/lib/site-packages/fixtures/core.json
- - python adlibre_dms/manage.py loaddata ~/virtualenv/python2.7/lib/site-packages/fixtures/djangoplugins.json
- - python adlibre_dms/manage.py loaddata ~/virtualenv/python2.7/lib/site-packages/fixtures/dms_plugins.json
+ - python adlibre_dms/manage.py loaddata $SITE_PACKAGES/fixtures/initial_datas.json
+ - python adlibre_dms/manage.py loaddata $SITE_PACKAGES/fixtures/core.json
+ - python adlibre_dms/manage.py loaddata $SITE_PACKAGES/fixtures/djangoplugins.json
+ - python adlibre_dms/manage.py loaddata $SITE_PACKAGES/fixtures/dms_plugins.json
 
 # command to run tests
 script: python adlibre_dms/manage.py test
