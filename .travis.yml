@@ -17,10 +17,10 @@ before_script:
  - python adlibre_dms/manage.py migrate core --fake
  - python adlibre_dms/manage.py migrate core --fake
  - python adlibre_dms/manage.py migrate dms_plugins --fake
- - python adlibre_dms/manage.py loaddata ~/virtualenv/python2.7/lib/site-packages/fixttures/initial_datas.json
- - python adlibre_dms/manage.py loaddata ~/virtualenv/python2.7/lib/site-packages/fixttures/core.json
- - python adlibre_dms/manage.py loaddata ~/virtualenv/python2.7/lib/site-packages/fixttures/djangoplugins.json
- - python adlibre_dms/manage.py loaddata ~/virtualenv/python2.7/lib/site-packages/fixttures/dms_plugins.json
+ - python adlibre_dms/manage.py loaddata ~/virtualenv/python2.7/lib/site-packages/fixtures/initial_datas.json
+ - python adlibre_dms/manage.py loaddata ~/virtualenv/python2.7/lib/site-packages/fixtures/core.json
+ - python adlibre_dms/manage.py loaddata ~/virtualenv/python2.7/lib/site-packages/fixtures/djangoplugins.json
+ - python adlibre_dms/manage.py loaddata ~/virtualenv/python2.7/lib/site-packages/fixtures/dms_plugins.json
 
 # command to run tests
 script: python adlibre_dms/manage.py test
