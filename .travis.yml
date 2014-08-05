@@ -11,7 +11,7 @@ install: "pip install ."
 
 before_script:
  - export SITE_PACKAGES=$(python -c "import distutils; print(distutils.sysconfig.get_python_lib())")
- - cp -rf $SITE_PACKAGES/fixtures
+ - cp -rf fixtures $SITE_PACKAGES/fixtures
  - mkdir $SITE_PACKAGES/db
  - mkdir $SITE_PACKAGES/log
  - python adlibre_dms/manage.py syncdb --noinput --all
