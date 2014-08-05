@@ -116,7 +116,7 @@ setup(name='adlibre_dms',
             # Docs
             'markdown2==2.2.0',
             # MUI
-            'couchdbkit==0.6.1',
+            'couchdbkit==0.6.5',
             'django-widget-tweaks==1.0',
             # Tagging
             'django-taggit==0.11.2',
