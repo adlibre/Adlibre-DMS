@@ -4138,6 +4138,13 @@ class MDTUI(MUITestData):
         self.assertContains(response, 'Step 3')
         self.assertContains(response, 'Barcode: None')
 
+    def test_00098_mui_edit_revisions_not_existing_code(self):
+        """Refs #1533 edit-revisions view returns error with partially wrong code"""
+        code = 'ADL-000'  # Partially right code that causes the bug
+        url = reverse('mdtui-edit-revisions', kwargs={'code': code})
+        response = self.client.get(url)
+        self.assertContains(response, MDTUI_ERROR_STRINGS['NO_DOC'])
+
     def test_85_choice_type_field(self):
         """
         Refs #700 Feature: MDT/MUI fixed choice index fields
