@@ -13,6 +13,8 @@ import urllib
 import datetime
 import re
 
+from tempfile import NamedTemporaryFile
+
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from django.core.paginator import Paginator
@@ -81,6 +83,7 @@ class MUITestData(TestCase):
         self.edit_document_name_6 = 'CCC-0003'
         self.edit_document_name_7 = 'BBB-0004'
         self.edit_type_document_name1 = 'BBB-0005'
+        self.unicode_filename = 'Capit\\xc3\\xa1n.pdf'.decode('string_escape')
 
         self.test_mdt_docrule_id = 2  # should be properly assigned to fixtures docrule that uses CouchDB plugins
         self.test_mdt_docrule_id2 = 7  # should be properly assigned to fixtures docrule that uses CouchDB plugins
@@ -4144,6 +4147,41 @@ class MDTUI(MUITestData):
         url = reverse('mdtui-edit-revisions', kwargs={'code': code})
         response = self.client.get(url)
         self.assertContains(response, MDTUI_ERROR_STRINGS['NO_DOC'])
+
+    def test_0099_unicode_filename_upload(self):
+        """Refs #1536 Unicode decode error while indexing a file through UI"""
+
+        suggested_format = 'pdf'
+        step1_url = reverse('mdtui-index-type')
+        step2_url = reverse('mdtui-index-details')
+        step3_url = reverse('mdtui-index-source')
+
+        response = self.client.post(step1_url, {self.test_mdt_docrule_id: 'docrule'})
+        self.assertRedirects(response, step2_url)
+
+        response = self.client.post(step2_url, self.doc1_dict)
+        self.assertRedirects(response, step3_url)
+        print response
+
+        file_path = os.path.join(self.test_document_files_dir, self.doc1 + '.' + suggested_format)
+        testfile_data = open(file_path, 'r').read()
+
+        unicode_file = os.path.join(self.test_document_files_dir, self.unicode_filename)
+
+        if os.path.isfile(unicode_file):
+            os.remove(unicode_file)
+            raise AssertionError('Data Left from previous tests iterations! File deleted... Run tests again.')
+        with open(unicode_file, "w+b") as uf:
+            uf.write(testfile_data)
+            data = {'file': uf, 'uploaded': u''}
+            response = self.client.post(step3_url + '?uploaded', data)
+            # Follow Redirect
+            self.assertEqual(response.status_code, 302)
+            new_url = self._retrieve_redirect_response_url(response)
+            response = self.client.get(new_url)
+            self._shelve(response)
+            self.assertContains(response, self.indexing_done_string)
+        os.remove(unicode_file)
 
     def test_85_choice_type_field(self):
         """
