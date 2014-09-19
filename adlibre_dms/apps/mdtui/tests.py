@@ -4138,7 +4138,7 @@ class MDTUI(MUITestData):
         self.assertContains(response, 'Step 3')
         self.assertContains(response, 'Barcode: None')
 
-    def test_00098_mui_edit_revisions_not_existing_code(self):
+    def test_98_mui_edit_revisions_not_existing_code(self):
         """Refs #1533 edit-revisions view returns error with partially wrong code"""
         code = 'ADL-000'  # Partially right code that causes the bug
         url = reverse('mdtui-edit-revisions', kwargs={'code': code})
