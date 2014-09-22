@@ -653,7 +653,9 @@ def edit_file_revisions(request, code, step='edit_revisions', template='mdtui/in
             'file_revision_data_order_list': sorted(frd.iterkeys()),
             'index_data': db_info,
         })
-    if processor.errors or doc.marked_deleted or (not frd and not db_info['mdt_indexes']):
+    if not db_info:
+        errors = [MDTUI_ERROR_STRINGS['NO_DOC'] + '. Maybe you should go index it first?']
+    elif processor.errors or doc.marked_deleted or (not frd and not db_info['mdt_indexes']):
         errors = [MDTUI_ERROR_STRINGS['NO_DOC'] + '. Maybe you should go index it first?']
     context.update({'error_warnings': errors})
     return render(request, template, context)
@@ -723,6 +725,15 @@ def edit_result(request, step='edit_finish', template='mdtui/indexing.html'):
     }
     return render(request, template, context)
 
+# from django.views.generic import View
+#
+# class MuiIndexingView(View):
+#
+#     template_name = 'mdtui/indexing.html'
+#
+#     def get(self, step=None):
+#
+#         return render()
 
 @login_required
 @group_required(SEC_GROUP_NAMES['index'])

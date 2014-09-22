@@ -13,11 +13,11 @@ from django.core.urlresolvers import reverse
 
 from adlibre.dms.base_test import DMSTestCase
 from core.models import CoreConfiguration
+from django.contrib.auth.models import User
 
 
 class ViewTest(DMSTestCase):
-    """
-    Adlibre Browser Views and functionality test case
+    """Adlibre Browser Views and functionality test case
 
     Test data is provided by DMSTestCase
     """
@@ -93,7 +93,7 @@ class ViewTest(DMSTestCase):
             url = '/get/%s?hashcode=%s' % (d[0], d[1])
             response = self.client.get(url)
             self.assertContains(response, self.pdf_file_contains)
-        
+
         for d in self.documents_hash:
             url = '/get/%s.pdf?hashcode=%s' % (d[0], d[1])
             response = self.client.get(url)
@@ -228,3 +228,37 @@ class ConversionTest(DMSTestCase):
     def test_zz_cleanup(self):
         """Test Cleanup"""
         self.cleanAll()
+
+
+class RegistrationTest(DMSTestCase):
+    """Testing django registration forms and password renewal"""
+
+    def setUp(self):
+        # Creating a special registration user
+        self.registration_email = 'another@hostname.com'
+        self.registration_username = 'RegistrationTest'
+        registration_user = User(username=self.registration_username)
+        registration_user.email = self.registration_email
+        registration_user.save()
+        self.registration_user = registration_user
+
+    def test_01_registration_openes(self):
+        url = reverse('pwd_reset')
+        response = self.client.get(url)
+        self.assertContains(response, 'id_email')
+        self.assertContains(response, 'Enter your e-mail address below')
+        self.assertNotContains(response, 'Admin')  # Django admin template not used
+
+    def test_02_registration_confirmation(self):
+        url = reverse('pwd_reset')
+        retrieve_url = 'http://127.0.0.1:8000/user/password/reset/NA-3rd-a49dd5e53146caf72ddb/'
+        post_data = {'email': self.registration_user.email}
+        response = self.client.post(url, post_data)
+        exp_url = reverse('django.contrib.auth.views.password_reset_done')
+        self.assertRedirects(response, exp_url)
+        response = self.client.get(exp_url)
+        self.assertContains(response, 'Instructions Emailed')
+        response = self.client.get(retrieve_url)
+        self.assertContains(response, 'Password reset unsuccessful')
+
+    # TODO: make check of full password reset with intercepting token.

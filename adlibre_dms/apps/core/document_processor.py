@@ -1,3 +1,4 @@
+# -- coding: utf-8 --
 """
 Module: DMS Core CRUD logic handler.
 
@@ -76,7 +77,7 @@ class DocumentProcessor(object):
         """
         barcode = self.option_in_options('barcode', options)
         valid = True
-        log.debug('CREATE Document %s, barcode: %s' % (uploaded_file, barcode))
+        log.debug('CREATE Document %s, barcode: %s' % (uploaded_file.name, barcode))
         operator = PluginsOperator()
         doc = self.init_Document_with_data(options, document_file=uploaded_file)
         # Setting new file name and type.
