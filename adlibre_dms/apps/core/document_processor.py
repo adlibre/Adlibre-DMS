@@ -16,7 +16,6 @@ from django.core.files.uploadedfile import UploadedFile
 from dms_plugins import pluginpoints
 from dms_plugins.operator import PluginsOperator
 
-from adlibre.unicode_cleaner import cleanup
 from core.models import Document
 from core.errors import DmsException
 
