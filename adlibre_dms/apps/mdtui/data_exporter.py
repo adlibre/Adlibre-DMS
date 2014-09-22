@@ -31,7 +31,7 @@ def export_to_csv(search_keys, sec_keys_names, documents):
     response['Content-Disposition'] = 'attachment; filename=search_results.csv'
     writer = csv.writer(response)
     # Writing table headers
-    counter = ['File', ] + ['Date'] + ['Description', ] + sec_keys_names + ['Type', ]
+    counter = ['File', ] + ['Date'] + ['Username'] + ['Description', ] + sec_keys_names + ['Type', ]
     writer.writerow(counter)
     # Writing each file's data into appropriate rows
     for name, doc in docs.iteritems():
@@ -50,7 +50,7 @@ def export_to_csv(search_keys, sec_keys_names, documents):
         docrule = dman.get_docrule_by_id(doc['metadata_doc_type_rule_id'])
         docrule_name = docrule.get_title()
         # Final row adding
-        doc_row = [unicode(name).encode('utf8'), ] + [cr_date, ] + [unicode(doc['metadata_description']).encode('utf8')] + doc_sec_keys + [unicode(docrule_name).encode('utf8'),]
+        doc_row = [unicode(name).encode('utf8'), ] + [cr_date, ] + [unicode(doc['metadata_user_name']).encode('utf8'), ]+ [unicode(doc['metadata_description']).encode('utf8')] + doc_sec_keys + [unicode(docrule_name).encode('utf8'),]
         writer.writerow(doc_row)
 
     # Appending search request parameters into CSV
