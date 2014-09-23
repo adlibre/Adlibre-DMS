@@ -130,8 +130,6 @@ setup(name='adlibre_dms',
             'argparse',  # required by bureaucrat
             # Logging
             'django-log-file-viewer==0.9',
-            # CI integration
-            'django-jenkins==0.15.0',
             # Thumbnails support
             'ghostscript==0.4.1',
     ],
