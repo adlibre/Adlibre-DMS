@@ -224,7 +224,6 @@ INSTALLED_APPS = (
     'widget_tweaks',  # used by MUI templates
     'compressor',  # MUI js / css compression
     'django-log-file-viewer',
-    'django_jenkins',
     'south',
 ) + PROJECT_APPS + ADDITIONAL_APPS
 
