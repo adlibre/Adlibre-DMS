@@ -77,7 +77,10 @@ class DocumentProcessor(object):
         """
         barcode = self.option_in_options('barcode', options)
         valid = True
-        log.debug('CREATE Document %s, barcode: %s' % (uploaded_file.name, barcode))
+        filename = None
+        if uploaded_file:
+            filename = uploaded_file.name
+        log.debug('CREATE Document %s, barcode: %s' % (filename, barcode))
         operator = PluginsOperator()
         doc = self.init_Document_with_data(options, document_file=uploaded_file)
         # Setting new file name and type.
