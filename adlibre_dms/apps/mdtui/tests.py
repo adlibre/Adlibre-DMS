@@ -745,11 +745,11 @@ class MDTUI(MUITestData):
         self.response = None
 
     def test_01_setup_mdts(self):
-        """
-        Setup all MDTs for the test suite.
+        """Setup all MDTs for the test suite.
+
         Made it standalone test because we need it to be run only once
+        adding our MDT's required through API. (MDT API should be working)
         """
-        # adding our MDT's required through API. (MDT API should be working)
         url = reverse('api_mdt')
         # List formatted so to comment out any MDT easily
         for m in [
@@ -770,9 +770,7 @@ class MDTUI(MUITestData):
                 raise AssertionError('MDT %s exists!' % m['_id'])
 
     def test_02_posting_document_with_all_keys(self):
-        """
-        Uploading File though MDTUI, adding all Secondary indexes accordingly.
-        """
+        """Uploading File though MDTUI, adding all Secondary indexes accordingly. """
         # Selecting Document Type Rule
         url = reverse('mdtui-index-type')
         response = self.client.post(url, {self.test_mdt_docrule_id: 'docrule'})
@@ -4147,7 +4145,7 @@ class MDTUI(MUITestData):
         response = self.client.get(url)
         self.assertContains(response, MDTUI_ERROR_STRINGS['NO_DOC'])
 
-    def test_99_unicode_filename_upload(self):
+    def ztest_99_unicode_filename_upload(self):
         """Refs #1536 Unicode decode error while indexing a file through UI"""
         pass
         # TODO: test this upload with real unicode filename (this test is failing if enabled)
