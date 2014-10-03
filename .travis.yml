@@ -13,10 +13,8 @@ before_script:
  - export SITE_PACKAGES=$(python -c "import distutils; print(distutils.sysconfig.get_python_lib())")
  - export GIT_ROOT=$(pwd)
  - cp -rf fixtures $SITE_PACKAGES/fixtures
- - mkdir $SITE_PACKAGES/db $SITE_PACKAGES/log
+ - mkdir $SITE_PACKAGES/db $SITE_PACKAGES/log $SITE_PACKAGES/documents
  - cd $VIRTUAL_ENV
- - mkdir lib/python2.7/site-packages/db/
- - mkdir lib/python2.7/site-packages/log/
  - python lib/python2.7/site-packages/adlibre_dms/manage.py syncdb --noinput --all
  - python lib/python2.7/site-packages/adlibre_dms/manage.py migrate core --fake
  - python lib/python2.7/site-packages/adlibre_dms/manage.py migrate dms_plugins --fake
