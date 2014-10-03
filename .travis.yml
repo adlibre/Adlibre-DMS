@@ -23,6 +23,8 @@ before_script:
  - python adlibre_dms/manage.py loaddata $SITE_PACKAGES/fixtures/core.json
  - python adlibre_dms/manage.py loaddata $SITE_PACKAGES/fixtures/djangoplugins.json
  - python adlibre_dms/manage.py loaddata $SITE_PACKAGES/fixtures/dms_plugins.json
+ - mkdir lib/python2.7/site-packages/db
+ - mkdir lib/python2.7/site-packages/log/
 
 # command to run tests
 script: lib/python2.7/site-packages/adlibre_dms/manage.py test
