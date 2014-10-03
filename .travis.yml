@@ -25,4 +25,4 @@ before_script:
  - python adlibre_dms/manage.py loaddata $SITE_PACKAGES/fixtures/dms_plugins.json
 
 # command to run tests
-script: cd lib/python2.7/site-packages/adlibre_dms; ls -la
+script: lib/python2.7/site-packages/adlibre_dms/manage.py test
