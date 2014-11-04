@@ -252,6 +252,8 @@ class OldFileHandler(BaseFileHandler):
             'user': request.user,
             'barcode': code,
         }
+        if uploaded_file.size == 0:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         document = processor.create(uploaded_file, options)
         if len(processor.errors) > 0:
             log.error('OldFileHandler.create errors: %s' % processor.errors)

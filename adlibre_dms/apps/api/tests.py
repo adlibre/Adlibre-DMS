@@ -7,6 +7,7 @@ License: See LICENSE for license information
 """
 import json
 import os
+import tempfile
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
@@ -437,6 +438,13 @@ class APITest(DMSTestCase):
         url = reverse('api_main')
         response = self.client.get(url)
         self.assertContains(response, 'api_rules_detail')
+
+    def test_27_api_empty_file_call(self):
+        """Get an empty file call response. File size is 0 (Should return error)"""
+        self.client.login(username=self.username, password=self.password)
+        url = reverse('api_file_deprecated', kwargs={'code': self.documents_codes[0]})
+        response = self.client.post(url, {'file': tempfile.TemporaryFile()})
+        self.assertEqual(response.status_code, 400)
 
     def test_zz_cleanup(self):
         """Test Cleanup"""
