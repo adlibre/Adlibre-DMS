@@ -725,59 +725,70 @@ def edit_result(request, step='edit_finish', template='mdtui/indexing.html'):
     }
     return render(request, template, context)
 
-# from django.views.generic import View
-#
-# class MuiIndexingView(View):
-#
-#     template_name = 'mdtui/indexing.html'
-#
-#     def get(self, step=None):
-#
-#         return render()
+from django.views.generic import View
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required
 
-@login_required
-@group_required(SEC_GROUP_NAMES['index'])
-def indexing_select_type(request, step=None, template='mdtui/indexing.html'):
+
+class MuiIndexingView(View):
     """Indexing: Step 1 : Select Document Type
 
     @param request: is a Django request object
     @param step: is a current step name (for template rendering)
     @param template: is a name of template for this view"""
-    # Context init
-    context = {'step': step}
+
+    template_name = 'mdtui/indexing.html'
+    context = {'step': "1"}
     docrule = None
     active_docrule = None
     warnings = []
-    docrules_list = make_document_type_select(user=request.user)
-    cleanup_search_session(request)
-    cleanup_mdts(request)
-    log.debug('indexing_select_type view called with docrule: %s' % docrule)
-    if request.POST:
+
+    @method_decorator(login_required)
+    @method_decorator(group_required(SEC_GROUP_NAMES['index']))
+    def dispatch(self, *args, **kwargs):
+        return super(MuiIndexingView, self).dispatch(*args, **kwargs)
+
+    def get(self, request):
+        context = self.context
+        docrules_list = make_document_type_select(user=request.user)
+        cleanup_search_session(request)
+        cleanup_mdts(request)
+
+        # initializing form with previously selected docrule.
+        try:
+            self.docrule = request.session['indexing_docrule_id']
+        except KeyError:
+            pass
+        if self.docrule:
+            self.active_docrule = self.docrule
+
+        log.debug('MuiIndexingView GET with docrule: %s' % self.docrule)
+        context.update({
+            'active_docrule': self.active_docrule,
+            'docrules_list': docrules_list,
+            'warnings': self.warnings,
+        })
+        return render(request, self.template_name, context)
+
+    def post(self, request):
         for item, value in request.POST.iteritems():
             if not item == u'csrfmiddlewaretoken':
-                docrule = int(item)
-        request.session['indexing_docrule_id'] = docrule
-        mdts = get_mdts_for_docrule(docrule)
+                self.docrule = int(item)
+        request.session['indexing_docrule_id'] = self.docrule
+        mdts = get_mdts_for_docrule(self.docrule)
+        log.debug('MuiIndexingView POST with docrule: %s' % self.docrule)
         if mdts:
             request.session['mdts'] = mdts
             return HttpResponseRedirect(reverse('mdtui-index-details'))
         else:
-            warnings.append(MDTUI_ERROR_STRINGS['NO_MDTS'])
-    else:
-        # initializing form with previously selected docrule.
-        try:
-            docrule = request.session['indexing_docrule_id']
-        except KeyError:
-            pass
-        if docrule:
-            active_docrule = docrule
-
-    context.update({
-        'active_docrule': active_docrule,
-        'docrules_list': docrules_list,
-        'warnings': warnings,
-    })
-    return render_to_response(template, context, context_instance=RequestContext(request))
+            warning = MDTUI_ERROR_STRINGS['NO_MDTS']
+            if not warning in self.warnings:
+                self.warnings.append(warning)
+            log.debug(
+                'MuiIndexingView POST have not found mdts for docrule docrule: %s'
+                % self.docrule
+            )
+            return self.get(request)
 
 
 @login_required

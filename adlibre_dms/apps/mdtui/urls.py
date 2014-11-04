@@ -7,6 +7,7 @@ License: See LICENSE for license information
 
 from django.conf.urls import patterns, url
 from django.views.generic import TemplateView
+from views import MuiIndexingView
 
 urlpatterns = patterns('mdtui.views',
     # Home
@@ -18,7 +19,7 @@ urlpatterns = patterns('mdtui.views',
     url(r'^search/results$', 'search_results', {'step': 'results'}, name='mdtui-search-results'),
     url(r'^search/export/$', 'search_results', {'step': 'export'}, name='mdtui-search-export'),
     # Indexing
-    url(r'^indexing/type$', 'indexing_select_type', {'step': '1'}, name='mdtui-index-type'),
+    url(r'^indexing/type$', MuiIndexingView.as_view(), name='mdtui-index-type'),
     url(r'^indexing/details$', 'indexing_details', {'step': '2'}, name='mdtui-index-details'),
     url(r'^indexing/source$', 'indexing_source', {'step': '3'}, name='mdtui-index-source'),
     url(r'^indexing/finished$', 'indexing_finished', {'step': '4'}, name='mdtui-index-finished'),
