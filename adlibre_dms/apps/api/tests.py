@@ -446,6 +446,13 @@ class APITest(DMSTestCase):
         response = self.client.post(url, {'file': tempfile.TemporaryFile()})
         self.assertEqual(response.status_code, 400)
 
+    def test_28_api_empty_call(self):
+        """Get an empty call response. Empty == does nothing. (Should return error)"""
+        self.client.login(username=self.username, password=self.password)
+        url = reverse('api_file_deprecated', kwargs={'code': self.documents_codes[0]})
+        response = self.client.post(url, {'file': ''})
+        self.assertEqual(response.status_code, 400)
+
     def test_zz_cleanup(self):
         """Test Cleanup"""
         self.cleanAll()
