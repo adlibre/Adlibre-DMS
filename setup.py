@@ -121,7 +121,7 @@ setup(name='adlibre_dms',
             # Tagging
             'django-taggit==0.11.2',
             # Adlibre Components
-            'django-bcp',
+            'django-bcp==0.1.8',
             # Plugins
             'django-plugins',
             # Deployment
