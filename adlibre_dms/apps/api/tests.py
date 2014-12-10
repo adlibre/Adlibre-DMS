@@ -31,6 +31,16 @@ class APITest(DMSTestCase):
         self.adlibre_invoices_rule_id = self.rules[0]
         self.test_tag = 'test_tag'
         self.hworker = HashCodeWorker(method=self.hash_method)
+        self.doc1_dict = {
+            'date': '2012/03/06',
+            'description': 'Test Document Number 1',
+            'Employee ID': '123456',
+            'Required Date': '2012/03/07',
+            'Employee Name': 'Iurii Garmash',
+            'Friends ID': '123',
+            'Friends Name': 'Andrew',
+            'Additional': 'Something for 1',
+        }
 
     def test_00_setup(self):
         """Load Test Data required by this test"""
@@ -452,6 +462,14 @@ class APITest(DMSTestCase):
         url = reverse('api_file_deprecated', kwargs={'code': self.documents_codes[0]})
         response = self.client.post(url, {'file': ''})
         self.assertEqual(response.status_code, 400)
+
+    def test_29_api_post_document_index_data(self):
+        """Put document's couchdb indexes via API call"""
+        self.client.login(username=self.username, password=self.password)
+        content = encode_multipart('BoUnDaRyStRiNg', {'indexing_data': json.dumps(self.doc1_dict)})
+        doc_url = reverse('api_file', kwargs={'code': self.documents_pdf[0], 'suggested_format': 'pdf'})
+        response = self.client.put(doc_url, content, content_type='multipart/form-data; boundary=BoUnDaRyStRiNg')
+        self.assertEqual(response.status_code, 200)
 
     def test_zz_cleanup(self):
         """Test Cleanup"""
