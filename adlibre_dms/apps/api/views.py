@@ -773,6 +773,7 @@ class ApiDocs(APIView):
             'viersion': rest_reverse('api_version', request=request, format=format),
             'api_file': rest_reverse('api_file', kwargs={'code': 'code'}, request=request, format=format),
             'api_file_info': reverse('api_file_info', kwargs={'code': 'code'}),
+            'api_file_list': reverse('api_file_list', kwargs={'id_rule': 1}),
             'api_revision_count': reverse('api_revision_count', kwargs={'document': 'code'}),
             'api_rules': rest_reverse('api_rules', request=request, format=format),
             'api_rules_detail': reverse('api_rules_detail', kwargs={'id_rule': '1'}),
