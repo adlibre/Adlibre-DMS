@@ -12,6 +12,7 @@ import logging
 import json
 import traceback
 import sys
+from copy import copy
 from wsgiref.handlers import format_date_time
 from datetime import datetime, timedelta
 from time import mktime
@@ -108,6 +109,8 @@ class DMSOBjectRevisionsData(dict):
         obj_mapping = obj_rule.get_docrule_plugin_mappings()
         d['document_list_url'] = reverse("api_file_list", kwargs={'id_rule': obj_mapping.pk})
         d['uncategorized'] = obj_rule.uncategorized
+        if dms_object.db_info:
+            d['indexing_data'] = self.format_indexes(dms_object.db_info)
         self.data = d
         self.jsons = json.dumps(d, indent=4)
         super(DMSOBjectRevisionsData, self).__init__(data=self.data, jsons=self.jsons)
@@ -115,3 +118,11 @@ class DMSOBjectRevisionsData(dict):
     def __repr__(self):
         return self.jsons
 
+    def format_indexes(self, dbinfo):
+        """Returns a set of DMS database indexing key/values"""
+        indexes = {}
+        if 'mdt_indexes' in dbinfo:
+            indexes = copy(dbinfo['mdt_indexes'])
+        if 'description' in dbinfo:
+            indexes['description'] = dbinfo['description']
+        return indexes

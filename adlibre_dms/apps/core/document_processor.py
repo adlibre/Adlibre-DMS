@@ -309,22 +309,21 @@ class DocumentProcessor(object):
                     if property_name == 'new_type':
                         if value:
                             doc.set_change_type(value)
-                    if property_name == 'mark_deleted':
-                        if value:
-                            doc.update_options({property_name: True})
                     if property_name == 'mark_revision_deleted':
                         if value:
                             doc.update_options({property_name: value})
-                    if property_name == 'thumbnail':
-                        if value:
-                            doc.update_options({property_name: True})
-                    if property_name == 'remove_thumbnails':
-                        if value:
-                            doc.update_options({property_name: True})
                     if property_name == 'delete_revision':
                         if value:
                             doc.update_options({property_name: value})
                             doc.set_revision(int(value))
+                    if property_name in [
+                        'indexing_data',
+                        'thumbnail',
+                        'mark_deleted',
+                        'remove_thumbnails',
+                    ]:
+                        if value:
+                            doc.update_options({property_name: True})
                     if property_name == 'update_file':
                         doc.set_file_obj(value)
                         if value:

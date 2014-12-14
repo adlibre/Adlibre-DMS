@@ -471,6 +471,23 @@ class APITest(DMSTestCase):
         response = self.client.put(doc_url, content, content_type='multipart/form-data; boundary=BoUnDaRyStRiNg')
         self.assertEqual(response.status_code, 200)
 
+    def test_30_api_get_document_indexes(self):
+        """Get document indexes from CouchDB"""
+        self.client.login(username=self.username, password=self.password)
+        url = reverse('api_file_info', kwargs={'code': self.documents_pdf[0]}) + '?indexing_data=1'
+        response = self.client.get(url)
+        r_data = json.loads(json.loads(response.content))
+        if not "indexing_data" in r_data:
+            raise AssertionError("No indexing data in %s" % r_data)
+        indexing_data = r_data['indexing_data']
+        if not 'description' in indexing_data:
+            raise AssertionError('No "description" field in indexing_data')
+        for key, value in indexing_data.iteritems():
+            if not key in self.doc1_dict.iterkeys():
+                raise AssertionError('Key "%s" not present in indexing_data: %s' % (key, indexing_data))
+            if not indexing_data[key] in self.doc1_dict.itervalues():
+                raise AssertionError('Value "%s" not present in indexing_data' % value)
+
     def test_zz_cleanup(self):
         """Test Cleanup"""
         self.cleanAll()

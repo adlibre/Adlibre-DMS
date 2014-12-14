@@ -306,12 +306,19 @@ class FileInfoHandler(BaseFileHandler):
     @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
     def get(self, request, code, suggested_format=None):
         revision, hashcode, extra = self._get_info(request)
+        only_metadata = True
+        indexing_data = extra.get('indexing_data', None)
+        # Security measure for variable
+        if indexing_data:
+            indexing_data = True
+            only_metadata = False
         processor = DocumentProcessor()
         options = {
             'revision': revision,
             'hashcode': hashcode,
-            'only_metadata': True,
+            'only_metadata': only_metadata,
             'extension': suggested_format,
+            'indexing_data': indexing_data,
             'user': request.user,
         }
         document = processor.read(code, options)
