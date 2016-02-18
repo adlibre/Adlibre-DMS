@@ -1,4 +1,4 @@
-FROM panubo/python-bureaucrat
+FROM panubo/python-bureaucrat:2.7
 
 COPY . /srv/git
 
