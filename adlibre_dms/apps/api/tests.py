@@ -7,6 +7,7 @@ License: See LICENSE for license information
 """
 import json
 import os
+import tempfile
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
@@ -30,6 +31,16 @@ class APITest(DMSTestCase):
         self.adlibre_invoices_rule_id = self.rules[0]
         self.test_tag = 'test_tag'
         self.hworker = HashCodeWorker(method=self.hash_method)
+        self.doc1_dict = {
+            'date': '2012/03/06',
+            'description': 'Test Document Number 1',
+            'Employee ID': '123456',
+            'Required Date': '2012/03/07',
+            'Employee Name': 'Iurii Garmash',
+            'Friends ID': '123',
+            'Friends Name': 'Andrew',
+            'Additional': 'Something for 1',
+        }
 
     def test_00_setup(self):
         """Load Test Data required by this test"""
@@ -437,6 +448,45 @@ class APITest(DMSTestCase):
         url = reverse('api_main')
         response = self.client.get(url)
         self.assertContains(response, 'api_rules_detail')
+
+    def test_27_api_empty_file_call(self):
+        """Get an empty file call response. File size is 0 (Should return error)"""
+        self.client.login(username=self.username, password=self.password)
+        url = reverse('api_file_deprecated', kwargs={'code': self.documents_codes[0]})
+        response = self.client.post(url, {'file': tempfile.TemporaryFile()})
+        self.assertEqual(response.status_code, 400)
+
+    def test_28_api_empty_call(self):
+        """Get an empty call response. Empty == does nothing. (Should return error)"""
+        self.client.login(username=self.username, password=self.password)
+        url = reverse('api_file_deprecated', kwargs={'code': self.documents_codes[0]})
+        response = self.client.post(url, {'file': ''})
+        self.assertEqual(response.status_code, 400)
+
+    def test_29_api_post_document_index_data(self):
+        """Put document's couchdb indexes via API call"""
+        self.client.login(username=self.username, password=self.password)
+        content = encode_multipart('BoUnDaRyStRiNg', {'indexing_data': json.dumps(self.doc1_dict)})
+        doc_url = reverse('api_file', kwargs={'code': self.documents_pdf[0], 'suggested_format': 'pdf'})
+        response = self.client.put(doc_url, content, content_type='multipart/form-data; boundary=BoUnDaRyStRiNg')
+        self.assertEqual(response.status_code, 200)
+
+    def test_30_api_get_document_indexes(self):
+        """Get document indexes from CouchDB"""
+        self.client.login(username=self.username, password=self.password)
+        url = reverse('api_file_info', kwargs={'code': self.documents_pdf[0]}) + '?indexing_data=1'
+        response = self.client.get(url)
+        r_data = json.loads(json.loads(response.content))
+        if not "indexing_data" in r_data:
+            raise AssertionError("No indexing data in %s" % r_data)
+        indexing_data = r_data['indexing_data']
+        if not 'description' in indexing_data:
+            raise AssertionError('No "description" field in indexing_data')
+        for key, value in indexing_data.iteritems():
+            if not key in self.doc1_dict.iterkeys():
+                raise AssertionError('Key "%s" not present in indexing_data: %s' % (key, indexing_data))
+            if not indexing_data[key] in self.doc1_dict.itervalues():
+                raise AssertionError('Value "%s" not present in indexing_data' % value)
 
     def test_zz_cleanup(self):
         """Test Cleanup"""

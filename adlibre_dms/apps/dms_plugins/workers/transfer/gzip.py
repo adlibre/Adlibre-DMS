@@ -82,7 +82,7 @@ class Gzip(object):
 
     def work_retrieve(self, document):
         # Doing nothing for only_metadata option
-        if document.get_option('only_metadata'):
+        if document.get_option('only_metadata') or document.get_option('indexing_data'):
             return document
         if document.get_current_file_revision_data().get('compression_type', None) == self.compression_type:
             try:

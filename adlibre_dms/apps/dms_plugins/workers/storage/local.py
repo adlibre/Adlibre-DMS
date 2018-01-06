@@ -109,7 +109,7 @@ class Local(object):
         return document
 
     def retrieve(self, document):
-        if document.get_option('only_metadata'):
+        if document.get_option('only_metadata') or document.get_option('indexing_data'):
             return document
         directory = self.filesystem.get_document_directory(document)
         fullpath = os.path.join(directory, document.get_current_file_revision_data()['name'])

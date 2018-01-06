@@ -13,16 +13,15 @@ before_script:
  - export SITE_PACKAGES=$(python -c "import distutils; print(distutils.sysconfig.get_python_lib())")
  - export GIT_ROOT=$(pwd)
  - cp -rf fixtures $SITE_PACKAGES/fixtures
- - mkdir $SITE_PACKAGES/db $SITE_PACKAGES/log
+ - mkdir $SITE_PACKAGES/db $SITE_PACKAGES/log $SITE_PACKAGES/documents
  - cd $VIRTUAL_ENV
- - python adlibre_dms/manage.py syncdb --noinput --all
- - python adlibre_dms/manage.py migrate core --fake
- - python adlibre_dms/manage.py migrate core --fake
- - python adlibre_dms/manage.py migrate dms_plugins --fake
- - python adlibre_dms/manage.py loaddata $SITE_PACKAGES/fixtures/initial_datas.json
- - python adlibre_dms/manage.py loaddata $SITE_PACKAGES/fixtures/core.json
- - python adlibre_dms/manage.py loaddata $SITE_PACKAGES/fixtures/djangoplugins.json
- - python adlibre_dms/manage.py loaddata $SITE_PACKAGES/fixtures/dms_plugins.json
+ - python lib/python2.7/site-packages/adlibre_dms/manage.py syncdb --noinput --all
+ - python lib/python2.7/site-packages/adlibre_dms/manage.py migrate core --fake
+ - python lib/python2.7/site-packages/adlibre_dms/manage.py migrate dms_plugins --fake
+ - python lib/python2.7/site-packages/adlibre_dms/manage.py loaddata $SITE_PACKAGES/fixtures/initial_datas.json
+ - python lib/python2.7/site-packages/adlibre_dms/manage.py loaddata $SITE_PACKAGES/fixtures/core.json
+ - python lib/python2.7/site-packages/adlibre_dms/manage.py loaddata $SITE_PACKAGES/fixtures/djangoplugins.json
+ - python lib/python2.7/site-packages/adlibre_dms/manage.py loaddata $SITE_PACKAGES/fixtures/dms_plugins.json
 
 # command to run tests
-script: python adlibre_dms/manage.py test
+script: lib/python2.7/site-packages/adlibre_dms/manage.py test --verbosity 2

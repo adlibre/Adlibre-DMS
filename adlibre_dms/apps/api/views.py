@@ -252,6 +252,8 @@ class OldFileHandler(BaseFileHandler):
             'user': request.user,
             'barcode': code,
         }
+        if uploaded_file.size == 0:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         document = processor.create(uploaded_file, options)
         if len(processor.errors) > 0:
             log.error('OldFileHandler.create errors: %s' % processor.errors)
@@ -304,12 +306,19 @@ class FileInfoHandler(BaseFileHandler):
     @method_decorator(group_required(API_GROUP_NAME))  # FIXME: Should be more granular permissions
     def get(self, request, code, suggested_format=None):
         revision, hashcode, extra = self._get_info(request)
+        only_metadata = True
+        indexing_data = extra.get('indexing_data', None)
+        # Security measure for variable
+        if indexing_data:
+            indexing_data = True
+            only_metadata = False
         processor = DocumentProcessor()
         options = {
             'revision': revision,
             'hashcode': hashcode,
-            'only_metadata': True,
+            'only_metadata': only_metadata,
             'extension': suggested_format,
+            'indexing_data': indexing_data,
             'user': request.user,
         }
         document = processor.read(code, options)
@@ -771,6 +780,7 @@ class ApiDocs(APIView):
             'viersion': rest_reverse('api_version', request=request, format=format),
             'api_file': rest_reverse('api_file', kwargs={'code': 'code'}, request=request, format=format),
             'api_file_info': reverse('api_file_info', kwargs={'code': 'code'}),
+            'api_file_list': reverse('api_file_list', kwargs={'id_rule': 1}),
             'api_revision_count': reverse('api_revision_count', kwargs={'document': 'code'}),
             'api_rules': rest_reverse('api_rules', request=request, format=format),
             'api_rules_detail': reverse('api_rules_detail', kwargs={'id_rule': '1'}),

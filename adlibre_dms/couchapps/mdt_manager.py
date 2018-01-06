@@ -1,5 +1,6 @@
 """
 Module: DMS Metadata Template Manager
+
 Project: Adlibre DMS
 Copyright: Adlibre Pty Ltd 2012
 License: See LICENSE for license information
@@ -12,9 +13,10 @@ from couchdbkit.exceptions import ResourceConflict
 
 log = logging.getLogger('dms.mdtcouch.mdt_manager')
 
+
 class MetaDataTemplateManager(object):
-    """
-    Main DMS manager for operating with Metadata Templates.
+    """Main DMS manager for operating with Metadata Templates.
+
     Uses only CouchDB storage implementation for now.
     """
     def __init__(self):
@@ -49,9 +51,7 @@ class MetaDataTemplateManager(object):
             return False
 
     def get_mdts_by_name(self, names_list):
-        """
-
-        """
+        """ """
         log.debug('Getting MDT-s named: %s' % names_list)
         mdts_list = {}
         # Getting MDT's from DB
@@ -75,13 +75,11 @@ class MetaDataTemplateManager(object):
             return False
 
     def get_all_mdts(self):
-        """
-
-        """
+        """ """
         log.debug('Getting all MDT-s.')
         mdts_list = {}
         # Getting MDT's from DB
-        mdts_view = MetaDataTemplate.view('mdtcouch/docrules_list')
+        mdts_view = MetaDataTemplate.view('mdtcouch/docrules_list', classes={None: MetaDataTemplate})
         if mdts_view:
             # Constructing MDT's response dict
             id = 1
@@ -91,7 +89,7 @@ class MetaDataTemplateManager(object):
                 mdts_list[str(id)]["mdt_id"] = mdts_list[str(id)]['_id']
                 del mdts_list[str(id)]['_id']
                 del mdts_list[str(id)]['_rev']
-                id+=1
+                id += 1
             return mdts_list
         else:
             log.error('Got no MDT-s from CouchDB.')

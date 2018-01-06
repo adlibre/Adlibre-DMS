@@ -364,7 +364,11 @@ class DMSSearchManager(object):
                      "metadata_description"
                      "metadata_doc_type_rule_id"
         """
-        documents = CouchDocument.view('dmscouch/search_main_indexes', keys=document_list)
+        documents = CouchDocument.view(
+            'dmscouch/search_main_indexes',
+            classes={None: CouchDocument},
+            keys=document_list
+        )
         return documents
 
     ##################################### Search Methods ######################################
@@ -388,7 +392,12 @@ class DMSSearchManager(object):
                         endkey = self.convert_to_search_keys_for_date_range(cleaned_document_keys, key, docrule_id, end=True, date_range=True)
                     if startkey and endkey:
                         # Appending results list to mixed set of results.
-                        search_res = CouchDocument.view('dmscouch/search', startkey=startkey, endkey=endkey)
+                        search_res = CouchDocument.view(
+                            'dmscouch/search',
+                            classes={None: CouchDocument},
+                            startkey=startkey,
+                            endkey=endkey
+                        )
                         if docrule_id in resp_set.iterkeys():
                             resp_set[docrule_id].append(search_res)
                         else:
@@ -416,7 +425,12 @@ class DMSSearchManager(object):
             startkey = [docrule_id, str_date_to_couch(cleaned_document_keys["date"])]
             endkey = [docrule_id, str_date_to_couch(cleaned_document_keys["end_date"])]
             # Getting all documents withing this date range
-            all_docs = CouchDocument.view('dmscouch/search_date', startkey=startkey, endkey=endkey)
+            all_docs = CouchDocument.view(
+                'dmscouch/search_date',
+                classes={None: CouchDocument},
+                startkey=startkey,
+                endkey=endkey
+            )
             # Appending to fetch docs list if not already there
             for doc in all_docs:
                 doc_name = doc.get_id
@@ -433,11 +447,19 @@ class DMSSearchManager(object):
         return resp_list
 
     def get_found_documents(self, document_names_list):
+
         """
         Method to retrieve documents index data by document names list.
 
         @param document_names_list: list of document id's, e.g. ['DOC0001', 'MAS0001', '...' ]
         @return: CouchDB documents list.
         """
-        documents = CouchDocument.view('dmscouch/all', keys=document_names_list, include_docs=True)
-        return documents
+        documents = CouchDocument.view(
+            'dmscouch/all',
+            keys=document_names_list,
+            include_docs=True)
+        # Converting documents to omit couchdb ViewResults iteration bug
+        results = []
+        for doc in documents:
+            results.append(doc)
+        return results
