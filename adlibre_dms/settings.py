@@ -3,12 +3,12 @@
 import os
 import sys
 
-
-PROJECT_PATH = os.path.abspath(os.path.split(__file__)[0])
-sys.path.append(os.path.join(PROJECT_PATH, 'apps'))
-sys.path.append(os.path.join(PROJECT_PATH, 'couchapps'))
-sys.path.append(os.path.join(PROJECT_PATH, 'libraries'))
-sys.path.append(os.path.join(PROJECT_PATH, 'dmsplugins'))
+# Define custom library path to make imports shorter
+LIBRARY_PATH = os.path.abspath(os.path.split(__file__)[0])
+sys.path.append(os.path.join(LIBRARY_PATH, 'apps'))
+sys.path.append(os.path.join(LIBRARY_PATH, 'couchapps'))
+sys.path.append(os.path.join(LIBRARY_PATH, 'libraries'))
+sys.path.append(os.path.join(LIBRARY_PATH, 'dmsplugins'))
 
 if len(sys.argv) > 1:
     # Define TEST Variable if running unit tests
@@ -29,7 +29,7 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',  # Add 'postgresql_psycopg2', 'postgresql', 'mysql' or 'sqlite3'
-        'NAME': os.path.join(PROJECT_PATH, '..', 'db', 'dms.sqlite'),  # Or path to database file if using sqlite3.
+        'NAME': os.path.join(LIBRARY_PATH, '..', 'db', 'dms.sqlite'),  # Or path to database file if using sqlite3.
         'USER': '',                      # Not used with sqlite3.
         'PASSWORD': '',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
@@ -92,9 +92,9 @@ USE_L10N = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
-MEDIA_ROOT = os.path.join(PROJECT_PATH, '..', 'www', 'media')
-DOCUMENT_ROOT = os.path.join(PROJECT_PATH, '..', 'documents')
-FIXTURE_DIRS = (os.path.join(PROJECT_PATH, '..', 'fixtures'), )
+MEDIA_ROOT = os.path.join(LIBRARY_PATH, '..', 'www', 'media')
+DOCUMENT_ROOT = os.path.join(LIBRARY_PATH, '..', 'documents')
+FIXTURE_DIRS = (os.path.join(LIBRARY_PATH, '..', 'fixtures'), )
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -105,7 +105,7 @@ MEDIA_URL = '/media/'
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = os.path.join(PROJECT_PATH, '..', 'www', 'static')
+STATIC_ROOT = os.path.join(LIBRARY_PATH, '..', 'www', 'static')
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
@@ -116,7 +116,7 @@ STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    os.path.join(PROJECT_PATH, '..', '..', 'custom_static'),
+    os.path.join(LIBRARY_PATH, '..', '..', 'custom_static'),
 )
 
 # List of finder classes that know how to find static files in
@@ -182,8 +182,8 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    os.path.join(PROJECT_PATH, '..', '..', 'custom_templates'),
-    os.path.join(PROJECT_PATH, 'templates'),
+    os.path.join(LIBRARY_PATH, '..', '..', 'custom_templates'),
+    os.path.join(LIBRARY_PATH, 'templates'),
 )
 
 PROJECT_APPS = (
@@ -339,7 +339,7 @@ if DEBUG:
             'file': {
                 'level': 'DEBUG',
                 'class': 'logging.handlers.TimedRotatingFileHandler',
-                'filename': os.path.join(PROJECT_PATH, '..', 'log', 'dms.log'),
+                'filename': os.path.join(LIBRARY_PATH, '..', 'log', 'dms.log'),
                 'when': 'midnight',
                 'interval': 1,  # 1 day
                 'backupCount': 14,  # two weeks
@@ -398,7 +398,7 @@ if not DEBUG:
         },
         'filesystem': {
             'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-            'LOCATION': os.path.join(PROJECT_PATH, '..', '..', '..', '..', 'cache'),
+            'LOCATION': os.path.join(LIBRARY_PATH, '..', '..', '..', '..', 'cache'),
         },
         'default': {
             'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
@@ -417,7 +417,7 @@ else:
         },
         'filesystem': {
             'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-            'LOCATION': os.path.join(PROJECT_PATH, '..', '..', '..', '..', 'cache'),
+            'LOCATION': os.path.join(LIBRARY_PATH, '..', '..', '..', '..', 'cache'),
         },
         'default': {
             'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
@@ -428,9 +428,9 @@ else:
 LOGIN_REDIRECT_URL = '/'
 
 # django-log-file-viewer setttings
-LOG_FILES_DIR = os.path.join(PROJECT_PATH, '..', '..', '..', '..', 'log')
+LOG_FILES_DIR = os.path.join(LIBRARY_PATH, '..', '..', '..', '..', 'log')
 # Debug/local settting to override in local_settins.py
-#LOG_FILES_DIR = os.path.join(PROJECT_PATH, '..', 'log')
+#LOG_FILES_DIR = os.path.join(LIBRARY_PATH, '..', 'log')
 LOG_FILES_RE = '(?P<date>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3})\s\[(?P<type>[A-Z]+)\]\s(?P<message>.+)'
 LOG_FILES_PAGINATE_LINES = 1000
 
@@ -478,7 +478,7 @@ except ImportError:
 # Trying to read DMS version from version file stored
 PRODUCT_VERSION = '1.0'
 try:
-    version_file = os.path.join(PROJECT_PATH, 'version.txt')
+    version_file = os.path.join(LIBRARY_PATH, 'version.txt')
     ver_file = open(version_file, 'r')
     version = ver_file.read()
     PRODUCT_VERSION = version
