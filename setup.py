@@ -123,7 +123,7 @@ setup(name='adlibre_dms',
             # Adlibre Components
             'django-bcp',
             # Plugins
-            'django-plugins',
+            'django-plugins==0.2.4',
             # Deployment
             'flup==1.0.3.dev-20110405',
             'bureaucrat',
