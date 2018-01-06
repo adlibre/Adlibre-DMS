@@ -1,6 +1,7 @@
 FROM python:2.7
 
 ARG DMS_VERSION=release/1.2
+ARG GUNICORN_VERSION=19.7.1
 
 WORKDIR /usr/src/app
 EXPOSE 8000
@@ -30,7 +31,8 @@ RUN mkdir -p $PROJECT_PATH/www/static && \
     chown -R www:www $PROJECT_PATH/www/static $PROJECT_PATH/log $PROJECT_PATH/documents $PROJECT_PATH/db
 
 # Install with pip
-RUN pip install --no-cache-dir git+https://github.com/adlibre/Adlibre-DMS.git@${DMS_VERSION}
+RUN pip install --no-cache-dir git+https://github.com/adlibre/Adlibre-DMS.git@${DMS_VERSION} && \
+    pip install --no-cache-dir gunicorn==${GUNICORN_VERSION}
 
 USER www
 RUN manage.py collectstatic --noinput
