@@ -41,7 +41,6 @@ run_deployfile() {
     # LICENSE: MIT License, Copyright (c) 2017 Volt Grid Pty Ltd
     # Run all Deployfile commands
     local deployfile=${1:-'Deployfile'}
-    local command_run=false
     if [ ! -e "$deployfile" ]; then return 0; fi
     while read line || [[ -n "$line" ]]; do
         if [[ -z "$line" ]] || [[ "$line" == \#* ]]; then continue; fi
@@ -49,14 +48,12 @@ run_deployfile() {
         eval "${line#*:[[:space:]]}"
         rc=$?
         [ "$rc" != 0 ] && exit $rc
-        command_run=true
     done < "$deployfile"
-    [ $command_run = true ] && exit 0 || return
 }
 
 if [ -z "$CI" ]; then
     echo "Waiting for attached services..."
-    wait_couch
+    wait_couch $COUCHDB_HOST $COUCHDB_PORT
 fi
 
 # Exec Procfile or run Deploy commands, or if not found then exec command passed
