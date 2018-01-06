@@ -4,27 +4,27 @@ Contains overrides for our project layout in a standard deployment.
 """
 
 from adlibre_dms.settings import * # Import global settings
+import os
 
 # Database Location project_root/db/
-import os
-PROJECT_PATH = os.path.abspath(os.path.split(__file__)[0])
+PROJECT_PATH = os.environ.get('PROJECT_PATH', os.path.abspath(os.path.join(os.path.split(__file__)[0], '..')))
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.abspath(os.path.join(PROJECT_PATH, '..', 'db', 'dms.sqlite')),
+        'NAME': os.path.abspath(os.path.join(PROJECT_PATH, 'db', 'dms.sqlite')),
         }
 }
 
-MEDIA_ROOT = os.path.abspath(os.path.join(PROJECT_PATH, '..', 'www', 'media'))
-STATIC_ROOT = os.path.abspath(os.path.join(PROJECT_PATH, '..', 'www', 'static'))
-DOCUMENT_ROOT = os.path.join(PROJECT_PATH, '..', 'documents')
+MEDIA_ROOT = os.path.abspath(os.path.join(PROJECT_PATH, 'www', 'media'))
+STATIC_ROOT = os.path.abspath(os.path.join(PROJECT_PATH, 'www', 'static'))
+DOCUMENT_ROOT = os.path.join(PROJECT_PATH, 'documents')
 COMPRESS_ROOT = STATIC_ROOT
 
 STATICFILES_DIRS = (
-    os.path.join(PROJECT_PATH, '..', 'custom_static'),
+    os.path.join(PROJECT_PATH, 'custom_static'),
 )
 
-TEMPLATE_DIRS = (os.path.join(PROJECT_PATH, '..', 'custom_templates'),) + TEMPLATE_DIRS
+TEMPLATE_DIRS = (os.path.join(PROJECT_PATH, 'custom_templates'),) + TEMPLATE_DIRS
 
 import logging
 #from adlibre_dms.settings import NoMessageFailuresFilter # already imported
@@ -52,7 +52,7 @@ LOGGING = {
         'file': {
             'level': 'DEBUG',
             'class': 'logging.handlers.TimedRotatingFileHandler',
-            'filename': os.path.join(PROJECT_PATH, '..', 'log', 'dms.log'),
+            'filename': os.path.join(PROJECT_PATH, 'log', 'dms.log'),
             'when': 'midnight',
             'interval': 1, # 1 day
             'backupCount': 14, # two weeks
@@ -99,12 +99,9 @@ LOGGING = {
 }
 
 # Email settings
-EMAIL_HOST = 'localhost'
-EMAIL_PORT = 25
-EMAIL_HOST_USER = ''
-EMAIL_HOST_PASSWORD = ''
-EMAIL_USE_TLS = False
-DEFAULT_FROM_EMAIL = 'testing@example.com' # Override in your local_settings
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'localhost')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '25'))
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'testing@example.com')
 
 # This will import the local_settings in our virtual_env subdir next to manage.py.
 try:
