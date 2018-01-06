@@ -6,6 +6,14 @@ Contains overrides for our project layout in a standard deployment.
 from adlibre_dms.settings import * # Import global settings
 import os
 
+# Define custom library path to make imports shorter
+import adlibre_dms.__init__
+LIBRARY_PATH = os.path.dirname(adlibre_dms.__init__.__file__)
+sys.path.append(os.path.join(LIBRARY_PATH, 'apps'))
+sys.path.append(os.path.join(LIBRARY_PATH, 'couchapps'))
+sys.path.append(os.path.join(LIBRARY_PATH, 'libraries'))
+sys.path.append(os.path.join(LIBRARY_PATH, 'dmsplugins'))
+
 # Database Location project_root/db/
 PROJECT_PATH = os.environ.get('PROJECT_PATH', os.path.abspath(os.path.join(os.path.split(__file__)[0], '..')))
 DATABASES = {
