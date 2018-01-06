@@ -35,3 +35,4 @@ RUN pip install --no-cache-dir git+https://github.com/adlibre/Adlibre-DMS.git@${
 USER www
 RUN manage.py collectstatic --noinput
 ENTRYPOINT ["/usr/src/app/deployment/entry.sh"]
+CMD ["web"]

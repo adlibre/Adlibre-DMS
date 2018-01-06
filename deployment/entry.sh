@@ -60,6 +60,6 @@ if [ -z "$CI" ]; then
 fi
 
 # Exec Procfile or run Deploy commands, or if not found then exec command passed
-run_deployfile Deployfile
-exec_procfile Procfile $1
+run_deployfile deployment/Deployfile
+exec_procfile deployment/Procfile $1
 exec "$@"
