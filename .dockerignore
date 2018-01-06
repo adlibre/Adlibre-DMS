@@ -1,0 +1,9 @@
+.dockerignore
+.git
+.gitignore
+.travis.yml
+adlibre_dms
+db/*
+local_settings.py.example
+settings_prod.py
+setup.py
