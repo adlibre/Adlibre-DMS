@@ -6,7 +6,6 @@ ARG GUNICORN_VERSION=19.7.1
 WORKDIR /usr/src/app
 EXPOSE 8000
 ENV PYTHONBUFFERED=1
-ENV PYTHONPATH="/usr/local/adlibre_dms"
 ENV PATH="/usr/local/adlibre_dms:${PATH}"
 
 # App config
