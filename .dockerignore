@@ -2,6 +2,7 @@
 .git
 .gitignore
 .travis.yml
+Dockerfile
 adlibre_dms
 db/*
 local_settings.py.example
