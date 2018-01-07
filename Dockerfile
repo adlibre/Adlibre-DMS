@@ -29,8 +29,9 @@ COPY . /usr/src/app/
 RUN mkdir -p $PROJECT_PATH/www/static && \
     chown -R www:www $PROJECT_PATH/www/static $PROJECT_PATH/log $PROJECT_PATH/documents $PROJECT_PATH/db
 
-# Install with pip
-RUN pip install --no-cache-dir git+https://github.com/adlibre/Adlibre-DMS.git@${DMS_VERSION}
+# Install with pip, fix reportlab bug in 2.6
+RUN pip install --no-cache-dir git+https://github.com/adlibre/Adlibre-DMS.git@${DMS_VERSION} && \
+    sed -i -e 's@OpenActions@OpenAction@g' /usr/local/lib/python*/site-packages/reportlab/pdfbase/pdfdoc.py
 
 USER www
 RUN manage.py collectstatic --noinput
