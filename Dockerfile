@@ -7,6 +7,7 @@ WORKDIR /usr/src/app
 EXPOSE 8000
 ENV PYTHONBUFFERED=1
 ENV PATH="/usr/local/adlibre_dms:${PATH}"
+ENV PYTHONPATH="/usr/local/adlibre_dms"
 
 # App config
 ENV DJANGO_SETTINGS_MODULE=settings_prod
