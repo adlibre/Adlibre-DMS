@@ -1,1 +1,1 @@
-web: gunicorn adlibre_dms.wsgi:application --bind 0.0.0.0 --log-file $PROJECT_PATH/log/gunicorn.log
+web: manage.py runfcgi method=prefork daemonize=false host=0.0.0.0 port=8000 minspare=1 maxspare=2 maxchildren=4 maxrequests=200
