@@ -1,6 +1,6 @@
 FROM python:2.7
 
-ARG DMS_VERSION=release/1.2
+ARG DMS_VERSION=release/1.3
 
 WORKDIR /usr/src/app
 EXPOSE 8000
