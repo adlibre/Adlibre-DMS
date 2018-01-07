@@ -1,0 +1,23 @@
+version: '2.1'
+
+services:
+  dms:
+    build: .
+    depends_on:
+      - couchdb
+    command: sleep infinity # for keeping the container running during devops processes
+#    command: "python manage.py runserver 0.0.0.0:8000" # local development
+    volumes:
+      - .:/usr/src/app/
+    ports:
+      - "8000:8000"
+    environment:
+      - COUCHDB_HOST=adlibredms_couchdb_1
+
+  couchdb:
+    image: docker.io/panubo/couchdb:latest
+    ports:
+      - "5984:5984"
+    environment:
+      - COUCHDB_USER=admin
+      - COUCHDB_PASS=admin

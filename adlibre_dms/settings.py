@@ -40,15 +40,18 @@ DATABASES = {
 XS_SHARING_ALLOWED_ORIGINS = '*'
 XS_SHARING_ALLOWED_METHODS = ['POST', 'GET', 'OPTIONS', 'PUT', 'DELETE']
 
+COUCHDB_HOST = os.environ.get('COUCHDB_HOST', 'localhost')
+COUCHDB_PORT = os.environ.get('COUCHDB_PORT', '5984')
+
 if DEBUG:
     COUCHDB_DATABASES = (
-        ('dmscouch', 'http://127.0.0.1:5984/dmscouch_test'),
-        ('mdtcouch', 'http://127.0.0.1:5984/mdtcouch_test'),
+        ('dmscouch', 'http://%s:%s/dmscouch_test' % (COUCHDB_HOST, COUCHDB_PORT)),
+        ('mdtcouch', 'http://%s:%s:5984/mdtcouch_test'% (COUCHDB_HOST, COUCHDB_PORT)),
     )
 else:
     COUCHDB_DATABASES = (
-        ('dmscouch', 'http://127.0.0.1:5984/dmscouch'),
-        ('mdtcouch', 'http://127.0.0.1:5984/mdtcouch'),
+        ('dmscouch', 'http://%s:%s/dmscouch' % (COUCHDB_HOST, COUCHDB_PORT)),
+        ('mdtcouch', 'http://%s:%s/mdtcouch' % (COUCHDB_HOST, COUCHDB_PORT)),
     )
 COUCHDB_COMPACT = False
 

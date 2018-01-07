@@ -19,16 +19,11 @@ COMPRESS_ENABLED = True
 # specific timezone settings
 TIME_ZONE = None
 
-# remove fcgi script name from url (lighttpd)
+# remove fcgi script name from url (lighttpd, nginx)
 FORCE_SCRIPT_NAME = ''
 
 # Email Settings Overrides
 DEFAULT_FROM_EMAIL = 'dms@example.com'
-
-COUCHDB_DATABASES = (
-    ('dmscouch', 'http://127.0.0.1:5984/dmscouch'),
-    ('mdtcouch', 'http://127.0.0.1:5984/mdtcouch'),
-)
 
 ALLOWED_HOSTS = [
     "www.mydomain.com"
