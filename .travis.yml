@@ -8,7 +8,7 @@ services:
 
 before_install:
   - sudo apt-get -qq update
-  - sudo apt-get install -y libgs9 libtiff5 libpoppler46 a2ps
+  - sudo apt-get install -y libgs9 libtiff5 libpoppler44 a2ps
 
 # command to install dependencies
 install: "pip install ."
