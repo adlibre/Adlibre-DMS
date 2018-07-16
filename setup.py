@@ -102,7 +102,7 @@ setup(name='adlibre_dms',
         ('www', ['www/.gitignore']), # create empty dir
         ('www/status-pages', find_files('www/status-pages', '*')),
         ('custom_static', ['custom_static/.gitignore']), # create empty dir
-        ('custom_templates', ['custom_templates/README']), 
+        ('custom_templates', ['custom_templates/README']),
     ],
     install_requires=[
             # Core requirements
@@ -114,7 +114,7 @@ setup(name='adlibre_dms',
             # API
             'djangorestframework==2.3.13',
             # Docs
-            'markdown2==2.2.0',
+            'markdown2==2.3.5',
             # MUI
             'couchdbkit==0.6.5',
             'django-widget-tweaks==1.0',
